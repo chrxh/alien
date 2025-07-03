@@ -142,12 +142,11 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).creatureId(1).cellState(CellState_Ready),
-        CellDescription().id(2).pos({11.0f, 10.0f}).creatureId(2).cellState(CellState_Detaching),
+    data.creatures({
+        CreatureDescription().cells({CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready)}),
+        CreatureDescription().cells({CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}),
     });
     data.addConnection(1, 2);
-    data.creatures({GenomeDescription().id(1), GenomeDescription().id(2)});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

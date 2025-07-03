@@ -366,7 +366,6 @@ struct CellDescription
         _signalRoutingRestriction = routingRestriction;
         return *this;
     }
-    bool DEPRECATED_hasGenome() const;
 
     bool isConnectedTo(uint64_t id) const;
 };

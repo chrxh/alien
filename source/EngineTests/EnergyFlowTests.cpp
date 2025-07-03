@@ -43,19 +43,24 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
 
 TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
-    CollectionDescription data;
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genome(GenomeDescription().genes({
+            GeneDescription().numBranches(1).nodes({NodeDescription()}),
+        })),
+    });
+    auto& creature = data._creatures.front();
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.creatureId(1).cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
+            cell.cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
         }
-        data.addCell(cell);
+        creature._cells.emplace_back(cell);
         if (i > 0) {
             data.addConnection(i, i + 1);
         }
     }
     data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(GenomeDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
+    data._creatures.emplace_back(creature);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -79,15 +84,21 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
 
-    CollectionDescription data;
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genome(GenomeDescription().genes({
+            GeneDescription().numBranches(1).nodes({NodeDescription()}),
+        })),
+    });
+    auto& creature = data._creatures.front();
+
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
             auto cell = CellDescription().id(id).pos({100.0f + toFloat(i), 100.0f});
             if (id == constructorId1 || id == constructorId2) {
-                cell.creatureId(1).cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
+                cell.cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
             }
-            data.addCell(cell);
+            creature._cells.emplace_back(cell);
             if (i > 0) {
                 data.addConnection(id - 1, id);
             }
@@ -96,8 +107,7 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
             }
         }
     }
-    data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(GenomeDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
+    creature._cells.at(0)._energy = 10000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1000);
@@ -116,19 +126,24 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
 
 TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 {
-    CollectionDescription data;
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genome(GenomeDescription().genes({
+            GeneDescription().numBranches(1).nodes({NodeDescription()}),
+        })),
+    });
+    auto& creature = data._creatures.front();
+
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            cell.creatureId(1).cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
+            cell.cellTypeData(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
         }
-        data.addCell(cell);
+        creature._cells.emplace_back(cell);
         if (i > 0) {
             data.addConnection(i, i + 1);
         }
     }
-    data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(GenomeDescription().id(1).genes({GeneDescription().numBranches(1).nodes({NodeDescription()})}));
+    creature._cells.at(0)._energy = 10000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1000);

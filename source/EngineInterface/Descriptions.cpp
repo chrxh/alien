@@ -54,15 +54,6 @@ CellType CellDescription::getCellType() const
     CHECK(false);
 }
 
-bool CellDescription::DEPRECATED_hasGenome() const
-{
-    auto cellTypeEnum = getCellType();
-    if (cellTypeEnum == CellType_Constructor || cellTypeEnum == CellType_Injector) {
-        return true;
-    }
-    return false;
-}
-
 bool CellDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._cellId == id; }) != _connections.end();
@@ -283,7 +274,31 @@ CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& ce
 CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
 {
     if (cache != nullptr) {
-        auto index = cache->cellIdToIndex.at(cellId);
+        _CollectionCache::Index index;
+        auto findResult = cache->cellIdToIndex.find(cellId);
+        if (findResult != cache->cellIdToIndex.end()) {
+            index = findResult->second;
+        } else {
+            auto found = false;
+            for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
+                for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
+                    index = _CollectionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)};
+                    found = true;
+                    break;
+                }
+                if (found) {
+                    break;
+                }
+            }
+            for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
+                index = _CollectionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)};
+                found = true;
+                break;
+            }
+            if (!found) {
+                CHECK(false);
+            }
+        }
         if (index.creatureIndex.has_value()) {
             return _creatures.at(index.creatureIndex.value())._cells.at(index.cellIndex);
         } else {

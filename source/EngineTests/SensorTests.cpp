@@ -245,29 +245,22 @@ TEST_F(SensorTests, foundMassWithMatchingDensity)
 
 TEST_F(SensorTests, scanForOtherMutants_found)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(6),
-        {
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(6).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+        CreatureDescription().mutationId(7).cells({
+            DescriptionEditService::get()
+                .createRect(
+                    DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
+                ._cells,
+        }),
+    });
     data.addConnection(1, 2);
-
-    data.addCreature(
-        GenomeDescription().mutationId(7),
-        DescriptionEditService::get()
-            .createRect(DescriptionEditService::CreateRectParameters()
-                            .center({100.0f, 10.0f})
-                            .width(16)
-                            .height(16)
-                            .cellDistance(0.5f)
-                            .creatureId(2)
-                            .cellType(BaseDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -285,24 +278,24 @@ TEST_F(SensorTests, scanForOtherMutants_found)
 
 TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(6),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(6).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+        CreatureDescription().mutationId(7).cells({
+            DescriptionEditService::get()
+                .createRect(
+                    DescriptionEditService::CreateRectParameters().center({200.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
+                ._cells,
+        }),
+    });
     data.addConnection(1, 2);
-
     data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({220.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
-
-    data.addCreature(
-        GenomeDescription().mutationId(7),
-        DescriptionEditService::get()
-            .createRect(
-                DescriptionEditService::CreateRectParameters().center({200.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -315,24 +308,24 @@ TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(7),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(6).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+        CreatureDescription().mutationId(7).cells({
+            DescriptionEditService::get()
+                .createRect(
+                    DescriptionEditService::CreateRectParameters().center({200.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
+                ._cells,
+        }),
+    });
     data.addConnection(1, 2);
-
     data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({150.0f, 100.0f}).width(1).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
-
-    data.addCreature(
-        GenomeDescription().mutationId(7),
-        DescriptionEditService::get()
-            .createRect(
-                DescriptionEditService::CreateRectParameters().center({200.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -345,21 +338,22 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_sameMutationId)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(7),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(7).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+        CreatureDescription().mutationId(7).cells({
+            DescriptionEditService::get()
+                .createRect(
+                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
+                ._cells,
+        }),
+    });
     data.addConnection(1, 2);
-
-    data.addCreature(
-        GenomeDescription().mutationId(7),
-        DescriptionEditService::get()
-            .createRect(
-                DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -372,25 +366,18 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_sameMutationId)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(7),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(7).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+    });
+    data.add(DescriptionEditService::get().createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
     data.addConnection(1, 2);
-
-    data.addCreature(
-        GenomeDescription().mutationId(6),
-        DescriptionEditService::get()
-            .createRect(DescriptionEditService::CreateRectParameters()
-                            .center({10.0f, 100.0f})
-                            .width(16)
-                            .height(16)
-                            .cellDistance(0.5f)
-                            .cellType(StructureCellDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -403,21 +390,18 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(7),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(7).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+    });
+    data.add(DescriptionEditService::get().createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(FreeCellDescription())));
     data.addConnection(1, 2);
-
-    data.addCreature(
-        GenomeDescription().mutationId(6),
-        DescriptionEditService::get()
-            .createRect(
-                DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(FreeCellDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -430,21 +414,21 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 
 TEST_F(SensorTests, scanForSameMutants_found)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(6),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(6).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+        CreatureDescription().mutationId(6).cells({
+            DescriptionEditService::get()
+                .createRect(
+                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
+                ._cells,
+        }),
+    });
     data.addConnection(1, 2);
-
-    data.addCreature(
-        GenomeDescription().mutationId(6),
-        DescriptionEditService::get()
-            .createRect(
-                DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-            ._cells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -462,21 +446,29 @@ TEST_F(SensorTests, scanForSameMutants_notFound_otherMutationId)
         if (otherMutantId == MutantId) {
             continue;
         }
-        CollectionDescription data;
-        data.addCreature(
-            GenomeDescription().id(0).mutationId(MutantId),
-            {
-                CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
-                CellDescription().id(2).pos({101.0f, 100.0f}),
-            });
-        data.addConnection(1, 2);
 
-        data.addCreature(
-            GenomeDescription().mutationId(otherMutantId),
-            DescriptionEditService::get()
-                .createRect(
-                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-                ._cells);
+        auto data = CollectionDescription().creatures({
+            CreatureDescription().mutationId(MutantId).cells({
+                CellDescription()
+                    .id(1)
+                    .pos({100.0f, 100.0f})
+                    .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
+                CellDescription().id(2).pos({101.0f, 100.0f}),
+            }),
+            CreatureDescription()
+                .mutationId(otherMutantId)
+                .cells({
+                    DescriptionEditService::get()
+                        .createRect(DescriptionEditService::CreateRectParameters()
+                                        .center({10.0f, 100.0f})
+                                        .width(16)
+                                        .height(16)
+                                        .cellDistance(0.5f)
+                                        .cellType(BaseDescription()))
+                        ._cells,
+                }),
+        });
+        data.addConnection(1, 2);
 
         _simulationFacade->clear();
         _simulationFacade->setCurrentTimestep(0ull);
@@ -493,25 +485,18 @@ TEST_F(SensorTests, scanForSameMutants_notFound_otherMutationId)
 TEST_F(SensorTests, scanForSameMutants_notFound_structure)
 {
     auto const MutantId = 6;
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(MutantId),
-        {
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
-            CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
-    data.addConnection(1, 2);
 
-    data.addCreature(
-        GenomeDescription().mutationId(MutantId),
-        DescriptionEditService::get()
-            .createRect(DescriptionEditService::CreateRectParameters()
-                            .center({10.0f, 100.0f})
-                            .width(16)
-                            .height(16)
-                            .cellDistance(0.5f)
-                            .cellType(StructureCellDescription()))
-            ._cells);
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(MutantId).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
+            CellDescription().id(2).pos({101.0f, 100.0f}),
+        }),
+    });
+    data.add(DescriptionEditService::get().createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
+    data.addConnection(1, 2);
 
     _simulationFacade->clear();
     _simulationFacade->setCurrentTimestep(0ull);
@@ -527,21 +512,16 @@ TEST_F(SensorTests, scanForSameMutants_notFound_structure)
 TEST_F(SensorTests, scanForSameMutants_notFound_freeCell)
 {
     auto const MutantId = 6;
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).mutationId(MutantId),
-        {
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().mutationId(MutantId).cells({
             CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
+        }),
+    });
+    data.add(DescriptionEditService::get().createRect(
+        DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(FreeCellDescription())));
     data.addConnection(1, 2);
-
-    data.addCreature(
-        GenomeDescription().mutationId(MutantId),
-        DescriptionEditService::get()
-            .createRect(
-                DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(FreeCellDescription()))
-            ._cells);
 
     _simulationFacade->clear();
     _simulationFacade->setCurrentTimestep(0ull);
@@ -641,24 +621,28 @@ TEST_F(SensorTests, scanForFreeCells_notFound)
 TEST_F(SensorTests, scanForLessComplexMutants_found)
 {
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
-        CollectionDescription data;
-        data.addCreature(
-            GenomeDescription().id(0).genomeComplexity(1000.0f),
-            {
+        auto data = CollectionDescription().creatures({
+            CreatureDescription().genomeComplexity(1000.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
                     .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants)),
                 CellDescription().id(2).pos({101.0f, 100.0f}),
-            });
+            }),
+            CreatureDescription()
+                .genomeComplexity(toFloat(otherGenomeComplexity))
+                .cells({
+                    DescriptionEditService::get()
+                        .createRect(DescriptionEditService::CreateRectParameters()
+                                        .center({10.0f, 100.0f})
+                                        .width(16)
+                                        .height(16)
+                                        .cellDistance(0.5f)
+                                        .cellType(BaseDescription()))
+                        ._cells,
+                }),
+        });
         data.addConnection(1, 2);
-
-        data.addCreature(
-            GenomeDescription().genomeComplexity(toFloat(otherGenomeComplexity)),
-            DescriptionEditService::get()
-                .createRect(
-                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).cellType(BaseDescription()).width(16).height(16).cellDistance(0.5f))
-                ._cells);
 
         _simulationFacade->clear();
         _simulationFacade->setCurrentTimestep(0ull);
@@ -675,24 +659,29 @@ TEST_F(SensorTests, scanForLessComplexMutants_found)
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 {
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
-        CollectionDescription data;
-        data.addCreature(
-            GenomeDescription().id(0).genomeComplexity(1000.0f),
-            {
+
+        auto data = CollectionDescription().creatures({
+            CreatureDescription().genomeComplexity(1000.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
                     .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants)),
                 CellDescription().id(2).pos({101.0f, 100.0f}),
-            });
+            }),
+            CreatureDescription()
+                .genomeComplexity(toFloat(otherGenomeComplexity) + 0.01f)
+                .cells({
+                    DescriptionEditService::get()
+                        .createRect(DescriptionEditService::CreateRectParameters()
+                                        .center({10.0f, 100.0f})
+                                        .width(16)
+                                        .height(16)
+                                        .cellDistance(0.5f)
+                                        .cellType(BaseDescription()))
+                        ._cells,
+                }),
+        });
         data.addConnection(1, 2);
-
-        data.addCreature(
-            GenomeDescription().genomeComplexity(toFloat(otherGenomeComplexity)),
-            DescriptionEditService::get()
-                .createRect(
-                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-                ._cells);
 
         _simulationFacade->clear();
         _simulationFacade->setCurrentTimestep(0ull);
@@ -708,15 +697,18 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).genomeComplexity(1000.0f),
-        {CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants)),
-         CellDescription().id(2).pos({101.0f, 100.0f}).cellTypeData(OscillatorDescription()).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
-    data.addConnection(1, 2);
-
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genomeComplexity(1000.0f).cells({
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants)),
+            CellDescription().id(2).pos({101.0f, 100.0f}),
+        }),
+    });
     data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -729,20 +721,18 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).genomeComplexity(1000.0f),
-        {
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genomeComplexity(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
-    data.addConnection(1, 2);
-
+        }),
+    });
     data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(FreeCellDescription())));
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -756,24 +746,28 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 TEST_F(SensorTests, scanForMoreComplexMutants_found)
 {
     for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
-        CollectionDescription data;
-        data.addCreature(
-            GenomeDescription().id(0).genomeComplexity(500.0f),
-            {
+        auto data = CollectionDescription().creatures({
+            CreatureDescription().genomeComplexity(500.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
                     .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToMoreComplexMutants)),
                 CellDescription().id(2).pos({101.0f, 100.0f}),
-            });
+            }),
+            CreatureDescription()
+                .genomeComplexity(toFloat(otherGenomeComplexity))
+                .cells({
+                    DescriptionEditService::get()
+                        .createRect(DescriptionEditService::CreateRectParameters()
+                                        .center({10.0f, 100.0f})
+                                        .width(16)
+                                        .height(16)
+                                        .cellDistance(0.5f)
+                                        .cellType(BaseDescription()))
+                        ._cells,
+                }),
+        });
         data.addConnection(1, 2);
-
-        data.addCreature(
-            GenomeDescription().genomeComplexity(toFloat(otherGenomeComplexity)),
-            DescriptionEditService::get()
-                .createRect(
-                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-                ._cells);
 
         _simulationFacade->clear();
         _simulationFacade->setCurrentTimestep(0ull);
@@ -790,24 +784,29 @@ TEST_F(SensorTests, scanForMoreComplexMutants_found)
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 {
     for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
-        CollectionDescription data;
-        data.addCreature(
-            GenomeDescription().id(0).genomeComplexity(500.0f),
-            {
+        auto data = CollectionDescription().creatures({
+            CreatureDescription().genomeComplexity(500.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
                     .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToMoreComplexMutants)),
                 CellDescription().id(2).pos({101.0f, 100.0f}),
-            });
+            }),
+            CreatureDescription()
+                .genomeComplexity(toFloat(otherGenomeComplexity))
+                .cells({
+                    DescriptionEditService::get()
+                        .createRect(DescriptionEditService::CreateRectParameters()
+                                        .center({10.0f, 100.0f})
+                                        .width(16)
+                                        .height(16)
+                                        .cellDistance(0.5f)
+                                        .cellType(BaseDescription()))
+                        ._cells,
+                }),
+        });
         data.addConnection(1, 2);
 
-        data.addCreature(
-            GenomeDescription().genomeComplexity(toFloat(otherGenomeComplexity)),
-            DescriptionEditService::get()
-                .createRect(
-                    DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
-                ._cells);
 
         _simulationFacade->clear();
         _simulationFacade->setCurrentTimestep(0ull);
@@ -823,20 +822,18 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 {
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).genomeComplexity(100.0f),
-        {
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genomeComplexity(100.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToMoreComplexMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
-    data.addConnection(1, 2);
-
+        }),
+    });
     data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(StructureCellDescription())));
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -849,22 +846,18 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_freeCell)
 {
-    _parameters.attackerSensorDetectionFactor.value[0] = 1.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-    CollectionDescription data;
-    data.addCreature(
-        GenomeDescription().id(0).genomeComplexity(100.0f),
-        {
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().genomeComplexity(100.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToMoreComplexMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
-        });
-    data.addConnection(1, 2);
-
+        }),
+    });
     data.add(DescriptionEditService::get().createRect(
         DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(FreeCellDescription())));
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

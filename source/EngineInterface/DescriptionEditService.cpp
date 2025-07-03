@@ -17,7 +17,6 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result.addCell(CellDescription()
-                               .id(NumberGenerator::get().createObjectId())
                                .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -41,7 +40,6 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
 
             //create cell: upper layer
             result.addCell(CellDescription()
-                               .id(NumberGenerator::get().createObjectId())
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -53,7 +51,6 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result.addCell(CellDescription()
-                                   .id(NumberGenerator::get().createObjectId())
                                    .cellTypeData(StructureCellDescription())
                                    .energy(parameters._energy)
                                    .stiffness(parameters._stiffness)
@@ -76,7 +73,6 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result.addCell(CellDescription()
-                           .id(NumberGenerator::get().createObjectId())
                            .cellTypeData(StructureCellDescription())
                            .pos(parameters._center)
                            .energy(parameters._energy)
@@ -101,7 +97,6 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
                 continue;
             }
             result.addCell(CellDescription()
-                               .id(NumberGenerator::get().createObjectId())
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -121,7 +116,6 @@ namespace
     {
         CHECK(!creature._cells.empty());
         auto refCell = creature._cells.front();
-        RealVector2D result;
         for (auto & cell : creature._cells) {
             auto topologyCorrection = spaceCalc.getCorrectionIncrement(refCell._pos, cell._pos);
             cell._pos = cell._pos + topologyCorrection;
