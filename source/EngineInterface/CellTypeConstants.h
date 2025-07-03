@@ -16,7 +16,7 @@ enum CellType_
     CellType_Depot,
     CellType_Constructor,
     CellType_Sensor,
-    CellType_Oscillator,
+    CellType_Generator,
     CellType_Attacker,
     CellType_Injector,
     CellType_Muscle,
@@ -29,7 +29,7 @@ enum CellType_
 namespace Const
 {
     std::vector<std::string> const CellTypeStrings =
-        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Oscillator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
+        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
 }
 
 using CellTypeGenome = int;
@@ -39,7 +39,7 @@ enum CellTypeGenome_
     CellTypeGenome_Depot,
     CellTypeGenome_Constructor,
     CellTypeGenome_Sensor,
-    CellTypeGenome_Oscillator,
+    CellTypeGenome_Generator,
     CellTypeGenome_Attacker,
     CellTypeGenome_Injector,
     CellTypeGenome_Muscle,
@@ -52,7 +52,7 @@ enum CellTypeGenome_
 namespace Const
 {
     std::vector<std::string> const CellTypeGenomeStrings =
-        {"Base", "Depot", "Constructor", "Sensor", "Oscillator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
+        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
 }
 
 using CellState = int;
@@ -84,11 +84,11 @@ namespace Const
 }
 
 //************************
-//* Oscillator constants *
+//* Generator constants *
 //************************
 namespace Channels
 {
-    auto constexpr OscillatorPulse = 0;
+    auto constexpr GeneratorPulse = 0;
 }
 
 //********************
@@ -210,14 +210,14 @@ namespace Const
 }
 
 //************************
-//* Oscillator constants *
+//* Generator constants *
 //************************
-using OscillatorPulseType = int;
-enum OscillatorPulseType_
+using GeneratorPulseType = int;
+enum GeneratorPulseType_
 {
-    OscillatorPulseType_Positive,
-    OscillatorPulseType_Alternation,
-    OscillatorPulseType_Count
+    GeneratorPulseType_Positive,
+    GeneratorPulseType_Alternation,
+    GeneratorPulseType_Count
 };
 
 //**********************

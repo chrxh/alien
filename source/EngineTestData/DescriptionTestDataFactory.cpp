@@ -100,8 +100,8 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     case CellType_Sensor:
         return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToCreatures(
             SensorRestrictToCreatures_RestrictToLessComplexMutants);
-    case CellType_Oscillator:
-        return OscillatorDescription().autoTriggerInterval(27).alternationInterval(45).numPulses(23);
+    case CellType_Generator:
+        return GeneratorDescription().autoTriggerInterval(27).alternationInterval(45).numPulses(23);
     case CellType_Attacker:
         return AttackerDescription();
     case CellType_Injector:
@@ -201,8 +201,8 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
     case CellTypeGenome_Sensor:
         return SensorGenomeDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToCreatures(
             SensorRestrictToCreatures_RestrictToLessComplexMutants);
-    case CellTypeGenome_Oscillator:
-        return OscillatorGenomeDescription().autoTriggerInterval(27).pulseType(OscillatorPulseType_Alternation).alternationInterval(45);
+    case CellTypeGenome_Generator:
+        return GeneratorGenomeDescription().autoTriggerInterval(27).pulseType(GeneratorPulseType_Alternation).alternationInterval(45);
     case CellTypeGenome_Attacker:
         return AttackerGenomeDescription();
     case CellTypeGenome_Injector:

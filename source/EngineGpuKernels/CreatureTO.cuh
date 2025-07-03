@@ -38,10 +38,10 @@ struct ConstructorGenomeTO
     float constructionAngle;
 };
 
-struct OscillatorGenomeTO
+struct GeneratorGenomeTO
 {
     uint32_t autoTriggerInterval;
-    OscillatorPulseType pulseType;
+    GeneratorPulseType pulseType;
     uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
@@ -124,7 +124,7 @@ union CellTypeDataGenomeTO
     DepotGenomeTO depot;
     ConstructorGenomeTO constructor;
     SensorGenomeTO sensor;
-    OscillatorGenomeTO oscillator;
+    GeneratorGenomeTO generator;
     AttackerGenomeTO attacker;
     InjectorGenomeTO injector;
     MuscleGenomeTO muscle;

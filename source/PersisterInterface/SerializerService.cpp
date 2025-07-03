@@ -182,9 +182,9 @@ namespace
     auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
     auto constexpr Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio = 1;
 
-    auto constexpr Id_OscillatorGenome_AutoTriggerInterval = 0;
-    auto constexpr Id_OscillatorGenome_PulseType = 1;
-    auto constexpr Id_OscillatorGenome_AlternationInterval = 2;
+    auto constexpr Id_GeneratorGenome_AutoTriggerInterval = 0;
+    auto constexpr Id_GeneratorGenome_PulseType = 1;
+    auto constexpr Id_GeneratorGenome_AlternationInterval = 2;
 
     auto constexpr Id_InjectorGenome_Mode = 0;
 
@@ -261,16 +261,16 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, OscillatorGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDescription& data)
     {
-        OscillatorGenomeDescription defaultObject;
+        GeneratorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_OscillatorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_OscillatorGenome_PulseType, data._pulseType, defaultObject._pulseType);
-        loadSave(task, auxiliaries, Id_OscillatorGenome_AlternationInterval, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_PulseType, data._pulseType, defaultObject._pulseType);
+        loadSave(task, auxiliaries, Id_GeneratorGenome_AlternationInterval, data._alternationInterval, defaultObject._alternationInterval);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(OscillatorGenomeDescription)
+    SPLIT_SERIALIZATION(GeneratorGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerGenomeDescription& data)
@@ -562,10 +562,10 @@ namespace
     auto constexpr Id_Injector_Mode = 0;
     auto constexpr Id_Injector_Counter = 1;
 
-    auto constexpr Id_Oscillator_AutoTriggerInterval = 0;
-    auto constexpr Id_Oscillator_PulseType = 1;
-    auto constexpr Id_Oscillator_AlternationMode = 2;
-    auto constexpr Id_Oscillator_NumPulses = 3;
+    auto constexpr Id_Generator_AutoTriggerInterval = 0;
+    auto constexpr Id_Generator_PulseType = 1;
+    auto constexpr Id_Generator_AlternationMode = 2;
+    auto constexpr Id_Generator_NumPulses = 3;
 
     auto constexpr Id_Sensor_MinDensity = 0;
     auto constexpr Id_Sensor_RestrictToColor = 4;
@@ -695,17 +695,17 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, OscillatorDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, GeneratorDescription& data)
     {
-        OscillatorDescription defaultObject;
+        GeneratorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Oscillator_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_Oscillator_PulseType, data._pulseType, defaultObject._pulseType);
-        loadSave(task, auxiliaries, Id_Oscillator_AlternationMode, data._alternationInterval, defaultObject._alternationInterval);
-        loadSave(task, auxiliaries, Id_Oscillator_NumPulses, data._numPulses, defaultObject._numPulses);
+        loadSave(task, auxiliaries, Id_Generator_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
+        loadSave(task, auxiliaries, Id_Generator_PulseType, data._pulseType, defaultObject._pulseType);
+        loadSave(task, auxiliaries, Id_Generator_AlternationMode, data._alternationInterval, defaultObject._alternationInterval);
+        loadSave(task, auxiliaries, Id_Generator_NumPulses, data._numPulses, defaultObject._numPulses);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(OscillatorDescription)
+    SPLIT_SERIALIZATION(GeneratorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerDescription& data)
@@ -1310,7 +1310,7 @@ namespace
         {"Defender activities", true},
         {"Injection activities", true},
         {"Completed injections", true},
-        {"Oscillator pulses", true},
+        {"Generator pulses", true},
         {"Neuron activities", true},
         {"Sensor activities", true},
         {"Sensor matches", true},
@@ -1356,7 +1356,7 @@ namespace
         } else if (colIndex == 14) {
             return &dataPoints.numCompletedInjections;
         } else if (colIndex == 15) {
-            return &dataPoints.numOscillatorPulses;
+            return &dataPoints.numGeneratorPulses;
         } else if (colIndex == 16) {
             return &dataPoints.numNeuronActivities;
         } else if (colIndex == 17) {

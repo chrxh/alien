@@ -89,7 +89,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -158,7 +158,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
     CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
         CellDescription()
             .id(4)
@@ -246,7 +246,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -338,7 +338,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(20)),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
         CellDescription()
             .id(4)
@@ -455,7 +455,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -502,7 +502,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
     CollectionDescription data;
     data.addCells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
-        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
         CellDescription()
             .id(4)
@@ -564,7 +564,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -630,7 +630,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -700,7 +700,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -751,7 +751,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
@@ -818,7 +818,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
 
     CollectionDescription data;
     data.addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(OscillatorDescription().autoTriggerInterval(3)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(3)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})

@@ -59,7 +59,7 @@ TEST_F(DetonatorTests, activateDetonator)
          CellDescription()
              .id(2)
              .pos({11.0f, 10.0f})
-             .cellTypeData(OscillatorDescription())
+             .cellTypeData(GeneratorDescription())
              .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
     data.addConnection(1, 2);
 

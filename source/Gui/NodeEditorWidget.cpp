@@ -61,8 +61,8 @@ namespace
             return ConstructorGenomeDescription();
         case CellTypeGenome_Sensor:
             return SensorGenomeDescription();
-        case CellTypeGenome_Oscillator:
-            return OscillatorGenomeDescription();
+        case CellTypeGenome_Generator:
+            return GeneratorGenomeDescription();
         case CellTypeGenome_Attacker:
             return AttackerGenomeDescription();
         case CellTypeGenome_Injector:
@@ -220,24 +220,24 @@ void _NodeEditorWidget::processNodeAttributes()
 
             AlienGui::EndIndent();
 
-        } else if (nodeType == CellTypeGenome_Oscillator) {
+        } else if (nodeType == CellTypeGenome_Generator) {
 
             AlienGui::BeginIndent();
 
             // Activation interval
-            auto& oscillator = std::get<OscillatorGenomeDescription>(node._cellTypeData);
-            AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), oscillator._autoTriggerInterval);
+            auto& generator = std::get<GeneratorGenomeDescription>(node._cellTypeData);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), generator._autoTriggerInterval);
 
             // Pulse type
             AlienGui::Combo(
-                AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), oscillator._pulseType);
+                AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), generator._pulseType);
 
-            if (oscillator._pulseType != OscillatorPulseType_Alternation) {
+            if (generator._pulseType != GeneratorPulseType_Alternation) {
 
                 AlienGui::BeginIndent();
 
                 // Pulses per phase
-                AlienGui::InputInt(AlienGui::InputIntParameters().name("Pulses per phase").textWidth(rightColumnWidth), oscillator._alternationInterval);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Pulses per phase").textWidth(rightColumnWidth), generator._alternationInterval);
 
                 AlienGui::EndIndent();
             }

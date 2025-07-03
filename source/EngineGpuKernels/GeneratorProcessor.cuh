@@ -9,7 +9,7 @@
 #include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
 
-class OscillatorProcessor
+class GeneratorProcessor
 {
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
@@ -19,28 +19,28 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void OscillatorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
+__inline__ __device__ void GeneratorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
-    auto& operations = data.cellTypeOperations[CellType_Oscillator];
+    auto& operations = data.cellTypeOperations[CellType_Generator];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;
 
-        auto& oscillator = cell->cellTypeData.oscillator;
-        if (SignalProcessor::isAutoTriggered(data, cell, max(1, oscillator.autoTriggerInterval))) {
+        auto& generator = cell->cellTypeData.generator;
+        if (SignalProcessor::isAutoTriggered(data, cell, max(1, generator.autoTriggerInterval))) {
             if (!cell->signal.active) {
                 SignalProcessor::createEmptySignal(cell);
             }
-            statistics.incNumOscillatorPulses(cell->color);
-            if (oscillator.pulseType == OscillatorPulseType_Positive) {
-                cell->signal.channels[Channels::OscillatorPulse] += 1.0f;
+            statistics.incNumGeneratorPulses(cell->color);
+            if (generator.pulseType == GeneratorPulseType_Positive) {
+                cell->signal.channels[Channels::GeneratorPulse] += 1.0f;
             } else {
-                cell->signal.channels[Channels::OscillatorPulse] += oscillator.numPulses < oscillator.alternationInterval ? 1.0f : -1.0f;
+                cell->signal.channels[Channels::GeneratorPulse] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
             }
-            ++oscillator.numPulses;
-            if (oscillator.alternationInterval > 0 && oscillator.numPulses == oscillator.alternationInterval * 2) {
-                oscillator.numPulses = 0;  
+            ++generator.numPulses;
+            if (generator.alternationInterval > 0 && generator.numPulses == generator.alternationInterval * 2) {
+                generator.numPulses = 0;  
             }
         }
 

@@ -111,17 +111,17 @@ struct SensorDescription
     MEMBER(SensorDescription, SensorRestrictToCreatures, restrictToCreatures, SensorRestrictToCreatures_NoRestriction);
 };
 
-struct OscillatorDescription
+struct GeneratorDescription
 {
-    auto operator<=>(OscillatorDescription const&) const = default;
+    auto operator<=>(GeneratorDescription const&) const = default;
 
     // Fixed data
-    MEMBER(OscillatorDescription, int, autoTriggerInterval, 100);   // Must be >= 3
-    MEMBER(OscillatorDescription, OscillatorPulseType, pulseType, OscillatorPulseType_Positive);
-    MEMBER(OscillatorDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(GeneratorDescription, int, autoTriggerInterval, 100);   // Must be >= 3
+    MEMBER(GeneratorDescription, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
+    MEMBER(GeneratorDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 
     // Process data
-    MEMBER(OscillatorDescription, int, numPulses, 0);
+    MEMBER(GeneratorDescription, int, numPulses, 0);
 };
 
 struct AttackerDescription
@@ -286,7 +286,7 @@ using CellTypeDescription = std::variant<
     DepotDescription,
     ConstructorDescription,
     SensorDescription,
-    OscillatorDescription,
+    GeneratorDescription,
     AttackerDescription,
     InjectorDescription,
     MuscleDescription,

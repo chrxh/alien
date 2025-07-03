@@ -40,7 +40,7 @@ public:
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription()),
+//            .cellTypeData(GeneratorDescription()),
 //        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
@@ -57,13 +57,13 @@ public:
 //    auto origTransmitterCell2 = getCell(data, 3);
 //    auto actualTransmitterCell2 = getCell(actualData, 3);
 //
-//    auto origOscillatorCell = getCell(data, 2);
-//    auto actualOscillatorCell = getCell(actualData, 2);
+//    auto origGeneratorCell = getCell(data, 2);
+//    auto actualGeneratorCell = getCell(actualData, 2);
 //
 //    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1._signal->_channels[0]));
 //    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
 //    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
-//    EXPECT_TRUE(approxCompare(origOscillatorCell._energy, actualOscillatorCell._energy));
+//    EXPECT_TRUE(approxCompare(origGeneratorCell._energy, actualGeneratorCell._energy));
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 //}
 //
@@ -82,7 +82,7 @@ public:
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription())
+//            .cellTypeData(GeneratorDescription())
 //            .signal(signal),
 //        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
 //    });
@@ -100,15 +100,15 @@ public:
 //    auto origTransmitterCell2 = getCell(data, 3);
 //    auto actualTransmitterCell2 = getCell(actualData, 3);
 //
-//    auto origOscillatorCell = getCell(data, 2);
-//    auto actualOscillatorCell = getCell(actualData, 2);
+//    auto origGeneratorCell = getCell(data, 2);
+//    auto actualGeneratorCell = getCell(actualData, 2);
 //
 //    for (int i = 0; i < MAX_CHANNELS; ++i) {
 //        EXPECT_TRUE(approxCompare(signal._channels[i], actualTransmitterCell1._signal->_channels[i]));
 //    }
 //    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
 //    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
-//    EXPECT_TRUE(approxCompare(origOscillatorCell._energy, actualOscillatorCell._energy));
+//    EXPECT_TRUE(approxCompare(origGeneratorCell._energy, actualGeneratorCell._energy));
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 //}
 //
@@ -124,7 +124,7 @@ public:
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription()),
+//            .cellTypeData(GeneratorDescription()),
 //        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
@@ -141,12 +141,12 @@ public:
 //    auto origTransmitterCell2 = getCell(data, 3);
 //    auto actualTransmitterCell2 = getCell(actualData, 3);
 //
-//    auto origOscillatorCell = getCell(data, 2);
-//    auto actualOscillatorCell = getCell(actualData, 2);
+//    auto origGeneratorCell = getCell(data, 2);
+//    auto actualGeneratorCell = getCell(actualData, 2);
 //
 //    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
 //    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
-//    EXPECT_TRUE(actualOscillatorCell._energy > origOscillatorCell._energy + NEAR_ZERO);
+//    EXPECT_TRUE(actualGeneratorCell._energy > origGeneratorCell._energy + NEAR_ZERO);
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 //}
 //

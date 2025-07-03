@@ -765,10 +765,10 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //        result->cellTypeData.sensor.minRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
 //        result->cellTypeData.sensor.maxRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
 //    } break;
-//    case CellType_Oscillator: {
-//        result->cellTypeData.oscillator.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-//        result->cellTypeData.oscillator.alternationInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-//        result->cellTypeData.oscillator.numPulses = 0;
+//    case CellType_Generator: {
+//        result->cellTypeData.generator.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+//        result->cellTypeData.generator.alternationInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
+//        result->cellTypeData.generator.numPulses = 0;
 //    } break;
 //    case CellType_Attacker: {
 //    } break;

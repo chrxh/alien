@@ -117,10 +117,10 @@ struct Sensor
     SensorRestrictToCreatures restrictToCreatures;
 };
 
-struct Oscillator
+struct Generator
 {
     uint32_t autoTriggerInterval;
-    OscillatorPulseType pulseType;
+    GeneratorPulseType pulseType;
     uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 
     // Process data
@@ -250,7 +250,7 @@ union CellTypeData
     Depot depot;
     Constructor constructor;
     Sensor sensor;
-    Oscillator oscillator;
+    Generator generator;
     Attacker attacker;
     Injector injector;
     Muscle muscle;

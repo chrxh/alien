@@ -71,13 +71,13 @@ struct SensorGenomeDescription
     MEMBER(SensorGenomeDescription, SensorRestrictToCreatures, restrictToCreatures, SensorRestrictToCreatures_NoRestriction);
 };
 
-struct OscillatorGenomeDescription
+struct GeneratorGenomeDescription
 {
-    auto operator<=>(OscillatorGenomeDescription const&) const = default;
+    auto operator<=>(GeneratorGenomeDescription const&) const = default;
 
-    MEMBER(OscillatorGenomeDescription, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
-    MEMBER(OscillatorGenomeDescription, OscillatorPulseType, pulseType, OscillatorPulseType_Positive);
-    MEMBER(OscillatorGenomeDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(GeneratorGenomeDescription, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
+    MEMBER(GeneratorGenomeDescription, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
+    MEMBER(GeneratorGenomeDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
 struct AttackerGenomeDescription
@@ -182,7 +182,7 @@ using CellTypeGenomeDescription = std::variant<
     DepotGenomeDescription,
     ConstructorGenomeDescription,
     SensorGenomeDescription,
-    OscillatorGenomeDescription,
+    GeneratorGenomeDescription,
     AttackerGenomeDescription,
     InjectorGenomeDescription,
     MuscleGenomeDescription,

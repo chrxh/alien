@@ -35,7 +35,7 @@ struct DataPointCollection
     DataPoint numTransmitterActivities;
     DataPoint numInjectionActivities;
     DataPoint numCompletedInjections;
-    DataPoint numOscillatorPulses;
+    DataPoint numGeneratorPulses;
     DataPoint numNeuronActivities;
     DataPoint numSensorActivities;
     DataPoint numSensorMatches;

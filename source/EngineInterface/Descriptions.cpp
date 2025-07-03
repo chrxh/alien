@@ -36,8 +36,8 @@ CellType CellDescription::getCellType() const
         return CellType_Constructor;
     } else if (std::holds_alternative<SensorDescription>(_cellTypeData)) {
         return CellType_Sensor;
-    } else if (std::holds_alternative<OscillatorDescription>(_cellTypeData)) {
-        return CellType_Oscillator;
+    } else if (std::holds_alternative<GeneratorDescription>(_cellTypeData)) {
+        return CellType_Generator;
     } else if (std::holds_alternative<AttackerDescription>(_cellTypeData)) {
         return CellType_Attacker;
     } else if (std::holds_alternative<InjectorDescription>(_cellTypeData)) {

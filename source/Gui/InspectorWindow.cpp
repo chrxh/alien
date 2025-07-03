@@ -279,8 +279,8 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                     case CellType_Sensor: {
                         cell._cellTypeData = SensorDescription();
                     } break;
-                    case CellType_Oscillator: {
-                        cell._cellTypeData = OscillatorDescription();
+                    case CellType_Generator: {
+                        cell._cellTypeData = GeneratorDescription();
                     } break;
                     case CellType_Attacker: {
                         cell._cellTypeData = AttackerDescription();
@@ -358,8 +358,8 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
             case CellType_Sensor: {
                 processSensorContent(std::get<SensorDescription>(cell._cellTypeData));
             } break;
-            case CellType_Oscillator: {
-                processOscillatorContent(std::get<OscillatorDescription>(cell._cellTypeData));
+            case CellType_Generator: {
+                processGeneratorContent(std::get<GeneratorDescription>(cell._cellTypeData));
             } break;
             case CellType_Attacker: {
                 processAttackerContent(std::get<AttackerDescription>(cell._cellTypeData));
@@ -511,23 +511,23 @@ void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::processOscillatorContent(OscillatorDescription& oscillator)
+void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
 {
-    if (ImGui::TreeNodeEx("Properties###oscillator", TreeNodeFlags)) {
+    if (ImGui::TreeNodeEx("Properties###_generator", TreeNodeFlags)) {
 
         AlienGui::InputInt(
-            AlienGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulseIntervalTooltip),
-            oscillator._autoTriggerInterval);
-        bool alternation = oscillator._alternationInterval > 0;
+            AlienGui::InputIntParameters().name("Pulse interval").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorPulseIntervalTooltip),
+            _generator._autoTriggerInterval);
+        bool alternation = _generator._alternationInterval > 0;
         if (AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorAlternatingPulsesTooltip),
+                AlienGui::CheckboxParameters().name("Alternating pulses").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorAlternatingPulsesTooltip),
                 alternation)) {
-            oscillator._alternationInterval = alternation ? 1 : 0;
+            _generator._alternationInterval = alternation ? 1 : 0;
         }
         if (alternation) {
             AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeOscillatorPulsesPerPhaseTooltip),
-                oscillator._alternationInterval);
+                AlienGui::InputIntParameters().name("Pulses per phase").textWidth(CellTypeTextWidth).tooltip(Const::GenomeGeneratorPulsesPerPhaseTooltip),
+                _generator._alternationInterval);
         }
         ImGui::TreePop();
     }
@@ -793,10 +793,10 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
             sensor._maxRange = std::max(0, std::min(127, *sensor._maxRange));
         }
     } break;
-    case CellType_Oscillator: {
-        auto& oscillator = std::get<OscillatorDescription>(cell._cellTypeData);
-        oscillator._autoTriggerInterval = std::max(0, oscillator._autoTriggerInterval);
-        oscillator._alternationInterval = std::max(0, oscillator._alternationInterval);
+    case CellType_Generator: {
+        auto& _generator = std::get<GeneratorDescription>(cell._cellTypeData);
+        _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
+        _generator._alternationInterval = std::max(0, _generator._alternationInterval);
     } break;
     case CellType_Detonator: {
         auto& detonator = std::get<DetonatorDescription>(cell._cellTypeData);

@@ -60,7 +60,7 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
     // Cell type-specific functions
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, data);
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_cellType_oscillator, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_generator, data, statistics);
 
     if (settings.simulationParameters.constructorCompletenessCheck.value) {
         KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, data, statistics);

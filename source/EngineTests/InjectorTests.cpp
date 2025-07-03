@@ -42,7 +42,7 @@
 //         CellDescription()
 //             .id(2)
 //             .pos({11.0f, 10.0f})
-//             .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//             .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
 //    data.addConnection(1, 2);
 //
@@ -73,7 +73,7 @@
 //         CellDescription()
 //             .id(2)
 //             .pos({11.0f, 10.0f})
-//             .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//             .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription()
 //            .id(3)
@@ -113,7 +113,7 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription().numExpectedCells(1)),
 //    });
@@ -153,7 +153,7 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription()
 //            .id(3)
@@ -196,7 +196,7 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription()
 //            .id(3)

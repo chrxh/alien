@@ -42,12 +42,12 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription()
 //            .id(3)
 //            .pos({9.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription()),
+//            .cellTypeData(GeneratorDescription()),
 //        CellDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
@@ -81,9 +81,9 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(OscillatorDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(GeneratorDescription()),
 //        CellDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
@@ -119,7 +119,7 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription()),
 //        CellDescription()
@@ -164,7 +164,7 @@
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(OscillatorDescription().autoTriggerInterval(1))
+//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription()),
 //        CellDescription()

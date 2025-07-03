@@ -16,7 +16,7 @@ PUBLIC
     IntegrationTestFramework.h
     MuscleTests.cpp
     NeuronTests.cpp
-    OscillatorTests.cpp
+    GeneratorTests.cpp
     ParametersEditServiceTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp

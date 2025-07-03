@@ -2,7 +2,7 @@
 #include "ForceFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
 #include "SignalProcessor.cuh"
-#include "OscillatorProcessor.cuh"
+#include "GeneratorProcessor.cuh"
 #include "NeuronProcessor.cuh"
 #include "AttackerProcessor.cuh"
 #include "InjectorProcessor.cuh"
@@ -124,9 +124,9 @@ __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
     CellProcessor::updateRenderingData(data);
 }
 
-__global__ void cudaNextTimestep_cellType_oscillator(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics)
 {
-    OscillatorProcessor::process(data, statistics);
+    GeneratorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)

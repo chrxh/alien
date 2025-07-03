@@ -55,7 +55,7 @@ add_library(EngineGpuKernels
     MaxAgeBalancer.cu
     MaxAgeBalancer.cuh
     MuscleProcessor.cuh
-    OscillatorProcessor.cuh
+    GeneratorProcessor.cuh
     NeuronProcessor.cuh
     Object.cuh
     Objects.cu

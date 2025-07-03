@@ -422,9 +422,9 @@ void StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numOscillatorPulses, 6);
+        processPlot(row++, &DataPointCollection::numGeneratorPulses, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Oscillator pulses");
+        AlienGui::Text("Generator pulses");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);

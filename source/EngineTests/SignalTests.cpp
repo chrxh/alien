@@ -27,8 +27,8 @@ TEST_F(SignalTests, noSignal)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_FALSE(oscillator._signal.has_value());
+    auto generator = actualCellById.at(1);
+    EXPECT_FALSE(generator._signal.has_value());
 }
 
 TEST_F(SignalTests, forwardSignal)

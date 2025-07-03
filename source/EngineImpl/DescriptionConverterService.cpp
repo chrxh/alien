@@ -335,13 +335,13 @@ CellDescription DescriptionConverterService::createCellDescription(
         sensor._restrictToCreatures = cellTO.cellTypeData.sensor.restrictToCreatures;
         result._cellTypeData = sensor;
     } break;
-    case CellType_Oscillator: {
-        OscillatorDescription oscillator;
-        oscillator._autoTriggerInterval = cellTO.cellTypeData.oscillator.autoTriggerInterval;
-        oscillator._pulseType = cellTO.cellTypeData.oscillator.pulseType;
-        oscillator._alternationInterval = cellTO.cellTypeData.oscillator.alternationInterval;
-        oscillator._numPulses = cellTO.cellTypeData.oscillator.numPulses;
-        result._cellTypeData = oscillator;
+    case CellType_Generator: {
+        GeneratorDescription generator;
+        generator._autoTriggerInterval = cellTO.cellTypeData.generator.autoTriggerInterval;
+        generator._pulseType = cellTO.cellTypeData.generator.pulseType;
+        generator._alternationInterval = cellTO.cellTypeData.generator.alternationInterval;
+        generator._numPulses = cellTO.cellTypeData.generator.numPulses;
+        result._cellTypeData = generator;
     } break;
     case CellType_Attacker: {
         AttackerDescription attacker;
@@ -521,12 +521,12 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
                 sensorDesc._restrictToCreatures = nodeTO->cellTypeData.sensor.restrictToCreatures;
                 nodeDesc._cellTypeData = sensorDesc;
             } break;
-            case CellTypeGenome_Oscillator: {
-                OscillatorGenomeDescription oscillatorDesc;
-                oscillatorDesc._autoTriggerInterval = nodeTO->cellTypeData.oscillator.autoTriggerInterval;
-                oscillatorDesc._pulseType = nodeTO->cellTypeData.oscillator.pulseType;
-                oscillatorDesc._alternationInterval = nodeTO->cellTypeData.oscillator.alternationInterval;
-                nodeDesc._cellTypeData = oscillatorDesc;
+            case CellTypeGenome_Generator: {
+                GeneratorGenomeDescription generatorDesc;
+                generatorDesc._autoTriggerInterval = nodeTO->cellTypeData.generator.autoTriggerInterval;
+                generatorDesc._pulseType = nodeTO->cellTypeData.generator.pulseType;
+                generatorDesc._alternationInterval = nodeTO->cellTypeData.generator.alternationInterval;
+                nodeDesc._cellTypeData = generatorDesc;
             } break;
             case CellTypeGenome_Attacker: {
                 AttackerGenomeDescription attackerDesc;
@@ -695,12 +695,12 @@ void DescriptionConverterService::convertCreatureToTO(
                 sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
                 sensorTO.restrictToCreatures = sensorDesc._restrictToCreatures;
             } break;
-            case CellTypeGenome_Oscillator: {
-                auto const& oscillatorDesc = std::get<OscillatorGenomeDescription>(nodeDesc._cellTypeData);
-                auto& oscillatorTO = nodeTO.cellTypeData.oscillator;
-                oscillatorTO.autoTriggerInterval = oscillatorDesc._autoTriggerInterval;
-                oscillatorTO.pulseType = oscillatorDesc._pulseType;
-                oscillatorTO.alternationInterval = oscillatorDesc._alternationInterval;
+            case CellTypeGenome_Generator: {
+                auto const& generatorDesc = std::get<GeneratorGenomeDescription>(nodeDesc._cellTypeData);
+                auto& generatorTO = nodeTO.cellTypeData.generator;
+                generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
+                generatorTO.pulseType = generatorDesc._pulseType;
+                generatorTO.alternationInterval = generatorDesc._alternationInterval;
             } break;
             case CellTypeGenome_Attacker: {
             } break;
@@ -853,13 +853,13 @@ void DescriptionConverterService::convertCellToTO(
         sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
     } break;
-    case CellType_Oscillator: {
-        auto const& oscillatorDesc = std::get<OscillatorDescription>(cellDesc._cellTypeData);
-        OscillatorTO& oscillatorTO = cellTO.cellTypeData.oscillator;
-        oscillatorTO.autoTriggerInterval = oscillatorDesc._autoTriggerInterval;
-        oscillatorTO.pulseType = oscillatorDesc._pulseType;
-        oscillatorTO.alternationInterval = oscillatorDesc._alternationInterval;
-        oscillatorTO.numPulses = oscillatorDesc._numPulses;
+    case CellType_Generator: {
+        auto const& generatorDesc = std::get<GeneratorDescription>(cellDesc._cellTypeData);
+        GeneratorTO& generatorTO = cellTO.cellTypeData.generator;
+        generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
+        generatorTO.pulseType = generatorDesc._pulseType;
+        generatorTO.alternationInterval = generatorDesc._alternationInterval;
+        generatorTO.numPulses = generatorDesc._numPulses;
     } break;
     case CellType_Attacker: {
         auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellTypeData);

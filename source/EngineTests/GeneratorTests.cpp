@@ -5,20 +5,20 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-class OscillatorTests : public IntegrationTestFramework
+class GeneratorTests : public IntegrationTestFramework
 {
 public:
-    OscillatorTests()
+    GeneratorTests()
         : IntegrationTestFramework()
     {}
 
-    ~OscillatorTests() = default;
+    ~GeneratorTests() = default;
 };
 
-TEST_F(OscillatorTests, generatePulse_timeBeforeFirstPulse)
+TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -27,14 +27,14 @@ TEST_F(OscillatorTests, generatePulse_timeBeforeFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_FALSE(oscillator._signal.has_value());
+    auto generator = actualCellById.at(1);
+    EXPECT_FALSE(generator._signal.has_value());
 }
 
-TEST_F(OscillatorTests, generatePulse_timeAtFirstPulse)
+TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -43,15 +43,15 @@ TEST_F(OscillatorTests, generatePulse_timeAtFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    ASSERT_TRUE(oscillator._signal.has_value());
-    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
+    auto generator = actualCellById.at(1);
+    ASSERT_TRUE(generator._signal.has_value());
+    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests, generatePulse_timeAtSecondPulse)
+TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97 * 2)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97 * 2)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -60,15 +60,15 @@ TEST_F(OscillatorTests, generatePulse_timeAtSecondPulse)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator._signal.has_value());
-    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
+    auto generator = actualCellById.at(1);
+    EXPECT_TRUE(generator._signal.has_value());
+    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests, generatePulse_timeAfterFirstPulse)
+TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -77,14 +77,14 @@ TEST_F(OscillatorTests, generatePulse_timeAfterFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_FALSE(oscillator._signal.has_value());
+    auto generator = actualCellById.at(1);
+    EXPECT_FALSE(generator._signal.has_value());
 }
 
-TEST_F(OscillatorTests, generatePulse_timeBeforeFirstPulseAlternation)
+TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -93,15 +93,15 @@ TEST_F(OscillatorTests, generatePulse_timeBeforeFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator._signal.has_value());
-    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
+    auto generator = actualCellById.at(1);
+    EXPECT_TRUE(generator._signal.has_value());
+    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests, generatePulse_timeAtFirstPulseAlternation)
+TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -110,15 +110,15 @@ TEST_F(OscillatorTests, generatePulse_timeAtFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator._signal.has_value());
-    EXPECT_EQ(-1.0f, oscillator._signal->_channels.at(0));
+    auto generator = actualCellById.at(1);
+    EXPECT_TRUE(generator._signal.has_value());
+    EXPECT_EQ(-1.0f, generator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests, generatePulse_timeAtSecondPulseAlternation)
+TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).cellTypeData(OscillatorDescription().autoTriggerInterval(97).pulseType(OscillatorPulseType_Alternation).alternationInterval(3)),
+        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -129,15 +129,15 @@ TEST_F(OscillatorTests, generatePulse_timeAtSecondPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualCellById = getCellById(actualData);
 
-    auto oscillator = actualCellById.at(1);
-    EXPECT_TRUE(oscillator._signal.has_value());
-    EXPECT_EQ(1.0f, oscillator._signal->_channels.at(0));
+    auto generator = actualCellById.at(1);
+    EXPECT_TRUE(generator._signal.has_value());
+    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
 
-TEST_F(OscillatorTests, generatePulse_triangularNetwork)
+TEST_F(GeneratorTests, generatePulse_triangularNetwork)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({0, 0}).cellTypeData(OscillatorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({0, 0}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0.5, 0.5}),
     });
@@ -152,10 +152,10 @@ TEST_F(OscillatorTests, generatePulse_triangularNetwork)
         auto actualData = _simulationFacade->getSimulationData();
         auto actualCellById = getCellById(actualData);
 
-        auto oscillator = actualCellById.at(1);
-        EXPECT_TRUE(oscillator._signal.has_value());
-        EXPECT_TRUE(approxCompare(1.0f, oscillator._signal->_channels.at(0)));
-        EXPECT_EQ(2, oscillator._signalRelaxationTime);
+        auto generator = actualCellById.at(1);
+        EXPECT_TRUE(generator._signal.has_value());
+        EXPECT_TRUE(approxCompare(1.0f, generator._signal->_channels.at(0)));
+        EXPECT_EQ(2, generator._signalRelaxationTime);
 
         auto base1 = actualCellById.at(2);
         EXPECT_FALSE(base1._signal.has_value());

@@ -87,10 +87,10 @@ namespace
                         nodeTO.cellTypeData.sensor.restrictToColor = node.cellTypeData.sensor.restrictToColor;
                         nodeTO.cellTypeData.sensor.restrictToCreatures = node.cellTypeData.sensor.restrictToCreatures;
                         break;
-                    case CellTypeGenome_Oscillator:
-                        nodeTO.cellTypeData.oscillator.autoTriggerInterval = node.cellTypeData.oscillator.autoTriggerInterval;
-                        nodeTO.cellTypeData.oscillator.pulseType = node.cellTypeData.oscillator.pulseType;
-                        nodeTO.cellTypeData.oscillator.alternationInterval = node.cellTypeData.oscillator.alternationInterval;
+                    case CellTypeGenome_Generator:
+                        nodeTO.cellTypeData.generator.autoTriggerInterval = node.cellTypeData.generator.autoTriggerInterval;
+                        nodeTO.cellTypeData.generator.pulseType = node.cellTypeData.generator.pulseType;
+                        nodeTO.cellTypeData.generator.alternationInterval = node.cellTypeData.generator.alternationInterval;
                         break;
                     case CellTypeGenome_Attacker:
                         break;
@@ -248,11 +248,11 @@ namespace
             cellTO.cellTypeData.sensor.restrictToColor = cell->cellTypeData.sensor.restrictToColor;
             cellTO.cellTypeData.sensor.restrictToCreatures = cell->cellTypeData.sensor.restrictToCreatures;
         } break;
-        case CellType_Oscillator: {
-            cellTO.cellTypeData.oscillator.autoTriggerInterval = cell->cellTypeData.oscillator.autoTriggerInterval;
-            cellTO.cellTypeData.oscillator.pulseType = cell->cellTypeData.oscillator.pulseType;
-            cellTO.cellTypeData.oscillator.alternationInterval = cell->cellTypeData.oscillator.alternationInterval;
-            cellTO.cellTypeData.oscillator.numPulses = cell->cellTypeData.oscillator.numPulses;
+        case CellType_Generator: {
+            cellTO.cellTypeData.generator.autoTriggerInterval = cell->cellTypeData.generator.autoTriggerInterval;
+            cellTO.cellTypeData.generator.pulseType = cell->cellTypeData.generator.pulseType;
+            cellTO.cellTypeData.generator.alternationInterval = cell->cellTypeData.generator.alternationInterval;
+            cellTO.cellTypeData.generator.numPulses = cell->cellTypeData.generator.numPulses;
         } break;
         case CellType_Attacker: {
         } break;
