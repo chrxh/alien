@@ -165,19 +165,3 @@ struct GeneTO
     int numNodes;
     uint64_t nodeArrayIndex;
 };
-
-struct CreatureTO
-{
-    uint64_t id;
-    uint64_t ancestorId;
-
-    // Genome
-    float frontAngle;
-    uint32_t mutationId;
-    float genomeComplexity;
-    int numGenes;
-    uint64_t geneArrayIndex;
-
-    // Temporary data
-    uint64_t creatureIndexOnGpu;
-};

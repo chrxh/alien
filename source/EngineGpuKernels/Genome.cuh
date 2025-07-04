@@ -163,20 +163,3 @@ struct Gene
     int numNodes;
     Node* nodes;
 };
-
-struct Creature
-{
-    uint64_t id;
-    uint64_t ancestorId;
-
-    // Genome
-    float frontAngle;
-    uint32_t mutationId;
-    float genomeComplexity;
-    int numGenes;
-    Gene* genes;
-
-    // Temporary data
-    uint64_t creatureIndex;
-    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
-};

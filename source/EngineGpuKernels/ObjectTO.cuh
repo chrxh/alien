@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "CreatureTO.cuh"
+#include "GenomeTO.cuh"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/ArraySizesForTO.h"
@@ -274,6 +274,22 @@ struct CellTO
 
     // Editing data
     uint8_t selected;
+};
+
+struct CreatureTO
+{
+    uint64_t id;
+    uint64_t ancestorId;
+
+    // Genome
+    float frontAngle;
+    uint32_t mutationId;
+    float genomeComplexity;
+    int numGenes;
+    uint64_t geneArrayIndex;
+
+    // Temporary data
+    uint64_t creatureIndexOnGpu;
 };
 
 struct CollectionTO

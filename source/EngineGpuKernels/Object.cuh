@@ -4,7 +4,7 @@
 #include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
-#include "Creature.cuh"
+#include "Genome.cuh"
 #include "Math.cuh"
 
 struct Particle
@@ -272,6 +272,23 @@ struct Signal
     float channels[MAX_CHANNELS];
 };
 
+struct Creature
+{
+    uint64_t id;
+    uint64_t ancestorId;
+
+    // Genome
+    float frontAngle;
+    uint32_t mutationId;
+    float genomeComplexity;
+    int numGenes;
+    Gene* genes;
+
+    // Temporary data
+    uint64_t creatureIndex;
+    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
+};
+
 struct Cell
 {
     // General
@@ -414,4 +431,3 @@ struct HashFunctor<Cell*>
         return abs(static_cast<int>(cell->id));
     }
 };
-
