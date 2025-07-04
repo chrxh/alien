@@ -39,8 +39,8 @@ void _DataAccessKernelsService::getData(
     CollectionTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
-    KERNEL_CALL(cudaPrepareGenomesForConversionToTO, rectUpperLeft, rectLowerRight, data);
-    KERNEL_CALL(cudaGetGenomeData, rectUpperLeft, rectLowerRight, data, dataTO);
+    KERNEL_CALL(cudaPrepareCreaturesForConversionToTO, rectUpperLeft, rectLowerRight, data);
+    KERNEL_CALL(cudaGetCreatureData, rectUpperLeft, rectLowerRight, data, dataTO);
     KERNEL_CALL(cudaGetCellDataWithoutConnections, rectUpperLeft, rectLowerRight, data, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
     KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, dataTO);
@@ -53,8 +53,8 @@ void _DataAccessKernelsService::getSelectedData(
     CollectionTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
-    KERNEL_CALL(cudaPrepareSelectedGenomesForConversionToTO, includeClusters, data);
-    KERNEL_CALL(cudaGetSelectedGenomeData, data, includeClusters, dataTO);
+    KERNEL_CALL(cudaPrepareSelectedCreaturesForConversionToTO, includeClusters, data);
+    KERNEL_CALL(cudaGetSelectedCreatureData, data, includeClusters, dataTO);
     KERNEL_CALL(cudaGetSelectedCellDataWithoutConnections, data, includeClusters, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
     KERNEL_CALL(cudaGetSelectedParticleData, data, dataTO);
@@ -67,8 +67,8 @@ void _DataAccessKernelsService::getInspectedData(
     CollectionTO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
-    KERNEL_CALL(cudaPrepareGenomesForConversionToTO, entityIds, data);
-    KERNEL_CALL(cudaGetGenomeData, entityIds, data, dataTO);
+    KERNEL_CALL(cudaPrepareCreaturesForConversionToTO, entityIds, data);
+    KERNEL_CALL(cudaGetCreatureData, entityIds, data, dataTO);
     KERNEL_CALL(cudaGetInspectedCellDataWithoutConnections, entityIds, data, dataTO);
     KERNEL_CALL(cudaResolveConnections, data, dataTO);
     KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, dataTO);
@@ -100,7 +100,7 @@ void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, Simulat
     KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
 
     KERNEL_CALL_1_1(cudaGetArraysBasedOnTO, data, dataTO, _cudaCellArray);
-    KERNEL_CALL(cudaSetGenomeDataFromTO, data, dataTO);
+    KERNEL_CALL(cudaSetCreatureDataFromTO, data, dataTO);
     KERNEL_CALL(cudaSetDataFromTO, data, dataTO, _cudaCellArray, selectData);
     _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {

@@ -18,7 +18,7 @@ class DescriptionConverterService
 public:
     CollectionDescription convertTOtoDescription(CollectionTO const& collectionTO) const;
     OverlayDescription convertTOtoOverlayDescription(CollectionTO const& collectionTO) const;
-    CollectionTO convertDescriptionToTO(CollectionDescription const& description) const;
+    CollectionTO convertDescriptionToTO(CollectionDescription const& data) const;
     CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
     CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
     CollectionTO convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const;

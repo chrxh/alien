@@ -159,7 +159,7 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Co
     return result;
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescription const& description) const
+CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescription const& data) const
 {
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
@@ -169,19 +169,25 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    for (auto const& creature : description._creatures) {
+    for (auto const& creature : data._creatures) {
         convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, creature, creatureTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
-
-    description.forEach([&](auto const& cell) { convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById); });
-    description.forEach([&](auto const& cell) {
+    for (auto const& cell : data._cells) {
+        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);        
+    }
+    for (auto const& creature : data._creatures) {
+        for (auto const& cell : creature._cells) {
+            convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creature._id, creatureTOIndexById);
+        }
+    }
+    data.forEach([&](auto const& cell) {
         if (cell._id != 0) {
             setConnections(cellTOs, cell, cellIndexTOById);
         }
     });
-    for (auto const& particle : description._particles) {
+    for (auto const& particle : data._particles) {
         addParticle(particleTOs, particle);
     }
 

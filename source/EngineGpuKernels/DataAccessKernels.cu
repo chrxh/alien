@@ -342,7 +342,7 @@ namespace
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
-__global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void cudaPrepareCreaturesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -360,7 +360,7 @@ __global__ void cudaPrepareGenomesForConversionToTO(int2 rectUpperLeft, int2 rec
     }
 }
 
-__global__ void cudaPrepareSelectedGenomesForConversionToTO(bool includeClusters, SimulationData data)
+__global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -377,7 +377,7 @@ __global__ void cudaPrepareSelectedGenomesForConversionToTO(bool includeClusters
     }
 }
 
-__global__ void cudaPrepareGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
+__global__ void cudaPrepareCreaturesForConversionToTO(InspectedEntityIds ids, SimulationData data)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -522,7 +522,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
-__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -538,12 +538,11 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
         if (!cell->creature) {
             continue;
         }
-
         createCreatureTO(cell, collectionTO);
     }
 }
 
-__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, CollectionTO collectionTO)
+__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, CollectionTO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -561,7 +560,7 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
     }
 }
 
-__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -645,7 +644,7 @@ __global__ void cudaGetArraysBasedOnTO(SimulationData data, CollectionTO collect
     *cellArray = data.objects.heap.getTypedSubArray<Cell>(*collectionTO.numCells);
 }
 
-__global__ void cudaSetGenomeDataFromTO(SimulationData data, CollectionTO collectionTO)
+__global__ void cudaSetCreatureDataFromTO(SimulationData data, CollectionTO collectionTO)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {

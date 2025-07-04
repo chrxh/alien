@@ -358,19 +358,19 @@ CellDescription const& CollectionDescription::getCellRef(uint64_t const& cellId,
             return _cells.at(index.cellIndex);
         }
     } else {
-        static CellDescription dummy;
-        CellDescription& result = dummy;
-        auto found = false;
-        forEach([&](auto& cell) {
+        for (auto& cell : _cells) {
             if (cell._id == cellId) {
-                result = cell;
-                found = true;
+                return cell;
             }
-        });
-        if (!found) {
-            CHECK(false);
         }
-        return result;
+        for (auto& creature : _creatures) {
+            for (auto& cell : creature._cells) {
+                if (cell._id == cellId) {
+                    return cell;
+                }
+            }
+        }
+        CHECK(false);
     }
 }
 
@@ -384,19 +384,19 @@ CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, Colle
             return _cells.at(index.cellIndex);
         }
     } else {
-        static CellDescription dummy;
-        CellDescription& result = dummy;
-        auto found = false;
-        forEach([&](auto& cell) {
+        for (auto& cell : _cells) {
             if (cell._id == cellId) {
-                result = cell;
-                found = true;
-            }
-        });
-        if (!found) {
-            CHECK(false);
+                return cell;
+            }            
         }
-        return result;
+        for (auto& creature: _creatures) {
+            for (auto& cell : creature._cells) {
+                if (cell._id == cellId) {
+                    return cell;
+                }
+            }
+        }
+        CHECK(false);
     }
 }
 
