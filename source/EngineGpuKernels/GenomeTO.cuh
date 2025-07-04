@@ -165,3 +165,11 @@ struct GeneTO
     int numNodes;
     uint64_t nodeArrayIndex;
 };
+
+struct GenomeTO
+{
+    int numGenes;
+    uint64_t geneArrayIndex;
+
+    float frontAngle;
+};

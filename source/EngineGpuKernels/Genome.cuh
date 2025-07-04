@@ -163,3 +163,11 @@ struct Gene
     int numNodes;
     Node* nodes;
 };
+
+struct Genome
+{
+    int numGenes;
+    Gene* genes;
+
+    float frontAngle;
+};

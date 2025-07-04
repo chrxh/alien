@@ -147,12 +147,12 @@ __global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
                 auto newGenome = newHeap.getTypedSubArray<Creature>(1);
                 *newGenome = *cell->creature;
 
-                auto const& genome = cell->creature;
-                auto newGenes = newHeap.getTypedSubArray<Gene>(genome->numGenes);
-                newGenome->genes = newGenes;
+                auto const& creature = cell->creature;
+                auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome.numGenes);
+                newGenome->genome.genes = newGenes;
 
-                for (int i = 0, j = genome->numGenes; i < j; ++i) {
-                    auto const& gene = &genome->genes[i];
+                for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
+                    auto const& gene = &creature->genome.genes[i];
                     auto newGene = &newGenes[i];
                     *newGene = *gene;
 

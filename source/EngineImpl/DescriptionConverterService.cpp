@@ -466,11 +466,11 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     result._ancestorId = creatureTO.ancestorId;
     result._mutationId = creatureTO.mutationId;
     result._genomeComplexity = creatureTO.genomeComplexity;
-    result._genome._frontAngle = creatureTO.frontAngle;
-    result._genome._genes.reserve(creatureTO.numGenes);
+    result._genome._frontAngle = creatureTO.genome.frontAngle;
+    result._genome._genes.reserve(creatureTO.genome.numGenes);
 
-    for (int i = 0; i < creatureTO.numGenes; ++i) {
-        auto geneTO = collectionTO.genes + creatureTO.geneArrayIndex + i;
+    for (int i = 0; i < creatureTO.genome.numGenes; ++i) {
+        auto geneTO = collectionTO.genes + creatureTO.genome.geneArrayIndex + i;
 
         GeneDescription geneDesc;
         geneDesc._numBranches = geneTO->numBranches > 0 ? std::make_optional(geneTO->numBranches) : std::nullopt;
@@ -641,9 +641,9 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.ancestorId = creatureDesc._ancestorId;
     creatureTO.mutationId = creatureDesc._mutationId;
     creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
-    creatureTO.frontAngle = creatureDesc._genome._frontAngle;
-    creatureTO.numGenes = toInt(creatureDesc._genome._genes.size());
-    creatureTO.geneArrayIndex = geneArrayStartIndex;
+    creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
+    creatureTO.genome.numGenes = toInt(creatureDesc._genome._genes.size());
+    creatureTO.genome.geneArrayIndex = geneArrayStartIndex;
 
     for (auto const& [geneIndex, geneDesc] : creatureDesc._genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);

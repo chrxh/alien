@@ -37,13 +37,14 @@ namespace
             creatureTO.ancestorId = creature->ancestorId;
             creatureTO.mutationId = creature->mutationId;
             creatureTO.genomeComplexity = creature->genomeComplexity;
-            creatureTO.frontAngle = creature->frontAngle;
-            creatureTO.numGenes = creature->numGenes;
+            creatureTO.genome.frontAngle = creature->genome.frontAngle;
+            creatureTO.genome.numGenes = creature->genome.numGenes;
 
-            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, creature->numGenes);
-            for (int i = 0, j = creature->numGenes; i < j; ++i) {
+            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, creature->genome.numGenes);
+            creatureTO.genome.geneArrayIndex = geneTOArrayStartIndex;
+            for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
-                auto const& gene = creature->genes[i];
+                auto const& gene = creature->genome.genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.numBranches = gene.numBranches;
                 geneTO.angleAlignment = gene.angleAlignment;
@@ -755,10 +756,10 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
         }
         if (cell->creature) {
             ++numGenomes;
-            auto const& genome = cell->creature;
-            numGenes += genome->numGenes;
-            for (int i = 0, j = genome->numGenes; i < j; ++i) {
-                numNodes += genome->genes[i].numNodes;
+            auto const& creature = cell->creature;
+            numGenes += creature->genome.numGenes;
+            for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
+                numNodes += creature->genome.genes[i].numNodes;
             }
         }
     }

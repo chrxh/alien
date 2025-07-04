@@ -23,11 +23,11 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Cell* cell)
     if (creature == nullptr) {
         return false;
     }
-    if (creature->numGenes == 0) {
+    if (creature->genome.numGenes == 0) {
         return true;
     }
     auto const& constructor = cell->cellTypeData.constructor;
-    auto const& gene = creature->genes[constructor.geneIndex];
+    auto const& gene = creature->genome.genes[constructor.geneIndex];
     if (gene.numBranches == 0) {
         return false;
     }

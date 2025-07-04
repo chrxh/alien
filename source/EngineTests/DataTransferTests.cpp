@@ -298,24 +298,23 @@ TEST_F(DataTransferTests, createCreatureIds_sameIds)
 
 TEST_F(DataTransferTests, changeGenome_successful)
 {
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().genome(GenomeDescription()).cells({CellDescription()})
-    });
-    auto creatureId = data._creatures.at(0)._id;
+    auto const CreatureId = 1;
+    auto data = CollectionDescription().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
 
     _simulationFacade->setSimulationData(data);
 
     auto newGenome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
-    auto result = _simulationFacade->changeCreature(creatureId, newGenome);
+    auto result = _simulationFacade->changeCreature(CreatureId, newGenome);
     ASSERT_TRUE(result);
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(1, actualData._cells.size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    EXPECT_EQ(creatureId, creature._id);
+    ASSERT_EQ(1, creature._cells.size());
+    EXPECT_EQ(CreatureId, creature._id);
 
     ASSERT_EQ(1, creature._genome._genes.size());
 
@@ -325,15 +324,14 @@ TEST_F(DataTransferTests, changeGenome_successful)
 
 TEST_F(DataTransferTests, changeGenome_failed)
 {
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().genome(GenomeDescription()).cells({CellDescription()})
-    });
-    auto creatureId = data._creatures.at(0)._id;
+    auto const CreatureId = 1;
+    auto const WrongCreatureId = 2;
+    auto data = CollectionDescription().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
 
     _simulationFacade->setSimulationData(data);
 
     auto newGenome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
-    auto result = _simulationFacade->changeCreature(creatureId, newGenome);
+    auto result = _simulationFacade->changeCreature(WrongCreatureId, newGenome);
     ASSERT_FALSE(result);
 }
 
