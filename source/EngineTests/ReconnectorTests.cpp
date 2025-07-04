@@ -130,7 +130,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().mutationId(5).cells({
+        CreatureDescription().id(0).id(0).mutationId(5).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -147,7 +147,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
 
     auto actualReconnectorCell = actualData.getCellRef(1);
 
@@ -164,7 +164,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().mutationId(5).cells({
+        CreatureDescription().id(0).mutationId(5).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -181,7 +181,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
 
     auto actualReconnectorCell = actualData.getCellRef(1);
     auto actualTargetCell = actualData.getCellRef(3);
@@ -195,7 +195,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().mutationId(5).cells({
+        CreatureDescription().id(0).mutationId(5).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -212,7 +212,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
 
     auto actualReconnectorCell = actualData.getCellRef(1);
     auto actualTargetCell = actualData.getCellRef(3);
@@ -228,7 +228,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().mutationId(5).cells({
+        CreatureDescription().id(0).mutationId(5).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -245,7 +245,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
 
     auto actualReconnectorCell = actualData.getCellRef(1);
     auto actualTargetCell = actualData.getCellRef(3);
@@ -367,7 +367,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().genomeComplexity(1000.0f).cells({
+        CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -391,7 +391,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().genomeComplexity(1000.0f).cells({
+        CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -415,7 +415,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().genomeComplexity(1000.0f).cells({
+        CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -439,7 +439,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().genomeComplexity(1000.0f).cells({
+        CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -463,7 +463,7 @@ TEST_F(ReconnectorTests, deleteConnections_success)
 {
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().cells({
+        CreatureDescription().id(0).cells({
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -486,7 +486,7 @@ TEST_F(ReconnectorTests, deleteConnections_success)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(4, actualData._cells.size());
+    ASSERT_EQ(3, actualData._creatures.size());
 
     auto actualReconnectorCell = actualData.getCellRef(1);
 

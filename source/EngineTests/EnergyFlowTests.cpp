@@ -44,9 +44,8 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
-            GeneDescription().numBranches(1).nodes({NodeDescription()}),
-        })),
-    });
+        GeneDescription().numBranches(1).nodes({NodeDescription()}),
+    }))});
     auto& creature = data._creatures.front();
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
@@ -58,15 +57,17 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
             data.addConnection(i, i + 1);
         }
     }
-    data._cells.at(0)._energy = 10000.0f;
-    data._creatures.emplace_back(creature);
+    creature._cells.at(0)._energy = 10000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(20, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto const& actualCreature = actualData._creatures.front();
+    ASSERT_EQ(20, actualCreature._cells.size());
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {

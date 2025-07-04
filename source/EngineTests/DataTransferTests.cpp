@@ -352,7 +352,6 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     _simulationFacade->setSimulationData(data);
 
     auto inspectedData = _simulationFacade->getInspectedSimulationData({cellId1, cellId2});
-    ASSERT_EQ(2, inspectedData._cells.size());
     ASSERT_EQ(1, inspectedData._creatures.size());
 
     auto creature = inspectedData._creatures.front();
