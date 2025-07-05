@@ -513,7 +513,7 @@ namespace
     auto constexpr Id_Constructor_CurrentNodeIndex = 3;
     auto constexpr Id_Constructor_Generation = 4;
     auto constexpr Id_Constructor_ConstructionAngle = 5;
-    auto constexpr Id_Constructor_CurrentRepetition = 9;
+    auto constexpr Id_Constructor_CurrentConcatenation = 9;
     auto constexpr Id_Constructor_LastConstructedCellId = 10;
     auto constexpr Id_Constructor_NumInheritedGenomeNodes = 11;
     auto constexpr Id_Constructor_CurrentBranch = 12;
@@ -670,7 +670,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
         loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
-        loadSave(task, auxiliaries, Id_Constructor_CurrentRepetition, data._currentRepetition, defaultObject._currentRepetition);
+        loadSave(task, auxiliaries, Id_Constructor_CurrentConcatenation, data._currentConcatenation, defaultObject._currentConcatenation);
         loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
         loadSave(task, auxiliaries, Id_Constructor_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);

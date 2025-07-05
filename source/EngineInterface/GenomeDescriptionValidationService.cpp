@@ -1,8 +1,8 @@
-#include "CreatureDescriptionValidationService.h"
+#include "GenomeDescriptionValidationService.h"
 
-void CreatureDescriptionValidationService::validateAndCorrect(GenomeDescription& creature)
+void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& genome)
 {
-    for (auto& gene : creature._genes) {
+    for (auto& gene : genome._genes) {
         for (auto& node : gene._nodes) {
             auto nodeType = node.getCellType();
             if (nodeType == CellTypeGenome_Constructor) {

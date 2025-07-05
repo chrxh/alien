@@ -270,7 +270,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
         cell->cellTypeData.constructor.numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
-        cell->cellTypeData.constructor.currentRepetition = cellTO.cellTypeData.constructor.currentRepetition;
+        cell->cellTypeData.constructor.currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         cell->cellTypeData.constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
         cell->cellTypeData.constructor.generation = cellTO.cellTypeData.constructor.generation;
         cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;

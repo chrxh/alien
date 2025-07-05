@@ -403,7 +403,7 @@ namespace Const
     std::string const GenomeCurrentBranchTooltip = "This number specifies the current branch on which the construction process takes place. Each branch is "
                                                    "connected to the constructor cell and consists of repetitions of the encoded cell network.";
 
-    std::string const GenomeCurrentRepetitionTooltip =
+    std::string const GenomeCurrentConcatenationTooltip =
         "The cell network encoded in the genome can be repeatedly built by specifying a number of "
         "repetitions. This value indicates the index of the current repetition.";
 

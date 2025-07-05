@@ -5,7 +5,7 @@
 
 #include "Base/StringHelper.h"
 
-#include "EngineInterface/CreatureDescriptionValidationService.h"
+#include "EngineInterface/GenomeDescriptionValidationService.h"
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
@@ -52,7 +52,7 @@ void _GenomeTabWidget::process()
     }
     ImGui::EndChild();
 
-    CreatureDescriptionValidationService::get().validateAndCorrect(_editData->genome);
+    GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
 }
 
 void _GenomeTabWidget::onGenomeIntoCreatureInjected()

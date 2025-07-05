@@ -7,14 +7,14 @@
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
 
-class CreatureDescriptionEditService
+class GenomeDescriptionEditService
 {
-    MAKE_SINGLETON(CreatureDescriptionEditService);
+    MAKE_SINGLETON(GenomeDescriptionEditService);
 
 public:
-    void addGene(GenomeDescription& creature, int index, GeneDescription const& newGene);    // Adds gene after index
-    void removeGene(GenomeDescription& creature, int index);
-    void swapGenes(GenomeDescription& creature, int index);   // Swaps gene at index with gene at index + 1
+    void addGene(GenomeDescription& genome, int index, GeneDescription const& newGene);    // Adds gene after index
+    void removeGene(GenomeDescription& genome, int index);
+    void swapGenes(GenomeDescription& genome, int index);  // Swaps gene at index with gene at index + 1
 
     void addEmptyNode(GeneDescription& gene, int index);  // Adds empty node after index
     void removeNode(GeneDescription& gene, int index);

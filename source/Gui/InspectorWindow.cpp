@@ -484,8 +484,8 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //                AlienGui::InputIntParameters()
         //                    .name("Current repetition index")
         //                    .textWidth(GenomeTabTextWidth)
-        //                    .tooltip(Const::GenomeCurrentRepetitionTooltip),
-        //                desc._currentRepetition);
+        //                    .tooltip(Const::GenomeCurrentConcatenationTooltip),
+        //                desc._currentConcatenation);
         //            AlienGui::InputInt(
         //                AlienGui::InputIntParameters().name("Current cell index").textWidth(GenomeTabTextWidth).tooltip(Const::GenomeCurrentCellTooltip),
         //                desc._currentNodeIndex);
@@ -769,9 +769,9 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
 
         //auto numRepetitions = GenomeDescriptionConverterService::get().getNumRepetitions(constructor._genome);
         //if (numRepetitions != std::numeric_limits<int>::max()) {
-        //    constructor._currentRepetition = ((constructor._currentRepetition % numRepetitions) + numRepetitions) % numRepetitions;
+        //    constructor._currentConcatenation = ((constructor._currentConcatenation % numRepetitions) + numRepetitions) % numRepetitions;
         //} else {
-        //    constructor._currentRepetition = 0;
+        //    constructor._currentConcatenation = 0;
         //}
 
         constructor._constructionActivationTime = ((constructor._constructionActivationTime % MAX_ACTIVATION_TIME) + MAX_ACTIVATION_TIME) % MAX_ACTIVATION_TIME;

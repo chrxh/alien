@@ -3,14 +3,14 @@ PUBLIC
     CellConnectionTests.cpp
     CellStateTransitionTests.cpp
     ConstructorTests.cpp
-    CreatureDescriptionEditServiceTests.cpp
-    CreatureDescriptionInfoServiceTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
     EnergyFlowTests.cpp
     GarbageCollectorTests.cpp
+    GenomeDescriptionEditServiceTests.cpp
+    GenomeDescriptionInfoServiceTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h

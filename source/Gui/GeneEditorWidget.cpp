@@ -6,7 +6,7 @@
 
 #include "Base/StringHelper.h"
 
-#include "EngineInterface/CreatureDescriptionEditService.h"
+#include "EngineInterface/GenomeDescriptionEditService.h"
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
@@ -250,7 +250,7 @@ void _GeneEditorWidget::onAddNode()
     auto& gene = _editData->getSelectedGeneRef();
     auto selectedNode = _editData->getSelectedNodeIndex();
     if (gene._nodes.empty()) {
-        CreatureDescriptionEditService::get().addEmptyNode(gene, 0);
+        GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
         _editData->setSelectedNodeIndex(0);
     } else {
         int insertIndex;
@@ -260,7 +260,7 @@ void _GeneEditorWidget::onAddNode()
             insertIndex = toInt(gene._nodes.size()) - 1;
         }
 
-        CreatureDescriptionEditService::get().addEmptyNode(gene, insertIndex);
+        GenomeDescriptionEditService::get().addEmptyNode(gene, insertIndex);
 
         _editData->setSelectedNodeIndex(insertIndex + 1);
     }
@@ -271,7 +271,7 @@ void _GeneEditorWidget::onRemoveNode()
     int removeIndex = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
 
-    CreatureDescriptionEditService::get().removeNode(gene, removeIndex);
+    GenomeDescriptionEditService::get().removeNode(gene, removeIndex);
 
     // Adapt node selection
     auto& nodes = gene._nodes;
@@ -288,7 +288,7 @@ void _GeneEditorWidget::onMoveNodeUpward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
-    CreatureDescriptionEditService::get().swapNodes(gene, indexToMove - 1);
+    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove - 1);
 
     // Adapt gene selection
     _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() - 1);
@@ -298,7 +298,7 @@ void _GeneEditorWidget::onMoveNodeDownward()
 {
     auto indexToMove = _editData->getSelectedNodeIndex().value();
     auto& gene = _editData->getSelectedGeneRef();
-    CreatureDescriptionEditService::get().swapNodes(gene, indexToMove);
+    GenomeDescriptionEditService::get().swapNodes(gene, indexToMove);
 
     // Adapt gene selection
     _editData->setSelectedNodeIndex(_editData->getSelectedNodeIndex().value() + 1);

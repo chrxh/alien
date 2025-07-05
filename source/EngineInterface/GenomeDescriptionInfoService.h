@@ -7,9 +7,9 @@
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
 
-class CreatureDescriptionInfoService
+class GenomeDescriptionInfoService
 {
-    MAKE_SINGLETON(CreatureDescriptionInfoService);
+    MAKE_SINGLETON(GenomeDescriptionInfoService);
 
 public:
     int getNumberOfNodes(GenomeDescription const& genome) const;

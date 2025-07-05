@@ -4,7 +4,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "EngineInterface/CreatureDescriptionInfoService.h"
+#include "EngineInterface/GenomeDescriptionInfoService.h"
 
 #include "AlienGui.h"
 #include "ChangeColorDialog.h"
@@ -207,7 +207,7 @@ void GenomeEditorWindow::onCreateSeed()
     auto creatureId = tab->getCreatureId();
 
     auto parameter = _simulationFacade->getSimulationParameters();
-    auto numNodes = CreatureDescriptionInfoService::get().getNumberOfNodes(genome);
+    auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
     auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
     auto data = CollectionDescription().creatures({
         CreatureDescription()

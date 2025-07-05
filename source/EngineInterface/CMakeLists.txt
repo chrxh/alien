@@ -5,12 +5,6 @@ add_library(EngineInterface
     CellTypeConstants.h
     CellTypeStrings.h
     Colors.h
-    CreatureDescriptionEditService.cpp
-    CreatureDescriptionEditService.h
-    CreatureDescriptionInfoService.cpp
-    CreatureDescriptionInfoService.h
-    CreatureDescriptionValidationService.cpp
-    CreatureDescriptionValidationService.h
     GenomeDescription.cpp
     GenomeDescription.h
     CudaSettings.h
@@ -22,6 +16,12 @@ add_library(EngineInterface
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
+    GenomeDescriptionEditService.cpp
+    GenomeDescriptionEditService.h
+    GenomeDescriptionInfoService.cpp
+    genomeDescriptionInfoService.h
+    GenomeDescriptionValidationService.cpp
+    GenomeDescriptionValidationService.h
     Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp

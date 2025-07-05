@@ -1,6 +1,6 @@
-#include "CreatureDescriptionInfoService.h"
+#include "GenomeDescriptionInfoService.h"
 
-int CreatureDescriptionInfoService::getNumberOfNodes(GenomeDescription const& genome) const
+int GenomeDescriptionInfoService::getNumberOfNodes(GenomeDescription const& genome) const
 {
     int result = 0;
     for (auto const& gene : genome._genes) {
@@ -22,7 +22,7 @@ namespace
         if (gene._numConcatenations == std::numeric_limits<int>::max()) {
             return -1;
         }
-        auto numBranches = gene._numBranches.value_or(1);
+        auto numBranches = geneIndex != 0 ? gene._numBranches.value_or(1) : 1;  // First gene is for self-replication and only one branch counts
         auto result = gene._nodes.size() * gene._numConcatenations * numBranches;
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
@@ -41,7 +41,7 @@ namespace
     }
 }
 
-int CreatureDescriptionInfoService::getNumberOfResultingCells(GenomeDescription const& genome) const
+int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription const& genome) const
 {
     if (genome._genes.empty()) {
         return 0;
@@ -50,7 +50,7 @@ int CreatureDescriptionInfoService::getNumberOfResultingCells(GenomeDescription 
     return countNodes(genome, 0, lastGenes);
 }
 
-std::vector<int> CreatureDescriptionInfoService::getReferences(GeneDescription const& gene) const
+std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription const& gene) const
 {
     std::vector<int> result;
     for (auto const& node : gene._nodes) {
@@ -62,7 +62,7 @@ std::vector<int> CreatureDescriptionInfoService::getReferences(GeneDescription c
     return result;
 }
 
-std::vector<int> CreatureDescriptionInfoService::getReferencedBy(GenomeDescription const& genome, int geneIndex) const
+std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription const& genome, int geneIndex) const
 {
     std::vector<int> result;
     for (int i = 0; i < genome._genes.size(); ++i) {

@@ -162,9 +162,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     //            if (GenomeDecoder::isLastNode(constructor)) {
     //                constructor.currentNodeIndex = 0;
     //                if (!constructionData.genomeHeader.hasInfiniteRepetitions()) {
-    //                    ++constructor.currentRepetition;
-    //                    if (constructor.currentRepetition == constructionData.genomeHeader.numRepetitions) {
-    //                        constructor.currentRepetition = 0;
+    //                    ++constructor.currentConcatenation;
+    //                    if (constructor.currentConcatenation == constructionData.genomeHeader.numRepetitions) {
+    //                        constructor.currentConcatenation = 0;
     //                        if (!constructionData.genomeHeader.separateConstruction) {
     //                            ++constructor.currentBranch;
     //                        }
@@ -191,7 +191,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //result.hasInfiniteRepetitions = GenomeDecoder::hasInfiniteRepetitions(constructor);
     //result.containsSelfReplication = isSelfReplicator(cell);
     //auto genomeNodesPerRepetition = GenomeDecoder::getNumNodes(constructor.genome, constructor.genomeSize);
-    //if (!GenomeDecoder::hasInfiniteRepetitions(constructor) && constructor.currentNodeIndex == 0 && constructor.currentRepetition == 0) {
+    //if (!GenomeDecoder::hasInfiniteRepetitions(constructor) && constructor.currentNodeIndex == 0 && constructor.currentConcatenation == 0) {
     //    result.lastConstructionCell = nullptr;
     //} else {
     //    result.lastConstructionCell = getLastConstructedCell(cell);
@@ -200,14 +200,14 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     //if (!result.lastConstructionCell) {
     //    //finished => reset indices
     //    constructor.currentNodeIndex = 0;
-    //    constructor.currentRepetition = 0;
+    //    constructor.currentConcatenation = 0;
     //} else if (result.lastConstructionCell->numConnections == 1 && constructor.numExpectedCells > 1) {
-    //    int numConstructedCells = constructor.currentRepetition * genomeNodesPerRepetition + constructor.currentNodeIndex;
+    //    int numConstructedCells = constructor.currentConcatenation * genomeNodesPerRepetition + constructor.currentNodeIndex;
     //    if (numConstructedCells > 1) {
 
     //        //construction is broken => reset indices
     //        constructor.currentNodeIndex = 0;
-    //        constructor.currentRepetition = 0;
+    //        constructor.currentConcatenation = 0;
     //    }
     //}
     //result.genomeCurrentBytePosition = GenomeDecoder::getNodeAddress(constructor.genome, constructor.genomeSize, constructor.currentNodeIndex);
@@ -738,7 +738,7 @@ __inline__ __device__ Cell* ConstructorProcessor::constructCellIntern(
     //    newConstructor.lastConstructedCellId = 0;
     //    newConstructor.currentBranch = 0;
     //    newConstructor.currentNodeIndex = 0;
-    //    newConstructor.currentRepetition = 0;
+    //    newConstructor.currentConcatenation = 0;
     //    newConstructor.constructionAngle = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
     //    newConstructor.constructionAngle2 = GenomeDecoder::readAngle(constructor, genomeCurrentBytePosition);
     //    GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);

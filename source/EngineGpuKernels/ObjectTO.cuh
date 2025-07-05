@@ -66,7 +66,7 @@ struct ConstructorTO
     // Process data
     uint64_t lastConstructedCellId;
     uint16_t currentNodeIndex;
-    uint16_t currentRepetition;
+    uint16_t currentConcatenation;
     uint8_t currentBranch;
 };
 

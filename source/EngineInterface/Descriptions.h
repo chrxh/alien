@@ -80,7 +80,7 @@ struct ConstructorDescription
     // Process data
     MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);
     MEMBER(ConstructorDescription, int, currentNodeIndex, 0);
-    MEMBER(ConstructorDescription, int, currentRepetition, 0);
+    MEMBER(ConstructorDescription, int, currentConcatenation, 0);
     MEMBER(ConstructorDescription, int, currentBranch, 0);
 
     bool isGenomeInherited() const;

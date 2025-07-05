@@ -323,7 +323,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
-        constructor._currentRepetition = cellTO.cellTypeData.constructor.currentRepetition;
+        constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
         constructor._generation = cellTO.cellTypeData.constructor.generation;
         constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
@@ -844,7 +844,7 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.numExpectedCells = static_cast<uint16_t>(constructorDesc._numExpectedCells);
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
-        constructorTO.currentRepetition = static_cast<uint16_t>(constructorDesc._currentRepetition);
+        constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
         constructorTO.generation = constructorDesc._generation;
         constructorTO.constructionAngle = constructorDesc._constructionAngle;
