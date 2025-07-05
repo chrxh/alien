@@ -278,7 +278,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
     EXPECT_EQ(2 + 2 + 3 * 3 + 3 * 3, result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_onGeneIndex0)
+TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_onFirstGene)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().numBranches(10).numConcatenations(5).nodes({
@@ -288,7 +288,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
     });
     auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);
 
-    EXPECT_EQ(2 * 5, result);
+    EXPECT_EQ(2 * 5 * 10, result);
 }
 
 TEST_F(GenomeDescriptionInfoServiceTests, getReferences)

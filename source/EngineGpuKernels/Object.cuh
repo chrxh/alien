@@ -105,6 +105,7 @@ struct Constructor
 
      // Temp data
     bool isReady;
+    Creature* offspring;    // Must be reset if construction finished and separated
 };
 
 struct Sensor

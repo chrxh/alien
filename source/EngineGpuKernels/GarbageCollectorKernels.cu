@@ -46,6 +46,9 @@ __global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap)
                 auto& connectedCell = cell->connections[i].cell;
                 connectedCell = reinterpret_cast<Cell*>(newHeapStart + connectedCell->tempValue);
             }
+            if (cell->cellType == CellType_Constructor) {
+                cell->cellTypeData.constructor.offspring = nullptr;
+            }
         }
     }
 }
@@ -122,7 +125,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap new
     }
 }
 
-__global__ void cudaCleanupGenomesStep1(Array<Cell*> cells)
+__global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -134,7 +137,7 @@ __global__ void cudaCleanupGenomesStep1(Array<Cell*> cells)
     }
 }
 
-__global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
+__global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -142,14 +145,14 @@ __global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
         auto& cell = cells.at(index);
         
         if (cell->creature) {
-            auto origGenomeIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
-            if (origGenomeIndex == Creature::CreatureIndex_NotSet) {
-                auto newGenome = newHeap.getTypedSubArray<Creature>(1);
-                *newGenome = *cell->creature;
+            auto origCreatureIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
+            if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
+                auto newCreature = newHeap.getTypedSubArray<Creature>(1);
+                *newCreature = *cell->creature;
 
                 auto const& creature = cell->creature;
                 auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome.numGenes);
-                newGenome->genome.genes = newGenes;
+                newCreature->genome.genes = newGenes;
 
                 for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
                     auto const& gene = &creature->genome.genes[i];
@@ -165,16 +168,16 @@ __global__ void cudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
                         *newNode = *node;
                     }
                 }
-                auto newGenomeIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newGenome) - newHeap.getArray());
-                atomicExch(&cell->creature->creatureIndex, newGenomeIndex);
-            } else if (origGenomeIndex != 0) {
-                atomicExch(&cell->creature->creatureIndex, origGenomeIndex);
+                auto newCreatureIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature) - newHeap.getArray());
+                atomicExch(&cell->creature->creatureIndex, newCreatureIndex);
+            } else if (origCreatureIndex != 0) {
+                atomicExch(&cell->creature->creatureIndex, origCreatureIndex);
             }
         }
     }
 }
 
-__global__ void cudaCleanupGenomesStep3(Array<Cell*> cells, Heap newHeap)
+__global__ void cudaCleanupCreaturesStep3(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 

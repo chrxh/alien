@@ -25,9 +25,9 @@ void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& g
     if (copyToHost(_cudaBool)) {
         KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
         KERNEL_CALL(cudaCleanupParticles, data.objects.particles, data.tempObjects.heap);
-        KERNEL_CALL(cudaCleanupGenomesStep1, data.objects.cells);
-        KERNEL_CALL(cudaCleanupGenomesStep2, data.objects.cells, data.tempObjects.heap);
-        KERNEL_CALL(cudaCleanupGenomesStep3, data.objects.cells, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCreaturesStep1, data.objects.cells);
+        KERNEL_CALL(cudaCleanupCreaturesStep2, data.objects.cells, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCreaturesStep3, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cells, data.tempObjects.heap);
@@ -44,9 +44,9 @@ void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings 
 
     KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
     KERNEL_CALL(cudaCleanupParticles, data.objects.particles, data.tempObjects.heap);
-    KERNEL_CALL(cudaCleanupGenomesStep1, data.objects.cells);
-    KERNEL_CALL(cudaCleanupGenomesStep2, data.objects.cells, data.tempObjects.heap);
-    KERNEL_CALL(cudaCleanupGenomesStep3, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep1, data.objects.cells);
+    KERNEL_CALL(cudaCleanupCreaturesStep2, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep3, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cells, data.tempObjects.heap);
@@ -61,9 +61,9 @@ void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings
 
     KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
     KERNEL_CALL(cudaCleanupParticles, data.tempObjects.particles, data.tempObjects.heap);
-    KERNEL_CALL(cudaCleanupGenomesStep1, data.objects.cells);
-    KERNEL_CALL(cudaCleanupGenomesStep2, data.objects.cells, data.tempObjects.heap);
-    KERNEL_CALL(cudaCleanupGenomesStep3, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep1, data.objects.cells);
+    KERNEL_CALL(cudaCleanupCreaturesStep2, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep3, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep1, data.tempObjects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep2, data.tempObjects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupDependentCellData, data.tempObjects.cells, data.tempObjects.heap);

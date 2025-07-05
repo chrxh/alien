@@ -8,13 +8,14 @@ public:
     // cell parameter must be of constructor type
 
     __inline__ __device__ static bool isSelfReplicator(Constructor const& constructor);
-    __inline__ __device__ static bool isFinished(Cell* cell);   
-    __inline__ __device__ static bool isFirstNode(Cell* cell);
-    __inline__ __device__ static bool isLastNode(Cell* cell);
-    __inline__ __device__ static bool isFirstConcatenation(Cell* cell);
-    __inline__ __device__ static bool isLastConcatenation(Cell* cell);
-    __inline__ __device__ static Gene* getCurrentGene(Cell* cell);
-    __inline__ __device__ static Node* getCurrentNode(Cell* cell);
+    __inline__ __device__ static bool isStarting(Constructor const& constructor);
+    __inline__ __device__ static bool isFinished(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static bool isFirstNode(Constructor const& constructor);
+    __inline__ __device__ static bool isLastNode(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static bool isFirstConcatenation(Constructor const& constructor);
+    __inline__ __device__ static bool isLastConcatenation(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static Node* getCurrentNode(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool isSeparating(Gene* gene);
     __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
 };
@@ -27,21 +28,20 @@ __inline__ __device__ bool ConstructorHelper::isSelfReplicator(Constructor const
     return constructor.geneIndex == 0;
 }
 
-__inline__ __device__ bool ConstructorHelper::isFinished(Cell* cell)
+__inline__ __device__ bool ConstructorHelper::isStarting(Constructor const& constructor)
 {
-    auto const& creature = cell->creature;
-    if (creature == nullptr) {
-        return false;
-    }
-    if (creature->genome.numGenes == 0) {
-        return true;
-    }
-    auto const& constructor = cell->cellTypeData.constructor;
+    return constructor.currentNodeIndex == 0 && constructor.currentBranch == 0 && constructor.currentConcatenation == 0;
+}
 
-    if (constructor.geneIndex >= creature->genome.numGenes) {
+__inline__ __device__ bool ConstructorHelper::isFinished(Constructor const& constructor, Genome const& genome)
+{
+    if (genome.numGenes == 0) {
         return true;
     }
-    auto const& gene = getCurrentGene(cell);
+    if (constructor.geneIndex >= genome.numGenes) {
+        return true;
+    }
+    auto const& gene = getCurrentGene(constructor, genome);
     if (isSeparating(gene) == 0) {
         return false;
     }
@@ -51,42 +51,37 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Cell* cell)
     return constructor.currentBranch >= gene->numBranches;
 }
 
-__inline__ __device__ bool ConstructorHelper::isFirstNode(Cell* cell)
+__inline__ __device__ bool ConstructorHelper::isFirstNode(Constructor const& constructor)
 {
-    return cell->cellTypeData.constructor.currentNodeIndex == 0;
+    return constructor.currentNodeIndex == 0;
 }
 
-__inline__ __device__ bool ConstructorHelper::isLastNode(Cell* cell)
+__inline__ __device__ bool ConstructorHelper::isLastNode(Constructor const& constructor, Genome const& genome)
 {
-    auto const& gene = getCurrentGene(cell);
-    auto const& constructor = cell->cellTypeData.constructor;
+    auto const& gene = getCurrentGene(constructor, genome);
     return constructor.currentNodeIndex == gene->numNodes - 1;
 }
 
-__inline__ __device__ bool ConstructorHelper::isFirstConcatenation(Cell* cell)
+__inline__ __device__ bool ConstructorHelper::isFirstConcatenation(Constructor const& constructor)
 {
-    return cell->cellTypeData.constructor.currentConcatenation == 0;
+    return constructor.currentConcatenation == 0;
 }
 
-__inline__ __device__ bool ConstructorHelper::isLastConcatenation(Cell* cell)
+__inline__ __device__ bool ConstructorHelper::isLastConcatenation(Constructor const& constructor, Genome const& genome)
 {
-    auto const& gene = getCurrentGene(cell);
-    auto const& constructor = cell->cellTypeData.constructor;
+    auto const& gene = getCurrentGene(constructor, genome);
     return constructor.currentConcatenation == gene->numConcatenations - 1;
 }
 
-__inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Cell* cell)
+__inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)
 {
-    auto const& constructor = cell->cellTypeData.constructor;
-    auto const& creature = cell->creature;
-    CUDA_CHECK(constructor.geneIndex < creature->genome.numGenes);
-    return &creature->genome.genes[constructor.geneIndex];
+    CUDA_CHECK(constructor.geneIndex < genome.numGenes);
+    return &genome.genes[constructor.geneIndex];
 }
 
-__inline__ __device__ Node* ConstructorHelper::getCurrentNode(Cell* cell)
+__inline__ __device__ Node* ConstructorHelper::getCurrentNode(Constructor const& constructor, Genome const& genome)
 {
-    auto const& constructor = cell->cellTypeData.constructor;
-    auto gene = getCurrentGene(cell);
+    auto gene = getCurrentGene(constructor, genome);
     return &gene->nodes[constructor.currentNodeIndex];
 }
 

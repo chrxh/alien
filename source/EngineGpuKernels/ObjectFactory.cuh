@@ -20,9 +20,16 @@ public:
     __inline__ __device__ Cell* createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray);
     __inline__ __device__ void changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
+
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
     __inline__ __device__ Cell* createFreeCell(float energy, float2 const& pos, float2 const& vel);
-    __inline__ __device__ Cell* createCell(uint64_t& cellPointerIndex);
+
+    __inline__ __device__ Creature* cloneCreature(Creature* creature);
+
+    __inline__ __device__ Cell* createEmptyCell(uint64_t& cellPointerIndex);
+    __inline__ __device__ Creature* createEmptyCreature();
+    __inline__ __device__ Gene* createEmptyGenes(int numGenes);
+    __inline__ __device__ Node* createEmptyNodes(int numNodes);
 
 private:
     template<typename T>
@@ -275,6 +282,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
         cell->cellTypeData.constructor.generation = cellTO.cellTypeData.constructor.generation;
         cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         cell->cellTypeData.constructor.isReady = true;
+        cell->cellTypeData.constructor.offspring = nullptr;
     } break;
     case CellType_Sensor: {
         cell->cellTypeData.sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
@@ -433,7 +441,32 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     return cell;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex)
+__inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
+{
+    auto newCreature = createEmptyCreature();
+    *newCreature = *creature;
+    newCreature->ancestorId = creature->id;
+    auto genes = createEmptyGenes(creature->genome.numGenes);
+    newCreature->genome.genes = genes;
+
+    for (int i = 0, numGenes = creature->genome.numGenes; i < numGenes; ++i) {
+        auto gene = &creature->genome.genes[i];
+        auto newGene = &newCreature->genome.genes[i];
+        *newGene = *gene;
+        auto nodes = createEmptyNodes(gene->numNodes);
+        newGene->numNodes = gene->numNodes;
+        newGene->nodes = nodes;
+        for (int j = 0, numNodes = gene->numNodes; j < numNodes; ++j) {
+            auto node = &gene->nodes[i];
+            auto newNode = &newGene->nodes[i];
+            *newNode = *node;
+        }
+    }
+
+    return newCreature;
+}
+
+__inline__ __device__ Cell* ObjectFactory::createEmptyCell(uint64_t& cellPointerIndex)
 {
     auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
     auto cellPointer = _data->objects.cells.getNewElement(&cellPointerIndex);
@@ -461,4 +494,23 @@ __inline__ __device__ Cell* ObjectFactory::createCell(uint64_t& cellPointerIndex
     cell->event = CellEvent_No;
     cell->cellTypeUsed = CellTriggered_No;
     return cell;
+}
+
+__inline__ __device__ Creature* ObjectFactory::createEmptyCreature()
+{
+    auto creature = _data->objects.heap.getTypedSubArray<Creature>(1);
+    creature->id = _data->primaryNumberGen.createCreatureId();
+    return creature;
+}
+
+__inline__ __device__ Gene* ObjectFactory::createEmptyGenes(int numGenes)
+{
+    auto genes = _data->objects.heap.getTypedSubArray<Gene>(numGenes);
+    return genes;
+}
+
+__inline__ __device__ Node* ObjectFactory::createEmptyNodes(int numNodes)
+{
+    auto nodes = _data->objects.heap.getTypedSubArray<Node>(numNodes);
+    return nodes;
 }
