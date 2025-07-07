@@ -27,11 +27,6 @@ ConstructorDescription::ConstructorDescription()
 {
 }
 
-bool ConstructorDescription::isGenomeInherited() const
-{
-    return _numExpectedCells != 0;
-}
-
 SignalDescription::SignalDescription()
 {
     _channels.resize(MAX_CHANNELS, 0);

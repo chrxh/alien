@@ -60,7 +60,6 @@ struct ConstructorTO
     // Genome data
     uint16_t geneIndex;
     float constructionAngle;
-    uint16_t numExpectedCells;
     uint32_t generation;
 
     // Process data
@@ -267,7 +266,7 @@ struct CellTO
     SignalTO signal;
     uint32_t activationTime;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
-    CellTriggered cellTypeUsed;
+    CellTriggered cellTriggered;
 
     // Misc
     CellMetadataTO metadata;

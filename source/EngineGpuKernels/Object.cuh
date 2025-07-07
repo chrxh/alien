@@ -94,8 +94,6 @@ struct Constructor
     // Genome data
     uint16_t geneIndex;
     float constructionAngle;
-    uint16_t numExpectedCells;
-    uint32_t generation;
 
     // Process data
     uint64_t lastConstructedCellId;
@@ -105,7 +103,7 @@ struct Constructor
 
      // Temp data
     bool isReady;
-    Creature* offspring;    // Must be reset if construction finished and separated
+    Creature* offspring;    // Must be reset if separated construction is finished
 };
 
 struct Sensor
@@ -278,6 +276,7 @@ struct Creature
     uint64_t id;
     uint64_t ancestorId;
 
+    uint32_t generation;
     uint32_t mutationId;
     float genomeComplexity;
 
@@ -292,10 +291,10 @@ struct Cell
 {
     // General
     uint64_t id;
+    uint8_t numConnections;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
-    uint8_t numConnections;
     float energy;
     float stiffness;
     uint8_t color;
@@ -317,7 +316,7 @@ struct Cell
     uint8_t signalRelaxationTime;
     Signal signal;
     uint32_t activationTime;
-    CellTriggered cellTypeUsed;
+    CellTriggered cellTriggered;
 
     // Process data
     Signal futureSignal;

@@ -483,7 +483,7 @@ namespace
     auto constexpr Id_Cell_Age = 7;
     auto constexpr Id_Cell_CellState = 8;
     auto constexpr Id_Cell_ActivationTime = 9;
-    auto constexpr Id_Cell_CellTypeUsed = 10;
+    auto constexpr Id_Cell_CellTriggered = 10;
     auto constexpr Id_Cell_DetectedByCreatureId = 11;
     auto constexpr Id_Cell_GenomeNodeIndex = 12;
     auto constexpr Id_Cell_SignalRelaxationTime = 13;
@@ -515,8 +515,7 @@ namespace
     auto constexpr Id_Constructor_ConstructionAngle = 5;
     auto constexpr Id_Constructor_CurrentConcatenation = 9;
     auto constexpr Id_Constructor_LastConstructedCellId = 10;
-    auto constexpr Id_Constructor_NumInheritedGenomeNodes = 11;
-    auto constexpr Id_Constructor_CurrentBranch = 12;
+    auto constexpr Id_Constructor_CurrentBranch = 11;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -674,7 +673,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
         loadSave(task, auxiliaries, Id_Constructor_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
-        loadSave(task, auxiliaries, Id_Constructor_NumInheritedGenomeNodes, data._numExpectedCells, defaultObject._numExpectedCells);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorDescription)
@@ -874,7 +872,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);
         loadSave(task, auxiliaries, Id_Cell_ActivationTime, data._activationTime, defaultObject._activationTime);
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
-        loadSave(task, auxiliaries, Id_Cell_CellTypeUsed, data._cellTypeUsed, defaultObject._cellTypeUsed);
+        loadSave(task, auxiliaries, Id_Cell_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data._genomeNodeIndex, defaultObject._genomeNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);

@@ -74,7 +74,6 @@ struct ConstructorDescription
     // Genome data
     MEMBER(ConstructorDescription, int, geneIndex, 0);
     MEMBER(ConstructorDescription, float, constructionAngle, 0);
-    MEMBER(ConstructorDescription, int, numExpectedCells, 0);
     MEMBER(ConstructorDescription, int, generation, 0);
 
     // Process data
@@ -82,8 +81,6 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, currentNodeIndex, 0);
     MEMBER(ConstructorDescription, int, currentConcatenation, 0);
     MEMBER(ConstructorDescription, int, currentBranch, 0);
-
-    bool isGenomeInherited() const;
 };
 
 struct SensorDescription
@@ -312,7 +309,7 @@ struct CellDescription
     MEMBER(CellDescription, std::optional<SignalDescription>, signal, std::nullopt);
     MEMBER(CellDescription, int, activationTime, 0);
     MEMBER(CellDescription, int, detectedByCreatureId, 0);  // Only the first 16 bits from the creature id
-    MEMBER(CellDescription, CellTriggered, cellTypeUsed, CellTriggered_No);
+    MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
 
     // Misc
     MEMBER(CellDescription, CellMetadataDescription, metadata, CellMetadataDescription());

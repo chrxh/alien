@@ -806,10 +806,10 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[cell->color];
         if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->cellType != CellType_Free && cell->cellType != CellType_Structure
-            && cell->cellTypeUsed == CellTriggered_No && cell->cellState == CellState_Ready && cell->activationTime == 0) {
+            && cell->cellTriggered == CellTriggered_No && cell->cellState == CellState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
-                if (cell->connections[i].cell->cellTypeUsed == CellTriggered_Yes) {
+                if (cell->connections[i].cell->cellTriggered == CellTriggered_Yes) {
                     adjacentCellsUsed = true;
                     break;
                 }

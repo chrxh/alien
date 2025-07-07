@@ -116,7 +116,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 
         cell->signal.active = cell->futureSignal.active;
         if (cell->signal.active) {
-            cell->cellTypeUsed = CellTriggered_Yes;
+            cell->cellTriggered = CellTriggered_Yes;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
             }

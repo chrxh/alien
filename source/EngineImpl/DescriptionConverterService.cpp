@@ -280,7 +280,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._color = cellTO.color;
     result._angleToFront = cellTO.angleToFront;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
-    result._cellTypeUsed = cellTO.cellTypeUsed;
+    result._cellTriggered = cellTO.cellTriggered;
     result._genomeNodeIndex = cellTO.genomeNodeIndex;
 
     auto const& metacollectionTO = cellTO.metadata;
@@ -320,7 +320,6 @@ CellDescription DescriptionConverterService::createCellDescription(
             cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
-        constructor._numExpectedCells = cellTO.cellTypeData.constructor.numExpectedCells;
         constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
@@ -812,7 +811,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.cellState = cellDesc._cellState;
     cellTO.cellType = cellDesc.getCellType();
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
-    cellTO.cellTypeUsed = cellDesc._cellTypeUsed;
+    cellTO.cellTriggered = cellDesc._cellTriggered;
     cellTO.genomeNodeIndex = cellDesc._genomeNodeIndex;
     cellTO.angleToFront = cellDesc._angleToFront;
 
@@ -841,7 +840,6 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
-        constructorTO.numExpectedCells = static_cast<uint16_t>(constructorDesc._numExpectedCells);
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
         constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);

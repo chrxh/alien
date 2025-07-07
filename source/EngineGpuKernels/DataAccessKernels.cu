@@ -188,7 +188,7 @@ namespace
         }
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
-        cellTO.cellTypeUsed = cell->cellTypeUsed;
+        cellTO.cellTriggered = cell->cellTriggered;
         cellTO.genomeNodeIndex = cell->genomeNodeIndex;
 
         copyDataToHeap(
@@ -233,7 +233,6 @@ namespace
             cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
             cellTO.cellTypeData.constructor.geneIndex = cell->cellTypeData.constructor.geneIndex;
-            cellTO.cellTypeData.constructor.numExpectedCells = cell->cellTypeData.constructor.numExpectedCells;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;
             cellTO.cellTypeData.constructor.currentConcatenation = cell->cellTypeData.constructor.currentConcatenation;
