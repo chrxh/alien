@@ -60,7 +60,6 @@ struct ConstructorTO
     // Genome data
     uint16_t geneIndex;
     float constructionAngle;
-    uint32_t generation;
 
     // Process data
     uint64_t lastConstructedCellId;
@@ -279,6 +278,8 @@ struct CreatureTO
 {
     uint64_t id;
     uint64_t ancestorId;
+
+    uint32_t generation;
     uint32_t mutationId;
     float genomeComplexity;
 

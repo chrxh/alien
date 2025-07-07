@@ -74,7 +74,6 @@ struct ConstructorDescription
     // Genome data
     MEMBER(ConstructorDescription, int, geneIndex, 0);
     MEMBER(ConstructorDescription, float, constructionAngle, 0);
-    MEMBER(ConstructorDescription, int, generation, 0);
 
     // Process data
     MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);
@@ -353,6 +352,7 @@ struct CreatureDescription
 
     MEMBER(CreatureDescription, uint64_t, id, 0);
     MEMBER(CreatureDescription, uint64_t, ancestorId, 0);
+    MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, mutationId, 0);
     MEMBER(CreatureDescription, float, genomeComplexity, 0);
     MEMBER(CreatureDescription, GenomeDescription, genome, {});

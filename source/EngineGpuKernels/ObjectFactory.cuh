@@ -77,6 +77,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
 
     creature->id = creatureTO.id;
     creature->ancestorId = creatureTO.ancestorId;
+    creature->generation = creatureTO.generation;
     creature->mutationId = creatureTO.mutationId;
     creature->genomeComplexity = creatureTO.genomeComplexity;
     creature->genome.frontAngle = creatureTO.genome.frontAngle;
@@ -279,7 +280,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
         cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         cell->cellTypeData.constructor.currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         cell->cellTypeData.constructor.currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        cell->cellTypeData.constructor.generation = cellTO.cellTypeData.constructor.generation;
         cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         cell->cellTypeData.constructor.isReady = true;
         cell->cellTypeData.constructor.offspring = nullptr;
@@ -446,6 +446,7 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
     auto newCreature = createEmptyCreature();
     *newCreature = *creature;
     newCreature->ancestorId = creature->id;
+    newCreature->generation = creature->generation + 1;
     auto genes = createEmptyGenes(creature->genome.numGenes);
     newCreature->genome.genes = genes;
 
@@ -557,103 +558,123 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     case CellTypeGenome_Constructor: {
         cell->cellType = CellType_Constructor;
         auto const& nodeConstructor = node->cellTypeData.constructor;
-        auto& newConstructor = cell->cellTypeData.constructor;
-        newConstructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
-        newConstructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
-        newConstructor.geneIndex = nodeConstructor.geneIndex;
-        newConstructor.constructionAngle = nodeConstructor.constructionAngle;
-        newConstructor.lastConstructedCellId = 0;
-        newConstructor.currentNodeIndex = 0;
-        newConstructor.currentConcatenation = 0;
-        newConstructor.currentBranch = 0;
-        newConstructor.isReady = true;
-        newConstructor.offspring = nullptr;
+        auto& constructor = cell->cellTypeData.constructor;
+        constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
+        constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
+        constructor.geneIndex = nodeConstructor.geneIndex;
+        constructor.constructionAngle = nodeConstructor.constructionAngle;
+        constructor.lastConstructedCellId = 0;
+        constructor.currentNodeIndex = 0;
+        constructor.currentConcatenation = 0;
+        constructor.currentBranch = 0;
+        constructor.isReady = true;
+        constructor.offspring = nullptr;
     } break;
     case CellTypeGenome_Sensor: {
-        result->cellTypeData.sensor.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-        result->cellTypeData.sensor.minDensity = (GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition) + 1.0f) / 2;
-        result->cellTypeData.sensor.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
-        result->cellTypeData.sensor.restrictToCreatures = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % SensorRestrictToCreatures_Count;
-        result->cellTypeData.sensor.minRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
-        result->cellTypeData.sensor.maxRange = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition);
+        cell->cellType = CellType_Sensor;
+        auto const& nodeSensor = node->cellTypeData.sensor;
+        auto& sensor = cell->cellTypeData.sensor;
+        sensor.autoTriggerInterval = nodeSensor.autoTriggerInterval;
+        sensor.minDensity = nodeSensor.minDensity;
+        sensor.minRange = nodeSensor.minRange;
+        sensor.maxRange = nodeSensor.maxRange;
+        sensor.restrictToColor = nodeSensor.restrictToColor;
+        sensor.restrictToCreatures = nodeSensor.restrictToCreatures;
     } break;
     case CellTypeGenome_Generator: {
-        result->cellTypeData.generator.autoTriggerInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-        result->cellTypeData.generator.alternationInterval = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition);
-        result->cellTypeData.generator.numPulses = 0;
+        cell->cellType = CellType_Generator;
+        auto const& nodeGenerator = node->cellTypeData.generator;
+        auto& generator = cell->cellTypeData.generator;
+        generator.autoTriggerInterval = nodeGenerator.autoTriggerInterval;
+        generator.pulseType = nodeGenerator.pulseType;
+        generator.alternationInterval = nodeGenerator.alternationInterval;
+        generator.numPulses = 0;
     } break;
     case CellTypeGenome_Attacker: {
+        cell->cellType = CellType_Attacker;
     } break;
     case CellTypeGenome_Injector: {
-        result->cellTypeData.injector.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % InjectorMode_Count;
-        result->cellTypeData.injector.counter = 0;
-        GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, result->cellTypeData.injector);
-        result->cellTypeData.injector.generation = constructor.generation + 1;
+        cell->cellType = CellType_Attacker;
+        auto const& nodeInjector = node->cellTypeData.injector;
+        auto& injector = cell->cellTypeData.injector;
+        injector.mode = nodeInjector.mode;
+        injector.counter =0;
     } break;
     case CellTypeGenome_Muscle: {
-        result->cellTypeData.muscle.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % MuscleMode_Count;
-        if (result->cellTypeData.muscle.mode == MuscleMode_AutoBending) {
-            result->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation =
-                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
-            result->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.autoBending.initialAngle = 0;
-            result->cellTypeData.muscle.modeData.autoBending.lastActualAngle = 0;
-            result->cellTypeData.muscle.modeData.autoBending.forward = true;
-            result->cellTypeData.muscle.modeData.autoBending.activation = 0;
-            result->cellTypeData.muscle.modeData.autoBending.activationCountdown = 0;
-            result->cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied = false;
-        } else if (result->cellTypeData.muscle.mode == MuscleMode_ManualBending) {
-            result->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation =
-                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
-            result->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.manualBending.initialAngle = 0;
-            result->cellTypeData.muscle.modeData.manualBending.lastActualAngle = 0;
-            result->cellTypeData.muscle.modeData.manualBending.lastAngleDelta = 0;
-            result->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = false;
-        } else if (result->cellTypeData.muscle.mode == MuscleMode_AngleBending) {
-            result->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation =
-                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
-            result->cellTypeData.muscle.modeData.angleBending.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.angleBending.initialAngle = 0;
-        } else if (result->cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
-            result->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation =
-                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
-            result->cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.autoCrawling.initialDistance = 0;
-            result->cellTypeData.muscle.modeData.autoCrawling.lastActualDistance = 0;
-            result->cellTypeData.muscle.modeData.autoCrawling.forward = true;
-            result->cellTypeData.muscle.modeData.autoCrawling.activation = 0;
-            result->cellTypeData.muscle.modeData.autoCrawling.activationCountdown = 0;
-            result->cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied = false;
-        } else if (result->cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
-            result->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
-                min(1.0f, max(0.0f, GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition)));
-            result->cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio = abs(GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition));
-            result->cellTypeData.muscle.modeData.manualCrawling.initialDistance = 0;
-            result->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = 0;
-            result->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = 0;
-            result->cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied = false;
-        } else if (result->cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
-            // Read dummy bytes
-            GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition);
-            GenomeDecoder::readFloat(constructor, genomeCurrentBytePosition);
+        cell->cellType = CellType_Muscle;
+        auto const& nodeMuscle = node->cellTypeData.muscle;
+        auto& muscle = cell->cellTypeData.muscle;
+        muscle.lastMovementX = 0;
+        muscle.lastMovementY = 0;
+        muscle.mode = nodeMuscle.mode;
+        switch (nodeMuscle.mode) {
+        case MuscleMode_AutoBending: {
+            muscle.modeData.autoBending.maxAngleDeviation = nodeMuscle.modeData.autoBending.maxAngleDeviation;
+            muscle.modeData.autoBending.frontBackVelRatio = nodeMuscle.modeData.autoBending.frontBackVelRatio;
+            muscle.modeData.autoBending.initialAngle = 0;
+            muscle.modeData.autoBending.lastActualAngle = 0;
+            muscle.modeData.autoBending.forward = true;
+            muscle.modeData.autoBending.activation = 0;
+            muscle.modeData.autoBending.activationCountdown = 0;
+            muscle.modeData.autoBending.impulseAlreadyApplied = false;
+        } break;
+        case MuscleMode_ManualBending: {
+            muscle.modeData.manualBending.maxAngleDeviation = nodeMuscle.modeData.manualBending.maxAngleDeviation;
+            muscle.modeData.manualBending.frontBackVelRatio = nodeMuscle.modeData.manualBending.frontBackVelRatio;
+            muscle.modeData.manualBending.initialAngle = 0;
+            muscle.modeData.manualBending.lastActualAngle = 0;
+            muscle.modeData.manualBending.lastAngleDelta = 0;
+            muscle.modeData.manualBending.impulseAlreadyApplied = false;
+        } break;
+        case MuscleMode_AngleBending: {
+            muscle.modeData.angleBending.maxAngleDeviation = nodeMuscle.modeData.angleBending.maxAngleDeviation;
+            muscle.modeData.angleBending.frontBackVelRatio = nodeMuscle.modeData.angleBending.frontBackVelRatio;
+            muscle.modeData.angleBending.initialAngle = 0;
+        } break;
+        case MuscleMode_AutoCrawling: {
+            muscle.modeData.autoCrawling.maxDistanceDeviation = nodeMuscle.modeData.autoCrawling.maxDistanceDeviation;
+            muscle.modeData.autoCrawling.frontBackVelRatio = nodeMuscle.modeData.autoCrawling.frontBackVelRatio;
+            muscle.modeData.autoCrawling.initialDistance = 0;
+            muscle.modeData.autoCrawling.lastActualDistance = 0;
+            muscle.modeData.autoCrawling.forward = true;
+            muscle.modeData.autoCrawling.activation = 0;
+            muscle.modeData.autoCrawling.activationCountdown = 0;
+            muscle.modeData.autoCrawling.impulseAlreadyApplied = false;
+        } break;
+        case MuscleMode_ManualCrawling: {
+            muscle.modeData.manualCrawling.maxDistanceDeviation = nodeMuscle.modeData.manualCrawling.maxDistanceDeviation;
+            muscle.modeData.manualCrawling.frontBackVelRatio = nodeMuscle.modeData.manualCrawling.frontBackVelRatio;
+            muscle.modeData.manualCrawling.initialDistance = 0;
+            muscle.modeData.manualCrawling.lastActualDistance = 0;
+            muscle.modeData.manualCrawling.lastDistanceDelta = 0;
+            muscle.modeData.manualCrawling.impulseAlreadyApplied = false;
+        } break;
+        case MuscleMode_DirectMovement: {
+        } break;
         }
-        result->cellTypeData.muscle.lastMovementX = 0;
-        result->cellTypeData.muscle.lastMovementY = 0;
     } break;
     case CellTypeGenome_Defender: {
-        result->cellTypeData.defender.mode = GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % DefenderMode_Count;
+        cell->cellType = CellType_Defender;
+        auto const& nodeDefender = node->cellTypeData.defender;
+        auto& defender = cell->cellTypeData.defender;
+        defender.mode = nodeDefender.mode;
     } break;
     case CellTypeGenome_Reconnector: {
-        result->cellTypeData.reconnector.restrictToColor = GenomeDecoder::readOptionalByte(constructor, genomeCurrentBytePosition, MAX_COLORS);
-        result->cellTypeData.reconnector.restrictToCreatures =
-            GenomeDecoder::readByte(constructor, genomeCurrentBytePosition) % ReconnectorRestrictToCreatures_Count;
+        cell->cellType = CellType_Reconnector;
+        auto const& nodeReconnector = node->cellTypeData.reconnector;
+        auto& reconnector = cell->cellTypeData.reconnector;
+        reconnector.restrictToColor = nodeReconnector.restrictToColor;
+        reconnector.restrictToCreatures = nodeReconnector.restrictToCreatures;
     } break;
     case CellTypeGenome_Detonator: {
-        result->cellTypeData.detonator.state = DetonatorState_Ready;
-        result->cellTypeData.detonator.countdown = GenomeDecoder::readWord(constructor, genomeCurrentBytePosition);
+        cell->cellType = CellType_Detonator;
+        auto const& nodeDetonator = node->cellTypeData.detonator;
+        auto& detonator = cell->cellTypeData.detonator;
+        detonator.state = DetonatorState_Ready;
+        detonator.countdown = nodeDetonator.countdown;
     } break;
     }
+    return cell;
 }
 
 __inline__ __device__ Creature* ObjectFactory::createEmptyCreature()

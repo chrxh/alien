@@ -35,6 +35,7 @@ namespace
             auto const& creature = cell->creature;
             creatureTO.id = creature->id;
             creatureTO.ancestorId = creature->ancestorId;
+            creatureTO.generation = creature->generation;
             creatureTO.mutationId = creature->mutationId;
             creatureTO.genomeComplexity = creature->genomeComplexity;
             creatureTO.genome.frontAngle = creature->genome.frontAngle;
@@ -237,7 +238,6 @@ namespace
             cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;
             cellTO.cellTypeData.constructor.currentConcatenation = cell->cellTypeData.constructor.currentConcatenation;
             cellTO.cellTypeData.constructor.currentBranch = cell->cellTypeData.constructor.currentBranch;
-            cellTO.cellTypeData.constructor.generation = cell->cellTypeData.constructor.generation;
             cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
         } break;
         case CellType_Sensor: {

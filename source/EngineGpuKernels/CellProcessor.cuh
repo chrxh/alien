@@ -881,10 +881,10 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-        auto needCellEnergy = cell->cellType == CellType_Constructor && !ConstructorHelper::isFinished(cell)
+        auto needCellEnergy = cell->cellType == CellType_Constructor && cell->creature && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome)
             && connectedCell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
-        auto hasOtherCellMoreEnergy =
-            (connectedCell->cellType != CellType_Constructor || ConstructorHelper::isFinished(connectedCell))
+        auto hasOtherCellMoreEnergy = (connectedCell->cellType != CellType_Constructor
+                                       || (connectedCell->creature && ConstructorHelper::isFinished(connectedCell->cellTypeData.constructor, connectedCell->creature->genome)))
             && connectedCell->energy > cell->energy;
         float flow = 0;
         if (needCellEnergy) {

@@ -781,7 +781,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         if (constructor._autoTriggerInterval < 0) {
             constructor._autoTriggerInterval = 0;
         }
-        constructor._generation = std::max(0, constructor._generation);
+        //constructor._generation = std::max(0, constructor._generation);
     } break;
     case CellType_Sensor: {
         auto& sensor = std::get<SensorDescription>(cell._cellTypeData);

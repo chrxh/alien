@@ -41,7 +41,7 @@ CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(
     NeuralNetworkGenomeDescription nn2;
     nn2.weight(1, 3, -1.0f);
 
-    return CreatureDescription().ancestorId(123).mutationId(42).genomeComplexity(23).genome(GenomeDescription().frontAngle(34.0f).genes({
+    return CreatureDescription().ancestorId(123).mutationId(42).generation(17).genomeComplexity(23).genome(GenomeDescription().frontAngle(34.0f).genes({
         GeneDescription()
             .shape(ConstructionShape_Hexagon)
             .numBranches(3)
@@ -102,7 +102,15 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     case CellType_Depot:
         return DepotDescription();
     case CellType_Constructor:
-        return ConstructorDescription().autoTriggerInterval(7).geneIndex(3).constructionActivationTime(4).constructionAngle(34.4f).lastConstructedCellId(45ull);
+        return ConstructorDescription()
+            .autoTriggerInterval(7)
+            .constructionActivationTime(4)
+            .geneIndex(3)
+            .constructionAngle(34.4f)
+            .lastConstructedCellId(45ull)
+            .currentNodeIndex(3)
+            .currentBranch(4)
+            .currentConcatenation(5);
     case CellType_Sensor:
         return SensorDescription().autoTriggerInterval(3).restrictToColor(5).minRange(34).maxRange(67).minDensity(0.25f).restrictToCreatures(
             SensorRestrictToCreatures_RestrictToLessComplexMutants);

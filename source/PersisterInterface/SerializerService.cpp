@@ -470,8 +470,9 @@ namespace
 
     auto constexpr Id_Creature_Id = 0;
     auto constexpr Id_Creature_AncestorId = 1;
-    auto constexpr Id_Creature_MutationId = 2;
-    auto constexpr Id_Creature_GenomeComplexity = 3;
+    auto constexpr Id_Creature_Generation = 2;
+    auto constexpr Id_Creature_MutationId = 3;
+    auto constexpr Id_Creature_GenomeComplexity = 4;
 
     auto constexpr Id_Cell_Id = 0;
     auto constexpr Id_Cell_Energy = 1;
@@ -511,11 +512,10 @@ namespace
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
     auto constexpr Id_Constructor_GeneIndex = 2;
     auto constexpr Id_Constructor_CurrentNodeIndex = 3;
-    auto constexpr Id_Constructor_Generation = 4;
-    auto constexpr Id_Constructor_ConstructionAngle = 5;
-    auto constexpr Id_Constructor_CurrentConcatenation = 9;
-    auto constexpr Id_Constructor_LastConstructedCellId = 10;
-    auto constexpr Id_Constructor_CurrentBranch = 11;
+    auto constexpr Id_Constructor_ConstructionAngle = 4;
+    auto constexpr Id_Constructor_CurrentConcatenation = 5;
+    auto constexpr Id_Constructor_LastConstructedCellId = 6;
+    auto constexpr Id_Constructor_CurrentBranch = 7;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -671,7 +671,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
         loadSave(task, auxiliaries, Id_Constructor_CurrentConcatenation, data._currentConcatenation, defaultObject._currentConcatenation);
         loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
-        loadSave(task, auxiliaries, Id_Constructor_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -888,6 +887,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
+        loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Creature_MutationId, data._mutationId, defaultObject._mutationId);
         loadSave(task, auxiliaries, Id_Creature_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
         

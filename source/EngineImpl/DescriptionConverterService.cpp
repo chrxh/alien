@@ -324,7 +324,6 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        constructor._generation = cellTO.cellTypeData.constructor.generation;
         constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         result._cellTypeData = constructor;
     } break;
@@ -463,6 +462,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     auto const& creatureTO = collectionTO.creatures[creatureIndex];
     result._id = creatureTO.id;
     result._ancestorId = creatureTO.ancestorId;
+    result._generation = creatureTO.generation;
     result._mutationId = creatureTO.mutationId;
     result._genomeComplexity = creatureTO.genomeComplexity;
     result._genome._frontAngle = creatureTO.genome.frontAngle;
@@ -638,6 +638,7 @@ void DescriptionConverterService::convertCreatureToTO(
 
     creatureTO.id = creatureDesc._id;
     creatureTO.ancestorId = creatureDesc._ancestorId;
+    creatureTO.generation = creatureDesc._generation;
     creatureTO.mutationId = creatureDesc._mutationId;
     creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
     creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
@@ -844,7 +845,6 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
         constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
-        constructorTO.generation = constructorDesc._generation;
         constructorTO.constructionAngle = constructorDesc._constructionAngle;
     } break;
     case CellType_Sensor: {
