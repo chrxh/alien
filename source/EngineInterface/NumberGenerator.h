@@ -13,8 +13,8 @@ public:
 	uint32_t getRandomInt();
     uint32_t getRandomInt(uint32_t range);
     uint32_t getRandomInt(uint32_t min, uint32_t max);
-    double getRandomReal();
-    double getRandomReal(double min, double max);
+    double getRandomDouble();
+    double getRandomDouble(double min, double max);
     float getRandomFloat(float min, float max);
     uint32_t getLargeRandomInt(uint32_t range);
 

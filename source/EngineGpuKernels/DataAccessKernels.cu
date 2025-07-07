@@ -54,6 +54,7 @@ namespace
                 geneTO.numConcatenations = gene.numConcatenations;
                 geneTO.numNodes = gene.numNodes;
                 auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
+                geneTO.nodeArrayIndex = nodeTOArrayStartIndex;
                 for (int i = 0, j = gene.numNodes; i < j; ++i) {
                     auto& nodeTO = collectionTO.nodes[nodeTOArrayStartIndex + i];
                     auto const& node = gene.nodes[i];

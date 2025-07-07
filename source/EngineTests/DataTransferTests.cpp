@@ -63,11 +63,12 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Reconnector},
         CellParameter{CellType_Detonator}));
 
-TEST_P(DataTransferTests_AllCellTypes, singleCellWithoutCreature)
+TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
 {
     auto cellParameter = GetParam();
 
     CollectionDescription data;
+    data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
     data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
 
     _simulationFacade->setSimulationData(data);
@@ -104,12 +105,13 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(DataTransferTests_AllNodeTypes, singleCellWithCreature_oneGene_oneNode)
+TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneGene_oneNode)
 {
     auto nodeParameter = GetParam();
 
     auto data = CollectionDescription().creatures({
-        _descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter).cells({CellDescription()})
+        _descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter).cells({CellDescription()}),
+        _descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter).cells({CellDescription()}),
     });
 
     _simulationFacade->setSimulationData(data);

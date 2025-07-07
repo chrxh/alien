@@ -290,12 +290,12 @@ CollectionDescription DescriptionEditService::randomMultiply(
         do {
             copy = input;
             removeMetadata(copy);
-            shift(copy, {toFloat(numberGen.getRandomReal(0, toInt(worldSize.x))), toFloat(numberGen.getRandomReal(0, toInt(worldSize.y)))});
-            rotate(copy, toInt(numberGen.getRandomReal(parameters._minAngle, parameters._maxAngle)));
+            shift(copy, {toFloat(numberGen.getRandomDouble(0, toInt(worldSize.x))), toFloat(numberGen.getRandomDouble(0, toInt(worldSize.y)))});
+            rotate(copy, toInt(numberGen.getRandomDouble(parameters._minAngle, parameters._maxAngle)));
             accelerate(copy,
-                {toFloat(numberGen.getRandomReal(parameters._minVelX, parameters._maxVelX)),
-                 toFloat(numberGen.getRandomReal(parameters._minVelY, parameters._maxVelY))},
-                toFloat(numberGen.getRandomReal(parameters._minAngularVel, parameters._maxAngularVel)));
+                {toFloat(numberGen.getRandomDouble(parameters._minVelX, parameters._maxVelX)),
+                 toFloat(numberGen.getRandomDouble(parameters._minVelY, parameters._maxVelY))},
+                toFloat(numberGen.getRandomDouble(parameters._minAngularVel, parameters._maxAngularVel)));
 
             //overlapping check
             overlapping = false;
@@ -401,13 +401,13 @@ void DescriptionEditService::randomizeGenomeColors(CollectionDescription& data, 
 void DescriptionEditService::randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy)
 {
     for (auto& creature : data._creatures) {
-        auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
+        auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : creature._cells) {
             cell._energy = energy;
         }
     }
     {
-        auto energy = NumberGenerator::get().getRandomReal(toDouble(minEnergy), toDouble(maxEnergy));
+        auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : data._cells) {
             cell._energy = energy;
         }
@@ -417,13 +417,13 @@ void DescriptionEditService::randomizeEnergies(CollectionDescription& data, floa
 void DescriptionEditService::randomizeAges(CollectionDescription& data, int minAge, int maxAge)
 {
     for (auto& creature : data._creatures) {
-        auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
+        auto age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
         for (auto& cell : creature._cells) {
             cell._age = age;
         }
     }
     {
-        auto age = NumberGenerator::get().getRandomReal(toDouble(minAge), toDouble(maxAge));
+        auto age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
         for (auto& cell : data._cells) {
             cell._age = age;
         }
@@ -433,7 +433,7 @@ void DescriptionEditService::randomizeAges(CollectionDescription& data, int minA
 void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue)
 {
     for (auto& creature : data._creatures) {
-        auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
+        auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
         for (auto& cell : creature._cells) {
             if (cell.getCellType() == CellType_Detonator) {
                 std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;
@@ -441,7 +441,7 @@ void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, in
         }
     }
     {
-        auto countdown = NumberGenerator::get().getRandomReal(toDouble(minValue), toDouble(maxValue));
+        auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
         for (auto& cell : data._cells) {
             if (cell.getCellType() == CellType_Detonator) {
                 std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;

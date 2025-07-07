@@ -31,6 +31,10 @@ public:
     bool compare(ParticleDescription left, ParticleDescription right) const;
 
 private:
+    float getRandomFloat(float min = -1.0f, float max = 1.0f) const;
+    RealVector2D getRandomFloat2(float min = -1.0f, float max = 1.0f) const;
+    int getRandomInt(int min = 0, int max = 42) const;
+
     CellTypeDescription createRandomCellTypeDescription(CellParameter cellParameter) const;
 
     NodeDescription createRandomNodeDescription(NodeParameter nodeParameter) const;

@@ -468,6 +468,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     result._genome._frontAngle = creatureTO.genome.frontAngle;
     result._genome._genes.reserve(creatureTO.genome.numGenes);
 
+    CHECK(creatureTO.genome.geneArrayIndex + creatureTO.genome.numGenes <= *collectionTO.numGenes);
     for (int i = 0; i < creatureTO.genome.numGenes; ++i) {
         auto geneTO = collectionTO.genes + creatureTO.genome.geneArrayIndex + i;
 
@@ -479,6 +480,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
         geneDesc._connectionDistance = geneTO->connectionDistance;
         geneDesc._numConcatenations = geneTO->numConcatenations;
 
+        CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *collectionTO.numNodes);
         for (int j = 0; j < geneTO->numNodes; ++j) {
             auto nodeTO = collectionTO.nodes + geneTO->nodeArrayIndex + j;
 

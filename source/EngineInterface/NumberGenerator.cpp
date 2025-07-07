@@ -56,17 +56,17 @@ void NumberGenerator::adaptMaxIds(Ids const& ids)
     _ids.currentMutationId = std::max(_ids.currentMutationId, ids.currentMutationId);
 }
 
-double NumberGenerator::getRandomReal(double min, double max)
+double NumberGenerator::getRandomDouble(double min, double max)
 {
 	return getLargeRandomInt(static_cast<int>((max - min) * 1000)) / 1000.0 + min;
 }
 
 float NumberGenerator::getRandomFloat(float min, float max)
 {
-    return toFloat(getRandomReal(min, max));
+    return toFloat(getRandomDouble(min, max));
 }
 
-double NumberGenerator::getRandomReal()
+double NumberGenerator::getRandomDouble()
 {
     return static_cast<double>(getNumberFromArray()) / static_cast<double>(std::numeric_limits<int>::max());
 }

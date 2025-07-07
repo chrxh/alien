@@ -42,7 +42,7 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Constructor const& cons
         return true;
     }
     auto const& gene = getCurrentGene(constructor, genome);
-    if (isSeparating(gene) == 0) {
+    if (isSeparating(gene)) {
         return false;
     }
     if (constructor.currentNodeIndex >= gene->numNodes) {
