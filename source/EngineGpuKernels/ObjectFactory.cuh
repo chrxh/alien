@@ -444,7 +444,9 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
 __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 {
     auto newCreature = createEmptyCreature();
+    auto newId = newCreature->id;
     *newCreature = *creature;
+    newCreature->id = newId;
     newCreature->ancestorId = creature->id;
     newCreature->generation = creature->generation + 1;
     auto genes = createEmptyGenes(creature->genome.numGenes);
@@ -463,7 +465,6 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
             *newNode = *node;
         }
     }
-
     return newCreature;
 }
 

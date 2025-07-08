@@ -284,6 +284,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         result.angle = angle;
     }
 
+    result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+
     return result;
 }
 

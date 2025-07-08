@@ -68,7 +68,7 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Reconnector},
         CellParameter{CellType_Detonator}));
 
-TEST_P(SerializerServiceTests_AllCellTypes, singleCellWithoutCreature)
+TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
 {
     auto cellParameter = GetParam();
 
@@ -105,7 +105,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(SerializerServiceTests_AllNodeTypes, singleCellWithCreature_oneGene_oneNode)
+TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
 {
     auto nodeParameter = GetParam();
 

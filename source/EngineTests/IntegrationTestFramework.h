@@ -30,12 +30,6 @@ public:
 protected:
     double getEnergy(CollectionDescription const& data) const;
 
-    ConnectionDescription getConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const;
-    ConnectionDescription getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
-    bool hasConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const;
-    CellDescription getOtherCell(CollectionDescription const& data, uint64_t id) const;
-    CellDescription getOtherCell(CollectionDescription const& data, std::set<uint64_t> ids) const;
-
     bool approxCompare(double expected, double actual, float precision = 0.001f) const;
     bool approxCompare(float expected, float actual, float precision = 0.001f) const;
     bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const;

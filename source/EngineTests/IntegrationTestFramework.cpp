@@ -41,58 +41,6 @@ double IntegrationTestFramework::getEnergy(CollectionDescription const& data) co
     return result;
 }
 
-ConnectionDescription IntegrationTestFramework::getConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const
-{
-    auto cell = data.getCellRef(id);
-    for (auto const& connection : cell._connections) {
-        if (connection._cellId == otherId) {
-            return connection;
-        }
-    }
-    THROW_NOT_IMPLEMENTED();
-}
-
-ConnectionDescription IntegrationTestFramework::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
-{
-    for (auto const& connection : cell1._connections) {
-        if (connection._cellId == cell2._id) {
-            return connection;
-        }
-    }
-    THROW_NOT_IMPLEMENTED();
-}
-
-bool IntegrationTestFramework::hasConnection(CollectionDescription const& data, uint64_t id, uint64_t otherId) const
-{
-    auto cell = data.getCellRef(id);
-    for (auto const& connection : cell._connections) {
-        if (connection._cellId == otherId) {
-            return true;
-        }
-    }
-    return false;
-}
-
-CellDescription IntegrationTestFramework::getOtherCell(CollectionDescription const& data, uint64_t id) const
-{
-    for (auto const& cell : data._cells) {
-        if (cell._id != id) {
-            return cell;
-        }
-    }
-    THROW_NOT_IMPLEMENTED();
-}
-
-CellDescription IntegrationTestFramework::getOtherCell(CollectionDescription const& data, std::set<uint64_t> ids) const
-{
-    for (auto const& cell : data._cells) {
-        if (!ids.contains(cell._id)) {
-            return cell;
-        }
-    }
-    THROW_NOT_IMPLEMENTED();
-}
-
 bool IntegrationTestFramework::approxCompare(double expected, double actual, float precision) const
 {
     return approxCompare(toFloat(expected), toFloat(actual));

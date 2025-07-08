@@ -26,6 +26,40 @@ protected:
 
     float getConstructorEnergy() const { return _parameters.normalCellEnergy.value[0] * 2.5f; }
 };
+
+TEST_F(ConstructorTests, firstCell_gene0_separation_finished)
+{
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .id(0)
+            .genome(GenomeDescription().genes({
+                GeneDescription().numBranches(std::nullopt).nodes({NodeDescription()}),
+            }))
+            .cells({CellDescription().energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto hostCreature = actualData.getCreature(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
+    EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
+}
+
 //
 //TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_upperSide)
 //{

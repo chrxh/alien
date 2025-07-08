@@ -105,7 +105,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneGene_oneNode)
+TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
 {
     auto nodeParameter = GetParam();
 
@@ -120,7 +120,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneGene_oneNode)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multiple_Nodes)
+TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
     CollectionDescription data;

@@ -70,7 +70,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
     EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell._connections.size());
     EXPECT_EQ(1, actualTargetCell._connections.size());
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -122,7 +122,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
     EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell._connections.size());
     EXPECT_EQ(1, actualTargetCell._connections.size());
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -156,7 +156,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
     EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell._connections.size());
     EXPECT_EQ(1, actualTargetCell._connections.size());
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -220,7 +220,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
     EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell._connections.size());
     EXPECT_EQ(1, actualTargetCell._connections.size());
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -279,7 +279,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToStructures_success)
     EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell._connections.size());
     EXPECT_EQ(1, actualTargetCell._connections.size());
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -333,7 +333,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_success)
     EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
     EXPECT_EQ(2, actualReconnectorCell._connections.size());
     EXPECT_EQ(1, actualTargetCell._connections.size());
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -384,7 +384,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed)
@@ -408,7 +408,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_FALSE(hasConnection(actualData, 1, 3));
+    EXPECT_FALSE(actualData.hasConnection(1, 3));
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_success)
@@ -432,7 +432,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_TRUE(hasConnection(actualData, 1, 3));
+    EXPECT_TRUE(actualData.hasConnection(1, 3));
 }
 
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed)
@@ -456,7 +456,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_FALSE(hasConnection(actualData, 1, 3));
+    EXPECT_FALSE(actualData.hasConnection(1, 3));
 }
 
 TEST_F(ReconnectorTests, deleteConnections_success)
@@ -497,6 +497,6 @@ TEST_F(ReconnectorTests, deleteConnections_success)
     EXPECT_EQ(1, actualReconnectorCell._connections.size());
     EXPECT_TRUE(actualTargetCell1._connections.empty());
     EXPECT_TRUE(actualTargetCell2._connections.empty());
-    EXPECT_TRUE(hasConnection(actualData, 1, 2));
+    EXPECT_TRUE(actualData.hasConnection(1, 2));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

@@ -395,6 +395,92 @@ CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, Colle
     }
 }
 
+CellDescription& CollectionDescription::getOtherCell(uint64_t id)
+{
+    for (auto& cell : _cells) {
+        if (cell._id != id) {
+            return cell;
+        }
+    }
+    for (auto& creature : _creatures) {
+        for (auto& cell : creature._cells) {
+            if (cell._id != id) {
+                return cell;
+            }
+        }
+    }
+    CHECK(false);
+}
+
+CellDescription& CollectionDescription::getOtherCell(std::set<uint64_t> const& ids)
+{
+    for (auto& cell : _cells) {
+        if (!ids.contains(cell._id)) {
+            return cell;
+        }
+    }
+    for (auto& creature : _creatures) {
+        for (auto& cell : creature._cells) {
+            if (!ids.contains(cell._id)) {
+                return cell;
+            }
+        }
+    }
+    CHECK(false);
+}
+
+bool CollectionDescription::hasConnection(uint64_t id, uint64_t otherId) const
+{
+    auto const& cell = getCellRef(id);
+    for (auto const& connection : cell._connections) {
+        if (connection._cellId == otherId) {
+            return true;
+        }
+    }
+    return false;
+}
+
+ConnectionDescription CollectionDescription::getConnection(uint64_t id, uint64_t otherId) const
+{
+    auto cell = getCellRef(id);
+    for (auto const& connection : cell._connections) {
+        if (connection._cellId == otherId) {
+            return connection;
+        }
+    }
+    CHECK(false);
+}
+
+ConnectionDescription CollectionDescription::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
+{
+    for (auto const& connection : cell1._connections) {
+        if (connection._cellId == cell2._id) {
+            return connection;
+        }
+    }
+    CHECK(false);
+}
+
+CreatureDescription& CollectionDescription::getCreature(uint64_t id)
+{
+    for (auto& creature : _creatures) {
+        if (creature._id == id) {
+            return creature;
+        }
+    }
+    CHECK(false);
+}
+
+CreatureDescription& CollectionDescription::getOtherCreature(uint64_t id)
+{
+    for (auto& creature : _creatures) {
+        if (creature._id != id) {
+            return creature;
+        }
+    }
+    CHECK(false);
+}
+
 _CollectionCache::Index CollectionDescription::getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const
 {
     _CollectionCache::Index result;
