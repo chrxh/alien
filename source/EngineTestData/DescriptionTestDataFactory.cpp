@@ -37,6 +37,23 @@ ParticleDescription DescriptionTestDataFactory::createRandomParticleDescription(
     return ParticleDescription().id(1).pos(getRandomFloat2(0, 1)).vel(getRandomFloat2(-1, 1)).energy(getRandomFloat(50.0f, 200.0f)).color(getRandomInt(0, MAX_COLORS - 1));
 }
 
+NodeDescription DescriptionTestDataFactory::createRandomNodeDescription(NodeParameter nodeParameter) const
+{
+    NeuralNetworkGenomeDescription nn;
+    nn.weight(4, 3, getRandomFloat());
+    nn._biases.at(3) = getRandomFloat();
+    nn._activationFunctions.at(2) = getRandomInt() % ActivationFunction_Count;
+
+    return NodeDescription()
+        .neuralNetwork(nn)
+        .cellTypeData(createRandomCellTypeGenomeDescription(nodeParameter))
+        .color(getRandomInt(0, MAX_COLORS - 1))
+        .numRequiredAdditionalConnections(getRandomInt())
+        .referenceAngle(getRandomFloat(0, 360.0f))
+        .signalRoutingRestriction(
+            SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(getRandomFloat(0, 360.0f)).openingAngle(getRandomFloat(0, 360.0f)));
+}
+
 CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(NodeParameter nodeParameter) const
 {
     return CreatureDescription()
@@ -210,23 +227,6 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     default:
         return CellTypeDescription();
     }
-}
-
-NodeDescription DescriptionTestDataFactory::createRandomNodeDescription(NodeParameter nodeParameter) const
-{
-    NeuralNetworkGenomeDescription nn;
-    nn.weight(4, 3, getRandomFloat());
-    nn._biases.at(3) = getRandomFloat();
-    nn._activationFunctions.at(2) = getRandomInt() % ActivationFunction_Count;
-
-    return NodeDescription()
-        .neuralNetwork(nn)
-        .cellTypeData(createRandomCellTypeGenomeDescription(nodeParameter))
-        .color(getRandomInt(0, MAX_COLORS - 1))
-        .numRequiredAdditionalConnections(getRandomInt())
-        .referenceAngle(getRandomFloat(0, 360.0f))
-        .signalRoutingRestriction(
-            SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(getRandomFloat(0, 360.0f)).openingAngle(getRandomFloat(0, 360.0f)));
 }
 
 CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const

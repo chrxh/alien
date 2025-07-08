@@ -24,6 +24,7 @@ public:
         CellTypeGenome cellTypeGenome;
         MuscleMode muscleMode;
     };
+    NodeDescription createRandomNodeDescription(NodeParameter nodeParameter) const;
     CreatureDescription createRandomCreatureDescription(NodeParameter nodeParameter) const;
 
     bool compare(CollectionDescription left, CollectionDescription right) const;
@@ -37,6 +38,5 @@ private:
 
     CellTypeDescription createRandomCellTypeDescription(CellParameter cellParameter) const;
 
-    NodeDescription createRandomNodeDescription(NodeParameter nodeParameter) const;
     CellTypeGenomeDescription createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const;
 };

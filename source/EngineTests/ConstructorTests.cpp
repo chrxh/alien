@@ -7,6 +7,8 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 
+#include "EngineTestData/DescriptionTestDataFactory.h"
+
 #include "IntegrationTestFramework.h"
 
 class ConstructorTests : public IntegrationTestFramework
@@ -14,26 +16,290 @@ class ConstructorTests : public IntegrationTestFramework
 public:
     ConstructorTests()
         : IntegrationTestFramework()
-    {}
+    {
+        _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
+    }
 
     ~ConstructorTests() = default;
 
 protected:
+    
     float getOffspringDistance() const
     {
         return 1.0f + _parameters.constructorAdditionalOffspringDistance;
     }
 
     float getConstructorEnergy() const { return _parameters.normalCellEnergy.value[0] * 2.5f; }
+
+    bool compare(CellDescription const& cell, NodeDescription const& node)
+    {
+        if (cell._color != node._color) {
+            return false;
+        }
+        if (!cell._neuralNetwork.has_value()) {
+            return false;
+        }
+        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+            if (cell._neuralNetwork->_weights[i] != node._neuralNetwork._weights[i]) {
+                return false;
+            }
+        }
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            if (cell._neuralNetwork->_biases[i] != node._neuralNetwork._biases[i]) {
+                return false;
+            }
+            if (cell._neuralNetwork->_activationFunctions[i] != node._neuralNetwork._activationFunctions[i]) {
+                return false;
+            }
+        }
+        if (cell._signalRoutingRestriction._active != node._signalRoutingRestriction._active) {
+            return false;
+        }
+        if (cell._signalRoutingRestriction._baseAngle != node._signalRoutingRestriction._baseAngle) {
+            return false;
+        }
+        if (cell._signalRoutingRestriction._openingAngle != node._signalRoutingRestriction._openingAngle) {
+            return false;
+        }
+
+        auto nodeType = node.getCellType();
+        switch (cell.getCellType()) {
+        case CellType_Base: {
+            if (nodeType != CellTypeGenome_Base) {
+                return false;
+            }
+        } break;
+        case CellType_Depot: {
+            if (nodeType != CellTypeGenome_Depot) {
+                return false;
+            }
+            auto const& depot = std::get<DepotDescription>(cell._cellTypeData);
+            auto const& nodeDepot = std::get<DepotGenomeDescription>(node._cellTypeData);
+            if (depot._mode != nodeDepot._mode) {
+                return false;
+            }
+        } break;
+        case CellType_Constructor: {
+            if (nodeType != CellTypeGenome_Constructor) {
+                return false;
+            }
+            auto const& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
+            auto const& nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+            if (constructor._autoTriggerInterval != nodeConstructor._autoTriggerInterval) {
+                return false;
+            }
+            if (constructor._geneIndex != nodeConstructor._geneIndex) {
+                return false;
+            }
+            if (constructor._constructionActivationTime != nodeConstructor._constructionActivationTime) {
+                return false;
+            }
+            if (constructor._constructionAngle != nodeConstructor._constructionAngle) {
+                return false;
+            }
+        }
+        break;
+        case CellType_Sensor: {
+            if (nodeType != CellTypeGenome_Sensor) {
+                return false;
+            }
+            auto const& sensor = std::get<SensorDescription>(cell._cellTypeData);
+            auto const& nodeSensor = std::get<SensorGenomeDescription>(node._cellTypeData);
+            if (sensor._autoTriggerInterval != nodeSensor._autoTriggerInterval) {
+                return false;
+            }
+            if (sensor._minDensity != nodeSensor._minDensity) {
+                return false;
+            }
+            if (sensor._minRange != nodeSensor._minRange) {
+                return false;
+            }
+            if (sensor._maxRange != nodeSensor._maxRange) {
+                return false;
+            }
+            if (sensor._restrictToColor != nodeSensor._restrictToColor) {
+                return false;
+            }
+            if (sensor._restrictToCreatures != nodeSensor._restrictToCreatures) {
+                return false;
+            }
+        } break;
+        case CellType_Generator: {
+            if (nodeType != CellTypeGenome_Generator) {
+                return false;
+            }
+            auto const& generator = std::get<GeneratorDescription>(cell._cellTypeData);
+            auto const& nodeGenerator = std::get<GeneratorGenomeDescription>(node._cellTypeData);
+            if (generator._autoTriggerInterval != nodeGenerator._autoTriggerInterval) {
+                return false;
+            }
+            if (generator._pulseType != nodeGenerator._pulseType) {
+                return false;
+            }
+            if (generator._alternationInterval != nodeGenerator._alternationInterval) {
+                return false;
+            }
+        } break;
+        case CellType_Attacker: {
+            if (nodeType != CellTypeGenome_Attacker) {
+                return false;
+            }
+        } break;
+        case CellType_Injector: {
+            if (nodeType != CellTypeGenome_Injector) {
+                return false;
+            }
+            auto const& injector = std::get<InjectorDescription>(cell._cellTypeData);
+            auto const& nodeInjector = std::get<InjectorGenomeDescription>(node._cellTypeData);
+            if (injector._mode != nodeInjector._mode) {
+                return false;
+            }
+        } break;
+        case CellType_Muscle: {
+            if (nodeType != CellTypeGenome_Muscle) {
+                return false;
+            }
+            auto const& muscle = std::get<MuscleDescription>(cell._cellTypeData);
+            auto const& nodeMuscle = std::get<MuscleGenomeDescription>(node._cellTypeData);
+            if (muscle.getMode() != nodeMuscle.getMode()) {
+                return false;
+            }
+            switch (muscle.getMode()) {
+            case MuscleMode_AutoBending: {
+                auto const& autoBending = std::get<AutoBendingDescription>(muscle._mode);
+                auto const& nodeAutoBending = std::get<AutoBendingGenomeDescription>(nodeMuscle._mode);
+                if (autoBending._maxAngleDeviation != nodeAutoBending._maxAngleDeviation) {
+                    return false;
+                }
+                if (autoBending._frontBackVelRatio != nodeAutoBending._frontBackVelRatio) {
+                    return false;
+                }
+            } break;
+            case MuscleMode_ManualBending: {
+                auto const& manualBending = std::get<ManualBendingDescription>(muscle._mode);
+                auto const& nodeManualBending = std::get<ManualBendingGenomeDescription>(nodeMuscle._mode);
+                if (manualBending._maxAngleDeviation != nodeManualBending._maxAngleDeviation) {
+                    return false;
+                }
+                if (manualBending._frontBackVelRatio != nodeManualBending._frontBackVelRatio) {
+                    return false;
+                }
+            } break;
+            case MuscleMode_AngleBending: {
+                auto const& angleBending = std::get<AngleBendingDescription>(muscle._mode);
+                auto const& nodeAngleBending = std::get<AngleBendingGenomeDescription>(nodeMuscle._mode);
+                if (angleBending._maxAngleDeviation != nodeAngleBending._maxAngleDeviation) {
+                    return false;
+                }
+                if (angleBending._frontBackVelRatio != nodeAngleBending._frontBackVelRatio) {
+                    return false;
+                }
+            } break;
+            case MuscleMode_AutoCrawling: {
+                auto const& autoCrawling = std::get<AutoCrawlingDescription>(muscle._mode);
+                auto const& nodeAutoCrawling = std::get<AutoCrawlingGenomeDescription>(nodeMuscle._mode);
+                if (autoCrawling._maxDistanceDeviation != nodeAutoCrawling._maxDistanceDeviation) {
+                    return false;
+                }
+                if (autoCrawling._frontBackVelRatio != nodeAutoCrawling._frontBackVelRatio) {
+                    return false;
+                }
+            } break;
+            case MuscleMode_ManualCrawling: {
+                auto const& manualCrawling = std::get<ManualCrawlingDescription>(muscle._mode);
+                auto const& nodeManualCrawling = std::get<ManualCrawlingGenomeDescription>(nodeMuscle._mode);
+                if (manualCrawling._maxDistanceDeviation != nodeManualCrawling._maxDistanceDeviation) {
+                    return false;
+                }
+                if (manualCrawling._frontBackVelRatio != nodeManualCrawling._frontBackVelRatio) {
+                    return false;
+                }
+            } break;
+            case MuscleMode_DirectMovement: {
+            } break;
+            default:
+                return false;
+            }
+        } break;
+        case CellType_Defender: {
+            if (nodeType != CellTypeGenome_Defender) {
+                return false;
+            }
+            auto const& defender = std::get<DefenderDescription>(cell._cellTypeData);
+            auto const& nodeDefender = std::get<DefenderGenomeDescription>(node._cellTypeData);
+            if (defender._mode != nodeDefender._mode) {
+                return false;
+            }
+        } break;
+        case CellType_Reconnector: {
+            if (nodeType != CellTypeGenome_Reconnector) {
+                return false;
+            }
+            auto const& reconnector = std::get<ReconnectorDescription>(cell._cellTypeData);
+            auto const& nodeReconnector = std::get<ReconnectorGenomeDescription>(node._cellTypeData);
+            if (reconnector._restrictToColor != nodeReconnector._restrictToColor) {
+                return false;
+            }
+            if (reconnector._restrictToCreatures != nodeReconnector._restrictToCreatures) {
+                return false;
+            }
+        } break;
+        case CellType_Detonator: {
+            if (nodeType != CellTypeGenome_Detonator) {
+                return false;
+            }
+            auto const& detonator = std::get<DetonatorDescription>(cell._cellTypeData);
+            auto const& nodeDetonator = std::get<DetonatorGenomeDescription>(node._cellTypeData);
+            if (detonator._countdown != nodeDetonator._countdown) {
+                return false;
+            }
+        } break;
+        default:
+            return false;
+        }
+        return true;
+    }
+
+    DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
-TEST_F(ConstructorTests, firstCell_gene0_separation_finished)
+using NodeParameter = DescriptionTestDataFactory::NodeParameter;
+class ConstructorTests_AllNodeTypes
+    : public ConstructorTests
+    , public testing::WithParamInterface<NodeParameter>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstructorTests_AllNodeTypes,
+    ConstructorTests_AllNodeTypes,
+    ::testing::Values(
+        NodeParameter{CellTypeGenome_Base},
+        NodeParameter{CellTypeGenome_Depot},
+        NodeParameter{CellTypeGenome_Constructor},
+        NodeParameter{CellTypeGenome_Sensor},
+        NodeParameter{CellTypeGenome_Generator},
+        NodeParameter{CellTypeGenome_Attacker},
+        NodeParameter{CellTypeGenome_Injector},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoBending},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualBending},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AngleBending},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoCrawling},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualCrawling},
+        NodeParameter{CellTypeGenome_Muscle, MuscleMode_DirectMovement},
+        NodeParameter{CellTypeGenome_Defender},
+        NodeParameter{CellTypeGenome_Reconnector},
+        NodeParameter{CellTypeGenome_Detonator}));
+
+TEST_P(ConstructorTests_AllNodeTypes, firstCell_gene0_separation_finished)
 {
+    auto nodeParameter = GetParam();
+    auto randomNode = _descriptionTestDataFactory->createRandomNodeDescription(nodeParameter);
+
     auto data = CollectionDescription().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
-                GeneDescription().numBranches(std::nullopt).nodes({NodeDescription()}),
+                GeneDescription().numBranches(std::nullopt).nodes({randomNode}),
             }))
             .cells({CellDescription().energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
     });
@@ -58,6 +324,7 @@ TEST_F(ConstructorTests, firstCell_gene0_separation_finished)
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
     EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
+    EXPECT_TRUE(compare(newCell, randomNode));
 }
 
 //

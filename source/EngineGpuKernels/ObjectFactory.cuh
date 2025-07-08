@@ -595,11 +595,11 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
         cell->cellType = CellType_Attacker;
     } break;
     case CellTypeGenome_Injector: {
-        cell->cellType = CellType_Attacker;
+        cell->cellType = CellType_Injector;
         auto const& nodeInjector = node->cellTypeData.injector;
         auto& injector = cell->cellTypeData.injector;
         injector.mode = nodeInjector.mode;
-        injector.counter =0;
+        injector.counter = 0;
     } break;
     case CellTypeGenome_Muscle: {
         cell->cellType = CellType_Muscle;
