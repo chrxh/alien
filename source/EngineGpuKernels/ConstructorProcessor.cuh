@@ -43,12 +43,12 @@ private:
 //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 //
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static Creature* findOrCreateCreatureForFutureCell(SimulationData& data, Cell* cell);
+    __inline__ __device__ static Creature* findOrCreateCreature(SimulationData& data, Cell* cell);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
-    __inline__ __device__ static Cell* getLastConstructedCellOnCurrentBranch(Cell* hostCell);
+    __inline__ __device__ static Cell* getLastConstructedCell(Cell* hostCell);
     __inline__ __device__ static Cell* startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 //    __inline__ __device__ static Cell* continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 //
@@ -155,7 +155,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
     auto& constructor = cell->cellTypeData.constructor;
     if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval)) {
-        constructor.offspring = findOrCreateCreatureForFutureCell(data, cell);
+        constructor.offspring = findOrCreateCreature(data, cell);
 
         if (ConstructorHelper::isFinished(constructor, constructor.offspring->genome)) {
             return;
@@ -182,7 +182,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     } 
 }
 
-__inline__ __device__ Creature* ConstructorProcessor::findOrCreateCreatureForFutureCell(SimulationData& data, Cell* cell)
+__inline__ __device__ Creature* ConstructorProcessor::findOrCreateCreature(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellTypeData.constructor;
 
@@ -196,7 +196,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateCreatureForFut
     }
 
     // Current branch under construction => use creature reference from there
-    auto lastConstructionCell = getLastConstructedCellOnCurrentBranch(cell);
+    auto lastConstructionCell = getLastConstructedCell(cell);
     if (lastConstructionCell) {
         return lastConstructionCell->creature;
     }
@@ -204,8 +204,11 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateCreatureForFut
     // Other branches already constructed => use creature reference from there
     for (int i = 0; i < cell->numConnections; ++i) {
         auto const& connectedCell = cell->connections[i].cell;
+        if (connectedCell->creature == nullptr) {
+            continue;
+        }
         if (connectedCell->creature != cell->creature) {
-            return lastConstructionCell->creature;
+            return connectedCell->creature;
         }
     }
 
@@ -225,12 +228,12 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
     result.isSelfReplicating = ConstructorHelper::isSelfReplicator(constructor);
-    result.isSeparating = ConstructorHelper::isSelfReplicator(constructor);
+    result.isSeparating = ConstructorHelper::isSeparating(result.gene);
     result.isLastNode = ConstructorHelper::isLastNode(constructor, genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, genome);
     
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
-    result.lastConstructionCell = getLastConstructedCellOnCurrentBranch(cell);
+    result.lastConstructionCell = getLastConstructedCell(cell);
 
     if (result.lastConstructionCell && result.lastConstructionCell->numConnections == 1) {
         int numConstructedCells = constructor.currentConcatenation * result.gene->numNodes + constructor.currentNodeIndex;
@@ -314,7 +317,7 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
     }
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCellOnCurrentBranch(Cell* hostCell)
+__inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCell(Cell* hostCell)
 {
     auto const& constructor = hostCell->cellTypeData.constructor;
     if (constructor.lastConstructedCellId != 0) {

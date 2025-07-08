@@ -48,6 +48,9 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Constructor const& cons
     if (constructor.currentNodeIndex >= gene->numNodes) {
         return true;
     }
+    if (constructor.currentConcatenation >= gene->numConcatenations) {
+        return true;
+    }
     return constructor.currentBranch >= gene->numBranches;
 }
 
