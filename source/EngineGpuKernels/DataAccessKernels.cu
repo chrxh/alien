@@ -401,7 +401,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
-            cell->tempValue = -1;
+            cell->tempValue = ConnectionTO::CellIndex_NotSet;
             continue;
         }
         createCellTO(cell, collectionTO, cellArrayStart);
@@ -445,7 +445,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
             }
         }
         if (!found) {
-            cell->tempValue = -1;
+            cell->tempValue = ConnectionTO::CellIndex_NotSet;
             continue;
         }
 
@@ -602,7 +602,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
         auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->tempValue = -1;
+            cell->tempValue = ConnectionTO::CellIndex_NotSet;
             continue;
         }
 

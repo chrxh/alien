@@ -183,9 +183,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
         }
     }
     data.forEach([&](auto const& cell) {
-        if (cell._id != 0) {
-            setConnections(cellTOs, cell, cellIndexTOById);
-        }
+        setConnections(cellTOs, cell, cellIndexTOById);
     });
     for (auto const& particle : data._particles) {
         addParticle(particleTOs, particle);
@@ -263,10 +261,11 @@ CellDescription DescriptionConverterService::createCellDescription(
     for (int i = 0; i < cellTO.numConnections; ++i) {
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
-        if (connectionTO.cellIndex != -1) {
+        if (connectionTO.cellIndex != ConnectionTO::CellIndex_NotSet) {
             connection._cellId = collectionTO.cells[connectionTO.cellIndex].id;
         } else {
-            connection._cellId = 0;
+            connections.clear();
+            break;
         }
         connection._distance = connectionTO.distance;
         connection._angleFromPrevious = connectionTO.angleFromPrevious;
@@ -868,8 +867,8 @@ void DescriptionConverterService::convertCellToTO(
         generatorTO.numPulses = generatorDesc._numPulses;
     } break;
     case CellType_Attacker: {
-        auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellTypeData);
-        AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
+        //auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellTypeData);
+        //AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
     } break;
     case CellType_Injector: {
         auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellTypeData);
@@ -991,15 +990,11 @@ void DescriptionConverterService::setConnections(
     auto& cellTO = cellTOs.at(cellIndexByIds.at(cellToAdd._id));
     float angleOffset = 0;
     for (ConnectionDescription const& connection : cellToAdd._connections) {
-        if (connection._cellId != 0) {
-            cellTO.connections[index].cellIndex = cellIndexByIds.at(connection._cellId);
-            cellTO.connections[index].distance = connection._distance;
-            cellTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;
-            ++index;
-            angleOffset = 0;
-        } else {
-            angleOffset += connection._angleFromPrevious;
-        }
+        cellTO.connections[index].cellIndex = cellIndexByIds.at(connection._cellId);
+        cellTO.connections[index].distance = connection._distance;
+        cellTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;
+        ++index;
+        angleOffset = 0;
     }
     if (angleOffset != 0 && index > 0) {
         cellTO.connections[0].angleFromPrevious += angleOffset;

@@ -23,7 +23,7 @@ struct ConnectionDescription
 {
     auto operator<=>(ConnectionDescription const&) const = default;
 
-    MEMBER(ConnectionDescription, uint64_t, cellId, 0ull);  // value of 0 means cell not present in CollectionDescription
+    MEMBER(ConnectionDescription, uint64_t, cellId, 0);
     MEMBER(ConnectionDescription, float, distance, 0.0f);
     MEMBER(ConnectionDescription, float, angleFromPrevious, 0.0f);
 };

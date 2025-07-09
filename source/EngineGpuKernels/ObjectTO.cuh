@@ -31,6 +31,8 @@ struct CellMetadataTO
 struct ConnectionTO
 {
     uint64_t cellIndex;
+    static auto constexpr CellIndex_NotSet = 0x7fffffffffffffff;
+
     float distance;
     float angleFromPrevious;
 };
