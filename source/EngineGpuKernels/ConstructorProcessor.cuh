@@ -43,7 +43,7 @@ private:
 //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 //
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static Creature* findOrCreateCreature(SimulationData& data, Cell* cell);
+    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Cell* cell);
     __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
@@ -68,6 +68,7 @@ private:
         float2 newCellPos,
         ConstructionData const& constructionData);
 
+    __inline__ __device__ static bool checkForBrokenConstruction(Cell* hostCell);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
 //
@@ -155,34 +156,39 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
     auto& constructor = cell->cellTypeData.constructor;
     if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval)) {
-        constructor.offspring = findOrCreateCreature(data, cell);
+        constructor.offspring = findOrCreateNewCreature(data, cell);
 
         if (ConstructorHelper::isFinished(constructor, constructor.offspring->genome)) {
             return;
         }
+
+        if (checkForBrokenConstruction(cell)) {
+            constructor.currentNodeIndex = 0;
+            constructor.currentConcatenation = 0;
+        }
+
         auto constructionData = readConstructionData(cell);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
-            if (ConstructorHelper::isLastNode(constructor, constructor.offspring->genome)) {
-                constructor.currentNodeIndex = 0;
-                if (!constructionData.hasInfiniteConcatenations) {
-                    ++constructor.currentConcatenation;
-                    if (constructor.currentConcatenation == constructionData.gene->numConcatenations) {
-                        constructor.currentConcatenation = 0;
-                        if (!constructionData.isSeparating) {
-                            ++constructor.currentBranch;
-                        } else {
-                            constructor.offspring = nullptr;
-                        }
-                    }
-                }
-            } else {
+            if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
+            } else {
+                constructor.currentNodeIndex = 0;
+                ++constructor.currentConcatenation;
+            }
+            if (constructionData.isLastNodeOfLastConcatenation) {
+                constructor.currentConcatenation = 0;
+                if (!constructionData.isSeparating) {
+                    ++constructor.currentBranch;
+                } else {
+                    constructor.offspring = nullptr;
+                }
+                constructor.lastConstructedCellId = 0;
             }
         }
     } 
 }
 
-__inline__ __device__ Creature* ConstructorProcessor::findOrCreateCreature(SimulationData& data, Cell* cell)
+__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Cell* cell)
 {
     auto& constructor = cell->cellTypeData.constructor;
 
@@ -234,16 +240,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionCell = getLastConstructedCell(cell);
-
-    if (result.lastConstructionCell && result.lastConstructionCell->numConnections == 1) {
-        int numConstructedCells = constructor.currentConcatenation * result.gene->numNodes + constructor.currentNodeIndex;
-        if (numConstructedCells > 1) {
-
-            //construction is broken => reset indices
-            constructor.currentNodeIndex = 0;
-            constructor.currentConcatenation = 0;
-        }
-    }
 
     CudaShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -713,6 +709,19 @@ ConstructorProcessor::constructCellIntern(
     statistics.incNumCreatedCells(hostCell->color);
 
     return result;
+}
+
+__inline__ __device__ bool ConstructorProcessor::checkForBrokenConstruction(Cell* hostCell)
+{
+    auto& constructor = hostCell->cellTypeData.constructor;
+    auto& genome = constructor.offspring->genome;
+
+    auto lastConstructionCell = getLastConstructedCell(hostCell);
+    if (lastConstructionCell && lastConstructionCell->numConnections == 1) {
+        int numConstructedCells = ConstructorHelper::getNumConstructedCellsOnBranch(constructor, genome);
+        return numConstructedCells > 1;
+    }
+    return false;
 }
 
 

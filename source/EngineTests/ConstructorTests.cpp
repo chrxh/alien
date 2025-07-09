@@ -276,7 +276,7 @@ TEST_F(ConstructorTests, firstCell_alreadyFinished)
                 CellDescription().id(2).pos({100.0f, 101.0f}),
             }),
     });
-    data.addConnection(0, 1);
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -290,7 +290,7 @@ TEST_F(ConstructorTests, firstCell_alreadyFinished)
     auto creature = actualData.getCreature(0);
     ASSERT_EQ(2, creature._cells.size());
 
-    auto hostCell = actualData.getCellRef(0);
+    auto hostCell = actualData.getCellRef(1);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellTypeData);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
@@ -391,8 +391,8 @@ TEST_F(ConstructorTests, firstCell_notGene0_separation_finished)
     auto creature = actualData.getCreature(0);
     ASSERT_EQ(2, creature._cells.size());
 
-    auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell(0);
+    auto hostCell = actualData.getCellRef(1);
+    auto newCell = actualData.getOtherCell(1);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
@@ -449,19 +449,23 @@ TEST_F(ConstructorTests, firstCell_gene0_branch1_finished)
 
 TEST_F(ConstructorTests, firstCell_gene0_branch2_finished)
 {
+    auto genome = GenomeDescription().genes({
+        GeneDescription().numBranches(2).nodes({NodeDescription()}),
+    });
     auto data = CollectionDescription().creatures({
+
+        // Parent
         CreatureDescription()
             .id(0)
-            .genome(GenomeDescription().genes({
-                GeneDescription().numBranches(2).nodes({NodeDescription()}),
-            }))
+            .genome(genome)
             .cells({CellDescription()
                         .id(1)
                         .energy(getConstructorEnergy())
                         .cellTypeData(ConstructorDescription().geneIndex(0).currentBranch(1))
                         .pos({100.0f, 100.0f})}),
-        CreatureDescription()
-            .id(1).cells({CellDescription().id(2).pos({100.0f, 101.0f})}),
+
+        // Offspring
+        CreatureDescription().id(1).genome(genome).cells({CellDescription().id(2).pos({100.0f, 101.0f})}),
     });
     data.addConnection(1, 2);
 
@@ -481,7 +485,7 @@ TEST_F(ConstructorTests, firstCell_gene0_branch2_finished)
     ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = hostCreature._cells.front();
-    auto newCell = data.getOtherCell({1, 2});
+    auto newCell = actualData.getOtherCell({1, 2});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
