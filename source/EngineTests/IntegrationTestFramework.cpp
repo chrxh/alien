@@ -57,7 +57,7 @@ bool IntegrationTestFramework::approxCompare(float expected, float actual, float
 
 bool IntegrationTestFramework::approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
 {
-    return approxCompare(expected.x, expected.x) && approxCompare(expected.y, expected.y);
+    return approxCompare(expected.x, actual.x) && approxCompare(expected.y, actual.y);
 }
 
 bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
