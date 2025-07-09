@@ -97,6 +97,7 @@ struct Constructor
 
     // Process data
     uint64_t lastConstructedCellId;
+    static auto constexpr LastConstructedCellId_NotSet = 0xffffffffffffffff;
     uint16_t currentNodeIndex;
     uint16_t currentConcatenation;
     uint8_t currentBranch;

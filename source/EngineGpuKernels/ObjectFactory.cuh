@@ -26,7 +26,6 @@ public:
 
     __inline__ __device__ Creature* cloneCreature(Creature* creature);
 
-    __inline__ __device__ Cell* createEmptyCell(uint64_t& cellIndex);
     __inline__ __device__ Cell* createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, float2 pos, float2 vel, float energy);
     __inline__ __device__ Creature* createEmptyCreature();
     __inline__ __device__ Gene* createEmptyGenes(int numGenes);
@@ -468,35 +467,35 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
     return newCreature;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createEmptyCell(uint64_t& cellIndex)
-{
-    auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
-    auto cellPointer = _data->objects.cells.getNewElement(&cellIndex);
-    *cellPointer = cell;
-
-    cell->id = _data->primaryNumberGen.createObjectId();
-    cell->stiffness = 1.0f;
-    cell->selected = 0;
-    cell->detached = 0;
-    cell->scheduledOperationIndex = -1;
-    cell->locked = 0;
-    cell->color = 0;
-    cell->metadata.nameSize = 0;
-    cell->metadata.descriptionSize = 0;
-    cell->barrier = false;
-    cell->sticky = false;
-    cell->age = 0;
-    cell->vel = {0, 0};
-    cell->activationTime = 0;
-    cell->signalRoutingRestriction.active = false;
-    cell->signalRelaxationTime = 0;
-    cell->signal.active = false;
-    cell->density = 1.0f;
-    cell->detectedByCreatureId = 0;
-    cell->event = CellEvent_No;
-    cell->cellTriggered = CellTriggered_No;
-    return cell;
-}
+//__inline__ __device__ Cell* ObjectFactory::createEmptyCell(uint64_t& cellIndex)
+//{
+//    auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
+//    auto cellPointer = _data->objects.cells.getNewElement(&cellIndex);
+//    *cellPointer = cell;
+//
+//    cell->id = _data->primaryNumberGen.createObjectId();
+//    cell->stiffness = 1.0f;
+//    cell->selected = 0;
+//    cell->detached = 0;
+//    cell->scheduledOperationIndex = -1;
+//    cell->locked = 0;
+//    cell->color = 0;
+//    cell->metadata.nameSize = 0;
+//    cell->metadata.descriptionSize = 0;
+//    cell->barrier = false;
+//    cell->sticky = false;
+//    cell->age = 0;
+//    cell->vel = {0, 0};
+//    cell->activationTime = 0;
+//    cell->signalRoutingRestriction.active = false;
+//    cell->signalRelaxationTime = 0;
+//    cell->signal.active = false;
+//    cell->density = 1.0f;
+//    cell->detectedByCreatureId = 0;
+//    cell->event = CellEvent_No;
+//    cell->cellTriggered = CellTriggered_No;
+//    return cell;
+//}
 
 __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, float2 pos, float2 vel, float energy)
 {
@@ -564,7 +563,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
-        constructor.lastConstructedCellId = 0;
+        constructor.lastConstructedCellId = Constructor::LastConstructedCellId_NotSet;
         constructor.currentNodeIndex = 0;
         constructor.currentConcatenation = 0;
         constructor.currentBranch = 0;
