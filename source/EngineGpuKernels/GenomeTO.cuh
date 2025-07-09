@@ -147,7 +147,7 @@ struct NodeTO
     int color;
     int numRequiredAdditionalConnections;
 
-    uint64_t neuralNetworkDataIndex;
+    NeuralNetworkGenomeTO neuralNetwork;
     CellTypeGenome cellType;
     CellTypeDataGenomeTO cellTypeData;
     SignalRoutingRestrictionGenomeTO signalRoutingRestriction;

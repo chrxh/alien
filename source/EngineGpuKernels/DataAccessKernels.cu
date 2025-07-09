@@ -61,11 +61,13 @@ namespace
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
                     nodeTO.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
-
-                    int targetSize;  //not used
-                    copyDataToHeap<int>(
-                        sizeof(NeuralNetworkGenome), reinterpret_cast<uint8_t*>(node.neuralNetwork), targetSize, nodeTO.neuralNetworkDataIndex, collectionTO);
-
+                    for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                        nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
+                    }
+                    for (int i = 0; i < MAX_CHANNELS; ++i) {
+                        nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
+                        nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
+                    }
                     nodeTO.signalRoutingRestriction.active = node.signalRoutingRestriction.active;
                     nodeTO.signalRoutingRestriction.baseAngle = node.signalRoutingRestriction.baseAngle;
                     nodeTO.signalRoutingRestriction.openingAngle = node.signalRoutingRestriction.openingAngle;
@@ -763,7 +765,6 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             }
         }
     }
-    heapBytes += numNodes * (sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes);
     atomicAdd(&arraySizes->creatures, numGenomes);
     atomicAdd(&arraySizes->genes, numGenes);
     atomicAdd(&arraySizes->nodes, numNodes);
@@ -779,7 +780,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, Arra
             &arraySizes->heap,
             *collectionTO.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *collectionTO.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
                 + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
-                + *collectionTO.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes) + *collectionTO.numNodes * (sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes));
+                + *collectionTO.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 
     {

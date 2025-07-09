@@ -105,8 +105,13 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
             node.referenceAngle = nodeTO.referenceAngle;
             node.color = nodeTO.color;
             node.numRequiredAdditionalConnections = nodeTO.numRequiredAdditionalConnections;
-
-            copyDataToHeap(sizeof(NeuralNetworkGenomeTO), nodeTO.neuralNetworkDataIndex, collectionTO.heap, reinterpret_cast<uint8_t*&>(node.neuralNetwork));
+            for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
+                node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];
+            }
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
+                node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
+            }
             node.signalRoutingRestriction.active = nodeTO.signalRoutingRestriction.active;
             node.signalRoutingRestriction.baseAngle = nodeTO.signalRoutingRestriction.baseAngle;
             node.signalRoutingRestriction.openingAngle = nodeTO.signalRoutingRestriction.openingAngle;
@@ -522,13 +527,13 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
 
     cell->neuralNetwork = _data->objects.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        cell->neuralNetwork->weights[i] = node->neuralNetwork->weights[i];
+        cell->neuralNetwork->weights[i] = node->neuralNetwork.weights[i];
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->neuralNetwork->biases[i] = node->neuralNetwork->biases[i];
+        cell->neuralNetwork->biases[i] = node->neuralNetwork.biases[i];
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        cell->neuralNetwork->activationFunctions[i] = node->neuralNetwork->activationFunctions[i];
+        cell->neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
     }
     cell->signalRoutingRestriction.active = node->signalRoutingRestriction.active;
     cell->signalRoutingRestriction.baseAngle = node->signalRoutingRestriction.baseAngle;

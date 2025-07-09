@@ -488,8 +488,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
             nodeDesc._color = nodeTO->color;
             nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
 
-            auto neuralNetworkGenomeTO = getFromHeap<NeuralNetworkGenomeTO>(collectionTO.heap, nodeTO->neuralNetworkDataIndex);
-            nodeDesc._neuralNetwork = convert(*neuralNetworkGenomeTO);
+            nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
             nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
             nodeDesc._signalRoutingRestriction._active = nodeTO->signalRoutingRestriction.active;
             nodeDesc._signalRoutingRestriction._baseAngle = nodeTO->signalRoutingRestriction.baseAngle;
@@ -669,11 +668,7 @@ void DescriptionConverterService::convertCreatureToTO(
             nodeTO.signalRoutingRestriction.active = nodeDesc._signalRoutingRestriction._active;
             nodeTO.signalRoutingRestriction.baseAngle = nodeDesc._signalRoutingRestriction._baseAngle;
             nodeTO.signalRoutingRestriction.openingAngle = nodeDesc._signalRoutingRestriction._openingAngle;
-
-            nodeTO.neuralNetworkDataIndex = heap.size();
-            heap.resize(heap.size() + sizeof(NeuralNetworkGenomeTO));
-            auto neuralNetworkTO = reinterpret_cast<NeuralNetworkGenomeTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkGenomeTO));
-            *neuralNetworkTO = convert(nodeDesc._neuralNetwork);
+            nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
 
             nodeTO.cellType = nodeDesc.getCellType();
             switch (nodeDesc.getCellType()) {

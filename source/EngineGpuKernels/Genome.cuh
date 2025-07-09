@@ -145,7 +145,7 @@ struct Node
     int color;
     int numRequiredAdditionalConnections;
 
-    NeuralNetworkGenome* neuralNetwork;
+    NeuralNetworkGenome neuralNetwork;
     CellTypeGenome cellType;
     CellTypeDataGenome cellTypeData;
     SignalRoutingRestrictionGenome signalRoutingRestriction;
