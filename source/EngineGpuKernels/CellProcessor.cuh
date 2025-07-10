@@ -639,9 +639,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 auto prevCell = cell->connections[activatingCellConnection].cell;
                 if (prevCell != cell->connections[0].cell) {
                     cell->angleToFront =
-                        Math::normalizedAngle(
-                        prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
-
+                        Math::normalizedAngle(prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
                 } else {
                     cell->angleToFront = Math::normalizedAngle(prevCell->angleToFront + 180.0f, -180.0f);
                 }
