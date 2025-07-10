@@ -263,7 +263,7 @@ protected:
     DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
-TEST_F(ConstructorTests, firstCell_alreadyFinished)
+TEST_F(ConstructorTests, start_alreadyFinished)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -324,7 +324,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(ConstructorTests_AllNodeTypes, firstCell_creatureSize1_gene0_separation_finished)
+TEST_P(ConstructorTests_AllNodeTypes, creatureSize1_start_gene0_separation_finished)
 {
     auto nodeParameter = GetParam();
     auto randomNode = _descriptionTestDataFactory->createRandomNodeDescription(nodeParameter);
@@ -367,7 +367,7 @@ TEST_P(ConstructorTests_AllNodeTypes, firstCell_creatureSize1_gene0_separation_f
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, firstCell_creatureSize1_notGene0_separation_finished)
+TEST_F(ConstructorTests, creatureSize1_start_notGene0_separation_finished)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -404,7 +404,7 @@ TEST_F(ConstructorTests, firstCell_creatureSize1_notGene0_separation_finished)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, firstCell_creatureSize1_gene0_branch1_finished)
+TEST_F(ConstructorTests, creatureSize1_start_gene0_branch1_finished)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -447,7 +447,53 @@ TEST_F(ConstructorTests, firstCell_creatureSize1_gene0_branch1_finished)
     EXPECT_EQ(1, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, firstCell_creatureSize1_gene0_branch2_finished)
+TEST_F(ConstructorTests, creatureSize1_start_gene0_branch1_concat0)
+{
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .id(0)
+            .genome(GenomeDescription().genes({
+                GeneDescription().numBranches(1).numConcatenations(2).nodes({NodeDescription()}),
+            }))
+            .cells({CellDescription()
+                        .energy(getConstructorEnergy())
+                        .cellTypeData(ConstructorDescription().geneIndex(0).currentConcatenation(0))
+                        .pos({100.0f, 100.0f})}),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto hostCreature = actualData.getCreature(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
+    EXPECT_EQ(CellState_Constructing, newCell._cellState);
+    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
+    EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
+
+    ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
+
+    auto connection = actualData.getConnection(hostCell, newCell);
+    EXPECT_EQ(1.0f + _parameters.constructorAdditionalOffspringDistance, connection._distance);
+
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellTypeData);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(1, hostConstructor._currentConcatenation);
+    EXPECT_EQ(0, hostConstructor._currentBranch);
+}
+
+TEST_F(ConstructorTests, creatureSize1_start_gene0_branch2_finished)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().numBranches(2).nodes({NodeDescription()}),
@@ -488,6 +534,7 @@ TEST_F(ConstructorTests, firstCell_creatureSize1_gene0_branch2_finished)
     auto newCell = actualData.getOtherCell({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
+    EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, 1.0f), newCell._pos));
     EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -501,7 +548,7 @@ TEST_F(ConstructorTests, firstCell_creatureSize1_gene0_branch2_finished)
     EXPECT_EQ(2, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, firstCell_creatureSize1_notGene0_branch1_finished)
+TEST_F(ConstructorTests, creatureSize1_start_notGene0_branch1_finished)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -538,7 +585,7 @@ TEST_F(ConstructorTests, firstCell_creatureSize1_notGene0_branch1_finished)
     EXPECT_EQ(1, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, firstCell_creatureSize2_gene0_separation_finished)
+TEST_F(ConstructorTests, creatureSize2_start_gene0_separation_finished)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -577,7 +624,131 @@ TEST_F(ConstructorTests, firstCell_creatureSize2_gene0_separation_finished)
     EXPECT_TRUE(actualData.hasConnection(0, 1));
 }
 
-// TODO tests host creature with multiple cells
+TEST_F(ConstructorTests, creatureSize2_start_gene0_branch1_finished)
+{
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .id(0)
+            .genome(GenomeDescription().genes({
+                GeneDescription().numBranches(1).nodes({NodeDescription()}),
+            }))
+            .cells({
+                CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+                CellDescription().id(1).pos({101.0f, 100.0f}),
+            }),
+    });
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreature(0);
+    ASSERT_EQ(2, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(1, newCreature._cells.size());
+
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(1.0f, 0.0f), newCell._pos));
+    EXPECT_TRUE(actualData.hasConnection(0, newCell._id));
+    EXPECT_FALSE(actualData.hasConnection(1, newCell._id));
+    EXPECT_TRUE(actualData.hasConnection(0, 1));
+}
+
+TEST_F(ConstructorTests, creatureSize2_start_gene0_branch2_finished)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().numBranches(2).nodes({NodeDescription()}),
+    });
+    auto data = CollectionDescription().creatures({
+
+        // Parent
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
+            CellDescription().id(1).pos({101.0f, 100.0f}),
+        }),
+
+        // Offspring
+        CreatureDescription().id(1).genome(genome).cells({CellDescription().id(2).pos({99.0f, 100.0f})}),
+    });
+    data.addConnection(0, 1);
+    data.addConnection(0, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreature(0);
+    ASSERT_EQ(2, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(2, newCreature._cells.size());
+
+    auto hostCell = actualData.getCellRef(0);
+    auto newCell = actualData.getOtherCell({0, 1, 2});
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, -1.0f), newCell._pos));
+    EXPECT_TRUE(actualData.hasConnection(0, newCell._id));
+    EXPECT_FALSE(actualData.hasConnection(1, newCell._id));
+    EXPECT_FALSE(actualData.hasConnection(2, newCell._id));
+    EXPECT_TRUE(actualData.hasConnection(0, 1));
+    EXPECT_TRUE(actualData.hasConnection(0, 2));
+}
+
+TEST_F(ConstructorTests, creatureSize2_start_notGene0_branch2_finished)
+{
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .id(0)
+            .genome(GenomeDescription().genes({
+                GeneDescription().numBranches(2).nodes({NodeDescription()}),
+                GeneDescription().numBranches(2).nodes({NodeDescription()}),
+            }))
+            .cells(
+                {CellDescription()
+                     .id(0)
+                     .energy(getConstructorEnergy())
+                     .cellTypeData(ConstructorDescription().geneIndex(1).currentBranch(1))
+                     .pos({100.0f, 100.0f}),
+                 CellDescription().id(1).pos({101.0f, 100.0f}),
+                 CellDescription().id(2).pos({99.0f, 100.0f})}),
+    });
+    data.addConnection(0, 1);
+    data.addConnection(0, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreature(0);
+    ASSERT_EQ(4, hostCreature._cells.size());
+
+    auto hostCell = actualData.getCellRef(0);
+    auto newCell = actualData.getOtherCell({0, 1, 2});
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, -1.0f), newCell._pos));
+    EXPECT_TRUE(actualData.hasConnection(0, newCell._id));
+    EXPECT_FALSE(actualData.hasConnection(1, newCell._id));
+    EXPECT_FALSE(actualData.hasConnection(2, newCell._id));
+    EXPECT_TRUE(actualData.hasConnection(0, 1));
+    EXPECT_TRUE(actualData.hasConnection(0, 2));
+}
+
 
 //
 //TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_upperSide)

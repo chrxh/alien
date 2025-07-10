@@ -27,6 +27,7 @@ private:
         bool isSeparating;
 
         // Construction position
+        bool isFirstNodeOfFirstConcatenation;
         bool isLastNode;
         bool isLastNodeOfLastConcatenation;
         bool hasInfiniteConcatenations;
@@ -182,7 +183,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 } else {
                     constructor.offspring = nullptr;
                 }
-                constructor.lastConstructedCellId = Constructor::LastConstructedCellId_NotSet;
             }
         }
     } 
@@ -202,19 +202,23 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     }
 
     // Current branch under construction => use creature reference from there
-    auto lastConstructionCell = getLastConstructedCellOnBranch(cell);
-    if (lastConstructionCell) {
-        return lastConstructionCell->creature;
+    if (!(ConstructorHelper::isFirstNode(constructor) && ConstructorHelper::isFirstConcatenation(constructor))) {
+        auto lastConstructionCell = getLastConstructedCellOnBranch(cell);
+        if (lastConstructionCell) {
+            return lastConstructionCell->creature;
+        }
     }
 
-    // Other branches already constructed => use creature reference from there
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto const& connectedCell = cell->connections[i].cell;
-        if (connectedCell->creature == nullptr) {
-            continue;
-        }
-        if (connectedCell->creature != cell->creature) {
-            return connectedCell->creature;
+    // Other branches already constructed => try to use creature reference from there
+    if (constructor.currentBranch > 0) {
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto const& connectedCell = cell->connections[i].cell;
+            if (connectedCell->creature == nullptr) {
+                continue;
+            }
+            if (connectedCell->creature != cell->creature) {
+                return connectedCell->creature;
+            }
         }
     }
 
@@ -235,6 +239,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
     result.isSelfReplicating = ConstructorHelper::isSelfReplicator(constructor);
     result.isSeparating = ConstructorHelper::isSeparating(result.gene);
+    result.isFirstNodeOfFirstConcatenation = ConstructorHelper::isFirstNode(constructor)&& ConstructorHelper::isFirstConcatenation(constructor);
     result.isLastNode = ConstructorHelper::isLastNode(constructor, genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, genome);
     
@@ -294,7 +299,12 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
     if (!hostCell->tryLock()) {
         return nullptr;
     }
-    if (constructionData.lastConstructionCell) {
+    if (constructionData.isFirstNodeOfFirstConcatenation) {
+        auto newCell = startNewConstruction(data, statistics, hostCell, constructionData);
+
+        hostCell->releaseLock();
+        return newCell;
+    } else {
         //if (!constructionData.lastConstructionCell->tryLock()) {
         //    hostCell->releaseLock();
         //    return nullptr;
@@ -305,11 +315,6 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
         //hostCell->releaseLock();
         //return newCell;
         return nullptr;
-    } else {
-        auto newCell = startNewConstruction(data, statistics, hostCell, constructionData);
-
-        hostCell->releaseLock();
-        return newCell;
     }
 }
 
