@@ -440,6 +440,11 @@ bool CollectionDescription::hasConnection(uint64_t id, uint64_t otherId) const
     return false;
 }
 
+bool CollectionDescription::hasConnection(CellDescription const& cell1, CellDescription const& cell2) const
+{
+    return hasConnection(cell1._id, cell2._id);
+}
+
 ConnectionDescription CollectionDescription::getConnection(uint64_t id, uint64_t otherId) const
 {
     auto cell = getCellRef(id);

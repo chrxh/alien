@@ -401,6 +401,7 @@ struct CollectionDescription
     CellDescription& getOtherCell(uint64_t id);
     CellDescription& getOtherCell(std::set<uint64_t> const& ids);
     bool hasConnection(uint64_t id, uint64_t otherId) const;
+    bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     ConnectionDescription getConnection(uint64_t id, uint64_t otherId) const;
     ConnectionDescription getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     CreatureDescription& getCreature(uint64_t id);
