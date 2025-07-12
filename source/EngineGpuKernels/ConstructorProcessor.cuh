@@ -50,8 +50,8 @@ private:
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static Cell* getLastConstructedCellOnBranch(Cell* hostCell);
-    __inline__ __device__ static Cell* startNewConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static Cell* continueConstruction(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell* continueConstructionOnBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static void getCellsToConnect(
         Cell* result[],
@@ -72,9 +72,8 @@ private:
     __inline__ __device__ static bool checkForBrokenConstruction(Cell* hostCell);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
-//
-//    __inline__ __device__ static bool isSelfReplicator(Cell* cell);
-//    __inline__ __device__ static float calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
+
+    //    __inline__ __device__ static float calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
 };
 
 /************************************************************************/
@@ -298,7 +297,7 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
         return nullptr;
     }
     if (constructionData.isFirstNodeOfFirstConcatenation) {
-        auto newCell = startNewConstruction(data, statistics, hostCell, constructionData);
+        auto newCell = startConstructionOnNewBranch(data, statistics, hostCell, constructionData);
 
         hostCell->releaseLock();
         return newCell;
@@ -307,7 +306,7 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
             hostCell->releaseLock();
             return nullptr;
         }
-        auto newCell = continueConstruction(data, statistics, hostCell, constructionData);
+        auto newCell = continueConstructionOnBranch(data, statistics, hostCell, constructionData);
 
         constructionData.lastConstructionCell->releaseLock();
         hostCell->releaseLock();
@@ -329,7 +328,7 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCellOnBranch
     return nullptr;
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::startNewConstruction(
+__inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
     SimulationData& data, 
     SimulationStatistics& statistics, 
     Cell* hostCell, 
@@ -379,7 +378,7 @@ __inline__ __device__ Cell* ConstructorProcessor::startNewConstruction(
     return newCell;
 }
 
-__inline__ __device__ Cell* ConstructorProcessor::continueConstruction(
+__inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     SimulationData& data,
     SimulationStatistics& statistics,
     Cell* hostCell,
@@ -814,13 +813,6 @@ __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, 
     }
 }
 
-//__inline__ __device__ bool ConstructorProcessor::isSelfReplicator(Cell* cell)
-//{
-//    if (cell->cellType != CellType_Constructor) {
-//        return false;
-//    }
-//    return GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor);
-//}
 //
 //__inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
 //{

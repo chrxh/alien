@@ -876,7 +876,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_separation_finished)
     auto prevCell = actualData.getCellRef(1);
     auto newCell = actualData.getOtherCell({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
+    EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(0.0f, newCell._angleToFront));
     EXPECT_TRUE(actualData.hasConnection(1, 2));
     EXPECT_FALSE(actualData.hasConnection(0, 1));
@@ -893,6 +893,7 @@ TEST_F(ConstructorTests, continue_middleNode_gene0_multipleNodes)
         }),
     });
     auto data = CollectionDescription().creatures({
+// TODO different connection distances
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
