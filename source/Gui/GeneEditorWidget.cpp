@@ -75,7 +75,7 @@ void _GeneEditorWidget::processHeaderData()
         _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
 
         // Shape
-        AlienGui::Combo(AlienGui::ComboParameters().name("Shape").values(Const::ConstructionShapeStrings).textWidth(rightColumnWidth), gene._shape);
+        AlienGui::Combo(AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructionShapeStrings).textWidth(rightColumnWidth), gene._shape);
 
         // Angle alignment
         AlienGui::BeginIndent();
