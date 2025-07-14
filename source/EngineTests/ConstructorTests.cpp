@@ -316,7 +316,10 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-TEST_P(ConstructorTests_AllNodeTypes, start_creatureSize1_gene0_separation_finished)
+// Scheme: creatureX_geneY_nodeZofA_concatenationBofC_branchCofD
+// _extra
+
+TEST_P(ConstructorTests_AllNodeTypes, creature1__gene0__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto const FrontAngle = 10.0f;
 
@@ -367,7 +370,7 @@ TEST_P(ConstructorTests_AllNodeTypes, start_creatureSize1_gene0_separation_finis
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize1_gene1_separation_finished)
+TEST_F(ConstructorTests, creature1__gene1__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto const FrontAngle = 10.0f;
 
@@ -413,7 +416,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene1_separation_finished)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize1_gene0_branch1_finished)
+TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto const FrontAngle = 10.0f;
 
@@ -464,7 +467,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene0_branch1_finished)
     EXPECT_EQ(1, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize1_gene0_branch1_moreNodes)
+TEST_F(ConstructorTests, creature1__gene0__node_0_2__concatenation_0_1__branch_0_1)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -510,7 +513,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene0_branch1_moreNodes)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize1_gene0_branch1_moreConcat)
+TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_2__branch_0_1)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -556,8 +559,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene0_branch1_moreConcat)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-
-TEST_F(ConstructorTests, start_creatureSize1_gene0_branch2_finished)
+TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_1__branch_1_2)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().numBranches(2).nodes({NodeDescription()}),
@@ -612,7 +614,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene0_branch2_finished)
     EXPECT_EQ(2, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize1_gene1_branch1_finished)
+TEST_F(ConstructorTests, creature1__gene1__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto const FrontAngle = 10.0f;
 
@@ -658,7 +660,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene1_branch1_finished)
     EXPECT_EQ(1, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize1_gene0_node0_ignoreNumAdditionalConnectionsAtStart)
+TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_1__branch_0_1__ignoreNumAdditionalConnectionsAtStart)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
