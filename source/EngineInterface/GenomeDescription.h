@@ -192,7 +192,7 @@ struct NodeDescription
 
     MEMBER(NodeDescription, float, referenceAngle, 0.0f);
     MEMBER(NodeDescription, int, color, 0);
-    MEMBER(NodeDescription, int, numRequiredAdditionalConnections, 0);
+    MEMBER(NodeDescription, int, numAdditionalConnections, 0);
 
     MEMBER(NodeDescription, NeuralNetworkGenomeDescription, neuralNetwork, NeuralNetworkGenomeDescription());
     MEMBER(NodeDescription, CellTypeGenomeDescription, cellTypeData, BaseGenomeDescription());

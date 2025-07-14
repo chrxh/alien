@@ -36,7 +36,7 @@ private:
         Cell* lastConstructionCell;
         float angle;
         float energy;
-        int numRequiredAdditionalConnections;  // -1 = none
+        int numAdditionalConnections;  // -1 = none
         int requiredNodeId1;    // -1 = none
         int requiredNodeId2;    // -1 = none
     };
@@ -244,7 +244,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
     result.angle = result.node->referenceAngle;
     result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
-    result.numRequiredAdditionalConnections = result.node->numRequiredAdditionalConnections;
+    result.numAdditionalConnections = result.node->numAdditionalConnections;
 
     CudaShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -253,7 +253,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
             auto generationResult = shapeGenerator.generateNextConstructionData(shape);
             if (i == constructor.currentNodeIndex) {
                 if (i > 0 && i < constructor.currentNodeIndex) {
-                    result.numRequiredAdditionalConnections = generationResult.numRequiredAdditionalConnections;
+                    result.numAdditionalConnections = generationResult.numAdditionalConnections;
                     result.angle = generationResult.angle;
                 }
                 result.gene->angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
@@ -267,7 +267,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     }
 
     if (result.gene->numNodes == 1) {
-        result.numRequiredAdditionalConnections = 0;
+        result.numAdditionalConnections = 0;
     }
 
     auto isAtFirstNode = ConstructorHelper::isFirstNode(constructor);
@@ -394,8 +394,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     int numCellsToConnect;
     getCellsToConnect(cellsToConnect, numCellsToConnect, data, hostCell, newCellPos, constructionData);
 
-    if (constructionData.numRequiredAdditionalConnections != -1) {
-        if (numCellsToConnect < constructionData.numRequiredAdditionalConnections) {
+    if (constructionData.numAdditionalConnections != -1) {
+        if (numCellsToConnect < constructionData.numAdditionalConnections) {
             return nullptr;
         }
     }
@@ -474,7 +474,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     }
 
     // Get surrounding cells
-    if (numCellsToConnect > 0 && constructionData.numRequiredAdditionalConnections != 0) {
+    if (numCellsToConnect > 0 && constructionData.numAdditionalConnections != 0) {
 
         // Sort surrounding cells by distance from newCell
         bubbleSort(cellsToConnect, numCellsToConnect, [&](auto const& cell1, auto const& cell2) {
@@ -496,8 +496,8 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
                 }
                 otherCell->releaseLock();
             }
-            if (constructionData.numRequiredAdditionalConnections != -1) {
-                if (numConnectedCells == constructionData.numRequiredAdditionalConnections) {
+            if (constructionData.numAdditionalConnections != -1) {
+                if (numConnectedCells == constructionData.numAdditionalConnections) {
                     break;
                 }
             }
@@ -555,7 +555,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
 {
     numResultCells = 0;
 
-    if (constructionData.numRequiredAdditionalConnections == 0) {
+    if (constructionData.numAdditionalConnections == 0) {
         return;
     }
 
@@ -632,10 +632,10 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                     || otherCell->creature != constructionData.creature) {
                     return false;
                 }
-                if (constructionData.numRequiredAdditionalConnections >= 1 && otherCell->genomeNodeIndex == constructionData.requiredNodeId1) {
+                if (constructionData.numAdditionalConnections >= 1 && otherCell->genomeNodeIndex == constructionData.requiredNodeId1) {
                     return true;
                 }
-                if (constructionData.numRequiredAdditionalConnections == 2 && otherCell->genomeNodeIndex == constructionData.requiredNodeId2) {
+                if (constructionData.numAdditionalConnections == 2 && otherCell->genomeNodeIndex == constructionData.requiredNodeId2) {
                     return true;
                 }
                 return false;

@@ -7,7 +7,7 @@ public:
     {
         ShapeGeneratorResult result;
         result.angle = 0;
-        result.numRequiredAdditionalConnections = 0;
+        result.numAdditionalConnections = 0;
         return result;
     }
 
@@ -23,16 +23,16 @@ public:
         auto edgeLength = std::max(2, _edgePos + 1);
         result.angle = _nodePos < edgeLength - 1 ? 0 : 120.0f;
         if (_edgePos == 0) {
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         } else if (_edgePos == 1) {
-            result.numRequiredAdditionalConnections = _nodePos == 0 ? 1 : 0;
+            result.numAdditionalConnections = _nodePos == 0 ? 1 : 0;
         } else {
             if (_nodePos == edgeLength - 1) {
-                result.numRequiredAdditionalConnections = 0;
+                result.numAdditionalConnections = 0;
             } else if (_nodePos == edgeLength - 2) {
-                result.numRequiredAdditionalConnections = 1;
+                result.numAdditionalConnections = 1;
             } else {
-                result.numRequiredAdditionalConnections = 2;
+                result.numAdditionalConnections = 2;
             }
         }
         if (++_nodePos == edgeLength) {
@@ -57,13 +57,13 @@ public:
         ShapeGeneratorResult result;
         if (_edgePos == 0) {
             result.angle = 0.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         } else if (_edgePos == 1) {
             result.angle = 90.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         } else {
             result.angle = _nodePos == 0 ? 90.0f : 0.0f;
-            result.numRequiredAdditionalConnections = _nodePos == 0 ? 0 : 1;
+            result.numAdditionalConnections = _nodePos == 0 ? 0 : 1;
         }
 
         auto edgeLength = _edgePos / 2;
@@ -95,13 +95,13 @@ public:
 
         if (_edgePos < 2) {
             result.angle = 120.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         } else if (_edgePos < 6) {
             result.angle = 60.0f;
-            result.numRequiredAdditionalConnections = 1;
+            result.numAdditionalConnections = 1;
         } else {
             result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
-            result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
+            result.numAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
         }
 
         if (++_nodePos >= edgeLength) {
@@ -132,13 +132,13 @@ public:
 
         if (_edgePos < 5) {
             result.angle = 60.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         } else if (_edgePos == 5) {
             result.angle = _nodePos == 0 ? 0.0f : 60.0f;
-            result.numRequiredAdditionalConnections = 1;
+            result.numAdditionalConnections = 1;
         } else {
             result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
-            result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
+            result.numAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
         }
 
         if (++_nodePos >= edgeLength) {
@@ -163,27 +163,27 @@ public:
         ShapeGeneratorResult result;
         if (_pos % 6 == 0) {
             result.angle = 0;
-            result.numRequiredAdditionalConnections = 2;
+            result.numAdditionalConnections = 2;
         }
         if (_pos % 6 == 1) {
             result.angle = 60.0f;
-            result.numRequiredAdditionalConnections = _pos == 1 ? 0 : 1;
+            result.numAdditionalConnections = _pos == 1 ? 0 : 1;
         }
         if (_pos % 6 == 2) {
             result.angle = 120.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         }
         if (_pos % 6 == 3) {
             result.angle = 0;
-            result.numRequiredAdditionalConnections = 2;
+            result.numAdditionalConnections = 2;
         }
         if (_pos % 6 == 4) {
             result.angle = -120.0f;
-            result.numRequiredAdditionalConnections = _pos == 4 ? 1 : 2;
+            result.numAdditionalConnections = _pos == 4 ? 1 : 2;
         }
         if (_pos % 6 == 5) {
             result.angle = -60.0f;
-            result.numRequiredAdditionalConnections = 1;
+            result.numAdditionalConnections = 1;
         }
         ++_pos;
 
@@ -211,13 +211,13 @@ public:
 
             if (_edgePos < 2) {
                 result.angle = 120.0f;
-                result.numRequiredAdditionalConnections = 0;
+                result.numAdditionalConnections = 0;
             } else if (_edgePos < 6) {
                 result.angle = 60.0f;
-                result.numRequiredAdditionalConnections = 1;
+                result.numAdditionalConnections = 1;
             } else {
                 result.angle = _nodePos < edgeLength - 1 ? 0.0f : 60.0f;
-                result.numRequiredAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
+                result.numAdditionalConnections = _nodePos < edgeLength - 1 ? 2 : 1;
             }
 
             if (++_nodePos >= edgeLength) {
@@ -226,7 +226,7 @@ public:
             }
         } else {
             result.angle = _nodePos == 1 ? -60.0f : 0.0f;
-            result.numRequiredAdditionalConnections = _nodePos == 1 ? 2 : 0;
+            result.numAdditionalConnections = _nodePos == 1 ? 2 : 0;
             ++_nodePos;
         }
         return result;
@@ -254,10 +254,10 @@ public:
 
             if (_edgePos < 2) {
                 result.angle = 120.0f;
-                result.numRequiredAdditionalConnections = 0;
+                result.numAdditionalConnections = 0;
             } else {
                 result.angle = 60.0f;
-                result.numRequiredAdditionalConnections = 1;
+                result.numAdditionalConnections = 1;
             }
 
             if (++_nodePos >= edgeLength) {
@@ -266,7 +266,7 @@ public:
             }
         } else {
             result.angle = _nodePos == 0 ? -60.0f : 0.0f;
-            result.numRequiredAdditionalConnections = _nodePos == 0 ? 2 : 0;
+            result.numAdditionalConnections = _nodePos == 0 ? 2 : 0;
             ++_nodePos;
         }
         return result;
@@ -287,19 +287,19 @@ public:
         ShapeGeneratorResult result;
         if (_nodePos % 4 == 0) {
             result.angle = 120.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         }
         if (_nodePos % 4 == 1) {
             result.angle = 0;
-            result.numRequiredAdditionalConnections = _nodePos == 1 ? 0 : 1;
+            result.numAdditionalConnections = _nodePos == 1 ? 0 : 1;
         }
         if (_nodePos % 4 == 2) {
             result.angle = -120.0f;
-            result.numRequiredAdditionalConnections = 0;
+            result.numAdditionalConnections = 0;
         }
         if (_nodePos % 4 == 3) {
             result.angle = 0;
-            result.numRequiredAdditionalConnections = 1;
+            result.numAdditionalConnections = 1;
         }
         ++_nodePos;
         return result;

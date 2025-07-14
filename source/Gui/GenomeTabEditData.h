@@ -59,7 +59,7 @@ struct _GenomeTabEditData
         for (auto& node : gene._nodes) {
             auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
             node._referenceAngle = shapeGenerationResult.angle;
-            node._numRequiredAdditionalConnections = shapeGenerationResult.numRequiredAdditionalConnections;
+            node._numAdditionalConnections = shapeGenerationResult.numAdditionalConnections;
         }
     }
 };

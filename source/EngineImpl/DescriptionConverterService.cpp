@@ -487,10 +487,10 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
             NodeDescription nodeDesc;
             nodeDesc._referenceAngle = nodeTO->referenceAngle;
             nodeDesc._color = nodeTO->color;
-            nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
+            nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
 
             nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
-            nodeDesc._numRequiredAdditionalConnections = nodeTO->numRequiredAdditionalConnections;
+            nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
             nodeDesc._signalRoutingRestriction._active = nodeTO->signalRoutingRestriction.active;
             nodeDesc._signalRoutingRestriction._baseAngle = nodeTO->signalRoutingRestriction.baseAngle;
             nodeDesc._signalRoutingRestriction._openingAngle = nodeTO->signalRoutingRestriction.openingAngle;
@@ -664,7 +664,7 @@ void DescriptionConverterService::convertCreatureToTO(
             NodeTO& nodeTO = nodeTOs.at(nodeArrayStartIndex + nodeIndex);
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
-            nodeTO.numRequiredAdditionalConnections = nodeDesc._numRequiredAdditionalConnections;
+            nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
             nodeTO.signalRoutingRestriction.active = nodeDesc._signalRoutingRestriction._active;
             nodeTO.signalRoutingRestriction.baseAngle = nodeDesc._signalRoutingRestriction._baseAngle;
             nodeTO.signalRoutingRestriction.openingAngle = nodeDesc._signalRoutingRestriction._openingAngle;

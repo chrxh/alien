@@ -417,8 +417,8 @@ namespace cereal
             task,
             auxiliaries,
             Id_Node_NumRequiredAdditionalConnections,
-            data._numRequiredAdditionalConnections,
-            defaultObject._numRequiredAdditionalConnections);
+            data._numAdditionalConnections,
+            defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._neuralNetwork, data._cellTypeData, data._signalRoutingRestriction);

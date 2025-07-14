@@ -146,7 +146,7 @@
 //
 //                ShapeGeneratorResult shapeResult;
 //                shapeResult.angle = node._referenceAngle;
-//                shapeResult.numRequiredAdditionalConnections = node._numRequiredAdditionalConnections;
+//                shapeResult.numAdditionalConnections = node._numAdditionalConnections;
 //                if (genome._header._shape != ConstructionShape_Custom) {
 //                    shapeResult = shapeGenerator->generateNextConstructionData();
 //                }
@@ -217,7 +217,7 @@
 //
 //                //add connections
 //                for (auto const& [otherIndex, otherCellIndex] : nearbyCellIndices | boost::adaptors::indexed(0)) {
-//                    if (shapeResult.numRequiredAdditionalConnections && otherIndex >= shapeResult.numRequiredAdditionalConnections) {
+//                    if (shapeResult.numAdditionalConnections && otherIndex >= shapeResult.numAdditionalConnections) {
 //                        continue;
 //                    }
 //                    auto& otherCell = result.previewDescription.cells.at(otherCellIndex);
