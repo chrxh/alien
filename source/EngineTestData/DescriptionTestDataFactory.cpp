@@ -48,7 +48,7 @@ NodeDescription DescriptionTestDataFactory::createRandomNodeDescription(NodePara
         .neuralNetwork(nn)
         .cellTypeData(createRandomCellTypeGenomeDescription(nodeParameter))
         .color(getRandomInt(0, MAX_COLORS - 1))
-        .numRequiredAdditionalConnections(getRandomInt())
+        .numAdditionalConnections(getRandomInt())
         .referenceAngle(getRandomFloat(0, 360.0f))
         .signalRoutingRestriction(
             SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(getRandomFloat(0, 360.0f)).openingAngle(getRandomFloat(0, 360.0f)));

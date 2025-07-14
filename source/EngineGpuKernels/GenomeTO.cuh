@@ -144,7 +144,7 @@ struct NodeTO
 {
     float referenceAngle;
     int color;
-    int numRequiredAdditionalConnections;
+    int numAdditionalConnections;
 
     NeuralNetworkGenomeTO neuralNetwork;
     CellTypeGenome cellType;

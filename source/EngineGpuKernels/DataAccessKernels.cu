@@ -60,7 +60,7 @@ namespace
                     auto const& node = gene.nodes[i];
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
-                    nodeTO.numRequiredAdditionalConnections = node.numRequiredAdditionalConnections;
+                    nodeTO.numAdditionalConnections = node.numAdditionalConnections;
                     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
                         nodeTO.neuralNetwork.weights[i] = node.neuralNetwork.weights[i];
                     }

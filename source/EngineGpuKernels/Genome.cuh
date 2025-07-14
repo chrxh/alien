@@ -142,7 +142,7 @@ struct Node
 {
     float referenceAngle;
     int color;
-    int numRequiredAdditionalConnections;
+    int numAdditionalConnections;
 
     NeuralNetworkGenome neuralNetwork;
     CellTypeGenome cellType;

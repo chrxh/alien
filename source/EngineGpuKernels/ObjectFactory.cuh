@@ -104,7 +104,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
             auto& node = nodes[i];
             node.referenceAngle = nodeTO.referenceAngle;
             node.color = nodeTO.color;
-            node.numRequiredAdditionalConnections = nodeTO.numRequiredAdditionalConnections;
+            node.numAdditionalConnections = nodeTO.numAdditionalConnections;
             for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
                 node.neuralNetwork.weights[i] = nodeTO.neuralNetwork.weights[i];
             }

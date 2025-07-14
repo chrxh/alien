@@ -120,12 +120,12 @@ void _NodeEditorWidget::processNodeAttributes()
 
         // Previous nodes connections
         if (nodeIndex != 0) {
-            auto numRequiredAdditionalConnections = node._numRequiredAdditionalConnections + 1;
+            auto numAdditionalConnections = node._numAdditionalConnections + 1;
             if (AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numRequiredAdditionalConnections)) {
+                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numAdditionalConnections)) {
                 gene._shape = ConstructionShape_Custom;
             }
-            node._numRequiredAdditionalConnections = numRequiredAdditionalConnections - 1;
+            node._numAdditionalConnections = numAdditionalConnections - 1;
         }
 
         AlienGui::Checkbox(

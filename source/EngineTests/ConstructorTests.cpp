@@ -662,7 +662,7 @@ TEST_F(ConstructorTests, start_creatureSize1_gene0_node0_ignoreNumAdditionalConn
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
-            NodeDescription().referenceAngle(0).numRequiredAdditionalConnections(1),
+            NodeDescription().referenceAngle(0).numAdditionalConnections(1),
         }),
     });
     auto data = CollectionDescription().creatures({
@@ -1239,7 +1239,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_moreNodes_numAdditionalCon
         GeneDescription().nodes({
             NodeDescription(),
             NodeDescription().referenceAngle(0),
-            NodeDescription().referenceAngle(45.0f).numRequiredAdditionalConnections(0),
+            NodeDescription().referenceAngle(45.0f).numAdditionalConnections(0),
             NodeDescription(),
         }),
     });
@@ -1325,7 +1325,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, continue_creatureSize1_gene0_moreNod
             .nodes({
                 NodeDescription(),
                 NodeDescription().referenceAngle(0),
-                NodeDescription().referenceAngle(NodeAngle).numRequiredAdditionalConnections(1),
+                NodeDescription().referenceAngle(NodeAngle).numAdditionalConnections(1),
                 NodeDescription(),
             })
             .angleAlignment(angleAlignment),
@@ -1492,7 +1492,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
     auto genome = GenomeDescription().genes({
         GeneDescription()
             .nodes({
-                NodeDescription().referenceAngle(-90.0f).numRequiredAdditionalConnections(1),
+                NodeDescription().referenceAngle(-90.0f).numAdditionalConnections(1),
                 NodeDescription().referenceAngle(-90.0f),
                 NodeDescription().referenceAngle(90.0f),
                 NodeDescription().referenceAngle(90.0f),
@@ -1577,7 +1577,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(1)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -1628,7 +1628,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(1)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -1678,7 +1678,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(1)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -1737,7 +1737,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(2)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(2)}));
 //
 //    auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 //
@@ -1799,7 +1799,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(2)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(2)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -1860,7 +1860,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(1)}));
 //
 //    auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 //
@@ -1923,7 +1923,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false).angleAlignment(ConstructorAngleAlignment_90))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(1)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -1980,7 +1980,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false).angleAlignment(ConstructorAngleAlignment_90))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(0)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(0)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -2027,7 +2027,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false).angleAlignment(ConstructorAngleAlignment_90))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(1)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(1)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
@@ -2084,7 +2084,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(
 //        GenomeDescription()
 //            .header(GenomeHeaderDescription().separateConstruction(false))
-//            .cells({CellGenomeDescription(), CellGenomeDescription().numRequiredAdditionalConnections(0)}));
+//            .cells({CellGenomeDescription(), CellGenomeDescription().numAdditionalConnections(0)}));
 //
 //    CollectionDescription data;
 //    data.addCells({
