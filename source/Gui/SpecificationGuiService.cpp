@@ -54,6 +54,7 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();
 
+    auto rightColumnWidth = ImGui::GetContentRegionAvail().x - scale(30);
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (groupSpec._expertToggle) {
             auto expertToggleValue = evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
@@ -61,7 +62,7 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
             AlienGui::Checkbox(
                 AlienGui::CheckboxParameters()
                     .name(groupSpec._name)
-                    .textWidth(0)
+                    .textWidth(scaleInverse(rightColumnWidth))
                     .defaultValue(*origExpertToggleValue).tooltip(groupSpec._description),
                 *expertToggleValue);
         }
