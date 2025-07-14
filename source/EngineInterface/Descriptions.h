@@ -73,7 +73,6 @@ struct ConstructorDescription
 
     // Genome data
     MEMBER(ConstructorDescription, int, geneIndex, 0);
-    MEMBER(ConstructorDescription, float, constructionAngle, 0);
 
     // Process data
     MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);

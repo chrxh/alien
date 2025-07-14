@@ -158,7 +158,6 @@ namespace
     auto constexpr Id_ConstructorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_ConstructorGenome_GeneIndex = 1;
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
-    auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
 
     auto constexpr Id_SensorGenome_MinDensity = 0;
     auto constexpr Id_SensorGenome_RestrictToColor = 1;
@@ -240,7 +239,6 @@ namespace cereal
             Id_ConstructorGenome_ConstructionActivationTime,
             data._constructionActivationTime,
             defaultObject._constructionActivationTime);
-        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDescription)
@@ -512,10 +510,9 @@ namespace
     auto constexpr Id_Constructor_ConstructionActivationTime = 1;
     auto constexpr Id_Constructor_GeneIndex = 2;
     auto constexpr Id_Constructor_CurrentNodeIndex = 3;
-    auto constexpr Id_Constructor_ConstructionAngle = 4;
-    auto constexpr Id_Constructor_CurrentConcatenation = 5;
-    auto constexpr Id_Constructor_LastConstructedCellId = 6;
-    auto constexpr Id_Constructor_CurrentBranch = 7;
+    auto constexpr Id_Constructor_CurrentConcatenation = 4;
+    auto constexpr Id_Constructor_LastConstructedCellId = 5;
+    auto constexpr Id_Constructor_CurrentBranch = 6;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -671,7 +668,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
         loadSave(task, auxiliaries, Id_Constructor_CurrentConcatenation, data._currentConcatenation, defaultObject._currentConcatenation);
         loadSave(task, auxiliaries, Id_Constructor_CurrentBranch, data._currentBranch, defaultObject._currentBranch);
-        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorDescription)

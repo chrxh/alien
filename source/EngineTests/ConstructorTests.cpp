@@ -94,9 +94,6 @@ protected:
             if (constructor._constructionActivationTime != nodeConstructor._constructionActivationTime) {
                 return false;
             }
-            if (constructor._constructionAngle != nodeConstructor._constructionAngle) {
-                return false;
-            }
         }
         break;
         case CellType_Sensor: {
