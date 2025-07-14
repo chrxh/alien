@@ -91,19 +91,21 @@ void _GeneEditorWidget::processHeaderData()
 
         // Number of branches
         auto numBranches = gene._numBranches;
-        if (numBranches.has_value()) {
-            --numBranches.value();
+        if (numBranches > 0) {
+            --numBranches;
         }
+        std::optional<int> numBranchesOptional = numBranches > 0 ? std::make_optional(numBranches) : std::nullopt;
         AlienGui::ComboOptional(
             AlienGui::ComboParameters()
                 .name("Attach to host")
                 .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches", "6 branches"})
                 .textWidth(rightColumnWidth),
-            numBranches);
-        if (numBranches.has_value()) {
-            ++numBranches.value();
+            numBranchesOptional);
+        if (numBranchesOptional.has_value()) {
+            gene._numBranches = numBranchesOptional.value() + 1;
+        } else {
+            gene._numBranches = 0;
         }
-        gene._numBranches = numBranches;
 
         // Concatenations
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);

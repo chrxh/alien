@@ -270,7 +270,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
                 NodeDescription(),
                 NodeDescription(),
             })
-            .numBranches(std::nullopt)
+            .numBranches(0)
             .numConcatenations(3),
     });
     auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);

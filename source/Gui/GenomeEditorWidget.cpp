@@ -142,13 +142,13 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 4: Branches
                     ImGui::TableNextColumn();
-                    if (gene._numBranches.has_value()) {
-                        auto const& numBranches = gene._numBranches.value();
+                    if (gene._numBranches > 0) {
+                        auto const& numBranches = gene._numBranches;
                         CHECK(numBranches >= 1 && numBranches <= 6);
                         if (numBranches == 1) {
                             AlienGui::Text("1 branch");
                         } else {
-                            AlienGui::Text(std::to_string(gene._numBranches.value()) + " branches");
+                            AlienGui::Text(std::to_string(gene._numBranches) + " branches");
                         }
                     } else {
                         AlienGui::Text("No");
@@ -218,7 +218,7 @@ void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().numBranches(std::nullopt));
+        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().numBranches(0));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;

@@ -472,7 +472,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
         auto geneTO = collectionTO.genes + creatureTO.genome.geneArrayIndex + i;
 
         GeneDescription geneDesc;
-        geneDesc._numBranches = geneTO->numBranches > 0 ? std::make_optional(geneTO->numBranches) : std::nullopt;
+        geneDesc._numBranches = geneTO->numBranches;
         geneDesc._shape = geneTO->shape;
         geneDesc._angleAlignment = geneTO->angleAlignment;
         geneDesc._stiffness = geneTO->stiffness;
@@ -649,7 +649,7 @@ void DescriptionConverterService::convertCreatureToTO(
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
         geneTO.shape = geneDesc._shape;
-        geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches.value_or(0));
+        geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
         geneTO.angleAlignment = geneDesc._angleAlignment;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
