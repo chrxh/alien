@@ -316,9 +316,6 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Reconnector},
         NodeParameter{CellTypeGenome_Detonator}));
 
-// Scheme: creatureX_geneY_nodeZofA_concatenationBofC_branchCofD
-// _extra
-
 TEST_P(ConstructorTests_AllNodeTypes, creature1__gene0__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto const FrontAngle = 10.0f;
@@ -660,7 +657,7 @@ TEST_F(ConstructorTests, creature1__gene1__node_0_1__concatenation_0_1__branch_0
     EXPECT_EQ(1, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_1__branch_0_1__ignoreNumAdditionalConnectionsAtStart)
+TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_1__branch_0_0__ignoreNumAdditionalConnectionsAtStart)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
@@ -699,7 +696,7 @@ TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_0_1__branch_0
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, start_creatureSize2_gene0_separation_finished)
+TEST_F(ConstructorTests, creature2__gene0__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -738,7 +735,7 @@ TEST_F(ConstructorTests, start_creatureSize2_gene0_separation_finished)
     EXPECT_TRUE(actualData.hasConnection(0, 1));
 }
 
-TEST_F(ConstructorTests, start_creatureSize2_gene0_branch1_finished)
+TEST_F(ConstructorTests, creature2__gene0__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -776,7 +773,7 @@ TEST_F(ConstructorTests, start_creatureSize2_gene0_branch1_finished)
     EXPECT_TRUE(actualData.hasConnection(0, 1));
 }
 
-TEST_F(ConstructorTests, start_creatureSize2_gene0_branch2_finished)
+TEST_F(ConstructorTests, creature2__gene0__node_0_1__concatenation_0_1__branch_1_2)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().numBranches(2).nodes({NodeDescription()}),
@@ -820,7 +817,7 @@ TEST_F(ConstructorTests, start_creatureSize2_gene0_branch2_finished)
     EXPECT_TRUE(actualData.hasConnection(0, 2));
 }
 
-TEST_F(ConstructorTests, start_creatureSize2_gene1_branch2_finished)
+TEST_F(ConstructorTests, creature2__gene1__node_0_1__concatenation_0_1__branch_1_2)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription()
@@ -863,45 +860,7 @@ TEST_F(ConstructorTests, start_creatureSize2_gene1_branch2_finished)
     EXPECT_TRUE(actualData.hasConnection(0, 2));
 }
 
-TEST_F(ConstructorTests, start_creatureSize3_gene1_branch1_finished)
-{
-    auto data = CollectionDescription().creatures({
-        CreatureDescription()
-            .id(0)
-            .genome(GenomeDescription().genes({
-                GeneDescription().nodes({NodeDescription()}),
-                GeneDescription().numBranches(1).nodes({NodeDescription()}),
-            }))
-            .cells({
-                CellDescription().id(0).pos({100.0f, 99.0f}).angleToFront(90.0f),
-                CellDescription().id(1).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f}).angleToFront(-90.0f),
-                 CellDescription().id(2).pos({101.0f, 100.0f}).angleToFront(0),
-            }),
-    });
-    data.addConnection(0, 1);
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(4, creature._cells.size());
-
-    auto hostCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1, 2});
-    EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(approxCompare(hostCell._pos + Math::unitVectorOfAngle(225.0f), newCell._pos));
-    EXPECT_TRUE(approxCompare(-135.0f, newCell._angleToFront));
-    EXPECT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
-}
-
-TEST_F(ConstructorTests, start_creatureSize3_gene1_branch1_finished_differentConstructionAngle)
+TEST_F(ConstructorTests, creature3__gene1__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto const FrontAngle = 10.0f;
     auto const ConstructionAngle = 20.0f;
@@ -957,7 +916,7 @@ TEST_F(ConstructorTests, start_creatureSize3_gene1_branch1_finished_differentCon
     EXPECT_EQ(1, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, continue_creatureSize1_gene0_separation_finished)
+TEST_F(ConstructorTests, creature1__gene0__node_1_2__concatenation_0_1__branch_0_0)
 {
     auto const FrontAngle = 10.0f;
 
@@ -1010,7 +969,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_separation_finished)
     EXPECT_FALSE(actualData.hasConnection(hostCell, newCell));
 }
 
-TEST_F(ConstructorTests, continue_creatureSize1_gene1_branch1_finished)
+TEST_F(ConstructorTests, creature1__gene1__node_1_2__concatenation_0_1__branch_0_1)
 {
     auto const FrontAngle = 10.0f;
     auto genome = GenomeDescription()
@@ -1068,7 +1027,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene1_branch1_finished)
     }
 }
 
-TEST_F(ConstructorTests, continue_creatureSize3_gene1_branch1_finished)
+TEST_F(ConstructorTests, creature3__gene1__node_1_2__concatenation_0_1__branch_0_1)
 {
     auto const FrontAngle = 10.0f;
     auto const MiddleAngle = 5.0f;
@@ -1123,7 +1082,7 @@ TEST_F(ConstructorTests, continue_creatureSize3_gene1_branch1_finished)
     EXPECT_TRUE(approxCompare(180.0f + MiddleAngle, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 }
 
-TEST_F(ConstructorTests, continue_mirroredCreatureSize3_gene1_branch1_finished)
+TEST_F(ConstructorTests, creature3__gene1__node_1_2__concatenation_0_1__branch_0_1__mirrored)
 {
     auto const FrontAngle = 10.0f;
     auto const MiddleAngle = 5.0f;
@@ -1178,7 +1137,7 @@ TEST_F(ConstructorTests, continue_mirroredCreatureSize3_gene1_branch1_finished)
     EXPECT_TRUE(approxCompare(180.0f + MiddleAngle, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 }
 
-TEST_F(ConstructorTests, continue_creatureSize1_gene0_moreNodes)
+TEST_F(ConstructorTests, creature1__gene0__node_1_3__concatenation_0_1__branch_0_0)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
@@ -1235,7 +1194,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_moreNodes)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, continue_creatureSize1_gene0_moreNodes_numAdditionalConnections0)
+TEST_F(ConstructorTests, creature1__gene0__node_2_4__concatenation_0_1__branch_0_0__numAdditionalConnections_0)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
@@ -1316,7 +1275,7 @@ INSTANTIATE_TEST_SUITE_P(
         ConstructorAngleAlignment_72,
         ConstructorAngleAlignment_60));
 
-TEST_P(ConstructorTests_AllAngleAlignments, continue_creatureSize1_gene0_moreNodes_numAdditionalConnections1)
+TEST_P(ConstructorTests_AllAngleAlignments, creature1__gene0__node_2_4__concatenation_0_1__branch_0_0__numAdditionalConnections_1__angleAlignment)
 {
     auto const NodeAngle = 5.0f;
 
@@ -1432,7 +1391,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, continue_creatureSize1_gene0_moreNod
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation1_angle)
+TEST_F(ConstructorTests, creature1__gene0__node_0_1__concatenation_1_3__branch_0_1__concatenationAngle)
 {
     auto const ConcatenationAngle = 20.0f;
 
@@ -1489,7 +1448,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation1_numAdditionalConnections1)
+TEST_F(ConstructorTests, creature1__gene0__node_0_4__concatenation_1_2__branch_0_1__numAdditionalConnections_1)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription()
@@ -1499,7 +1458,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_branch1_startConcatenation
                 NodeDescription().referenceAngle(90.0f),
                 NodeDescription().referenceAngle(90.0f),
             })
-            .numConcatenations(3)
+            .numConcatenations(2)
             .numBranches(1)
             .angleAlignment(ConstructorAngleAlignment_90),
     });
