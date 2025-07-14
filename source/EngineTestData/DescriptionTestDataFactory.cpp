@@ -143,7 +143,6 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
             .autoTriggerInterval(getRandomInt())
             .constructionActivationTime(getRandomInt())
             .geneIndex(getRandomInt())
-            .constructionAngle(getRandomFloat(0, 360.0f))
             .lastConstructedCellId(getRandomInt())
             .currentNodeIndex(getRandomInt())
             .currentBranch(getRandomInt())
@@ -241,8 +240,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
     case CellTypeGenome_Constructor:
         return ConstructorGenomeDescription()
             .autoTriggerInterval(getRandomInt())
-            .constructionActivationTime(getRandomInt())
-            .constructionAngle(getRandomFloat(0, 360.0f));
+            .constructionActivationTime(getRandomInt());
     case CellTypeGenome_Sensor:
         return SensorGenomeDescription()
             .autoTriggerInterval(getRandomInt())

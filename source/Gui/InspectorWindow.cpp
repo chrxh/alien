@@ -569,13 +569,6 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 .textWidth(CellTypeTextWidth)
                 .tooltip(Const::GenomeConstructorOffspringActivationTime),
             constructor._constructionActivationTime);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Construction angle #1")
-                .textWidth(CellTypeTextWidth)
-                .format("%.1f")
-                .tooltip(Const::GenomeConstructorAngle1Tooltip),
-            constructor._constructionAngle);
         ImGui::TreePop();
     }
 }

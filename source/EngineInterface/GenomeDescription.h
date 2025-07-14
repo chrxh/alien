@@ -44,7 +44,6 @@ struct ConstructorGenomeDescription
     MEMBER(ConstructorGenomeDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering
     MEMBER(ConstructorGenomeDescription, int, geneIndex, 0);
     MEMBER(ConstructorGenomeDescription, int, constructionActivationTime, 100);
-    MEMBER(ConstructorGenomeDescription, float, constructionAngle, 0.0f);
 };
 
 struct SensorGenomeDescription

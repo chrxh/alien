@@ -323,7 +323,6 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         result._cellTypeData = constructor;
     } break;
     case CellType_Sensor: {
@@ -511,7 +510,6 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
                     : std::nullopt;
                 constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
-                constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
                 nodeDesc._cellTypeData = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
@@ -685,7 +683,6 @@ void DescriptionConverterService::convertCreatureToTO(
                 constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
                 constructorTO.geneIndex = constructorDesc._geneIndex;
                 constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
-                constructorTO.constructionAngle = constructorDesc._constructionAngle;
             } break;
             case CellTypeGenome_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellTypeData);
@@ -841,7 +838,6 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
         constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
-        constructorTO.constructionAngle = constructorDesc._constructionAngle;
     } break;
     case CellType_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellTypeData);

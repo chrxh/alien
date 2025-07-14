@@ -61,7 +61,6 @@ struct ConstructorTO
 
     // Genome data
     uint16_t geneIndex;
-    float constructionAngle;
 
     // Process data
     uint64_t lastConstructedCellId;

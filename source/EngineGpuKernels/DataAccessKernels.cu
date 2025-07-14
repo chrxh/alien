@@ -82,7 +82,6 @@ namespace
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
                         nodeTO.cellTypeData.constructor.geneIndex = node.cellTypeData.constructor.geneIndex;
                         nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
-                        nodeTO.cellTypeData.constructor.constructionAngle = node.cellTypeData.constructor.constructionAngle;
                         break;
                     case CellTypeGenome_Sensor:
                         nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
@@ -241,7 +240,6 @@ namespace
             cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;
             cellTO.cellTypeData.constructor.currentConcatenation = cell->cellTypeData.constructor.currentConcatenation;
             cellTO.cellTypeData.constructor.currentBranch = cell->cellTypeData.constructor.currentBranch;
-            cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
         } break;
         case CellType_Sensor: {
             cellTO.cellTypeData.sensor.autoTriggerInterval = cell->cellTypeData.sensor.autoTriggerInterval;
