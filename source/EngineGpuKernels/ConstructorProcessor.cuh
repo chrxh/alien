@@ -242,6 +242,9 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
+    result.angle = result.node->referenceAngle;
+    result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+    result.numRequiredAdditionalConnections = result.node->numRequiredAdditionalConnections;
 
     CudaShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
@@ -249,8 +252,10 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         for (int i = 0; i <= constructor.currentNodeIndex; ++i) {
             auto generationResult = shapeGenerator.generateNextConstructionData(shape);
             if (i == constructor.currentNodeIndex) {
-                result.numRequiredAdditionalConnections = generationResult.numRequiredAdditionalConnections;
-                result.angle = generationResult.angle;
+                if (i > 0 && i < constructor.currentNodeIndex) {
+                    result.numRequiredAdditionalConnections = generationResult.numRequiredAdditionalConnections;
+                    result.angle = generationResult.angle;
+                }
                 result.gene->angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
                 result.requiredNodeId1 = generationResult.requiredNodeId1;
                 result.requiredNodeId2 = generationResult.requiredNodeId2;
@@ -261,31 +266,17 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
         result.requiredNodeId2 = -1;
     }
 
-    auto angle = result.node->referenceAngle;
-    int numRequiredAdditionalConnections = result.node->numRequiredAdditionalConnections;
-
-    if (shape == ConstructionShape_Custom) {
-        result.angle = angle;
-        result.numRequiredAdditionalConnections = numRequiredAdditionalConnections;
-    }
-
     if (result.gene->numNodes == 1) {
         result.numRequiredAdditionalConnections = 0;
     }
 
     auto isAtFirstNode = ConstructorHelper::isFirstNode(constructor);
     if (isAtFirstNode) {
-        if (ConstructorHelper::isFirstConcatenation(constructor)) {
-            result.angle = constructor.constructionAngle;
-        } else {
-            result.angle = angle;
-        }
+        result.angle = result.node->referenceAngle;
     }
     if (result.isLastNode && !isAtFirstNode) {
-        result.angle = angle;
+        result.angle = result.node->referenceAngle;
     }
-
-    result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
 
     return result;
 }

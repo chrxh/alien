@@ -879,7 +879,7 @@ TEST_F(ConstructorTests, start_creatureSize3_gene1_branch1_finished_differentCon
             .genome(GenomeDescription()
                         .genes({
                             GeneDescription().nodes({NodeDescription()}),
-                            GeneDescription().numBranches(1).nodes({NodeDescription()}),
+                            GeneDescription().numBranches(1).nodes({NodeDescription().referenceAngle(ConstructionAngle)}),
                         })
                         .frontAngle(FrontAngle))
             .cells({
@@ -887,7 +887,7 @@ TEST_F(ConstructorTests, start_creatureSize3_gene1_branch1_finished_differentCon
                 CellDescription()
                     .id(1)
                     .energy(getConstructorEnergy())
-                    .cellTypeData(ConstructorDescription().geneIndex(1).constructionAngle(ConstructionAngle))
+                    .cellTypeData(ConstructorDescription().geneIndex(1))
                     .pos({100.0f, 100.0f})
                     .angleToFront(FrontAngle - 180.0f),
                 CellDescription().id(2).pos({100.0f, 101.0f}).angleToFront(FrontAngle - 90.0f),
@@ -1207,7 +1207,7 @@ TEST_F(ConstructorTests, continue_creatureSize1_gene0_moreNodes_numAdditionalCon
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({
             NodeDescription(),
-            NodeDescription().referenceAngle(-90.0f),
+            NodeDescription().referenceAngle(0),
             NodeDescription().referenceAngle(45.0f).numRequiredAdditionalConnections(0),
             NodeDescription(),
         }),
@@ -1293,7 +1293,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, continue_creatureSize1_gene0_moreNod
         GeneDescription()
             .nodes({
                 NodeDescription(),
-                NodeDescription().referenceAngle(-90.0f),
+                NodeDescription().referenceAngle(0),
                 NodeDescription().referenceAngle(NodeAngle).numRequiredAdditionalConnections(1),
                 NodeDescription(),
             })
@@ -1401,6 +1401,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, continue_creatureSize1_gene0_moreNod
 
 // TODO Test for first angle of node
 // TODO Test for last angle of node
+// TODO Tests for failures
 // TODO Tests for different shape generators
 // TODO Regression tests
 
