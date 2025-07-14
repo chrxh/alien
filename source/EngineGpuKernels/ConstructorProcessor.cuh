@@ -69,7 +69,7 @@ private:
         float2 newCellPos,
         ConstructionData const& constructionData);
 
-    __inline__ __device__ static bool checkForBrokenConstruction(Cell* hostCell);
+    __inline__ __device__ static bool checkForValidConstruction(Cell* hostCell);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -162,7 +162,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             return;
         }
 
-        if (checkForBrokenConstruction(cell)) {
+        if (!checkForValidConstruction(cell)) {
             constructor.currentNodeIndex = 0;
             constructor.currentConcatenation = 0;
         }
@@ -705,17 +705,20 @@ ConstructorProcessor::constructCellIntern(
     return result;
 }
 
-__inline__ __device__ bool ConstructorProcessor::checkForBrokenConstruction(Cell* hostCell)
+__inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell* hostCell)
 {
     auto& constructor = hostCell->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
 
     auto lastConstructionCell = getLastConstructedCellOnBranch(hostCell);
+    if (lastConstructionCell == nullptr) {
+        return false;
+    }
     if (lastConstructionCell && lastConstructionCell->numConnections == 1) {
         int numConstructedCells = ConstructorHelper::getNumConstructedCellsOnBranch(constructor, genome);
-        return numConstructedCells > 1;
+        return numConstructedCells <= 1;
     }
-    return false;
+    return true;
 }
 
 
