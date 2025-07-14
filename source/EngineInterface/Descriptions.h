@@ -75,7 +75,7 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, geneIndex, 0);
 
     // Process data
-    MEMBER(ConstructorDescription, uint64_t, lastConstructedCellId, 0);
+    MEMBER(ConstructorDescription, std::optional<uint64_t>, lastConstructedCellId, std::nullopt);
     MEMBER(ConstructorDescription, int, currentNodeIndex, 0);
     MEMBER(ConstructorDescription, int, currentConcatenation, 0);
     MEMBER(ConstructorDescription, int, currentBranch, 0);
