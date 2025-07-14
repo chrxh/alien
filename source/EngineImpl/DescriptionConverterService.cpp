@@ -319,7 +319,9 @@ CellDescription DescriptionConverterService::createCellDescription(
             cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
-        constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
+        constructor._lastConstructedCellId = 
+            cellTO.cellTypeData.constructor.lastConstructedCellId != ConstructorTO::LastConstructedCellId_NotSet ? 
+            std::make_optional(cellTO.cellTypeData.constructor.lastConstructedCellId) : std::nullopt;
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
@@ -834,7 +836,7 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
-        constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId;
+        constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(ConstructorTO::LastConstructedCellId_NotSet);
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
         constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
