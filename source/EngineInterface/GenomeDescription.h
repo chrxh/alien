@@ -212,6 +212,8 @@ struct GeneDescription
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);
     MEMBER(GeneDescription, float, connectionDistance, 1.0f);
+
+    static auto constexpr NumConcatenations_Infinite = std::numeric_limits<int>::max();
 };
 
 struct GenomeDescription

@@ -43,14 +43,14 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Constructor const& cons
         return true;
     }
     auto const& gene = getCurrentGene(constructor, genome);
-    if (isSeparating(gene)) {
-        return false;
-    }
     if (constructor.currentNodeIndex >= gene->numNodes) {
         return true;
     }
     if (constructor.currentConcatenation >= gene->numConcatenations) {
         return true;
+    }
+    if (isSeparating(gene)) {
+        return false;
     }
     return constructor.currentBranch >= gene->numBranches;
 }

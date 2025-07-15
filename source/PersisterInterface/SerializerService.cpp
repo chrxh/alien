@@ -141,7 +141,7 @@ namespace
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
-    auto constexpr Id_Node_NumRequiredAdditionalConnections = 2;
+    auto constexpr Id_Node_NumAdditionalConnections = 2;
 
     auto constexpr Id_SignalRoutingGenome_Active = 0;
     auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
@@ -416,7 +416,7 @@ namespace cereal
         loadSave(
             task,
             auxiliaries,
-            Id_Node_NumRequiredAdditionalConnections,
+            Id_Node_NumAdditionalConnections,
             data._numAdditionalConnections,
             defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);

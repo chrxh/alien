@@ -462,8 +462,8 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
         newGene->numNodes = gene->numNodes;
         newGene->nodes = nodes;
         for (int j = 0, numNodes = gene->numNodes; j < numNodes; ++j) {
-            auto node = &gene->nodes[i];
-            auto newNode = &newGene->nodes[i];
+            auto node = &gene->nodes[j];
+            auto newNode = &newGene->nodes[j];
             *newNode = *node;
         }
     }

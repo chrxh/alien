@@ -397,23 +397,26 @@ CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, Colle
 
 CellDescription& CollectionDescription::getOtherCell(uint64_t id)
 {
-    for (auto& cell : _cells) {
-        if (cell._id != id) {
-            return cell;
-        }
-    }
-    for (auto& creature : _creatures) {
-        for (auto& cell : creature._cells) {
-            if (cell._id != id) {
-                return cell;
-            }
-        }
-    }
-    CHECK(false);
+    return getOtherCell(std::set<uint64_t>{id});
 }
 
 CellDescription& CollectionDescription::getOtherCell(std::set<uint64_t> const& ids)
 {
+    std::vector<uint64_t> matchingCells;
+    for (auto& cell : _cells) {
+        if (!ids.contains(cell._id)) {
+            matchingCells.emplace_back(cell._id);
+        }
+    }
+    for (auto& creature : _creatures) {
+        for (auto& cell : creature._cells) {
+            if (!ids.contains(cell._id)) {
+                matchingCells.emplace_back(cell._id);
+            }
+        }
+    }
+    CHECK(matchingCells.size() == 1);
+
     for (auto& cell : _cells) {
         if (!ids.contains(cell._id)) {
             return cell;
