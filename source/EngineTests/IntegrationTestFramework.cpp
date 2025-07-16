@@ -35,6 +35,11 @@ double IntegrationTestFramework::getEnergy(CollectionDescription const& data) co
     for (auto const& cell : data._cells) {
         result += cell._energy;
     }
+    for (auto const& creature : data._creatures) {
+        for (auto const& cell : creature._cells) {
+            result += cell._energy;
+        }
+    }
     for (auto const& particle : data._particles) {
         result += particle._energy;
     }

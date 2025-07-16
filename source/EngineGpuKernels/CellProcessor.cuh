@@ -879,23 +879,25 @@ __inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-        auto canCellHaveEnergy = cell->cellType == CellType_Constructor && cell->creature && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome)
-            && connectedCell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
-        auto canOtherCellProvideEnergy = (connectedCell->cellType != CellType_Constructor
-                                       || (connectedCell->creature && ConstructorHelper::isFinished(connectedCell->cellTypeData.constructor, connectedCell->creature->genome)))
-            && connectedCell->energy > cell->energy;
+        auto canConnectedCellHaveEnergy = connectedCell->cellType == CellType_Constructor && connectedCell->creature
+            && !ConstructorHelper::isFinished(connectedCell->cellTypeData.constructor, connectedCell->creature->genome)
+            && cell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        auto canCellProvideEnergy =
+            (cell->cellType != CellType_Constructor
+                                     || (cell->creature && ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome)))
+            && cell->energy > connectedCell->energy;
         float flow = 0;
-        if (canCellHaveEnergy) {
-            flow = connectedCell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
-        } else if (canOtherCellProvideEnergy) {
-            flow = (connectedCell->energy - cell->energy) / 2;
+        if (canConnectedCellHaveEnergy) {
+            flow = cell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        } else if (canCellProvideEnergy) {
+            flow = (cell->energy - connectedCell->energy) / 2;
         }
         if (flow > 0) {
-            auto orig = atomicAdd(&connectedCell->energy, -flow);
+            auto orig = atomicAdd(&cell->energy, -flow);
             if (orig < cellMinEnergy) {
-                atomicAdd(&connectedCell->energy, flow);
-            } else {
                 atomicAdd(&cell->energy, flow);
+            } else {
+                atomicAdd(&connectedCell->energy, flow);
             }
         }
     }

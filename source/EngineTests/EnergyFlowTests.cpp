@@ -71,7 +71,7 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {
-            EXPECT_TRUE(actualData.getCellRef(i)._energy > 10000.0f - 400.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy > 10000.0f - 500.0f);
         } else {
             EXPECT_TRUE(actualData.getCellRef(i)._energy < 200.0f);
         }
@@ -152,4 +152,37 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
         EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 600.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, energyFlowsBranches)
+{
+    auto data = CollectionDescription().cells({
+        CellDescription().id(0).pos({100.0f, 99.0f}).energy(100.0f),
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(2400.0f),
+        CellDescription().id(2).pos({100.0f, 101.0f}).energy(100.0f),
+        CellDescription().id(3).pos({99.0f, 100.0f}).energy(100.0f),
+    });
+    data.addConnection(0, 1);
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    _simulationFacade->setSimulationData(data);
+    for (int i = 0; i < 100; ++i) {
+        _simulationFacade->calcTimesteps(1);
+
+        auto actualData = _simulationFacade->getSimulationData();
+
+        EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+        for (auto const& cell : actualData._cells) {
+            EXPECT_TRUE(cell._energy > 100.0f - NEAR_ZERO);
+        }
+    }
+    {
+        auto actualData = _simulationFacade->getSimulationData();
+        for (auto const& cell : actualData._cells) {
+            EXPECT_TRUE(cell._energy > 2700.0f / 4  - 50.0f);
+            EXPECT_TRUE(cell._energy < 2700.0f / 4 + 50.0f);
+        }
+    }
 }
