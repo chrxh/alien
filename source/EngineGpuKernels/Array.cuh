@@ -127,11 +127,16 @@ public:
 
     __device__ __inline__ void swapContent(Array& other)
     {
+        swapValues(*_capacity, *other._capacity);
         swapValues(*_numEntries, *other._numEntries);
         swapValues(*_data, *other._data);
     }
 
-    __device__ __inline__ void reset() { *_numEntries = 0; }
+    __device__ __inline__ void reset()
+    {
+        *_numEntries = 0;
+        *_numOrigEntries = 0;
+    }
 
     __device__ __inline__ T* getSubArray(uint64_t size)
     {

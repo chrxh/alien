@@ -29,10 +29,10 @@ struct SimulationData
 
     // Additional data for cell functions
     double* externalEnergy;
-    Heap processMemory;
     PreprocessedSimulationData preprocessedSimulationData;
 
     // Temporary memory for operations
+    Heap processMemory;
     UnmanagedArray<StructuralOperation> structuralOperations;
     UnmanagedArray<CellTypeOperation> cellTypeOperations[CellType_Count];
 

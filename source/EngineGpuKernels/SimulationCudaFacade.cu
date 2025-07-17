@@ -90,6 +90,9 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     // Default array sizes for empty simulation (will be resized later if not sufficient)
     _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
     _cudaPreviewData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
+
+    auto memory = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
+    log(Priority::Important, std::to_string(memory / (1024 * 1024)) + " MB GPU memory used");
 }
 
 _SimulationCudaFacade::~_SimulationCudaFacade()

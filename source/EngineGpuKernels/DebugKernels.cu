@@ -8,8 +8,49 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         if (auto& cell = cells.at(index)) {
 
+            if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                || reinterpret_cast<uint64_t>(cell) + sizeof(Cell) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                printf("wrong cell pointer at %d\n", location);
+                CUDA_THROW_NOT_IMPLEMENTED();
+            }
+
+            if (cell->creature) {
+                if (reinterpret_cast<uint64_t>(cell->creature) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                    || reinterpret_cast<uint64_t>(cell->creature) + sizeof(Creature)
+                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                    printf("wrong creature pointer at %d\n", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
+
+                if (reinterpret_cast<uint64_t>(cell->creature->genome.genes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                    || reinterpret_cast<uint64_t>(cell->creature->genome.genes) + sizeof(Gene) * cell->creature->genome.numGenes
+                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                    printf("wrong genes pointer at %d\n", location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
+                for (int i = 0; i < cell->creature->genome.numGenes; ++i) {
+                    auto const& gene = cell->creature->genome.genes[i];
+                    if (reinterpret_cast<uint64_t>(gene.nodes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                        || reinterpret_cast<uint64_t>(gene.nodes) + sizeof(Node) * gene.numNodes
+                            >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                        printf("wrong nodes pointer at %d\n", location);
+                        CUDA_THROW_NOT_IMPLEMENTED();
+                    }
+                }
+            }
+
+            if (cell->numConnections > MAX_CELL_BONDS) {
+                printf("too much cell connections at %d\n", location);
+                CUDA_THROW_NOT_IMPLEMENTED();
+            }
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectingCell = cell->connections[i].cell;
+                if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                    || reinterpret_cast<uint64_t>(connectingCell) + sizeof(Cell)
+                        >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                    printf("wrong connectingCell pointer (cell: %llu, numConnections: %d) at %d\n", cell->id, cell->numConnections, location);
+                    CUDA_THROW_NOT_IMPLEMENTED();
+                }
 
                 auto displacement = connectingCell->pos - cell->pos;
                 data.cellMap.correctDirection(displacement);
@@ -21,9 +62,11 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
             }
             if (cell->energy < 0 || isnan(cell->energy)) {
                 printf("cell energy invalid at %d", location);
-                CUDA_THROW_NOT_IMPLEMENTED();
+                //CUDA_THROW_NOT_IMPLEMENTED();
             }
-            atomicAdd(sumEnergy, cell->energy);
+            if (sumEnergy != nullptr) {
+                atomicAdd(sumEnergy, cell->energy);
+            }
         }
     }
 }
@@ -34,11 +77,19 @@ __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particles.at(particleIndex)) {
+            if (reinterpret_cast<uint64_t>(particle) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                || reinterpret_cast<uint64_t>(particle) + sizeof(Particle)
+                    >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                printf("wrong particle pointer at %d\n", location);
+                CUDA_THROW_NOT_IMPLEMENTED();
+            }
             if (particle->energy < 0 || isnan(particle->energy)) {
                 printf("particle energy invalid at %d", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
-            atomicAdd(sumEnergy, particle->energy);
+            if (sumEnergy != nullptr) {
+                atomicAdd(sumEnergy, particle->energy);
+            }
         }
     }
 }

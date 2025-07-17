@@ -522,6 +522,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     cell->cellState = CellState_Constructing;
     cell->creature = creature;
     cell->genomeNodeIndex = nodeIndex;
+    cell->numConnections = 0;
 
     cell->neuralNetwork = _data->objects.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
