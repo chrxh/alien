@@ -2130,9 +2130,29 @@ namespace
         if (tryMaintainFormat) {
             return format;
         }
-        char result[16];
-        snprintf(result, sizeof(result), format.c_str(), value);
-        return std::string(result);
+        
+        // Use StringHelper::format for float values to get comma formatting
+        if constexpr (std::is_same_v<T, float>) {
+            // Extract decimal places from format string like "%.3f"
+            int decimalPlaces = 3; // default
+            auto dotPos = format.find('.');
+            if (dotPos != std::string::npos) {
+                auto fPos = format.find('f', dotPos);
+                if (fPos != std::string::npos) {
+                    auto decimalStr = format.substr(dotPos + 1, fPos - dotPos - 1);
+                    try {
+                        decimalPlaces = std::stoi(decimalStr);
+                    } catch (...) {
+                        // Use default if parsing fails
+                    }
+                }
+            }
+            return StringHelper::format(value, decimalPlaces);
+        } else {
+            char result[16];
+            snprintf(result, sizeof(result), format.c_str(), value);
+            return std::string(result);
+        }
     }
 }
 
