@@ -1868,6 +1868,51 @@ TEST_F(ConstructorTests, creature_1__gene_0__node_0_1__concatenation_1_inf__bran
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
+TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__largeFirstReferenceAngle)
+{
+    auto const FirstAngle = 180.0f;
+
+    auto genome = GenomeDescription().genes({
+        GeneDescription().nodes({NodeDescription().referenceAngle(FirstAngle)}).numBranches(1),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription().id(0).pos({100.0f, 99.0f}),
+            CellDescription()
+                .id(1)
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
+                .pos({100.0f, 100.0f}),
+            CellDescription().id(2).pos({100.1f, 101.0f}),
+        }),
+
+    });
+    data.addConnection(0, 1);
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto hostCreature = actualData.getCreature(0);
+    ASSERT_EQ(3, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(1, newCreature._cells.size());
+
+    auto const& hostCell = actualData.getCellRef(1);
+    auto const& newCell = actualData.getOtherCell({0, 1, 2});
+
+    auto angleSpan_cell2_cell0 = hostCell.getAngleSpan(2, 0);
+    auto angleSpan_lastCell_and_cell0 = hostCell.getAngleSpan(newCell._id, 0);
+    EXPECT_TRUE(approxCompare(Math::normalizedAngle(angleSpan_lastCell_and_cell0 + FirstAngle, 0.0f), angleSpan_cell2_cell0 / 2));
+}
+
 class ConstructorTests_AllShapes
     : public ConstructorTests
     , public testing::WithParamInterface<ConstructorShape>
@@ -1887,7 +1932,7 @@ INSTANTIATE_TEST_SUITE_P(
         ConstructorShape_SmallLolli,
         ConstructorShape_Zigzag));
 
-TEST_P(ConstructorTests_AllShapes, generateShape)
+TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
     auto const FirstAngle = 8.0f;
     auto const LastAngle = -5.0f;
@@ -1973,9 +2018,9 @@ TEST_P(ConstructorTests_AllShapes, generateShape)
     // Check angles for first node
     {
         auto const& hostCell = actualData.getCellRef(1);
-        auto angleSpan_cell0_cell1 = hostCell.getAngleSpan(2, 0);
-        auto angleSpan_lastCell_and_cell2 = hostCell._connections.at(0)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(angleSpan_lastCell_and_cell2 + FirstAngle, angleSpan_cell0_cell1 / 2));
+        auto angleSpan_cell2_cell0 = hostCell.getAngleSpan(2, 0);
+        auto angleSpan_lastCell_and_cell0 = hostCell._connections.at(0)._angleFromPrevious;
+        EXPECT_TRUE(approxCompare(angleSpan_lastCell_and_cell0 + FirstAngle, angleSpan_cell2_cell0 / 2));
     }
 
     // Check angles for last node
@@ -1989,7 +2034,6 @@ TEST_P(ConstructorTests_AllShapes, generateShape)
     }
 }
 
-// TODO Creature_3, first node angle = 180 Grad 
 // TODO Regression tests
 
 
