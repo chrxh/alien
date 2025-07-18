@@ -114,7 +114,7 @@ void _NodeEditorWidget::processNodeAttributes()
         auto nodeIndex = _editData->getSelectedNodeIndex();
         if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
             if (nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1) {
-                gene._shape = ConstructionShape_Custom;
+                gene._shape = ConstructorShape_Custom;
             }
         }
 
@@ -123,7 +123,7 @@ void _NodeEditorWidget::processNodeAttributes()
             auto numAdditionalConnections = node._numAdditionalConnections + 1;
             if (AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numAdditionalConnections)) {
-                gene._shape = ConstructionShape_Custom;
+                gene._shape = ConstructorShape_Custom;
             }
             node._numAdditionalConnections = numAdditionalConnections - 1;
         }

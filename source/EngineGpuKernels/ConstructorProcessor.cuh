@@ -248,7 +248,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
     CudaShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
-    if (shape != ConstructionShape_Custom && !ConstructorHelper::isFirstNode(constructor) && !result.isLastNode) {
+    if (shape != ConstructorShape_Custom && !ConstructorHelper::isFirstNode(constructor) && !result.isLastNode) {
         for (int i = 0; i <= constructor.currentNodeIndex; ++i) {
             auto generationResult = shapeGenerator.generateNextConstructionData(shape);
             if (i == constructor.currentNodeIndex) {

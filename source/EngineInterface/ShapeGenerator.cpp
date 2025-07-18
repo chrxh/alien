@@ -311,26 +311,26 @@ private:
     int _nodePos = 0;
 };
 
-ShapeGenerator ShapeGeneratorFactory::create(ConstructionShape shape)
+ShapeGenerator ShapeGeneratorFactory::create(ConstructorShape shape)
 {
     switch (shape) {
-    case ConstructionShape_Segment:
+    case ConstructorShape_Segment:
         return std::make_shared<_SegmentGenerator>();
-    case ConstructionShape_Triangle:
+    case ConstructorShape_Triangle:
         return std::make_shared<_TriangleGenerator>();
-    case ConstructionShape_Rectangle:
+    case ConstructorShape_Rectangle:
         return std::make_shared<_RectangleGenerator>();
-    case ConstructionShape_Hexagon:
+    case ConstructorShape_Hexagon:
         return std::make_shared<_HexagonGenerator>();
-    case ConstructionShape_Loop:
+    case ConstructorShape_Loop:
         return std::make_shared<_LoopGenerator>();
-    case ConstructionShape_Tube:
+    case ConstructorShape_Tube:
         return std::make_shared<_TubeGenerator>();
-    case ConstructionShape_Lolli:
+    case ConstructorShape_Lolli:
         return std::make_shared<_LolliGenerator>();
-    case ConstructionShape_SmallLolli:
+    case ConstructorShape_SmallLolli:
         return std::make_shared<_SmallLolliGenerator>();
-    case ConstructionShape_Zigzag:
+    case ConstructorShape_Zigzag:
         return std::make_shared<_ZigzagGenerator>();
     }
     return nullptr;

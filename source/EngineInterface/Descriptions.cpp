@@ -98,6 +98,25 @@ bool CellDescription::isConnectedTo(uint64_t id) const
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._cellId == id; }) != _connections.end();
 }
 
+float CellDescription::getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const
+{
+    std::optional<float> result;
+    auto numConnections = _connections.size();
+    for (int i = 0; i < numConnections * 2; ++i) {
+        auto const& connection = _connections.at(i % numConnections);
+        if (result.has_value()) {
+            *result += connection._angleFromPrevious;
+        }
+        if (connection._cellId == connectedCellId1) {
+            result = 0.0f;
+        }
+        if (result.has_value() && connection._cellId == connectedCellId2) {
+            return result.value();
+        }
+    }
+    CHECK(false);
+}
+
 CellDescription& CellDescription::signalAndRelaxTime(std::vector<float> const& value)
 {
     CHECK(value.size() == MAX_CHANNELS);

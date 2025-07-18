@@ -5,6 +5,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/ShapeGenerator.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "EngineTestData/DescriptionTestDataFactory.h"
@@ -1867,31 +1868,47 @@ TEST_F(ConstructorTests, creature_1__gene_0__node_0_1__concatenation_1_inf__bran
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, withShapeGenerator)
+class ConstructorTests_AllShapes
+    : public ConstructorTests
+    , public testing::WithParamInterface<ConstructorShape>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstructorTests_AllShapes,
+    ConstructorTests_AllShapes,
+    ::testing::Values(
+        ConstructorShape_Segment,
+        ConstructorShape_Triangle,
+        ConstructorShape_Rectangle,
+        ConstructorShape_Hexagon,
+        ConstructorShape_Loop,
+        ConstructorShape_Tube,
+        ConstructorShape_Lolli,
+        ConstructorShape_SmallLolli,
+        ConstructorShape_Zigzag));
+
+TEST_P(ConstructorTests_AllShapes, generateShape)
 {
-    auto genome = GenomeDescription().genes({
-        GeneDescription()
-            .nodes({
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-                NodeDescription(),
-            })
-            .numBranches(1)
-            .shape(ConstructionShape_Hexagon),
-    });
+    auto const FirstAngle = 8.0f;
+    auto const LastAngle = -5.0f;
+    auto const n = 20;
+
+    auto shape = GetParam();
+
+    auto gene = GeneDescription().numBranches(1).shape(shape);
+    gene._nodes.emplace_back(NodeDescription().referenceAngle(FirstAngle));
+    for (int i = 0; i < n - 2; ++i) {
+        gene._nodes.emplace_back(NodeDescription());
+    }
+    gene._nodes.emplace_back(NodeDescription().referenceAngle(LastAngle));
+    auto genome = GenomeDescription().genes({gene});
+
     auto data = CollectionDescription().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
                 .id(1)
-                .energy(getConstructorEnergy() * 10)
+                .energy(getConstructorEnergy() * n)
                 .cellTypeData(ConstructorDescription().geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
@@ -1903,9 +1920,10 @@ TEST_F(ConstructorTests, withShapeGenerator)
 
     _simulationFacade->setSimulationData(data);
 
+    // Construct offspring and record ids of constructed cells
     std::vector<uint64_t> createdCellIds;
     {
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < n; ++i) {
             _simulationFacade->calcTimesteps(100);
             auto actualData = _simulationFacade->getSimulationData();
 
@@ -1928,7 +1946,7 @@ TEST_F(ConstructorTests, withShapeGenerator)
             auto newCell = actualData.getOtherCell(knownCellIds);
             createdCellIds.emplace_back(newCell._id);
 
-            if (i < 9) {
+            if (i < n - 1) {
                 EXPECT_EQ(CellState_Constructing, newCell._cellState);
             } else {
                 EXPECT_EQ(CellState_Ready, newCell._cellState);
@@ -1936,9 +1954,41 @@ TEST_F(ConstructorTests, withShapeGenerator)
             EXPECT_TRUE(actualData.hasConnection(hostCell, newCell));
         }
     }
+
+    // Check angles except for first and last node
+    auto actualData = _simulationFacade->getSimulationData();
+    auto shapeGenerator = ShapeGeneratorFactory::create(shape);
+    for (int i = 0; i < n; ++i) {
+        auto shapeResult = shapeGenerator->generateNextConstructionData();
+        if (i > 0 && i < n - 1) {
+            auto const& cell = actualData.getCellRef(createdCellIds.at(i));
+            auto prevCellId = createdCellIds.at(i - 1);
+            auto nextCellId = createdCellIds.at(i + 1);
+            auto angle = cell.getAngleSpan(prevCellId, nextCellId);
+            angle = Math::normalizedAngle(angle - 180.0f, -180.0f);
+            EXPECT_EQ(shapeResult.angle, angle);
+        }
+    }
+
+    // Check angles for first node
+    {
+        auto const& hostCell = actualData.getCellRef(1);
+        auto angleSpan_cell0_cell1 = hostCell.getAngleSpan(2, 0);
+        auto angleSpan_lastCell_and_cell2 = hostCell._connections.at(0)._angleFromPrevious;
+        EXPECT_TRUE(approxCompare(angleSpan_lastCell_and_cell2 + FirstAngle, angleSpan_cell0_cell1 / 2));
+    }
+
+    // Check angles for last node
+    {
+        auto const& cell = actualData.getCellRef(createdCellIds.back());
+        auto prevCellId = createdCellIds.at(n - 2);
+        auto nextCellId = 1;    // = id of hostCell
+        auto angle = cell.getAngleSpan(prevCellId, nextCellId);
+        angle = Math::normalizedAngle(angle - 180.0f, -180.0f);
+        EXPECT_EQ(LastAngle, angle);
+    }
 }
 
-// TODO Tests for different shape generators
 // TODO Creature_3, first node angle = 180 Grad 
 // TODO Regression tests
 

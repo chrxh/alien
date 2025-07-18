@@ -15,8 +15,8 @@ struct ShapeGeneratorResult
 class CudaShapeGenerator
 {
 public:
-    __inline__ __device__ ShapeGeneratorResult generateNextConstructionData(ConstructionShape shape);
-    __inline__ __device__ ConstructorAngleAlignment getConstructorAngleAlignment(ConstructionShape shape);
+    __inline__ __device__ ShapeGeneratorResult generateNextConstructionData(ConstructorShape shape);
+    __inline__ __device__ ConstructorAngleAlignment getConstructorAngleAlignment(ConstructorShape shape);
 
 private:
     __inline__ __device__ ShapeGeneratorResult generateNextConstructionDataForSegment();
@@ -39,52 +39,52 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionData(ConstructionShape shape)
+__inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConstructionData(ConstructorShape shape)
 {
     switch (shape) {
-    case ConstructionShape_Segment:
+    case ConstructorShape_Segment:
         return generateNextConstructionDataForSegment();
-    case ConstructionShape_Triangle:
+    case ConstructorShape_Triangle:
         return generateNextConstructionDataForTriangle();
-    case ConstructionShape_Rectangle:
+    case ConstructorShape_Rectangle:
         return generateNextConstructionDataForRectangle();
-    case ConstructionShape_Hexagon:
+    case ConstructorShape_Hexagon:
         return generateNextConstructionDataForHexagon();
-    case ConstructionShape_Loop:
+    case ConstructorShape_Loop:
         return generateNextConstructionDataForLoop();
-    case ConstructionShape_Tube:
+    case ConstructorShape_Tube:
         return generateNextConstructionDataForTube();
-    case ConstructionShape_Lolli:
+    case ConstructorShape_Lolli:
         return generateNextConstructionDataForLolli();
-    case ConstructionShape_SmallLolli:
+    case ConstructorShape_SmallLolli:
         return generateNextConstructionDataForSmallLolli();
-    case ConstructionShape_Zigzag:
+    case ConstructorShape_Zigzag:
         return generateNextConstructionDataForZigzag();
     default:
         return ShapeGeneratorResult();
     }
 }
 
-__inline__ __device__ ConstructorAngleAlignment CudaShapeGenerator::getConstructorAngleAlignment(ConstructionShape shape)
+__inline__ __device__ ConstructorAngleAlignment CudaShapeGenerator::getConstructorAngleAlignment(ConstructorShape shape)
 {
     switch (shape) {
-    case ConstructionShape_Custom:
+    case ConstructorShape_Custom:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_Segment:
+    case ConstructorShape_Segment:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_Triangle:
+    case ConstructorShape_Triangle:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_Rectangle:
+    case ConstructorShape_Rectangle:
         return ConstructorAngleAlignment_90;
-    case ConstructionShape_Hexagon:
+    case ConstructorShape_Hexagon:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_Loop:
+    case ConstructorShape_Loop:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_Tube:
+    case ConstructorShape_Tube:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_Lolli:
+    case ConstructorShape_Lolli:
         return ConstructorAngleAlignment_60;
-    case ConstructionShape_SmallLolli:
+    case ConstructorShape_SmallLolli:
         return ConstructorAngleAlignment_60;
     default:
         return ConstructorAngleAlignment_60;

@@ -154,7 +154,7 @@ struct NodeTO
 
 struct GeneTO
 {
-    ConstructionShape shape;
+    ConstructorShape shape;
     uint8_t numBranches;    // 0 = separation
     ConstructorAngleAlignment angleAlignment;
     float stiffness;

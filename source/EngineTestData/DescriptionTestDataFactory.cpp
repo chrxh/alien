@@ -65,7 +65,7 @@ CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(
                     .frontAngle(getRandomFloat(0, 360.0f))
                     .genes({
                         GeneDescription()
-                            .shape(ConstructionShape_Hexagon)
+                            .shape(ConstructorShape_Hexagon)
                             .numBranches(getRandomInt(1, 10))
                             .numConcatenations(getRandomInt(1, 10))
                             .angleAlignment(ConstructorAngleAlignment_180)

@@ -147,7 +147,7 @@
 //                ShapeGeneratorResult shapeResult;
 //                shapeResult.angle = node._referenceAngle;
 //                shapeResult.numAdditionalConnections = node._numAdditionalConnections;
-//                if (genome._header._shape != ConstructionShape_Custom) {
+//                if (genome._header._shape != ConstructorShape_Custom) {
 //                    shapeResult = shapeGenerator->generateNextConstructionData();
 //                }
 //                if (lastReferenceAngle.has_value() && partIndex == toInt(genome._cells.size()) - 1 && repetition == genome._header._numRepetitions - 1) {

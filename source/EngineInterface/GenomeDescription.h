@@ -206,7 +206,7 @@ struct GeneDescription
     auto operator<=>(GeneDescription const&) const = default;
 
     MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
-    MEMBER(GeneDescription, ConstructionShape, shape, ConstructionShape_Custom);
+    MEMBER(GeneDescription, ConstructorShape, shape, ConstructorShape_Custom);
     MEMBER(GeneDescription, int, numBranches, 0);  // 0 = separation
     MEMBER(GeneDescription, int, numConcatenations, 1);
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);

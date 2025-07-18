@@ -40,7 +40,7 @@ struct Particle
 
 struct GenomeHeader
 {
-    ConstructionShape shape;
+    ConstructorShape shape;
     int numBranches;
     bool separateConstruction;
     ConstructorAngleAlignment angleAlignment;

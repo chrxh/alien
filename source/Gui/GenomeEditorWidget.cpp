@@ -138,7 +138,7 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 3: Shape
                     ImGui::TableNextColumn();
-                    AlienGui::Text(Const::ConstructionShapeStrings.at(gene._shape));
+                    AlienGui::Text(Const::ConstructorShapeStrings.at(gene._shape));
 
                     // Column 4: Branches
                     ImGui::TableNextColumn();

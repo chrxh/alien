@@ -48,7 +48,7 @@ struct _GenomeTabEditData
         return gene._nodes.at(nodeIndex.value());
     }
 
-    void updateGeometry(ConstructionShape shape)
+    void updateGeometry(ConstructorShape shape)
     {
         auto shapeGenerator = ShapeGeneratorFactory::create(shape);
         if (!shapeGenerator) {

@@ -23,5 +23,5 @@ public:
 class ShapeGeneratorFactory
 {
 public:
-    static ShapeGenerator create(ConstructionShape shape);
+    static ShapeGenerator create(ConstructorShape shape);
 };

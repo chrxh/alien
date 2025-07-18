@@ -187,25 +187,25 @@ namespace Const
     std::vector<std::string> const ConstructorAlignmentStrings = {"None"s, "180 deg"s, "120 deg"s, "90 deg"s, "72 deg"s, "60 deg"s};
 }
 
-using ConstructionShape = int;
-enum ConstructionShape_
+using ConstructorShape = int;
+enum ConstructorShape_
 {
-    ConstructionShape_Custom,
-    ConstructionShape_Segment,
-    ConstructionShape_Triangle,
-    ConstructionShape_Rectangle,
-    ConstructionShape_Hexagon,
-    ConstructionShape_Loop,
-    ConstructionShape_Tube,
-    ConstructionShape_Lolli,
-    ConstructionShape_SmallLolli,
-    ConstructionShape_Zigzag,
-    ConstructionShape_Count
+    ConstructorShape_Custom,
+    ConstructorShape_Segment,
+    ConstructorShape_Triangle,
+    ConstructorShape_Rectangle,
+    ConstructorShape_Hexagon,
+    ConstructorShape_Loop,
+    ConstructorShape_Tube,
+    ConstructorShape_Lolli,
+    ConstructorShape_SmallLolli,
+    ConstructorShape_Zigzag,
+    ConstructorShape_Count
 };
 
 namespace Const
 {
-    std::vector<std::string> const ConstructionShapeStrings =
+    std::vector<std::string> const ConstructorShapeStrings =
         {"Custom", "Segment", "Triangle", "Rectangle", "Hexagon", "Loop", "Tube", "Lolli", "Small Lolli", "Zigzag"};
 }
 
