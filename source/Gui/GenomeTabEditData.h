@@ -56,10 +56,15 @@ struct _GenomeTabEditData
         }
         auto& gene = getSelectedGeneRef();
         gene._angleAlignment = shapeGenerator->getConstructorAngleAlignment();
+        auto numNodes = gene._nodes.size();
+        int index = 0;
         for (auto& node : gene._nodes) {
             auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
-            node._referenceAngle = shapeGenerationResult.angle;
-            node._numAdditionalConnections = shapeGenerationResult.numAdditionalConnections;
+            if (index > 0 && index < numNodes - 1) {
+                node._referenceAngle = shapeGenerationResult.angle;
+                node._numAdditionalConnections = shapeGenerationResult.numAdditionalConnections;
+            }
+            ++index;
         }
     }
 };
