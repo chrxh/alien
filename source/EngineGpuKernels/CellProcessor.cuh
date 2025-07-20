@@ -657,8 +657,16 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
             }
         } else if (origCellState == CellState_Ready) {
             if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
-                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->cellType == CellType_Constructor
-                    && ConstructorHelper::isSelfReplicator(cell->cellTypeData.constructor)) {
+                auto isSeparating = false;
+                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->creature != nullptr
+                    && cell->cellType == CellType_Constructor) {
+                    auto const& constructor = cell->cellTypeData.constructor;
+                    auto const& gene = ConstructorHelper::getCurrentGene(constructor, cell->creature->genome);
+                    if (ConstructorHelper::isSeparating(gene)) {
+                        isSeparating = true;
+                    }
+                }
+                if (isSeparating) {
                     cellState = CellState_Reviving;
                 } else {
                     cellState = CellState_Detaching;

@@ -23,7 +23,6 @@ private:
         Creature* creature;
         Gene* gene;
         Node* node;
-        bool isSelfReplicating;
         bool isSeparating;
 
         // Construction position
@@ -195,9 +194,13 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
         return constructor.offspring;
     }
 
-    // No self-replicator => same creature
-    if (!ConstructorHelper::isSelfReplicator(constructor)) {
-        return cell->creature;
+    // No separation => same creature
+    auto& genome = cell->creature->genome;
+    if (constructor.geneIndex < genome.numGenes) {
+        auto const& gene = ConstructorHelper::getCurrentGene(constructor, genome);
+        if (!ConstructorHelper::isSeparating(gene)) {
+            return cell->creature;
+        }
     }
 
     // Current branch under construction => use creature reference from there
@@ -208,15 +211,9 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
         }
     }
 
-    // Other branches already constructed => try to use creature reference from there
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto const& connectedCell = cell->connections[i].cell;
-        if (connectedCell->creature == nullptr) {
-            continue;
-        }
-        if (connectedCell->creature != cell->creature) {
-            return connectedCell->creature;
-        }
+    // Other branches already constructed => same creature
+    if (constructor.currentBranch > 0) {
+        return cell->creature;
     }
 
     // Nothing found => clone creature
@@ -234,7 +231,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
-    result.isSelfReplicating = ConstructorHelper::isSelfReplicator(constructor);
     result.isSeparating = ConstructorHelper::isSeparating(result.gene);
     result.isFirstNodeOfFirstConcatenation = ConstructorHelper::isFirstNode(constructor)&& ConstructorHelper::isFirstConcatenation(constructor);
     result.isLastNode = ConstructorHelper::isLastNode(constructor, genome);
@@ -728,7 +724,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         && cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
-                return !constructionData.isSelfReplicating && !ConstructorHelper::isFinished(hostCell->cellTypeData.constructor, constructionData.creature->genome)
+                return !constructionData.isSeparating && !ConstructorHelper::isFinished(hostCell->cellTypeData.constructor, constructionData.creature->genome)
                     ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color]
                     : 0.0f;
             } else {
@@ -756,7 +752,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
             return 0.0f;
         }
         if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
-            return !constructionData.isSelfReplicating ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color] : 0.0f;
+            return !constructionData.isSeparating ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color] : 0.0f;
         } else {
             return cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color];
         }
@@ -787,7 +783,7 @@ __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, 
     if (constructionData.isLastNodeOfLastConcatenation || (constructionData.isLastNode && constructionData.hasInfiniteConcatenations)) {
         newCell->cellState = CellState_Activating;
 
-        if (constructionData.isSeparating || constructionData.isSelfReplicating) {
+        if (constructionData.isSeparating) {
             newCell->angleToFront = constructionData.creature->genome.frontAngle;
         } else {
             if (hostCell->numConnections > 1) {

@@ -5,9 +5,6 @@
 class ConstructorHelper
 {
 public:
-    // cell parameter must be of constructor type
-
-    __inline__ __device__ static bool isSelfReplicator(Constructor const& constructor);
     __inline__ __device__ static bool isStarting(Constructor const& constructor);
     __inline__ __device__ static bool isFinished(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool isFirstNode(Constructor const& constructor);
@@ -24,11 +21,6 @@ public:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ bool ConstructorHelper::isSelfReplicator(Constructor const& constructor)
-{
-    return constructor.geneIndex == 0;
-}
-
 __inline__ __device__ bool ConstructorHelper::isStarting(Constructor const& constructor)
 {
     return constructor.currentNodeIndex == 0 && constructor.currentBranch == 0 && constructor.currentConcatenation == 0;
