@@ -2122,17 +2122,31 @@ void AlienGui::DisabledField()
 namespace
 {
     template <typename T>
-    std::string toString(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
+    std::string applyFormatToValue(T const& value, std::string const& format, bool allowInfinity = false, bool tryMaintainFormat = false)
     {
         if (allowInfinity && value == Infinity<T>::value) {
             return "Infinity";
         }
-        if (tryMaintainFormat) {
-            return format;
+       
+        if constexpr (std::is_same_v<T, float>) {
+            // Extract decimal places from format string like "%.3f"
+            int decimalPlaces = 3; // default
+            auto dotPos = format.find('.');
+            if (dotPos != std::string::npos) {
+                auto fPos = format.find('f', dotPos);
+                if (fPos != std::string::npos) {
+                    auto decimalStr = format.substr(dotPos + 1, fPos - dotPos - 1);
+                    decimalPlaces = std::stoi(decimalStr);
+                }
+            }
+            return StringHelper::format(value, decimalPlaces);
+        } else if constexpr (std::is_same_v<T, int>) {
+            return StringHelper::format(value, 0);
+        } else {
+            char result[16];
+            snprintf(result, sizeof(result), format.c_str(), value);
+            return std::string(result);
         }
-        char result[16];
-        snprintf(result, sizeof(result), format.c_str(), value);
-        return std::string(result);
     }
 }
 
@@ -2221,18 +2235,18 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
             }
             if (minValue != maxValue) {
                 if constexpr (std::is_same<T, float>()) {
-                    format = parameters._format + " ... " + toString(maxValue, parameters._format, parameters._infinity, false);
+                    format = parameters._format + " ... " + applyFormatToValue(maxValue, parameters._format, parameters._infinity);
                 } else {
-                    format = toString(minValue, parameters._format, parameters._infinity, false) + " ... "
-                        + toString(maxValue, parameters._format, parameters._infinity, false);
+                    format = applyFormatToValue(minValue, parameters._format, parameters._infinity) + " ... "
+                        + applyFormatToValue(maxValue, parameters._format, parameters._infinity);
                 }
             } else {
-                format = toString(value[color], parameters._format, parameters._infinity, true);
+                format = applyFormatToValue(value[color], parameters._format, parameters._infinity);
             }
             sliderValue = minValue;
         }
         else {
-            format = toString(value[color], parameters._format, parameters._infinity, true);
+            format = applyFormatToValue(value[color], parameters._format, parameters._infinity);
             sliderValue = value[color];
             sliderValueColor = color;
         }
@@ -2448,12 +2462,12 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
 
             if (minValue != maxValue) {
                 if constexpr (std::is_same<T, float>()) {
-                    format = parameters._format + " ... " + toString(maxValue, parameters._format, false, false);
+                    format = parameters._format + " ... " + applyFormatToValue(maxValue, parameters._format, false);
                 } else {
                     format = std::to_string(minValue) + " ... " + std::to_string(maxValue);
                 }
             } else {
-                format = toString(value[0][0], parameters._format, false, true);
+                format = applyFormatToValue(value[0][0], parameters._format, false);
             }
             sliderValue = minValue;
 
