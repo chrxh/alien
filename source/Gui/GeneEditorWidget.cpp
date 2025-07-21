@@ -89,26 +89,22 @@ void _GeneEditorWidget::processHeaderData()
         }
         AlienGui::EndIndent();
 
-        // Separating checkbox
+        // Separating
         AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separating").textWidth(rightColumnWidth), gene._separating);
 
         // Number of branches
         AlienGui::BeginIndent();
         if (!gene._separating) {
-            auto numBranches = gene._numBranches;
-            if (numBranches < 1) {
-                numBranches = 1;  // Ensure at least 1 branch when not separating
-            }
-            --numBranches;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
+            auto numBranches = gene._numBranches - 1;   // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
             AlienGui::Combo(
                 AlienGui::ComboParameters()
                     .name("Number of branches")
-                    .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches", "6 branches"})
+                    .values({"1", "2", "3", "4", "5", "6"})
                     .textWidth(rightColumnWidth),
                 numBranches);
             gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
         } else {
-            std::string text = "Not applicable";
+            std::string text = "-";
             AlienGui::InputText(AlienGui::InputTextParameters().name("Number of branches").textWidth(rightColumnWidth).readOnly(true), text);
         }
         AlienGui::EndIndent();

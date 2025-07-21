@@ -440,16 +440,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        // Backward compatibility: if we're loading and separating attribute wasn't in the file
-        // (default was used) and numBranches is 0, then this was a separating gene in the old format
-        if (task == SerializationTask::Load) {
-            auto separatingFound = auxiliaries.find(Id_Gene_Separating);
-            if (separatingFound == auxiliaries.end() && data._numBranches == 0) {
-                data._separating = true;
-                data._numBranches = 1; // Set to valid value for new format
-            }
-        }
-
         ar(data._nodes);
     }
     SPLIT_SERIALIZATION(GeneDescription)
