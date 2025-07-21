@@ -207,7 +207,8 @@ struct GeneDescription
 
     MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
     MEMBER(GeneDescription, ConstructorShape, shape, ConstructorShape_Custom);
-    MEMBER(GeneDescription, int, numBranches, 0);  // 0 = separation
+    MEMBER(GeneDescription, int, numBranches, 1);  // >= 1 when not separating
+    MEMBER(GeneDescription, bool, separating, false);
     MEMBER(GeneDescription, int, numConcatenations, 1);
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);

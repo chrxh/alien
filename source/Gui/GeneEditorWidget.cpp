@@ -89,23 +89,29 @@ void _GeneEditorWidget::processHeaderData()
         }
         AlienGui::EndIndent();
 
+        // Separating checkbox
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separating").textWidth(rightColumnWidth), gene._separating);
+
         // Number of branches
-        auto numBranches = gene._numBranches;
-        if (numBranches > 0) {
-            --numBranches;
-        }
-        std::optional<int> numBranchesOptional = numBranches > 0 ? std::make_optional(numBranches) : std::nullopt;
-        AlienGui::ComboOptional(
-            AlienGui::ComboParameters()
-                .name("Attach to host")
-                .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches", "6 branches"})
-                .textWidth(rightColumnWidth),
-            numBranchesOptional);
-        if (numBranchesOptional.has_value()) {
-            gene._numBranches = numBranchesOptional.value() + 1;
+        AlienGui::BeginIndent();
+        if (!gene._separating) {
+            auto numBranches = gene._numBranches;
+            if (numBranches < 1) {
+                numBranches = 1;  // Ensure at least 1 branch when not separating
+            }
+            --numBranches;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
+                    .name("Number of branches")
+                    .values({"1 branch", "2 branches", "3 branches", "4 branches", "5 branches", "6 branches"})
+                    .textWidth(rightColumnWidth),
+                numBranches);
+            gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
         } else {
-            gene._numBranches = 0;
+            std::string text = "Not applicable";
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Number of branches").textWidth(rightColumnWidth).readOnly(true), text);
         }
+        AlienGui::EndIndent();
 
         // Concatenations
         AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
