@@ -23,7 +23,7 @@ private:
         Creature* creature;
         Gene* gene;
         Node* node;
-        bool isSeparating;
+        bool isSeparation;
 
         // Construction position
         bool isFirstNodeOfFirstConcatenation;
@@ -176,7 +176,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             }
             if (constructionData.isLastNodeOfLastConcatenation) {
                 constructor.currentConcatenation = 0;
-                if (!constructionData.isSeparating) {
+                if (!constructionData.isSeparation) {
                     ++constructor.currentBranch;
                 } else {
                     constructor.offspring = nullptr;
@@ -198,7 +198,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     auto& genome = cell->creature->genome;
     if (constructor.geneIndex < genome.numGenes) {
         auto const& gene = ConstructorHelper::getCurrentGene(constructor, genome);
-        if (!ConstructorHelper::isSeparating(gene)) {
+        if (!ConstructorHelper::isSeparation(gene)) {
             return cell->creature;
         }
     }
@@ -231,7 +231,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
-    result.isSeparating = ConstructorHelper::isSeparating(result.gene);
+    result.isSeparation = ConstructorHelper::isSeparation(result.gene);
     result.isFirstNodeOfFirstConcatenation = ConstructorHelper::isFirstNode(constructor)&& ConstructorHelper::isFirstConcatenation(constructor);
     result.isLastNode = ConstructorHelper::isLastNode(constructor, genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, genome);
@@ -349,8 +349,8 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
         return nullptr;
     }
 
-    if (!constructionData.isLastNodeOfLastConcatenation || !ConstructorHelper::isSeparating(constructionData.gene)) {
-        auto distance = constructionData.isLastNodeOfLastConcatenation && !ConstructorHelper::isSeparating(constructionData.gene)
+    if (!constructionData.isLastNodeOfLastConcatenation || !ConstructorHelper::isSeparation(constructionData.gene)) {
+        auto distance = constructionData.isLastNodeOfLastConcatenation && !ConstructorHelper::isSeparation(constructionData.gene)
             ? constructionData.gene->connectionDistance
             : constructionData.gene->connectionDistance + cudaSimulationParameters.constructorAdditionalOffspringDistance;
         if (!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
@@ -440,7 +440,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     // Possibly connect newCell to hostCell
     bool adaptReferenceAngle = false;
-    if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparating) {
+    if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
 
         auto distance = constructionData.gene->connectionDistance;
         if (!constructionData.isLastNodeOfLastConcatenation) {
@@ -724,7 +724,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         && cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
-                return !constructionData.isSeparating && !ConstructorHelper::isFinished(hostCell->cellTypeData.constructor, constructionData.creature->genome)
+                return !constructionData.isSeparation && !ConstructorHelper::isFinished(hostCell->cellTypeData.constructor, constructionData.creature->genome)
                     ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color]
                     : 0.0f;
             } else {
@@ -752,7 +752,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
             return 0.0f;
         }
         if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
-            return !constructionData.isSeparating ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color] : 0.0f;
+            return !constructionData.isSeparation ? cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color] : 0.0f;
         } else {
             return cudaSimulationParameters.externalEnergyConditionalInflowFactor.value[hostCell->color];
         }
@@ -783,7 +783,7 @@ __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, 
     if (constructionData.isLastNodeOfLastConcatenation || (constructionData.isLastNode && constructionData.hasInfiniteConcatenations)) {
         newCell->cellState = CellState_Activating;
 
-        if (constructionData.isSeparating) {
+        if (constructionData.isSeparation) {
             newCell->angleToFront = constructionData.creature->genome.frontAngle;
         } else {
             if (hostCell->numConnections > 1) {

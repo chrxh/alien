@@ -89,8 +89,8 @@ void _GeneEditorWidget::processHeaderData()
         }
         AlienGui::EndIndent();
 
-        // Separating
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separating").textWidth(rightColumnWidth), gene._separation);
+        // Separation
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separation);
 
         // Number of branches
         AlienGui::BeginIndent();

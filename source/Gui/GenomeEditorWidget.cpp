@@ -143,7 +143,7 @@ void _GenomeEditorWidget::processGeneList()
                     // Column 4: Branches
                     ImGui::TableNextColumn();
                     if (gene._separation) {
-                        AlienGui::Text("Separating");
+                        AlienGui::Text("Separation");
                     } else {
                         auto const& numBranches = gene._numBranches;
                         CHECK(numBranches >= 1 && numBranches <= 6);

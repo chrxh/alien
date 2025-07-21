@@ -134,7 +134,7 @@ namespace
 
     auto constexpr Id_Gene_Shape = 0;
     auto constexpr Id_Gene_NumBranches = 1;
-    auto constexpr Id_Gene_Separating = 2;
+    auto constexpr Id_Gene_Separation = 2;
     auto constexpr Id_Gene_AngleAlignment = 3;
     auto constexpr Id_Gene_Stiffness = 4;
     auto constexpr Id_Gene_ConnectionDistance = 5;
@@ -433,7 +433,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
-        loadSave(task, auxiliaries, Id_Gene_Separating, data._separation, defaultObject._separation);
+        loadSave(task, auxiliaries, Id_Gene_Separation, data._separation, defaultObject._separation);
         loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
