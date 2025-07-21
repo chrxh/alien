@@ -134,10 +134,11 @@ namespace
 
     auto constexpr Id_Gene_Shape = 0;
     auto constexpr Id_Gene_NumBranches = 1;
-    auto constexpr Id_Gene_AngleAlignment = 2;
-    auto constexpr Id_Gene_Stiffness = 3;
-    auto constexpr Id_Gene_ConnectionDistance = 4;
-    auto constexpr Id_Gene_NumRepetitions = 5;
+    auto constexpr Id_Gene_Separating = 2;
+    auto constexpr Id_Gene_AngleAlignment = 3;
+    auto constexpr Id_Gene_Stiffness = 4;
+    auto constexpr Id_Gene_ConnectionDistance = 5;
+    auto constexpr Id_Gene_NumRepetitions = 6;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
@@ -432,11 +433,22 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
+        loadSave(task, auxiliaries, Id_Gene_Separating, data._separating, defaultObject._separating);
         loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
         loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        // Backward compatibility: if we're loading and separating attribute wasn't in the file
+        // (default was used) and numBranches is 0, then this was a separating gene in the old format
+        if (task == SerializationTask::Load) {
+            auto separatingFound = auxiliaries.find(Id_Gene_Separating);
+            if (separatingFound == auxiliaries.end() && data._numBranches == 0) {
+                data._separating = true;
+                data._numBranches = 1; // Set to valid value for new format
+            }
+        }
 
         ar(data._nodes);
     }

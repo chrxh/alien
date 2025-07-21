@@ -142,7 +142,9 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 4: Branches
                     ImGui::TableNextColumn();
-                    if (gene._numBranches > 0) {
+                    if (gene._separating) {
+                        AlienGui::Text("Separating");
+                    } else {
                         auto const& numBranches = gene._numBranches;
                         CHECK(numBranches >= 1 && numBranches <= 6);
                         if (numBranches == 1) {
@@ -150,8 +152,6 @@ void _GenomeEditorWidget::processGeneList()
                         } else {
                             AlienGui::Text(std::to_string(gene._numBranches) + " branches");
                         }
-                    } else {
-                        AlienGui::Text("No");
                     }
 
                     // Column 5: Concatenations
@@ -218,7 +218,7 @@ void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().numBranches(0));
+        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separating(true));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;

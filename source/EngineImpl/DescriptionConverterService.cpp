@@ -474,6 +474,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
 
         GeneDescription geneDesc;
         geneDesc._numBranches = geneTO->numBranches;
+        geneDesc._separating = geneTO->separating;
         geneDesc._shape = geneTO->shape;
         geneDesc._angleAlignment = geneTO->angleAlignment;
         geneDesc._stiffness = geneTO->stiffness;
@@ -650,6 +651,7 @@ void DescriptionConverterService::convertCreatureToTO(
 
         geneTO.shape = geneDesc._shape;
         geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
+        geneTO.separating = geneDesc._separating;
         geneTO.angleAlignment = geneDesc._angleAlignment;
         geneTO.stiffness = geneDesc._stiffness;
         geneTO.connectionDistance = geneDesc._connectionDistance;
