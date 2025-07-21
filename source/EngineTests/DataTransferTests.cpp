@@ -125,10 +125,12 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
     CollectionDescription data;
     data.creatures({
-        CreatureDescription().genome(
-            GenomeDescription().genes(
-                {GeneDescription().nodes({NodeDescription(), NodeDescription()}),
-                 GeneDescription().nodes({NodeDescription(), NodeDescription(), NodeDescription()})})).cells(hexagon._cells)
+        CreatureDescription()
+            .genome(GenomeDescription().genes({
+                GeneDescription().nodes({NodeDescription(), NodeDescription()}),
+                GeneDescription().nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
+            }))
+            .cells(hexagon._cells),
     });
 
     _simulationFacade->setSimulationData(data);

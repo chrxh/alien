@@ -47,6 +47,7 @@ namespace
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
                 auto const& gene = creature->genome.genes[i];
                 geneTO.shape = gene.shape;
+                geneTO.separating = gene.separating;
                 geneTO.numBranches = gene.numBranches;
                 geneTO.angleAlignment = gene.angleAlignment;
                 geneTO.stiffness = gene.stiffness;
