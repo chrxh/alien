@@ -89,7 +89,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
         auto const& geneTO = geneTOs[i];
         auto& gene = genes[i];
         gene.shape = geneTO.shape;
-        gene.separating = geneTO.separating;
+        gene.separation = geneTO.separation;
         gene.numBranches = geneTO.numBranches;
         gene.angleAlignment = geneTO.angleAlignment;
         gene.stiffness = geneTO.stiffness;

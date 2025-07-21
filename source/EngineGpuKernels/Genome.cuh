@@ -153,8 +153,8 @@ struct Node
 struct Gene
 {
     ConstructorShape shape;
-    bool separating;
-    uint8_t numBranches;    // For separating = false
+    bool separation;
+    uint8_t numBranches;    // For separation = false
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     float connectionDistance;

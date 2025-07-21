@@ -83,7 +83,7 @@ __inline__ __device__ Node* ConstructorHelper::getCurrentNode(Constructor const&
 
 __inline__ __device__ bool ConstructorHelper::isSeparating(Gene* gene)
 {
-    return gene->separating;
+    return gene->separation;
 }
 
 __inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(Gene* gene)

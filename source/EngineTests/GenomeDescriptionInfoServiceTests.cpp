@@ -270,7 +270,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
                 NodeDescription(),
                 NodeDescription(),
             })
-            .separating(true)
+            .separation(true)
             .numConcatenations(3),
     });
     auto result = GenomeDescriptionInfoService::get().getNumberOfResultingCells(genome);

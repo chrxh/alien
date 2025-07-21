@@ -90,11 +90,11 @@ void _GeneEditorWidget::processHeaderData()
         AlienGui::EndIndent();
 
         // Separating
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separating").textWidth(rightColumnWidth), gene._separating);
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separating").textWidth(rightColumnWidth), gene._separation);
 
         // Number of branches
         AlienGui::BeginIndent();
-        if (!gene._separating) {
+        if (!gene._separation) {
             auto numBranches = gene._numBranches - 1;   // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
             AlienGui::Combo(
                 AlienGui::ComboParameters()

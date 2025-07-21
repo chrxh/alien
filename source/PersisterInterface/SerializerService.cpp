@@ -433,7 +433,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
-        loadSave(task, auxiliaries, Id_Gene_Separating, data._separating, defaultObject._separating);
+        loadSave(task, auxiliaries, Id_Gene_Separating, data._separation, defaultObject._separation);
         loadSave(task, auxiliaries, Id_Gene_AngleAlignment, data._angleAlignment, defaultObject._angleAlignment);
         loadSave(task, auxiliaries, Id_Gene_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Gene_ConnectionDistance, data._connectionDistance, defaultObject._connectionDistance);
