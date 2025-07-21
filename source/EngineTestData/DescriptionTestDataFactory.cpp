@@ -81,7 +81,7 @@ CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(
                         GeneDescription()
                             .shape(ConstructorShape_Hexagon)
                             .numBranches(getRandomInt(defaultGene._numBranches, 1, 6))
-                            .separating(false)
+                            .separation(false)
                             .numConcatenations(getRandomInt(defaultGene._numConcatenations, 1, 10))
                             .angleAlignment(ConstructorAngleAlignment_180)
                             .stiffness(getRandomFloat(0, 1))

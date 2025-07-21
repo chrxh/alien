@@ -13,7 +13,7 @@ public:
     __inline__ __device__ static bool isLastConcatenation(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static Node* getCurrentNode(Constructor const& constructor, Genome const& genome);
-    __inline__ __device__ static bool isSeparating(Gene* gene);
+    __inline__ __device__ static bool isSeparation(Gene* gene);
     __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
     __inline__ __device__ static int getNumConstructedCellsOnBranch(Constructor const& constructor, Genome const& genome);
 };
@@ -41,7 +41,7 @@ __inline__ __device__ bool ConstructorHelper::isFinished(Constructor const& cons
     if (constructor.currentConcatenation >= gene->numConcatenations) {
         return true;
     }
-    if (isSeparating(gene)) {
+    if (isSeparation(gene)) {
         return false;
     }
     return constructor.currentBranch >= gene->numBranches;
@@ -81,9 +81,9 @@ __inline__ __device__ Node* ConstructorHelper::getCurrentNode(Constructor const&
     return &gene->nodes[constructor.currentNodeIndex];
 }
 
-__inline__ __device__ bool ConstructorHelper::isSeparating(Gene* gene)
+__inline__ __device__ bool ConstructorHelper::isSeparation(Gene* gene)
 {
-    return gene->separating;
+    return gene->separation;
 }
 
 __inline__ __device__ bool ConstructorHelper::hasInfiniteConcatenations(Gene* gene)

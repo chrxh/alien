@@ -142,8 +142,8 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 4: Branches
                     ImGui::TableNextColumn();
-                    if (gene._separating) {
-                        AlienGui::Text("Separating");
+                    if (gene._separation) {
+                        AlienGui::Text("Separation");
                     } else {
                         auto const& numBranches = gene._numBranches;
                         CHECK(numBranches >= 1 && numBranches <= 6);
@@ -218,7 +218,7 @@ void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separating(true));
+        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separation(true));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
