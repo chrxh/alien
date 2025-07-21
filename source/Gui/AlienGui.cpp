@@ -817,7 +817,42 @@ bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
     if (!matchWithFilter(parameters._name)) {
         return false;
     }
-    ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(30.0f), 0.0f));
+
+    auto startPos = ImGui::GetCursorScreenPos();
+    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(26.0f);
+    auto height = ImGui::GetFrameHeight();
+    ImVec4 frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
+    frameBgColor.w *= 0.6f;  // make it half-transparent
+
+    // Draw hatched (diagonal lines) rectangle
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    ImU32 bgCol = ImGui::GetColorU32(frameBgColor);
+    float hatchSpacing = 6.0f;
+    ImVec2 rectMin = startPos;
+    ImVec2 rectMax = ImVec2(startPos.x + width, startPos.y + height);
+    // Draw border
+    drawList->AddRect(rectMin, rectMax, bgCol);
+    // Draw hatching
+    for (float x = rectMin.x - height; x < rectMax.x; x += hatchSpacing) {
+        ImVec2 p1 = ImVec2(x, rectMin.y);
+        ImVec2 p2 = ImVec2(x + height, rectMin.y + height);
+        // Clip to rect
+        if (p1.x < rectMin.x) {
+            float dy = rectMin.x - p1.x;
+            p1.x = rectMin.x;
+            p1.y += dy;
+        }
+        if (p2.x > rectMax.x) {
+            float dx = p2.x - rectMax.x;
+            p2.x = rectMax.x;
+            p2.y -= dx;
+        }
+        if (p1.y < rectMin.y) p1.y = rectMin.y;
+        if (p2.y > rectMax.y) p2.y = rectMax.y;
+        drawList->AddLine(p1, p2, bgCol, 1.0f);
+    }
+
+    ImGui::Dummy(ImVec2(width - ImGui::GetStyle().FramePadding.x, height));
     ImGui::SameLine();
 
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
