@@ -126,7 +126,7 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
-            GeneDescription().numBranches(1).nodes({NodeDescription()}),
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         })),
     });
     auto& creature = data._creatures.front();

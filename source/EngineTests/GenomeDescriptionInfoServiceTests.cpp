@@ -245,6 +245,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
                 NodeDescription(),
                 NodeDescription(),
             })
+            .separation(false)
             .numBranches(2)
             .numConcatenations(3),
     });
@@ -281,7 +282,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_onFirstGene)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().numBranches(10).numConcatenations(5).nodes({
+        GeneDescription().separation(false).numBranches(10).numConcatenations(5).nodes({
             NodeDescription(),
             NodeDescription(),
         }),

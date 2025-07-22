@@ -109,7 +109,7 @@ __global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, Simu
 
 __global__ void cudaNextTimestep_energyFlow(SimulationData data)
 {
-    CellProcessor::applyEnergyFlow(data);
+    CellProcessor::performEnergyFlow(data);
 }
 
 __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)

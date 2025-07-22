@@ -106,18 +106,15 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    CollectionDescription data;
-    data.addCells({
-        CellDescription()
-            .id(1)
-            .cellTypeData(ConstructorDescription().geneIndex(0))
-            .pos({10.0f, 10.0f})
-            .cellState(CellState_Ready),
-        CellDescription()
-            .id(2)
-            .pos({11.0f, 10.0f})
-            .cellState(CellState_Detaching),
-    });
+    auto data = CollectionDescription().creatures(
+        {CreatureDescription()
+             .genome(GenomeDescription().genes({
+                 GeneDescription().separation(true).nodes({NodeDescription()}),
+             }))
+             .cells({
+                 CellDescription().id(1).cellTypeData(ConstructorDescription().geneIndex(0)).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+                 CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
+             })});
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);

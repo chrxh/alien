@@ -47,7 +47,7 @@ public:
 
     __inline__ __device__ static void updateRenderingData(SimulationData& data);
 
-    __inline__ __device__ static void applyEnergyFlow(SimulationData& data);
+    __inline__ __device__ static void performEnergyFlow(SimulationData& data);
 
 private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
@@ -873,7 +873,7 @@ __inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& da
     }
 }
 
-__inline__ __device__ void CellProcessor::applyEnergyFlow(SimulationData& data)
+__inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data)
 {
     auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
