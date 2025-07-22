@@ -660,6 +660,118 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
+TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__angleToFront_upperSide)
+{
+    auto genome = GenomeDescription()
+                      .genes({
+                          GeneDescription().separation(true).nodes(
+                              {NodeDescription(), NodeDescription(), NodeDescription().cellTypeData(ConstructorGenomeDescription())}),
+                      })
+                      .frontAngle(45.0f);
+
+    auto data = CollectionDescription().creatures({
+
+        // Parent
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
+        }),
+
+        // Offspring
+        CreatureDescription().id(1).genome(genome).cells({
+            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreature(0);
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+    ASSERT_EQ(3, newCreature._cells.size());
+
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto prevConstructedCell = actualData.getCellRef(2);
+    auto prevPrevConstructedCell = actualData.getCellRef(3);
+
+    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
+
+    EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(135.0f, prevConstructedCell._angleToFront));
+
+    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(-45.0f, prevPrevConstructedCell._angleToFront));
+}
+
+TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__angleToFront_lowerSide)
+{
+    auto genome = GenomeDescription()
+                      .genes({
+                          GeneDescription().separation(true).nodes(
+                              {NodeDescription(), NodeDescription(), NodeDescription().cellTypeData(ConstructorGenomeDescription())}),
+                      })
+                      .frontAngle(45.0f);
+
+    auto data = CollectionDescription().creatures({
+
+        // Parent
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
+        }),
+
+        // Offspring
+        CreatureDescription().id(1).genome(genome).cells({
+            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(2, 3);
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreature(0);
+    auto newCreature = actualData.getOtherCreature(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+    ASSERT_EQ(3, newCreature._cells.size());
+
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto prevConstructedCell = actualData.getCellRef(2);
+    auto prevPrevConstructedCell = actualData.getCellRef(3);
+
+    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
+
+    EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(-45.0f, prevConstructedCell._angleToFront));
+
+    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(135.0f, prevPrevConstructedCell._angleToFront));
+}
+
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_0)
 {
     auto const FrontAngle = 10.0f;
@@ -1360,6 +1472,57 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
     EXPECT_TRUE(approxCompare(180.0f + MiddleAngle, actualData.getConnection(newCell, hostCell)._angleFromPrevious));
 }
 
+TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__onSpike)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(0)}),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}),
+            CellDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(3)),
+            CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(4, creature._cells.size());
+
+    auto actualOtherCell = actualData.getCellRef(1);
+    auto actualHostCell = actualData.getCellRef(2);
+    auto actualPrevConstructedCell = actualData.getCellRef(3);
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+
+    ASSERT_EQ(1, actualOtherCell._connections.size());
+    ASSERT_EQ(2, actualHostCell._connections.size());
+    ASSERT_EQ(2, actualConstructedCell._connections.size());
+    ASSERT_EQ(1, actualPrevConstructedCell._connections.size());
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualOtherCell, actualHostCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualOtherCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+}
+
 TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
 {
     auto genome = GenomeDescription().genes({
@@ -1797,7 +1960,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1_num
     EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualLowerConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
 }
 
-TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__threeCellsWithSmallAngles1)
+TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_2__threeCellsWithSmallAngles__variant_1)
 {
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
@@ -1862,7 +2025,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__th
     EXPECT_TRUE(approxCompare(240.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 }
 
-TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__threeCellsWithSmallAngles2)
+TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_2__threeCellsWithSmallAngles__variant_2)
 {
     auto data = CollectionDescription().creatures(
         {CreatureDescription()
@@ -1926,6 +2089,252 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__th
 
     EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(300.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+}
+
+TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_1__threeCellsWithSmallAngles)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
+    });
+
+    auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
+            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).cellState(CellState_Constructing),
+            CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(1, 2);
+    auto cell3_refPos = data.getCellRef(2)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
+    data.addConnection(2, 3, cell3_refPos);
+    auto cell4_refPos = data.getCellRef(3)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
+    data.addConnection(3, 4, cell4_refPos);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(5, creature._cells.size());
+
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto origPrevPrevConstructedCell = data.getCellRef(3);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
+    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+
+    ASSERT_EQ(1, actualHostCell._connections.size());
+    ASSERT_EQ(3, actualConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevPrevPrevConstructedCell._connections.size());
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(120.0f, actualData.getConnection(actualConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(300.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_EQ(origPrevPrevConstructedCell._connections, actualPrevPrevConstructedCell._connections);
+
+    EXPECT_TRUE(approxCompare(120.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(240.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+}
+
+TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_1__90degAlignment)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription()
+            .separation(false)
+            .angleAlignment(ConstructorAngleAlignment_90)
+            .nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
+            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
+            CellDescription().id(4).pos({10.0f + getOffspringDistance() - 1.0f, 9.0f - 0.2f}).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    auto cell4_refPos = data.getCellRef(3)._pos + RealVector2D(-1.0f, 0.0f);
+    data.addConnection(3, 4, cell4_refPos);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(5, creature._cells.size());
+
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
+    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+
+    ASSERT_EQ(1, actualHostCell._connections.size());
+    ASSERT_EQ(3, actualConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevPrevPrevConstructedCell._connections.size());
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+}
+
+TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__numAdditionalConnections_0__90degAlignment)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription()
+            .separation(false)
+            .angleAlignment(ConstructorAngleAlignment_90)
+            .nodes({NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(0)}),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
+            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(4, creature._cells.size());
+
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+
+    ASSERT_EQ(1, actualHostCell._connections.size());
+    ASSERT_EQ(2, actualConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
+    ASSERT_EQ(1, actualPrevPrevConstructedCell._connections.size());
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+}
+
+TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_1__90degAlignment__connectToCellWithAngleSpace)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription()
+            .separation(false)
+            .angleAlignment(ConstructorAngleAlignment_90)
+            .nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
+            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).cellState(CellState_Constructing),
+            CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.0f - 1.0f}).cellState(CellState_Constructing),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    auto cell4_refPos = data.getCellRef(3)._pos + RealVector2D(-1.0f, 0.0f);
+    data.addConnection(3, 4, cell4_refPos);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(5, creature._cells.size());
+
+    auto actualHostCell = actualData.getCellRef(1);
+    auto actualPrevConstructedCell = actualData.getCellRef(2);
+    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
+    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+
+    ASSERT_EQ(1, actualHostCell._connections.size());
+    ASSERT_EQ(3, actualConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevPrevConstructedCell._connections.size());
+    ASSERT_EQ(2, actualPrevPrevPrevConstructedCell._connections.size());
+
+    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
+
+    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
@@ -2061,6 +2470,84 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     EXPECT_TRUE(approxCompare(Math::normalizedAngle(angleSpan_lastCell_and_cell0 + FirstAngle, 0.0f), angleSpan_cell2_cell0 / 2));
 }
 
+TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__angleToFront_leftSide)
+{
+    auto genome = GenomeDescription()
+                      .genes({
+                          GeneDescription().separation(false).nodes({NodeDescription()}),
+                      })
+                      .frontAngle(45.0f);
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}),
+            CellDescription()
+                .id(2)
+                .pos({9.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0))
+                .angleToFront(-45.0f),
+            CellDescription().id(3).pos({9.0f, 11.0f}),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(4, creature._cells.size());
+
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+
+    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront));
+}
+
+TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__angleToFront_rightSide)
+{
+    auto genome = GenomeDescription()
+                      .genes({
+                          GeneDescription().separation(false).nodes({NodeDescription()}),
+                      })
+                      .frontAngle(-45.0f);
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription().id(1).pos({8.0f, 10.0f}),
+            CellDescription()
+                .id(2)
+                .pos({9.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0))
+                .angleToFront(45.0f),
+            CellDescription().id(3).pos({9.0f, 11.0f}),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreature(0);
+    ASSERT_EQ(4, creature._cells.size());
+
+    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+
+    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._angleToFront));
+}
+
 class ConstructorTests_AllShapes
     : public ConstructorTests
     , public testing::WithParamInterface<ConstructorShape>
@@ -2187,462 +2674,3 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 }
 
 // TODO Regression tests
-
-
-TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_threeCellsWithSmallAngles_restrictAdditionalConnections)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
-    });
-
-    auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription()
-                .id(3)
-                .pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f)
-                .cellState(CellState_Constructing),
-            CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(1, 2);
-    auto cell3_refPos = data.getCellRef(2)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
-    data.addConnection(2, 3, cell3_refPos);
-    auto cell4_refPos = data.getCellRef(3)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
-    data.addConnection(3, 4, cell4_refPos);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(5, creature._cells.size());
-    
-    auto actualHostCell = actualData.getCellRef(1);
-    auto actualPrevConstructedCell = actualData.getCellRef(2);
-    auto origPrevPrevConstructedCell = data.getCellRef(3);
-    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
-    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
-
-    ASSERT_EQ(1, actualHostCell._connections.size());
-    ASSERT_EQ(3, actualConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevPrevConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevPrevPrevConstructedCell._connections.size());
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(120.0f, actualData.getConnection(actualConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(300.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_EQ(origPrevPrevConstructedCell._connections, actualPrevPrevConstructedCell._connections);
-
-    EXPECT_TRUE(approxCompare(120.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(240.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-}
-TEST_F(ConstructorTests, constructFurtherCell_connectToExistingCell_90degAlignment)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).angleAlignment(ConstructorAngleAlignment_90).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
-    });
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
-            CellDescription().id(4).pos({10.0f + getOffspringDistance() - 1.0f, 9.0f - 0.2f}).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    auto cell4_refPos = data.getCellRef(3)._pos + RealVector2D(-1.0f, 0.0f);
-    data.addConnection(3, 4, cell4_refPos);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(5, creature._cells.size());
-    
-    auto actualHostCell = actualData.getCellRef(1);
-    auto actualPrevConstructedCell = actualData.getCellRef(2);
-    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
-    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
-
-    ASSERT_EQ(1, actualHostCell._connections.size());
-    ASSERT_EQ(3, actualConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevPrevConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevPrevPrevConstructedCell._connections.size());
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-}
-TEST_F(ConstructorTests, constructFurtherCell_connectToNoExistingCells_90degAlignment)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).angleAlignment(ConstructorAngleAlignment_90).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(0)}),
-    });
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(4, creature._cells.size());
-    
-    auto actualHostCell = actualData.getCellRef(1);
-    auto actualPrevConstructedCell = actualData.getCellRef(2);
-    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
-
-    ASSERT_EQ(1, actualHostCell._connections.size());
-    ASSERT_EQ(2, actualConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
-    ASSERT_EQ(1, actualPrevPrevConstructedCell._connections.size());
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-}
-TEST_F(ConstructorTests, constructFurtherCell_connectToCellWithAngleSpace_90degAlignment)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).angleAlignment(ConstructorAngleAlignment_90).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
-    });
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).cellState(CellState_Constructing),
-            CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.0f - 1.0f}).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-    auto cell4_refPos = data.getCellRef(3)._pos + RealVector2D(-1.0f, 0.0f);
-    data.addConnection(3, 4, cell4_refPos);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(5, creature._cells.size());
-    
-    auto actualHostCell = actualData.getCellRef(1);
-    auto actualPrevConstructedCell = actualData.getCellRef(2);
-    auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
-    auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
-
-    ASSERT_EQ(1, actualHostCell._connections.size());
-    ASSERT_EQ(3, actualConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevPrevConstructedCell._connections.size());
-    ASSERT_EQ(2, actualPrevPrevPrevConstructedCell._connections.size());
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(90.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(270.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
-}
-TEST_F(ConstructorTests, constructFurtherCell_onSpike)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(0)}),
-    });
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}),
-            CellDescription()
-                .id(2)
-                .pos({11.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(3)),
-            CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(4, creature._cells.size());
-    
-    auto actualOtherCell = actualData.getCellRef(1);
-    auto actualHostCell = actualData.getCellRef(2);
-    auto actualPrevConstructedCell = actualData.getCellRef(3);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
-
-    ASSERT_EQ(1, actualOtherCell._connections.size());
-    ASSERT_EQ(2, actualHostCell._connections.size());
-    ASSERT_EQ(2, actualConstructedCell._connections.size());
-    ASSERT_EQ(1, actualPrevConstructedCell._connections.size());
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualOtherCell, actualHostCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualOtherCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualHostCell, actualConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualHostCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(180.0f, actualData.getConnection(actualConstructedCell, actualPrevConstructedCell)._angleFromPrevious));
-
-    EXPECT_TRUE(approxCompare(360.0f, actualData.getConnection(actualPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-}
-TEST_F(ConstructorTests, finishCreature_angleToFront_upperSide)
-{
-    auto genome = GenomeDescription()
-                      .genes({
-                          GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription().cellTypeData(ConstructorGenomeDescription())}),
-                      })
-                      .frontAngle(45.0f);
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(2, 3);
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(2, actualData._creatures.size());
-    
-    auto hostCreature = actualData.getCreature(0);
-    auto newCreature = actualData.getOtherCreature(0);
-    ASSERT_EQ(4, hostCreature._cells.size() + newCreature._cells.size());
-    
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
-    auto prevConstructedCell = actualData.getCellRef(2);
-    auto prevPrevConstructedCell = actualData.getCellRef(3);
-
-    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
-
-    EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(135.0f, prevConstructedCell._angleToFront));
-
-    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(-45.0f, prevPrevConstructedCell._angleToFront));
-}
-TEST_F(ConstructorTests, finishCreature_angleToFront_lowerSide)
-{
-    auto genome = GenomeDescription()
-                      .genes({
-                          GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription().cellTypeData(ConstructorGenomeDescription())}),
-                      })
-                      .frontAngle(45.0f);
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).cellState(CellState_Constructing),
-        }),
-    });
-    data.addConnection(2, 3);
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(2, actualData._creatures.size());
-    
-    auto hostCreature = actualData.getCreature(0);
-    auto newCreature = actualData.getOtherCreature(0);
-    ASSERT_EQ(4, hostCreature._cells.size() + newCreature._cells.size());
-    
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
-    auto prevConstructedCell = actualData.getCellRef(2);
-    auto prevPrevConstructedCell = actualData.getCellRef(3);
-
-    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
-
-    EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(-45.0f, prevConstructedCell._angleToFront));
-
-    EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(135.0f, prevPrevConstructedCell._angleToFront));
-}
-TEST_F(ConstructorTests, finishBodyPart_angleToFront_leftSide)
-{
-    auto genome = GenomeDescription()
-                      .genes({
-                          GeneDescription().separation(false).nodes({NodeDescription()}),
-                      })
-                      .frontAngle(45.0f);
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}),
-            CellDescription()
-                .id(2)
-                .pos({9.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0))
-                .angleToFront(-45.0f),
-            CellDescription().id(3).pos({9.0f, 11.0f}),
-        }),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(4, creature._cells.size());
-    
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
-
-    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront));
-}
-
-TEST_F(ConstructorTests, finishBodyPart_angleToFront_rightSide)
-{
-    auto genome = GenomeDescription()
-                      .genes({
-                          GeneDescription().separation(false).nodes({NodeDescription()}),
-                      })
-                      .frontAngle(-45.0f);
-
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genome(genome).cells({
-            CellDescription().id(1).pos({8.0f, 10.0f}),
-            CellDescription()
-                .id(2)
-                .pos({9.0f, 10.0f})
-                .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0))
-                .angleToFront(45.0f),
-            CellDescription().id(3).pos({9.0f, 11.0f}),
-        }),
-    });
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    ASSERT_EQ(0, actualData._cells.size());
-    ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
-    ASSERT_EQ(4, creature._cells.size());
-    
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
-
-    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._angleToFront));
-}
