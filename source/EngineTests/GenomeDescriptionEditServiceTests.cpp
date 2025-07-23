@@ -131,6 +131,26 @@ protected:
             }),
         });
     }
+
+    // Helper method to create a gene with multiple constructors for comprehensive testing
+    GenomeDescription createGenome_multipleConstructors()
+    {
+        return GenomeDescription().genes({
+            GeneDescription().separation(true).nodes({
+                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+                NodeDescription(),
+            }),
+            GeneDescription().separation(true).nodes({
+                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),  // Creates cycle with gene 0
+                NodeDescription(),
+            }),
+            GeneDescription().separation(false).nodes({
+                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),  // Also references gene 0, but gene 2 has separation=false
+                NodeDescription(),
+            }),
+        });
+    }
 };
 
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onEmptyGenome)
@@ -515,4 +535,29 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_invalidGeneReference)
     ASSERT_EQ(CellTypeGenome_Constructor, genome._genes.at(0)._nodes.at(0).getCellType());
     // Invalid reference should remain unchanged (the castrate method has bounds checking)
     EXPECT_EQ(5, std::get<ConstructorGenomeDescription>(genome._genes.at(0)._nodes.at(0)._cellTypeData)._geneIndex);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, castrate_multipleConstructors)
+{
+    auto genome = createGenome_multipleConstructors();
+    GenomeDescriptionEditService::get().castrate(genome);
+
+    ASSERT_EQ(3, genome._genes.size());
+    
+    // Gene 0 has two constructors: one to gene 1, one to gene 2
+    ASSERT_EQ(3, genome._genes.at(0)._nodes.size());
+    ASSERT_EQ(CellTypeGenome_Constructor, genome._genes.at(0)._nodes.at(0).getCellType());
+    ASSERT_EQ(CellTypeGenome_Constructor, genome._genes.at(0)._nodes.at(1).getCellType());
+    EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(genome._genes.at(0)._nodes.at(0)._cellTypeData)._geneIndex);  // Still references gene 1
+    EXPECT_EQ(2, std::get<ConstructorGenomeDescription>(genome._genes.at(0)._nodes.at(1)._cellTypeData)._geneIndex);  // Still references gene 2
+    
+    // Gene 1's constructor should be castrated (references gene 0 which was already visited and has separation=true)
+    ASSERT_EQ(2, genome._genes.at(1)._nodes.size());
+    ASSERT_EQ(CellTypeGenome_Constructor, genome._genes.at(1)._nodes.at(0).getCellType());
+    EXPECT_EQ(3, std::get<ConstructorGenomeDescription>(genome._genes.at(1)._nodes.at(0)._cellTypeData)._geneIndex);  // Castrated to genome.size()
+    
+    // Gene 2's constructor should also be castrated (references gene 0 which was already visited and has separation=true)  
+    ASSERT_EQ(2, genome._genes.at(2)._nodes.size());
+    ASSERT_EQ(CellTypeGenome_Constructor, genome._genes.at(2)._nodes.at(0).getCellType());
+    EXPECT_EQ(3, std::get<ConstructorGenomeDescription>(genome._genes.at(2)._nodes.at(0)._cellTypeData)._geneIndex);  // Castrated to genome.size()
 }
