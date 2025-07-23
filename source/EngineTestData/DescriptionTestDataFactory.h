@@ -16,27 +16,23 @@ public:
         CellType cellType;
         MuscleMode muscleMode;
     };
-    CellDescription createRandomCellDescription(CellParameter cellParameter) const;
-    ParticleDescription createRandomParticleDescription() const;
+    CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
+    ParticleDescription createNonDefaultParticleDescription() const;
 
     struct NodeParameter
     {
         CellTypeGenome cellTypeGenome;
         MuscleMode muscleMode;
     };
-    NodeDescription createRandomNodeDescription(NodeParameter nodeParameter) const;
-    CreatureDescription createRandomCreatureDescription(NodeParameter nodeParameter) const;
+    NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
+    CreatureDescription createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
 
     bool compare(CollectionDescription left, CollectionDescription right) const;
     bool compare(CellDescription left, CellDescription right) const;
     bool compare(ParticleDescription left, ParticleDescription right) const;
 
 private:
-    float getRandomFloat(float min = -1.0f, float max = 1.0f) const;
-    RealVector2D getRandomFloat2(float min = -1.0f, float max = 1.0f) const;
-    int getRandomInt(int exception = -1, int min = 0, int max = 42) const;
+    CellTypeDescription createNonDefaultCellTypeDescription(CellParameter cellParameter) const;
 
-    CellTypeDescription createRandomCellTypeDescription(CellParameter cellParameter) const;
-
-    CellTypeGenomeDescription createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const;
+    CellTypeGenomeDescription createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const;
 };

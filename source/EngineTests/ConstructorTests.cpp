@@ -570,7 +570,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto const FrontAngle = 10.0f;
 
     auto nodeParameter = GetParam();
-    auto randomNode = _descriptionTestDataFactory->createRandomNodeDescription(nodeParameter);
+    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
 
     auto data = CollectionDescription().creatures({
         CreatureDescription()
