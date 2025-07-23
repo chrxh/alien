@@ -8,7 +8,7 @@
 #include <imgui.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/PreviewDescriptionService.h"
+#include "EngineInterface/PreviewDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienGui.h"
@@ -404,7 +404,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //    if (previewNodeResult) {
         //        if (ImGui::BeginChild("##child", ImVec2(0, scale(200)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
         //            auto genomDesc = GenomeDescriptionConverterService::get().convertBytesToDescription(desc._genome);
-        //            auto previewDesc = PreviewDescriptionService::get().convert(genomDesc, std::nullopt, parameters);
+        //            auto previewDesc = PreviewDescriptionConverterService::get().convert(genomDesc, std::nullopt, parameters);
         //            std::optional<int> selectedNodeDummy;
         //            AlienGui::ShowPreviewDescription(previewDesc, _genomeZoom, selectedNodeDummy);
         //        }
