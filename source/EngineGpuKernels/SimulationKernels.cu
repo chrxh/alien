@@ -99,7 +99,6 @@ __global__ void cudaNextTimestep_signal_calcFutureSignals(SimulationData data)
 __global__ void cudaNextTimestep_signal_updateSignals(SimulationData data)
 {
     SignalProcessor::updateSignals(data);
-    SignalProcessor::collectCellTypeOperations(data);
 }
 
 __global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, SimulationStatistics statistics)
@@ -120,6 +119,7 @@ __global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 
 __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
 {
+    SignalProcessor::collectCellTypeOperations(data);
     CellProcessor::cellStateTransition_applyNextState(data);
     CellProcessor::updateRenderingData(data);
 }
@@ -134,9 +134,9 @@ __global__ void cudaNextTimestep_cellType_constructor_completenessCheck(Simulati
     ConstructorProcessor::preprocess(data);
 }
 
-__global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics, bool forPreview)
 {
-    ConstructorProcessor::process(data, statistics);
+    ConstructorProcessor::process(data, statistics, forPreview);
 }
 
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)

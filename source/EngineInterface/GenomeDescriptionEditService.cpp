@@ -78,3 +78,7 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
 {
     std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
 }
+
+void GenomeDescriptionEditService::castrate(GenomeDescription& genome)
+{
+}

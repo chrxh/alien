@@ -2672,5 +2672,3 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
         EXPECT_EQ(LastAngle, angle);
     }
 }
-
-// TODO Regression tests

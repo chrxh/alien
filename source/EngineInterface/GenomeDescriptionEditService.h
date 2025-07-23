@@ -19,4 +19,6 @@ public:
     void addEmptyNode(GeneDescription& gene, int index);  // Adds empty node after index
     void removeNode(GeneDescription& gene, int index);
     void swapNodes(GeneDescription& gene, int index);  // Swaps node at index with node at index + 1
+
+    void castrate(GenomeDescription& genome);
 };

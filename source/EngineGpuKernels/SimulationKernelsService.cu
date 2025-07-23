@@ -65,7 +65,7 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
     if (settings.simulationParameters.constructorCompletenessCheck.value) {
         KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, data, statistics);
     }
-    KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics, false);
     KERNEL_CALL(cudaNextTimestep_cellType_injector, data, statistics);
     KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, 4, data, statistics);
     KERNEL_CALL_MOD(cudaNextTimestep_cellType_transmitter, 4, data, statistics);
@@ -128,7 +128,7 @@ void _SimulationKernelsService::calcTimestepForPreview(
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, data);
     KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, data);
 
-    KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics, true);
 
     if (considerInnerFriction) {
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, 16, data);

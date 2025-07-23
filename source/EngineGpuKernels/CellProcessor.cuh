@@ -662,7 +662,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                     && cell->cellType == CellType_Constructor) {
                     auto const& constructor = cell->cellTypeData.constructor;
                     auto const& gene = ConstructorHelper::getCurrentGene(constructor, cell->creature->genome);
-                    if (ConstructorHelper::isSeparation(gene)) {
+                    if (gene->separation) {
                         isSeparation = true;
                     }
                 }

@@ -14,11 +14,13 @@ class ConstructorProcessor
 {
 public:
     __inline__ __device__ static void preprocess(SimulationData& data);
-    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool forPreview);
 
 private:
     struct ConstructionData
     {
+        bool forPreview;
+
         // Creature and genome data
         Creature* creature;
         Gene* gene;
@@ -42,9 +44,9 @@ private:
 //
 //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 //
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool forPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Cell* cell);
-    __inline__ __device__ static ConstructionData readConstructionData(Cell* cell);
+    __inline__ __device__ static ConstructionData createConstructionData(Cell* cell, bool forPreview);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -87,12 +89,12 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
     //}
 }
 
-__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
+__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool forPreview)
 {
     auto& operations = data.cellTypeOperations[CellType_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, statistics, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).cell, forPreview);
     }
 }
 
@@ -148,11 +150,12 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    constructor.isReady = (actualCells >= constructor.numExpectedCells);
 //}
 //
-__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool forPreview)
 {
     if (cell->creature == nullptr) {
         return;
     }
+    printf("numCells: %llu\n", data.objects.cells.getNumEntries());
     auto& constructor = cell->cellTypeData.constructor;
     if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval)) {
         constructor.offspring = findOrCreateNewCreature(data, cell);
@@ -166,7 +169,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             constructor.currentConcatenation = 0;
         }
 
-        auto constructionData = readConstructionData(cell);
+        auto constructionData = createConstructionData(cell, forPreview);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
@@ -180,6 +183,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                     ++constructor.currentBranch;
                 } else {
                     constructor.offspring = nullptr;
+                    if (forPreview) {
+                        constructor.geneIndex = constructionData.creature->genome.numGenes + 1;  // Do not construct more than one offspring in preview
+                    }
                 }
             }
         }
@@ -198,7 +204,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     auto& genome = cell->creature->genome;
     if (constructor.geneIndex < genome.numGenes) {
         auto const& gene = ConstructorHelper::getCurrentGene(constructor, genome);
-        if (!ConstructorHelper::isSeparation(gene)) {
+        if (!gene->separation) {
             return cell->creature;
         }
     }
@@ -222,17 +228,18 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     return factory.cloneCreature(cell->creature);
 }
 
-__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::readConstructionData(Cell* cell)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell, bool forPreview)
 {
     auto& constructor = cell->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
 
     ConstructionData result;
+    result.forPreview = forPreview;
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
-    result.isSeparation = ConstructorHelper::isSeparation(result.gene);
-    result.isFirstNodeOfFirstConcatenation = ConstructorHelper::isFirstNode(constructor)&& ConstructorHelper::isFirstConcatenation(constructor);
+    result.isSeparation = result.gene->separation;
+    result.isFirstNodeOfFirstConcatenation = ConstructorHelper::isFirstNode(constructor) && ConstructorHelper::isFirstConcatenation(constructor);
     result.isLastNode = ConstructorHelper::isLastNode(constructor, genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, genome);
     
@@ -349,8 +356,8 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
         return nullptr;
     }
 
-    if (!constructionData.isLastNodeOfLastConcatenation || !ConstructorHelper::isSeparation(constructionData.gene)) {
-        auto distance = constructionData.isLastNodeOfLastConcatenation && !ConstructorHelper::isSeparation(constructionData.gene)
+    if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
+        auto distance = constructionData.isLastNodeOfLastConcatenation && !constructionData.isSeparation
             ? constructionData.gene->connectionDistance
             : constructionData.gene->connectionDistance + cudaSimulationParameters.constructorAdditionalOffspringDistance;
         if (!CellConnectionProcessor::tryAddConnections(data, hostCell, newCell, anglesForNewConnection.referenceAngle, 0, distance)) {
@@ -718,6 +725,10 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell*
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
+    if (constructionData.forPreview) {
+        return true;
+    }
+
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostCell->color];
 
     if (cudaSimulationParameters.externalEnergyControlToggle.value && hostCell->energy < constructionData.energy + normalCellEnergy
