@@ -16,7 +16,6 @@ public:
     virtual ~PreviewDescriptionConverterServiceTests() = default;
 
 protected:
-    // Helper function to create a simple cell at a given position
     CellDescription createCell(uint64_t id, RealVector2D pos, int color = 0, uint16_t nodeIndex = 0)
     {
         return CellDescription().id(id).pos(pos).color(color).genomeNodeIndex(nodeIndex);
@@ -29,8 +28,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
     
     auto result = PreviewDescriptionConverterService::get().convert(input);
     
-    EXPECT_TRUE(result.cells.empty());
-    EXPECT_TRUE(result.connections.empty());
+    EXPECT_TRUE(result._cells.empty());
+    EXPECT_TRUE(result._connections.empty());
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertSingleCell)
@@ -41,23 +40,20 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertSingleCell)
     
     auto result = PreviewDescriptionConverterService::get().convert(input);
     
-    EXPECT_EQ(1, result.cells.size());
-    EXPECT_EQ(0, result.connections.size());
+    EXPECT_EQ(1, result._cells.size());
+    EXPECT_EQ(0, result._connections.size());
     
-    // Check cell properties
-    EXPECT_EQ(3, result.cells[0].color);
-    EXPECT_EQ(5, result.cells[0].nodeIndex);
+    EXPECT_EQ(3, result._cells[0]._color);
+    EXPECT_EQ(5, result._cells[0]._nodeIndex);
     
-    // Position should be centered at {0, 0}
-    EXPECT_FLOAT_EQ(0.0f, result.cells[0].pos.x);
-    EXPECT_FLOAT_EQ(0.0f, result.cells[0].pos.y);
+    EXPECT_FLOAT_EQ(0.0f, result._cells[0]._pos.x);
+    EXPECT_FLOAT_EQ(0.0f, result._cells[0]._pos.y);
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
 {
     CollectionDescription input;
     
-    // Create cells at different positions
     auto cell1 = createCell(1, {10.0f, 10.0f}, 1, 2);
     auto cell2 = createCell(2, {20.0f, 10.0f}, 2, 3);
     auto cell3 = createCell(3, {15.0f, 20.0f}, 3, 4);
@@ -68,24 +64,21 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
     
     auto result = PreviewDescriptionConverterService::get().convert(input);
     
-    EXPECT_EQ(3, result.cells.size());
-    EXPECT_EQ(0, result.connections.size());
+    EXPECT_EQ(3, result._cells.size());
+    EXPECT_EQ(0, result._connections.size());
     
-    // Check that cells are properly converted
     for (int i = 0; i < 3; ++i) {
-        EXPECT_EQ(i + 1, result.cells[i].color);
-        EXPECT_EQ(i + 2, result.cells[i].nodeIndex);
+        EXPECT_EQ(i + 1, result._cells[i]._color);
+        EXPECT_EQ(i + 2, result._cells[i]._nodeIndex);
     }
     
-    // Check centering: the center should be at {0, 0}
-    // Original center was at {15, 13.33...}, so cells should be offset
     RealVector2D center = {0.0f, 0.0f};
-    for (const auto& cell : result.cells) {
-        center.x += cell.pos.x;
-        center.y += cell.pos.y;
+    for (const auto& cell : result._cells) {
+        center.x += cell._pos.x;
+        center.y += cell._pos.y;
     }
-    center.x /= result.cells.size();
-    center.y /= result.cells.size();
+    center.x /= result._cells.size();
+    center.y /= result._cells.size();
     
     EXPECT_NEAR(0.0f, center.x, 0.001f);
     EXPECT_NEAR(0.0f, center.y, 0.001f);
@@ -101,30 +94,24 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCellsWithConnections)
     
     auto result = PreviewDescriptionConverterService::get().convert(data);
     
-    EXPECT_EQ(2, result.cells.size());
-    EXPECT_EQ(1, result.connections.size());
+    EXPECT_EQ(2, result._cells.size());
+    EXPECT_EQ(1, result._connections.size());
     
-    // Check connection positions
-    auto& connection = result.connections[0];
+    auto& connection = result._connections[0];
     
-    // Connection should reference the centered positions
-    // Since we have 2 cells at {10,10} and {20,10}, center is {15,10}
-    // After centering, positions should be {-5,0} and {5,0}
-    EXPECT_FLOAT_EQ(-5.0f, std::min(connection.cell1.x, connection.cell2.x));
-    EXPECT_FLOAT_EQ(5.0f, std::max(connection.cell1.x, connection.cell2.x));
-    EXPECT_FLOAT_EQ(0.0f, connection.cell1.y);
-    EXPECT_FLOAT_EQ(0.0f, connection.cell2.y);
+    EXPECT_FLOAT_EQ(-5.0f, std::min(connection._cell1.x, connection._cell2.x));
+    EXPECT_FLOAT_EQ(5.0f, std::max(connection._cell1.x, connection._cell2.x));
+    EXPECT_FLOAT_EQ(0.0f, connection._cell1.y);
+    EXPECT_FLOAT_EQ(0.0f, connection._cell2.y);
     
-    // Check arrow settings (should be false as per requirements)
-    EXPECT_FALSE(connection.arrowToCell1);
-    EXPECT_FALSE(connection.arrowToCell2);
+    EXPECT_FALSE(connection._arrowToCell1);
+    EXPECT_FALSE(connection._arrowToCell2);
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
 {
     CollectionDescription input;
     
-    // Create a creature with cells
     CreatureDescription creature;
     creature.id(100).cells({
         CellDescription().id(1).pos({5.0f, 5.0f}).color(4).genomeNodeIndex(6),
@@ -133,20 +120,18 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
     
     input._creatures.push_back(creature);
     
-    // Create cache and add connection
     auto cache = input.createCache();
     input.addConnection(1, 2, cache);
     
     auto result = PreviewDescriptionConverterService::get().convert(input);
     
-    EXPECT_EQ(2, result.cells.size());
-    EXPECT_EQ(1, result.connections.size());
+    EXPECT_EQ(2, result._cells.size());
+    EXPECT_EQ(1, result._connections.size());
     
-    // Check that creature cells are properly converted
-    EXPECT_EQ(4, result.cells[0].color);
-    EXPECT_EQ(6, result.cells[0].nodeIndex);
-    EXPECT_EQ(5, result.cells[1].color);
-    EXPECT_EQ(7, result.cells[1].nodeIndex);
+    EXPECT_EQ(4, result._cells[0]._color);
+    EXPECT_EQ(6, result._cells[0]._nodeIndex);
+    EXPECT_EQ(5, result._cells[1]._color);
+    EXPECT_EQ(7, result._cells[1]._nodeIndex);
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
@@ -155,7 +140,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
         CellDescription().id(1).pos({0.0f, 0.0f}).color(1).genomeNodeIndex(1),
     });
     
-    // Add creature with cells
     CreatureDescription creature;
     creature.id(100).cells({
         CellDescription().id(2).pos({10.0f, 0.0f}).color(2).genomeNodeIndex(2),
@@ -168,19 +152,16 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
     
     auto result = PreviewDescriptionConverterService::get().convert(data);
     
-    // Should have 3 cells total (1 direct + 2 from creature)
-    EXPECT_EQ(3, result.cells.size());
-    // Should have 1 connection (between the creature cells)
-    EXPECT_EQ(1, result.connections.size());
+    EXPECT_EQ(3, result._cells.size());
+    EXPECT_EQ(1, result._connections.size());
     
-    // Check centering: all cells should be centered around {0, 0}
     RealVector2D center = {0.0f, 0.0f};
-    for (const auto& cell : result.cells) {
-        center.x += cell.pos.x;
-        center.y += cell.pos.y;
+    for (const auto& cell : result._cells) {
+        center.x += cell._pos.x;
+        center.y += cell._pos.y;
     }
-    center.x /= result.cells.size();
-    center.y /= result.cells.size();
+    center.x /= result._cells.size();
+    center.y /= result._cells.size();
     
     EXPECT_NEAR(0.0f, center.x, 0.001f);
     EXPECT_NEAR(0.0f, center.y, 0.001f);
@@ -194,14 +175,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, avoidDuplicateConnections)
         CellDescription().id(3).pos({5.0f, 10.0f}).color(3).genomeNodeIndex(3),
     });
     
-    // Add triangle connections
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 1);
     
     auto result = PreviewDescriptionConverterService::get().convert(data);
     
-    EXPECT_EQ(3, result.cells.size());
-    // Should have exactly 3 connections, not 6 (no duplicates)
-    EXPECT_EQ(3, result.connections.size());
+    EXPECT_EQ(3, result._cells.size());
+    EXPECT_EQ(3, result._connections.size());
 }

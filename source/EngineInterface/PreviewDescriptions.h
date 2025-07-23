@@ -1,24 +1,33 @@
 #pragma once
 
+#include <vector>
+
 #include "Base/Definitions.h"
+#include "Base/Macros.h"
 
 struct CellPreviewDescription
 {
-    RealVector2D pos;
-    int color = 0;
-    int nodeIndex = 0;
+    auto operator<=>(CellPreviewDescription const&) const = default;
+    
+    MEMBER(CellPreviewDescription, RealVector2D, pos, {});
+    MEMBER(CellPreviewDescription, int, color, 0);
+    MEMBER(CellPreviewDescription, int, nodeIndex, 0);
 };
 
 struct ConnectionPreviewDescription
 {
-    RealVector2D cell1;
-    RealVector2D cell2;
-    bool arrowToCell1 = false;
-    bool arrowToCell2 = false;
+    auto operator<=>(ConnectionPreviewDescription const&) const = default;
+    
+    MEMBER(ConnectionPreviewDescription, RealVector2D, cell1, {});
+    MEMBER(ConnectionPreviewDescription, RealVector2D, cell2, {});
+    MEMBER(ConnectionPreviewDescription, bool, arrowToCell1, false);
+    MEMBER(ConnectionPreviewDescription, bool, arrowToCell2, false);
 };
 
 struct PreviewDescription
 {
-    std::vector<CellPreviewDescription> cells;
-    std::vector<ConnectionPreviewDescription> connections;
+    auto operator<=>(PreviewDescription const&) const = default;
+    
+    MEMBER(PreviewDescription, std::vector<CellPreviewDescription>, cells, {});
+    MEMBER(PreviewDescription, std::vector<ConnectionPreviewDescription>, connections, {});
 };
