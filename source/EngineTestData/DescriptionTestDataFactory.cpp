@@ -2,92 +2,90 @@
 
 #include <algorithm>
 
-#include "EngineInterface/NumberGenerator.h"
-
-CellDescription DescriptionTestDataFactory::createRandomCellDescription(CellParameter cellParameter) const
+CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(CellParameter cellParameter) const
 {
     CellDescription defaultCell;
 
-    auto cellTypeDesc = createRandomCellTypeDescription(cellParameter);
+    auto cellTypeDesc = createNonDefaultCellTypeDescription(cellParameter);
     auto result = CellDescription()
                       .id(1)
-                      .pos(getRandomFloat2(0, 1))
-                      .vel(getRandomFloat2(-1, 1))
-                      .energy(getRandomFloat(50.0f, 200.0f))
-                      .age(getRandomInt(defaultCell._age))
-                      .color(getRandomInt(defaultCell._color, 0, MAX_COLORS - 1))
+                      .pos({0.5f, 0.8f})
+                      .vel({-0.3f, 0.7f})
+                      .energy(150.0f)
+                      .age(42)
+                      .color(3)
                       .barrier(true)
                       .cellState(false)
-                      .signalAndRelaxTime({1, 0, getRandomFloat(), 0, 0, 0, 0, 0})
+                      .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
                       .signalRoutingRestriction(
-                          SignalRoutingRestrictionDescription().active(true).baseAngle(getRandomFloat(0, 360.0f)).openingAngle(getRandomFloat(0, 360.0f)))
+                          SignalRoutingRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
                       .cellTypeData(cellTypeDesc)
                       .metadata(CellMetadataDescription().name("Test1").description("Test2"));
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
         NeuralNetworkDescription defaultNn; 
         NeuralNetworkDescription nn;
-        nn.weight(2, 1, getRandomFloat());
-        nn._biases.at(1) = getRandomFloat();
-        nn._activationFunctions.at(5) = getRandomInt(defaultNn._activationFunctions.at(0)) % ActivationFunction_Count;
+        nn.weight(2, 1, 0.7f);
+        nn._biases.at(1) = -0.4f;
+        nn._activationFunctions.at(5) = 2 % ActivationFunction_Count;
         result._neuralNetwork = nn;
     }
     return result;
 }
 
-ParticleDescription DescriptionTestDataFactory::createRandomParticleDescription() const
+ParticleDescription DescriptionTestDataFactory::createNonDefaultParticleDescription() const
 {
     ParticleDescription defaultParticle;
     return ParticleDescription()
         .id(1)
-        .pos(getRandomFloat2(0, 1))
-        .vel(getRandomFloat2(-1, 1))
-        .energy(getRandomFloat(50.0f, 200.0f))
-        .color(getRandomInt(defaultParticle._color, 0, MAX_COLORS - 1));
+        .pos({0.3f, 0.9f})
+        .vel({-0.6f, 0.2f})
+        .energy(75.0f)
+        .color(5);
 }
 
-NodeDescription DescriptionTestDataFactory::createRandomNodeDescription(NodeParameter nodeParameter) const
+NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(NodeParameter nodeParameter) const
 {
     NodeDescription defaultNode;
 
     NeuralNetworkGenomeDescription nn;
-    nn.weight(4, 3, getRandomFloat());
-    nn._biases.at(3) = getRandomFloat();
-    nn._activationFunctions.at(2) = getRandomInt(defaultNode._neuralNetwork._activationFunctions.at(0) , 0, ActivationFunction_Count - 1);
+    nn.weight(4, 3, 0.8f);
+    nn._biases.at(3) = -0.5f;
+    nn._activationFunctions.at(2) = 1;
 
     return NodeDescription()
         .neuralNetwork(nn)
-        .cellTypeData(createRandomCellTypeGenomeDescription(nodeParameter))
-        .color(getRandomInt(defaultNode._color, 0, MAX_COLORS - 1))
-        .numAdditionalConnections(getRandomInt())
-        .referenceAngle(getRandomFloat(0, 360.0f))
+        .cellTypeData(createNonDefaultCellTypeGenomeDescription(nodeParameter))
+        .color(4)
+        .numAdditionalConnections(3)
+        .referenceAngle(90.0f)
         .signalRoutingRestriction(
-            SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(getRandomFloat(0, 360.0f)).openingAngle(getRandomFloat(0, 360.0f)));
+            SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
 }
 
-CreatureDescription DescriptionTestDataFactory::createRandomCreatureDescription(NodeParameter nodeParameter) const
+CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const
 {
     CreatureDescription defaultCreature;
     GeneDescription defaultGene;
 
     return CreatureDescription()
-        .ancestorId(getRandomInt(defaultCreature._ancestorId))
-        .mutationId(getRandomInt(defaultCreature._mutationId))
-        .generation(getRandomInt(defaultCreature._generation))
-        .genomeComplexity(getRandomInt(defaultCreature._genomeComplexity))
+        .ancestorId(1001)
+        .mutationId(502)
+        .generation(7)
+        .genomeComplexity(25)
         .genome(GenomeDescription()
-                    .frontAngle(getRandomFloat(0, 360.0f))
+                    .frontAngle(270.0f)
                     .genes({
                         GeneDescription()
                             .shape(ConstructorShape_Hexagon)
-                            .numBranches(getRandomInt(defaultGene._numBranches, 1, 6))
+                            .numBranches(4)
                             .separation(false)
-                            .numConcatenations(getRandomInt(defaultGene._numConcatenations, 1, 10))
+                            .numConcatenations(6)
                             .angleAlignment(ConstructorAngleAlignment_180)
-                            .stiffness(getRandomFloat(0, 1))
-                            .connectionDistance(getRandomFloat(0.3f, 1.0f))
+                            .stiffness(0.75f)
+                            .connectionDistance(0.8f)
                             .nodes({
-                                createRandomNodeDescription(nodeParameter),
+                                createNonDefaultNodeDescription(nodeParameter),
                             }),
                     }));
 }
@@ -123,27 +121,9 @@ bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescr
     return left == right;
 }
 
-float DescriptionTestDataFactory::getRandomFloat(float min, float max) const
-{
-    return NumberGenerator::get().getRandomFloat(min, max);
-}
 
-RealVector2D DescriptionTestDataFactory::getRandomFloat2(float min, float max) const
-{
-    return {getRandomFloat(min, max), getRandomFloat(min, max)};
-}
 
-int DescriptionTestDataFactory::getRandomInt(int exception, int min, int max) const
-{
-    while (true) {
-        auto result = NumberGenerator::get().getRandomInt(min, max);
-        if (result != exception) {
-            return result;
-        }
-    }
-}
-
-CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(CellParameter cellParameter) const
+CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const
 {
     auto const& type = cellParameter.cellType;
     auto const& muscleMode = cellParameter.muscleMode;
@@ -160,82 +140,82 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     case CellType_Constructor: {
         ConstructorDescription defaultConstructor;
         return ConstructorDescription()
-            .autoTriggerInterval(getRandomInt())
-            .constructionActivationTime(getRandomInt(defaultConstructor._constructionActivationTime))
-            .geneIndex(getRandomInt(defaultConstructor._geneIndex))
-            .lastConstructedCellId(getRandomInt())
-            .currentNodeIndex(getRandomInt(defaultConstructor._currentNodeIndex))
-            .currentBranch(getRandomInt(defaultConstructor._currentBranch))
-            .currentConcatenation(getRandomInt(defaultConstructor._currentConcatenation));
+            .autoTriggerInterval(50)
+            .constructionActivationTime(75)
+            .geneIndex(2)
+            .lastConstructedCellId(123)
+            .currentNodeIndex(1)
+            .currentBranch(3)
+            .currentConcatenation(2);
     }
     case CellType_Sensor:
         return SensorDescription()
-            .autoTriggerInterval(getRandomInt())
-            .restrictToColor(getRandomInt(-1, 0, MAX_COLORS - 1))
-            .minRange(getRandomInt())
-            .maxRange(getRandomInt())
-            .minDensity(getRandomFloat(0, 1))
+            .autoTriggerInterval(80)
+            .restrictToColor(2)
+            .minRange(10)
+            .maxRange(50)
+            .minDensity(0.3f)
             .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellType_Generator: {
         GeneratorDescription defaultGenerator;
         return GeneratorDescription()
-            .autoTriggerInterval(getRandomInt(defaultGenerator._autoTriggerInterval))
-            .alternationInterval(getRandomInt(defaultGenerator._alternationInterval))
-            .numPulses(getRandomInt(defaultGenerator._numPulses));
+            .autoTriggerInterval(60)
+            .alternationInterval(3)
+            .numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDescription();
     case CellType_Injector:
-        return InjectorDescription().counter(getRandomInt());
+        return InjectorDescription().counter(15);
     case CellType_Muscle: {
         MuscleModeDescription muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
             AutoBendingDescription defaultBending;
             muscleModeDesc = AutoBendingDescription()
-                                 .maxAngleDeviation(getRandomFloat(0, 1))
-                                 .frontBackVelRatio(getRandomFloat(0, 1))
-                                 .initialAngle(getRandomFloat(0, 360.0f))
-                                 .lastActualAngle(getRandomFloat(0, 360.0))
+                                 .maxAngleDeviation(0.6f)
+                                 .frontBackVelRatio(0.4f)
+                                 .initialAngle(135.0f)
+                                 .lastActualAngle(180.0f)
                                  .forward(false)
-                                 .activation(getRandomFloat(0, 1))
-                                 .activationCountdown(getRandomInt(defaultBending._activationCountdown))
+                                 .activation(0.7f)
+                                 .activationCountdown(8)
                                  .impulseAlreadyApplied(true);
         } break;
         case MuscleMode_ManualBending:
             muscleModeDesc = ManualBendingDescription()
-                                 .maxAngleDeviation(getRandomFloat(0, 1))
-                                 .frontBackVelRatio(getRandomFloat(0, 1))
-                                 .initialAngle(getRandomFloat(0, 360.0f))
-                                 .lastActualAngle(getRandomFloat(0, 360.0f))
-                                 .lastAngleDelta(getRandomFloat(0, 1))
+                                 .maxAngleDeviation(0.5f)
+                                 .frontBackVelRatio(0.3f)
+                                 .initialAngle(225.0f)
+                                 .lastActualAngle(270.0f)
+                                 .lastAngleDelta(0.8f)
                                  .impulseAlreadyApplied(true);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingDescription()
-                                 .maxAngleDeviation(getRandomFloat(0, 1))
-                                 .frontBackVelRatio(getRandomFloat(0, 1))
-                                 .initialAngle(getRandomFloat(0, 360.0f));
+                                 .maxAngleDeviation(0.7f)
+                                 .frontBackVelRatio(0.6f)
+                                 .initialAngle(315.0f);
             break;
         case MuscleMode_AutoCrawling: {
             AutoCrawlingDescription defaultCrawling;
             muscleModeDesc = AutoCrawlingDescription()
-                                 .maxDistanceDeviation(getRandomFloat(0, 1))
-                                 .frontBackVelRatio(getRandomFloat(0, 1))
-                                 .initialDistance(getRandomFloat(0, 1))
-                                 .lastActualDistance(getRandomFloat(0, 1))
+                                 .maxDistanceDeviation(0.9f)
+                                 .frontBackVelRatio(0.35f)
+                                 .initialDistance(0.6f)
+                                 .lastActualDistance(0.8f)
                                  .forward(false)
-                                 .activation(getRandomFloat(0, 1))
-                                 .activationCountdown(getRandomInt(defaultCrawling._activationCountdown))
+                                 .activation(0.4f)
+                                 .activationCountdown(12)
                                  .impulseAlreadyApplied(true);
         } break;
         case MuscleMode_ManualCrawling:
             muscleModeDesc = ManualCrawlingDescription()
-                                 .maxDistanceDeviation(getRandomFloat(0, 1))
-                                 .frontBackVelRatio(getRandomFloat(0, 1))
-                                 .initialDistance(getRandomFloat(0, 1))
-                                 .lastActualDistance(getRandomFloat(0, 1))
-                                 .lastDistanceDelta(getRandomFloat(0, 1))
+                                 .maxDistanceDeviation(0.75f)
+                                 .frontBackVelRatio(0.45f)
+                                 .initialDistance(0.4f)
+                                 .lastActualDistance(0.9f)
+                                 .lastDistanceDelta(0.65f)
                                  .impulseAlreadyApplied(true);
             break;
         case MuscleMode_DirectMovement:
@@ -250,7 +230,7 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
         return DefenderDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellType_Reconnector:
         return ReconnectorDescription()
-            .restrictToColor(getRandomInt(-1, 0, MAX_COLORS - 1))
+            .restrictToColor(1)
             .restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
@@ -259,7 +239,7 @@ CellTypeDescription DescriptionTestDataFactory::createRandomCellTypeDescription(
     }
 }
 
-CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenomeDescription(NodeParameter cellParameter) const
+CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const
 {
     auto const& type = cellParameter.cellTypeGenome;
     auto const& muscleMode = cellParameter.muscleMode;
@@ -271,23 +251,23 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
     case CellTypeGenome_Constructor: {
         ConstructorGenomeDescription defaultConstructor;
         return ConstructorGenomeDescription()
-            .autoTriggerInterval(getRandomInt())
-            .constructionActivationTime(getRandomInt(defaultConstructor._constructionActivationTime));
+            .autoTriggerInterval(45)
+            .constructionActivationTime(85);
     }
     case CellTypeGenome_Sensor:
         return SensorGenomeDescription()
-            .autoTriggerInterval(getRandomInt())
-            .restrictToColor(getRandomInt(-1, 0, MAX_COLORS - 1))
-            .minRange(getRandomInt())
-            .maxRange(getRandomInt())
-            .minDensity(getRandomFloat(0, 1))
+            .autoTriggerInterval(70)
+            .restrictToColor(6)
+            .minRange(5)
+            .maxRange(30)
+            .minDensity(0.25f)
             .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellTypeGenome_Generator: {
         GeneratorGenomeDescription defaultGenerator;
         return GeneratorGenomeDescription()
-            .autoTriggerInterval(getRandomInt(defaultGenerator._autoTriggerInterval))
+            .autoTriggerInterval(55)
             .pulseType(GeneratorPulseType_Alternation)
-            .alternationInterval(getRandomInt(defaultGenerator._alternationInterval));
+            .alternationInterval(4);
     }
     case CellTypeGenome_Attacker:
         return AttackerGenomeDescription();
@@ -297,19 +277,19 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
         MuscleModeGenomeDescription muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending:
-            muscleModeDesc = AutoBendingGenomeDescription().maxAngleDeviation(getRandomFloat(0, 1)).frontBackVelRatio(getRandomFloat(0, 1));
+            muscleModeDesc = AutoBendingGenomeDescription().maxAngleDeviation(0.55f).frontBackVelRatio(0.25f);
             break;
         case MuscleMode_ManualBending:
-            muscleModeDesc = ManualBendingGenomeDescription().maxAngleDeviation(getRandomFloat(0, 1)).frontBackVelRatio(getRandomFloat(0, 1));
+            muscleModeDesc = ManualBendingGenomeDescription().maxAngleDeviation(0.45f).frontBackVelRatio(0.35f);
             break;
         case MuscleMode_AngleBending:
-            muscleModeDesc = AngleBendingGenomeDescription().maxAngleDeviation(getRandomFloat(0, 1)).frontBackVelRatio(getRandomFloat(0, 1));
+            muscleModeDesc = AngleBendingGenomeDescription().maxAngleDeviation(0.65f).frontBackVelRatio(0.55f);
             break;
         case MuscleMode_AutoCrawling:
-            muscleModeDesc = AutoCrawlingGenomeDescription().maxDistanceDeviation(getRandomFloat(0, 1)).frontBackVelRatio(getRandomFloat(0, 1));
+            muscleModeDesc = AutoCrawlingGenomeDescription().maxDistanceDeviation(0.85f).frontBackVelRatio(0.15f);
             break;
         case MuscleMode_ManualCrawling:
-            muscleModeDesc = ManualCrawlingGenomeDescription().maxDistanceDeviation(getRandomFloat(0, 1)).frontBackVelRatio(getRandomFloat(0, 1));
+            muscleModeDesc = ManualCrawlingGenomeDescription().maxDistanceDeviation(0.95f).frontBackVelRatio(0.25f);
             break;
         case MuscleMode_DirectMovement:
             muscleModeDesc = DirectMovementGenomeDescription();
@@ -323,11 +303,11 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createRandomCellTypeGenome
         return DefenderGenomeDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellTypeGenome_Reconnector:
         return ReconnectorGenomeDescription()
-            .restrictToColor(getRandomInt(-1, 0, MAX_COLORS - 1))
+            .restrictToColor(4)
             .restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellTypeGenome_Detonator: {
         DetonatorGenomeDescription defaultDetonator;
-        return DetonatorGenomeDescription().countdown(getRandomInt(defaultDetonator._countdown));
+        return DetonatorGenomeDescription().countdown(45);
     }
     default:
         return CellTypeGenomeDescription();

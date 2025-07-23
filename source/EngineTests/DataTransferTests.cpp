@@ -25,7 +25,7 @@ protected:
 TEST_F(DataTransferTests, singleParticle)
 {
     CollectionDescription data;
-    data.addParticle(_descriptionTestDataFactory->createRandomParticleDescription());
+    data.addParticle(_descriptionTestDataFactory->createNonDefaultParticleDescription());
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -68,8 +68,8 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
     auto cellParameter = GetParam();
 
     CollectionDescription data;
-    data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
-    data.addCell(_descriptionTestDataFactory->createRandomCellDescription(cellParameter));
+    data.addCell(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    data.addCell(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -110,8 +110,8 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
     auto nodeParameter = GetParam();
 
     auto data = CollectionDescription().creatures({
-        _descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter).cells({CellDescription()}),
-        _descriptionTestDataFactory->createRandomCreatureDescription(nodeParameter).cells({CellDescription()}),
+        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
+        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
     });
 
     _simulationFacade->setSimulationData(data);
