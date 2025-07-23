@@ -1,6 +1,7 @@
 #include "SimulatedPreviewWidget.h"
 
 #include "EngineInterface/Descriptions.h"
+#include "EngineInterface/GenomeDescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "GenomeTabEditData.h"
@@ -14,9 +15,12 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& s
 void _SimulatedPreviewWidget::process()
 {
     if (!_lastGenome.has_value() || _lastGenome.value() != _editData->genome) {
+        auto castratedGenome = _editData->genome;
+
+        GenomeDescriptionEditService::get().castrate(castratedGenome);
         auto preview = CollectionDescription().creatures({
             CreatureDescription()
-                .genome(_editData->genome)
+                .genome(castratedGenome)
                 .cells({
                     CellDescription()
                         .pos({0, 0})

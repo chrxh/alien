@@ -79,6 +79,30 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
     std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
 }
 
+namespace
+{
+    void castrateIntern(GenomeDescription& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
+    {
+        inspectedGeneIndices.insert(geneIndex);
+        auto& gene = genome._genes.at(geneIndex);
+        for (auto& node : gene._nodes) {
+            if (node.getCellType() == CellTypeGenome_Constructor) {
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                if (constructor._geneIndex < genome._genes.size()) {
+                    auto const& gene = genome._genes.at(constructor._geneIndex);
+                    if (inspectedGeneIndices.contains(constructor._geneIndex) && gene._separation) {
+                        constructor._geneIndex = genome._genes.size();  // Perform castration
+                    } else {
+                        castrateIntern(genome, constructor._geneIndex, inspectedGeneIndices);   // Inspect further gene
+                    }
+                }
+            }
+        }
+    }
+}
+
 void GenomeDescriptionEditService::castrate(GenomeDescription& genome)
 {
+    std::set<int> inspectedGeneIndices;
+    castrateIntern(genome, 0, inspectedGeneIndices);
 }
