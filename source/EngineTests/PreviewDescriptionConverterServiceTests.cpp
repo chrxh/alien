@@ -19,28 +19,7 @@ protected:
     // Helper function to create a simple cell at a given position
     CellDescription createCell(uint64_t id, RealVector2D pos, int color = 0, uint16_t nodeIndex = 0)
     {
-        CellDescription cell;
-        cell.id(id);
-        cell.pos(pos);
-        cell.color(color);
-        cell.genomeNodeIndex(nodeIndex);
-        return cell;
-    }
-
-    // Helper function to create a connection between two cells
-    void addConnection(CellDescription& cell1, CellDescription& cell2)
-    {
-        ConnectionDescription connection1;
-        connection1.cellId(cell2._id);
-        connection1.distance(1.0f);
-        connection1.angleFromPrevious(0.0f);
-        cell1._connections.push_back(connection1);
-
-        ConnectionDescription connection2;
-        connection2.cellId(cell1._id);
-        connection2.distance(1.0f);
-        connection2.angleFromPrevious(0.0f);
-        cell2._connections.push_back(connection2);
+        return CellDescription().id(id).pos(pos).color(color).genomeNodeIndex(nodeIndex);
     }
 };
 
@@ -114,19 +93,13 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertCellsWithConnections)
 {
-    CollectionDescription input;
+    auto data = CollectionDescription().addCells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).color(1).genomeNodeIndex(2),
+        CellDescription().id(2).pos({20.0f, 10.0f}).color(2).genomeNodeIndex(3),
+    });
+    data.addConnection(1, 2);
     
-    // Create two connected cells
-    auto cell1 = createCell(1, {10.0f, 10.0f}, 1, 2);
-    auto cell2 = createCell(2, {20.0f, 10.0f}, 2, 3);
-    
-    // Add connection between cells
-    addConnection(cell1, cell2);
-    
-    input.addCell(cell1);
-    input.addCell(cell2);
-    
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(data);
     
     EXPECT_EQ(2, result.cells.size());
     EXPECT_EQ(1, result.connections.size());
@@ -153,15 +126,16 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
     
     // Create a creature with cells
     CreatureDescription creature;
-    creature.id(100);
-    
-    auto cell1 = createCell(1, {5.0f, 5.0f}, 4, 6);
-    auto cell2 = createCell(2, {15.0f, 5.0f}, 5, 7);
-    addConnection(cell1, cell2);
-    
-    creature.cells({cell1, cell2});
+    creature.id(100).cells({
+        CellDescription().id(1).pos({5.0f, 5.0f}).color(4).genomeNodeIndex(6),
+        CellDescription().id(2).pos({15.0f, 5.0f}).color(5).genomeNodeIndex(7),
+    });
     
     input._creatures.push_back(creature);
+    
+    // Create cache and add connection
+    auto cache = input.createCache();
+    input.addConnection(1, 2, cache);
     
     auto result = PreviewDescriptionConverterService::get().convert(input);
     
@@ -177,24 +151,22 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
 {
-    CollectionDescription input;
-    
-    // Add direct cell
-    auto directCell = createCell(1, {0.0f, 0.0f}, 1, 1);
-    input.addCell(directCell);
+    auto data = CollectionDescription().addCells({
+        CellDescription().id(1).pos({0.0f, 0.0f}).color(1).genomeNodeIndex(1),
+    });
     
     // Add creature with cells
     CreatureDescription creature;
-    creature.setId(100);
+    creature.id(100).cells({
+        CellDescription().id(2).pos({10.0f, 0.0f}).color(2).genomeNodeIndex(2),
+        CellDescription().id(3).pos({20.0f, 0.0f}).color(3).genomeNodeIndex(3),
+    });
     
-    auto creatureCell1 = createCell(2, {10.0f, 0.0f}, 2, 2);
-    auto creatureCell2 = createCell(3, {20.0f, 0.0f}, 3, 3);
-    addConnection(creatureCell1, creatureCell2);
+    data._creatures.push_back(creature);
+    auto cache = data.createCache();
+    data.addConnection(2, 3, cache);
     
-    creature.cells({creatureCell1, creatureCell2});
-    input._creatures.push_back(creature);
-    
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(data);
     
     // Should have 3 cells total (1 direct + 2 from creature)
     EXPECT_EQ(3, result.cells.size());
@@ -216,23 +188,18 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
 
 TEST_F(PreviewDescriptionConverterServiceTests, avoidDuplicateConnections)
 {
-    CollectionDescription input;
+    auto data = CollectionDescription().addCells({
+        CellDescription().id(1).pos({0.0f, 0.0f}).color(1).genomeNodeIndex(1),
+        CellDescription().id(2).pos({10.0f, 0.0f}).color(2).genomeNodeIndex(2),
+        CellDescription().id(3).pos({5.0f, 10.0f}).color(3).genomeNodeIndex(3),
+    });
     
-    // Create three cells in a triangle, each connected to the others
-    auto cell1 = createCell(1, {0.0f, 0.0f}, 1, 1);
-    auto cell2 = createCell(2, {10.0f, 0.0f}, 2, 2);
-    auto cell3 = createCell(3, {5.0f, 10.0f}, 3, 3);
+    // Add triangle connections
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 1);
     
-    // Add bidirectional connections
-    addConnection(cell1, cell2);
-    addConnection(cell2, cell3);
-    addConnection(cell3, cell1);
-    
-    input.addCell(cell1);
-    input.addCell(cell2);
-    input.addCell(cell3);
-    
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(data);
     
     EXPECT_EQ(3, result.cells.size());
     // Should have exactly 3 connections, not 6 (no duplicates)
