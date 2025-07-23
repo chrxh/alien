@@ -155,6 +155,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     if (cell->creature == nullptr) {
         return;
     }
+    printf("numCells: %llu\n", data.objects.cells.getNumEntries());
     auto& constructor = cell->cellTypeData.constructor;
     if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval)) {
         constructor.offspring = findOrCreateNewCreature(data, cell);

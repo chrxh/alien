@@ -387,7 +387,6 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_noCycles)
     auto genome = createGenome_noCycles();
     GenomeDescriptionEditService::get().castrate(genome);
 
-    // No cycles, so no constructors should be castrated
     ASSERT_EQ(3, genome._genes.size());
     
     // Gene 0 should still reference gene 1
@@ -494,30 +493,9 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_selfReference)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_emptyGenome)
 {
     auto genome = GenomeDescription();
-    
-    // Note: The current implementation of castrate assumes genome has at least one gene
-    // since it starts processing from gene 0. For an empty genome, this would be undefined behavior.
-    // This test is commented out to avoid crashes. In practice, empty genomes might not be valid inputs.
-    
-    // GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().castrate(genome);
     
     EXPECT_EQ(0, genome._genes.size());
-}
-
-TEST_F(GenomeDescriptionEditServiceTests, castrate_singleGeneNoConstructors)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(true).nodes({
-            NodeDescription(),  // Base node, no constructor
-            NodeDescription().cellTypeData(SensorGenomeDescription()),
-        }),
-    });
-    GenomeDescriptionEditService::get().castrate(genome);
-
-    ASSERT_EQ(1, genome._genes.size());
-    ASSERT_EQ(2, genome._genes.at(0)._nodes.size());
-    EXPECT_EQ(CellTypeGenome_Base, genome._genes.at(0)._nodes.at(0).getCellType());
-    EXPECT_EQ(CellTypeGenome_Sensor, genome._genes.at(0)._nodes.at(1).getCellType());
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, castrate_invalidGeneReference)

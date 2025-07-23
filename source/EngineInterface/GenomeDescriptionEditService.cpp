@@ -83,6 +83,9 @@ namespace
 {
     void castrateIntern(GenomeDescription& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
     {
+        if (geneIndex >= genome._genes.size() || inspectedGeneIndices.contains(geneIndex)) {
+            return;
+        }
         inspectedGeneIndices.insert(geneIndex);
         auto& gene = genome._genes.at(geneIndex);
         for (auto& node : gene._nodes) {
