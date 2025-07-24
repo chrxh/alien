@@ -7,6 +7,7 @@
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
+#include "PreviewDescriptionWidget.h"
 #include "WindowController.h"
 
 SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
@@ -41,9 +42,12 @@ void _SimulatedPreviewWidget::process()
 
     auto desc = _simulationFacade->getPreviewData();
     auto previewDesc = PreviewDescriptionConverterService::get().convert(desc);
-    static float zoom = 20.0f;
-    static std::optional<int> selectedNode;
-    AlienGui::ShowPreviewDescription(previewDesc, zoom, selectedNode);
+    
+    // Use the new PreviewDescriptionWidget instead of static variables
+    if (!_previewWidget) {
+        _previewWidget = PreviewDescriptionWidget::create();
+    }
+    _previewWidget->process(previewDesc);
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)

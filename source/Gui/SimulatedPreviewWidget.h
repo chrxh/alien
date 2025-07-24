@@ -21,4 +21,5 @@ private:
     GenomeTabLayoutData _layoutData;
 
     std::optional<GenomeDescription> _lastGenome;
+    PreviewDescriptionWidget _previewWidget;
 };

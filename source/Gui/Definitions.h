@@ -132,6 +132,9 @@ using NeuralNetEditorWidget = std::shared_ptr<_NeuralNetEditorWidget>;
 class _SimulatedPreviewWidget;
 using SimulatedPreviewWidget = std::shared_ptr<_SimulatedPreviewWidget>;
 
+class _PreviewDescriptionWidget;
+using PreviewDescriptionWidget = std::shared_ptr<_PreviewDescriptionWidget>;
+
 struct UserInfo;
 
 struct GLFWvidmode;

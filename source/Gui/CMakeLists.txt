@@ -123,6 +123,8 @@ PUBLIC
     ShaderWindow.h
     SimulatedPreviewWidget.cpp
     SimulatedPreviewWidget.h
+    PreviewDescriptionWidget.cpp
+    PreviewDescriptionWidget.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp
