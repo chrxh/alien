@@ -1700,18 +1700,18 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
 
     RealVector2D upperLeft;
     RealVector2D lowerRight;
-    for (auto const& cell : desc.cells) {
-        if (cell.pos.x < upperLeft.x) {
-            upperLeft.x = cell.pos.x;
+    for (auto const& cell : desc._cells) {
+        if (cell._pos.x < upperLeft.x) {
+            upperLeft.x = cell._pos.x;
         }
-        if (cell.pos.y < upperLeft.y) {
-            upperLeft.y = cell.pos.y;
+        if (cell._pos.y < upperLeft.y) {
+            upperLeft.y = cell._pos.y;
         }
-        if (cell.pos.x > lowerRight.x) {
-            lowerRight.x = cell.pos.x;
+        if (cell._pos.x > lowerRight.x) {
+            lowerRight.x = cell._pos.x;
         }
-        if (cell.pos.y > lowerRight.y) {
-            lowerRight.y = cell.pos.y;
+        if (cell._pos.y > lowerRight.y) {
+            lowerRight.y = cell._pos.y;
         }
     }
     RealVector2D previewSize = (lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
@@ -1728,15 +1728,15 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
         ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
         //draw cells
-        for (auto const& cell : desc.cells) {
-            auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
+        for (auto const& cell : desc._cells) {
+            auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
             float h, s, v;
-            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell.color], h, s, v);
+            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
 
             auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-            if (selectedNode && cell.nodeIndex == *selectedNode) {
+            if (selectedNode && cell._nodeIndex == *selectedNode) {
                 if (zoom > ZoomLevelForLabels) {
                     drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
                 } else {
@@ -1747,7 +1747,7 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
             if (clickedOnPreviewWindow) {
                 if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                     && mousePos.y <= cellPos.y + cellSize / 2) {
-                    selectedNode = cell.nodeIndex;
+                    selectedNode = cell._nodeIndex;
                     result = true;
                 }
             }
@@ -1755,31 +1755,31 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
         }
 
         //draw symbols
-        for (auto const& symbol : desc.symbols) {
-            auto pos = (symbol.pos - upperLeft) * cellSize + offset;
-            switch (symbol.type) {
-            case SymbolPreviewDescription::Type::Dot: {
-                auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.15f : 0.35f;
-                drawList->AddCircleFilled({pos.x, pos.y}, cellSize * cellRadiusFactor, Const::GenomePreviewDotSymbolColor);
-            } break;
-            case SymbolPreviewDescription::Type::Infinity: {
-                if (zoom > ZoomLevelForConnections) {
-                    drawList->AddText(
-                        StyleRepository::get().getIconFont(),
-                        cellSize / 2,
-                        {pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f},
-                        Const::GenomePreviewInfinitySymbolColor,
-                        ICON_FA_INFINITY);
-                }
-            } break;
-            }
-        }
+        //for (auto const& symbol : desc.symbols) {
+        //    auto pos = (symbol.pos - upperLeft) * cellSize + offset;
+        //    switch (symbol.type) {
+        //    case SymbolPreviewDescription::Type::Dot: {
+        //        auto cellRadiusFactor = zoom > ZoomLevelForConnections ? 0.15f : 0.35f;
+        //        drawList->AddCircleFilled({pos.x, pos.y}, cellSize * cellRadiusFactor, Const::GenomePreviewDotSymbolColor);
+        //    } break;
+        //    case SymbolPreviewDescription::Type::Infinity: {
+        //        if (zoom > ZoomLevelForConnections) {
+        //            drawList->AddText(
+        //                StyleRepository::get().getIconFont(),
+        //                cellSize / 2,
+        //                {pos.x - cellSize * 0.4f, pos.y - cellSize * 0.2f},
+        //                Const::GenomePreviewInfinitySymbolColor,
+        //                ICON_FA_INFINITY);
+        //        }
+        //    } break;
+        //    }
+        //}
 
         //draw cell connections
         if (zoom > ZoomLevelForConnections) {
-            for (auto const& connection : desc.connections) {
-                auto cellPos1 = (connection.cell1 - upperLeft) * cellSize + offset;
-                auto cellPos2 = (connection.cell2 - upperLeft) * cellSize + offset;
+            for (auto const& connection : desc._connections) {
+                auto cellPos1 = (connection._cell1 - upperLeft) * cellSize + offset;
+                auto cellPos2 = (connection._cell2 - upperLeft) * cellSize + offset;
 
                 auto direction = cellPos1 - cellPos2;
 
@@ -1789,7 +1789,7 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
                 drawList->AddLine(
                     {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
-                if (connection.arrowToCell1) {
+                if (connection._arrowToCell1) {
                     auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
                     auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
                     drawList->AddLine(
@@ -1807,7 +1807,7 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
                         LineThickness);
                 }
 
-                if (connection.arrowToCell2) {
+                if (connection._arrowToCell2) {
                     auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
                     auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
                     drawList->AddLine(
@@ -1822,51 +1822,51 @@ bool AlienGui::ShowPreviewDescription(PreviewDescription const& desc, float& zoo
         }
 
         //draw cell infos (start/end marks and multiple constructor marks)
-        if (zoom > ZoomLevelForLabels) {
-            for (auto const& cell : desc.cells) {
-                auto cellPos = (cell.pos - upperLeft) * cellSize + offset;
-                auto length = cellSize / 4;
-                if (cell.partStart !=  cell.partEnd) {
-                    drawList->AddTriangleFilled(
-                        {cellPos.x + length, cellPos.y},
-                        {cellPos.x + length * 2, cellPos.y - length / 2},
-                        {cellPos.x + length * 2, cellPos.y + length / 2},
-                        cell.partStart ? Const::GenomePreviewStartColor : Const::GenomePreviewEndColor);
-                }
-                if (cell.partStart && cell.partEnd) {
-                    drawList->AddTriangleFilled(
-                        {cellPos.x + length, cellPos.y - length},
-                        {cellPos.x + length * 2, cellPos.y - length * 3  / 2},
-                        {cellPos.x + length * 2, cellPos.y - length / 2},
-                        Const::GenomePreviewStartColor);
-                    drawList->AddTriangleFilled(
-                        {cellPos.x + length, cellPos.y + length},
-                        {cellPos.x + length * 2, cellPos.y + length / 2},
-                        {cellPos.x + length * 2, cellPos.y + length * 3 / 2},
-                        Const::GenomePreviewEndColor);
-                }
-                if (cell.multipleConstructor) {
-                    drawList->AddLine(
-                        {cellPos.x + length, cellPos.y + length},
-                        {cellPos.x + length * 2, cellPos.y + length},
-                        Const::GenomePreviewMultipleConstructorColor,
-                        LineThickness);
-                    drawList->AddLine(
-                        {cellPos.x + length * 1.5f, cellPos.y + length / 2},
-                        {cellPos.x + length * 1.5f, cellPos.y + length * 1.5f},
-                        Const::GenomePreviewMultipleConstructorColor,
-                        LineThickness);
-                }
-                if (cell.selfReplicator) {
-                    drawList->AddText(
-                        StyleRepository::get().getIconFont(),
-                        cellSize / 4,
-                        {cellPos.x - length * 2, cellPos.y + length},
-                        Const::GenomePreviewSelfReplicatorColor,
-                        ICON_FA_CLONE);
-                }
-            }
-        }
+        //if (zoom > ZoomLevelForLabels) {
+        //    for (auto const& cell : desc._cells) {
+        //        auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
+        //        auto length = cellSize / 4;
+        //        if (cell.partStart !=  cell.partEnd) {
+        //            drawList->AddTriangleFilled(
+        //                {cellPos.x + length, cellPos.y},
+        //                {cellPos.x + length * 2, cellPos.y - length / 2},
+        //                {cellPos.x + length * 2, cellPos.y + length / 2},
+        //                cell.partStart ? Const::GenomePreviewStartColor : Const::GenomePreviewEndColor);
+        //        }
+        //        if (cell.partStart && cell.partEnd) {
+        //            drawList->AddTriangleFilled(
+        //                {cellPos.x + length, cellPos.y - length},
+        //                {cellPos.x + length * 2, cellPos.y - length * 3  / 2},
+        //                {cellPos.x + length * 2, cellPos.y - length / 2},
+        //                Const::GenomePreviewStartColor);
+        //            drawList->AddTriangleFilled(
+        //                {cellPos.x + length, cellPos.y + length},
+        //                {cellPos.x + length * 2, cellPos.y + length / 2},
+        //                {cellPos.x + length * 2, cellPos.y + length * 3 / 2},
+        //                Const::GenomePreviewEndColor);
+        //        }
+        //        if (cell.multipleConstructor) {
+        //            drawList->AddLine(
+        //                {cellPos.x + length, cellPos.y + length},
+        //                {cellPos.x + length * 2, cellPos.y + length},
+        //                Const::GenomePreviewMultipleConstructorColor,
+        //                LineThickness);
+        //            drawList->AddLine(
+        //                {cellPos.x + length * 1.5f, cellPos.y + length / 2},
+        //                {cellPos.x + length * 1.5f, cellPos.y + length * 1.5f},
+        //                Const::GenomePreviewMultipleConstructorColor,
+        //                LineThickness);
+        //        }
+        //        if (cell.selfReplicator) {
+        //            drawList->AddText(
+        //                StyleRepository::get().getIconFont(),
+        //                cellSize / 4,
+        //                {cellPos.x - length * 2, cellPos.y + length},
+        //                Const::GenomePreviewSelfReplicatorColor,
+        //                ICON_FA_CLONE);
+        //        }
+        //    }
+        //}
 
     }
     ImGui::EndChild();

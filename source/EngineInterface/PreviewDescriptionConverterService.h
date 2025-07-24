@@ -11,5 +11,5 @@ class PreviewDescriptionConverterService
 {
     MAKE_SINGLETON(PreviewDescriptionConverterService);
 public:
-    PreviewDescription convert(CollectionDescription const& data) const;
+    PreviewDescription convert(CollectionDescription data) const;
 };

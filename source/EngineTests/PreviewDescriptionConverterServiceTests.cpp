@@ -142,8 +142,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
     });
     
     data._creatures.push_back(creature);
-    auto cache = data.createCache();
-    data.addConnection(2, 3, cache);
+    data.addConnection(2, 3);
     
     auto result = PreviewDescriptionConverterService::get().convert(data);
     

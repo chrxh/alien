@@ -4,15 +4,14 @@
 
 #include "DescriptionEditService.h"
 
-PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescription const& data) const
+PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescription data) const
 {
     PreviewDescription result;
     
-    CollectionDescription tempData = data;
-    auto cache = tempData.createCache();
+    auto cache = data.createCache();
     
     bool hasCells = false;
-    tempData.forEach([&](CellDescription const& cell) {
+    data.forEach([&](CellDescription const& cell) {
         hasCells = true;
     });
     
@@ -20,17 +19,17 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
         return result;
     }
     
-    DescriptionEditService::get().setCenter(tempData, {0.0f, 0.0f});
+    DescriptionEditService::get().setCenter(data, {0.0f, 0.0f});
     
-    tempData.forEach([&](CellDescription const& cell) {
+    data.forEach([&](CellDescription const& cell) {
         CellPreviewDescription previewCell;
         previewCell.pos(cell._pos).color(cell._color).nodeIndex(cell._genomeNodeIndex);
         result._cells.push_back(previewCell);
     });
     
-    std::set<std::pair<uint64_t, uint64_t>> processedConnections;
+    std::unordered_set<std::pair<uint64_t, uint64_t>> processedConnections;
     
-    tempData.forEach([&](CellDescription const& cell) {
+    data.forEach([&](CellDescription const& cell) {
         for (const auto& connection : cell._connections) {
             uint64_t cellId1 = cell._id;
             uint64_t cellId2 = connection._cellId;
@@ -42,7 +41,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
             processedConnections.insert(connectionPair);
             
             ConnectionPreviewDescription previewConnection;
-            previewConnection.cell1(tempData.getCellRef(cellId1, cache)._pos).cell2(tempData.getCellRef(cellId2, cache)._pos).arrowToCell1(false).arrowToCell2(false);
+            previewConnection.cell1(data.getCellRef(cellId1, cache)._pos).cell2(data.getCellRef(cellId2, cache)._pos).arrowToCell1(false).arrowToCell2(false);
             result._connections.push_back(previewConnection);
         }
     });
