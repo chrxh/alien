@@ -402,8 +402,6 @@ public:
     static void BeginIndent();
     static void EndIndent();
 
-    static bool ShowPreviewDescription(PreviewDescription const& desc, float& zoom, std::optional<int>& selectedNode);
-
     struct NeuronSelectionParameters
     {
         MEMBER(NeuronSelectionParameters, std::string, name, "");
