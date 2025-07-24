@@ -27,7 +27,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
         result._cells.push_back(previewCell);
     });
     
-    std::unordered_set<std::pair<uint64_t, uint64_t>> processedConnections;
+    std::set<std::pair<uint64_t, uint64_t>> processedConnections;
     
     data.forEach([&](CellDescription const& cell) {
         for (const auto& connection : cell._connections) {

@@ -2,8 +2,10 @@
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
+#include "EngineInterface/PreviewDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
+#include "AlienGui.h"
 #include "GenomeTabEditData.h"
 #include "WindowController.h"
 
@@ -36,6 +38,12 @@ void _SimulatedPreviewWidget::process()
     _simulationFacade->calcTimestepsForPreview(duration);
 
     _lastGenome = _editData->genome;
+
+    auto desc = _simulationFacade->getPreviewData();
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(desc);
+    static float zoom = 20.0f;
+    static std::optional<int> selectedNode;
+    AlienGui::ShowPreviewDescription(previewDesc, zoom, selectedNode);
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
