@@ -43,11 +43,11 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertSingleCell)
     EXPECT_EQ(1, result._cells.size());
     EXPECT_EQ(0, result._connections.size());
     
-    EXPECT_EQ(3, result._cells[0]._color);
-    EXPECT_EQ(5, result._cells[0]._nodeIndex);
+    EXPECT_EQ(3, result._cells.at(0)._color);
+    EXPECT_EQ(5, result._cells.at(0)._nodeIndex);
     
-    EXPECT_FLOAT_EQ(0.0f, result._cells[0]._pos.x);
-    EXPECT_FLOAT_EQ(0.0f, result._cells[0]._pos.y);
+    EXPECT_FLOAT_EQ(0.0f, result._cells.at(0)._pos.x);
+    EXPECT_FLOAT_EQ(0.0f, result._cells.at(0)._pos.y);
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
@@ -68,17 +68,18 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
     EXPECT_EQ(0, result._connections.size());
     
     for (int i = 0; i < 3; ++i) {
-        EXPECT_EQ(i + 1, result._cells[i]._color);
-        EXPECT_EQ(i + 2, result._cells[i]._nodeIndex);
+        EXPECT_EQ(i + 1, result._cells.at(i)._color);
+        EXPECT_EQ(i + 2, result._cells.at(i)._nodeIndex);
     }
     
-    RealVector2D center = {0.0f, 0.0f};
+    CollectionDescription previewCollection;
     for (const auto& cell : result._cells) {
-        center.x += cell._pos.x;
-        center.y += cell._pos.y;
+        CellDescription convertedCell;
+        convertedCell._pos = cell._pos;
+        previewCollection.addCell(convertedCell);
     }
-    center.x /= result._cells.size();
-    center.y /= result._cells.size();
+    
+    auto center = DescriptionEditService::get().calcCenter(previewCollection);
     
     EXPECT_NEAR(0.0f, center.x, 0.001f);
     EXPECT_NEAR(0.0f, center.y, 0.001f);
@@ -97,7 +98,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCellsWithConnections)
     EXPECT_EQ(2, result._cells.size());
     EXPECT_EQ(1, result._connections.size());
     
-    auto& connection = result._connections[0];
+    auto& connection = result._connections.at(0);
     
     EXPECT_FLOAT_EQ(-5.0f, std::min(connection._cell1.x, connection._cell2.x));
     EXPECT_FLOAT_EQ(5.0f, std::max(connection._cell1.x, connection._cell2.x));
@@ -128,10 +129,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
     EXPECT_EQ(2, result._cells.size());
     EXPECT_EQ(1, result._connections.size());
     
-    EXPECT_EQ(4, result._cells[0]._color);
-    EXPECT_EQ(6, result._cells[0]._nodeIndex);
-    EXPECT_EQ(5, result._cells[1]._color);
-    EXPECT_EQ(7, result._cells[1]._nodeIndex);
+    EXPECT_EQ(4, result._cells.at(0)._color);
+    EXPECT_EQ(6, result._cells.at(0)._nodeIndex);
+    EXPECT_EQ(5, result._cells.at(1)._color);
+    EXPECT_EQ(7, result._cells.at(1)._nodeIndex);
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)

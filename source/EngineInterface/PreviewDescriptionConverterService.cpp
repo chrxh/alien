@@ -13,16 +13,9 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     auto cache = tempData.createCache();
     
     std::vector<CellDescription> allCells;
-    
-    for (const auto& cell : tempData._cells) {
+    tempData.forEach([&](CellDescription const& cell) {
         allCells.push_back(cell);
-    }
-    
-    for (const auto& creature : tempData._creatures) {
-        for (const auto& cell : creature._cells) {
-            allCells.push_back(cell);
-        }
-    }
+    });
     
     if (allCells.empty()) {
         return result;
@@ -31,16 +24,9 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     DescriptionEditService::get().setCenter(tempData, {0.0f, 0.0f});
     
     std::unordered_map<uint64_t, RealVector2D> centeredPositions;
-    
-    for (const auto& cell : tempData._cells) {
+    tempData.forEach([&](CellDescription const& cell) {
         centeredPositions[cell._id] = cell._pos;
-    }
-    
-    for (const auto& creature : tempData._creatures) {
-        for (const auto& cell : creature._cells) {
-            centeredPositions[cell._id] = cell._pos;
-        }
-    }
+    });
     
     for (const auto& cell : allCells) {
         CellPreviewDescription previewCell;
