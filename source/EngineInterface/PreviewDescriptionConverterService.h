@@ -7,9 +7,9 @@
 #include "SimulationParameters.h"
 #include "PreviewDescriptions.h"
 
-class PreviewDescriptionService
+class PreviewDescriptionConverterService
 {
-    MAKE_SINGLETON(PreviewDescriptionService);
+    MAKE_SINGLETON(PreviewDescriptionConverterService);
 public:
     PreviewDescription convert(CollectionDescription const& data) const;
 };

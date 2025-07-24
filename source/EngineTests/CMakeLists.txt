@@ -18,6 +18,7 @@ PUBLIC
     NeuronTests.cpp
     GeneratorTests.cpp
     ParametersEditServiceTests.cpp
+    PreviewDescriptionConverterServiceTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
     SignalTests.cpp
