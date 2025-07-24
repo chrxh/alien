@@ -1,7 +1,6 @@
 #include "PreviewDescriptionConverterService.h"
 
 #include <set>
-#include <unordered_map>
 
 #include "DescriptionEditService.h"
 
@@ -23,10 +22,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     
     DescriptionEditService::get().setCenter(tempData, {0.0f, 0.0f});
     
-    std::unordered_map<uint64_t, RealVector2D> centeredPositions;
     tempData.forEach([&](CellDescription const& cell) {
-        centeredPositions[cell._id] = cell._pos;
-        
         CellPreviewDescription previewCell;
         previewCell.pos(cell._pos).color(cell._color).nodeIndex(cell._genomeNodeIndex);
         result._cells.push_back(previewCell);
@@ -45,14 +41,9 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
             }
             processedConnections.insert(connectionPair);
             
-            auto pos1It = centeredPositions.find(cellId1);
-            auto pos2It = centeredPositions.find(cellId2);
-            
-            if (pos1It != centeredPositions.end() && pos2It != centeredPositions.end()) {
-                ConnectionPreviewDescription previewConnection;
-                previewConnection.cell1(pos1It->second).cell2(pos2It->second).arrowToCell1(false).arrowToCell2(false);
-                result._connections.push_back(previewConnection);
-            }
+            ConnectionPreviewDescription previewConnection;
+            previewConnection.cell1(tempData.getCellRef(cellId1, cache)._pos).cell2(tempData.getCellRef(cellId2, cache)._pos).arrowToCell1(false).arrowToCell2(false);
+            result._connections.push_back(previewConnection);
         }
     });
     
