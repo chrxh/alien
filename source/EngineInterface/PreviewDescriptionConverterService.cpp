@@ -12,12 +12,12 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     CollectionDescription tempData = data;
     auto cache = tempData.createCache();
     
-    std::vector<CellDescription> allCells;
+    bool hasCells = false;
     tempData.forEach([&](CellDescription const& cell) {
-        allCells.push_back(cell);
+        hasCells = true;
     });
     
-    if (allCells.empty()) {
+    if (!hasCells) {
         return result;
     }
     
@@ -26,17 +26,15 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     std::unordered_map<uint64_t, RealVector2D> centeredPositions;
     tempData.forEach([&](CellDescription const& cell) {
         centeredPositions[cell._id] = cell._pos;
-    });
-    
-    for (const auto& cell : allCells) {
+        
         CellPreviewDescription previewCell;
-        previewCell.pos(centeredPositions[cell._id]).color(cell._color).nodeIndex(cell._genomeNodeIndex);
+        previewCell.pos(cell._pos).color(cell._color).nodeIndex(cell._genomeNodeIndex);
         result._cells.push_back(previewCell);
-    }
+    });
     
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
     
-    for (const auto& cell : allCells) {
+    tempData.forEach([&](CellDescription const& cell) {
         for (const auto& connection : cell._connections) {
             uint64_t cellId1 = cell._id;
             uint64_t cellId2 = connection._cellId;
@@ -56,7 +54,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
                 result._connections.push_back(previewConnection);
             }
         }
-    }
+    });
     
     return result;
 }
