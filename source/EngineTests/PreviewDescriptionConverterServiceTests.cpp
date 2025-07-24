@@ -14,12 +14,6 @@ public:
         : IntegrationTestFramework(std::nullopt, {100, 100})
     {}
     virtual ~PreviewDescriptionConverterServiceTests() = default;
-
-protected:
-    CellDescription createCell(uint64_t id, RealVector2D pos, int color = 0, uint16_t nodeIndex = 0)
-    {
-        return CellDescription().id(id).pos(pos).color(color).genomeNodeIndex(nodeIndex);
-    }
 };
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
@@ -35,7 +29,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 TEST_F(PreviewDescriptionConverterServiceTests, convertSingleCell)
 {
     CollectionDescription input;
-    auto cell = createCell(1, {10.0f, 20.0f}, 3, 5);
+    auto cell = CellDescription().id(1).pos({10.0f, 20.0f}).color(3).genomeNodeIndex(5);
     input.addCell(cell);
     
     auto result = PreviewDescriptionConverterService::get().convert(input);
@@ -54,9 +48,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
 {
     CollectionDescription input;
     
-    auto cell1 = createCell(1, {10.0f, 10.0f}, 1, 2);
-    auto cell2 = createCell(2, {20.0f, 10.0f}, 2, 3);
-    auto cell3 = createCell(3, {15.0f, 20.0f}, 3, 4);
+    auto cell1 = CellDescription().id(1).pos({10.0f, 10.0f}).color(1).genomeNodeIndex(2);
+    auto cell2 = CellDescription().id(2).pos({20.0f, 10.0f}).color(2).genomeNodeIndex(3);
+    auto cell3 = CellDescription().id(3).pos({15.0f, 20.0f}).color(3).genomeNodeIndex(4);
     
     input.addCell(cell1);
     input.addCell(cell2);
