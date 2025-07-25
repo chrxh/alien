@@ -385,7 +385,7 @@ TEST_F(GenomeDescriptionEditServiceTests, swapNodes)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_noCycles)
 {
     auto genome = createGenome_noCycles();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(3, genome._genes.size());
     
@@ -403,7 +403,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_noCycles)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_simpleCycle)
 {
     auto genome = createGenome_simpleCycle();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(2, genome._genes.size());
     
@@ -421,7 +421,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_simpleCycle)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_complexCycle)
 {
     auto genome = createGenome_complexCycle();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(3, genome._genes.size());
     
@@ -444,7 +444,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_complexCycle)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_mixedSeparation)
 {
     auto genome = createGenome_mixedSeparation();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(2, genome._genes.size());
     
@@ -462,7 +462,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_mixedSeparation)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_noSeparationReference)
 {
     auto genome = createGenome_noSeparationReference();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(3, genome._genes.size());
     
@@ -480,7 +480,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_noSeparationReference)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_selfReference)
 {
     auto genome = createGenome_selfReference();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(1, genome._genes.size());
     
@@ -493,7 +493,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_selfReference)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_emptyGenome)
 {
     auto genome = GenomeDescription();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
     
     EXPECT_EQ(0, genome._genes.size());
 }
@@ -506,7 +506,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_invalidGeneReference)
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(1, genome._genes.size());
     ASSERT_EQ(2, genome._genes.at(0)._nodes.size());
@@ -518,7 +518,7 @@ TEST_F(GenomeDescriptionEditServiceTests, castrate_invalidGeneReference)
 TEST_F(GenomeDescriptionEditServiceTests, castrate_multipleConstructors)
 {
     auto genome = createGenome_multipleConstructors();
-    GenomeDescriptionEditService::get().castrate(genome);
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(genome);
 
     ASSERT_EQ(3, genome._genes.size());
     

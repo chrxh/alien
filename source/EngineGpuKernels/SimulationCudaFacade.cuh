@@ -97,6 +97,7 @@ public:
     void resizeArraysIfNecessary(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
 
     // Simulated preview
+    void initPreviewData();
     void newPreview(CollectionTO const& dataTO);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     CollectionTO getPreviewData();
@@ -128,6 +129,7 @@ private:
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;
     SimulationParametersUpdateConfig _simulationParametersUpdateConfig = SimulationParametersUpdateConfig::All;
+    SimulationParameters _simulationParametersForPreview;
 
     SettingsForSimulation _settings;
 

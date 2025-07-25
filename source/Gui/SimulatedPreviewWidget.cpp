@@ -20,13 +20,13 @@ void _SimulatedPreviewWidget::process()
     if (!_lastGenome.has_value() || _lastGenome.value() != _editData->genome) {
         auto castratedGenome = _editData->genome;
 
-        GenomeDescriptionEditService::get().castrate(castratedGenome);
+        GenomeDescriptionEditService::get().adaptDescriptionForPreview(castratedGenome);
         auto preview = CollectionDescription().creatures({
             CreatureDescription()
                 .genome(castratedGenome)
                 .cells({
                     CellDescription()
-                        .pos({0, 0})
+                        .pos({100.0f, 100.0f})
                         .stiffness(1.0f)
                         .cellTypeData(ConstructorDescription().geneIndex(0)),
                 }),
@@ -43,14 +43,11 @@ void _SimulatedPreviewWidget::process()
     auto desc = _simulationFacade->getPreviewData();
     auto previewDesc = PreviewDescriptionConverterService::get().convert(desc);
     
-    // Use the new PreviewDescriptionWidget instead of static variables
-    if (!_previewWidget) {
-        _previewWidget = PreviewDescriptionWidget::create();
-    }
     _previewWidget->process(previewDesc);
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
     : _simulationFacade(simulationFacade), _editData(editData)
 {
+    _previewWidget = _PreviewDescriptionWidget::create();
 }

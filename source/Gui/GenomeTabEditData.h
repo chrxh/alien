@@ -62,6 +62,8 @@ struct _GenomeTabEditData
             auto shapeGenerationResult = shapeGenerator->generateNextConstructionData();
             if (index > 0 && index < numNodes - 1) {
                 node._referenceAngle = shapeGenerationResult.angle;
+            }
+            if (index > 0) {
                 node._numAdditionalConnections = shapeGenerationResult.numAdditionalConnections;
             }
             ++index;

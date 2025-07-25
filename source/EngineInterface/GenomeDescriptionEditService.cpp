@@ -81,7 +81,7 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
 
 namespace
 {
-    void castrateIntern(GenomeDescription& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
+    void castrate(GenomeDescription& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
     {
         if (geneIndex >= genome._genes.size() || inspectedGeneIndices.contains(geneIndex)) {
             return;
@@ -96,16 +96,29 @@ namespace
                     if (inspectedGeneIndices.contains(constructor._geneIndex) && gene._separation) {
                         constructor._geneIndex = genome._genes.size();  // Perform castration
                     } else {
-                        castrateIntern(genome, constructor._geneIndex, inspectedGeneIndices);   // Inspect further gene
+                        castrate(genome, constructor._geneIndex, inspectedGeneIndices);   // Inspect further gene
                     }
+                }
+            }
+        }
+    }
+
+    void constructionTriggering(GenomeDescription& genome)
+    {
+        for (auto& gene : genome._genes) {
+            for (auto& node : gene._nodes) {
+                if (node.getCellType() == CellTypeGenome_Constructor) {
+                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                    constructor._autoTriggerInterval = 30;
                 }
             }
         }
     }
 }
 
-void GenomeDescriptionEditService::castrate(GenomeDescription& genome)
+void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome)
 {
     std::set<int> inspectedGeneIndices;
-    castrateIntern(genome, 0, inspectedGeneIndices);
+    castrate(genome, 0, inspectedGeneIndices);
+    constructionTriggering(genome);
 }
