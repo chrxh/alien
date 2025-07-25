@@ -111,7 +111,7 @@ public:
     float getTps() const override;
 
     // Simulated preview
-    void newPreview(CollectionDescription const& data) override;
+    void newPreview(GenomeDescription const& genome) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
     CollectionDescription getPreviewData() override;
 

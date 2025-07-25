@@ -125,7 +125,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numAdditionalConnections)) {
                 gene._shape = ConstructorShape_Custom;
             }
-            node._numAdditionalConnections = numAdditionalConnections - 1;
+            node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
         }
 
         AlienGui::Checkbox(

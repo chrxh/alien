@@ -104,7 +104,7 @@ public:
     virtual float getTps() const = 0;
 
     // Simulated preview
-    virtual void newPreview(CollectionDescription const& data) = 0;
+    virtual void newPreview(GenomeDescription const& genome) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
     virtual CollectionDescription getPreviewData() = 0;
 

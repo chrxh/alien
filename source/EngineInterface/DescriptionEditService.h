@@ -23,7 +23,7 @@ public:
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, barrier, false);
     };
-    CollectionDescription createRect(CreateRectParameters const& parameters);
+    CollectionDescription createRect(CreateRectParameters const& parameters) const;
 
     struct CreateHexParameters
     {
@@ -37,7 +37,7 @@ public:
         MEMBER(CreateHexParameters, int, color, 0);
         MEMBER(CreateHexParameters, bool, barrier, false);
     };
-    CollectionDescription createHex(CreateHexParameters const& parameters);
+    CollectionDescription createHex(CreateHexParameters const& parameters) const;
 
     struct CreateUnconnectedCircleParameters
     {
@@ -50,9 +50,9 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
     };
-    CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
+    CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
 
-    void duplicate(CollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
+    void duplicate(CollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {
@@ -69,7 +69,7 @@ public:
         MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
         MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    CollectionDescription gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters);
+    CollectionDescription gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters) const;
 
     struct RandomMultiplyParameters
     {
@@ -89,42 +89,48 @@ public:
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
         CollectionDescription&& existentData,
-        bool& overlappingCheckSuccessful);
+        bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    void
-    addIfSpaceAvailable(CollectionDescription& result, Occupancy& cellOccupancy, CollectionDescription const& toAdd, float distance, IntVector2D const& worldSize);
+    void addIfSpaceAvailable(
+        CollectionDescription& result,
+        Occupancy& cellOccupancy,
+        CollectionDescription const& toAdd,
+        float distance,
+        IntVector2D const& worldSize) const;
 
-    void reconnectCells(CollectionDescription& data, float maxDistance);    // For non-creatures
+    void reconnectCells(CollectionDescription& data, float maxDistance) const;  // For non-creatures
 
-    void randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes);
-    void randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes);
-    void randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy);
-    void randomizeAges(CollectionDescription& data, int minAge, int maxAge);
-    void randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue);
-    void randomizeMutationIds(CollectionDescription& data);
+    void randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;
+    void randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;
+    void randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy) const;
+    void randomizeAges(CollectionDescription& data, int minAge, int maxAge) const;
+    void randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue) const;
+    void randomizeMutationIds(CollectionDescription& data) const;
 
-    uint64_t getId(ExtendedCellOrParticleDescription const& entity);
-    RealVector2D getPos(ExtendedCellOrParticleDescription const& entity);
-    std::vector<ExtendedCellOrParticleDescription> getObjects(CollectionDescription const& data);
-    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(CollectionDescription const& data);
+    uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
+    RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;
+    std::vector<ExtendedCellOrParticleDescription> getObjects(CollectionDescription const& data) const;
+    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(CollectionDescription const& data) const;
 
-    void removeMetadata(CollectionDescription& data);
+    void removeMetadata(CollectionDescription& data) const;
 
-    void assignNewObjectAndCreatureIds(CollectionDescription& data);
+    void assignNewObjectAndCreatureIds(CollectionDescription& data) const;
 
-    void setCenter(CollectionDescription& collection, RealVector2D const& center);
+    void setCenter(CollectionDescription& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(CollectionDescription const& collection) const;
     RealVector2D calcCenter(CreatureDescription const& creature) const;
-    void shift(CollectionDescription& collection, RealVector2D const& delta);
-    void rotate(CollectionDescription& collection, float angle);
-    void accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta);
+    void shift(CollectionDescription& collection, RealVector2D const& delta) const;
+    void rotate(CollectionDescription& collection, float angle) const;
+    void accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta) const;
+
+    void removeCell(CollectionDescription& collection, uint64_t cellId) const;
 
 private:
-    void removeMetadata(CellDescription& cell);
+    void removeMetadata(CellDescription& cell) const;
     bool isCellPresent(
         Occupancy const& cellPosBySlot,
         SpaceCalculator const& spaceCalculator,
         RealVector2D const& posToCheck,
-        float distance);
+        float distance) const;
 };

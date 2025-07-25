@@ -21,18 +21,7 @@ void _SimulatedPreviewWidget::process()
         auto castratedGenome = _editData->genome;
 
         GenomeDescriptionEditService::get().adaptDescriptionForPreview(castratedGenome);
-        auto preview = CollectionDescription().creatures({
-            CreatureDescription()
-                .genome(castratedGenome)
-                .cells({
-                    CellDescription()
-                        .pos({100.0f, 100.0f})
-                        .stiffness(1.0f)
-                        .cellTypeData(ConstructorDescription().geneIndex(0)),
-                }),
-        });
-        
-        _simulationFacade->newPreview(preview);
+        _simulationFacade->newPreview(castratedGenome);
     }
     auto fps = WindowController::get().getFps();
     auto duration = std::chrono::milliseconds(1000 / fps / 2);

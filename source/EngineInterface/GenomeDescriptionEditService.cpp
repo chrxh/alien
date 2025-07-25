@@ -109,7 +109,7 @@ namespace
             for (auto& node : gene._nodes) {
                 if (node.getCellType() == CellTypeGenome_Constructor) {
                     auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
-                    constructor._autoTriggerInterval = 30;
+                    constructor._autoTriggerInterval = 15;
                 }
             }
         }

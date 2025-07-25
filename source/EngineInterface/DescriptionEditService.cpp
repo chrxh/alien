@@ -11,7 +11,7 @@
 #include "GenomeDescription.h"
 #include "SpaceCalculator.h"
 
-CollectionDescription DescriptionEditService::createRect(CreateRectParameters const& parameters)
+CollectionDescription DescriptionEditService::createRect(CreateRectParameters const& parameters) const
 {
     CollectionDescription result;
     for (int i = 0; i < parameters._width; ++i) {
@@ -31,7 +31,7 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
     return result;
 }
 
-CollectionDescription DescriptionEditService::createHex(CreateHexParameters const& parameters)
+CollectionDescription DescriptionEditService::createHex(CreateHexParameters const& parameters) const
 {
     CollectionDescription result;
     auto incY = sqrt(3.0) * parameters._cellDistance / 2.0;
@@ -68,7 +68,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
     return result;
 }
 
-CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters)
+CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const
 {
     CollectionDescription result;
 
@@ -150,7 +150,7 @@ namespace
 
 }
 
-void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size)
+void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D const& origSize, IntVector2D const& size) const
 {
     correctConnectionsForNonCreatures(data, origSize);
 
@@ -233,7 +233,7 @@ namespace
     }
 }
 
-CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters)
+CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters) const
 {
     CollectionDescription result;
     auto clone = input;
@@ -266,7 +266,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
     RandomMultiplyParameters const& parameters,
     IntVector2D const& worldSize,
     CollectionDescription&& existentData,
-    bool& overlappingCheckSuccessful)
+    bool& overlappingCheckSuccessful) const
 {
     overlappingCheckSuccessful = true;
     SpaceCalculator spaceCalculator(worldSize);
@@ -333,7 +333,7 @@ void DescriptionEditService::addIfSpaceAvailable(
     Occupancy& cellOccupancy,
     CollectionDescription const& toAdd,
     float distance,
-    IntVector2D const& worldSize)
+    IntVector2D const& worldSize) const
 {
     SpaceCalculator space(worldSize);
 
@@ -345,7 +345,7 @@ void DescriptionEditService::addIfSpaceAvailable(
     }
 }
 
-void DescriptionEditService::reconnectCells(CollectionDescription& data, float maxDistance)
+void DescriptionEditService::reconnectCells(CollectionDescription& data, float maxDistance) const
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
 
@@ -370,7 +370,7 @@ void DescriptionEditService::reconnectCells(CollectionDescription& data, float m
     }
 }
 
-void DescriptionEditService::randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes) const
 {
     for (auto& creature : data._creatures) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -386,7 +386,7 @@ void DescriptionEditService::randomizeCellColors(CollectionDescription& data, st
     }
 }
 
-void DescriptionEditService::randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes)
+void DescriptionEditService::randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes) const
 {
     for (auto& creature : data._creatures) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
@@ -398,7 +398,7 @@ void DescriptionEditService::randomizeGenomeColors(CollectionDescription& data, 
     }
 }
 
-void DescriptionEditService::randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy)
+void DescriptionEditService::randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy) const
 {
     for (auto& creature : data._creatures) {
         auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
@@ -414,7 +414,7 @@ void DescriptionEditService::randomizeEnergies(CollectionDescription& data, floa
     }
 }
 
-void DescriptionEditService::randomizeAges(CollectionDescription& data, int minAge, int maxAge)
+void DescriptionEditService::randomizeAges(CollectionDescription& data, int minAge, int maxAge) const
 {
     for (auto& creature : data._creatures) {
         auto age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
@@ -430,7 +430,7 @@ void DescriptionEditService::randomizeAges(CollectionDescription& data, int minA
     }
 }
 
-void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue)
+void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue) const
 {
     for (auto& creature : data._creatures) {
         auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
@@ -450,19 +450,19 @@ void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, in
     }
 }
 
-void DescriptionEditService::randomizeMutationIds(CollectionDescription& data)
+void DescriptionEditService::randomizeMutationIds(CollectionDescription& data) const
 {
     for (auto& creature : data._creatures) {
         creature._mutationId = NumberGenerator::get().getRandomInt() % 0xffff;
     }
 }
 
-void DescriptionEditService::removeMetadata(CollectionDescription& data)
+void DescriptionEditService::removeMetadata(CollectionDescription& data) const
 {
     data.forEach([&](CellDescription& cell) { removeMetadata(cell); });
 }
 
-void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data)
+void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data) const
 {
     std::unordered_map<uint64_t, uint64_t> oldToNewObjectIds;
     std::unordered_map<uint64_t, uint64_t> oldToNewCreatureIds;
@@ -500,7 +500,7 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
     }
 }
 
-void DescriptionEditService::setCenter(CollectionDescription& collection, RealVector2D const& center)
+void DescriptionEditService::setCenter(CollectionDescription& collection, RealVector2D const& center) const
 {
     auto origCenter = calcCenter(collection);
     auto delta = center - origCenter;
@@ -535,7 +535,7 @@ RealVector2D DescriptionEditService::calcCenter(CreatureDescription const& creat
     return result;
 }
 
-void DescriptionEditService::shift(CollectionDescription& collection, RealVector2D const& delta)
+void DescriptionEditService::shift(CollectionDescription& collection, RealVector2D const& delta) const
 {
     collection.forEach([&](CellDescription& cell) { cell._pos += delta; });
 
@@ -544,7 +544,7 @@ void DescriptionEditService::shift(CollectionDescription& collection, RealVector
     }
 }
 
-void DescriptionEditService::rotate(CollectionDescription& collection, float angle)
+void DescriptionEditService::rotate(CollectionDescription& collection, float angle) const
 {
     auto rotationMatrix = Math::calcRotationMatrix(angle);
     auto center = calcCenter(collection);
@@ -560,7 +560,7 @@ void DescriptionEditService::rotate(CollectionDescription& collection, float ang
     }
 }
 
-void DescriptionEditService::accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta)
+void DescriptionEditService::accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta) const
 {
     auto center = calcCenter(collection);
 
@@ -574,13 +574,45 @@ void DescriptionEditService::accelerate(CollectionDescription& collection, RealV
     }
 }
 
-void DescriptionEditService::removeMetadata(CellDescription& cell)
+void DescriptionEditService::removeCell(CollectionDescription& collection, uint64_t cellId) const
+{
+    std::erase_if(collection._cells, [&](auto const& cell) { return cell._id == cellId; });
+    for (auto& creature : collection._creatures) {
+        std::erase_if(creature._cells, [&](auto const& cell) { return cell._id == cellId; });
+    }
+    collection.forEach([&](CellDescription& cell) {
+        for (int i = 0, numConnections = cell._connections.size(); i < numConnections; ++i) {
+            auto const& connection = cell._connections[i];
+            if (connection._cellId == cellId) {
+                auto angleToAdd = connection._angleFromPrevious;
+                for (int k = i; k < numConnections - 1; ++k) {
+                    cell._connections.at(k) = cell._connections.at(k + 1);
+                }
+
+                if (i < numConnections - 1) {
+                    cell._connections.at(i)._angleFromPrevious += angleToAdd;
+                } else {
+                    cell._connections.at(0)._angleFromPrevious += angleToAdd;
+                }
+
+                cell._connections.pop_back();
+                return;
+            }
+        }
+    });
+}
+
+void DescriptionEditService::removeMetadata(CellDescription& cell) const
 {
     cell._metadata._description.clear();
     cell._metadata._name.clear();
 }
 
-bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance)
+bool DescriptionEditService::isCellPresent(
+    Occupancy const& cellPosBySlot,
+    SpaceCalculator const& spaceCalculator,
+    RealVector2D const& posToCheck,
+    float distance) const
 {
     auto intPos = toIntVector2D(posToCheck);
 
@@ -613,7 +645,7 @@ bool DescriptionEditService::isCellPresent(Occupancy const& cellPosBySlot, Space
     return false;
 }
 
-uint64_t DescriptionEditService::getId(ExtendedCellOrParticleDescription const& entity)
+uint64_t DescriptionEditService::getId(ExtendedCellOrParticleDescription const& entity) const
 {
     if (std::holds_alternative<ExtendedCellDescription>(entity)) {
         return std::get<ExtendedCellDescription>(entity).cell._id;
@@ -621,7 +653,7 @@ uint64_t DescriptionEditService::getId(ExtendedCellOrParticleDescription const& 
     return std::get<ParticleDescription>(entity)._id;
 }
 
-RealVector2D DescriptionEditService::getPos(ExtendedCellOrParticleDescription const& entity)
+RealVector2D DescriptionEditService::getPos(ExtendedCellOrParticleDescription const& entity) const
 {
     if (std::holds_alternative<ExtendedCellDescription>(entity)) {
         return std::get<ExtendedCellDescription>(entity).cell._pos;
@@ -629,8 +661,7 @@ RealVector2D DescriptionEditService::getPos(ExtendedCellOrParticleDescription co
     return std::get<ParticleDescription>(entity)._pos;
 }
 
-std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObjects(
-    CollectionDescription const& data)
+std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObjects(CollectionDescription const& data) const
 {
     std::vector<ExtendedCellOrParticleDescription> result;
     for (auto const& particle : data._particles) {
@@ -653,31 +684,7 @@ std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObject
     return result;
 }
 
-namespace
-{
-    template <typename T1, typename T2>
-    bool contains(std::vector<T1> const& a, std::vector<T2> const& b)
-    {
-        for (auto i = a.begin(), y = a.end(); i != y; ++i) {
-            bool match = true;
-
-            auto ii = i;
-            for (auto j = b.begin(), z = b.end(); j != z; ++j) {
-                if (ii == a.end() || *j != *ii) {
-                    match = false;
-                    break;
-                }
-                ii++;
-            }
-            if (match) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-
-std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getCellsForCreatureRepresentatives(CollectionDescription const& data)
+std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getCellsForCreatureRepresentatives(CollectionDescription const& data) const
 {
     return {};
 }

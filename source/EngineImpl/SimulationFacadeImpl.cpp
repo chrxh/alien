@@ -358,8 +358,15 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
-void _SimulationFacadeImpl::newPreview(CollectionDescription const& data)
+void _SimulationFacadeImpl::newPreview(GenomeDescription const& genome)
 {
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .genome(genome)
+            .cells({
+                CellDescription().stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(0)),
+            }),
+    });
     _worker.newPreview(data);
 }
 

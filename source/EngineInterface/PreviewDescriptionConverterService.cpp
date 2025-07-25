@@ -9,17 +9,13 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     PreviewDescription result;
     
     auto cache = data.createCache();
-    
-    bool hasCells = false;
-    data.forEach([&](CellDescription const& cell) {
-        hasCells = true;
-    });
-    
-    if (!hasCells) {
-        return result;
-    }
-    
-    DescriptionEditService::get().setCenter(data, {0.0f, 0.0f});
+
+    auto const& editService = DescriptionEditService::get();
+
+    uint64_t smallestCellId = 0xffffffffffffffff;
+    data.forEach([&](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
+    editService.removeCell(data, smallestCellId);
+    editService.setCenter(data, {0.0f, 0.0f});
     
     data.forEach([&](CellDescription const& cell) {
         CellPreviewDescription previewCell;

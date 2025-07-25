@@ -12,6 +12,7 @@
 
 #include "Base/Exceptions.h"
 #include "Base/LoggingService.h"
+#include "Base/Macros.h"
 
 #include "EngineInterface/InspectedEntityIds.h"
 #include "EngineInterface/SimulationParameters.h"
@@ -548,6 +549,11 @@ void _SimulationCudaFacade::initPreviewData()
 
 void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
 {
+    // Center position
+    CHECK(*dataTO.numCells == 1);
+    dataTO.cells[0].pos.x = toFloat(PreviewSize.x / 2);
+    dataTO.cells[0].pos.y = toFloat(PreviewSize.y / 2);
+
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
