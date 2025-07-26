@@ -8,7 +8,6 @@
 #include <imgui.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/PreviewDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienGui.h"

@@ -375,7 +375,7 @@ void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds co
     _worker.calcTimestepsForPreview(duration);
 }
 
-CollectionDescription _SimulationFacadeImpl::getPreviewData()
+PreviewDescription _SimulationFacadeImpl::getPreviewData()
 {
     return _worker.getPreviewData();
 }

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -11,22 +11,23 @@
 
 #include "Base/Definitions.h"
 
-#include "EngineInterface/Definitions.h"
+#include "EngineInterface/ArraySizesForGpu.h"
 #include "EngineInterface/CudaSettings.h"
+#include "EngineInterface/Definitions.h"
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/StatisticsRawData.h"
-#include "EngineInterface/SettingsForSimulation.h"
+#include "EngineInterface/PreviewDescriptions.h"
 #include "EngineInterface/SelectionShallowData.h"
+#include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/StatisticsHistory.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
+#include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 #include "EngineGpuKernels/Definitions.h"
 
 #include "Definitions.h"
-#include "EngineInterface/ArraySizesForGpu.h"
 
 struct ExceptionData
 {
@@ -39,6 +40,7 @@ struct CollectionTO;
 class EngineWorker
 {
     friend class EngineWorkerGuard;
+
 public:
     void newSimulation(uint64_t timestep, SettingsForSimulation const& _settings);
     void clear();
@@ -77,7 +79,7 @@ public:
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);
 
-    void beginShutdown(); //caller should wait for termination of thread
+    void beginShutdown();  //caller should wait for termination of thread
     void endShutdown();
 
     int getTpsRestriction() const;
@@ -114,7 +116,7 @@ public:
     // Simulated preview
     void newPreview(CollectionDescription const& data);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
-    CollectionDescription getPreviewData();
+    PreviewDescription getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -171,7 +173,7 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _measureTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
-  
+
     //internals
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;

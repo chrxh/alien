@@ -9,6 +9,7 @@
 #include "SimulationFacade.h"
 #include "MutationType.h"
 #include "DataPointCollection.h"
+#include "PreviewDescriptions.h"
 #include "StatisticsHistory.h"
 #include "SimulationParametersUpdateConfig.h"
 
@@ -106,7 +107,7 @@ public:
     // Simulated preview
     virtual void newPreview(GenomeDescription const& genome) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
-    virtual CollectionDescription getPreviewData() = 0;
+    virtual PreviewDescription getPreviewData() = 0;
 
     // Only for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;

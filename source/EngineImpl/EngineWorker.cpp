@@ -12,6 +12,8 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/NumberGenerator.h"
 
+#include "PreviewDescriptionConverterService.h"
+
 namespace
 {
     std::chrono::milliseconds const FrameTimeout(500);
@@ -442,14 +444,18 @@ void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& dura
     _simulationCudaFacade->calcTimestepsForPreview(duration);
 }
 
-CollectionDescription EngineWorker::getPreviewData()
+PreviewDescription EngineWorker::getPreviewData()
 {
-    EngineWorkerGuard access(this);
+    CollectionDescription data;
+    {
+        EngineWorkerGuard access(this);
 
-    auto dataTO = _simulationCudaFacade->getPreviewData();
-    ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
+        auto dataTO = _simulationCudaFacade->getPreviewData();
+        ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
 
-    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
+        data = DescriptionConverterService::get().convertTOtoDescription(dataTO);
+    }
+    return PreviewDescriptionConverterService::get().convert(data);
 }
 
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)

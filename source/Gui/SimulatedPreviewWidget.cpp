@@ -29,9 +29,8 @@ void _SimulatedPreviewWidget::process()
 
     _lastGenome = _editData->genome;
 
-    auto desc = _simulationFacade->getPreviewData();
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(desc);
-    
+    auto previewDesc = _simulationFacade->getPreviewData();
+   
     _previewWidget->process(previewDesc);
 }
 
