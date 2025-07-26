@@ -16,6 +16,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .color(3)
                       .barrier(true)
                       .cellState(false)
+                      .geneIndex(42)
                       .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
                       .signalRoutingRestriction(
                           SignalRoutingRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))

@@ -307,6 +307,7 @@ struct Cell
     // Creature data
     Creature* creature;
     uint16_t genomeNodeIndex;
+    int geneIndex;
 
     // Cell type data
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells

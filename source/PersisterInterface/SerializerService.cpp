@@ -487,9 +487,10 @@ namespace
     auto constexpr Id_Cell_CellTriggered = 10;
     auto constexpr Id_Cell_DetectedByCreatureId = 11;
     auto constexpr Id_Cell_GenomeNodeIndex = 12;
-    auto constexpr Id_Cell_SignalRelaxationTime = 13;
-    auto constexpr Id_Cell_AngleToFront = 14;
-    auto constexpr Id_Cell_Sticky = 15;
+    auto constexpr Id_Cell_GeneIndex = 13;
+    auto constexpr Id_Cell_SignalRelaxationTime = 14;
+    auto constexpr Id_Cell_AngleToFront = 15;
+    auto constexpr Id_Cell_Sticky = 16;
 
     auto constexpr Id_Signal_Channels = 0;
 
@@ -871,6 +872,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_DetectedByCreatureId, data._detectedByCreatureId, defaultObject._detectedByCreatureId);
         loadSave(task, auxiliaries, Id_Cell_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
         loadSave(task, auxiliaries, Id_Cell_GenomeNodeIndex, data._genomeNodeIndex, defaultObject._genomeNodeIndex);
+        loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);
 
