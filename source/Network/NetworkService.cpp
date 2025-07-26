@@ -172,7 +172,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
             _password = password;
         }
 
-        errorCode = 0;
+        errorCode = LoginErrorCode_UnknownUser;
         std::stringstream stream(result->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
@@ -181,6 +181,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
         return boolResult;
     } catch (...) {
         logNetworkError();
+        errorCode = LoginErrorCode_Other;
         return false;
     }
 }

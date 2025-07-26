@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include "DescriptionEditService.h"
+#include "EngineInterface/DescriptionEditService.h"
 
 PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescription data) const
 {
