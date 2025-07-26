@@ -298,6 +298,7 @@ struct CellDescription
 
     // Creature data
     MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
+    MEMBER(CellDescription, int, geneIndex, 0);
 
     // Cell type-specific data
     MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);

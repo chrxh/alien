@@ -194,6 +194,7 @@ namespace
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTriggered = cell->cellTriggered;
         cellTO.genomeNodeIndex = cell->genomeNodeIndex;
+        cellTO.geneIndex = cell->geneIndex;
 
         copyDataToHeap(
             cell->metadata.nameSize,

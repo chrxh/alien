@@ -256,6 +256,7 @@ struct CellTO
     bool belongToCreature;
     uint64_t creatureIndex;
     uint16_t genomeNodeIndex;
+    int geneIndex;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells

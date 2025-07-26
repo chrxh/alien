@@ -281,6 +281,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTriggered = cellTO.cellTriggered;
     result._genomeNodeIndex = cellTO.genomeNodeIndex;
+    result._geneIndex = cellTO.geneIndex;
 
     auto const& metacollectionTO = cellTO.metadata;
     auto metadata = CellMetadataDescription();
@@ -811,6 +812,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTriggered = cellDesc._cellTriggered;
     cellTO.genomeNodeIndex = cellDesc._genomeNodeIndex;
+    cellTO.geneIndex = cellDesc._geneIndex;
     cellTO.angleToFront = cellDesc._angleToFront;
 
     auto cellType = cellDesc.getCellType();

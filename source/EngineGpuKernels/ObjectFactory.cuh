@@ -242,6 +242,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTriggered = cellTO.cellTriggered;
     cell->genomeNodeIndex = cellTO.genomeNodeIndex;
+    cell->geneIndex = cellTO.geneIndex;
 
     copyDataToHeap(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, collectionTO.heap, cell->metadata.nameSize, cell->metadata.name);
 
@@ -523,6 +524,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     cell->cellState = CellState_Constructing;
     cell->creature = creature;
     cell->genomeNodeIndex = nodeIndex;
+    cell->geneIndex = geneIndex;
     cell->numConnections = 0;
 
     cell->neuralNetwork = _data->objects.heap.getTypedSubArray<NeuralNetwork>(1);
