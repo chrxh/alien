@@ -13,19 +13,20 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     auto const& editService = DescriptionEditService::get();
 
     uint64_t smallestCellId = 0xffffffffffffffff;
-    data.forEach([&](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
+    data.forEachCell([&smallestCellId](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
     editService.removeCell(data, smallestCellId);
     editService.setCenter(data, {0.0f, 0.0f});
+
+    std::unordered_map<int, std::unordered_map<int, uint64_t>> geneAndNodeIndexToId;
+    data.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._genomeNodeIndex] = cell._id; });
     
-    data.forEach([&](CellDescription const& cell) {
-        CellPreviewDescription previewCell;
-        previewCell.pos(cell._pos).color(cell._color).nodeIndex(cell._genomeNodeIndex);
-        result._cells.push_back(previewCell);
+    data.forEachCell([&](CellDescription const& cell) {
+        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(cell._color).nodeIndex(cell._genomeNodeIndex));
     });
     
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
     
-    data.forEach([&](CellDescription const& cell) {
+    data.forEachCell([&](CellDescription const& cell) {
         for (const auto& connection : cell._connections) {
             uint64_t cellId1 = cell._id;
             uint64_t cellId2 = connection._cellId;

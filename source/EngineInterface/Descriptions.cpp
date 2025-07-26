@@ -170,7 +170,7 @@ CreatureDescription::CreatureDescription()
     _id = NumberGenerator::get().createCreatureId();
 }
 
-void CollectionDescription::forEach(std::function<void(CellDescription const&)> const& applyFunc) const
+void CollectionDescription::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
 {
     for (auto& cell : _cells) {
         applyFunc(cell);
@@ -182,7 +182,7 @@ void CollectionDescription::forEach(std::function<void(CellDescription const&)> 
     }
 }
 
-void CollectionDescription::forEach(std::function<void(CellDescription&)> const& applyFunc)
+void CollectionDescription::forEachCell(std::function<void(CellDescription&)> const& applyFunc)
 {
     for (auto& cell : _cells) {
         applyFunc(cell);

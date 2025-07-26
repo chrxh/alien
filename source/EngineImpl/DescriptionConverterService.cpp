@@ -182,7 +182,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
             convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creature._id, creatureTOIndexById);
         }
     }
-    data.forEach([&](auto const& cell) {
+    data.forEachCell([&](auto const& cell) {
         setConnections(cellTOs, cell, cellIndexTOById);
     });
     for (auto const& particle : data._particles) {

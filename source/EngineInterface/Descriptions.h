@@ -379,8 +379,8 @@ struct CollectionDescription
     MEMBER(CollectionDescription, std::vector<ParticleDescription>, particles, {});
     MEMBER(CollectionDescription, std::vector<CreatureDescription>, creatures, {});
 
-    void forEach(std::function<void(CellDescription const&)> const& applyFunc) const;
-    void forEach(std::function<void(CellDescription&)> const& applyFunc);
+    void forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const;
+    void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
 
     CollectionDescription& add(CollectionDescription const& other);
     CollectionDescription& addCells(std::vector<CellDescription> const& value);

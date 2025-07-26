@@ -274,7 +274,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
 
     //create map for overlapping check
     if (parameters._overlappingCheck) {
-        input.forEach([&](CellDescription const& cell) {
+        input.forEachCell([&](CellDescription const& cell) {
             auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
             cellPosBySlot[intPos].emplace_back(cell._pos);
         });
@@ -300,7 +300,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
             //overlapping check
             overlapping = false;
             if (parameters._overlappingCheck) {
-                copy.forEach([&](CellDescription const& cell) {
+                copy.forEachCell([&](CellDescription const& cell) {
                     auto pos = spaceCalculator.getCorrectedPosition(cell._pos);
                     if (isCellPresent(cellPosBySlot, spaceCalculator, pos, 2.0f)) {
                         overlapping = true;
@@ -317,7 +317,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
 
         //add copy to existentData for overlapping check
         if (parameters._overlappingCheck) {
-            copy.forEach([&](CellDescription const& cell) {
+            copy.forEachCell([&](CellDescription const& cell) {
                 existentData._cells.emplace_back(cell);
                 auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
                 cellPosBySlot[intPos].emplace_back(cell._pos);
@@ -459,7 +459,7 @@ void DescriptionEditService::randomizeMutationIds(CollectionDescription& data) c
 
 void DescriptionEditService::removeMetadata(CollectionDescription& data) const
 {
-    data.forEach([&](CellDescription& cell) { removeMetadata(cell); });
+    data.forEachCell([&](CellDescription& cell) { removeMetadata(cell); });
 }
 
 void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data) const
@@ -480,13 +480,13 @@ void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription
     for (auto& creature : data._creatures) {
         replaceCreatureId(creature._id);
     }
-    data.forEach([&](CellDescription& cell) {
+    data.forEachCell([&](CellDescription& cell) {
         auto newObjectId = NumberGenerator::get().createObjectId();
         oldToNewObjectIds.emplace(cell._id, newObjectId);
         cell._id = newObjectId;
     });
 
-    data.forEach([&](CellDescription& cell) {
+    data.forEachCell([&](CellDescription& cell) {
         for (auto& connection : cell._connections) {
             auto findResult = oldToNewObjectIds.find(connection._cellId);
             if (findResult != oldToNewObjectIds.end()) {
@@ -514,7 +514,7 @@ RealVector2D DescriptionEditService::calcCenter(CollectionDescription const& col
     for (auto const& creatures : collection._creatures) {
         numEntities += creatures._cells.size();
     }
-    collection.forEach([&](CellDescription const& cell) { result += cell._pos; });
+    collection.forEachCell([&](CellDescription const& cell) { result += cell._pos; });
 
     for (auto const& particle : collection._particles) {
         result += particle._pos;
@@ -537,7 +537,7 @@ RealVector2D DescriptionEditService::calcCenter(CreatureDescription const& creat
 
 void DescriptionEditService::shift(CollectionDescription& collection, RealVector2D const& delta) const
 {
-    collection.forEach([&](CellDescription& cell) { cell._pos += delta; });
+    collection.forEachCell([&](CellDescription& cell) { cell._pos += delta; });
 
     for (auto& particle : collection._particles) {
         particle._pos += delta;
@@ -554,7 +554,7 @@ void DescriptionEditService::rotate(CollectionDescription& collection, float ang
         auto rotatedRelPos = rotationMatrix * relPos;
         pos = center + rotatedRelPos;
     };
-    collection.forEach([&](CellDescription& cell) { rotate(cell._pos); });
+    collection.forEachCell([&](CellDescription& cell) { rotate(cell._pos); });
     for (auto& particle : collection._particles) {
         rotate(particle._pos);
     }
@@ -568,7 +568,7 @@ void DescriptionEditService::accelerate(CollectionDescription& collection, RealV
         auto relPos = pos - center;
         vel += Physics::tangentialVelocity(relPos, velDelta, angularVelDelta);
     };
-    collection.forEach([&](CellDescription& cell) { accelerate(cell._pos, cell._vel); });
+    collection.forEachCell([&](CellDescription& cell) { accelerate(cell._pos, cell._vel); });
     for (auto& particle : collection._particles) {
         accelerate(particle._pos, particle._vel);
     }
@@ -580,7 +580,7 @@ void DescriptionEditService::removeCell(CollectionDescription& collection, uint6
     for (auto& creature : collection._creatures) {
         std::erase_if(creature._cells, [&](auto const& cell) { return cell._id == cellId; });
     }
-    collection.forEach([&](CellDescription& cell) {
+    collection.forEachCell([&](CellDescription& cell) {
         for (int i = 0, numConnections = cell._connections.size(); i < numConnections; ++i) {
             auto const& connection = cell._connections[i];
             if (connection._cellId == cellId) {
