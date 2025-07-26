@@ -455,7 +455,7 @@ PreviewDescription EngineWorker::getPreviewData()
 
         data = DescriptionConverterService::get().convertTOtoDescription(dataTO);
     }
-    return PreviewDescriptionConverterService::get().convert(data);
+    return PreviewDescriptionConverterService::get().convert(std::move(data));
 }
 
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)

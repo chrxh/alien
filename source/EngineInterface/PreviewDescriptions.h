@@ -11,6 +11,7 @@ struct CellPreviewDescription
     
     MEMBER(CellPreviewDescription, RealVector2D, pos, {});
     MEMBER(CellPreviewDescription, int, color, 0);
+    MEMBER(CellPreviewDescription, int, geneIndex, 0);
     MEMBER(CellPreviewDescription, int, nodeIndex, 0);
 };
 

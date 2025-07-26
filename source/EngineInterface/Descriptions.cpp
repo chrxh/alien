@@ -230,17 +230,14 @@ void CollectionDescription::clear()
 {
     _cells.clear();
     _particles.clear();
+    _creatures.clear();
 }
 
 bool CollectionDescription::isEmpty() const
 {
-    if (!_cells.empty()) {
-        return false;
-    }
-    if (!_particles.empty()) {
-        return false;
-    }
-    return true;
+    auto numCells = 0;
+    forEachCell([&numCells](auto const& cell) { ++numCells; });
+    return numCells == 0 && _particles.empty();
 }
 
 std::unordered_set<uint64_t> CollectionDescription::getCellIds() const

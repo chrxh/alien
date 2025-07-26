@@ -22,7 +22,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 {
     CollectionDescription input;
 
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
 
     EXPECT_TRUE(result._cells.empty());
     EXPECT_TRUE(result._connections.empty());
@@ -34,7 +34,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertSingleCell)
     auto cell = CellDescription().id(1).pos({10.0f, 20.0f}).color(3).nodeIndex(5);
     input.addCell(cell);
 
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
 
     EXPECT_EQ(1, result._cells.size());
     EXPECT_EQ(0, result._connections.size());
@@ -58,7 +58,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
     input.addCell(cell2);
     input.addCell(cell3);
 
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
 
     EXPECT_EQ(3, result._cells.size());
     EXPECT_EQ(0, result._connections.size());
@@ -89,7 +89,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCellsWithConnections)
     });
     data.addConnection(1, 2);
 
-    auto result = PreviewDescriptionConverterService::get().convert(data);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(data));
 
     EXPECT_EQ(2, result._cells.size());
     EXPECT_EQ(1, result._connections.size());
@@ -120,7 +120,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
     auto cache = input.createCache();
     input.addConnection(1, 2, cache);
 
-    auto result = PreviewDescriptionConverterService::get().convert(input);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
 
     EXPECT_EQ(2, result._cells.size());
     EXPECT_EQ(1, result._connections.size());
@@ -146,7 +146,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
     data._creatures.push_back(creature);
     data.addConnection(2, 3);
 
-    auto result = PreviewDescriptionConverterService::get().convert(data);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(data));
 
     EXPECT_EQ(3, result._cells.size());
     EXPECT_EQ(1, result._connections.size());
@@ -175,7 +175,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, avoidDuplicateConnections)
     data.addConnection(2, 3);
     data.addConnection(3, 1);
 
-    auto result = PreviewDescriptionConverterService::get().convert(data);
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(data));
 
     EXPECT_EQ(3, result._cells.size());
     EXPECT_EQ(3, result._connections.size());

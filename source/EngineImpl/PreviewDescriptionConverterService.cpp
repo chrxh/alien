@@ -4,24 +4,30 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 
-PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescription data) const
+PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescription&& data) const
 {
     PreviewDescription result;
     
     auto cache = data.createCache();
-
     auto const& editService = DescriptionEditService::get();
 
+    // Remove seed
     uint64_t smallestCellId = 0xffffffffffffffff;
     data.forEachCell([&smallestCellId](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
     editService.removeCell(data, smallestCellId);
-    editService.setCenter(data, {0.0f, 0.0f});
+    if (data.isEmpty()) {
+        return result;
+    }
 
-    std::unordered_map<int, std::unordered_map<int, uint64_t>> geneAndNodeIndexToId;
+    // Get last constructed cell on principal gene
+    std::map<int, std::map<int, uint64_t>> geneAndNodeIndexToId;
     data.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._nodeIndex] = cell._id; });
-    
+
+    auto lastConstructedCellId = (--geneAndNodeIndexToId.at(0).end())->second;
+    auto& lastConstructedCell = data.getCellRef(lastConstructedCellId);
+
     data.forEachCell([&](CellDescription const& cell) {
-        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(cell._color).nodeIndex(cell._nodeIndex));
+        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(cell._color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex));
     });
     
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
