@@ -31,7 +31,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 TEST_F(PreviewDescriptionConverterServiceTests, convertSingleCell)
 {
     CollectionDescription input;
-    auto cell = CellDescription().id(1).pos({10.0f, 20.0f}).color(3).genomeNodeIndex(5);
+    auto cell = CellDescription().id(1).pos({10.0f, 20.0f}).color(3).nodeIndex(5);
     input.addCell(cell);
 
     auto result = PreviewDescriptionConverterService::get().convert(input);
@@ -50,9 +50,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
 {
     CollectionDescription input;
 
-    auto cell1 = CellDescription().id(1).pos({10.0f, 10.0f}).color(1).genomeNodeIndex(2);
-    auto cell2 = CellDescription().id(2).pos({20.0f, 10.0f}).color(2).genomeNodeIndex(3);
-    auto cell3 = CellDescription().id(3).pos({15.0f, 20.0f}).color(3).genomeNodeIndex(4);
+    auto cell1 = CellDescription().id(1).pos({10.0f, 10.0f}).color(1).nodeIndex(2);
+    auto cell2 = CellDescription().id(2).pos({20.0f, 10.0f}).color(2).nodeIndex(3);
+    auto cell3 = CellDescription().id(3).pos({15.0f, 20.0f}).color(3).nodeIndex(4);
 
     input.addCell(cell1);
     input.addCell(cell2);
@@ -84,8 +84,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMultipleCells)
 TEST_F(PreviewDescriptionConverterServiceTests, convertCellsWithConnections)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).color(1).genomeNodeIndex(2),
-        CellDescription().id(2).pos({20.0f, 10.0f}).color(2).genomeNodeIndex(3),
+        CellDescription().id(1).pos({10.0f, 10.0f}).color(1).nodeIndex(2),
+        CellDescription().id(2).pos({20.0f, 10.0f}).color(2).nodeIndex(3),
     });
     data.addConnection(1, 2);
 
@@ -111,8 +111,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
 
     CreatureDescription creature;
     creature.id(100).cells({
-        CellDescription().id(1).pos({5.0f, 5.0f}).color(4).genomeNodeIndex(6),
-        CellDescription().id(2).pos({15.0f, 5.0f}).color(5).genomeNodeIndex(7),
+        CellDescription().id(1).pos({5.0f, 5.0f}).color(4).nodeIndex(6),
+        CellDescription().id(2).pos({15.0f, 5.0f}).color(5).nodeIndex(7),
     });
 
     input._creatures.push_back(creature);
@@ -134,13 +134,13 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureCells)
 TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({0.0f, 0.0f}).color(1).genomeNodeIndex(1),
+        CellDescription().id(1).pos({0.0f, 0.0f}).color(1).nodeIndex(1),
     });
 
     CreatureDescription creature;
     creature.id(100).cells({
-        CellDescription().id(2).pos({10.0f, 0.0f}).color(2).genomeNodeIndex(2),
-        CellDescription().id(3).pos({20.0f, 0.0f}).color(3).genomeNodeIndex(3),
+        CellDescription().id(2).pos({10.0f, 0.0f}).color(2).nodeIndex(2),
+        CellDescription().id(3).pos({20.0f, 0.0f}).color(3).nodeIndex(3),
     });
 
     data._creatures.push_back(creature);
@@ -166,9 +166,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertMixedCellsAndCreatures)
 TEST_F(PreviewDescriptionConverterServiceTests, avoidDuplicateConnections)
 {
     auto data = CollectionDescription().addCells({
-        CellDescription().id(1).pos({0.0f, 0.0f}).color(1).genomeNodeIndex(1),
-        CellDescription().id(2).pos({10.0f, 0.0f}).color(2).genomeNodeIndex(2),
-        CellDescription().id(3).pos({5.0f, 10.0f}).color(3).genomeNodeIndex(3),
+        CellDescription().id(1).pos({0.0f, 0.0f}).color(1).nodeIndex(1),
+        CellDescription().id(2).pos({10.0f, 0.0f}).color(2).nodeIndex(2),
+        CellDescription().id(3).pos({5.0f, 10.0f}).color(3).nodeIndex(3),
     });
 
     data.addConnection(1, 2);

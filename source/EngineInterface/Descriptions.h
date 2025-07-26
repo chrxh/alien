@@ -297,7 +297,7 @@ struct CellDescription
     MEMBER(CellDescription, CellState, cellState, CellState_Ready);
 
     // Creature data
-    MEMBER(CellDescription, uint16_t, genomeNodeIndex, 0);
+    MEMBER(CellDescription, uint16_t, nodeIndex, 0);
     MEMBER(CellDescription, int, geneIndex, 0);
 
     // Cell type-specific data

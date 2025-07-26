@@ -255,7 +255,7 @@ struct CellTO
     // Creature data
     bool belongToCreature;
     uint64_t creatureIndex;
-    uint16_t genomeNodeIndex;
+    uint16_t nodeIndex;
     int geneIndex;
 
     // Cell type data
