@@ -193,7 +193,7 @@ namespace
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTriggered = cell->cellTriggered;
-        cellTO.genomeNodeIndex = cell->genomeNodeIndex;
+        cellTO.nodeIndex = cell->nodeIndex;
         cellTO.geneIndex = cell->geneIndex;
 
         copyDataToHeap(

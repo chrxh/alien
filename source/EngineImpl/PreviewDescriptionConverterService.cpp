@@ -18,10 +18,10 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     editService.setCenter(data, {0.0f, 0.0f});
 
     std::unordered_map<int, std::unordered_map<int, uint64_t>> geneAndNodeIndexToId;
-    data.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._genomeNodeIndex] = cell._id; });
+    data.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._nodeIndex] = cell._id; });
     
     data.forEachCell([&](CellDescription const& cell) {
-        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(cell._color).nodeIndex(cell._genomeNodeIndex));
+        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(cell._color).nodeIndex(cell._nodeIndex));
     });
     
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;

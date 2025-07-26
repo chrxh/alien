@@ -306,7 +306,7 @@ struct Cell
 
     // Creature data
     Creature* creature;
-    uint16_t genomeNodeIndex;
+    uint16_t nodeIndex;
     int geneIndex;
 
     // Cell type data

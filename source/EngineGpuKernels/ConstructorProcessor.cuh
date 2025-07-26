@@ -632,10 +632,10 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                     || otherCell->creature != constructionData.creature) {
                     return false;
                 }
-                if (constructionData.numAdditionalConnections >= 1 && otherCell->genomeNodeIndex == constructionData.requiredNodeId1) {
+                if (constructionData.numAdditionalConnections >= 1 && otherCell->nodeIndex == constructionData.requiredNodeId1) {
                     return true;
                 }
-                if (constructionData.numAdditionalConnections == 2 && otherCell->genomeNodeIndex == constructionData.requiredNodeId2) {
+                if (constructionData.numAdditionalConnections == 2 && otherCell->nodeIndex == constructionData.requiredNodeId2) {
                     return true;
                 }
                 return false;

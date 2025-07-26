@@ -241,7 +241,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->activationTime = cellTO.activationTime;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTriggered = cellTO.cellTriggered;
-    cell->genomeNodeIndex = cellTO.genomeNodeIndex;
+    cell->nodeIndex = cellTO.nodeIndex;
     cell->geneIndex = cellTO.geneIndex;
 
     copyDataToHeap(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, collectionTO.heap, cell->metadata.nameSize, cell->metadata.name);
@@ -438,7 +438,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellTriggered = CellTriggered_No;
-    cell->genomeNodeIndex = 0;
+    cell->nodeIndex = 0;
     cell->cellType = CellType_Free;
     cell->neuralNetwork = nullptr;
 
@@ -523,7 +523,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     cell->age = 0;
     cell->cellState = CellState_Constructing;
     cell->creature = creature;
-    cell->genomeNodeIndex = nodeIndex;
+    cell->nodeIndex = nodeIndex;
     cell->geneIndex = geneIndex;
     cell->numConnections = 0;
 
