@@ -582,7 +582,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
-CollectionTO _SimulationCudaFacade::getPreviewData()
+auto _SimulationCudaFacade::getPreviewData() -> PreviewData
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(PreviewCapacityTO);
     _dataAccessKernels->getData(_settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {PreviewSize.x + 10, PreviewSize.y + 10}, cudaDataTO);
@@ -591,7 +591,7 @@ CollectionTO _SimulationCudaFacade::getPreviewData()
     auto dataTO = _collectionTOProvider->provideNewUnmanagedDataTO(cudaDataTO.capacities);
     copyDataTOtoHost(dataTO, cudaDataTO);
 
-    return dataTO;
+    return {.timestep = _cudaPreviewData->timestep, .data = dataTO};
 }
 
 void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)

@@ -5,6 +5,8 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/Math.h"
+#include "Base/StringHelper.h"
+
 #include "EngineInterface/Colors.h"
 
 #include "AlienGui.h"
@@ -15,18 +17,18 @@ PreviewDescriptionWidget _PreviewDescriptionWidget::create()
     return PreviewDescriptionWidget(new _PreviewDescriptionWidget());
 }
 
-bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
+bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
-    auto const LineThickness = StyleRepository::get().scale(2.0f);
+    auto const LineThickness = scale(2.0f);
 
     auto result = false;
 
     if (ImGui::BeginChild("preview", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
-        auto const cellSize = StyleRepository::get().scale(_zoom);
+        auto const cellSize = scale(_zoom);
 
         auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY) {
             drawList->AddText(
@@ -67,7 +69,7 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
 
             ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
-            //draw cells
+            // Draw cells
             for (auto const& cell : desc._cells) {
                 auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
                 float h, s, v;
@@ -93,7 +95,7 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
                 }
             }
 
-            //draw symbols
+            // Draw symbols
             //for (auto const& symbol : desc.symbols) {
             //    auto pos = (symbol.pos - upperLeft) * cellSize + offset;
             //    switch (symbol.type) {
@@ -114,7 +116,7 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
             //    }
             //}
 
-            //draw cell connections
+            // Draw cell connections
             if (_zoom > ZoomLevelForConnections) {
                 for (auto const& connection : desc._connections) {
                     auto cellPos1 = (connection._cell1 - upperLeft) * cellSize + offset;
@@ -169,7 +171,7 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
                 }
             }
 
-            //draw cell infos (start/end marks and multiple constructor marks)
+            // Draw cell infos (start/end marks and multiple constructor marks)
             //if (zoom > ZoomLevelForLabels) {
             //    for (auto const& cell : desc._cells) {
             //        auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
@@ -218,9 +220,16 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
         }
         ImGui::EndChild();
 
-        //zoom buttons
-        ImGui::SetCursorPos({ImGui::GetScrollX() + StyleRepository::get().scale(10), ImGui::GetScrollY() + windowSize.y - StyleRepository::get().scale(40)});
-        if (ImGui::BeginChild("##buttons", ImVec2(StyleRepository::get().scale(100), StyleRepository::get().scale(30)), false)) {
+        // Draw timestep in bottom right corner of "preview" child window
+        ImGui::SetCursorPos({ImGui::GetScrollX() + windowSize.x - scale(100), ImGui::GetScrollY() + windowSize.y - scale(40)});
+        if (ImGui::BeginChild("##TPS", ImVec2(scale(100), scale(30)), false)) {
+            AlienGui::Text("TPS: " + StringHelper::format(tps));
+        }
+        ImGui::EndChild();
+
+        // Zoom buttons
+        ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
+        if (ImGui::BeginChild("##buttons", ImVec2(scale(100), scale(30)), false)) {
             ImGui::SetCursorPos({0, 0});
             ImGui::PushStyleColor(ImGuiCol_Button, color);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);

@@ -113,7 +113,7 @@ public:
     // Simulated preview
     void newPreview(GenomeDescription const& genome) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
-    PreviewDescription getPreviewData() override;
+    PreviewData getPreviewData() override;
 
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;

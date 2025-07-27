@@ -9,7 +9,7 @@ class _PreviewDescriptionWidget
 public:
     static PreviewDescriptionWidget create();
 
-    bool process(PreviewDescription const& desc);
+    bool process(int tps, PreviewDescription const& desc);
     
     float getZoom() const;
     void setZoom(float zoom);

@@ -116,7 +116,12 @@ public:
     // Simulated preview
     void newPreview(CollectionDescription const& data);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
-    PreviewDescription getPreviewData();
+    struct PreviewData
+    {
+        uint64_t timestep = 0;
+        PreviewDescription description;
+    };
+    PreviewData getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);

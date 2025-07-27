@@ -375,9 +375,10 @@ void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds co
     _worker.calcTimestepsForPreview(duration);
 }
 
-PreviewDescription _SimulationFacadeImpl::getPreviewData()
+auto _SimulationFacadeImpl::getPreviewData() -> PreviewData
 {
-    return _worker.getPreviewData();
+    auto result = _worker.getPreviewData();
+    return {.timestep = result.timestep, .description = result.description};
 }
 
 void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)

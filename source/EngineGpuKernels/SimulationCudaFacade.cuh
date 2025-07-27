@@ -24,6 +24,7 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.cuh"
+#include "ObjectTO.cuh"
 
 struct cudaGraphicsResource;
 
@@ -100,7 +101,12 @@ public:
     void initPreviewData();
     void newPreview(CollectionTO const& dataTO);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
-    CollectionTO getPreviewData();
+    struct PreviewData
+    {
+        uint64_t timestep = 0;
+        CollectionTO data;
+    };
+    PreviewData getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);

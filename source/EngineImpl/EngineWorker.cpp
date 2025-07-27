@@ -444,18 +444,19 @@ void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& dura
     _simulationCudaFacade->calcTimestepsForPreview(duration);
 }
 
-PreviewDescription EngineWorker::getPreviewData()
+auto EngineWorker::getPreviewData() -> PreviewData
 {
     CollectionDescription data;
+    _SimulationCudaFacade::PreviewData preview;
     {
         EngineWorkerGuard access(this);
 
-        auto dataTO = _simulationCudaFacade->getPreviewData();
-        ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
+        preview = _simulationCudaFacade->getPreviewData();
+        ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview.data); });
 
-        data = DescriptionConverterService::get().convertTOtoDescription(dataTO);
+        data = DescriptionConverterService::get().convertTOtoDescription(preview.data);
     }
-    return PreviewDescriptionConverterService::get().convert(std::move(data));
+    return {.timestep = preview.timestep, .description = PreviewDescriptionConverterService::get().convert(std::move(data))};
 }
 
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
