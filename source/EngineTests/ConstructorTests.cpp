@@ -330,7 +330,7 @@ TEST_F(ConstructorTests, emptyGene)
     auto data = CollectionDescription().creatures({
         CreatureDescription()
             .id(0)
-            .genome(GenomeDescription().genes({GeneDescription()}))
+            .genome(GenomeDescription().genes({GeneDescription().separation(true)}))
             .cells({
                 CellDescription()
                     .id(0)
@@ -364,7 +364,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     auto data = CollectionDescription().creatures({
         CreatureDescription()
             .id(0)
-            .genome(GenomeDescription().genes({GeneDescription()}))
+            .genome(GenomeDescription().genes({GeneDescription().separation(true)}))
             .cells({
                 CellDescription()
                     .id(0)
@@ -398,7 +398,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     auto data = CollectionDescription().creatures({
         CreatureDescription()
             .id(0)
-            .genome(GenomeDescription().genes({GeneDescription()}))
+            .genome(GenomeDescription().genes({GeneDescription().separation(true)}))
             .cells({
                 CellDescription()
                     .id(0)
@@ -432,7 +432,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
     auto data = CollectionDescription().creatures({
         CreatureDescription()
             .id(0)
-            .genome(GenomeDescription().genes({GeneDescription().nodes({NodeDescription()})}))
+            .genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription()})}))
             .cells({
                 CellDescription()
                     .id(0)
@@ -497,7 +497,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
 TEST_F(ConstructorTests, insufficientSpace)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
     });
     auto data = CollectionDescription().creatures({
 
@@ -577,7 +577,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
             .id(0)
             .genome(GenomeDescription()
                         .genes({
-                            GeneDescription().nodes({randomNode}),
+                            GeneDescription().separation(true).nodes({randomNode}),
                         })
                         .frontAngle(FrontAngle))
             .cells({CellDescription()
@@ -625,8 +625,8 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
             .id(0)
             .genome(GenomeDescription()
                         .genes({
-                            GeneDescription(),
-                            GeneDescription().nodes({NodeDescription()}),
+                            GeneDescription().separation(true),
+                            GeneDescription().separation(true).nodes({NodeDescription()}),
                         })
                         .frontAngle(FrontAngle))
             .cells({CellDescription().energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f}).angleToFront(FrontAngle)}),
@@ -830,7 +830,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
             .id(0)
             .genome(GenomeDescription()
                         .genes({
-                            GeneDescription(),
+                            GeneDescription().separation(true),
                             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
                         })
                         .frontAngle(FrontAngle))
@@ -1043,7 +1043,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ignoreNumAdditionalConnectionsAtStart)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().referenceAngle(0).numAdditionalConnections(1),
         }),
     });
@@ -1085,7 +1085,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
-                GeneDescription().nodes({NodeDescription()}),
+                GeneDescription().separation(true).nodes({NodeDescription()}),
             }))
             .cells({
                 CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
@@ -1259,7 +1259,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
 
     auto genome = GenomeDescription()
                       .genes({
-                          GeneDescription().nodes({NodeDescription(), NodeDescription()}),
+                          GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
                       })
                       .frontAngle(FrontAngle);
     auto data = CollectionDescription().creatures({
@@ -1526,7 +1526,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
 TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().referenceAngle(0.0f), 
             NodeDescription().referenceAngle(45.0f), 
             NodeDescription().referenceAngle(0.0f)
@@ -1583,7 +1583,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
 TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__numAdditionalConnections_0)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription().referenceAngle(0),
             NodeDescription().referenceAngle(45.0f).numAdditionalConnections(0),
@@ -1669,6 +1669,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
 
     auto genome = GenomeDescription().genes({
         GeneDescription()
+            .separation(true)
             .nodes({
                 NodeDescription(),
                 NodeDescription().referenceAngle(0),
@@ -2340,7 +2341,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
+        GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
     });
     auto data = CollectionDescription().creatures({
         CreatureDescription().id(0).genome(genome).cells({
@@ -2377,7 +2378,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
+        GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
     });
     auto data = CollectionDescription().creatures({
 
