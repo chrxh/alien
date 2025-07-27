@@ -14,25 +14,25 @@ protected:
     GenomeDescription createGenome_3genes_3_4_5nodes()
     {
         return GenomeDescription().genes({
-            GeneDescription().nodes({
+            GeneDescription().separation(true).nodes({
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
             }),
-            GeneDescription().nodes({
+            GeneDescription().separation(true).nodes({
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
                 NodeDescription(),
             }),
-            GeneDescription().nodes({
+            GeneDescription().separation(true).nodes({
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
                 NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
                 NodeDescription(),
                 NodeDescription(),
             }),
-        });        
+        });
     }
 
     // Helper method to create a genome with no cycles for castrate testing
@@ -156,7 +156,7 @@ protected:
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onEmptyGenome)
 {
     auto genome = GenomeDescription();
-    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
+    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separation(true));
 
     EXPECT_EQ(1, genome._genes.size());
 }
@@ -164,17 +164,17 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onEmptyGenome)
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_start)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription());
+    GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separation(true));
 
     EXPECT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -185,17 +185,17 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_start)
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_end)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
     });
-    GenomeDescriptionEditService::get().addGene(genome, 2, GeneDescription());
+    GenomeDescriptionEditService::get().addGene(genome, 2, GeneDescription().separation(true));
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -206,7 +206,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onNonEmptyGenome_end)
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_withReferences)
 {
     auto genome = createGenome_3genes_3_4_5nodes();
-    GenomeDescriptionEditService::get().addGene(genome, 1, GeneDescription());
+    GenomeDescriptionEditService::get().addGene(genome, 1, GeneDescription().separation(true));
 
     ASSERT_EQ(4, genome._genes.size());
     for (int i = 0; i < 4; ++i) {
@@ -279,7 +279,7 @@ TEST_F(GenomeDescriptionEditServiceTests, swapGenes)
 
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_start)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
@@ -295,7 +295,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_start)
 
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_middle)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
@@ -311,7 +311,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_middle)
 
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_end)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
@@ -327,7 +327,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_end)
 
 TEST_F(GenomeDescriptionEditServiceTests, removeNode_start)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
@@ -341,7 +341,7 @@ TEST_F(GenomeDescriptionEditServiceTests, removeNode_start)
 
 TEST_F(GenomeDescriptionEditServiceTests, removeNode_middle)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
@@ -355,7 +355,7 @@ TEST_F(GenomeDescriptionEditServiceTests, removeNode_middle)
 
 TEST_F(GenomeDescriptionEditServiceTests, removeNode_end)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
@@ -369,7 +369,7 @@ TEST_F(GenomeDescriptionEditServiceTests, removeNode_end)
 
 TEST_F(GenomeDescriptionEditServiceTests, swapNodes)
 {
-    auto gene = GeneDescription().nodes({
+    auto gene = GeneDescription().separation(true).nodes({
         NodeDescription().cellTypeData(DepotGenomeDescription()),
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),

@@ -44,7 +44,7 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
     auto data = CollectionDescription().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
-        GeneDescription().numBranches(1).nodes({NodeDescription()}),
+        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
     }))});
     auto& creature = data._creatures.front();
     for (int i = 0; i < 20; ++i) {
@@ -85,7 +85,7 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
 
     auto data = CollectionDescription().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
-            GeneDescription().numBranches(1).nodes({NodeDescription()}),
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         })),
     });
     auto& creature = data._creatures.front();

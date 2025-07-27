@@ -21,13 +21,13 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_Empty)
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesOneSingleTimes)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
         }),
@@ -40,13 +40,13 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReference
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesOneMultipleTimes)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
         }),
@@ -59,15 +59,15 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReference
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReferencesMany_depth1)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
             NodeDescription(),
@@ -82,35 +82,35 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReference
 {
     auto genome = GenomeDescription().genes({
         // Level 0
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
         }),
         // Level 1
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(3)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(4)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(5)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(6)),
             NodeDescription(),
         }),
         // Level 2
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
     });
@@ -122,15 +122,15 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_oneReference
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_manyReferenceOne)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
             NodeDescription(),
@@ -144,10 +144,10 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_manyReferenc
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountUnreachable)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
     });
@@ -159,7 +159,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountUn
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountPrincipalReferencesPrincipal)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
             NodeDescription(),
             NodeDescription(),
@@ -173,12 +173,12 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountPr
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountAuxiliaryReferencesPrincipal)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
             NodeDescription(),
         }),
@@ -191,12 +191,12 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_doNotCountAu
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_1cycle)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
@@ -209,16 +209,16 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_1cy
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_2cycle)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
@@ -231,11 +231,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_infinity_2cy
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_withoutSeparation)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
             NodeDescription(),
         }),
@@ -257,11 +257,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
 TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBranchesAndConcatenations_withSeparation)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
             NodeDescription(),
         }),
@@ -295,15 +295,15 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
 TEST_F(GenomeDescriptionInfoServiceTests, getReferences)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
         }),
     });
@@ -318,15 +318,15 @@ TEST_F(GenomeDescriptionInfoServiceTests, getReferences)
 TEST_F(GenomeDescriptionInfoServiceTests, getReferencedBy)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription(),
             NodeDescription(),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
         }),
-        GeneDescription().nodes({
+        GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
         }),
     });

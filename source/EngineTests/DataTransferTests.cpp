@@ -127,8 +127,8 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
     data.creatures({
         CreatureDescription()
             .genome(GenomeDescription().genes({
-                GeneDescription().nodes({NodeDescription(), NodeDescription()}),
-                GeneDescription().nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
+                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
+                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
             }))
             .cells(hexagon._cells),
     });
@@ -307,7 +307,7 @@ TEST_F(DataTransferTests, changeGenome_successful)
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
     auto result = _simulationFacade->changeCreature(CreatureId, newGenome);
     ASSERT_TRUE(result);
 
@@ -334,7 +334,7 @@ TEST_F(DataTransferTests, changeGenome_failed)
 
     _simulationFacade->setSimulationData(data);
 
-    auto newGenome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})});
+    auto newGenome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
     auto result = _simulationFacade->changeCreature(WrongCreatureId, newGenome);
     ASSERT_FALSE(result);
 }
@@ -342,7 +342,7 @@ TEST_F(DataTransferTests, changeGenome_failed)
 TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().genome(GenomeDescription().genes({GeneDescription().nodes({NodeDescription(), NodeDescription()})})).cells({
+        CreatureDescription().genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})})).cells({
             CellDescription().id(1), 
             CellDescription().id(2)
         }),
