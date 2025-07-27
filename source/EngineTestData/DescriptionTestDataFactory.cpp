@@ -80,7 +80,7 @@ CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescript
                         GeneDescription()
                             .shape(ConstructorShape_Hexagon)
                             .numBranches(4)
-                            .separation(false)
+                            .separation(true)
                             .numConcatenations(6)
                             .angleAlignment(ConstructorAngleAlignment_180)
                             .stiffness(0.75f)

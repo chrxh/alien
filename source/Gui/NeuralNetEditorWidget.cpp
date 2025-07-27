@@ -22,7 +22,7 @@ NeuralNetEditorWidget _NeuralNetEditorWidget::create()
 
 void _NeuralNetEditorWidget::process(std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions)
 {
-    if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0))) {
+    if (ImGui::BeginChild("NeuralNetEditor", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto& selectionData = getValueRef(_dataById);
 
         processNetwork(selectionData, weights, biases, activationFunctions);

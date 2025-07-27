@@ -580,6 +580,8 @@ void DescriptionEditService::removeCell(CollectionDescription& collection, uint6
     for (auto& creature : collection._creatures) {
         std::erase_if(creature._cells, [&](auto const& cell) { return cell._id == cellId; });
     }
+    std::erase_if(collection._creatures, [&](auto const& creature) { return creature._cells.empty(); });
+
     collection.forEachCell([&](CellDescription& cell) {
         for (int i = 0, numConnections = cell._connections.size(); i < numConnections; ++i) {
             auto const& connection = cell._connections[i];

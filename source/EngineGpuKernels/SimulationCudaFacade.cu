@@ -540,7 +540,8 @@ void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpu const& size
 
 void _SimulationCudaFacade::initPreviewData()
 {
-    _simulationParametersForPreview.friction.baseValue = 0.05f;
+    _simulationParametersForPreview.friction.baseValue = 0.01f;
+    _simulationParametersForPreview.maxVelocity.value = 0.002f;
     for (int i = 0; i < MAX_COLORS; ++i) {
         _simulationParametersForPreview.radiationType1_strength.baseValue[i] = 0.0f;
         _simulationParametersForPreview.radiationType2_strength.value[i] = 0.0f;

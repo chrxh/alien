@@ -96,7 +96,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
     auto expectedCell2_pos = RealVector2D{0, 0.5f};
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
-    checkConnections(result, {{expectedCell1_pos, expectedCell2_pos}});
+    checkConnections(result, {{cell1._pos, cell2._pos}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSeparated)
@@ -127,7 +127,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
     auto expectedCell2_pos = RealVector2D{0, 0.5f};
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
-    checkConnections(result, {{expectedCell1_pos, expectedCell2_pos}});
+    checkConnections(result, {{cell1._pos, cell2._pos}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
@@ -165,5 +165,37 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
     EXPECT_TRUE(approxCompare(expectedCell3_pos, cell3._pos));
-    checkConnections(result, {{expectedCell1_pos, expectedCell2_pos}, {expectedCell2_pos, expectedCell3_pos}, {expectedCell3_pos, expectedCell1_pos}});
+    checkConnections(result, {{cell1._pos, cell2._pos}, {cell2._pos, cell3._pos}, {cell3._pos, cell1._pos}});
+}
+
+TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
+{
+    auto input = CollectionDescription().creatures({
+        CreatureDescription().cells({
+            CellDescription().id(0).pos({11.0f, 10.0f}).color(1),
+        }),
+        CreatureDescription().cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ConstructorDescription().geneIndex(1)).color(2).geneIndex(0).nodeIndex(0),
+        }),
+        CreatureDescription().cells({
+            CellDescription().id(2).pos({9.0f, 10.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(3).pos({9.0f, 9.0f}).color(4).geneIndex(1).nodeIndex(1),
+        }),
+    });
+    input.addConnection(2, 3);
+
+    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+
+    ASSERT_EQ(3, result._cells.size());
+    ASSERT_EQ(1, result._connections.size());
+
+    auto cell1 = getPreviewCell(result, 0, 0);
+    auto cell2 = getPreviewCell(result, 1, 0);
+    auto cell3 = getPreviewCell(result, 1, 1);
+    EXPECT_EQ(2, cell1._color);
+    EXPECT_EQ(3, cell2._color);
+    EXPECT_EQ(4, cell3._color);
+
+    EXPECT_TRUE(approxCompare(cell3._pos.x, cell1._pos.x));  // result should be rotated such that cell3 and cell1 are aligned on the x-axis
+    checkConnections(result, {{cell2._pos, cell3._pos}});
 }

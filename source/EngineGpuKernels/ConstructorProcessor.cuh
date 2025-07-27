@@ -183,7 +183,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 } else {
                     constructor.offspring = nullptr;
                     if (forPreview) {
-                        constructor.geneIndex = constructionData.creature->genome.numGenes + 1;  // Do not construct more than one offspring in preview
+                        constructor.currentConcatenation = constructionData.gene->numConcatenations;  // Do not construct more than one offspring in preview
                     }
                 }
             }

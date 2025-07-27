@@ -109,7 +109,7 @@ namespace
             for (auto& node : gene._nodes) {
                 if (node.getCellType() == CellTypeGenome_Constructor) {
                     auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
-                    constructor._autoTriggerInterval = 10;
+                    constructor._autoTriggerInterval = 25;
                 }
             }
         }
@@ -121,4 +121,7 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
     std::set<int> inspectedGeneIndices;
     castrate(genome, 0, inspectedGeneIndices);
     constructionTriggering(genome);
+    if (!genome._genes.empty()) {
+        genome._genes.at(0)._numBranches = 1;
+    }
 }
