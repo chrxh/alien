@@ -10,13 +10,13 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
 {
     PreviewDescription result;
 
-    auto cache = data.createCache();
     auto const& editService = DescriptionEditService::get();
 
     // Remove seed
     uint64_t smallestCellId = 0xffffffffffffffff;
     data.forEachCell([&smallestCellId](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
     editService.removeCell(data, smallestCellId);
+    auto cache = data.createCache();
     if (data.isEmpty()) {
         return result;
     }
