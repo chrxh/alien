@@ -3,16 +3,16 @@
 #include <chrono>
 
 #include "Base/ExitScopeGuard.h"
-#include "EngineInterface/Ids.h"
-#include "EngineGpuKernels/ObjectTO.cuh"
-#include "EngineGpuKernels/SimulationCudaFacade.cuh"
-#include "EngineGpuKernels/CollectionTOProvider.cuh"
 
-#include "DescriptionConverterService.h"
 #include "EngineInterface/DescriptionEditService.h"
+#include "EngineInterface/Ids.h"
 #include "EngineInterface/NumberGenerator.h"
 
-#include "PreviewDescriptionConverterService.h"
+#include "EngineGpuKernels/CollectionTOProvider.cuh"
+#include "EngineGpuKernels/ObjectTO.cuh"
+#include "EngineGpuKernels/SimulationCudaFacade.cuh"
+
+#include "DescriptionConverterService.h"
 
 namespace
 {
@@ -428,7 +428,17 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
-void EngineWorker::newPreview(CollectionDescription const& data)
+CollectionDescription EngineWorker::getPreviewData()
+{
+    EngineWorkerGuard access(this);
+
+    auto preview = _simulationCudaFacade->getPreviewData();
+    ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview); });
+
+    return DescriptionConverterService::get().convertTOtoDescription(preview);
+}
+
+void EngineWorker::setPreviewData(CollectionDescription const& data)
 {
     EngineWorkerGuard access(this);
 
@@ -444,19 +454,9 @@ void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& dura
     _simulationCudaFacade->calcTimestepsForPreview(duration);
 }
 
-auto EngineWorker::getPreviewData() -> PreviewData
+uint64_t EngineWorker::getCurrentTimestepForPreview()
 {
-    CollectionDescription data;
-    _SimulationCudaFacade::PreviewData preview;
-    {
-        EngineWorkerGuard access(this);
-
-        preview = _simulationCudaFacade->getPreviewData();
-        ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview.data); });
-
-        data = DescriptionConverterService::get().convertTOtoDescription(preview.data);
-    }
-    return {.timestep = preview.timestep, .description = PreviewDescriptionConverterService::get().convert(std::move(data))};
+    return _simulationCudaFacade->getCurrentTimestepForPreview();
 }
 
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)

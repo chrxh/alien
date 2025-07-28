@@ -101,12 +101,8 @@ public:
     void initPreviewData();
     void newPreview(CollectionTO const& dataTO);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
-    struct PreviewData
-    {
-        uint64_t timestep = 0;
-        CollectionTO data;
-    };
-    PreviewData getPreviewData();
+    uint64_t getCurrentTimestepForPreview();
+    CollectionTO getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);

@@ -111,9 +111,10 @@ public:
     float getTps() const override;
 
     // Simulated preview
-    void newPreview(GenomeDescription const& genome) override;
+    CollectionDescription getPreviewData() override;
+    void setPreviewData(CollectionDescription const& data) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
-    PreviewData getPreviewData() override;
+    uint64_t getCurrentTimestepForPreview() override;
 
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;

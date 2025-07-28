@@ -358,16 +358,14 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
-void _SimulationFacadeImpl::newPreview(GenomeDescription const& genome)
+CollectionDescription _SimulationFacadeImpl::getPreviewData()
 {
-    auto data = CollectionDescription().creatures({
-        CreatureDescription()
-            .genome(genome)
-            .cells({
-                CellDescription().stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(0)),
-            }),
-    });
-    _worker.newPreview(data);
+    return _worker.getPreviewData();
+}
+
+void _SimulationFacadeImpl::setPreviewData(CollectionDescription const& data)
+{
+    _worker.setPreviewData(data);
 }
 
 void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
@@ -375,10 +373,9 @@ void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds co
     _worker.calcTimestepsForPreview(duration);
 }
 
-auto _SimulationFacadeImpl::getPreviewData() -> PreviewData
+uint64_t _SimulationFacadeImpl::getCurrentTimestepForPreview()
 {
-    auto result = _worker.getPreviewData();
-    return {.timestep = result.timestep, .description = result.description};
+    return _worker.getCurrentTimestepForPreview();
 }
 
 void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)

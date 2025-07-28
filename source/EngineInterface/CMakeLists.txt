@@ -35,6 +35,8 @@ add_library(EngineInterface
     ParametersValidationService.cpp
     ParametersValidationService.h
     PreviewDescriptions.h
+    PreviewDescriptionConverterService.cpp
+    PreviewDescriptionConverterService.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h

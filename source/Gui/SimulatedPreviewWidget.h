@@ -11,25 +11,29 @@
 class _SimulatedPreviewWidget
 {
 public:
-    static SimulatedPreviewWidget create(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData);
+    static SimulatedPreviewWidget
+    create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void process();
 
 private:
-    _SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData);
+    _SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void initPreview();
+    void continuePreview();
     void calcPreview();
     void showPreview();
 
     SimulationFacade _simulationFacade;
     PreviewDescriptionWidget _previewWidget;
 
+    GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
-    std::optional<GenomeDescription> _lastGenome;
-    std::optional<uint64_t> _lastPreviewTimestep;
-    std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
-    std::optional<int> _lastTps;
+    CollectionDescription _previewData;
+    std::optional<GenomeDescription> _genomeFromPreviousFrame;
+    std::optional<uint64_t> _previewTimestepFromPreviousMeasure;
+    std::optional<std::chrono::steady_clock::time_point> _timepointFromPreviousMeasure;
+    std::optional<int> _tpsFromPreviousMeasure;
 };

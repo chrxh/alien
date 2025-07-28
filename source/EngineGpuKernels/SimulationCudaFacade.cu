@@ -550,11 +550,6 @@ void _SimulationCudaFacade::initPreviewData()
 
 void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
 {
-    // Center position
-    CHECK(*dataTO.numCells == 1);
-    dataTO.cells[0].pos.x = toFloat(PreviewSize.x / 2);
-    dataTO.cells[0].pos.y = toFloat(PreviewSize.y / 2);
-
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
@@ -582,7 +577,12 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 }
 
-auto _SimulationCudaFacade::getPreviewData() -> PreviewData
+uint64_t _SimulationCudaFacade::getCurrentTimestepForPreview()
+{
+    return _cudaPreviewData->timestep;
+}
+
+CollectionTO _SimulationCudaFacade::getPreviewData()
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(PreviewCapacityTO);
     _dataAccessKernels->getData(_settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {PreviewSize.x + 10, PreviewSize.y + 10}, cudaDataTO);
@@ -591,7 +591,7 @@ auto _SimulationCudaFacade::getPreviewData() -> PreviewData
     auto dataTO = _collectionTOProvider->provideNewUnmanagedDataTO(cudaDataTO.capacities);
     copyDataTOtoHost(dataTO, cudaDataTO);
 
-    return {.timestep = _cudaPreviewData->timestep, .data = dataTO};
+    return dataTO;
 }
 
 void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)

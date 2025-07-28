@@ -105,14 +105,10 @@ public:
     virtual float getTps() const = 0;
 
     // Simulated preview
-    virtual void newPreview(GenomeDescription const& genome) = 0;
+    virtual CollectionDescription getPreviewData() = 0;
+    virtual void setPreviewData(CollectionDescription const& data) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
-    struct PreviewData
-    {
-        uint64_t timestep = 0;
-        PreviewDescription description;
-    };
-    virtual PreviewData getPreviewData() = 0;
+    virtual uint64_t getCurrentTimestepForPreview() = 0;
 
     // Only for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;

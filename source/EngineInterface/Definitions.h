@@ -43,4 +43,7 @@ class StatisticsHistory;
 
 class SimulationParametersService;
 
+struct PreviewDescription;
+
+
 struct Ids;

@@ -114,6 +114,9 @@ using GenomeTabWidget = std::shared_ptr<_GenomeTabWidget>;
 struct _GenomeTabLayoutData;
 using GenomeTabLayoutData = std::shared_ptr<_GenomeTabLayoutData>;
 
+struct _GenomeWindowEditData;
+using GenomeWindowEditData = std::shared_ptr<_GenomeWindowEditData>;
+
 struct _GenomeTabEditData;
 using GenomeTabEditData = std::shared_ptr<_GenomeTabEditData>;
 

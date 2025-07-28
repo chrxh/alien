@@ -9,8 +9,16 @@
 class _GenomeTabWidget
 {
 public:
-    static GenomeTabWidget createDraftTab(SimulationFacade const& simulationFacade, GenomeDescription const& creature, GenomeTabLayoutData const& layoutData = nullptr);
-    static GenomeTabWidget createCreatureTab(SimulationFacade const& simulationFacade, uint64_t creatureId, GenomeDescription const& genome);
+    static GenomeTabWidget createDraftTab(
+        SimulationFacade const& simulationFacade,
+        GenomeWindowEditData const& genomeEditData,
+        GenomeDescription const& creature,
+        GenomeTabLayoutData const& layoutData = nullptr);
+    static GenomeTabWidget createCreatureTab(
+        SimulationFacade const& simulationFacade,
+        GenomeWindowEditData const& genomeEditData,
+        uint64_t creatureId,
+        GenomeDescription const& genome);
 
     void process();
 
@@ -43,6 +51,7 @@ private:
 
     _GenomeTabWidget(
         SimulationFacade const& simulationFacade,
+        GenomeWindowEditData const& genomeEditData, 
         GenomeDescription const& genome,
         SpecificEditData const& specificEditData,
         GenomeTabLayoutData const& layoutData = nullptr);
@@ -54,8 +63,6 @@ private:
     void processSimulatedPreview();
 
     void doLayout();
-
-    int _id = 0;
 
     // Widgets
     GenomeEditorWidget _genomeEditorWidget;

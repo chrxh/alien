@@ -5,8 +5,6 @@ add_library(EngineImpl
     Definitions.h
     EngineWorker.cpp
     EngineWorker.h
-    PreviewDescriptionConverterService.cpp
-    PreviewDescriptionConverterService.h
     SimulationFacadeImpl.cpp
     SimulationFacadeImpl.h)
 

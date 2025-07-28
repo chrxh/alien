@@ -2,31 +2,42 @@
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
+#include "EngineInterface/PreviewDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
+#include "GenomeWindowEditData.h"
 #include "PreviewDescriptionWidget.h"
 #include "WindowController.h"
 
-SimulatedPreviewWidget _SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
+SimulatedPreviewWidget
+_SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
-    return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, editData));
+    return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, genomeEditData, editData));
 }
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_lastGenome.has_value() || _lastGenome.value() != _editData->genome) {
+    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         initPreview();
+    }
+    if (_genomeEditData->previewId.has_value() && _genomeEditData->previewId.value() != _editData->id) {
+        continuePreview();
     }
     calcPreview();
     showPreview();
 
-    _lastGenome = _editData->genome;
+    _genomeFromPreviousFrame = _editData->genome;
 }
 
-_SimulatedPreviewWidget::_SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeTabEditData const& editData)
-    : _simulationFacade(simulationFacade), _editData(editData)
+_SimulatedPreviewWidget::_SimulatedPreviewWidget(
+    SimulationFacade const& simulationFacade,
+    GenomeWindowEditData const& genomeEditData,
+    GenomeTabEditData const& editData)
+    : _simulationFacade(simulationFacade)
+    , _genomeEditData(genomeEditData)
+    , _editData(editData)
 {
     _previewWidget = _PreviewDescriptionWidget::create();
 }
@@ -35,7 +46,23 @@ void _SimulatedPreviewWidget::initPreview()
 {
     auto castratedGenome = _editData->genome;
     GenomeDescriptionEditService::get().adaptDescriptionForPreview(castratedGenome);
-    _simulationFacade->newPreview(castratedGenome);
+
+    _previewData = CollectionDescription().creatures({
+        CreatureDescription()
+            .genome(castratedGenome)
+            .cells({
+            CellDescription().stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+        }),
+    });
+
+    _simulationFacade->setPreviewData(_previewData);
+    _genomeEditData->previewId = _editData->id;
+}
+
+void _SimulatedPreviewWidget::continuePreview()
+{
+    _simulationFacade->setPreviewData(_previewData);
+    _genomeEditData->previewId = _editData->id;
 }
 
 void _SimulatedPreviewWidget::calcPreview()
@@ -64,24 +91,27 @@ namespace
 void _SimulatedPreviewWidget::showPreview()
 {
     auto now = std::chrono::steady_clock::now();
-    auto preview = _simulationFacade->getPreviewData();
+    _previewData = _simulationFacade->getPreviewData();
+    auto timestep = _simulationFacade->getCurrentTimestepForPreview();
 
     int tps = 0;
-    if (_lastPreviewTimestep.has_value() && _lastTimepoint.has_value()) {
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_lastTimepoint);
+    if (_previewTimestepFromPreviousMeasure.has_value() && _timepointFromPreviousMeasure.has_value()) {
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_timepointFromPreviousMeasure);
         if (duration.count() > 300) {
-            tps = calcTimestepsPerSecond(_lastPreviewTimestep.value(), preview.timestep, duration);
-            _lastPreviewTimestep = preview.timestep;
-            _lastTimepoint = now;
-            _lastTps = tps;
+            tps = calcTimestepsPerSecond(_previewTimestepFromPreviousMeasure.value(), timestep, duration);
+            _previewTimestepFromPreviousMeasure = timestep;
+            _timepointFromPreviousMeasure = now;
+            _tpsFromPreviousMeasure = tps;
         } else {
-            tps = _lastTps.value();
+            tps = _tpsFromPreviousMeasure.value();
         }
     } else {
-        _lastPreviewTimestep = preview.timestep;
-        _lastTimepoint = now;
-        _lastTps = tps;
+        _previewTimestepFromPreviousMeasure = timestep;
+        _timepointFromPreviousMeasure = now;
+        _tpsFromPreviousMeasure = tps;
     }
-    _previewWidget->process(tps, preview.description);
+    auto copy = _previewData;
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(std::move(copy));
+    _previewWidget->process(tps, previewDesc);
 
 }

@@ -8,6 +8,7 @@
 
 #include "AlienGui.h"
 #include "ChangeColorDialog.h"
+#include "GenomeWindowEditData.h"
 #include "GenomeTabLayoutData.h"
 #include "GenomeTabWidget.h"
 #include "EditorController.h"
@@ -58,9 +59,10 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     ChangeColorDialog::get().setup();
 
     _simulationFacade = simulationFacade;
+    _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, GenomeDescription()));
+    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, GenomeDescription()));
 }
 
 void GenomeEditorWindow::shutdownIntern() {}
@@ -228,12 +230,12 @@ void GenomeEditorWindow::onCreateSeed()
 
 void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, creatureId, genome);
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _genomeEditData, creatureId, genome);
 }
 
 void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
 {
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, genome);
+    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, genome);
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)

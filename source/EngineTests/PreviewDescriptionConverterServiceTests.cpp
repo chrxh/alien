@@ -4,8 +4,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
-
-#include "EngineImpl/PreviewDescriptionConverterService.h"
+#include "EngineInterface/PreviewDescriptionConverterService.h"
 
 #include "IntegrationTestFramework.h"
 

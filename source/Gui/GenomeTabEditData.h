@@ -7,6 +7,7 @@
 
 struct _GenomeTabEditData
 {
+    int id = 0;
     GenomeDescription genome;
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
