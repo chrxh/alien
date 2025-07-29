@@ -218,7 +218,7 @@ void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separation(true));
+        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separation(true).nodes({NodeDescription()}));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
@@ -228,7 +228,7 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        GenomeDescriptionEditService::get().addGene(genome, insertIndex, GeneDescription().numBranches(1));
+        GenomeDescriptionEditService::get().addGene(genome, insertIndex, GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}));
 
         // Adapt gene selection
         _editData->selectedGeneIndex = insertIndex + 1;

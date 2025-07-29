@@ -11,6 +11,9 @@ public:
 
     bool process(int tps, PreviewDescription const& desc);
     
+    std::optional<int> getSelectedGene() const;
+    void setSelectedGene(std::optional<int> selectedGene);
+
     std::optional<int> getSelectedNode() const;
     void setSelectedNode(std::optional<int> selectedNode);
 
@@ -19,5 +22,6 @@ private:
 
     PreviewDescriptionSettings _settings;
     float _zoom = 20.0f;
+    std::optional<int> _selectedGene;
     std::optional<int> _selectedNode;
 };

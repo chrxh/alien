@@ -118,6 +118,9 @@ void _SimulatedPreviewWidget::showPreview()
     }
     auto copy = _previewData;
     auto previewDesc = PreviewDescriptionConverterService::get().convert(std::move(copy));
+    _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
+    _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
     _previewWidget->process(tps, previewDesc);
-
+    _editData->selectedGeneIndex = _previewWidget->getSelectedGene();
+    _editData->setSelectedNodeIndex(_previewWidget->getSelectedNode());
 }

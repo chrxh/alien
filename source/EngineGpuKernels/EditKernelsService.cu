@@ -146,7 +146,7 @@ void _EditKernelsService::shallowUpdateSelectedObjects(
             KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
             KERNEL_CALL(cudaProcessAddConnectionChanges, data);
 
-            KERNEL_CALL(cudaCleanupCellMap, data);
+            KERNEL_CALL(cudaCleanupMaps, data);
             cudaDeviceSynchronize();
 
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat
@@ -227,7 +227,7 @@ void _EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationD
         KERNEL_CALL(cudaProcessDeleteConnectionChanges, data);
         KERNEL_CALL(cudaProcessAddConnectionChanges, data);
 
-        KERNEL_CALL(cudaCleanupCellMap, data);
+        KERNEL_CALL(cudaCleanupMaps, data);
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat

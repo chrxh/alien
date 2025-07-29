@@ -112,11 +112,9 @@ void _SimulationKernelsService::calcTimestepForPreview(
 
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);
-    if (settings.simulationParameters.motionType.value == MotionType_Fluid) {
+    {
         auto threadBlockSize = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
         KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, threadBlockSize, data);
-    } else {
-        KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, data);
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, 16, data);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);
@@ -135,13 +133,13 @@ void _SimulationKernelsService::calcTimestepForPreview(
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
 
-    KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
-    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
-    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
-    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
-    KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
+    //KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
+    //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
+    //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
+    //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
+    //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
-    _garbageCollector->cleanupAfterTimestep(settings.cudaSettings, data);
+    _garbageCollector->cleanupAfterTimestepForPreview(settings.cudaSettings, data);
 }
 
 void _SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)

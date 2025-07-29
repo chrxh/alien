@@ -82,13 +82,9 @@ __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap)
     }
 }
 
-__global__ void cudaCleanupCellMap(SimulationData data)
+__global__ void cudaCleanupMaps(SimulationData data)
 {
     data.cellMap.cleanup_system();
-}
-
-__global__ void cudaCleanupParticleMap(SimulationData data)
-{
     data.particleMap.cleanup_system();
 }
 

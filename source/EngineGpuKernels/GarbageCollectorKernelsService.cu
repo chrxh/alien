@@ -12,8 +12,7 @@ _GarbageCollectorKernelsService::~_GarbageCollectorKernelsService()
 
 void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& data)
 {
-    KERNEL_CALL(cudaCleanupCellMap, data);
-    KERNEL_CALL(cudaCleanupParticleMap, data);
+    KERNEL_CALL(cudaCleanupMaps, data);
 
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.objects.particles, data.tempObjects.particles);
@@ -33,6 +32,11 @@ void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& g
         KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL_1_1(cudaSwapHeaps, data);
     }
+}
+
+void _GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& data)
+{
+    KERNEL_CALL(cudaCleanupMaps, data);
 }
 
 void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)

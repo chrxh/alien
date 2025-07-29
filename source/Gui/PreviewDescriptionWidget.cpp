@@ -79,7 +79,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                 auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-                if (_selectedNode && cell._nodeIndex == *_selectedNode) {
+                if (_selectedGene.has_value() && _selectedNode.has_value() && cell._geneIndex == _selectedGene.value() && cell._nodeIndex == _selectedNode.value()) {
                     if (_zoom > ZoomLevelForLabels) {
                         drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
                     } else {
@@ -90,6 +90,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                 if (clickedOnPreviewWindow) {
                     if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                         && mousePos.y <= cellPos.y + cellSize / 2) {
+                        _selectedGene = cell._geneIndex;
                         _selectedNode = cell._nodeIndex;
                         result = true;
                     }
@@ -256,6 +257,16 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
     }
     ImGui::EndChild();
     return result;
+}
+
+std::optional<int> _PreviewDescriptionWidget::getSelectedGene() const
+{
+    return _selectedGene;
+}
+
+void _PreviewDescriptionWidget::setSelectedGene(std::optional<int> selectedGene)
+{
+    _selectedGene = selectedGene;
 }
 
 std::optional<int> _PreviewDescriptionWidget::getSelectedNode() const

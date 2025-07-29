@@ -265,6 +265,6 @@ void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab
 GenomeDescription GenomeEditorWindow::getDefaultGenome() const
 {
     return GenomeDescription().genes({
-        GeneDescription().nodes({NodeDescription()}),
+        GeneDescription().nodes({NodeDescription()}).separation(true),
     });
 }
