@@ -1357,13 +1357,13 @@ bool AlienGui::SelectableToolbarButton(std::string const& text, int& value, int 
     return result;
 }
 
-void AlienGui::VerticalSeparator(float length)
+void AlienGui::VerticalSeparator(float height)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
     color.Value.w *= ImGui::GetStyle().Alpha;
-    drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y - ImGui::GetStyle().FramePadding.y), ImVec2(cursorPos.x, cursorPos.y + scale(length)), color, 2.0f);
+    drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y - ImGui::GetStyle().FramePadding.y), ImVec2(cursorPos.x, cursorPos.y + scale(height)), color, 2.0f);
     ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x * 2, 1));
 }
 
@@ -1525,7 +1525,7 @@ bool AlienGui::Button(ButtonParameters const& parameters)
 
 bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::ActionButtonTextColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_Text, parameters._highlighted ? Const::ActionButtonHighlightedTextColor.Value : Const::ActionButtonTextColor.Value);
     ImGui::PushStyleColor(ImGuiCol_Button, Const::ActionButtonBackgroundColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::ActionButtonActiveColor.Value);

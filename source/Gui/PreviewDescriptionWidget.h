@@ -7,19 +7,17 @@
 class _PreviewDescriptionWidget
 {
 public:
-    static PreviewDescriptionWidget create();
+    static PreviewDescriptionWidget create(PreviewDescriptionSettings const& settings);
 
     bool process(int tps, PreviewDescription const& desc);
-    
-    float getZoom() const;
-    void setZoom(float zoom);
     
     std::optional<int> getSelectedNode() const;
     void setSelectedNode(std::optional<int> selectedNode);
 
 private:
-    _PreviewDescriptionWidget();
+    _PreviewDescriptionWidget(PreviewDescriptionSettings const& settings);
 
+    PreviewDescriptionSettings _settings;
     float _zoom = 20.0f;
     std::optional<int> _selectedNode;
 };

@@ -18,21 +18,24 @@
 
 GenomeTabWidget _GenomeTabWidget::createDraftTab(
     SimulationFacade const& simulationFacade,
+    PreviewDescriptionSettings const& previewSettings,
     GenomeWindowEditData const& genomeEditData,
     GenomeDescription const& creature,
     GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genomeEditData, creature, DraftData(), layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, previewSettings, genomeEditData, creature, DraftData(), layoutData));
 }
 
 GenomeTabWidget _GenomeTabWidget::createCreatureTab(
     SimulationFacade const& simulationFacade,
+    PreviewDescriptionSettings const& previewSettings,
     GenomeWindowEditData const& genomeEditData,
     uint64_t creatureId,
     GenomeDescription const& genome,
     GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(
+        simulationFacade, previewSettings, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -140,6 +143,7 @@ void _GenomeTabWidget::resetChanges()
 
 _GenomeTabWidget::_GenomeTabWidget(
     SimulationFacade const& simulationFacade,
+    PreviewDescriptionSettings const& previewSettings,
     GenomeWindowEditData const& genomeEditData,
     GenomeDescription const& genome,
     SpecificEditData const& specificEditData,
@@ -148,6 +152,12 @@ _GenomeTabWidget::_GenomeTabWidget(
     static int _sequence = 0;
 
     _editData = std::make_shared<_GenomeTabEditData>(++_sequence, genome);
+    if (!genome._genes.empty()) {
+        _editData->selectedGeneIndex = 0;
+        if (!genome._genes.front()._nodes.empty()) {
+            _editData->selectedNodeByGeneIndex.emplace(0, 0);
+        }
+    }
     _layoutData = layoutData;
     if (!_layoutData) {
         _layoutData = std::make_shared<_GenomeTabLayoutData>();
@@ -157,7 +167,7 @@ _GenomeTabWidget::_GenomeTabWidget(
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
-    _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, genomeEditData, _editData);
+    _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, previewSettings, genomeEditData, _editData);
     _specificEditData = specificEditData;
 }
 

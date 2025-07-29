@@ -19,12 +19,6 @@ PUBLIC
     CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
-    GenomeEditorWindow.cpp
-    GenomeEditorWindow.h
-    GenomeTabEditData.h
-    GenomeTabLayoutData.h
-    GenomeTabWidget.cpp
-    GenomeTabWidget.h
     Definitions.h
     DelayedExecutionController.cpp
     DelayedExecutionController.h
@@ -52,6 +46,13 @@ PUBLIC
     GeneEditorWidget.h
     GenomeEditorWidget.cpp
     GenomeEditorWidget.h
+    GenomeEditorWindow.cpp
+    GenomeEditorWindow.h
+    GenomeTabEditData.h
+    GenomeTabLayoutData.h
+    GenomeTabWidget.cpp
+    GenomeTabWidget.h
+    GenomeWindowEditData.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GpuSettingsDialog.cpp
@@ -111,6 +112,9 @@ PUBLIC
     OverlayController.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PreviewDescriptionWidget.cpp
+    PreviewDescriptionWidget.h
+    PreviewDescriptionWidgetSettings.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
@@ -123,8 +127,6 @@ PUBLIC
     ShaderWindow.h
     SimulatedPreviewWidget.cpp
     SimulatedPreviewWidget.h
-    PreviewDescriptionWidget.cpp
-    PreviewDescriptionWidget.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp

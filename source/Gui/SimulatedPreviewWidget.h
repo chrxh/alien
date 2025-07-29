@@ -11,13 +11,20 @@
 class _SimulatedPreviewWidget
 {
 public:
-    static SimulatedPreviewWidget
-    create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
+    static SimulatedPreviewWidget create(
+        SimulationFacade const& simulationFacade,
+        PreviewDescriptionSettings const& previewSettings,
+        GenomeWindowEditData const& genomeEditData,
+        GenomeTabEditData const& editData);
 
     void process();
 
 private:
-    _SimulatedPreviewWidget(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
+    _SimulatedPreviewWidget(
+        SimulationFacade const& simulationFacade,
+        PreviewDescriptionSettings const& settings,
+        GenomeWindowEditData const& genomeEditData,
+        GenomeTabEditData const& editData);
 
     void initPreview();
     void continuePreview();
@@ -27,6 +34,7 @@ private:
     SimulationFacade _simulationFacade;
     PreviewDescriptionWidget _previewWidget;
 
+    PreviewDescriptionSettings _settings;
     GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;

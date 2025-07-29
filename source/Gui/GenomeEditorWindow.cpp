@@ -15,6 +15,7 @@
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
+#include "PreviewDescriptionWidgetSettings.h"
 
 void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
 {
@@ -59,10 +60,11 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     ChangeColorDialog::get().setup();
 
     _simulationFacade = simulationFacade;
+    _previewSettings = std::make_shared<_PreviewDescriptionSettings>();
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, GenomeDescription()));
+    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _previewSettings, _genomeEditData, getDefaultGenome()));
 }
 
 void GenomeEditorWindow::shutdownIntern() {}
@@ -136,7 +138,7 @@ void GenomeEditorWindow::processTabWidget()
     if (ImGui::BeginTabBar("##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
         if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            onScheduleAddDraftTab(GenomeDescription());
+            onScheduleAddDraftTab(getDefaultGenome());
         }
         AlienGui::Tooltip("New creature");
 
@@ -231,13 +233,13 @@ void GenomeEditorWindow::onCreateSeed()
 void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _previewSettings, _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _previewSettings, _genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)
@@ -258,4 +260,11 @@ void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab
         ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.62f).Value);
         ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.7f).Value);
     }
+}
+
+GenomeDescription GenomeEditorWindow::getDefaultGenome() const
+{
+    return GenomeDescription().genes({
+        GeneDescription().nodes({NodeDescription()}),
+    });
 }

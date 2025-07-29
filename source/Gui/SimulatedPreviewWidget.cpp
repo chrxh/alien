@@ -9,12 +9,16 @@
 #include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
 #include "PreviewDescriptionWidget.h"
+#include "PreviewDescriptionWidgetSettings.h"
 #include "WindowController.h"
 
-SimulatedPreviewWidget
-_SimulatedPreviewWidget::create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
+SimulatedPreviewWidget _SimulatedPreviewWidget::create(
+    SimulationFacade const& simulationFacade,
+    PreviewDescriptionSettings const& settings,
+    GenomeWindowEditData const& genomeEditData,
+    GenomeTabEditData const& editData)
 {
-    return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, genomeEditData, editData));
+    return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, settings, genomeEditData, editData));
 }
 
 void _SimulatedPreviewWidget::process()
@@ -33,13 +37,15 @@ void _SimulatedPreviewWidget::process()
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(
     SimulationFacade const& simulationFacade,
+    PreviewDescriptionSettings const& settings,
     GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData)
     : _simulationFacade(simulationFacade)
+    , _settings(settings)
     , _genomeEditData(genomeEditData)
     , _editData(editData)
 {
-    _previewWidget = _PreviewDescriptionWidget::create();
+    _previewWidget = _PreviewDescriptionWidget::create(settings);
 }
 
 void _SimulatedPreviewWidget::initPreview()
@@ -68,7 +74,7 @@ void _SimulatedPreviewWidget::continuePreview()
 void _SimulatedPreviewWidget::calcPreview()
 {
     auto fps = WindowController::get().getFps();
-    auto duration = std::chrono::milliseconds(1000 / fps / 2);
+    auto duration = _settings->maxSpeed ? std::chrono::milliseconds(1000 / fps) : std::chrono::milliseconds(1000 / fps / 2);
     _simulationFacade->calcTimestepsForPreview(duration);
 }
 

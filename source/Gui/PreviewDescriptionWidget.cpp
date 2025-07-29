@@ -10,11 +10,12 @@
 #include "EngineInterface/Colors.h"
 
 #include "AlienGui.h"
+#include "PreviewDescriptionWidgetSettings.h"
 #include "StyleRepository.h"
 
-PreviewDescriptionWidget _PreviewDescriptionWidget::create()
+PreviewDescriptionWidget _PreviewDescriptionWidget::create(PreviewDescriptionSettings const& settings)
 {
-    return PreviewDescriptionWidget(new _PreviewDescriptionWidget());
+    return PreviewDescriptionWidget(new _PreviewDescriptionWidget(settings));
 }
 
 bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
@@ -231,36 +232,30 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
         ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
         if (ImGui::BeginChild("##buttons", ImVec2(scale(100), scale(30)), false)) {
             ImGui::SetCursorPos({0, 0});
-            ImGui::PushStyleColor(ImGuiCol_Button, color);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, color);
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, color);
             ImGui::PushID(1);
-            if (ImGui::Button(ICON_FA_SEARCH_PLUS)) {
+            if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
                 _zoom *= 1.5f;
             }
             ImGui::PopID();
             ImGui::SameLine();
             ImGui::PushID(2);
-            if (ImGui::Button(ICON_FA_SEARCH_MINUS)) {
+            if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
                 _zoom /= 1.5f;
             }
             ImGui::PopID();
-            ImGui::PopStyleColor(3);
+            ImGui::SameLine();
+            AlienGui::VerticalSeparator(23);
+            ImGui::SameLine();
+            ImGui::PushID(3);
+            if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_WIND).highlighted(_settings->maxSpeed))) {
+                _settings->maxSpeed = !_settings->maxSpeed;
+            }
+            ImGui::PopID();
         }
         ImGui::EndChild();
     }
     ImGui::EndChild();
     return result;
-}
-
-float _PreviewDescriptionWidget::getZoom() const
-{
-    return _zoom;
-}
-
-void _PreviewDescriptionWidget::setZoom(float zoom)
-{
-    _zoom = zoom;
 }
 
 std::optional<int> _PreviewDescriptionWidget::getSelectedNode() const
@@ -273,6 +268,6 @@ void _PreviewDescriptionWidget::setSelectedNode(std::optional<int> selectedNode)
     _selectedNode = selectedNode;
 }
 
-_PreviewDescriptionWidget::_PreviewDescriptionWidget()
-{
-}
+_PreviewDescriptionWidget::_PreviewDescriptionWidget(PreviewDescriptionSettings const& settings)
+    : _settings(settings)
+{}

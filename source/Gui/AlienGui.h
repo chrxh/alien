@@ -343,7 +343,7 @@ public:
     static bool ToolbarButton(ToolbarButtonParameters const& parameters);
     static bool SelectableToolbarButton(std::string const& text, int& value, int selectionValue, int deselectionValue);
 
-    static void VerticalSeparator(float length = 23.0f);
+    static void VerticalSeparator(float height = 23.0f);
     static void ToolbarSeparator();
     static bool Button(std::string const& text, float size = 0);
     static bool CollapseButton(bool collapsed);
@@ -381,6 +381,7 @@ public:
     struct ActionButtonParameters
     {
         MEMBER(ActionButtonParameters, std::string, buttonText, "");
+        MEMBER(ActionButtonParameters, bool, highlighted, false);
         MEMBER(ActionButtonParameters, bool, frame, false);
         MEMBER(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };

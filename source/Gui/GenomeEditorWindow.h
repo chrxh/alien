@@ -33,9 +33,11 @@ private:
 
     void pushStyleColorForTab(GenomeTabWidget const& creatureTab);
 
+    GenomeDescription getDefaultGenome() const;
 
     SimulationFacade _simulationFacade;
 
+    PreviewDescriptionSettings _previewSettings;
     GenomeWindowEditData _genomeEditData; 
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
