@@ -29,9 +29,10 @@ GenomeTabWidget _GenomeTabWidget::createCreatureTab(
     SimulationFacade const& simulationFacade,
     GenomeWindowEditData const& genomeEditData,
     uint64_t creatureId,
-    GenomeDescription const& genome)
+    GenomeDescription const& genome,
+    GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}));
+    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -94,6 +95,11 @@ GenomeTabEditData const& _GenomeTabWidget::getEditData() const
     return _editData;
 }
 
+GenomeTabLayoutData const& _GenomeTabWidget::getLayoutData() const
+{
+    return _layoutData;
+}
+
 GenomeDescription const& _GenomeTabWidget::getGenomeDescription()
 {
     return _editData->genome;
@@ -145,6 +151,8 @@ _GenomeTabWidget::_GenomeTabWidget(
     _layoutData = layoutData;
     if (!_layoutData) {
         _layoutData = std::make_shared<_GenomeTabLayoutData>();
+    } else {
+        _origLayoutData = _layoutData->clone();
     }
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
@@ -222,8 +230,8 @@ void _GenomeTabWidget::doLayout()
         _layoutData->nodeListHeight = height / 4;
         _layoutData->neuralNetEditorHeight = height / 4;
         _layoutData->initialized = true;
-        _origLayoutData = std::make_shared<_GenomeTabLayoutData>();
-        *_origLayoutData = *_layoutData;
+        _origLayoutData = _layoutData->clone();
+       
         return;
     }
 

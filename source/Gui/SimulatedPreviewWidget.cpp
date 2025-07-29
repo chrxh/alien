@@ -22,7 +22,7 @@ void _SimulatedPreviewWidget::process()
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         initPreview();
     }
-    if (_genomeEditData->previewId.has_value() && _genomeEditData->previewId.value() != _editData->id) {
+    if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
         continuePreview();
     }
     calcPreview();
@@ -56,13 +56,13 @@ void _SimulatedPreviewWidget::initPreview()
     });
 
     _simulationFacade->setPreviewData(_previewData);
-    _genomeEditData->previewId = _editData->id;
+    _genomeEditData->currentPreviewId = _editData->id;
 }
 
 void _SimulatedPreviewWidget::continuePreview()
 {
     _simulationFacade->setPreviewData(_previewData);
-    _genomeEditData->previewId = _editData->id;
+    _genomeEditData->currentPreviewId = _editData->id;
 }
 
 void _SimulatedPreviewWidget::calcPreview()

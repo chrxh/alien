@@ -12,4 +12,11 @@ struct _GenomeTabLayoutData
     float geneListHeight = 0;
     float nodeListHeight = 0;
     float neuralNetEditorHeight = 0;
+
+    GenomeTabLayoutData clone() const
+    {
+        auto result = std::make_shared<_GenomeTabLayoutData>();
+        *result = *this;
+        return result;
+    }
 };

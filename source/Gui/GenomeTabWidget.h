@@ -18,7 +18,8 @@ public:
         SimulationFacade const& simulationFacade,
         GenomeWindowEditData const& genomeEditData,
         uint64_t creatureId,
-        GenomeDescription const& genome);
+        GenomeDescription const& genome,
+        GenomeTabLayoutData const& layoutData = nullptr);
 
     void process();
 
@@ -29,6 +30,7 @@ public:
     std::string getName() const;
 
     GenomeTabEditData const& getEditData() const;
+    GenomeTabLayoutData const& getLayoutData() const;
     GenomeDescription const& getGenomeDescription();
 
     bool hasCreaturesGenomeBeChanged() const;

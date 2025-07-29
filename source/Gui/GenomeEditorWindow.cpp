@@ -230,12 +230,14 @@ void GenomeEditorWindow::onCreateSeed()
 
 void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _genomeEditData, creatureId, genome);
+    auto const& currentTab = _tabs.at(_selectedTabIndex);
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
 {
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, genome);
+    auto const& currentTab = _tabs.at(_selectedTabIndex);
+    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)

@@ -4,5 +4,5 @@
 
 struct _GenomeWindowEditData
 {
-    std::optional<int> previewId;
+    std::optional<int> currentPreviewId;   // TabId of the current preview
 };
