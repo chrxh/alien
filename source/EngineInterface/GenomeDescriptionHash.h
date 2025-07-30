@@ -6,32 +6,11 @@
 
 namespace std {
 
-/**
- * Hash function specializations for GenomeDescription and all related types.
- * 
- * This header provides std::hash specializations that allow GenomeDescription
- * and its constituent types to be used as keys in std::unordered_map and 
- * std::unordered_set containers.
- * 
- * The hash functions are designed to be:
- * - Consistent with operator== (equal objects have equal hashes)
- * - Fast and reasonably collision-resistant
- * - Comprehensive (all members that affect equality are included)
- * 
- * Usage example:
- *   std::unordered_map<GenomeDescription, std::string> genomeMap;
- *   GenomeDescription genome = // ... construct genome
- *   genomeMap[genome] = "My genome";
- */
-
-// Hash combining utility function to avoid collisions
-// Uses the same algorithm as boost::hash_combine
 template<typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {
     seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-// Helper to hash variant types
 template<typename... Types>
 struct variant_hasher {
     std::size_t operator()(const std::variant<Types...>& v) const {
@@ -41,7 +20,6 @@ struct variant_hasher {
     }
 };
 
-// Hash specialization for NeuralNetworkGenomeDescription
 template<>
 struct hash<NeuralNetworkGenomeDescription> {
     std::size_t operator()(const NeuralNetworkGenomeDescription& desc) const {
@@ -59,16 +37,13 @@ struct hash<NeuralNetworkGenomeDescription> {
     }
 };
 
-// Hash specialization for BaseGenomeDescription
 template<>
 struct hash<BaseGenomeDescription> {
     std::size_t operator()(const BaseGenomeDescription& desc) const {
-        // BaseGenomeDescription has no members, so return a constant
         return 0;
     }
 };
 
-// Hash specialization for DepotGenomeDescription
 template<>
 struct hash<DepotGenomeDescription> {
     std::size_t operator()(const DepotGenomeDescription& desc) const {
@@ -76,7 +51,6 @@ struct hash<DepotGenomeDescription> {
     }
 };
 
-// Hash specialization for ConstructorGenomeDescription
 template<>
 struct hash<ConstructorGenomeDescription> {
     std::size_t operator()(const ConstructorGenomeDescription& desc) const {
@@ -84,7 +58,7 @@ struct hash<ConstructorGenomeDescription> {
         if (desc._autoTriggerInterval) {
             hash_combine(seed, *desc._autoTriggerInterval);
         } else {
-            hash_combine(seed, -1); // Use -1 for nullopt
+            hash_combine(seed, -1);
         }
         hash_combine(seed, desc._geneIndex);
         hash_combine(seed, desc._constructionActivationTime);
@@ -92,7 +66,6 @@ struct hash<ConstructorGenomeDescription> {
     }
 };
 
-// Hash specialization for SensorGenomeDescription
 template<>
 struct hash<SensorGenomeDescription> {
     std::size_t operator()(const SensorGenomeDescription& desc) const {
@@ -123,7 +96,6 @@ struct hash<SensorGenomeDescription> {
     }
 };
 
-// Hash specialization for GeneratorGenomeDescription
 template<>
 struct hash<GeneratorGenomeDescription> {
     std::size_t operator()(const GeneratorGenomeDescription& desc) const {
@@ -135,16 +107,13 @@ struct hash<GeneratorGenomeDescription> {
     }
 };
 
-// Hash specialization for AttackerGenomeDescription
 template<>
 struct hash<AttackerGenomeDescription> {
     std::size_t operator()(const AttackerGenomeDescription& desc) const {
-        // AttackerGenomeDescription has no members, so return a constant
         return 1;
     }
 };
 
-// Hash specialization for InjectorGenomeDescription
 template<>
 struct hash<InjectorGenomeDescription> {
     std::size_t operator()(const InjectorGenomeDescription& desc) const {
@@ -152,7 +121,6 @@ struct hash<InjectorGenomeDescription> {
     }
 };
 
-// Hash specialization for AutoBendingGenomeDescription
 template<>
 struct hash<AutoBendingGenomeDescription> {
     std::size_t operator()(const AutoBendingGenomeDescription& desc) const {
@@ -163,7 +131,6 @@ struct hash<AutoBendingGenomeDescription> {
     }
 };
 
-// Hash specialization for ManualBendingGenomeDescription
 template<>
 struct hash<ManualBendingGenomeDescription> {
     std::size_t operator()(const ManualBendingGenomeDescription& desc) const {
@@ -174,7 +141,6 @@ struct hash<ManualBendingGenomeDescription> {
     }
 };
 
-// Hash specialization for AngleBendingGenomeDescription
 template<>
 struct hash<AngleBendingGenomeDescription> {
     std::size_t operator()(const AngleBendingGenomeDescription& desc) const {
@@ -185,7 +151,6 @@ struct hash<AngleBendingGenomeDescription> {
     }
 };
 
-// Hash specialization for AutoCrawlingGenomeDescription
 template<>
 struct hash<AutoCrawlingGenomeDescription> {
     std::size_t operator()(const AutoCrawlingGenomeDescription& desc) const {
@@ -196,7 +161,6 @@ struct hash<AutoCrawlingGenomeDescription> {
     }
 };
 
-// Hash specialization for ManualCrawlingGenomeDescription
 template<>
 struct hash<ManualCrawlingGenomeDescription> {
     std::size_t operator()(const ManualCrawlingGenomeDescription& desc) const {
@@ -207,16 +171,13 @@ struct hash<ManualCrawlingGenomeDescription> {
     }
 };
 
-// Hash specialization for DirectMovementGenomeDescription
 template<>
 struct hash<DirectMovementGenomeDescription> {
     std::size_t operator()(const DirectMovementGenomeDescription& desc) const {
-        // DirectMovementGenomeDescription has no members, so return a constant
         return 2;
     }
 };
 
-// Hash specialization for MuscleModeGenomeDescription (variant)
 template<>
 struct hash<MuscleModeGenomeDescription> {
     std::size_t operator()(const MuscleModeGenomeDescription& desc) const {
@@ -230,7 +191,6 @@ struct hash<MuscleModeGenomeDescription> {
     }
 };
 
-// Hash specialization for MuscleGenomeDescription
 template<>
 struct hash<MuscleGenomeDescription> {
     std::size_t operator()(const MuscleGenomeDescription& desc) const {
@@ -238,7 +198,6 @@ struct hash<MuscleGenomeDescription> {
     }
 };
 
-// Hash specialization for DefenderGenomeDescription
 template<>
 struct hash<DefenderGenomeDescription> {
     std::size_t operator()(const DefenderGenomeDescription& desc) const {
@@ -246,7 +205,6 @@ struct hash<DefenderGenomeDescription> {
     }
 };
 
-// Hash specialization for ReconnectorGenomeDescription
 template<>
 struct hash<ReconnectorGenomeDescription> {
     std::size_t operator()(const ReconnectorGenomeDescription& desc) const {
@@ -261,7 +219,6 @@ struct hash<ReconnectorGenomeDescription> {
     }
 };
 
-// Hash specialization for DetonatorGenomeDescription
 template<>
 struct hash<DetonatorGenomeDescription> {
     std::size_t operator()(const DetonatorGenomeDescription& desc) const {
@@ -269,7 +226,6 @@ struct hash<DetonatorGenomeDescription> {
     }
 };
 
-// Hash specialization for CellTypeGenomeDescription (variant)
 template<>
 struct hash<CellTypeGenomeDescription> {
     std::size_t operator()(const CellTypeGenomeDescription& desc) const {
@@ -288,7 +244,6 @@ struct hash<CellTypeGenomeDescription> {
     }
 };
 
-// Hash specialization for SignalRoutingRestrictionGenomeDescription
 template<>
 struct hash<SignalRoutingRestrictionGenomeDescription> {
     std::size_t operator()(const SignalRoutingRestrictionGenomeDescription& desc) const {
@@ -300,7 +255,6 @@ struct hash<SignalRoutingRestrictionGenomeDescription> {
     }
 };
 
-// Hash specialization for NodeDescription
 template<>
 struct hash<NodeDescription> {
     std::size_t operator()(const NodeDescription& desc) const {
@@ -315,7 +269,6 @@ struct hash<NodeDescription> {
     }
 };
 
-// Hash specialization for GeneDescription
 template<>
 struct hash<GeneDescription> {
     std::size_t operator()(const GeneDescription& desc) const {
@@ -334,7 +287,6 @@ struct hash<GeneDescription> {
     }
 };
 
-// Hash specialization for GenomeDescription
 template<>
 struct hash<GenomeDescription> {
     std::size_t operator()(const GenomeDescription& desc) const {
