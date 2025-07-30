@@ -70,6 +70,15 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
 
             ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
 
+            // Draw selected gene
+            auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
+            for (auto const& cell : desc._cells) {
+                auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
+                if (_selectedGene.has_value() && cell._geneIndex == _selectedGene.value()) {
+                    drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
+                }
+            }
+
             // Draw cells
             for (auto const& cell : desc._cells) {
                 auto cellPos = (cell._pos - upperLeft) * cellSize + offset;

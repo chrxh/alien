@@ -59,14 +59,14 @@ void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int inde
     }
 }
 
-void GenomeDescriptionEditService::addEmptyNode(GeneDescription& gene, int index)
+void GenomeDescriptionEditService::addNode(GeneDescription& gene, int index, NodeDescription const& node)
 {
     if (gene._nodes.empty()) {
-        gene._nodes.emplace_back(NodeDescription());
+        gene._nodes.emplace_back(node);
         return;
     }
 
-    gene._nodes.insert(gene._nodes.begin() + index + 1, NodeDescription());
+    gene._nodes.insert(gene._nodes.begin() + index + 1, node);
 }
 
 void GenomeDescriptionEditService::removeNode(GeneDescription& gene, int index)

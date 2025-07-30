@@ -26,4 +26,6 @@ private:
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
+
+    std::optional<int> _selectedNodeFromPreviousFrame;
 };

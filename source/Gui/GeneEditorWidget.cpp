@@ -125,6 +125,14 @@ void _GeneEditorWidget::processHeaderData()
 
 void _GeneEditorWidget::processNodeList()
 {
+    auto scrollToNodeIndex = -1;
+    auto selectedNode = _editData->getSelectedNodeIndex();
+    if (!_selectedNodeFromPreviousFrame.has_value() || _selectedNodeFromPreviousFrame != selectedNode) {
+        if (selectedNode.has_value()) {
+            scrollToNodeIndex = std::max(1, selectedNode.value());
+        }
+    }
+    _selectedNodeFromPreviousFrame = selectedNode;
     if (ImGui::BeginChild("NodeList", ImVec2(0, 0))) {
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -143,10 +151,15 @@ void _GeneEditorWidget::processNodeList()
 
             ImGuiListClipper clipper;
             clipper.Begin(gene._nodes.size());
+            if (scrollToNodeIndex != -1) {
+                clipper.IncludeItemByIndex(scrollToNodeIndex);
+            }
             while (clipper.Step()) {
                 for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                     auto const& node = gene._nodes.at(row);
-
+                    if (row == scrollToNodeIndex) {
+                        ImGui::SetScrollHereY();
+                    }
                     ImGui::PushID(row);
                     ImGui::TableNextRow(0, scale(21.0f));
 
@@ -254,7 +267,7 @@ void _GeneEditorWidget::onAddNode()
     auto& gene = _editData->getSelectedGeneRef();
     auto selectedNode = _editData->getSelectedNodeIndex();
     if (gene._nodes.empty()) {
-        GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
+        GenomeDescriptionEditService::get().addNode(gene, 0, NodeDescription());
         _editData->setSelectedNodeIndex(0);
     } else {
         int insertIndex;
@@ -263,8 +276,9 @@ void _GeneEditorWidget::onAddNode()
         } else {
             insertIndex = toInt(gene._nodes.size()) - 1;
         }
+        int color = gene._nodes.at(insertIndex)._color;
 
-        GenomeDescriptionEditService::get().addEmptyNode(gene, insertIndex);
+        GenomeDescriptionEditService::get().addNode(gene, insertIndex, NodeDescription().color(color));
 
         _editData->setSelectedNodeIndex(insertIndex + 1);
     }
