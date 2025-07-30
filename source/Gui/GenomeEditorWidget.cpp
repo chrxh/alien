@@ -71,6 +71,14 @@ void _GenomeEditorWidget::processHeaderData()
 void _GenomeEditorWidget::processGeneList()
 {
     if (ImGui::BeginChild("GeneList", ImVec2(0, 0))) {
+        auto scrollToGeneIndex = -1;
+        if (!_selectedGeneFromPreviousFrame.has_value() || _selectedGeneFromPreviousFrame != _editData->selectedGeneIndex) {
+            if (_editData->selectedGeneIndex.has_value()) {
+                scrollToGeneIndex = std::max(1, _editData->selectedGeneIndex.value());
+            }
+        }
+        _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
+
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
@@ -79,9 +87,9 @@ void _GenomeEditorWidget::processGeneList()
             ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
             ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
-            ImGui::TableSetupColumn("Branches", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
+            ImGui::TableSetupColumn("Branches", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(75.0f));
             ImGui::TableSetupColumn("Concatenations", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
-            ImGui::TableSetupColumn("Nodes", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(90.0f));
+            ImGui::TableSetupColumn("Nodes", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableHeadersRow();
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -90,9 +98,15 @@ void _GenomeEditorWidget::processGeneList()
 
             ImGuiListClipper clipper;
             clipper.Begin(genome._genes.size());
+            if (scrollToGeneIndex != -1) {
+                clipper.IncludeItemByIndex(scrollToGeneIndex);
+            }
             while (clipper.Step()) {
                 for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                     auto const& gene = genome._genes.at(row);
+                    if (row == scrollToGeneIndex) {
+                        ImGui::SetScrollHereY();
+                    }
 
                     ImGui::PushID(row);
                     ImGui::TableNextRow(0, scale(21.0f));

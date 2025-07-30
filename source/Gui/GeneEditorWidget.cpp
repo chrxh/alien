@@ -125,15 +125,16 @@ void _GeneEditorWidget::processHeaderData()
 
 void _GeneEditorWidget::processNodeList()
 {
-    auto scrollToNodeIndex = -1;
-    auto selectedNode = _editData->getSelectedNodeIndex();
-    if (!_selectedNodeFromPreviousFrame.has_value() || _selectedNodeFromPreviousFrame != selectedNode) {
-        if (selectedNode.has_value()) {
-            scrollToNodeIndex = std::max(1, selectedNode.value());
-        }
-    }
-    _selectedNodeFromPreviousFrame = selectedNode;
     if (ImGui::BeginChild("NodeList", ImVec2(0, 0))) {
+        auto scrollToNodeIndex = -1;
+        auto selectedNode = _editData->getSelectedNodeIndex();
+        if (!_selectedNodeFromPreviousFrame.has_value() || _selectedNodeFromPreviousFrame != selectedNode) {
+            if (selectedNode.has_value()) {
+                scrollToNodeIndex = std::max(1, selectedNode.value());
+            }
+        }
+        _selectedNodeFromPreviousFrame = selectedNode;
+
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
