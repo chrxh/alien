@@ -26,8 +26,8 @@ private:
         GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData);
 
-    void initPreview();
-    void continuePreview();
+    void createGenomeForPreview();
+    void setPreview();
     void calcPreview();
     void showPreview();
 
@@ -39,7 +39,7 @@ private:
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
-    CollectionDescription _previewData;
+    GenomeDescription _genomeForPreview;
     std::optional<GenomeDescription> _genomeFromPreviousFrame;
     std::optional<uint64_t> _previewTimestepFromPreviousMeasure;
     std::optional<std::chrono::steady_clock::time_point> _timepointFromPreviousMeasure;

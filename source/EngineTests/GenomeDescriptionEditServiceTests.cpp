@@ -284,7 +284,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_start)
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
     });
-    GenomeDescriptionEditService::get().addEmptyNode(gene, 0);
+    GenomeDescriptionEditService::get().addNode(gene, 0, NodeDescription());
 
     ASSERT_EQ(4, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -300,7 +300,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_middle)
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
     });
-    GenomeDescriptionEditService::get().addEmptyNode(gene, 1);
+    GenomeDescriptionEditService::get().addNode(gene, 1, NodeDescription());
 
     ASSERT_EQ(4, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());
@@ -316,7 +316,7 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_end)
         NodeDescription().cellTypeData(ConstructorGenomeDescription()),
         NodeDescription().cellTypeData(SensorGenomeDescription()),
     });
-    GenomeDescriptionEditService::get().addEmptyNode(gene, 2);
+    GenomeDescriptionEditService::get().addNode(gene, 2, NodeDescription());
 
     ASSERT_EQ(4, gene._nodes.size());
     EXPECT_EQ(CellTypeGenome_Depot, gene._nodes.at(0).getCellType());

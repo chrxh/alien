@@ -24,10 +24,11 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 void _SimulatedPreviewWidget::process()
 {
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
-        initPreview();
+        createGenomeForPreview();
+        setPreview();
     }
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
-        continuePreview();
+        setPreview();
     }
     calcPreview();
     showPreview();
@@ -48,26 +49,32 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
     _previewWidget = _PreviewDescriptionWidget::create(settings);
 }
 
-void _SimulatedPreviewWidget::initPreview()
+void _SimulatedPreviewWidget::createGenomeForPreview()
 {
-    auto castratedGenome = _editData->genome;
-    GenomeDescriptionEditService::get().adaptDescriptionForPreview(castratedGenome);
+    _genomeForPreview = _editData->genome;
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview);
 
-    _previewData = CollectionDescription().creatures({
-        CreatureDescription()
-            .genome(castratedGenome)
-            .cells({
-            CellDescription().stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
-        }),
-    });
-
-    _simulationFacade->setPreviewData(_previewData);
-    _genomeEditData->currentPreviewId = _editData->id;
 }
 
-void _SimulatedPreviewWidget::continuePreview()
+void _SimulatedPreviewWidget::setPreview()
 {
-    _simulationFacade->setPreviewData(_previewData);
+    CollectionDescription preview;
+
+    // Cache the preview data to avoid recalculating it if the genome hasn't changed
+    auto findResult = _genomeEditData->genotypeToPhenotype.find(_genomeForPreview);
+    if (findResult != _genomeEditData->genotypeToPhenotype.end()) {
+        preview = findResult->second;
+    } else {
+        preview = CollectionDescription().creatures({
+            CreatureDescription()
+                .genome(_genomeForPreview)
+                .cells({
+                    CellDescription().stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+                }),
+        });
+    }
+
+    _simulationFacade->setPreviewData(preview);
     _genomeEditData->currentPreviewId = _editData->id;
 }
 
@@ -97,7 +104,9 @@ namespace
 void _SimulatedPreviewWidget::showPreview()
 {
     auto now = std::chrono::steady_clock::now();
-    _previewData = _simulationFacade->getPreviewData();
+    auto previewData = _simulationFacade->getPreviewData();
+    _genomeEditData->genotypeToPhenotype.insert_or_assign(_genomeForPreview, previewData);
+
     auto timestep = _simulationFacade->getCurrentTimestepForPreview();
 
     int tps = 0;
@@ -116,11 +125,11 @@ void _SimulatedPreviewWidget::showPreview()
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
-    auto copy = _previewData;
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(std::move(copy));
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(std::move(previewData));
     _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
     _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
     _previewWidget->process(tps, previewDesc);
     _editData->selectedGeneIndex = _previewWidget->getSelectedGene();
     _editData->setSelectedNodeIndex(_previewWidget->getSelectedNode());
 }
+
