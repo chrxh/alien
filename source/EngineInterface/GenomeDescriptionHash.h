@@ -6,7 +6,26 @@
 
 namespace std {
 
+/**
+ * Hash function specializations for GenomeDescription and all related types.
+ * 
+ * This header provides std::hash specializations that allow GenomeDescription
+ * and its constituent types to be used as keys in std::unordered_map and 
+ * std::unordered_set containers.
+ * 
+ * The hash functions are designed to be:
+ * - Consistent with operator== (equal objects have equal hashes)
+ * - Fast and reasonably collision-resistant
+ * - Comprehensive (all members that affect equality are included)
+ * 
+ * Usage example:
+ *   std::unordered_map<GenomeDescription, std::string> genomeMap;
+ *   GenomeDescription genome = // ... construct genome
+ *   genomeMap[genome] = "My genome";
+ */
+
 // Hash combining utility function to avoid collisions
+// Uses the same algorithm as boost::hash_combine
 template<typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {
     seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
