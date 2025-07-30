@@ -50,7 +50,6 @@
 namespace
 {
     std::chrono::milliseconds const StatisticsUpdate(30);
-    IntVector2D const PreviewSize{200, 200};
     ArraySizesForGpu const PreviewCapacityGpu{10000, 10000, 10000000};
     ArraySizesForTO const PreviewCapacityTO{1000, 1000, 10000, 10000, 10000, 10000000};
 }
@@ -59,6 +58,8 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 {
     initCuda();
     CudaMemoryManager::getInstance().reset();
+
+    initPreviewData();
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
@@ -76,8 +77,8 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaPreviewStatistics = std::make_shared<SimulationStatistics>();
     _maxAgeBalancer = std::make_shared<_MaxAgeBalancer>();
 
-    _cudaSimulationData->init({settings.worldSizeX, settings.worldSizeY}, timestep);
-    _cudaPreviewData->init({PreviewSize.x, PreviewSize.y}, 0);
+    _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
+    _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
     _cudaRenderingData->init();
     _cudaSimulationStatistics->init();
     _cudaPreviewStatistics->init();
@@ -94,8 +95,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     // Default array sizes for empty simulation (will be resized later if not sufficient)
     _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
     _cudaPreviewData->resizeObjectsAndTempObjects(PreviewCapacityGpu);
-
-    initPreviewData();
 
     auto memory = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memory / (1024 * 1024)) + " MB GPU memory used");
@@ -450,9 +449,6 @@ void _SimulationCudaFacade::setDetached(bool value)
 void _SimulationCudaFacade::setGpuConstants(CudaSettings const& gpuConstants)
 {
     _settings.cudaSettings = gpuConstants;
-
-    CHECK_FOR_CUDA_ERROR(
-        cudaMemcpyToSymbol(cudaSettings, &gpuConstants, sizeof(CudaSettings), 0, cudaMemcpyHostToDevice));
 }
 
 SimulationParameters _SimulationCudaFacade::getSimulationParameters() const
@@ -540,12 +536,15 @@ void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpu const& size
 
 void _SimulationCudaFacade::initPreviewData()
 {
-    _simulationParametersForPreview.friction.baseValue = 0.01f;
-    _simulationParametersForPreview.maxVelocity.value = 0.002f;
+    _settingsForPreview.simulationParameters.friction.baseValue = 0.01f;
+    _settingsForPreview.simulationParameters.maxVelocity.value = 0.002f;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        _simulationParametersForPreview.radiationType1_strength.baseValue[i] = 0.0f;
-        _simulationParametersForPreview.radiationType2_strength.value[i] = 0.0f;
+        _settingsForPreview.simulationParameters.radiationType1_strength.baseValue[i] = 0.0f;
+        _settingsForPreview.simulationParameters.radiationType2_strength.value[i] = 0.0f;
     }
+    _settingsForPreview.worldSizeX = 400;
+    _settingsForPreview.worldSizeY = 400;
+    _settingsForPreview.cudaSettings.numBlocks = 16;
 }
 
 void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
@@ -562,12 +561,12 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
 {
     
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
-        cudaSimulationParameters, &_simulationParametersForPreview, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+        cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     auto startTimepoint = std::chrono::steady_clock::now();
     while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration) {
 
-        _simulationKernels->calcTimestepForPreview(_settings, *_cudaPreviewData, *_cudaPreviewStatistics);
+        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;
@@ -585,7 +584,8 @@ uint64_t _SimulationCudaFacade::getCurrentTimestepForPreview()
 CollectionTO _SimulationCudaFacade::getPreviewData()
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(PreviewCapacityTO);
-    _dataAccessKernels->getData(_settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {PreviewSize.x + 10, PreviewSize.y + 10}, cudaDataTO);
+    _dataAccessKernels->getData(
+        _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaDataTO);
     syncAndCheck();
 
     auto dataTO = _collectionTOProvider->provideNewUnmanagedDataTO(cudaDataTO.capacities);

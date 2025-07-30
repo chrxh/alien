@@ -131,9 +131,9 @@ private:
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;
     SimulationParametersUpdateConfig _simulationParametersUpdateConfig = SimulationParametersUpdateConfig::All;
-    SimulationParameters _simulationParametersForPreview;
 
     SettingsForSimulation _settings;
+    SettingsForSimulation _settingsForPreview;
 
     mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
