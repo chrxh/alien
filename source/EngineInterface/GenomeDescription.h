@@ -224,3 +224,6 @@ struct GenomeDescription
     MEMBER(GenomeDescription, std::vector<GeneDescription>, genes, {})
     MEMBER(GenomeDescription, float, frontAngle, 0.0f);
 };
+
+// Include hash specializations
+#include "GenomeDescriptionHash.h"

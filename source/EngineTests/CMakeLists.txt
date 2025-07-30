@@ -10,6 +10,7 @@ PUBLIC
     EnergyFlowTests.cpp
     GarbageCollectorTests.cpp
     GenomeDescriptionEditServiceTests.cpp
+    GenomeDescriptionHashTests.cpp
     GenomeDescriptionInfoServiceTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
