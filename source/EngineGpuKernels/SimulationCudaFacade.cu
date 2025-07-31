@@ -98,6 +98,10 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     auto memory = CudaMemoryManager::getInstance().getSizeOfAcquiredMemory();
     log(Priority::Important, std::to_string(memory / (1024 * 1024)) + " MB GPU memory used");
+
+    // Create dedicated CUDA stream for preview operations
+    // This enables preview operations to run concurrently with main simulation
+    CHECK_FOR_CUDA_ERROR(cudaStreamCreate(&_previewStream));
 }
 
 _SimulationCudaFacade::~_SimulationCudaFacade()
@@ -117,6 +121,11 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
 
     _cudaCollectionTOProvider.reset();
     _collectionTOProvider.reset();
+
+    // Cleanup preview CUDA stream
+    if (_previewStream) {
+        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_previewStream));
+    }
 
     CHECK_FOR_CUDA_ERROR(cudaDeviceReset());
     log(Priority::Important, "simulation closed");
@@ -547,24 +556,24 @@ void _SimulationCudaFacade::initPreviewData()
     _settingsForPreview.cudaSettings.numBlocks = 16;
 }
 
-void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO, cudaStream_t stream)
+void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
 {
-    // Stream-aware preview data initialization
-    // Uses provided stream for synchronization instead of blocking main simulation
+    // Use internal preview stream for concurrent operations
+    // This allows preview operations to run without blocking main simulation
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
     _dataAccessKernels->clearData(_settings.cudaSettings, *_cudaPreviewData);
     _dataAccessKernels->addData(_settings.cudaSettings, *_cudaPreviewData, cudaDataTO, false);
     
-    // Use stream-aware synchronization for preview operations
-    syncAndCheck(stream);
+    // Use internal stream for synchronization
+    syncAndCheck(_previewStream);
 }
 
-void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds const& duration, cudaStream_t stream)
+void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
-    // Stream-aware preview simulation computation
-    // Allows preview to run concurrently with main simulation using dedicated stream
+    // Use internal preview stream for concurrent computation
+    // This allows preview simulation to run without blocking main simulation
     
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
@@ -574,8 +583,8 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
 
         _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics);
         
-        // Use stream-aware synchronization for preview operations
-        syncAndCheck(stream);
+        // Use internal stream for synchronization
+        syncAndCheck(_previewStream);
 
         ++_cudaPreviewData->timestep;
     }
@@ -589,16 +598,16 @@ uint64_t _SimulationCudaFacade::getCurrentTimestepForPreview()
     return _cudaPreviewData->timestep;
 }
 
-CollectionTO _SimulationCudaFacade::getPreviewData(cudaStream_t stream)
+CollectionTO _SimulationCudaFacade::getPreviewData()
 {
-    // Stream-aware preview data retrieval  
-    // Uses provided stream for synchronization to avoid blocking main simulation
+    // Use internal preview stream for concurrent data retrieval  
+    // This allows preview operations to run without blocking main simulation
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(PreviewCapacityTO);
     _dataAccessKernels->getData(
         _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaDataTO);
     
-    // Use stream-aware synchronization for preview operations
-    syncAndCheck(stream);
+    // Use internal stream for synchronization
+    syncAndCheck(_previewStream);
 
     auto dataTO = _collectionTOProvider->provideNewUnmanagedDataTO(cudaDataTO.capacities);
     copyDataTOtoHost(dataTO, cudaDataTO);

@@ -99,10 +99,10 @@ public:
 
     // Simulated preview
     void initPreviewData();
-    void newPreview(CollectionTO const& dataTO, cudaStream_t stream = 0);
-    void calcTimestepsForPreview(std::chrono::milliseconds const& duration, cudaStream_t stream = 0);
+    void newPreview(CollectionTO const& dataTO);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     uint64_t getCurrentTimestepForPreview();
-    CollectionTO getPreviewData(cudaStream_t stream = 0);
+    CollectionTO getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -151,6 +151,10 @@ private:
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
     MaxAgeBalancer _maxAgeBalancer;
+
+    // CUDA stream for preview operations - managed internally to enable concurrency
+    // This dedicated stream allows preview operations to run without blocking main simulation
+    cudaStream_t _previewStream = 0;
 
     SimulationKernelsService _simulationKernels;
     DataAccessKernelsService _dataAccessKernels;

@@ -1,7 +1,6 @@
 #include "EngineWorker.h"
 
 #include <chrono>
-#include <cuda_runtime.h>
 
 #include "Base/ExitScopeGuard.h"
 
@@ -12,7 +11,6 @@
 #include "EngineGpuKernels/CollectionTOProvider.cuh"
 #include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
-#include "EngineGpuKernels/Macros.cuh"
 
 #include "DescriptionConverterService.h"
 
@@ -28,13 +26,6 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
     _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
     _cudaResource = nullptr;
-    
-    // Create dedicated CUDA stream for preview operations
-    // Note: If this is called multiple times, the previous stream should be destroyed first
-    if (_previewStream) {
-        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_previewStream));
-    }
-    CHECK_FOR_CUDA_ERROR(cudaStreamCreate(&_previewStream));
 }
 
 void EngineWorker::clear()
@@ -277,11 +268,6 @@ void EngineWorker::endShutdown()
     _isSimulationRunning = false;
     _isShutdown = false;
     _simulationCudaFacade.reset();
-    
-    // Cleanup preview CUDA stream
-    if (_previewStream) {
-        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_previewStream));
-    }
 }
 
 int EngineWorker::getTpsRestriction() const
@@ -444,12 +430,9 @@ bool EngineWorker::isSimulationRunning() const
 
 CollectionDescription EngineWorker::getPreviewData()
 {
-    // Use dedicated preview stream instead of EngineWorkerGuard for concurrency
-    // This allows preview operations to run without blocking the main simulation thread
-    auto preview = _simulationCudaFacade->getPreviewData(_previewStream);
-    
-    // Synchronize preview stream to ensure data is ready before conversion
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_previewStream));
+    // Preview operations now use internal CUDA stream management in SimulationCudaFacade
+    // This allows concurrent execution without blocking the main simulation thread
+    auto preview = _simulationCudaFacade->getPreviewData();
     
     ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview); });
 
@@ -458,30 +441,24 @@ CollectionDescription EngineWorker::getPreviewData()
 
 void EngineWorker::setPreviewData(CollectionDescription const& data)
 {
-    // Use dedicated preview stream instead of EngineWorkerGuard for concurrency
-    // This allows preview data setting without blocking the main simulation thread
+    // Preview operations now use internal CUDA stream management in SimulationCudaFacade
+    // This allows concurrent execution without blocking the main simulation thread
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);
 
-    _simulationCudaFacade->newPreview(dataTO, _previewStream);
-    
-    // Synchronize preview stream to ensure operation is complete
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_previewStream));
+    _simulationCudaFacade->newPreview(dataTO);
 }
 
 void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
-    // Use dedicated preview stream instead of EngineWorkerGuard for concurrency
-    // This allows preview simulation to run without blocking the main simulation thread
-    _simulationCudaFacade->calcTimestepsForPreview(duration, _previewStream);
-    
-    // Synchronize preview stream to ensure computation is complete
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_previewStream));
+    // Preview operations now use internal CUDA stream management in SimulationCudaFacade
+    // This allows concurrent execution without blocking the main simulation thread
+    _simulationCudaFacade->calcTimestepsForPreview(duration);
 }
 
 uint64_t EngineWorker::getCurrentTimestepForPreview()
 {
-    // No EngineWorkerGuard needed - this is a simple data read that doesn't require synchronization
-    // Preview timestep is managed internally by the dedicated preview stream operations
+    // Simple data read - no synchronization needed
+    // Preview timestep is managed internally by SimulationCudaFacade
     return _simulationCudaFacade->getCurrentTimestepForPreview();
 }
 
