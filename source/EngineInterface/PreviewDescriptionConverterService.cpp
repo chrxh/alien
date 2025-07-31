@@ -6,7 +6,7 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 
-PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescription&& data) const
+PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype) const
 {
     PreviewDescription result;
 
@@ -14,23 +14,23 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
 
     // Remove seed
     uint64_t smallestCellId = 0xffffffffffffffff;
-    data.forEachCell([&smallestCellId](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
-    editService.removeCell(data, smallestCellId);
-    auto cache = data.createCache();
-    if (data.isEmpty()) {
+    phenotype.forEachCell([&smallestCellId](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
+    editService.removeCell(phenotype, smallestCellId);
+    auto cache = phenotype.createCache();
+    if (phenotype.isEmpty()) {
         return result;
     }
 
     // Center
-    editService.setCenter(data, {0.0f, 0.0f});
+    editService.setCenter(phenotype, {0.0f, 0.0f});
 
     // Try to get last and previous last constructed cell on principal gene
     std::map<int, std::map<int, uint64_t>> geneAndNodeIndexToId;
-    data.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._nodeIndex] = cell._id; });
+    phenotype.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._nodeIndex] = cell._id; });
 
     auto& firstGene_NodeIndexToId = geneAndNodeIndexToId.at(0);
     auto lastConstructedCellId = (--firstGene_NodeIndexToId.end())->second;
-    auto& lastConstructedCell = data.getCellRef(lastConstructedCellId);
+    auto& lastConstructedCell = phenotype.getCellRef(lastConstructedCellId);
 
     std::optional<uint64_t> prevLastConstructedCellId;
     if (firstGene_NodeIndexToId.size() > 1) {
@@ -47,20 +47,21 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
     }
 
     if (prevLastConstructedCellId.has_value()) {
-        auto& prevLastConstructedCell = data.getCellRef(prevLastConstructedCellId.value());
+        auto& prevLastConstructedCell = phenotype.getCellRef(prevLastConstructedCellId.value());
 
         auto angle = Math::angleOfVector(prevLastConstructedCell._pos - lastConstructedCell._pos);
-        editService.rotate(data, -angle);
+        editService.rotate(phenotype, -angle);
     }
 
     // Create preview cells
-    data.forEachCell([&](CellDescription const& cell) {
-        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(cell._color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex));
+    phenotype.forEachCell([&](CellDescription const& cell) {
+        auto const& color = genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex)._color;
+        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex));
     });
 
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
-    data.forEachCell([&](CellDescription const& cell) {
+    phenotype.forEachCell([&](CellDescription const& cell) {
         for (const auto& connection : cell._connections) {
             uint64_t cellId1 = cell._id;
             uint64_t cellId2 = connection._cellId;
@@ -72,7 +73,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(CollectionDescrip
             processedConnections.insert(connectionPair);
 
             ConnectionPreviewDescription previewConnection;
-            previewConnection.cell1(data.getCellRef(cellId1, cache)._pos).cell2(data.getCellRef(cellId2, cache)._pos).arrowToCell1(false).arrowToCell2(false);
+            previewConnection.cell1(phenotype.getCellRef(cellId1, cache)._pos).cell2(phenotype.getCellRef(cellId2, cache)._pos).arrowToCell1(false).arrowToCell2(false);
             result._connections.push_back(previewConnection);
         }
     });

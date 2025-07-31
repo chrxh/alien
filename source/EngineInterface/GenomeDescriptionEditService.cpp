@@ -103,13 +103,19 @@ namespace
         }
     }
 
-    void constructionTriggering(GenomeDescription& genome)
+    void setNodeAttributesForPreview(GenomeDescription& genome)
     {
         for (auto& gene : genome._genes) {
             for (auto& node : gene._nodes) {
-                if (node.getCellType() == CellTypeGenome_Constructor) {
+                node._color = 0;
+                node._neuralNetwork = NeuralNetworkGenomeDescription();
+                node._signalRoutingRestriction = SignalRoutingRestrictionGenomeDescription();
+                if (node.getCellType() != CellTypeGenome_Constructor) {
+                    node._cellTypeData = BaseGenomeDescription();
+                } else {
                     auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                     constructor._autoTriggerInterval = 75;
+                    constructor._constructionActivationTime = 100;
                 }
             }
         }
@@ -120,7 +126,7 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
 {
     std::set<int> inspectedGeneIndices;
     castrate(genome, 0, inspectedGeneIndices);
-    constructionTriggering(genome);
+    setNodeAttributesForPreview(genome);
     if (!genome._genes.empty()) {
         genome._genes.at(0)._numBranches = 1;
     }

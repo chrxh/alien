@@ -10,5 +10,5 @@ class PreviewDescriptionConverterService
     MAKE_SINGLETON(PreviewDescriptionConverterService);
 
 public:
-    PreviewDescription convert(CollectionDescription&& data) const;
+    PreviewDescription convert(GenomeDescription const& genome, CollectionDescription&& phenotype) const;
 };

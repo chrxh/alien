@@ -125,7 +125,7 @@ void _SimulatedPreviewWidget::showPreview()
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(std::move(previewData));
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(previewData));
     _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
     _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
     _previewWidget->process(tps, previewDesc);
