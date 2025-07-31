@@ -8,6 +8,7 @@
 #include <windows.h>
 #endif
 #include <GL/gl.h>
+#include <cuda_runtime.h>
 
 #include "Base/Definitions.h"
 
@@ -179,6 +180,11 @@ private:
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;
     CollectionTOProvider _collectionTOProvider;
+
+    //preview CUDA stream for concurrent operations
+    //This dedicated stream allows preview operations to run concurrently with main simulation
+    //without blocking via EngineWorkerGuard. Synchronization is managed at the stream level.
+    cudaStream_t _previewStream;
 };
 
 class EngineWorkerGuard

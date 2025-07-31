@@ -99,10 +99,10 @@ public:
 
     // Simulated preview
     void initPreviewData();
-    void newPreview(CollectionTO const& dataTO);
-    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
+    void newPreview(CollectionTO const& dataTO, cudaStream_t stream = 0);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration, cudaStream_t stream = 0);
     uint64_t getCurrentTimestepForPreview();
-    CollectionTO getPreviewData();
+    CollectionTO getPreviewData(cudaStream_t stream = 0);
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -117,6 +117,7 @@ private:
     void initCuda();
 
     void syncAndCheck();
+    void syncAndCheck(cudaStream_t stream);
     void copyDataTOtoGpu(CollectionTO const& cudaDataTO, CollectionTO const& dataTO);
     void copyDataTOtoHost(CollectionTO const& dataTO, CollectionTO const& cudaDataTO);
     void automaticResizeArrays();

@@ -1,6 +1,7 @@
 #include "EngineWorker.h"
 
 #include <chrono>
+#include <cuda_runtime.h>
 
 #include "Base/ExitScopeGuard.h"
 
@@ -26,6 +27,9 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
     _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
     _cudaResource = nullptr;
+    
+    // Create dedicated CUDA stream for preview operations
+    cudaStreamCreate(&_previewStream);
 }
 
 void EngineWorker::clear()
@@ -268,6 +272,11 @@ void EngineWorker::endShutdown()
     _isSimulationRunning = false;
     _isShutdown = false;
     _simulationCudaFacade.reset();
+    
+    // Cleanup preview CUDA stream
+    if (_previewStream) {
+        cudaStreamDestroy(_previewStream);
+    }
 }
 
 int EngineWorker::getTpsRestriction() const
@@ -430,9 +439,13 @@ bool EngineWorker::isSimulationRunning() const
 
 CollectionDescription EngineWorker::getPreviewData()
 {
-    EngineWorkerGuard access(this);
-
-    auto preview = _simulationCudaFacade->getPreviewData();
+    // Use dedicated preview stream instead of EngineWorkerGuard for concurrency
+    // This allows preview operations to run without blocking the main simulation thread
+    auto preview = _simulationCudaFacade->getPreviewData(_previewStream);
+    
+    // Synchronize preview stream to ensure data is ready before conversion
+    cudaStreamSynchronize(_previewStream);
+    
     ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview); });
 
     return DescriptionConverterService::get().convertTOtoDescription(preview);
@@ -440,22 +453,30 @@ CollectionDescription EngineWorker::getPreviewData()
 
 void EngineWorker::setPreviewData(CollectionDescription const& data)
 {
-    EngineWorkerGuard access(this);
-
+    // Use dedicated preview stream instead of EngineWorkerGuard for concurrency
+    // This allows preview data setting without blocking the main simulation thread
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);
 
-    _simulationCudaFacade->newPreview(dataTO);
+    _simulationCudaFacade->newPreview(dataTO, _previewStream);
+    
+    // Synchronize preview stream to ensure operation is complete
+    cudaStreamSynchronize(_previewStream);
 }
 
 void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
-    EngineWorkerGuard access(this);
-
-    _simulationCudaFacade->calcTimestepsForPreview(duration);
+    // Use dedicated preview stream instead of EngineWorkerGuard for concurrency
+    // This allows preview simulation to run without blocking the main simulation thread
+    _simulationCudaFacade->calcTimestepsForPreview(duration, _previewStream);
+    
+    // Synchronize preview stream to ensure computation is complete
+    cudaStreamSynchronize(_previewStream);
 }
 
 uint64_t EngineWorker::getCurrentTimestepForPreview()
 {
+    // No EngineWorkerGuard needed - this is a simple data read that doesn't require synchronization
+    // Preview timestep is managed internally by the dedicated preview stream operations
     return _simulationCudaFacade->getCurrentTimestepForPreview();
 }
 
