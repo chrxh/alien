@@ -184,7 +184,7 @@ private:
     //preview CUDA stream for concurrent operations
     //This dedicated stream allows preview operations to run concurrently with main simulation
     //without blocking via EngineWorkerGuard. Synchronization is managed at the stream level.
-    cudaStream_t _previewStream;
+    cudaStream_t _previewStream = 0;
 };
 
 class EngineWorkerGuard

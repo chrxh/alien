@@ -12,6 +12,7 @@
 #include "EngineGpuKernels/CollectionTOProvider.cuh"
 #include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
+#include "EngineGpuKernels/Macros.cuh"
 
 #include "DescriptionConverterService.h"
 
@@ -29,7 +30,11 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
     _cudaResource = nullptr;
     
     // Create dedicated CUDA stream for preview operations
-    cudaStreamCreate(&_previewStream);
+    // Note: If this is called multiple times, the previous stream should be destroyed first
+    if (_previewStream) {
+        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_previewStream));
+    }
+    CHECK_FOR_CUDA_ERROR(cudaStreamCreate(&_previewStream));
 }
 
 void EngineWorker::clear()
@@ -275,7 +280,7 @@ void EngineWorker::endShutdown()
     
     // Cleanup preview CUDA stream
     if (_previewStream) {
-        cudaStreamDestroy(_previewStream);
+        CHECK_FOR_CUDA_ERROR(cudaStreamDestroy(_previewStream));
     }
 }
 
@@ -444,7 +449,7 @@ CollectionDescription EngineWorker::getPreviewData()
     auto preview = _simulationCudaFacade->getPreviewData(_previewStream);
     
     // Synchronize preview stream to ensure data is ready before conversion
-    cudaStreamSynchronize(_previewStream);
+    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_previewStream));
     
     ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview); });
 
@@ -460,7 +465,7 @@ void EngineWorker::setPreviewData(CollectionDescription const& data)
     _simulationCudaFacade->newPreview(dataTO, _previewStream);
     
     // Synchronize preview stream to ensure operation is complete
-    cudaStreamSynchronize(_previewStream);
+    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_previewStream));
 }
 
 void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
@@ -470,7 +475,7 @@ void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& dura
     _simulationCudaFacade->calcTimestepsForPreview(duration, _previewStream);
     
     // Synchronize preview stream to ensure computation is complete
-    cudaStreamSynchronize(_previewStream);
+    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_previewStream));
 }
 
 uint64_t EngineWorker::getCurrentTimestepForPreview()
