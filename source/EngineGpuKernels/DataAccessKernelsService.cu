@@ -113,3 +113,39 @@ void _DataAccessKernelsService::clearData(CudaSettings const& gpuSettings, Simul
 {
     KERNEL_CALL(cudaClearData, data);
 }
+
+void _DataAccessKernelsService::getData(
+    CudaSettings const& gpuSettings,
+    SimulationData const& data,
+    int2 const& rectUpperLeft,
+    int2 const& rectLowerRight,
+    CollectionTO const& dataTO,
+    cudaStream_t stream)
+{
+    KERNEL_CALL_1_1_STREAM(cudaClearDataTO, stream, dataTO);
+    KERNEL_CALL_STREAM(cudaPrepareCreaturesForConversionToTO, stream, rectUpperLeft, rectLowerRight, data);
+    KERNEL_CALL_STREAM(cudaGetCreatureData, stream, rectUpperLeft, rectLowerRight, data, dataTO);
+    KERNEL_CALL_STREAM(cudaGetCellDataWithoutConnections, stream, rectUpperLeft, rectLowerRight, data, dataTO);
+    KERNEL_CALL_STREAM(cudaResolveConnections, stream, data, dataTO);
+    KERNEL_CALL_STREAM(cudaGetParticleData, stream, rectUpperLeft, rectLowerRight, data, dataTO);
+}
+
+void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData, cudaStream_t stream)
+{
+    KERNEL_CALL_1_1_STREAM(cudaSaveNumEntries, stream, data);
+    KERNEL_CALL_STREAM(cudaAdaptNumberGenerator, stream, data.primaryNumberGen, dataTO);
+
+    KERNEL_CALL_1_1_STREAM(cudaGetArraysBasedOnTO, stream, data, dataTO, _cudaCellArray);
+    KERNEL_CALL_STREAM(cudaSetCreatureDataFromTO, stream, data, dataTO);
+    KERNEL_CALL_STREAM(cudaSetDataFromTO, stream, data, dataTO, _cudaCellArray, selectData);
+    _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);
+    if (selectData) {
+        _editKernels->rolloutSelection(gpuSettings, data, stream);
+    }
+    KERNEL_CALL_STREAM(cudaAdaptNumberGenerator, stream, data.primaryNumberGen, dataTO);
+}
+
+void _DataAccessKernelsService::clearData(CudaSettings const& gpuSettings, SimulationData const& data, cudaStream_t stream)
+{
+    KERNEL_CALL_STREAM(cudaClearData, stream, data);
+}

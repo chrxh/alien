@@ -99,3 +99,31 @@ void checkAndThrowError(T result, char const *const func, const char *const file
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }
+
+#define KERNEL_CALL_STREAM(func, stream, ...) \
+    if (GlobalSettings::get().isDebugMode()) { \
+        func<<<gpuSettings.numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
+        cudaStreamSynchronize(stream); \
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+    } \
+    else { \
+        func<<<gpuSettings.numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
+    }
+
+#define KERNEL_CALL_1_1_STREAM(func, stream, ...) \
+    if (GlobalSettings::get().isDebugMode()) { \
+        func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
+        cudaStreamSynchronize(stream); \
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+    } else { \
+        func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
+    }
+
+#define KERNEL_CALL_MOD_STREAM(func, threadsPerBlock, stream, ...) \
+    if (GlobalSettings::get().isDebugMode()) { \
+        func<<<gpuSettings.numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
+        cudaStreamSynchronize(stream); \
+        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+    } else { \
+        func<<<gpuSettings.numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
+    }

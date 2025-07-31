@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <cuda_runtime.h>
+
 #include "EngineInterface/SettingsForSimulation.h"
 
 #include "Definitions.cuh"
@@ -12,6 +14,7 @@ public:
 
     void calcTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
     void calcTimestepForPreview(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
+    void calcTimestepForPreview(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics, cudaStream_t stream);
     void prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& simulationData);
 
 private:

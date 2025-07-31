@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <cuda_runtime.h>
+
 #include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 
@@ -35,6 +37,7 @@ public:
     void applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);
 
     void rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data);
+    void rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data, cudaStream_t stream);
 
     void applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data);
 

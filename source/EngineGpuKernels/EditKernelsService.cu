@@ -294,6 +294,16 @@ void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, Simu
     } while (1 == copyToHost(_cudaRolloutResult));
 }
 
+void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data, cudaStream_t stream)
+{
+    do {
+        setValueToDevice(_cudaRolloutResult, 0);
+        KERNEL_CALL_STREAM(cudaRolloutSelectionStep, stream, data, _cudaRolloutResult);
+        cudaStreamSynchronize(stream);
+
+    } while (1 == copyToHost(_cudaRolloutResult));
+}
+
 void _EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaApplyCataclysm, data);

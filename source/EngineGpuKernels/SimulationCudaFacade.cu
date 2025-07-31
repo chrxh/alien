@@ -563,8 +563,8 @@ void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(dataTO.capacities);
     copyDataTOtoGpu(cudaDataTO, dataTO);
 
-    _dataAccessKernels->clearData(_settings.cudaSettings, *_cudaPreviewData);
-    _dataAccessKernels->addData(_settings.cudaSettings, *_cudaPreviewData, cudaDataTO, false);
+    _dataAccessKernels->clearData(_settings.cudaSettings, *_cudaPreviewData, _previewStream);
+    _dataAccessKernels->addData(_settings.cudaSettings, *_cudaPreviewData, cudaDataTO, false, _previewStream);
     
     // Use internal stream for synchronization
     syncAndCheck(_previewStream);
@@ -581,7 +581,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
     auto startTimepoint = std::chrono::steady_clock::now();
     while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration) {
 
-        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics);
+        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, _previewStream);
         
         // Use internal stream for synchronization
         syncAndCheck(_previewStream);
@@ -604,7 +604,7 @@ CollectionTO _SimulationCudaFacade::getPreviewData()
     // This allows preview operations to run without blocking main simulation
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(PreviewCapacityTO);
     _dataAccessKernels->getData(
-        _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaDataTO);
+        _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaDataTO, _previewStream);
     
     // Use internal stream for synchronization
     syncAndCheck(_previewStream);

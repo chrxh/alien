@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <cuda_runtime.h>
+
 #include "EngineInterface/CudaSettings.h"
 
 #include "Definitions.cuh"
@@ -15,6 +17,7 @@ public:
 
     void cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& simulationData);
     void cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& simulationData);
+    void cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& simulationData, cudaStream_t stream);
     void cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& simulationData);
     void copyArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
     void swapArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);

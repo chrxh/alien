@@ -39,6 +39,11 @@ void _GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSetting
     KERNEL_CALL(cudaCleanupMaps, data);
 }
 
+void _GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& data, cudaStream_t stream)
+{
+    KERNEL_CALL_STREAM(cudaCleanupMaps, stream, data);
+}
+
 void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);

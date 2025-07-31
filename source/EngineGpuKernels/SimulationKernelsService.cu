@@ -142,6 +142,51 @@ void _SimulationKernelsService::calcTimestepForPreview(
     _garbageCollector->cleanupAfterTimestepForPreview(settings.cudaSettings, data);
 }
 
+void _SimulationKernelsService::calcTimestepForPreview(
+    SettingsForSimulation const& settings,
+    SimulationData const& data,
+    SimulationStatistics const& statistics,
+    cudaStream_t stream)
+{
+    auto const gpuSettings = settings.cudaSettings;
+    KERNEL_CALL_1_1_STREAM(cudaNextTimestep_prepare, stream, data);
+
+    // Not all kernels need to be executed in each time step for performance reasons
+    bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
+    bool considerInnerFriction = (data.timestep % 3 == 0);
+
+    KERNEL_CALL_STREAM(cudaNextTimestep_physics_init, stream, data);
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_fillMaps, 64, stream, data);
+    {
+        auto threadBlockSize = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
+        KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_calcFluidForces, threadBlockSize, stream, data);
+    }
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_applyForces, 16, stream, data);
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_calcConnectionForces, 16, stream, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_verletPositionUpdate, 16, stream, data);
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_calcConnectionForces, 16, stream, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_verletVelocityUpdate, 16, stream, data);
+
+    // Cell type-specific functions
+    KERNEL_CALL_STREAM(cudaNextTimestep_cellType_prepare_substep1, stream, data);
+    KERNEL_CALL_STREAM(cudaNextTimestep_cellType_prepare_substep2, stream, data);
+
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_cellType_constructor, 4, stream, data, statistics, true);
+
+    if (considerInnerFriction) {
+        KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_applyInnerFriction, 16, stream, data);
+    }
+    KERNEL_CALL_MOD_STREAM(cudaNextTimestep_physics_applyFriction, 16, stream, data);
+
+    //KERNEL_CALL_1_1_STREAM(cudaNextTimestep_structuralOperations_substep1, stream, data);
+    //KERNEL_CALL_STREAM(cudaNextTimestep_structuralOperations_substep2, stream, data);
+    //KERNEL_CALL_STREAM(cudaNextTimestep_structuralOperations_substep3, stream, data);
+    //KERNEL_CALL_STREAM(cudaNextTimestep_structuralOperations_substep4, stream, data);
+    //KERNEL_CALL_STREAM(cudaNextTimestep_structuralOperations_substep5, stream, data);
+
+    _garbageCollector->cleanupAfterTimestepForPreview(settings.cudaSettings, data, stream);
+}
+
 void _SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
 {
     auto const gpuSettings = settings.cudaSettings;
