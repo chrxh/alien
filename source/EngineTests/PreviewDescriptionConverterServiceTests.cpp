@@ -6,6 +6,8 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/PreviewDescriptionConverterService.h"
 
+#include <boost/range/combine.hpp>
+
 #include "IntegrationTestFramework.h"
 
 class PreviewDescriptionConverterServiceTests : public IntegrationTestFramework
@@ -48,7 +50,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 {
     CollectionDescription input;
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(GenomeDescription(), std::move(input));
 
     EXPECT_TRUE(result._cells.empty());
     EXPECT_TRUE(result._connections.empty());
@@ -58,11 +60,11 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOnlySeed)
 {
     auto input = CollectionDescription().creatures({
         CreatureDescription().cells({
-            CellDescription().id(0).pos({10.0f, 20.0f}).color(3).geneIndex(0).nodeIndex(0),
+            CellDescription().id(0).pos({10.0f, 20.0f}),
         }),
     });
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(GenomeDescription(), std::move(input));
 
     EXPECT_EQ(0, result._cells.size()); // Seed is removed
     EXPECT_EQ(0, result._connections.size());
@@ -70,18 +72,22 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOnlySeed)
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated)
 {
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
+    });
+
     auto input = CollectionDescription().creatures({
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
         }),
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
         }),
     });
     input.addConnection(1, 2);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(2, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
@@ -100,11 +106,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSeparated)
 {
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
+    });
     auto input = CollectionDescription().creatures({
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(0).pos({12.0f, 10.0f}),
         }),
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
         }),
@@ -112,7 +121,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
     input.addConnection(1, 2);
     input.addConnection(2, 0);
     
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(2, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
@@ -131,11 +140,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
 {
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription().color(2), NodeDescription().color(3), NodeDescription().color(4)}),
+    });
     auto input = CollectionDescription().creatures({
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
         }),
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 9.0f}).color(2).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
             CellDescription().id(3).pos({11.0f, 10.0f}).color(4).geneIndex(0).nodeIndex(2),
@@ -145,7 +157,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     input.addConnection(2, 3);
     input.addConnection(3, 1);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(3, result._cells.size());
     ASSERT_EQ(3, result._connections.size());
@@ -169,21 +181,25 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
 {
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription().color(2)}),
+        GeneDescription().separation(true).nodes({NodeDescription().color(3), NodeDescription().color(4)}),
+    });
     auto input = CollectionDescription().creatures({
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(0).pos({11.0f, 10.0f}).color(1),
         }),
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ConstructorDescription().geneIndex(1)).color(2).geneIndex(0).nodeIndex(0),
         }),
-        CreatureDescription().cells({
+        CreatureDescription().genome(genome).cells({
             CellDescription().id(2).pos({9.0f, 10.0f}).color(3).geneIndex(1).nodeIndex(0),
             CellDescription().id(3).pos({9.0f, 9.0f}).color(4).geneIndex(1).nodeIndex(1),
         }),
     });
     input.addConnection(2, 3);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(3, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
@@ -197,4 +213,146 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
 
     EXPECT_TRUE(approxCompare(cell3._pos.x, cell1._pos.x));  // result should be rotated such that cell3 and cell1 are aligned on the x-axis
     checkConnections(result, {{cell2._pos, cell3._pos}});
+}
+
+// TODO tests with multiple concatenations:
+// (3) Creature mit zwei Genen, eins mit einem Node und ein anderes mit mehreren Nodes und mehreren concatenations
+
+TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multipleNodes_multipleConcatenations)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).numConcatenations(4).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
+    });
+    auto input = CollectionDescription().creatures({
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(0).pos({12.0f, 10.0f}),
+        }),
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 4.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({10.0f, 5.0f}).color(3).geneIndex(0).nodeIndex(1),
+            CellDescription().id(3).pos({10.0f, 6.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(4).pos({10.0f, 7.0f}).color(3).geneIndex(0).nodeIndex(1),
+            CellDescription().id(5).pos({10.0f, 8.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(6).pos({10.0f, 9.0f}).color(3).geneIndex(0).nodeIndex(1),
+            CellDescription().id(7).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(8).pos({11.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
+        }),
+    });
+    for (int i = 0; i < 7; ++i) {
+        input.addConnection(i + 1, i + 2);
+    }
+    input.addConnection(8, 0);
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
+
+    ASSERT_EQ(8, result._cells.size());
+    ASSERT_EQ(7, result._connections.size());
+
+    std::set<RealVector2D> actualPositions;
+    for (const auto& cell : result._cells) {
+        actualPositions.insert(cell._pos);
+    }
+    std::set<RealVector2D> expectedPositions = {
+        {3.375f, -0.125f},
+        {2.375f, -0.125f},
+        {1.375f, -0.125f},
+        {0.375f, -0.125f},
+        {-0.625f, -0.125},
+        {-1.625f, -0.125},
+        {-2.625f, -0.125f},
+        {-2.625f, 0.875f}
+    };
+    ASSERT_EQ(expectedPositions.size(), actualPositions.size());
+    for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
+        EXPECT_TRUE(approxCompare(expectedPosition, actualPosition));
+    }
+}
+
+TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_multipleConcatenations)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).numConcatenations(8).nodes({NodeDescription().color(2)}),
+    });
+    auto input = CollectionDescription().creatures({
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(0).pos({12.0f, 10.0f}),
+        }),
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 4.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({10.0f, 5.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(3).pos({10.0f, 6.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(4).pos({10.0f, 7.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(5).pos({10.0f, 8.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(6).pos({10.0f, 9.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(7).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(8).pos({11.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
+        }),
+    });
+    for (int i = 0; i < 7; ++i) {
+        input.addConnection(i + 1, i + 2);
+    }
+    input.addConnection(8, 0);
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
+
+    ASSERT_EQ(8, result._cells.size());
+    ASSERT_EQ(7, result._connections.size());
+
+    std::set<RealVector2D> actualPositions;
+    for (const auto& cell : result._cells) {
+        actualPositions.insert(cell._pos);
+    }
+    std::set<RealVector2D> expectedPositions = {
+        {3.375f, -0.125f}, {2.375f, -0.125f}, {1.375f, -0.125f}, {0.375f, -0.125f}, {-0.625f, -0.125}, {-1.625f, -0.125}, {-2.625f, -0.125f}, {-2.625f, 0.875f}};
+    ASSERT_EQ(expectedPositions.size(), actualPositions.size());
+    for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
+        EXPECT_TRUE(approxCompare(expectedPosition, actualPosition));
+    }
+}
+
+TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNodes_multipleConcatenations)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({NodeDescription().color(2).cellTypeData(ConstructorGenomeDescription().geneIndex(1))}),
+        GeneDescription().separation(false).numConcatenations(7).nodes({NodeDescription().color(3)}),
+    });
+    auto input = CollectionDescription().creatures({
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(0).pos({12.0f, 10.0f}),
+        }),
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(2).pos({10.0f, 4.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(3).pos({10.0f, 5.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(4).pos({10.0f, 6.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(5).pos({10.0f, 7.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(6).pos({10.0f, 8.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(7).pos({10.0f, 9.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(8).pos({10.0f, 10.0f}).color(3).geneIndex(1).nodeIndex(0),
+            CellDescription().id(1).pos({11.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
+        }),
+    });
+    input.addConnection(1, 0);
+    input.addConnection(2, 3);
+    input.addConnection(3, 4);
+    input.addConnection(4, 5);
+    input.addConnection(5, 6);
+    input.addConnection(6, 7);
+    input.addConnection(7, 8);
+    input.addConnection(8, 1);
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
+
+    ASSERT_EQ(8, result._cells.size());
+    ASSERT_EQ(7, result._connections.size());
+
+    std::set<RealVector2D> actualPositions;
+    for (const auto& cell : result._cells) {
+        actualPositions.insert(cell._pos);
+    }
+    std::set<RealVector2D> expectedPositions = {
+        {3.375f, -0.125f}, {2.375f, -0.125f}, {1.375f, -0.125f}, {0.375f, -0.125f}, {-0.625f, -0.125}, {-1.625f, -0.125}, {-2.625f, -0.125f}, {-2.625f, 0.875f}};
+    ASSERT_EQ(expectedPositions.size(), actualPositions.size());
+    for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
+        EXPECT_TRUE(approxCompare(expectedPosition, actualPosition));
+    }
 }

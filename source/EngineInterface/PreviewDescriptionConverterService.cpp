@@ -6,6 +6,20 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 
+namespace
+{
+    template <typename U>
+    U getLastElement(std::set<U> const& s)
+    {
+        return *(--s.end());
+    }
+
+    template <typename U, typename V>
+    V getLastValue(std::map<U, V> const& m)
+    {
+        return (--m.end())->second;
+    }
+}
 PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype) const
 {
     PreviewDescription result;
@@ -24,25 +38,34 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     // Center
     editService.setCenter(phenotype, {0.0f, 0.0f});
 
-    // Try to get last and previous last constructed cell on principal gene
-    std::map<int, std::map<int, uint64_t>> geneAndNodeIndexToId;
-    phenotype.forEachCell([&geneAndNodeIndexToId](auto const& cell) { geneAndNodeIndexToId[cell._geneIndex][cell._nodeIndex] = cell._id; });
-
-    auto& firstGene_NodeIndexToId = geneAndNodeIndexToId.at(0);
-    auto lastConstructedCellId = (--firstGene_NodeIndexToId.end())->second;
+    // Get last constructed cell on principal gene
+    std::map<int, std::map<int, std::set<uint64_t>>> geneAndNodeIndexToIds;  // Value has several ids in case of concantenations
+    phenotype.forEachCell([&geneAndNodeIndexToIds](auto const& cell) { geneAndNodeIndexToIds[cell._geneIndex][cell._nodeIndex].insert(cell._id); });
+    auto const& firstGene_NodeIndexToIds = geneAndNodeIndexToIds.at(0);
+    auto const& lastConstructedCellIds = getLastValue(firstGene_NodeIndexToIds);
+    auto const& lastConstructedCellId = getLastElement(lastConstructedCellIds);
     auto& lastConstructedCell = phenotype.getCellRef(lastConstructedCellId);
 
+
+    // Try to get cell on principal gene with second last node index
     std::optional<uint64_t> prevLastConstructedCellId;
-    if (firstGene_NodeIndexToId.size() > 1) {
-        prevLastConstructedCellId = (--(--firstGene_NodeIndexToId.end()))->second;
-    } else {
-        if (lastConstructedCell.getCellType() == CellType_Constructor) {
-            auto const& constructor = std::get<ConstructorDescription>(lastConstructedCell._cellTypeData);
-            auto geneIndex = constructor._geneIndex;
-            if (geneAndNodeIndexToId.contains(geneIndex)) {
-                auto& secondGene_NodeIndexToId = geneAndNodeIndexToId.at(geneIndex);
-                prevLastConstructedCellId = (--secondGene_NodeIndexToId.end())->second;
-            }
+    if (firstGene_NodeIndexToIds.size() > 1) {
+        auto const& secondLastConstructedCellIds = (--(--firstGene_NodeIndexToIds.end()))->second;
+        prevLastConstructedCellId = getLastElement(secondLastConstructedCellIds);
+    }
+
+    // Try to get cell on principal gene on second last concatenation 
+    else if (lastConstructedCellIds.size() > 1) {
+        prevLastConstructedCellId = *(--(--lastConstructedCellIds.end()));
+    }
+
+    // Try to get cell which is constructed of last cell on principal gene
+    else if (lastConstructedCell.getCellType() == CellType_Constructor) {
+        auto const& constructor = std::get<ConstructorDescription>(lastConstructedCell._cellTypeData);
+        auto geneIndex = constructor._geneIndex;
+        if (geneAndNodeIndexToIds.contains(geneIndex)) {
+            auto& secondGene_NodeIndexToIds = geneAndNodeIndexToIds.at(geneIndex);
+            prevLastConstructedCellId = getLastElement(getLastValue(secondGene_NodeIndexToIds));
         }
     }
 

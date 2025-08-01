@@ -1,5 +1,10 @@
 #include "GenomeDescriptionEditService.h"
 
+#include <algorithm>
+#include <iterator>
+
+#include "GenomeDescriptionInfoService.h"
+
 void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index, GeneDescription const& newGene)
 {
     if (genome._genes.empty()) {
@@ -120,6 +125,40 @@ namespace
             }
         }
     }
+
+    void resetUnusedGenes(GenomeDescription& genome)
+    {
+        if (genome._genes.empty()) {
+            return;
+        }
+
+        std::set<int> alreadyInspectedGeneIndices = {0};
+        std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
+        do {
+            std::set<int> newGeneIndices;
+            for (auto const& geneIndex : toInspectedGeneIndices) {
+                if (geneIndex >= genome._genes.size()) {
+                    continue;
+                }
+                auto referenced = GenomeDescriptionInfoService::get().getReferences(genome._genes.at(geneIndex));
+                newGeneIndices.insert(referenced.begin(), referenced.end());
+            }
+            toInspectedGeneIndices.clear();
+            std::set_difference(
+                newGeneIndices.begin(), newGeneIndices.end(), alreadyInspectedGeneIndices.begin(), alreadyInspectedGeneIndices.end(), std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
+            alreadyInspectedGeneIndices.insert(newGeneIndices.begin(), newGeneIndices.end());
+        } while (!toInspectedGeneIndices.empty());
+
+        if (alreadyInspectedGeneIndices.size() == genome._genes.size()) {
+            return;
+        }
+
+        for (int i = 0; i < genome._genes.size(); ++i) {
+            if (!alreadyInspectedGeneIndices.contains(i)) {
+                genome._genes.at(i)._nodes.clear();
+            }
+        }
+    }
 }
 
 void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome)
@@ -127,6 +166,7 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
     std::set<int> inspectedGeneIndices;
     castrate(genome, 0, inspectedGeneIndices);
     setNodeAttributesForPreview(genome);
+    resetUnusedGenes(genome);
     if (!genome._genes.empty()) {
         genome._genes.at(0)._numBranches = 1;
     }
