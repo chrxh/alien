@@ -11,4 +11,5 @@ class PreviewDescriptionConverterService
 
 public:
     PreviewDescription convert(GenomeDescription const& genome, CollectionDescription&& phenotype) const;
+    PreviewDescription convert(CollectionDescription&& phenotype) const;
 };

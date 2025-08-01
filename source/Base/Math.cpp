@@ -88,6 +88,23 @@ bool Math::isAngleInBetween(float angle1, float angle2, float angleBetweenCandid
     return angle2 - angle1 < 360.0f;
 }
 
+bool Math::isAngleStrictInBetween(float angle1, float angle2, float angleBetweenCandidate)
+{
+    if (abs(angle1 - angleBetweenCandidate) < NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle1 - angleBetweenCandidate) > 360.0 - NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle2 - angleBetweenCandidate) < NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle2 - angleBetweenCandidate) > 360.0 - NEAR_ZERO) {
+        return false;
+    }
+    return isAngleInBetween(angle1, angle2, angleBetweenCandidate);
+}
+
 float Math::normalizedAngle(float angle, float base)
 {
     angle = Math::modulo(angle, 360.0f);
