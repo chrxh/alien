@@ -88,7 +88,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
     auto [side, channel0, channel1] = GetParam();
 
     CollectionDescription data;
-    data.addCells({
+    std::vector<CellDescription> cellsToAdd = {
         CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription()
             .id(2)
@@ -97,7 +97,8 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
             .cellTypeData(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4)),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
-    });
+    };
+    data.cells().insert(data.cells().end(), cellsToAdd.begin(), cellsToAdd.end());
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 

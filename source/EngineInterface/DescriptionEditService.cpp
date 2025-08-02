@@ -16,7 +16,7 @@ CollectionDescription DescriptionEditService::createRect(CreateRectParameters co
     CollectionDescription result;
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
-            result.addCell(CellDescription()
+            result.cells().push_back(CellDescription()
                                .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -39,7 +39,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
         for (int i = -(parameters._layers - 1); i < parameters._layers - j; ++i) {
 
             //create cell: upper layer
-            result.addCell(CellDescription()
+            result.cells().push_back(CellDescription()
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -51,7 +51,7 @@ CollectionDescription DescriptionEditService::createHex(CreateHexParameters cons
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
-                result.addCell(CellDescription()
+                result.cells().push_back(CellDescription()
                                    .cellTypeData(StructureCellDescription())
                                    .energy(parameters._energy)
                                    .stiffness(parameters._stiffness)
@@ -73,7 +73,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
     CollectionDescription result;
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
-        result.addCell(CellDescription()
+        result.cells().push_back(CellDescription()
                            .cellTypeData(StructureCellDescription())
                            .pos(parameters._center)
                            .energy(parameters._energy)
@@ -97,7 +97,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
             if (dxMod * dxMod + dy * dy > radiusRounded * radiusRounded + NEAR_ZERO) {
                 continue;
             }
-            result.addCell(CellDescription()
+            result.cells().push_back(CellDescription()
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -189,7 +189,7 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
                 auto origPos = particle._pos;
                 particle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
                 if (particle._pos.x < size.x && particle._pos.y < size.y) {
-                    result.addParticle(particle);
+                    result.particles().push_back(particle);
                 }
             }
         }
@@ -339,7 +339,7 @@ void DescriptionEditService::addIfSpaceAvailable(
 
     for (auto const& cell : toAdd._cells) {
         if (!isCellPresent(cellOccupancy, space, cell._pos, distance)) {
-            result.addCell(cell);
+            result.cells().push_back(cell);
             cellOccupancy[toIntVector2D(cell._pos)].emplace_back(cell._pos);
         }
     }
