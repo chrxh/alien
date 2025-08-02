@@ -63,8 +63,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOnlySeed)
         }),
     });
 
-    GenomeDescription genome;
-    genome._genes = {GeneDescription().nodes({NodeDescription().color(3)})};
+    auto genome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription().color(3)})});
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
@@ -85,8 +84,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
     });
     input.addConnection(1, 2);
 
-    GenomeDescription genome;
-    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+    auto genome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})});
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
@@ -119,8 +117,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
     input.addConnection(1, 2);
     input.addConnection(2, 0);
     
-    GenomeDescription genome;
-    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+    auto genome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})});
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
@@ -155,8 +152,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     input.addConnection(2, 3);
     input.addConnection(3, 1);
 
-    GenomeDescription genome;
-    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3), NodeDescription().color(4)})};
+    auto genome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3), NodeDescription().color(4)})});
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
@@ -196,11 +192,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
     });
     input.addConnection(2, 3);
 
-    GenomeDescription genome;
-    genome._genes = {
+    auto genome = GenomeDescription().genes({
         GeneDescription().nodes({NodeDescription().color(2)}),
         GeneDescription().nodes({NodeDescription().color(3), NodeDescription().color(4)})
-    };
+    });
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
@@ -231,8 +226,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_arrowDire
     });
     input.addConnection(1, 2);
 
-    GenomeDescription genome;
-    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+    auto genome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})});
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
@@ -259,8 +253,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSigna
     });
     input.addConnection(1, 2);
 
-    GenomeDescription genome;
-    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+    auto genome = GenomeDescription().genes({GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})});
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
