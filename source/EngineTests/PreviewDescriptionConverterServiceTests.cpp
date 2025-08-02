@@ -28,13 +28,25 @@ public:
         CHECK(false);
     }
 
-    void checkConnections(PreviewDescription const& preview, std::vector<std::pair<RealVector2D, RealVector2D>> const& expectedConnectionPos)
+    struct ConnectionCheckDescription
     {
-        for (auto const& [expectedPos1, expectedPos2] : expectedConnectionPos) {
+        RealVector2D cell1;
+        RealVector2D cell2;
+        bool arrowToCell1 = true;
+        bool arrowToCell2 = true;
+    };
+    void checkConnections(PreviewDescription const& preview, std::vector<ConnectionCheckDescription> const& expectedConnections)
+    {
+        for (auto const& expectedConnection : expectedConnections) {
             auto found = false;
             for (auto const& connection : preview._connections) {
-                if(approxCompare(expectedPos1, connection._cell1) && approxCompare(expectedPos2, connection._cell2)
-                    || approxCompare(expectedPos2, connection._cell1) && approxCompare(expectedPos1, connection._cell2)) {
+                if (approxCompare(expectedConnection.cell1, connection._cell1) && approxCompare(expectedConnection.cell2, connection._cell2)
+                        && expectedConnection.arrowToCell1 == connection._arrowToCell1 && expectedConnection.arrowToCell2 == connection._arrowToCell2) {
+                    found = true;
+                    break;
+                }
+                if (approxCompare(expectedConnection.cell2, connection._cell1) && approxCompare(expectedConnection.cell1, connection._cell2)
+                    && expectedConnection.arrowToCell2 == connection._arrowToCell1 && expectedConnection.arrowToCell1 == connection._arrowToCell2) {
                     found = true;
                     break;
                 }
@@ -171,6 +183,36 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result, {{cell1._pos, cell2._pos}});
+}
+
+TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated_withSignalRestrictions)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({
+            NodeDescription().color(2).signalRoutingRestriction(SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(0).openingAngle(90.0f)),
+            NodeDescription().color(3),
+        }),
+    });
+
+    auto input = CollectionDescription().creatures({
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
+        }),
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),  // Signal restrictions are fetched from genome
+            CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        }),
+    });
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input), 0);
+
+    ASSERT_EQ(2, result._cells.size());
+    ASSERT_EQ(1, result._connections.size());
+
+    auto cell1 = getPreviewCell(result, 0, 0);
+    auto cell2 = getPreviewCell(result, 0, 1);
+    checkConnections(result, {{cell1._pos, cell2._pos, true, false}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)

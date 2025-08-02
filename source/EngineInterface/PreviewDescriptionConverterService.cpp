@@ -95,6 +95,32 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
         result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex));
     });
 
+    // Determine arrow directions for each cell
+    std::set<std::pair<uint64_t, uint64_t>> arrowFromCell1ToCell2;
+    phenotype.forEachCell([&](CellDescription const& cell) {
+        auto const& node = genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex);
+
+        auto signalAngleRestrictionStart = 180.0f + node._signalRoutingRestriction._baseAngle - node._signalRoutingRestriction._openingAngle / 2;
+        auto signalAngleRestrictionEnd = 180.0f + node._signalRoutingRestriction._baseAngle + node._signalRoutingRestriction._openingAngle / 2;
+        signalAngleRestrictionStart = Math::normalizedAngle(signalAngleRestrictionStart, 0.0f);
+        signalAngleRestrictionEnd = Math::normalizedAngle(signalAngleRestrictionEnd, 0.0f);
+
+        auto summedAngle = 0.0f;
+        for (int i = 0; i < cell._connections.size(); ++i) {
+            if (i > 0) {
+                summedAngle += cell._connections[i]._angleFromPrevious;
+            }
+            auto connectedCellId = cell._connections[i]._cellId;
+
+            bool shouldAddArrow =
+                !node._signalRoutingRestriction._active || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+
+            if (shouldAddArrow) {
+                arrowFromCell1ToCell2.insert({cell._id, connectedCellId});
+            }
+        }
+    });
+    
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
     phenotype.forEachCell([&](CellDescription const& cell) {
@@ -108,8 +134,13 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
             }
             processedConnections.insert(connectionPair);
 
-            ConnectionPreviewDescription previewConnection;
-            previewConnection.cell1(phenotype.getCellRef(cellId1, cache)._pos).cell2(phenotype.getCellRef(cellId2, cache)._pos).arrowToCell1(false).arrowToCell2(false);
+            bool arrowToCell1 = arrowFromCell1ToCell2.contains({cellId2, cellId1});
+            bool arrowToCell2 = arrowFromCell1ToCell2.contains({cellId1, cellId2});
+            auto previewConnection = ConnectionPreviewDescription()
+                                         .cell1(phenotype.getCellRef(cellId1, cache)._pos)
+                                         .cell2(phenotype.getCellRef(cellId2, cache)._pos)
+                                         .arrowToCell1(arrowToCell1)
+                                         .arrowToCell2(arrowToCell2);
             result._connections.push_back(previewConnection);
         }
     });
