@@ -47,8 +47,9 @@ public:
 TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 {
     CollectionDescription input;
+    GenomeDescription genome;
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     EXPECT_TRUE(result._cells.empty());
     EXPECT_TRUE(result._connections.empty());
@@ -62,7 +63,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOnlySeed)
         }),
     });
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {GeneDescription().nodes({NodeDescription().color(3)})};
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     EXPECT_EQ(0, result._cells.size()); // Seed is removed
     EXPECT_EQ(0, result._connections.size());
@@ -81,7 +85,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
     });
     input.addConnection(1, 2);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(2, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
@@ -112,7 +119,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
     input.addConnection(1, 2);
     input.addConnection(2, 0);
     
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(2, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
@@ -145,7 +155,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     input.addConnection(2, 3);
     input.addConnection(3, 1);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3), NodeDescription().color(4)})};
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(3, result._cells.size());
     ASSERT_EQ(3, result._connections.size());
@@ -183,7 +196,13 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
     });
     input.addConnection(2, 3);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {
+        GeneDescription().nodes({NodeDescription().color(2)}),
+        GeneDescription().nodes({NodeDescription().color(3), NodeDescription().color(4)})
+    };
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(3, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
@@ -212,14 +231,18 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_arrowDire
     });
     input.addConnection(1, 2);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(2, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
 
-    // Since signal routing restrictions are not active by default, both cells should have arrows pointing to their connected cells
+    // Since signal routing restrictions are not active by default, both arrows should be present
     auto& connection = result._connections[0];
-    EXPECT_TRUE(connection._arrowToCell1 || connection._arrowToCell2) << "At least one arrow should be present when no signal routing restrictions are active";
+    EXPECT_TRUE(connection._arrowToCell1);
+    EXPECT_TRUE(connection._arrowToCell2);
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSignalRoutingRestriction)
@@ -236,7 +259,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSigna
     });
     input.addConnection(1, 2);
 
-    auto result = PreviewDescriptionConverterService::get().convert(std::move(input));
+    GenomeDescription genome;
+    genome._genes = {GeneDescription().nodes({NodeDescription().color(2), NodeDescription().color(3)})};
+
+    auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input));
 
     ASSERT_EQ(2, result._cells.size());
     ASSERT_EQ(1, result._connections.size());
