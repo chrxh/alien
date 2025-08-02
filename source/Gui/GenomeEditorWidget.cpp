@@ -277,8 +277,8 @@ void _GenomeEditorWidget::onRemoveGene()
     }
     if (_editData->selectedGeneIndex.value() == 0) {
         GenericMessageDialog::get().yesNo(
-            "Delete principal gene",
-            "Do you really want to delete the principal gene? If you decide to do so, the following gene will become the new principal gene.",
+            "Delete root gene",
+            "Do you really want to delete the root gene? If you decide to do so, the following gene will become the new root gene.",
             [this] { this->removeGeneIntern(); });
         return;
     }
@@ -288,7 +288,7 @@ void _GenomeEditorWidget::onRemoveGene()
 void _GenomeEditorWidget::onMoveGeneUpward()
 {
     if (_editData->selectedGeneIndex.value() == 1) {
-        GenericMessageDialog::get().yesNo("Swap principal gene", "Do you really want to swap the principal gene?", [this] { this->moveGeneUpwardIntern(); });
+        GenericMessageDialog::get().yesNo("Swap root gene", "Do you really want to swap the root gene?", [this] { this->moveGeneUpwardIntern(); });
         return;
     }
     moveGeneUpwardIntern();
@@ -297,7 +297,7 @@ void _GenomeEditorWidget::onMoveGeneUpward()
 void _GenomeEditorWidget::onMoveGeneDownward()
 {
     if (_editData->selectedGeneIndex.value() == 0) {
-        GenericMessageDialog::get().yesNo("Swap principal gene", "Do you really want to swap the principal gene?", [this] { this->moveGeneDownwardIntern(); });
+        GenericMessageDialog::get().yesNo("Swap root gene", "Do you really want to swap the root gene?", [this] { this->moveGeneDownwardIntern(); });
         return;
     }
     moveGeneDownwardIntern();

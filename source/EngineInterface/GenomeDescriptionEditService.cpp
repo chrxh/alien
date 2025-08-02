@@ -86,26 +86,39 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
 
 namespace
 {
-    void castrate(GenomeDescription& genome, int startGeneIndex, std::set<int>& inspectedGeneIndices)
+    void castrate(GenomeDescription& genome, int startGeneIndex)
     {
-        if (startGeneIndex >= genome._genes.size() || inspectedGeneIndices.contains(startGeneIndex)) {
-            return;
-        }
-        inspectedGeneIndices.insert(startGeneIndex);
-        auto& gene = genome._genes.at(startGeneIndex);
-        for (auto& node : gene._nodes) {
-            if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
-                if (constructor._geneIndex < genome._genes.size()) {
-                    auto const& gene = genome._genes.at(constructor._geneIndex);
-                    if (inspectedGeneIndices.contains(constructor._geneIndex) && gene._separation) {
-                        constructor._geneIndex = genome._genes.size();  // Perform castration
-                    } else {
-                        castrate(genome, constructor._geneIndex, inspectedGeneIndices);   // Inspect further gene
+        std::set<int> alreadyInspectedGeneIndices = {startGeneIndex};
+        std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
+        do {
+            std::set<int> newGeneIndices;
+            for (auto const& geneIndex : toInspectedGeneIndices) {
+                if (geneIndex >= genome._genes.size()) {
+                    continue;
+                }
+                std::vector<int> referencedGeneIndices;
+                auto& gene = genome._genes.at(geneIndex);
+                for (auto& node : gene._nodes) {
+                    if (node.getCellType() == CellTypeGenome_Constructor) {
+                        auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                        referencedGeneIndices.emplace_back(constructor._geneIndex);
+                        if (alreadyInspectedGeneIndices.contains(constructor._geneIndex)) {
+                            constructor._geneIndex = genome._genes.size();  // Perform castration
+                        }
                     }
                 }
+
+                newGeneIndices.insert(referencedGeneIndices.begin(), referencedGeneIndices.end());
             }
-        }
+            toInspectedGeneIndices.clear();
+            std::set_difference(
+                newGeneIndices.begin(),
+                newGeneIndices.end(),
+                alreadyInspectedGeneIndices.begin(),
+                alreadyInspectedGeneIndices.end(),
+                std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
+            alreadyInspectedGeneIndices.insert(newGeneIndices.begin(), newGeneIndices.end());
+        } while (!toInspectedGeneIndices.empty());
     }
 
     void setNodeAttributesForPreview(GenomeDescription& genome)
@@ -129,8 +142,7 @@ namespace
 
 void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex)
 {
-    std::set<int> inspectedGeneIndices;
-    castrate(genome, startGeneIndex, inspectedGeneIndices);
+    castrate(genome, startGeneIndex);
     setNodeAttributesForPreview(genome);
     if (!genome._genes.empty()) {
         genome._genes.at(startGeneIndex)._numBranches = 1;

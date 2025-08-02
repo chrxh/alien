@@ -14,13 +14,26 @@ namespace
         return *(--s.end());
     }
 
+    template <typename U>
+    U getSecondLastElement(std::set<U> const& s)
+    {
+        return *(--(--s.end()));
+    }
+
     template <typename U, typename V>
     V getLastValue(std::map<U, V> const& m)
     {
         return (--m.end())->second;
     }
+
+    template <typename U, typename V>
+    V getSecondLastValue(std::map<U, V> const& m)
+    {
+        return (--(--m.end()))->second;
+    }
 }
-PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int rootGeneIndex) const
+
+PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex) const
 {
     PreviewDescription result;
 
@@ -41,7 +54,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     // Get last constructed cell on principal gene
     std::map<int, std::map<int, std::set<uint64_t>>> geneAndNodeIndexToIds;  // Value has several ids in case of concantenations
     phenotype.forEachCell([&geneAndNodeIndexToIds](auto const& cell) { geneAndNodeIndexToIds[cell._geneIndex][cell._nodeIndex].insert(cell._id); });
-    auto const& firstGene_NodeIndexToIds = geneAndNodeIndexToIds.at(rootGeneIndex);
+    auto const& firstGene_NodeIndexToIds = geneAndNodeIndexToIds.at(startGeneIndex);
     auto const& lastConstructedCellIds = getLastValue(firstGene_NodeIndexToIds);
     auto const& lastConstructedCellId = getLastElement(lastConstructedCellIds);
     auto& lastConstructedCell = phenotype.getCellRef(lastConstructedCellId);
@@ -50,13 +63,13 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     // Try to get cell on principal gene with second last node index
     std::optional<uint64_t> prevLastConstructedCellId;
     if (firstGene_NodeIndexToIds.size() > 1) {
-        auto const& secondLastConstructedCellIds = (--(--firstGene_NodeIndexToIds.end()))->second;
+        auto const& secondLastConstructedCellIds = getSecondLastValue(firstGene_NodeIndexToIds);
         prevLastConstructedCellId = getLastElement(secondLastConstructedCellIds);
     }
 
     // Try to get cell on principal gene on second last concatenation 
     else if (lastConstructedCellIds.size() > 1) {
-        prevLastConstructedCellId = *(--(--lastConstructedCellIds.end()));
+        prevLastConstructedCellId = getSecondLastElement(lastConstructedCellIds);
     }
 
     // Try to get cell which is constructed of last cell on principal gene
