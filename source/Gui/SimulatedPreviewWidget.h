@@ -40,7 +40,11 @@ private:
     GenomeTabLayoutData _layoutData;
 
     GenomeDescription _genomeForPreview;
+    int _rootGeneIndex = 0;
+
     std::optional<GenomeDescription> _genomeFromPreviousFrame;
+    std::optional<int> _selectedGeneIndexFromPreviousFrame;
+
     std::optional<uint64_t> _previewTimestepFromPreviousMeasure;
     std::optional<std::chrono::steady_clock::time_point> _timepointFromPreviousMeasure;
     std::optional<int> _tpsFromPreviousMeasure;

@@ -299,4 +299,15 @@ struct hash<GenomeDescription> {
     }
 };
 
+template <>
+struct hash<GenomeDescriptionWithRootIndex>
+{
+    std::size_t operator()(const GenomeDescriptionWithRootIndex& genomeWithRootIndex) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, genomeWithRootIndex.genome);
+        hash_combine(seed, genomeWithRootIndex.rootIndex);
+        return seed;
+    }
+};
 } // namespace std

@@ -24,7 +24,7 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
+    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex) {
         createGenomeForPreview();
         setPreview();
     }
@@ -35,6 +35,7 @@ void _SimulatedPreviewWidget::process()
     showPreview();
 
     _genomeFromPreviousFrame = _editData->genome;
+    _selectedGeneIndexFromPreviousFrame = _editData->selectedGeneIndex;
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(
@@ -53,10 +54,8 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
 void _SimulatedPreviewWidget::createGenomeForPreview()
 {
     _genomeForPreview = _editData->genome;
-    if (auto startGene = _editData->selectedGeneIndex) {
-        auto rootGene = GenomeDescriptionInfoService::get().getRootGene(_genomeForPreview, startGene.value());
-        GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, rootGene);
-    }
+    _rootGeneIndex = GenomeDescriptionInfoService::get().getRootGene(_genomeForPreview, _editData->selectedGeneIndex.value_or(0));
+    GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, _rootGeneIndex);
 }
 
 void _SimulatedPreviewWidget::setPreview()
@@ -64,7 +63,7 @@ void _SimulatedPreviewWidget::setPreview()
     CollectionDescription preview;
 
     // Cache the preview data to avoid recalculating it if the genome hasn't changed
-    auto findResult = _genomeEditData->genotypeToPhenotype.find(_genomeForPreview);
+    auto findResult = _genomeEditData->genotypeToPhenotype.find(GenomeDescriptionWithRootIndex{_genomeForPreview, _rootGeneIndex});
     if (findResult != _genomeEditData->genotypeToPhenotype.end()) {
         preview = findResult->second;
     } else {
@@ -72,7 +71,9 @@ void _SimulatedPreviewWidget::setPreview()
             CreatureDescription()
                 .genome(_genomeForPreview)
                 .cells({
-                    CellDescription().stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+                    CellDescription()
+                        .stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(_rootGeneIndex))
+                        .pos({100.0f, 100.0f}),
                 }),
         });
     }
@@ -108,7 +109,7 @@ void _SimulatedPreviewWidget::showPreview()
 {
     auto now = std::chrono::steady_clock::now();
     auto previewData = _simulationFacade->getPreviewData();
-    _genomeEditData->genotypeToPhenotype.insert_or_assign(_genomeForPreview, previewData);
+    _genomeEditData->genotypeToPhenotype.insert_or_assign(GenomeDescriptionWithRootIndex{_genomeForPreview, _rootGeneIndex}, previewData);
 
     auto timestep = _simulationFacade->getCurrentTimestepForPreview();
 
@@ -128,7 +129,7 @@ void _SimulatedPreviewWidget::showPreview()
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(previewData));
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(previewData), _rootGeneIndex);
     _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
     _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
     _previewWidget->process(tps, previewDesc);

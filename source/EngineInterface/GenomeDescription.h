@@ -225,5 +225,14 @@ struct GenomeDescription
     MEMBER(GenomeDescription, float, frontAngle, 0.0f);
 };
 
+struct GenomeDescriptionWithRootIndex
+{
+    GenomeDescription genome;
+    int rootIndex;
+
+    bool operator==(const GenomeDescriptionWithRootIndex&) const = default;
+};
+
+
 // Include hash specializations
 #include "GenomeDescriptionHash.h"

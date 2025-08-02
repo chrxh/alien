@@ -20,7 +20,7 @@ namespace
         return (--m.end())->second;
     }
 }
-PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype) const
+PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int rootGeneIndex) const
 {
     PreviewDescription result;
 
@@ -41,7 +41,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     // Get last constructed cell on principal gene
     std::map<int, std::map<int, std::set<uint64_t>>> geneAndNodeIndexToIds;  // Value has several ids in case of concantenations
     phenotype.forEachCell([&geneAndNodeIndexToIds](auto const& cell) { geneAndNodeIndexToIds[cell._geneIndex][cell._nodeIndex].insert(cell._id); });
-    auto const& firstGene_NodeIndexToIds = geneAndNodeIndexToIds.at(0);
+    auto const& firstGene_NodeIndexToIds = geneAndNodeIndexToIds.at(rootGeneIndex);
     auto const& lastConstructedCellIds = getLastValue(firstGene_NodeIndexToIds);
     auto const& lastConstructedCellId = getLastElement(lastConstructedCellIds);
     auto& lastConstructedCell = phenotype.getCellRef(lastConstructedCellId);

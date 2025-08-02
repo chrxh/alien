@@ -1,5 +1,8 @@
 #include "GenomeDescriptionInfoService.h"
 
+#include <algorithm>
+#include <iterator>
+
 int GenomeDescriptionInfoService::getNumberOfNodes(GenomeDescription const& genome) const
 {
     int result = 0;
@@ -79,6 +82,40 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription
     return result;
 }
 
-int GenomeDescriptionInfoService::getRootGene(GenomeDescription const& genome, int geneIndex) const
+int GenomeDescriptionInfoService::getRootGene(GenomeDescription const& genome, int startGeneIndex) const
 {
+    auto hull = calcIndicesOfGeneHull(genome);
+    if (hull.contains(startGeneIndex)) {
+        return 0;
+    } else {
+        return startGeneIndex;
+    }
+}
+
+std::set<int> GenomeDescriptionInfoService::calcIndicesOfGeneHull(GenomeDescription const& genome) const
+{
+    CHECK(!genome._genes.empty());
+
+    std::set<int> alreadyInspectedGeneIndices = {0};
+    std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
+    do {
+        std::set<int> newGeneIndices;
+        for (auto const& geneIndex : toInspectedGeneIndices) {
+            if (geneIndex >= genome._genes.size()) {
+                continue;
+            }
+            auto referenced = getReferences(genome._genes.at(geneIndex));
+            newGeneIndices.insert(referenced.begin(), referenced.end());
+        }
+        toInspectedGeneIndices.clear();
+        std::set_difference(
+            newGeneIndices.begin(),
+            newGeneIndices.end(),
+            alreadyInspectedGeneIndices.begin(),
+            alreadyInspectedGeneIndices.end(),
+            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
+        alreadyInspectedGeneIndices.insert(newGeneIndices.begin(), newGeneIndices.end());
+    } while (!toInspectedGeneIndices.empty());
+
+    return alreadyInspectedGeneIndices;
 }
