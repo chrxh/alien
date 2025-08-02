@@ -31,7 +31,7 @@ public:
 TEST_F(DetonatorTests, doNothing)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().countdown(14)),
     });
 
@@ -51,8 +51,7 @@ TEST_F(DetonatorTests, doNothing)
 TEST_F(DetonatorTests, activateDetonator)
 {
     CollectionDescription data;
-    data.addCells(
-        {CellDescription()
+    data.cells() = {CellDescription()
              .id(1)
              .pos({10.0f, 10.0f})
              .cellTypeData(DetonatorDescription().countdown(10)),
@@ -79,7 +78,7 @@ TEST_F(DetonatorTests, activateDetonator)
 TEST_F(DetonatorTests, explosion)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
         CellDescription().id(2).pos({12.0f, 10.0f}),
     });
@@ -102,7 +101,7 @@ TEST_F(DetonatorTests, explosion)
 TEST_F(DetonatorTests, chainExplosion)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
@@ -128,7 +127,7 @@ TEST_F(DetonatorTests, chainExplosion)
 TEST_F(DetonatorTests, explosionAlsoIfDying)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})

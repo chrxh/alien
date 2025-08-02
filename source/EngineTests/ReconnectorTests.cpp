@@ -28,7 +28,7 @@ public:
 TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription()),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
     });
@@ -50,7 +50,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
             CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription()),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
             CellDescription().id(3).pos({9.0f, 10.0f}),
@@ -77,7 +77,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToColor(1)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}),
@@ -102,7 +102,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
 TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToColor(1)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
         CellDescription().id(3).pos({9.0f, 10.0f}).color(1),
@@ -258,11 +258,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
 TEST_F(ReconnectorTests, establishConnection_restrictToStructures_success)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
     });
-    data.addCells({
+    data.cells() = {
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(StructureCellDescription()),
     });
     data.addConnection(1, 2);
@@ -286,11 +286,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToStructures_success)
 TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
     });
-    data.addCells({
+    data.cells() = {
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(BaseDescription()),
     });
     data.addConnection(1, 2);
@@ -312,11 +312,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_success)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
     });
-    data.addCells({
+    data.cells() = {
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(FreeCellDescription()),
     });
     data.addConnection(1, 2);
@@ -340,11 +340,11 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_success)
 TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_failed)
 {
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
     });
-    data.addCells({
+    data.cells() = {
         CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(BaseDescription()),
     });
     data.addConnection(1, 2);

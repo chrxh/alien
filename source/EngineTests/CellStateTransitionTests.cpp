@@ -41,7 +41,7 @@ TEST_P(CellStateTransitionTests, ready_ready)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Ready),
     });
@@ -60,7 +60,7 @@ TEST_P(CellStateTransitionTests, ready_dying)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Dying),
     });
@@ -79,7 +79,7 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
     });
@@ -167,7 +167,7 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Detaching),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Reviving),
     });
@@ -195,7 +195,7 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Constructing),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Activating),
     });
@@ -214,7 +214,7 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _simulationFacade->setSimulationParameters(_parameters);
 
     CollectionDescription data;
-    data.addCells({
+    data.cells() = {
         CellDescription().id(1).barrier(true).pos({10.0f, 10.0f}).cellState(CellState_Dying),
     });
 

@@ -34,7 +34,7 @@
 //TEST_F(DefenderTests, attackerVsAntiAttacker)
 //{
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -73,7 +73,7 @@
 //TEST_F(DefenderTests, attackerVsAntiInjector)
 //{
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -111,7 +111,7 @@
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -156,7 +156,7 @@
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
