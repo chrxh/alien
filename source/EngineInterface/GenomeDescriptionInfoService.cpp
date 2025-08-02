@@ -82,17 +82,13 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription
     return result;
 }
 
-int GenomeDescriptionInfoService::getRootGene(GenomeDescription const& genome, int startGeneIndex) const
+bool GenomeDescriptionInfoService::isConnectedToRoot(GenomeDescription const& genome, int startGeneIndex) const
 {
-    auto hull = calcIndicesOfGeneHull(genome);
-    if (hull.contains(startGeneIndex)) {
-        return 0;
-    } else {
-        return startGeneIndex;
-    }
+    auto hull = calcIndicesOfRootGeneHull(genome);
+    return hull.contains(startGeneIndex);
 }
 
-std::set<int> GenomeDescriptionInfoService::calcIndicesOfGeneHull(GenomeDescription const& genome) const
+std::set<int> GenomeDescriptionInfoService::calcIndicesOfRootGeneHull(GenomeDescription const& genome) const
 {
     CHECK(!genome._genes.empty());
 

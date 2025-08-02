@@ -54,7 +54,8 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
 void _SimulatedPreviewWidget::createGenomeForPreview()
 {
     _genomeForPreview = _editData->genome;
-    _rootGeneIndex = GenomeDescriptionInfoService::get().getRootGene(_genomeForPreview, _editData->selectedGeneIndex.value_or(0));
+    auto startGeneIndex = _editData->selectedGeneIndex.value_or(0);
+    _rootGeneIndex = GenomeDescriptionInfoService::get().isConnectedToRoot(_genomeForPreview, startGeneIndex) ? 0 : startGeneIndex;
     GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, _rootGeneIndex);
 }
 

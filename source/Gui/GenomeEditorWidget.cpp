@@ -79,14 +79,16 @@ void _GenomeEditorWidget::processGeneList()
         }
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
 
+        auto rootHull = GenomeDescriptionInfoService::get().calcIndicesOfRootGeneHull(_editData->genome);
+
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTable("Gene list", 7, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
+            ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
             ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
-            ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
+            ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(60.0f));
             ImGui::TableSetupColumn("Branches", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(75.0f));
             ImGui::TableSetupColumn("Concatenations", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
             ImGui::TableSetupColumn("Nodes", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(70.0f));
@@ -113,11 +115,13 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
+                    auto geneIndexText = std::to_string(row + 1);
                     if (row == 0) {
-                        AlienGui::Text(std::to_string(row + 1) + " (root)");
-                    } else {
-                        AlienGui::Text(std::to_string(row + 1));
+                        geneIndexText += " (root)";
+                    } else if (!rootHull.contains(row)) {
+                        geneIndexText += " (unreachable)";
                     }
+                    AlienGui::Text(geneIndexText);
                     ImGui::SameLine();
                     auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
                     if (ImGui::Selectable(
@@ -146,7 +150,7 @@ void _GenomeEditorWidget::processGeneList()
                         AlienGui::Text(referencedByString);
                     } else {
                         if (row > 0) {
-                            AlienGui::Text("Unused");
+                            AlienGui::Text("-");
                         }
                     }
 
