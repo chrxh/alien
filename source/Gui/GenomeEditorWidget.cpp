@@ -114,7 +114,7 @@ void _GenomeEditorWidget::processGeneList()
                     // Column 0: No.
                     ImGui::TableNextColumn();
                     if (row == 0) {
-                        AlienGui::Text(std::to_string(row + 1) + " (principal)");
+                        AlienGui::Text(std::to_string(row + 1) + " (root)");
                     } else {
                         AlienGui::Text(std::to_string(row + 1));
                     }

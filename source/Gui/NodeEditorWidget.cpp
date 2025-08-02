@@ -172,7 +172,7 @@ void _NodeEditorWidget::processNodeAttributes()
             for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
                 if (index == 0) {
-                    text += " (principal)";
+                    text += " (root)";
                 }
                 genes.emplace_back(text);
             }

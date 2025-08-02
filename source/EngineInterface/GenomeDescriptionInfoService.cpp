@@ -78,3 +78,7 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription
     }
     return result;
 }
+
+int GenomeDescriptionInfoService::getRootGene(GenomeDescription const& genome, int geneIndex) const
+{
+}

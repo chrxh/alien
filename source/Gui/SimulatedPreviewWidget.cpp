@@ -2,6 +2,7 @@
 
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
+#include "EngineInterface/GenomeDescriptionInfoService.h"
 #include "EngineInterface/PreviewDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
@@ -52,8 +53,10 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
 void _SimulatedPreviewWidget::createGenomeForPreview()
 {
     _genomeForPreview = _editData->genome;
-    GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview);
-
+    if (auto startGene = _editData->selectedGeneIndex) {
+        auto rootGene = GenomeDescriptionInfoService::get().getRootGene(_genomeForPreview, startGene.value());
+        GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, rootGene);
+    }
 }
 
 void _SimulatedPreviewWidget::setPreview()
