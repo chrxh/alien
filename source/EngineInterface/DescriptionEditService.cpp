@@ -97,7 +97,7 @@ CollectionDescription DescriptionEditService::createUnconnectedCircle(CreateUnco
             if (dxMod * dxMod + dy * dy > radiusRounded * radiusRounded + NEAR_ZERO) {
                 continue;
             }
-            result.cells().push_back(CellDescription()
+            result._cells.emplace_back(CellDescription()
                                .cellTypeData(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
@@ -339,7 +339,7 @@ void DescriptionEditService::addIfSpaceAvailable(
 
     for (auto const& cell : toAdd._cells) {
         if (!isCellPresent(cellOccupancy, space, cell._pos, distance)) {
-            result.cells().push_back(cell);
+            result._cells.emplace_back(cell);
             cellOccupancy[toIntVector2D(cell._pos)].emplace_back(cell._pos);
         }
     }
