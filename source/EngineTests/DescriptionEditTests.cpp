@@ -51,8 +51,7 @@ TEST_F(DescriptionEditTests, correctConnections)
 
 TEST_F(DescriptionEditTests, addThirdConnection1)
 {
-    CollectionDescription data;
-    data.cells() = {
+    auto data = CollectionDescription().cells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0, 1}),
