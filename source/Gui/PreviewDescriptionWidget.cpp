@@ -79,7 +79,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                 }
             }
 
-            // Draw cells
+            // Draw cells and selected cells
             for (auto const& cell : desc._cells) {
                 auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
                 float h, s, v;
@@ -103,6 +103,42 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                         _selectedNode = cell._nodeIndex;
                         result = true;
                     }
+                }
+            }
+
+            // Draw signal restrictions
+            if (_zoom > ZoomLevelForConnections) {
+                for (auto const& cell : desc._cells) {
+                    if (!cell._signalRestriction.has_value()) {
+                        continue;
+                    }
+                    auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
+
+                    auto cellRadiusFactor = 0.3f;
+                    auto startAngle = cell._signalRestriction->_startAngle;
+                    auto endAngle = cell._signalRestriction->_endAngle;
+
+                    // With the following code to draw a filled arc (pie segment) between startAngle and endAngle:
+                    const int numSegments = 32;  // Increase for smoother arc
+                    float radius = cellSize * cellRadiusFactor;
+                    float startRad = startAngle * Const::DegToRad;
+                    float endRad = endAngle * Const::DegToRad;
+
+                    // Clamp angles to [0, 2*PI]
+                    if (endRad < startRad)
+                        endRad += 2.0f * Const::Pi;
+                    float angleStep = (endRad - startRad) / numSegments;
+
+                    // Build points for the arc
+                    std::vector<ImVec2> arcPoints;
+                    arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
+                    for (int i = 0; i <= numSegments; ++i) {
+                        float angle = startRad + i * angleStep;
+                        arcPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
+                    }
+
+                    // Draw filled polygon (pie segment)
+                    drawList->AddConvexPolyFilled(arcPoints.data(), arcPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
                 }
             }
 

@@ -266,7 +266,7 @@ struct SignalRoutingRestrictionDescription
 
     MEMBER(SignalRoutingRestrictionDescription, bool, active, false);
     MEMBER(SignalRoutingRestrictionDescription, float, baseAngle, 0);
-    MEMBER(SignalRoutingRestrictionDescription, float, openingAngle, 0);
+    MEMBER(SignalRoutingRestrictionDescription, float, openingAngle, 90.0f);
 };
 
 struct SignalDescription

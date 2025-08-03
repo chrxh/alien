@@ -90,16 +90,31 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     }
 
     // Create preview cells
+    auto getNode = [&](CellDescription const& cell) -> NodeDescription const& {
+        return genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex); };
     phenotype.forEachCell([&](CellDescription const& cell) {
-        auto const& color = genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex)._color;
-        result._cells.push_back(CellPreviewDescription().pos(cell._pos).color(color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex));
+        auto const& node = getNode(cell);
+        auto const& color = node._color;
+        auto previewCell = CellPreviewDescription().pos(cell._pos).color(color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex);
+
+        if (node._signalRoutingRestriction._active && !cell._connections.empty()) {
+            auto otherCellId = cell._connections.front()._cellId;
+            auto const& otherCell = phenotype.getCellRef(otherCellId, cache);
+            auto baseAngle = Math::angleOfVector(otherCell._pos - cell._pos) + 180.0f + node._signalRoutingRestriction._baseAngle;
+            auto signalAngleRestrictionStart = Math::normalizedAngle(baseAngle - node._signalRoutingRestriction._openingAngle / 2, 0);
+            auto signalAngleRestrictionEnd = Math::normalizedAngle(baseAngle + node._signalRoutingRestriction._openingAngle / 2, 0);
+            if (signalAngleRestrictionStart > signalAngleRestrictionEnd) {
+                signalAngleRestrictionEnd += 360.0f;  // If the angle wraps around, we need to adjust the end angle
+            }
+            previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
+        }
+        result._cells.emplace_back(previewCell);
     });
 
     // Determine arrow directions for each cell
     std::set<std::pair<uint64_t, uint64_t>> arrowFromCell1ToCell2;
     phenotype.forEachCell([&](CellDescription const& cell) {
-        auto const& node = genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex);
-
+        auto const& node = getNode(cell);
         auto signalAngleRestrictionStart = 180.0f + node._signalRoutingRestriction._baseAngle - node._signalRoutingRestriction._openingAngle / 2;
         auto signalAngleRestrictionEnd = 180.0f + node._signalRoutingRestriction._baseAngle + node._signalRoutingRestriction._openingAngle / 2;
         signalAngleRestrictionStart = Math::normalizedAngle(signalAngleRestrictionStart, 0.0f);

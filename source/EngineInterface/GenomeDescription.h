@@ -183,7 +183,7 @@ struct SignalRoutingRestrictionGenomeDescription
 
     MEMBER(SignalRoutingRestrictionGenomeDescription, bool, active, false);
     MEMBER(SignalRoutingRestrictionGenomeDescription, float, baseAngle, 0.0f);
-    MEMBER(SignalRoutingRestrictionGenomeDescription, float, openingAngle, 0.0f);
+    MEMBER(SignalRoutingRestrictionGenomeDescription, float, openingAngle, 90.0f);
 };
 
 struct NodeDescription
