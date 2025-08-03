@@ -36,8 +36,7 @@ TEST_F(CellConnectionTests, decay)
 
 TEST_F(CellConnectionTests, addFirstConnection)
 {
-    CollectionDescription data;
-    data.cells() = {
+    auto data = CollectionDescription().cells({
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
     });

@@ -25,7 +25,7 @@ protected:
 TEST_F(DataTransferTests, singleParticle)
 {
     CollectionDescription data;
-    data.particles().push_back(_descriptionTestDataFactory->createNonDefaultParticleDescription());
+    data._particles.emplace_back(_descriptionTestDataFactory->createNonDefaultParticleDescription());
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -68,8 +68,8 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
     auto cellParameter = GetParam();
 
     CollectionDescription data;
-    data.cells().push_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
-    data.cells().push_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();

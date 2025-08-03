@@ -235,7 +235,7 @@ void CreatorWindow::createCell()
                     .barrier(_barrier)
                     .sticky(_makeSticky);
     CollectionDescription data;
-    data.cells().push_back(cell);
+    data._cells.emplace_back(cell);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
@@ -243,7 +243,7 @@ void CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
     CollectionDescription data;
-    data.particles().push_back(particle);
+    data._particles.emplace_back(particle);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
@@ -305,7 +305,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            data.cells().push_back(CellDescription()
+            data._cells.emplace_back(CellDescription()
                              .id(NumberGenerator::get().createObjectId())
                              .energy(_energy)
                              .stiffness(_stiffness)
