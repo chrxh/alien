@@ -93,8 +93,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
             CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(2).pos({11.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         }),
     });
     input.addConnection(1, 2);
@@ -128,8 +128,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
             CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}).color(2).geneIndex(1).nodeIndex(0),
-            CellDescription().id(2).pos({11.0f, 10.0f}).color(3).geneIndex(1).nodeIndex(1),
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(1).nodeIndex(1),
         }),
     });
     input.addConnection(1, 2);
@@ -161,8 +161,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
             CellDescription().id(0).pos({12.0f, 10.0f}),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(2).pos({11.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         }),
     });
     input.addConnection(1, 2);
@@ -187,9 +187,13 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated_withSignalRestrictions)
 {
+    auto constexpr BaseAngle = 10.0f;
+    auto constexpr OpeningAngle = 90.0f;
+
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({
-            NodeDescription().color(2).signalRoutingRestriction(SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(0).openingAngle(90.0f)),
+            NodeDescription().color(2).signalRoutingRestriction(
+                SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(BaseAngle).openingAngle(OpeningAngle)),
             NodeDescription().color(3),
         }),
     });
@@ -212,6 +216,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     auto cell1 = getPreviewCell(result, 0, 0);
     auto cell2 = getPreviewCell(result, 0, 1);
+    ASSERT_TRUE(cell1._signalRestriction.has_value());
+    EXPECT_TRUE(approxCompare(360.0f - OpeningAngle / 2 + BaseAngle, cell1._signalRestriction->_startAngle));
+    EXPECT_TRUE(approxCompare(OpeningAngle / 2 + BaseAngle, cell1._signalRestriction->_endAngle));
     checkConnections(result, {{cell1._pos, cell2._pos, true, false}});
 }
 
@@ -225,9 +232,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
             CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 9.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(2).pos({10.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
-            CellDescription().id(3).pos({11.0f, 10.0f}).color(4).geneIndex(0).nodeIndex(2),
+            CellDescription().id(1).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+            CellDescription().id(3).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(2),
         }),
     });
     input.addConnection(1, 2);
@@ -267,11 +274,11 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
             CellDescription().id(0).pos({11.0f, 10.0f}).color(1),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ConstructorDescription().geneIndex(1)).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ConstructorDescription().geneIndex(1)).geneIndex(0).nodeIndex(0),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(2).pos({9.0f, 10.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(3).pos({9.0f, 9.0f}).color(4).geneIndex(1).nodeIndex(1),
+            CellDescription().id(2).pos({9.0f, 10.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(3).pos({9.0f, 9.0f}).geneIndex(1).nodeIndex(1),
         }),
     });
     input.addConnection(2, 3);
@@ -305,14 +312,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
             CellDescription().id(0).pos({12.0f, 10.0f}),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 4.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(2).pos({10.0f, 5.0f}).color(3).geneIndex(0).nodeIndex(1),
-            CellDescription().id(3).pos({10.0f, 6.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(4).pos({10.0f, 7.0f}).color(3).geneIndex(0).nodeIndex(1),
-            CellDescription().id(5).pos({10.0f, 8.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(6).pos({10.0f, 9.0f}).color(3).geneIndex(0).nodeIndex(1),
-            CellDescription().id(7).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(8).pos({11.0f, 10.0f}).color(3).geneIndex(0).nodeIndex(1),
+            CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
+            CellDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
+            CellDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
+            CellDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         }),
     });
     for (int i = 0; i < 7; ++i) {
@@ -355,14 +362,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
             CellDescription().id(0).pos({12.0f, 10.0f}),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 4.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(2).pos({10.0f, 5.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(3).pos({10.0f, 6.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(4).pos({10.0f, 7.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(5).pos({10.0f, 8.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(6).pos({10.0f, 9.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(7).pos({10.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
-            CellDescription().id(8).pos({11.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0),
+            CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+            CellDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0),
         }),
     });
     for (int i = 0; i < 7; ++i) {
@@ -398,14 +405,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
             CellDescription().id(0).pos({12.0f, 10.0f}),
         }),
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(2).pos({10.0f, 4.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(3).pos({10.0f, 5.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(4).pos({10.0f, 6.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(5).pos({10.0f, 7.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(6).pos({10.0f, 8.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(7).pos({10.0f, 9.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(8).pos({10.0f, 10.0f}).color(3).geneIndex(1).nodeIndex(0),
-            CellDescription().id(1).pos({11.0f, 10.0f}).color(2).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
+            CellDescription().id(2).pos({10.0f, 4.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(3).pos({10.0f, 5.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(4).pos({10.0f, 6.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(5).pos({10.0f, 7.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(6).pos({10.0f, 8.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(7).pos({10.0f, 9.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(8).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
+            CellDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
         }),
     });
     input.addConnection(1, 0);

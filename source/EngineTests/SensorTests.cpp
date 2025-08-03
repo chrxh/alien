@@ -19,9 +19,9 @@ public:
 TEST_F(SensorTests, autoTriggered)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(15)),
-    });
+    };
     _simulationFacade->setSimulationData(data);
 
     {
@@ -49,9 +49,9 @@ TEST_F(SensorTests, autoTriggered)
 TEST_F(SensorTests, manuallyTriggered_noSignal)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(0)),
-    });
+    };
     _simulationFacade->setSimulationData(data);
 
     for (int i = 0; i < 100; ++i) {
@@ -64,10 +64,10 @@ TEST_F(SensorTests, manuallyTriggered_noSignal)
 TEST_F(SensorTests, manuallyTriggered_signal)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(0)),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    };
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -79,10 +79,10 @@ TEST_F(SensorTests, manuallyTriggered_signal)
 TEST_F(SensorTests, aboveMinDensity)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
         DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.0f)));
@@ -103,10 +103,10 @@ TEST_F(SensorTests, aboveMinDensity)
 TEST_F(SensorTests, belowMinDensity)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.1f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
         DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(2.5f)));
@@ -122,10 +122,10 @@ TEST_F(SensorTests, belowMinDensity)
 TEST_F(SensorTests, targetAbove)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
         DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(1.0f)));
@@ -147,10 +147,10 @@ TEST_F(SensorTests, targetAbove)
 TEST_F(SensorTests, targetBelow)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
     data.add(DescriptionEditService::get().get().createRect(
         DescriptionEditService::CreateRectParameters().center({100.0f, 190.0f}).width(16).height(16).cellDistance(1.0f)));
@@ -172,11 +172,11 @@ TEST_F(SensorTests, targetBelow)
 TEST_F(SensorTests, targetConcealed)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 101.0f}),
         CellDescription().id(3).pos({101.0f, 99.0f}),
-    });
+    };
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(2, 3);
@@ -195,11 +195,11 @@ TEST_F(SensorTests, targetConcealed)
 TEST_F(SensorTests, targetNotConcealed)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 101.0f}),
         CellDescription().id(3).pos({101.0f, 99.0f}),
-    });
+    };
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(2, 3);
@@ -218,10 +218,10 @@ TEST_F(SensorTests, targetNotConcealed)
 TEST_F(SensorTests, foundMassWithMatchingDensity)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.7f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -537,10 +537,10 @@ TEST_F(SensorTests, scanForSameMutants_notFound_freeCell)
 TEST_F(SensorTests, scanForStructures_found)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -558,10 +558,10 @@ TEST_F(SensorTests, scanForStructures_found)
 TEST_F(SensorTests, scanForStructures_notFound)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -579,10 +579,10 @@ TEST_F(SensorTests, scanForStructures_notFound)
 TEST_F(SensorTests, scanForFreeCells_found)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -600,10 +600,10 @@ TEST_F(SensorTests, scanForFreeCells_found)
 TEST_F(SensorTests, scanForFreeCells_notFound)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -871,10 +871,10 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_freeCell)
 TEST_F(SensorTests, minRange_found)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().minRange(50)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -892,10 +892,10 @@ TEST_F(SensorTests, minRange_found)
 TEST_F(SensorTests, minRange_notFound)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().minRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -913,10 +913,10 @@ TEST_F(SensorTests, minRange_notFound)
 TEST_F(SensorTests, maxRange_found)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().maxRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(
@@ -934,10 +934,10 @@ TEST_F(SensorTests, maxRange_found)
 TEST_F(SensorTests, maxRange_notFound)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().maxRange(50)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
+    };
     data.addConnection(1, 2);
 
     data.add(DescriptionEditService::get().createRect(

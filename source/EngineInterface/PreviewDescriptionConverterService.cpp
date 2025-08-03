@@ -103,9 +103,6 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
             auto baseAngle = Math::angleOfVector(otherCell._pos - cell._pos) + 180.0f + node._signalRoutingRestriction._baseAngle;
             auto signalAngleRestrictionStart = Math::normalizedAngle(baseAngle - node._signalRoutingRestriction._openingAngle / 2, 0);
             auto signalAngleRestrictionEnd = Math::normalizedAngle(baseAngle + node._signalRoutingRestriction._openingAngle / 2, 0);
-            if (signalAngleRestrictionStart > signalAngleRestrictionEnd) {
-                signalAngleRestrictionEnd += 360.0f;  // If the angle wraps around, we need to adjust the end angle
-            }
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
         }
         result._cells.emplace_back(previewCell);

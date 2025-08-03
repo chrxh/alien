@@ -31,9 +31,9 @@ public:
 TEST_F(DetonatorTests, doNothing)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().countdown(14)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -51,15 +51,10 @@ TEST_F(DetonatorTests, doNothing)
 TEST_F(DetonatorTests, activateDetonator)
 {
     CollectionDescription data;
-    data.cells() = {CellDescription()
-             .id(1)
-             .pos({10.0f, 10.0f})
-             .cellTypeData(DetonatorDescription().countdown(10)),
-         CellDescription()
-             .id(2)
-             .pos({11.0f, 10.0f})
-             .cellTypeData(GeneratorDescription())
-             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
+    data._cells = {
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().countdown(10)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(GeneratorDescription()).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+    };
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -78,10 +73,10 @@ TEST_F(DetonatorTests, activateDetonator)
 TEST_F(DetonatorTests, explosion)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
         CellDescription().id(2).pos({12.0f, 10.0f}),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
@@ -101,7 +96,7 @@ TEST_F(DetonatorTests, explosion)
 TEST_F(DetonatorTests, chainExplosion)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
@@ -110,7 +105,7 @@ TEST_F(DetonatorTests, chainExplosion)
             .id(2)
             .pos({12.0f, 10.0f})
             .cellTypeData(DetonatorDescription().state(DetonatorState_Ready).countdown(10)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);
@@ -127,14 +122,14 @@ TEST_F(DetonatorTests, chainExplosion)
 TEST_F(DetonatorTests, explosionAlsoIfDying)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription()
             .id(1)
             .pos({10.0f, 10.0f})
             .cellState(CellState_Dying)
             .activationTime(100)
             .cellTypeData(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(11);

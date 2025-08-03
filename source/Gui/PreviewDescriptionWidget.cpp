@@ -123,13 +123,12 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                     float radius = cellSize * cellRadiusFactor;
                     float startRad = startAngle * Const::DegToRad;
                     float endRad = endAngle * Const::DegToRad;
+                    if (startRad > endRad) {
+                        endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
+                    }
 
-                    // Clamp angles to [0, 2*PI]
-                    if (endRad < startRad)
-                        endRad += 2.0f * Const::Pi;
                     float angleStep = (endRad - startRad) / numSegments;
 
-                    // Build points for the arc
                     std::vector<ImVec2> arcPoints;
                     arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
                     for (int i = 0; i <= numSegments; ++i) {

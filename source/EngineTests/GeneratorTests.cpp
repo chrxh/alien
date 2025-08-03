@@ -18,9 +18,9 @@ public:
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97);
@@ -34,9 +34,9 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(98);
@@ -51,9 +51,9 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97 * 2)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 2 + 1);
@@ -68,9 +68,9 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(99);
@@ -84,9 +84,9 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 2 + 1);
@@ -101,9 +101,9 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 3 + 1);
@@ -118,9 +118,9 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
-    });
+    };
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(97 * 6 + 1);
@@ -137,11 +137,11 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 TEST_F(GeneratorTests, generatePulse_triangularNetwork)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({0, 0}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0.5, 0.5}),
-    });
+    };
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     data.addConnection(3, 1);

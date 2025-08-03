@@ -81,12 +81,12 @@ TEST_F(DescriptionEditTests, addThirdConnection1)
 TEST_F(DescriptionEditTests, addThirdConnection2)
 {
     CollectionDescription data;
-    data.cells() = {
+    data._cells = {
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({-1, 0}),
         CellDescription().id(4).pos({0, 1}),
-    });
+    };
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(1, 4);
