@@ -439,11 +439,11 @@ CellDescription DescriptionConverterService::createCellDescription(
         result._neuralNetwork = convert(*neuralNetworkTO);
     }
 
-    SignalRoutingRestrictionDescription routingRestriction;
-    routingRestriction._active = cellTO.signalRoutingRestriction.active;
-    routingRestriction._baseAngle = cellTO.signalRoutingRestriction.baseAngle;
-    routingRestriction._openingAngle = cellTO.signalRoutingRestriction.openingAngle;
-    result._signalRoutingRestriction = routingRestriction;
+    SignalRestrictionDescription routingRestriction;
+    routingRestriction._active = cellTO.signalRestriction.active;
+    routingRestriction._baseAngle = cellTO.signalRestriction.baseAngle;
+    routingRestriction._openingAngle = cellTO.signalRestriction.openingAngle;
+    result._signalRestriction = routingRestriction;
     result._signalRelaxationTime = cellTO.signalRelaxationTime;
     if (cellTO.signal.active) {
         SignalDescription signal;
@@ -493,9 +493,9 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
 
             nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
             nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
-            nodeDesc._signalRoutingRestriction._active = nodeTO->signalRoutingRestriction.active;
-            nodeDesc._signalRoutingRestriction._baseAngle = nodeTO->signalRoutingRestriction.baseAngle;
-            nodeDesc._signalRoutingRestriction._openingAngle = nodeTO->signalRoutingRestriction.openingAngle;
+            nodeDesc._signalRestriction._active = nodeTO->signalRestriction.active;
+            nodeDesc._signalRestriction._baseAngle = nodeTO->signalRestriction.baseAngle;
+            nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
 
             switch (nodeTO->cellType) {
             case CellTypeGenome_Base: {
@@ -668,9 +668,9 @@ void DescriptionConverterService::convertCreatureToTO(
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
             nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
-            nodeTO.signalRoutingRestriction.active = nodeDesc._signalRoutingRestriction._active;
-            nodeTO.signalRoutingRestriction.baseAngle = nodeDesc._signalRoutingRestriction._baseAngle;
-            nodeTO.signalRoutingRestriction.openingAngle = nodeDesc._signalRoutingRestriction._openingAngle;
+            nodeTO.signalRestriction.active = nodeDesc._signalRestriction._active;
+            nodeTO.signalRestriction.baseAngle = nodeDesc._signalRestriction._baseAngle;
+            nodeTO.signalRestriction.openingAngle = nodeDesc._signalRestriction._openingAngle;
             nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
 
             nodeTO.cellType = nodeDesc.getCellType();
@@ -946,9 +946,9 @@ void DescriptionConverterService::convertCellToTO(
         detonatorTO.countdown = detonatorDesc._countdown;
     } break;
     }
-    cellTO.signalRoutingRestriction.active = cellDesc._signalRoutingRestriction._active;
-    cellTO.signalRoutingRestriction.baseAngle = cellDesc._signalRoutingRestriction._baseAngle;
-    cellTO.signalRoutingRestriction.openingAngle = cellDesc._signalRoutingRestriction._openingAngle;
+    cellTO.signalRestriction.active = cellDesc._signalRestriction._active;
+    cellTO.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
+    cellTO.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
     cellTO.signalRelaxationTime = cellDesc._signalRelaxationTime;
     cellTO.signal.active = cellDesc._signal.has_value();
     if (cellTO.signal.active) {
