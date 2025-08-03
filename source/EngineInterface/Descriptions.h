@@ -260,13 +260,13 @@ using CellTypeDescription = std::variant<
     ReconnectorDescription,
     DetonatorDescription>;
 
-struct SignalRoutingRestrictionDescription
+struct SignalRestrictionDescription
 {
-    auto operator<=>(SignalRoutingRestrictionDescription const&) const = default;
+    auto operator<=>(SignalRestrictionDescription const&) const = default;
 
-    MEMBER(SignalRoutingRestrictionDescription, bool, active, false);
-    MEMBER(SignalRoutingRestrictionDescription, float, baseAngle, 0);
-    MEMBER(SignalRoutingRestrictionDescription, float, openingAngle, 90.0f);
+    MEMBER(SignalRestrictionDescription, bool, active, false);
+    MEMBER(SignalRestrictionDescription, float, baseAngle, 0);
+    MEMBER(SignalRestrictionDescription, float, openingAngle, 90.0f);
 };
 
 struct SignalDescription
@@ -303,7 +303,7 @@ struct CellDescription
     // Cell type-specific data
     MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
     MEMBER(CellDescription, CellTypeDescription, cellTypeData, BaseDescription());
-    MEMBER(CellDescription, SignalRoutingRestrictionDescription, signalRoutingRestriction, SignalRoutingRestrictionDescription());
+    MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
     MEMBER(CellDescription, uint8_t, signalRelaxationTime, 0);
     MEMBER(CellDescription, std::optional<SignalDescription>, signal, std::nullopt);
     MEMBER(CellDescription, int, activationTime, 0);

@@ -132,7 +132,7 @@ union CellTypeDataGenomeTO
     DetonatorGenomeTO detonator;
 };
 
-struct SignalRoutingRestrictionGenomeTO
+struct SignalRestrictionGenomeTO
 {
     bool active;
     float baseAngle;
@@ -149,7 +149,7 @@ struct NodeTO
     NeuralNetworkGenomeTO neuralNetwork;
     CellTypeGenome cellType;
     CellTypeDataGenomeTO cellTypeData;
-    SignalRoutingRestrictionGenomeTO signalRoutingRestriction;
+    SignalRestrictionGenomeTO signalRestriction;
 };
 
 struct GeneTO

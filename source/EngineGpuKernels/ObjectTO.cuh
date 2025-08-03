@@ -222,7 +222,7 @@ union CellTypeDataTO
     DetonatorTO detonator;
 };
 
-struct SignalRoutingRestrictionTO
+struct SignalRestrictionTO
 {
     bool active;
     float baseAngle;
@@ -263,7 +263,7 @@ struct CellTO
     static auto constexpr NeuralNetworkDataIndex_NotSet = 0xffffffffffffffff;
     CellType cellType;
     CellTypeDataTO cellTypeData;
-    SignalRoutingRestrictionTO signalRoutingRestriction;
+    SignalRestrictionTO signalRestriction;
     uint8_t signalRelaxationTime;
     SignalTO signal;
     uint32_t activationTime;
