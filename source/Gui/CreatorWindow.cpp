@@ -234,14 +234,16 @@ void CreatorWindow::createCell()
                     .color(EditorModel::get().getDefaultColorCode())
                     .barrier(_barrier)
                     .sticky(_makeSticky);
-    auto data = CollectionDescription().addCell(cell);
+    CollectionDescription data;
+    data._cells.emplace_back(cell);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
 void CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
-    auto data = CollectionDescription().addParticle(particle);
+    CollectionDescription data;
+    data._particles.emplace_back(particle);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
 
@@ -303,7 +305,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            data.addCell(CellDescription()
+            data._cells.emplace_back(CellDescription()
                              .id(NumberGenerator::get().createObjectId())
                              .energy(_energy)
                              .stiffness(_stiffness)

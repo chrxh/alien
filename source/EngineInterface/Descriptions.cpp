@@ -202,30 +202,6 @@ CollectionDescription& CollectionDescription::add(CollectionDescription const& o
     return *this;
 }
 
-CollectionDescription& CollectionDescription::addCells(std::vector<CellDescription> const& value)
-{
-    _cells.insert(_cells.end(), value.begin(), value.end());
-    return *this;
-}
-
-CollectionDescription& CollectionDescription::addCell(CellDescription const& value)
-{
-    addCells({value});
-    return *this;
-}
-
-CollectionDescription& CollectionDescription::addParticles(std::vector<ParticleDescription> const& value)
-{
-    _particles.insert(_particles.end(), value.begin(), value.end());
-    return *this;
-}
-
-CollectionDescription& CollectionDescription::addParticle(ParticleDescription const& value)
-{
-    addParticles({value});
-    return *this;
-}
-
 void CollectionDescription::clear()
 {
     _cells.clear();

@@ -17,7 +17,8 @@ public:
 
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
     });
 
@@ -32,7 +33,8 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
     });
 
@@ -48,7 +50,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97 * 2)),
     });
 
@@ -64,7 +67,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 
 TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
     });
 
@@ -79,7 +83,8 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     });
 
@@ -95,7 +100,8 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     });
 
@@ -111,7 +117,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     });
 
@@ -129,7 +136,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 
 TEST_F(GeneratorTests, generatePulse_triangularNetwork)
 {
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).pos({0, 0}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0.5, 0.5}),

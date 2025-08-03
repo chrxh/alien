@@ -383,11 +383,6 @@ struct CollectionDescription
     void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
 
     CollectionDescription& add(CollectionDescription const& other);
-    CollectionDescription& addCells(std::vector<CellDescription> const& value);
-    CollectionDescription& addCell(CellDescription const& value);
-
-    CollectionDescription& addParticles(std::vector<ParticleDescription> const& value);
-    CollectionDescription& addParticle(ParticleDescription const& value);
 
     void clear();
     bool isEmpty() const;

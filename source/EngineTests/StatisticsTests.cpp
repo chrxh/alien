@@ -31,7 +31,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
     //        }));
 
     //CollectionDescription data;
-    //data.addCells({
+    //data.cells() = {
     //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
 
@@ -56,7 +56,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
     //        }));
 
     //CollectionDescription data;
-    //data.addCells({
+    //data.cells() = {
     //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
 
@@ -80,7 +80,7 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
     //        }));
 
     //CollectionDescription data;
-    //data.addCells({
+    //data.cells() = {
     //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
 

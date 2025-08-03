@@ -22,7 +22,7 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
     CollectionDescription data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
-        data.addCell(cell);
+        data._cells.emplace_back(cell);
         if (i > 0) {
             data.addConnection(i, i + 1);
         }

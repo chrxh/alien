@@ -76,10 +76,11 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     nn.weight(2, 7, 0.5f);
     nn.weight(5, 3, -1.5f);
 
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
         CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 1, 0, 0, 0, 0.5f}),
-    });
+    };
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -103,10 +104,11 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     }
     nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    auto data = CollectionDescription().addCells({
+    CollectionDescription data;
+    data.cells() = {
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
         CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    };
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);

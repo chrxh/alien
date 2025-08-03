@@ -31,7 +31,7 @@ public:
 //TEST_F(DepotTests, distributeToOtherTransmitter)
 //{
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -73,7 +73,7 @@ public:
 //    signal.channels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -115,7 +115,7 @@ public:
 //TEST_F(DepotTests, distributeToConnectedCells)
 //{
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -155,7 +155,7 @@ public:
 //    //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -192,7 +192,7 @@ public:
 //    //auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
 //    
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -230,7 +230,7 @@ public:
 //TEST_F(DepotTests, distributeToTwoTransmittersWithDifferentColor)
 //{
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -276,7 +276,7 @@ public:
 //    });
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({9.0f, 10.0f})
@@ -329,7 +329,7 @@ public:
 //    //});
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({9.0f, 10.0f})

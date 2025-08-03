@@ -105,7 +105,7 @@
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -145,7 +145,7 @@
 //    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
@@ -188,7 +188,7 @@
 //    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
 //
 //    CollectionDescription data;
-//    data.addCells({
+//    data.cells() = {
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
