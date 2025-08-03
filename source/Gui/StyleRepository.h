@@ -80,7 +80,7 @@ namespace Const
     ImColor const ToolbarButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
 
     ImColor const ActionButtonTextColor = ImColor::HSV(0.54f, 0.43f, 1.0f, 1.0f);
-    ImColor const ActionButtonHighlightedTextColor = ImColor::HSV(0.0f, 0.6f, 1.0f, 1.0f);
+    ImColor const ActionButtonHighlightedTextColor = ImColor::HSV(0.9f, 0.6f, 1.0f, 1.0f);
     ImColor const ActionButtonBackgroundColor = ImColor::HSV(0.54f, 0.43f, 0.2f, 1.0f);
     ImColor const ActionButtonHoveredColor = ImColor::HSV(0.54f, 0.43f, 0.4f, 1.0f);
     ImColor const ActionButtonActiveColor = ImColor::HSV(0.54f, 0.43f, 0.55f, 1.0f);

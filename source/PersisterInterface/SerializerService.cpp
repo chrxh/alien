@@ -144,9 +144,9 @@ namespace
     auto constexpr Id_Node_Color = 1;
     auto constexpr Id_Node_NumAdditionalConnections = 2;
 
-    auto constexpr Id_SignalRoutingGenome_Active = 0;
-    auto constexpr Id_SignalRoutingGenome_BaseAngle = 1;
-    auto constexpr Id_SignalRoutingGenome_OpeneningAngle = 2;
+    auto constexpr Id_SignalRestrictionGenome_Active = 0;
+    auto constexpr Id_SignalRestrictionGenome_BaseAngle = 1;
+    auto constexpr Id_SignalRestrictionGenome_OpeneningAngle = 2;
 
     auto constexpr Id_NeuralNetworkGenome_Weights = 0;
     auto constexpr Id_NeuralNetworkGenome_Biases = 1;
@@ -396,16 +396,16 @@ namespace cereal
     SPLIT_SERIALIZATION(DetonatorGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRoutingRestrictionGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescription& data)
     {
-        SignalRoutingRestrictionGenomeDescription defaultObject;
+        SignalRestrictionGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRoutingGenome_Active, data._active, defaultObject._active);
-        loadSave(task, auxiliaries, Id_SignalRoutingGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
-        loadSave(task, auxiliaries, Id_SignalRoutingGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
+        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_Active, data._active, defaultObject._active);
+        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
+        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRoutingRestrictionGenomeDescription)
+    SPLIT_SERIALIZATION(SignalRestrictionGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NodeDescription& data)
@@ -494,9 +494,9 @@ namespace
 
     auto constexpr Id_Signal_Channels = 0;
 
-    auto constexpr Id_SignalRouting_Active = 0;
-    auto constexpr Id_SignalRouting_BaseAngle = 1;
-    auto constexpr Id_SignalRouting_OpeneningAngle = 2;
+    auto constexpr Id_SignalRestriction_Active = 0;
+    auto constexpr Id_SignalRestriction_BaseAngle = 1;
+    auto constexpr Id_SignalRestriction_OpeneningAngle = 2;
 
     auto constexpr Id_Connection_CellId = 0;
     auto constexpr Id_Connection_Distance = 1;
@@ -618,16 +618,16 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRoutingRestrictionDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, SignalRestrictionDescription& data)
     {
-        SignalRoutingRestrictionDescription defaultObject;
+        SignalRestrictionDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRouting_Active, data._active, defaultObject._active);
-        loadSave(task, auxiliaries, Id_SignalRouting_BaseAngle, data._baseAngle, defaultObject._baseAngle);
-        loadSave(task, auxiliaries, Id_SignalRouting_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
+        loadSave(task, auxiliaries, Id_SignalRestriction_Active, data._active, defaultObject._active);
+        loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
+        loadSave(task, auxiliaries, Id_SignalRestriction_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRoutingRestrictionDescription)
+    SPLIT_SERIALIZATION(SignalRestrictionDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, NeuralNetworkDescription& data)
