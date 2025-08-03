@@ -263,9 +263,9 @@ namespace std
     };
 
     template <>
-    struct hash<SignalRoutingRestrictionGenomeDescription>
+    struct hash<SignalRestrictionGenomeDescription>
     {
-        std::size_t operator()(const SignalRoutingRestrictionGenomeDescription& desc) const
+        std::size_t operator()(const SignalRestrictionGenomeDescription& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._active);
@@ -286,7 +286,7 @@ namespace std
             hash_combine(seed, desc._numAdditionalConnections);
             hash_combine(seed, std::hash<NeuralNetworkGenomeDescription>{}(desc._neuralNetwork));
             hash_combine(seed, std::hash<CellTypeGenomeDescription>{}(desc._cellTypeData));
-            hash_combine(seed, std::hash<SignalRoutingRestrictionGenomeDescription>{}(desc._signalRoutingRestriction));
+            hash_combine(seed, std::hash<SignalRestrictionGenomeDescription>{}(desc._signalRestriction));
             return seed;
         }
     };

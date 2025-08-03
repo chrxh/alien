@@ -49,13 +49,13 @@ protected:
                 return false;
             }
         }
-        if (cell._signalRoutingRestriction._active != node._signalRoutingRestriction._active) {
+        if (cell._signalRestriction._active != node._signalRestriction._active) {
             return false;
         }
-        if (cell._signalRoutingRestriction._baseAngle != node._signalRoutingRestriction._baseAngle) {
+        if (cell._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
             return false;
         }
-        if (cell._signalRoutingRestriction._openingAngle != node._signalRoutingRestriction._openingAngle) {
+        if (cell._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
             return false;
         }
 

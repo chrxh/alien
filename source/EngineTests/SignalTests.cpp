@@ -177,7 +177,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
     CollectionDescription data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRoutingRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
+        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
         CellDescription().id(3).pos({2, 0}),
     };
     data.addConnection(1, 2);
@@ -208,7 +208,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
     CollectionDescription data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRoutingRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
+        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
         CellDescription().id(3).pos({2, 0}),
     };
     data.addConnection(1, 2);

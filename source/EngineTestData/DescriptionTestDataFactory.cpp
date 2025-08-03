@@ -18,8 +18,8 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .cellState(false)
                       .geneIndex(42)
                       .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
-                      .signalRoutingRestriction(
-                          SignalRoutingRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
+                      .signalRestriction(
+                          SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
                       .cellTypeData(cellTypeDesc)
                       .metadata(CellMetadataDescription().name("Test1").description("Test2"));
 
@@ -60,8 +60,8 @@ NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(Node
         .color(4)
         .numAdditionalConnections(3)
         .referenceAngle(90.0f)
-        .signalRoutingRestriction(
-            SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
+        .signalRestriction(
+            SignalRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
 }
 
 CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const

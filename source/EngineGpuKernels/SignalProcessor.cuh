@@ -70,14 +70,14 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 continue;
             }
             int skip = false;
-            if (connectedCell->signalRoutingRestriction.active) {
+            if (connectedCell->signalRestriction.active) {
                 float signalAngleRestrictionStart = 0;
                 float signalAngleRestrictionEnd = 0;
-                if (connectedCell->signalRoutingRestriction.active) {
+                if (connectedCell->signalRestriction.active) {
                     signalAngleRestrictionStart =
-                        180.0f + connectedCell->signalRoutingRestriction.baseAngle - connectedCell->signalRoutingRestriction.openingAngle / 2;
+                        180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
                     signalAngleRestrictionEnd =
-                        180.0f + connectedCell->signalRoutingRestriction.baseAngle + connectedCell->signalRoutingRestriction.openingAngle / 2;
+                        180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
                 }
 
                 float connectionAngle = 0;

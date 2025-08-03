@@ -69,9 +69,9 @@ namespace
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
-                    nodeTO.signalRoutingRestriction.active = node.signalRoutingRestriction.active;
-                    nodeTO.signalRoutingRestriction.baseAngle = node.signalRoutingRestriction.baseAngle;
-                    nodeTO.signalRoutingRestriction.openingAngle = node.signalRoutingRestriction.openingAngle;
+                    nodeTO.signalRestriction.active = node.signalRestriction.active;
+                    nodeTO.signalRestriction.baseAngle = node.signalRestriction.baseAngle;
+                    nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
                     nodeTO.cellType = node.cellType;
                     switch (node.cellType) {
                     case CellTypeGenome_Base:
@@ -182,9 +182,9 @@ namespace
         cellTO.color = cell->color;
         cellTO.angleToFront = cell->angleToFront;
         cellTO.age = cell->age;
-        cellTO.signalRoutingRestriction.active = cell->signalRoutingRestriction.active;
-        cellTO.signalRoutingRestriction.baseAngle = cell->signalRoutingRestriction.baseAngle;
-        cellTO.signalRoutingRestriction.openingAngle = cell->signalRoutingRestriction.openingAngle;
+        cellTO.signalRestriction.active = cell->signalRestriction.active;
+        cellTO.signalRestriction.baseAngle = cell->signalRestriction.baseAngle;
+        cellTO.signalRestriction.openingAngle = cell->signalRestriction.openingAngle;
         cellTO.signalRelaxationTime = cell->signalRelaxationTime;
         cellTO.signal.active = cell->signal.active;
         for (int i = 0; i < MAX_CHANNELS; ++i) {

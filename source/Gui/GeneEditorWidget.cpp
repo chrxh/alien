@@ -205,11 +205,11 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 4: Signal restriction
                     ImGui::TableNextColumn();
-                    if (node._signalRoutingRestriction._active) {
+                    if (node._signalRestriction._active) {
                         if (ImGui::BeginChild("signal", {0, scale(17.0f)}, 0, ImGuiWindowFlags_NoInputs)) {
                             AlienGui::Text(
-                                StringHelper::format(node._signalRoutingRestriction._baseAngle, 1) + " deg, "
-                                + StringHelper::format(node._signalRoutingRestriction._openingAngle, 1) + " deg");
+                                StringHelper::format(node._signalRestriction._baseAngle, 1) + " deg, "
+                                + StringHelper::format(node._signalRestriction._openingAngle, 1) + " deg");
                         }
                         ImGui::EndChild();
                     }

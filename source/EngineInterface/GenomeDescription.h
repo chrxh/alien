@@ -177,13 +177,13 @@ using CellTypeGenomeDescription = std::variant<
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription>;
 
-struct SignalRoutingRestrictionGenomeDescription
+struct SignalRestrictionGenomeDescription
 {
-    auto operator<=>(SignalRoutingRestrictionGenomeDescription const&) const = default;
+    auto operator<=>(SignalRestrictionGenomeDescription const&) const = default;
 
-    MEMBER(SignalRoutingRestrictionGenomeDescription, bool, active, false);
-    MEMBER(SignalRoutingRestrictionGenomeDescription, float, baseAngle, 0.0f);
-    MEMBER(SignalRoutingRestrictionGenomeDescription, float, openingAngle, 90.0f);
+    MEMBER(SignalRestrictionGenomeDescription, bool, active, false);
+    MEMBER(SignalRestrictionGenomeDescription, float, baseAngle, 0.0f);
+    MEMBER(SignalRestrictionGenomeDescription, float, openingAngle, 90.0f);
 };
 
 struct NodeDescription
@@ -196,7 +196,7 @@ struct NodeDescription
 
     MEMBER(NodeDescription, NeuralNetworkGenomeDescription, neuralNetwork, NeuralNetworkGenomeDescription());
     MEMBER(NodeDescription, CellTypeGenomeDescription, cellTypeData, BaseGenomeDescription());
-    MEMBER(NodeDescription, SignalRoutingRestrictionGenomeDescription, signalRoutingRestriction, SignalRoutingRestrictionGenomeDescription());
+    MEMBER(NodeDescription, SignalRestrictionGenomeDescription, signalRestriction, SignalRestrictionGenomeDescription());
 
     CellTypeGenome getCellType() const;
 };

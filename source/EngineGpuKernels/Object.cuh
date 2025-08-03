@@ -258,7 +258,7 @@ union CellTypeData
     Detonator detonator;
 };
 
-struct SignalRoutingRestriction
+struct SignalRestriction
 {
     bool active;
     float baseAngle;
@@ -313,7 +313,7 @@ struct Cell
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
-    SignalRoutingRestriction signalRoutingRestriction;
+    SignalRestriction signalRestriction;
     uint8_t signalRelaxationTime;
     Signal signal;
     uint32_t activationTime;

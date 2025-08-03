@@ -128,13 +128,13 @@ CellDescription& CellDescription::signalAndRelaxTime(std::vector<float> const& v
     return *this;
 }
 
-CellDescription& CellDescription::signalRoutingRestriction(float baseAngle, float openingAngle)
+CellDescription& CellDescription::signalRestriction(float baseAngle, float openingAngle)
 {
-    SignalRoutingRestrictionDescription routingRestriction;
+    SignalRestrictionDescription routingRestriction;
     routingRestriction._active = true;
     routingRestriction._baseAngle = baseAngle;
     routingRestriction._openingAngle = openingAngle;
-    _signalRoutingRestriction = routingRestriction;
+    _signalRestriction = routingRestriction;
     return *this;
 }
 

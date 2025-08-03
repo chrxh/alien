@@ -113,9 +113,9 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
                 node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
             }
-            node.signalRoutingRestriction.active = nodeTO.signalRoutingRestriction.active;
-            node.signalRoutingRestriction.baseAngle = nodeTO.signalRoutingRestriction.baseAngle;
-            node.signalRoutingRestriction.openingAngle = nodeTO.signalRoutingRestriction.openingAngle;
+            node.signalRestriction.active = nodeTO.signalRestriction.active;
+            node.signalRestriction.baseAngle = nodeTO.signalRestriction.baseAngle;
+            node.signalRestriction.openingAngle = nodeTO.signalRestriction.openingAngle;
 
             node.cellType = nodeTO.cellType;
 
@@ -253,9 +253,9 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
         cell->metadata.descriptionSize,
         cell->metadata.description);
 
-    cell->signalRoutingRestriction.active = cellTO.signalRoutingRestriction.active;
-    cell->signalRoutingRestriction.baseAngle = cellTO.signalRoutingRestriction.baseAngle;
-    cell->signalRoutingRestriction.openingAngle = cellTO.signalRoutingRestriction.openingAngle;
+    cell->signalRestriction.active = cellTO.signalRestriction.active;
+    cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
+    cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
 
     cell->signalRelaxationTime = cellTO.signalRelaxationTime;
     cell->signal.active = cellTO.signal.active;
@@ -431,7 +431,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->sticky = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->signalRoutingRestriction.active = false;
+    cell->signalRestriction.active = false;
     cell->signalRelaxationTime = 0;
     cell->signal.active = false;
     cell->density = 1.0f;
@@ -492,7 +492,7 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    cell->age = 0;
 //    cell->vel = {0, 0};
 //    cell->activationTime = 0;
-//    cell->signalRoutingRestriction.active = false;
+//    cell->signalRestriction.active = false;
 //    cell->signalRelaxationTime = 0;
 //    cell->signal.active = false;
 //    cell->density = 1.0f;
@@ -537,9 +537,9 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
     }
-    cell->signalRoutingRestriction.active = node->signalRoutingRestriction.active;
-    cell->signalRoutingRestriction.baseAngle = node->signalRoutingRestriction.baseAngle;
-    cell->signalRoutingRestriction.openingAngle = node->signalRoutingRestriction.openingAngle;
+    cell->signalRestriction.active = node->signalRestriction.active;
+    cell->signalRestriction.baseAngle = node->signalRestriction.baseAngle;
+    cell->signalRestriction.openingAngle = node->signalRestriction.openingAngle;
     cell->signalRelaxationTime = 0;
     cell->signal.active = false;
     cell->activationTime = 0;
