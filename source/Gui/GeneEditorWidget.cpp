@@ -233,13 +233,13 @@ void _GeneEditorWidget::processNodeListButtons()
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
         auto selectedNode = _editData->getSelectedNodeIndex();
         auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE).frame(true).transparentBackground(false))) {
             onAddNode();
         }
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!selectedNode.has_value());
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE).frame(true).transparentBackground(false))) {
             onRemoveNode();
         }
         ImGui::EndDisabled();
@@ -247,7 +247,7 @@ void _GeneEditorWidget::processNodeListButtons()
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == 0);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP).frame(true).transparentBackground(false))) {
             onMoveNodeUpward();
         }
         ImGui::EndDisabled();
@@ -255,7 +255,7 @@ void _GeneEditorWidget::processNodeListButtons()
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!selectedNode.has_value() || selectedNode.value() == gene._nodes.size() - 1);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN).frame(true).transparentBackground(false))) {
             onMoveNodeDownward();
         }
         ImGui::EndDisabled();

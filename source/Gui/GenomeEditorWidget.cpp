@@ -202,13 +202,13 @@ void _GenomeEditorWidget::processGeneListButtons()
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
 
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE).frame(true).transparentBackground(false))) {
             onAddGene();
         }
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value());
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_MINUS_CIRCLE).frame(true).transparentBackground(false))) {
             onRemoveGene();
         }
         ImGui::EndDisabled();
@@ -216,7 +216,7 @@ void _GenomeEditorWidget::processGeneListButtons()
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == 0);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_UP).frame(true).transparentBackground(false))) {
             onMoveGeneUpward();
         }
         ImGui::EndDisabled();
@@ -224,7 +224,7 @@ void _GenomeEditorWidget::processGeneListButtons()
         ImGui::SameLine();
         AlienGui::MoveTickLeft();
         ImGui::BeginDisabled(!_editData->selectedGeneIndex.has_value() || _editData->selectedGeneIndex.value() == _editData->genome._genes.size() - 1);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN))) {
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_CHEVRON_CIRCLE_DOWN).frame(true).transparentBackground(false))) {
             onMoveGeneDownward();
         }
         ImGui::EndDisabled();

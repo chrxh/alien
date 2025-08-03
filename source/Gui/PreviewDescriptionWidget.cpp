@@ -109,35 +109,36 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             // Draw signal restrictions
             if (_zoom > ZoomLevelForConnections) {
                 for (auto const& cell : desc._cells) {
-                    if (!cell._signalRestriction.has_value()) {
-                        continue;
-                    }
                     auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
-
-                    auto cellRadiusFactor = 0.3f;
-                    auto startAngle = cell._signalRestriction->_startAngle;
-                    auto endAngle = cell._signalRestriction->_endAngle;
-
-                    // With the following code to draw a filled arc (pie segment) between startAngle and endAngle:
-                    const int numSegments = 32;  // Increase for smoother arc
+                    auto constexpr cellRadiusFactor = 0.3f;
                     float radius = cellSize * cellRadiusFactor;
-                    float startRad = startAngle * Const::DegToRad;
-                    float endRad = endAngle * Const::DegToRad;
-                    if (startRad > endRad) {
-                        endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
+                    if (!cell._signalRestriction.has_value()) {
+                        drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
+                    } else {
+                        auto startAngle = cell._signalRestriction->_startAngle;
+                        auto endAngle = cell._signalRestriction->_endAngle;
+
+                        // With the following code to draw a filled arc (pie segment) between startAngle and endAngle:
+                        const int numSegments = 32;  // Increase for smoother arc
+                        float radius = cellSize * cellRadiusFactor;
+                        float startRad = startAngle * Const::DegToRad;
+                        float endRad = endAngle * Const::DegToRad;
+                        if (startRad > endRad) {
+                            endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
+                        }
+
+                        float angleStep = (endRad - startRad) / numSegments;
+
+                        std::vector<ImVec2> arcPoints;
+                        arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
+                        for (int i = 0; i <= numSegments; ++i) {
+                            float angle = startRad + i * angleStep;
+                            arcPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
+                        }
+
+                        // Draw filled polygon (pie segment)
+                        drawList->AddConvexPolyFilled(arcPoints.data(), arcPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
                     }
-
-                    float angleStep = (endRad - startRad) / numSegments;
-
-                    std::vector<ImVec2> arcPoints;
-                    arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
-                    for (int i = 0; i <= numSegments; ++i) {
-                        float angle = startRad + i * angleStep;
-                        arcPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
-                    }
-
-                    // Draw filled polygon (pie segment)
-                    drawList->AddConvexPolyFilled(arcPoints.data(), arcPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
                 }
             }
 
@@ -273,9 +274,9 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
         }
         ImGui::EndChild();
 
-        // Zoom buttons
+        // Action buttons
         ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
-        if (ImGui::BeginChild("##buttons", ImVec2(scale(100), scale(30)), false)) {
+        if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), false)) {
             ImGui::SetCursorPos({0, 0});
             ImGui::PushID(1);
             if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
@@ -292,7 +293,8 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             AlienGui::VerticalSeparator(23);
             ImGui::SameLine();
             ImGui::PushID(3);
-            if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_WIND).highlighted(_settings->maxSpeed))) {
+            if (AlienGui::ActionButton(
+                    AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
                 _settings->maxSpeed = !_settings->maxSpeed;
             }
             ImGui::PopID();

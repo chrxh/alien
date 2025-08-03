@@ -1526,7 +1526,7 @@ bool AlienGui::Button(ButtonParameters const& parameters)
 bool AlienGui::ActionButton(ActionButtonParameters const& parameters)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, parameters._highlighted ? Const::ActionButtonHighlightedTextColor.Value : Const::ActionButtonTextColor.Value);
-    ImGui::PushStyleColor(ImGuiCol_Button, Const::ActionButtonBackgroundColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_Button, !parameters._transparentBackground ? Const::ActionButtonBackgroundColor.Value : ImColor::HSV(0, 0, 0, 0).Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::ActionButtonHoveredColor.Value);
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::ActionButtonActiveColor.Value);
     auto size = ImGui::CalcTextSize(parameters._buttonText.c_str());

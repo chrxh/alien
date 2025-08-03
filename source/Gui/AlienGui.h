@@ -383,6 +383,7 @@ public:
         MEMBER(ActionButtonParameters, std::string, buttonText, "");
         MEMBER(ActionButtonParameters, bool, highlighted, false);
         MEMBER(ActionButtonParameters, bool, frame, false);
+        MEMBER(ActionButtonParameters, bool, transparentBackground, true);
         MEMBER(ActionButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool ActionButton(ActionButtonParameters const& parameters);
