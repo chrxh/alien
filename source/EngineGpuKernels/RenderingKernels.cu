@@ -449,9 +449,9 @@ __global__ void cudaDrawCells(
         if (zoom >= ZoomLevelForSignalFlow && cell->numConnections > 0 && cell->cellType != CellType_Structure && cell->cellType != CellType_Free) {
             float signalAngleRestrictionStart;
             float signalAngleRestrictionEnd;
-            if (cell->signalRoutingRestriction.active) {
-                signalAngleRestrictionStart = 180.0f + cell->signalRoutingRestriction.baseAngle - cell->signalRoutingRestriction.openingAngle / 2;
-                signalAngleRestrictionEnd = 180.0f + cell->signalRoutingRestriction.baseAngle + cell->signalRoutingRestriction.openingAngle / 2;
+            if (cell->signalRestriction.active) {
+                signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
+                signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
             } else {
                 signalAngleRestrictionStart = 0;
                 signalAngleRestrictionEnd = 359.9f;
@@ -554,8 +554,8 @@ __global__ void cudaDrawCells(
 
         // draw arrows
         if (zoom >= ZoomLevelForSignalFlow) {
-            auto signalAngleRestrictionStart = 180.0f + cell->signalRoutingRestriction.baseAngle - cell->signalRoutingRestriction.openingAngle / 2;
-            auto signalAngleRestrictionEnd = 180.0f + cell->signalRoutingRestriction.baseAngle + cell->signalRoutingRestriction.openingAngle / 2;
+            auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
+            auto signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
             signalAngleRestrictionStart = Math::normalizedAngle(signalAngleRestrictionStart, 0.0f);
             signalAngleRestrictionEnd = Math::normalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
@@ -565,7 +565,7 @@ __global__ void cudaDrawCells(
                     summedAngle += cell->connections[i].angleFromPrevious;
                 }
                 auto const& otherCell = cell->connections[i].cell;
-                if (!cell->signalRoutingRestriction.active
+                if (!cell->signalRestriction.active
                     || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle)) {
                     auto otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
