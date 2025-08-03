@@ -126,7 +126,7 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SEEDLING).tooltip("Create a seed with current genome"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EGG).tooltip("Create a seed with current genome"))) {
         onCreateSeed();
     }
 

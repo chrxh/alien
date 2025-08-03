@@ -26,7 +26,8 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
 
     auto result = false;
 
-    if (ImGui::BeginChild("preview", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+    auto windowSize = ImGui::GetWindowSize();
+    if (ImGui::BeginChild("outerPreview", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysHorizontalScrollbar)) {
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto const cellSize = scale(_zoom);
@@ -39,7 +40,6 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
 
         auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
         auto windowPos = ImGui::GetWindowPos();
-        auto windowSize = ImGui::GetWindowSize();
 
         RealVector2D upperLeft;
         RealVector2D lowerRight;
@@ -57,18 +57,18 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                 lowerRight.y = cell._pos.y;
             }
         }
-        RealVector2D previewSize = (lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
+        RealVector2D previewSize = RealVector2D{200.0f, 200.0f} * cellSize;  //(lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
 
         auto mousePos = ImGui::GetMousePos();
         auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y
             && mousePos.x <= windowPos.x + windowSize.x && mousePos.y <= windowPos.y + windowSize.y;
-        ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
-        if (ImGui::BeginChild("##genome", ImVec2(previewSize.x, previewSize.y), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+        //ImGui::SetCursorPos({std::max(0.0f, windowSize.x - previewSize.x) / 2, std::max(0.0f, windowSize.y - previewSize.y) / 2});
+        if (ImGui::BeginChild("innerPreview", ImVec2(previewSize.x, previewSize.y), 0, ImGuiWindowFlags_NoScrollbar)) {
 
             auto windowPos = ImGui::GetWindowPos();
             RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
-            ImGui::SetCursorPos({previewSize.x - 1, previewSize.y - 1});
+            //ImGui::SetCursorPos({(previewSize.x - 1) / 2, (previewSize.y - 1) / 2});
 
             // Draw selected gene
             auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
@@ -266,40 +266,39 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             //}
         }
         ImGui::EndChild();
+    }
+    ImGui::EndChild();
 
-        // Draw timestep in bottom right corner of "preview" child window
-        ImGui::SetCursorPos({ImGui::GetScrollX() + windowSize.x - scale(100), ImGui::GetScrollY() + windowSize.y - scale(40)});
-        if (ImGui::BeginChild("##TPS", ImVec2(scale(100), scale(30)), false)) {
-            AlienGui::Text("TPS: " + StringHelper::format(tps));
-        }
-        ImGui::EndChild();
+    // Draw timestep in bottom right corner of "preview" child window
+    ImGui::SetCursorPos({ImGui::GetScrollX() + windowSize.x - scale(100), ImGui::GetScrollY() + windowSize.y - scale(40)});
+    if (ImGui::BeginChild("##TPS", ImVec2(scale(100), scale(30)), false)) {
+        AlienGui::Text("TPS: " + StringHelper::format(tps));
+    }
+    ImGui::EndChild();
 
-        // Action buttons
-        ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
-        if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), false)) {
-            ImGui::SetCursorPos({0, 0});
-            ImGui::PushID(1);
-            if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
-                _zoom *= 1.5f;
-            }
-            ImGui::PopID();
-            ImGui::SameLine();
-            ImGui::PushID(2);
-            if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
-                _zoom /= 1.5f;
-            }
-            ImGui::PopID();
-            ImGui::SameLine();
-            AlienGui::VerticalSeparator(23);
-            ImGui::SameLine();
-            ImGui::PushID(3);
-            if (AlienGui::ActionButton(
-                    AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
-                _settings->maxSpeed = !_settings->maxSpeed;
-            }
-            ImGui::PopID();
+    // Action buttons
+    ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
+    if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), false)) {
+        ImGui::SetCursorPos({0, 0});
+        ImGui::PushID(1);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
+            _zoom *= 1.5f;
         }
-        ImGui::EndChild();
+        ImGui::PopID();
+        ImGui::SameLine();
+        ImGui::PushID(2);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
+            _zoom /= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+        AlienGui::VerticalSeparator(23);
+        ImGui::SameLine();
+        ImGui::PushID(3);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
+            _settings->maxSpeed = !_settings->maxSpeed;
+        }
+        ImGui::PopID();
     }
     ImGui::EndChild();
     return result;
