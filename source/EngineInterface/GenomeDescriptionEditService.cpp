@@ -127,7 +127,7 @@ namespace
             for (auto& node : gene._nodes) {
                 node._color = 0;
                 node._neuralNetwork = NeuralNetworkGenomeDescription();
-                node._signalRoutingRestriction = SignalRoutingRestrictionGenomeDescription();
+                node._signalRestriction = SignalRestrictionGenomeDescription();
                 if (node.getCellType() != CellTypeGenome_Constructor) {
                     node._cellTypeData = BaseGenomeDescription();
                 } else {

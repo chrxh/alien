@@ -315,7 +315,7 @@ struct CellDescription
 
     CellType getCellType() const;
     CellDescription& signalAndRelaxTime(std::vector<float> const& value);
-    CellDescription& signalRoutingRestriction(float baseAngle, float openingAngle);
+    CellDescription& signalRestriction(float baseAngle, float openingAngle);
 
     bool isConnectedTo(uint64_t id) const;
     float getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const;

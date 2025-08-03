@@ -129,7 +129,7 @@ void _NodeEditorWidget::processNodeAttributes()
         }
 
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Signal routing restriction").textWidth(rightColumnWidth), node._signalRoutingRestriction._active);
+            AlienGui::CheckboxParameters().name("Signal restriction").textWidth(rightColumnWidth), node._signalRestriction._active);
 
         AlienGui::BeginIndent();
 
@@ -138,18 +138,18 @@ void _NodeEditorWidget::processNodeAttributes()
                 .name("Signal base angle")
                 .format("%.1f")
                 .step(0.5f)
-                .readOnly(!node._signalRoutingRestriction._active)
+                .readOnly(!node._signalRestriction._active)
                 .textWidth(rightColumnWidth),
-            node._signalRoutingRestriction._baseAngle);
+            node._signalRestriction._baseAngle);
 
         AlienGui::InputFloat(
             AlienGui::InputFloatParameters()
                 .name("Signal opening angle")
                 .format("%.1f")
                 .step(0.5f)
-                .readOnly(!node._signalRoutingRestriction._active)
+                .readOnly(!node._signalRestriction._active)
                 .textWidth(rightColumnWidth),
-            node._signalRoutingRestriction._openingAngle);
+            node._signalRestriction._openingAngle);
 
         AlienGui::EndIndent();
 

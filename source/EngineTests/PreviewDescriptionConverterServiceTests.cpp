@@ -192,8 +192,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({
-            NodeDescription().color(2).signalRoutingRestriction(
-                SignalRoutingRestrictionGenomeDescription().active(true).baseAngle(BaseAngle).openingAngle(OpeningAngle)),
+            NodeDescription().color(2).signalRestriction(
+                SignalRestrictionGenomeDescription().active(true).baseAngle(BaseAngle).openingAngle(OpeningAngle)),
             NodeDescription().color(3),
         }),
     });
