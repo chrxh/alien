@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "EngineInterface/CellTypeConstants.h"
+#include "EngineInterface/SimulationParametersTypes.h"
 
 struct NeuralNetworkGenome
 {
@@ -152,6 +153,7 @@ struct Node
 
 struct Gene
 {
+    Char64 name;
     ConstructorShape shape;
     bool separation;
     uint8_t numBranches;    // For separation = false
@@ -166,6 +168,7 @@ struct Gene
 
 struct Genome
 {
+    Char64 name;
     int numGenes;
     Gene* genes;
 

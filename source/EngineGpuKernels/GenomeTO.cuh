@@ -4,6 +4,7 @@
 
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/EngineConstants.h"
+#include "EngineInterface/SimulationParametersTypes.h"
 
 struct NeuralNetworkGenomeTO
 {
@@ -154,6 +155,7 @@ struct NodeTO
 
 struct GeneTO
 {
+    Char64 name;
     ConstructorShape shape;
     bool separation;
     uint8_t numBranches;    // For separation = false
@@ -168,6 +170,7 @@ struct GeneTO
 
 struct GenomeTO
 {
+    Char64 name;
     int numGenes;
     uint64_t geneArrayIndex;
 
