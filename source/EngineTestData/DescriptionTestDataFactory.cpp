@@ -75,9 +75,11 @@ CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescript
         .generation(7)
         .genomeComplexity(25)
         .genome(GenomeDescription()
+                    .name("Test Genome")
                     .frontAngle(270.0f)
                     .genes({
                         GeneDescription()
+                            .name("Test Gene")
                             .shape(ConstructorShape_Hexagon)
                             .numBranches(4)
                             .separation(true)
