@@ -99,18 +99,7 @@ namespace
         return result;
     }
 
-    template <typename Container, typename SizeType>
-    void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
-    {
-        targetSize = source.size();
-        if (targetSize > 0) {
-            targetIndex = heap.size();
-            uint64_t size = source.size();
-            for (uint64_t i = 0; i < size; ++i) {
-                heap.emplace_back(source.at(i));
-            }
-        }
-    }
+
 }
 
 CollectionDescription DescriptionConverterService::convertTOtoDescription(CollectionTO const& collectionTO) const
