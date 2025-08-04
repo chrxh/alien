@@ -113,8 +113,6 @@ public:
     std::vector<ExtendedCellOrParticleDescription> getObjects(CollectionDescription const& data) const;
     std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(CollectionDescription const& data) const;
 
-    void removeMetadata(CollectionDescription& data) const;
-
     void assignNewObjectAndCreatureIds(CollectionDescription& data) const;
 
     void setCenter(CollectionDescription& collection, RealVector2D const& center) const;
@@ -127,7 +125,6 @@ public:
     void removeCell(CollectionDescription& collection, uint64_t cellId) const;
 
 private:
-    void removeMetadata(CellDescription& cell) const;
     bool isCellPresent(
         Occupancy const& cellPosBySlot,
         SpaceCalculator const& spaceCalculator,

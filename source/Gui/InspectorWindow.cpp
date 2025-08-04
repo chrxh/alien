@@ -118,7 +118,7 @@ void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
         if (cell.getCellType() == CellType_Injector) {
             processCellGenomeTab(std::get<InjectorDescription>(cell._cellTypeData));
         }
-        processCellMetadataTab(cell);
+
         validateAndCorrect(cell);
 
         ImGui::EndTabBar();
@@ -497,18 +497,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
     }
 }
 
-void _InspectorWindow::processCellMetadataTab(CellDescription& cell)
-{
-    if (ImGui::BeginTabItem("Annotation", nullptr, ImGuiTabItemFlags_None)) {
-        if (ImGui::BeginChild("##", ImVec2(0, 0), false, 0)) {
-            AlienGui::InputText(AlienGui::InputTextParameters().hint("Name").textWidth(0), cell._metadata._name);
 
-            AlienGui::InputTextMultiline(AlienGui::InputTextMultilineParameters().hint("Notes").textWidth(0).height(100), cell._metadata._description);
-        }
-        ImGui::EndChild();
-        ImGui::EndTabItem();
-    }
-}
 
 void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
 {

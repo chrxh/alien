@@ -168,9 +168,6 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
                 if (newPos.x < size.x && newPos.y < size.y) {
                     for (auto& cell : creature._cells) {
                         cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
-                        if (incX > 0 || incY > 0) {
-                            removeMetadata(cell);
-                        }
                     }
                     result._creatures.emplace_back(creature);
                 }
@@ -179,9 +176,6 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
                 RealVector2D newPos = {cell._pos.x + incX, cell._pos.y + incY};
                 cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
                 if (newPos.x < size.x && newPos.y < size.y) {
-                    if (incX > 0 || incY > 0) {
-                        removeMetadata(cell);
-                    }
                     result._cells.emplace_back(cell);
                 }
             }
@@ -237,15 +231,14 @@ CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription
 {
     CollectionDescription result;
     auto clone = input;
-    auto cloneWithoutMetadata = input;
-    removeMetadata(cloneWithoutMetadata);
+    auto cloneTemplate = input;
     for (int i = 0; i < parameters._horizontalNumber; ++i) {
         for (int j = 0; j < parameters._verticalNumber; ++j) {
             auto templateData = [&] {
                 if (i == 0 && j == 0) {
                     return clone;
                 }
-                return cloneWithoutMetadata;
+                return cloneTemplate;
             }();
             shift(templateData, {i * parameters._horizontalDistance, j * parameters._verticalDistance});
             rotate(templateData, i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);
@@ -289,7 +282,6 @@ CollectionDescription DescriptionEditService::randomMultiply(
         int attempts = 0;
         do {
             copy = input;
-            removeMetadata(copy);
             shift(copy, {toFloat(numberGen.getRandomDouble(0, toInt(worldSize.x))), toFloat(numberGen.getRandomDouble(0, toInt(worldSize.y)))});
             rotate(copy, toInt(numberGen.getRandomDouble(parameters._minAngle, parameters._maxAngle)));
             accelerate(copy,
@@ -457,10 +449,7 @@ void DescriptionEditService::randomizeMutationIds(CollectionDescription& data) c
     }
 }
 
-void DescriptionEditService::removeMetadata(CollectionDescription& data) const
-{
-    data.forEachCell([&](CellDescription& cell) { removeMetadata(cell); });
-}
+
 
 void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data) const
 {
@@ -604,11 +593,7 @@ void DescriptionEditService::removeCell(CollectionDescription& collection, uint6
     });
 }
 
-void DescriptionEditService::removeMetadata(CellDescription& cell) const
-{
-    cell._metadata._description.clear();
-    cell._metadata._name.clear();
-}
+
 
 bool DescriptionEditService::isCellPresent(
     Occupancy const& cellPosBySlot,

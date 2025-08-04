@@ -99,18 +99,7 @@ namespace
         return result;
     }
 
-    template <typename Container, typename SizeType>
-    void convert(std::vector<uint8_t>& heap, SizeType& targetSize, uint64_t& targetIndex, Container const& source)
-    {
-        targetSize = source.size();
-        if (targetSize > 0) {
-            targetIndex = heap.size();
-            uint64_t size = source.size();
-            for (uint64_t i = 0; i < size; ++i) {
-                heap.emplace_back(source.at(i));
-            }
-        }
-    }
+
 }
 
 CollectionDescription DescriptionConverterService::convertTOtoDescription(CollectionTO const& collectionTO) const
@@ -299,19 +288,6 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._cellTriggered = cellTO.cellTriggered;
     result._nodeIndex = cellTO.nodeIndex;
     result._geneIndex = cellTO.geneIndex;
-
-    auto const& metacollectionTO = cellTO.metadata;
-    auto metadata = CellMetadataDescription();
-    if (metacollectionTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&collectionTO.heap[metacollectionTO.nameDataIndex]), metacollectionTO.nameSize);
-        metadata.name(name);
-    }
-    if (metacollectionTO.descriptionSize > 0) {
-        auto const description =
-            std::string(reinterpret_cast<char*>(&collectionTO.heap[metacollectionTO.descriptionDataIndex]), metacollectionTO.descriptionSize);
-        metadata.description(description);
-    }
-    result._metadata = metadata;
 
     switch (cellTO.cellType) {
     case CellType_Structure: {
@@ -983,8 +959,6 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.sticky = cellDesc._sticky;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
-    convert(heap, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cellDesc._metadata._name);
-    convert(heap, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex, cellDesc._metadata._description);
 }
 
 void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const

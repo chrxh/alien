@@ -11,14 +11,6 @@
 #include "Definitions.h"
 #include "GenomeDescription.h"
 
-struct CellMetadataDescription
-{
-    auto operator<=>(CellMetadataDescription const&) const = default;
-
-    MEMBER(CellMetadataDescription, std::string, name, "");
-    MEMBER(CellMetadataDescription, std::string, description, "");
-};
-
 struct ConnectionDescription
 {
     auto operator<=>(ConnectionDescription const&) const = default;
@@ -309,9 +301,6 @@ struct CellDescription
     MEMBER(CellDescription, int, activationTime, 0);
     MEMBER(CellDescription, int, detectedByCreatureId, 0);  // Only the first 16 bits from the creature id
     MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
-
-    // Misc
-    MEMBER(CellDescription, CellMetadataDescription, metadata, CellMetadataDescription());
 
     CellType getCellType() const;
     CellDescription& signalAndRelaxTime(std::vector<float> const& value);

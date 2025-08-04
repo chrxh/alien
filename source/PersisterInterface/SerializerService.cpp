@@ -502,9 +502,6 @@ namespace
     auto constexpr Id_Connection_Distance = 1;
     auto constexpr Id_Connection_AngleFromPrevious = 2;
 
-    auto constexpr Id_Metadata_Name = 0;
-    auto constexpr Id_Metadata_Description = 1;
-
     auto constexpr Id_NeuralNetwork_Weights = 0;
     auto constexpr Id_NeuralNetwork_Biases = 1;
     auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
@@ -584,16 +581,7 @@ namespace
 
 namespace cereal
 {
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CellMetadataDescription& data)
-    {
-        CellMetadataDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Metadata_Name, data._name, defaultObject._name);
-        loadSave(task, auxiliaries, Id_Metadata_Description, data._description, defaultObject._description);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(CellMetadataDescription)
+
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConnectionDescription& data)
@@ -876,7 +864,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data._cellTypeData, data._signal, data._signalRestriction, data._neuralNetwork, data._metadata);
+        ar(data._connections, data._cellTypeData, data._signal, data._signalRestriction, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDescription)
 

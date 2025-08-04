@@ -28,7 +28,6 @@ private:
     void processCellTypePropertiesTab(CellDescription& cell);
     template <typename Description>
     void processCellGenomeTab(Description& desc);
-    void processCellMetadataTab(CellDescription& cell);
 
     void processGeneratorContent(GeneratorDescription& generator);
     void processNeuronContent(CellDescription& cell);

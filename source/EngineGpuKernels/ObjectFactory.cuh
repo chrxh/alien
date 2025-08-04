@@ -244,15 +244,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->nodeIndex = cellTO.nodeIndex;
     cell->geneIndex = cellTO.geneIndex;
 
-    copyDataToHeap(cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, collectionTO.heap, cell->metadata.nameSize, cell->metadata.name);
-
-    copyDataToHeap(
-        cellTO.metadata.descriptionSize,
-        cellTO.metadata.descriptionDataIndex,
-        collectionTO.heap,
-        cell->metadata.descriptionSize,
-        cell->metadata.description);
-
     cell->signalRestriction.active = cellTO.signalRestriction.active;
     cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
     cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
@@ -425,8 +416,6 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->scheduledOperationIndex = -1;
     cell->color = 0;
     cell->angleToFront = 0;
-    cell->metadata.nameSize = 0;
-    cell->metadata.descriptionSize = 0;
     cell->barrier = false;
     cell->sticky = false;
     cell->age = 0;
@@ -485,8 +474,6 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    cell->scheduledOperationIndex = -1;
 //    cell->locked = 0;
 //    cell->color = 0;
-//    cell->metadata.nameSize = 0;
-//    cell->metadata.descriptionSize = 0;
 //    cell->barrier = false;
 //    cell->sticky = false;
 //    cell->age = 0;
@@ -545,8 +532,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     cell->activationTime = 0;
     cell->cellTriggered = CellTriggered_No;
     cell->detectedByCreatureId = 0;
-    cell->metadata.nameSize = 0;
-    cell->metadata.descriptionSize = 0;
     cell->event = CellEvent_No;
     cell->selected = 0;
     cell->detached = 0;
