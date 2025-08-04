@@ -371,8 +371,6 @@ struct CollectionDescription
     void forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const;
     void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
 
-    CollectionDescription& add(CollectionDescription const& other);
-
     void clear();
     bool isEmpty() const;
 

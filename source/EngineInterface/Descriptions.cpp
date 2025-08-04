@@ -194,14 +194,6 @@ void CollectionDescription::forEachCell(std::function<void(CellDescription&)> co
     }
 }
 
-CollectionDescription& CollectionDescription::add(CollectionDescription const& other)
-{
-    _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
-    _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
-    _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
-    return *this;
-}
-
 void CollectionDescription::clear()
 {
     _cells.clear();
