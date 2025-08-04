@@ -20,8 +20,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
                       .signalRestriction(
                           SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
-                      .cellTypeData(cellTypeDesc)
-                      .metadata(CellMetadataDescription().name("Test1").description("Test2"));
+                      .cellTypeData(cellTypeDesc);
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
         NeuralNetworkDescription defaultNn; 

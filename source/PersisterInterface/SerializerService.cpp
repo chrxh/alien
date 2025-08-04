@@ -584,16 +584,7 @@ namespace
 
 namespace cereal
 {
-    template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CellMetadataDescription& data)
-    {
-        CellMetadataDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Metadata_Name, data._name, defaultObject._name);
-        loadSave(task, auxiliaries, Id_Metadata_Description, data._description, defaultObject._description);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(CellMetadataDescription)
+
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ConnectionDescription& data)

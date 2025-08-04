@@ -54,15 +54,6 @@ struct GenomeHeader
     __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == 0x7fffffff; }
 };
 
-struct CellMetadata
-{
-    uint16_t nameSize;
-    uint8_t* name;
-
-    uint16_t descriptionSize;
-    uint8_t* description;
-};
-
 struct CellConnection
 {
     Cell* cell;
@@ -322,9 +313,6 @@ struct Cell
     // Process data
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
-
-    // Annotations
-    CellMetadata metadata;
 
     // Additional rendering data
     CellEvent event;

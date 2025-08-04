@@ -300,19 +300,6 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._nodeIndex = cellTO.nodeIndex;
     result._geneIndex = cellTO.geneIndex;
 
-    auto const& metacollectionTO = cellTO.metadata;
-    auto metadata = CellMetadataDescription();
-    if (metacollectionTO.nameSize > 0) {
-        auto const name = std::string(reinterpret_cast<char*>(&collectionTO.heap[metacollectionTO.nameDataIndex]), metacollectionTO.nameSize);
-        metadata.name(name);
-    }
-    if (metacollectionTO.descriptionSize > 0) {
-        auto const description =
-            std::string(reinterpret_cast<char*>(&collectionTO.heap[metacollectionTO.descriptionDataIndex]), metacollectionTO.descriptionSize);
-        metadata.description(description);
-    }
-    result._metadata = metadata;
-
     switch (cellTO.cellType) {
     case CellType_Structure: {
         StructureCellDescription base;
@@ -983,8 +970,6 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.sticky = cellDesc._sticky;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;
-    convert(heap, cellTO.metadata.nameSize, cellTO.metadata.nameDataIndex, cellDesc._metadata._name);
-    convert(heap, cellTO.metadata.descriptionSize, cellTO.metadata.descriptionDataIndex, cellDesc._metadata._description);
 }
 
 void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const

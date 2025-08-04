@@ -19,15 +19,6 @@ struct ParticleTO
 	uint8_t selected;
 };
 
-struct CellMetadataTO
-{
-    uint16_t nameSize;
-    uint64_t nameDataIndex;
-
-    uint16_t descriptionSize;
-    uint64_t descriptionDataIndex;
-};
-
 struct ConnectionTO
 {
     uint64_t cellIndex;
@@ -269,9 +260,6 @@ struct CellTO
     uint32_t activationTime;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     CellTriggered cellTriggered;
-
-    // Misc
-    CellMetadataTO metadata;
 
     // Editing data
     uint8_t selected;
