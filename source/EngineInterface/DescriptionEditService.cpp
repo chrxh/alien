@@ -168,9 +168,6 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
                 if (newPos.x < size.x && newPos.y < size.y) {
                     for (auto& cell : creature._cells) {
                         cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
-                        if (incX > 0 || incY > 0) {
-                            // Metadata would have been removed here
-                        }
                     }
                     result._creatures.emplace_back(creature);
                 }
@@ -179,9 +176,6 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
                 RealVector2D newPos = {cell._pos.x + incX, cell._pos.y + incY};
                 cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
                 if (newPos.x < size.x && newPos.y < size.y) {
-                    if (incX > 0 || incY > 0) {
-                        // Metadata would have been removed here
-                    }
                     result._cells.emplace_back(cell);
                 }
             }
@@ -237,14 +231,14 @@ CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription
 {
     CollectionDescription result;
     auto clone = input;
-    auto cloneWithoutMetadata = input;
+    auto cloneTemplate = input;
     for (int i = 0; i < parameters._horizontalNumber; ++i) {
         for (int j = 0; j < parameters._verticalNumber; ++j) {
             auto templateData = [&] {
                 if (i == 0 && j == 0) {
                     return clone;
                 }
-                return cloneWithoutMetadata;
+                return cloneTemplate;
             }();
             shift(templateData, {i * parameters._horizontalDistance, j * parameters._verticalDistance});
             rotate(templateData, i * parameters._horizontalAngleInc + j * parameters._verticalAngleInc);

@@ -502,9 +502,6 @@ namespace
     auto constexpr Id_Connection_Distance = 1;
     auto constexpr Id_Connection_AngleFromPrevious = 2;
 
-    auto constexpr Id_Metadata_Name = 0;
-    auto constexpr Id_Metadata_Description = 1;
-
     auto constexpr Id_NeuralNetwork_Weights = 0;
     auto constexpr Id_NeuralNetwork_Biases = 1;
     auto constexpr Id_NeuralNetwork_ActivationFunctions = 2;
@@ -867,7 +864,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data._cellTypeData, data._signal, data._signalRestriction, data._neuralNetwork, data._metadata);
+        ar(data._connections, data._cellTypeData, data._signal, data._signalRestriction, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDescription)
 
