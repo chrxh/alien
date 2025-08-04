@@ -74,6 +74,9 @@ void _GeneEditorWidget::processHeaderData()
 
         _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
 
+        // Gene name
+        AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
+
         // Shape
         AlienGui::Combo(AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape);
 

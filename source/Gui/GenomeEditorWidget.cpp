@@ -55,6 +55,8 @@ void _GenomeEditorWidget::processHeaderData()
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->geneListHeight), 0)) {
 
+        AlienGui::InputText(AlienGui::InputTextParameters().name("Genome name").textWidth(rightColumnWidth), _editData->genome._name);
+
         auto numNodesString = std::to_string(GenomeDescriptionInfoService::get().getNumberOfNodes(_editData->genome));
         AlienGui::InputText(AlienGui::InputTextParameters().name("Node count").readOnly(true).textWidth(rightColumnWidth), numNodesString);
 
@@ -84,8 +86,9 @@ void _GenomeEditorWidget::processGeneList()
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-        if (ImGui::BeginTable("Gene list", 7, flags, ImVec2(-1, -1), 0.0f)) {
+        if (ImGui::BeginTable("Gene list", 8, flags, ImVec2(-1, -1), 0.0f)) {
             ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
             ImGui::TableSetupColumn("Shape", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(60.0f));
@@ -134,14 +137,19 @@ void _GenomeEditorWidget::processGeneList()
                         }
                     }
 
-                    // Column 1: References
+                    // Column 1: Name
+                    ImGui::TableNextColumn();
+                    auto geneName = gene._name.empty() ? std::string("(unnamed)") : gene._name;
+                    AlienGui::Text(geneName);
+
+                    // Column 2: References
                     ImGui::TableNextColumn();
                     auto references = GenomeDescriptionInfoService::get().getReferences(gene);
                     auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                     auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
                     AlienGui::Text(referencesString);
 
-                    // Column 2: Referenced by
+                    // Column 3: Referenced by
                     ImGui::TableNextColumn();
                     auto referencedBy = GenomeDescriptionInfoService::get().getReferencedBy(genome, row);
                     if (!referencedBy.empty()) {
@@ -154,11 +162,11 @@ void _GenomeEditorWidget::processGeneList()
                         }
                     }
 
-                    // Column 3: Shape
+                    // Column 4: Shape
                     ImGui::TableNextColumn();
                     AlienGui::Text(Const::ConstructorShapeStrings.at(gene._shape));
 
-                    // Column 4: Branches
+                    // Column 5: Branches
                     ImGui::TableNextColumn();
                     if (gene._separation) {
                         AlienGui::Text("Separation");

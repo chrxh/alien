@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
@@ -20,6 +21,22 @@ namespace
     T* getFromHeap(uint8_t* heap, uint64_t sourceIndex)
     {
         return reinterpret_cast<T*>(&heap[sourceIndex]);
+    }
+
+    void stringToChar64(std::string const& source, Char64& target)
+    {
+        size_t length = std::min(source.length(), size_t(63)); // Leave space for null terminator
+        std::memcpy(target, source.c_str(), length);
+        target[length] = '\0'; // Ensure null termination
+        // Clear remaining bytes
+        for (size_t i = length + 1; i < 64; ++i) {
+            target[i] = '\0';
+        }
+    }
+
+    std::string char64ToString(Char64 const& source)
+    {
+        return std::string(source, strnlen(source, 64));
     }
 
     NeuralNetworkGenomeDescription convert(NeuralNetworkGenomeTO const& neuralNetworkGenomeTO)
@@ -466,6 +483,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     result._generation = creatureTO.generation;
     result._mutationId = creatureTO.mutationId;
     result._genomeComplexity = creatureTO.genomeComplexity;
+    result._genome._name = char64ToString(creatureTO.genome.name);
     result._genome._frontAngle = creatureTO.genome.frontAngle;
     result._genome._genes.reserve(creatureTO.genome.numGenes);
 
@@ -474,6 +492,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
         auto geneTO = collectionTO.genes + creatureTO.genome.geneArrayIndex + i;
 
         GeneDescription geneDesc;
+        geneDesc._name = char64ToString(geneTO->name);
         geneDesc._numBranches = geneTO->numBranches;
         geneDesc._separation = geneTO->separation;
         geneDesc._shape = geneTO->shape;
@@ -643,6 +662,7 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.generation = creatureDesc._generation;
     creatureTO.mutationId = creatureDesc._mutationId;
     creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
+    stringToChar64(creatureDesc._genome._name, creatureTO.genome.name);
     creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
     creatureTO.genome.numGenes = toInt(creatureDesc._genome._genes.size());
     creatureTO.genome.geneArrayIndex = geneArrayStartIndex;
@@ -650,6 +670,7 @@ void DescriptionConverterService::convertCreatureToTO(
     for (auto const& [geneIndex, geneDesc] : creatureDesc._genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
+        stringToChar64(geneDesc._name, geneTO.name);
         geneTO.shape = geneDesc._shape;
         geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
         geneTO.separation = geneDesc._separation;
