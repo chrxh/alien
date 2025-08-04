@@ -205,6 +205,7 @@ struct GeneDescription
 {
     auto operator<=>(GeneDescription const&) const = default;
 
+    MEMBER(GeneDescription, std::string, name, "");
     MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
     MEMBER(GeneDescription, ConstructorShape, shape, ConstructorShape_Custom);
     MEMBER(GeneDescription, bool, separation, false);
@@ -221,6 +222,7 @@ struct GenomeDescription
 {
     auto operator<=>(GenomeDescription const&) const = default;
 
+    MEMBER(GenomeDescription, std::string, name, "");
     MEMBER(GenomeDescription, std::vector<GeneDescription>, genes, {})
     MEMBER(GenomeDescription, float, frontAngle, 0.0f);
 };

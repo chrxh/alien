@@ -154,6 +154,9 @@ struct NodeTO
 
 struct GeneTO
 {
+    uint16_t nameSize;
+    uint64_t nameDataIndex;
+
     ConstructorShape shape;
     bool separation;
     uint8_t numBranches;    // For separation = false
@@ -168,6 +171,9 @@ struct GeneTO
 
 struct GenomeTO
 {
+    uint16_t nameSize;
+    uint64_t nameDataIndex;
+
     int numGenes;
     uint64_t geneArrayIndex;
 

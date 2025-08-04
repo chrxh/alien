@@ -152,6 +152,9 @@ struct Node
 
 struct Gene
 {
+    uint16_t nameSize;
+    uint8_t* name;
+
     ConstructorShape shape;
     bool separation;
     uint8_t numBranches;    // For separation = false
@@ -166,6 +169,9 @@ struct Gene
 
 struct Genome
 {
+    uint16_t nameSize;
+    uint8_t* name;
+
     int numGenes;
     Gene* genes;
 

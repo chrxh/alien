@@ -467,6 +467,10 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     result._mutationId = creatureTO.mutationId;
     result._genomeComplexity = creatureTO.genomeComplexity;
     result._genome._frontAngle = creatureTO.genome.frontAngle;
+    if (creatureTO.genome.nameSize > 0) {
+        auto const name = std::string(reinterpret_cast<char*>(&collectionTO.heap[creatureTO.genome.nameDataIndex]), creatureTO.genome.nameSize);
+        result._genome.name(name);
+    }
     result._genome._genes.reserve(creatureTO.genome.numGenes);
 
     CHECK(creatureTO.genome.geneArrayIndex + creatureTO.genome.numGenes <= *collectionTO.numGenes);
@@ -474,6 +478,10 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
         auto geneTO = collectionTO.genes + creatureTO.genome.geneArrayIndex + i;
 
         GeneDescription geneDesc;
+        if (geneTO->nameSize > 0) {
+            auto const name = std::string(reinterpret_cast<char*>(&collectionTO.heap[geneTO->nameDataIndex]), geneTO->nameSize);
+            geneDesc.name(name);
+        }
         geneDesc._numBranches = geneTO->numBranches;
         geneDesc._separation = geneTO->separation;
         geneDesc._shape = geneTO->shape;
@@ -644,12 +652,14 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.mutationId = creatureDesc._mutationId;
     creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
     creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
+    convert(heap, creatureTO.genome.nameSize, creatureTO.genome.nameDataIndex, creatureDesc._genome._name);
     creatureTO.genome.numGenes = toInt(creatureDesc._genome._genes.size());
     creatureTO.genome.geneArrayIndex = geneArrayStartIndex;
 
     for (auto const& [geneIndex, geneDesc] : creatureDesc._genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
+        convert(heap, geneTO.nameSize, geneTO.nameDataIndex, geneDesc._name);
         geneTO.shape = geneDesc._shape;
         geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
         geneTO.separation = geneDesc._separation;

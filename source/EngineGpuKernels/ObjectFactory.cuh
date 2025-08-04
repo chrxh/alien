@@ -80,6 +80,12 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
     creature->mutationId = creatureTO.mutationId;
     creature->genomeComplexity = creatureTO.genomeComplexity;
     creature->genome.frontAngle = creatureTO.genome.frontAngle;
+    copyDataToHeap(
+        creatureTO.genome.nameSize,
+        creatureTO.genome.nameDataIndex,
+        collectionTO.heap,
+        creature->genome.nameSize,
+        creature->genome.name);
     creature->genome.numGenes = creatureTO.genome.numGenes;
 
     auto const& geneTOs = collectionTO.genes + creatureTO.genome.geneArrayIndex;
@@ -88,6 +94,12 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
     for (int i = 0, j = creatureTO.genome.numGenes; i < j; ++i) {
         auto const& geneTO = geneTOs[i];
         auto& gene = genes[i];
+        copyDataToHeap(
+            geneTO.nameSize,
+            geneTO.nameDataIndex,
+            collectionTO.heap,
+            gene.nameSize,
+            gene.name);
         gene.shape = geneTO.shape;
         gene.separation = geneTO.separation;
         gene.numBranches = geneTO.numBranches;

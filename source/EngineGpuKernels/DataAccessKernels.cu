@@ -39,6 +39,12 @@ namespace
             creatureTO.mutationId = creature->mutationId;
             creatureTO.genomeComplexity = creature->genomeComplexity;
             creatureTO.genome.frontAngle = creature->genome.frontAngle;
+            copyDataToHeap(
+                creature->genome.nameSize,
+                creature->genome.name,
+                creatureTO.genome.nameSize,
+                creatureTO.genome.nameDataIndex,
+                collectionTO);
             creatureTO.genome.numGenes = creature->genome.numGenes;
 
             auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, creature->genome.numGenes);
@@ -46,6 +52,12 @@ namespace
             for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
                 auto const& gene = creature->genome.genes[i];
+                copyDataToHeap(
+                    gene.nameSize,
+                    gene.name,
+                    geneTO.nameSize,
+                    geneTO.nameDataIndex,
+                    collectionTO);
                 geneTO.shape = gene.shape;
                 geneTO.separation = gene.separation;
                 geneTO.numBranches = gene.numBranches;
@@ -759,8 +771,10 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
         if (cell->creature) {
             ++numGenomes;
             auto const& creature = cell->creature;
+            heapBytes += creature->genome.nameSize + GpuMemoryAlignmentBytes;
             numGenes += creature->genome.numGenes;
             for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
+                heapBytes += creature->genome.genes[i].nameSize + GpuMemoryAlignmentBytes;
                 numNodes += creature->genome.genes[i].numNodes;
             }
         }
