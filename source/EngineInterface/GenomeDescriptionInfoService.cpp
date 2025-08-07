@@ -84,11 +84,11 @@ std::vector<int> GenomeDescriptionInfoService::getReferencedBy(GenomeDescription
 
 bool GenomeDescriptionInfoService::isConnectedToRoot(GenomeDescription const& genome, int startGeneIndex) const
 {
-    auto hull = calcIndicesOfRootGeneHull(genome);
+    auto hull = getReferencedGenesInRootGeneHull(genome);
     return hull.contains(startGeneIndex);
 }
 
-std::set<int> GenomeDescriptionInfoService::calcIndicesOfRootGeneHull(GenomeDescription const& genome) const
+std::set<int> GenomeDescriptionInfoService::getReferencedGenesInRootGeneHull(GenomeDescription const& genome) const
 {
     CHECK(!genome._genes.empty());
 
@@ -114,4 +114,59 @@ std::set<int> GenomeDescriptionInfoService::calcIndicesOfRootGeneHull(GenomeDesc
     } while (!toInspectedGeneIndices.empty());
 
     return alreadyInspectedGeneIndices;
+}
+
+ReferencedGenesInNonSeparatingGeneHull GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDescription const& genome, int startGeneIndex) const
+{
+    CHECK(!genome._genes.empty());
+    CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());
+
+    ReferencedGenesInNonSeparatingGeneHull result;
+    std::set<int> alreadyInspectedGeneIndices = {startGeneIndex};
+    std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
+    
+    do {
+        std::set<int> newGeneIndices;
+        for (auto const& geneIndex : toInspectedGeneIndices) {
+            if (geneIndex >= genome._genes.size()) {
+                continue;
+            }
+            auto referenced = getReferences(genome._genes.at(geneIndex));
+            newGeneIndices.insert(referenced.begin(), referenced.end());
+        }
+        toInspectedGeneIndices.clear();
+        std::set_difference(
+            newGeneIndices.begin(),
+            newGeneIndices.end(),
+            alreadyInspectedGeneIndices.begin(),
+            alreadyInspectedGeneIndices.end(),
+            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
+        
+        // Separate new genes into separating and non-separating
+        std::set<int> newNonSeparatingGenes;
+        for (auto const& geneIndex : toInspectedGeneIndices) {
+            if (geneIndex < genome._genes.size()) {
+                if (genome._genes[geneIndex]._separation) {
+                    // This is a separating gene - add to separating list but don't traverse through it
+                    result.separatingGeneIndices.push_back(geneIndex);
+                } else {
+                    // This is a non-separating gene - add to non-separating list and continue traversal
+                    newNonSeparatingGenes.insert(geneIndex);
+                }
+            }
+        }
+        
+        // Only add non-separating genes to continue traversal
+        toInspectedGeneIndices = newNonSeparatingGenes;
+        alreadyInspectedGeneIndices.insert(newGeneIndices.begin(), newGeneIndices.end());
+    } while (!toInspectedGeneIndices.empty());
+
+    // Convert all non-separating genes from the set to the result vector
+    for (auto const& geneIndex : alreadyInspectedGeneIndices) {
+        if (geneIndex < genome._genes.size() && !genome._genes[geneIndex]._separation) {
+            result.nonSeparatingGeneIndices.push_back(geneIndex);
+        }
+    }
+
+    return result;
 }
