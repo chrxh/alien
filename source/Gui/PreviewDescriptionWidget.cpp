@@ -58,6 +58,11 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             }
         }
         RealVector2D previewSize = RealVector2D{200.0f, 200.0f} * cellSize;  //(lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
+        //ImGui::SetCursorPos({(previewSize.x - 1) / 2, (previewSize.y - 1) / 2});
+        float centerX = ImGui::GetScrollMaxX() / 2.0f;
+        float centerY = ImGui::GetScrollMaxY() / 2.0f;
+        ImGui::SetScrollX(centerX);
+        ImGui::SetScrollY(centerY);
 
         auto mousePos = ImGui::GetMousePos();
         auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y
@@ -68,12 +73,10 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             auto windowPos = ImGui::GetWindowPos();
             RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
-            //ImGui::SetCursorPos({(previewSize.x - 1) / 2, (previewSize.y - 1) / 2});
-
             // Draw selected gene
             auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
             for (auto const& cell : desc._cells) {
-                auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
+                auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
                 if (_selectedGene.has_value() && cell._geneIndex == _selectedGene.value()) {
                     drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
                 }
@@ -81,7 +84,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
 
             // Draw cells and selected cells
             for (auto const& cell : desc._cells) {
-                auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
+                auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
                 float h, s, v;
                 AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
 
@@ -109,7 +112,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             // Draw signal restrictions
             if (_zoom > ZoomLevelForConnections) {
                 for (auto const& cell : desc._cells) {
-                    auto cellPos = (cell._pos - upperLeft) * cellSize + offset;
+                    auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
                     auto constexpr cellRadiusFactor = 0.3f;
                     float radius = cellSize * cellRadiusFactor;
                     if (!cell._signalRestriction.has_value()) {
@@ -166,8 +169,8 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             // Draw cell connections
             if (_zoom > ZoomLevelForConnections) {
                 for (auto const& connection : desc._connections) {
-                    auto cellPos1 = (connection._cell1 - upperLeft) * cellSize + offset;
-                    auto cellPos2 = (connection._cell2 - upperLeft) * cellSize + offset;
+                    auto cellPos1 = (connection._cell1 + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+                    auto cellPos2 = (connection._cell2 + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
 
                     auto direction = cellPos1 - cellPos2;
 
