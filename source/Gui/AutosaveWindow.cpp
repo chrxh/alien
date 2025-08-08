@@ -219,9 +219,7 @@ void AutosaveWindow::processTable()
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienGui::Text(" (" + entry->peakType + ")");
-                    ImGui::PopStyleColor();
+                    AlienGui::DecentText(" (" + entry->peakType + ")");
                 }
 
                 ImGui::PopID();

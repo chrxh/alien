@@ -936,6 +936,13 @@ void AlienGui::MonospaceText(std::string const& text)
     ImGui::PopFont();
 }
 
+void AlienGui::DecentText(std::string const& text)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
+    Text(text);
+    ImGui::PopStyleColor();
+}
+
 void AlienGui::BeginMenuBar()
 {
     _menuBarVisible = ImGui::BeginMainMenuBar();

@@ -87,7 +87,7 @@ void _GenomeEditorWidget::processGeneList()
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
         if (ImGui::BeginTable("Gene list", 8, flags, ImVec2(-1, -1), 0.0f)) {
-            ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(100.0f));
+            ImGui::TableSetupColumn("Gene", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(105.0f));
             ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(120.0f));
             ImGui::TableSetupColumn("References", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(80.0f));
             ImGui::TableSetupColumn("Referenced by", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(95.0f));
@@ -118,13 +118,14 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    auto geneIndexText = std::to_string(row + 1);
+                    AlienGui::Text(std::to_string(row + 1));
                     if (row == 0) {
-                        geneIndexText += " (root)";
+                        ImGui::SameLine();
+                        AlienGui::DecentText(" (root)");
                     } else if (!rootHull.contains(row)) {
-                        geneIndexText += " (unreachable)";
+                        ImGui::SameLine();
+                        AlienGui::DecentText(" (unreachable)");
                     }
-                    AlienGui::Text(geneIndexText);
                     ImGui::SameLine();
                     auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
                     if (ImGui::Selectable(
@@ -139,8 +140,11 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 1: Name
                     ImGui::TableNextColumn();
-                    auto geneName = gene._name.empty() ? std::string("(unnamed)") : gene._name;
-                    AlienGui::Text(geneName);
+                    if (!gene._name.empty()) {
+                        AlienGui::Text(gene._name);
+                    } else {
+                        AlienGui::DecentText("(unnamed)");
+                    }
 
                     // Column 2: References
                     ImGui::TableNextColumn();
