@@ -196,19 +196,6 @@ namespace
         cellTO.nodeIndex = cell->nodeIndex;
         cellTO.geneIndex = cell->geneIndex;
 
-        copyDataToHeap(
-            cell->metadata.nameSize,
-            cell->metadata.name,
-            cellTO.metadata.nameSize,
-            cellTO.metadata.nameDataIndex,
-            collectionTO);
-        copyDataToHeap(
-            cell->metadata.descriptionSize,
-            cell->metadata.description,
-            cellTO.metadata.descriptionSize,
-            cellTO.metadata.descriptionDataIndex,
-            collectionTO);
-
         cell->tempValue = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
@@ -752,7 +739,6 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
     uint64_t numNodes = 0;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        heapBytes += cell->metadata.nameSize + cell->metadata.descriptionSize + GpuMemoryAlignmentBytes * 2;
         if (cell->neuralNetwork) {
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
@@ -788,7 +774,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, Arra
         uint64_t heapBytes = 0;
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cellTO = collectionTO.cells[index];
-            heapBytes += sizeof(Cell) + cellTO.metadata.nameSize + cellTO.metadata.descriptionSize + GpuMemoryAlignmentBytes * 2;
+            heapBytes += sizeof(Cell) + GpuMemoryAlignmentBytes;
             if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }

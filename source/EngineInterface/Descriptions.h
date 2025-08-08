@@ -376,6 +376,8 @@ struct CollectionDescription
 
     std::unordered_set<uint64_t> getCellIds() const;
 
+    void add(CollectionDescription const& other);
+
     CollectionCache createCache() const;
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
