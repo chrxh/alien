@@ -113,8 +113,6 @@ public:
     std::vector<ExtendedCellOrParticleDescription> getObjects(CollectionDescription const& data) const;
     std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(CollectionDescription const& data) const;
 
-    void assignNewObjectAndCreatureIds(CollectionDescription& data) const;
-
     void setCenter(CollectionDescription& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(CollectionDescription const& collection) const;
     RealVector2D calcCenter(CreatureDescription const& creature) const;

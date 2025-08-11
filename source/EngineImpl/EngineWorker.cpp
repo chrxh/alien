@@ -160,7 +160,7 @@ void EngineWorker::addAndSelectSimulationData(CollectionDescription&& dataToUpda
     auto maxIds = _simulationCudaFacade->getMaxIds();
     NumberGenerator::get().adaptMaxIds(maxIds);
 
-    DescriptionEditService::get().assignNewObjectAndCreatureIds(dataToUpdate);
+    dataToUpdate.assignNewIds();
 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
 

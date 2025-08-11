@@ -374,9 +374,8 @@ struct CollectionDescription
     void clear();
     bool isEmpty() const;
 
-    std::unordered_set<uint64_t> getCellIds() const;
-
-    void add(CollectionDescription const& other);
+    void add(CollectionDescription&& other);
+    void assignNewIds();
 
     CollectionCache createCache() const;
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);

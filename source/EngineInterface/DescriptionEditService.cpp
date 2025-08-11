@@ -155,6 +155,7 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
     correctConnectionsForNonCreatures(data, origSize);
 
     auto clone = CollectionDescription(data);
+    clone.assignNewIds();
 
     SpaceCalculator spaceCalc(origSize);
 
@@ -190,7 +191,6 @@ void DescriptionEditService::duplicate(CollectionDescription& data, IntVector2D 
     }
 
     data = CollectionDescription(result);
-    assignNewObjectAndCreatureIds(data);
 }
 
 namespace
@@ -247,7 +247,7 @@ CollectionDescription DescriptionEditService::gridMultiply(CollectionDescription
                 {i * parameters._horizontalVelXinc + j * parameters._verticalVelXinc, i * parameters._horizontalVelYinc + j * parameters._verticalVelYinc},
                 i * parameters._horizontalAngularVelInc + j * parameters._verticalAngularVelInc);
 
-            result.add(templateData);
+            result.add(std::move(templateData));
         }
     }
 
@@ -265,7 +265,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
     SpaceCalculator spaceCalculator(worldSize);
     std::unordered_map<IntVector2D, std::vector<RealVector2D>> cellPosBySlot;
 
-    //create map for overlapping check
+    // Create map for overlapping check
     if (parameters._overlappingCheck) {
         input.forEachCell([&](CellDescription const& cell) {
             auto intPos = toIntVector2D(spaceCalculator.getCorrectedPosition(cell._pos));
@@ -273,7 +273,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
         });
     }
 
-    //do multiplication
+    // Do multiplication
     CollectionDescription result = input;
     auto& numberGen = NumberGenerator::get();
     for (int i = 0; i < parameters._number; ++i) {
@@ -305,9 +305,7 @@ CollectionDescription DescriptionEditService::randomMultiply(
             overlappingCheckSuccessful = false;
         }
 
-        result.add(copy);
-
-        //add copy to existentData for overlapping check
+        // Add copy to existentData for overlapping check
         if (parameters._overlappingCheck) {
             copy.forEachCell([&](CellDescription const& cell) {
                 existentData._cells.emplace_back(cell);
@@ -315,6 +313,8 @@ CollectionDescription DescriptionEditService::randomMultiply(
                 cellPosBySlot[intPos].emplace_back(cell._pos);
             });
         }
+
+        result.add(std::move(copy));
     }
 
     return result;
@@ -446,46 +446,6 @@ void DescriptionEditService::randomizeMutationIds(CollectionDescription& data) c
 {
     for (auto& creature : data._creatures) {
         creature._mutationId = NumberGenerator::get().getRandomInt() % 0xffff;
-    }
-}
-
-
-
-void DescriptionEditService::assignNewObjectAndCreatureIds(CollectionDescription& data) const
-{
-    std::unordered_map<uint64_t, uint64_t> oldToNewObjectIds;
-    std::unordered_map<uint64_t, uint64_t> oldToNewCreatureIds;
-
-    auto replaceCreatureId = [&](uint64_t& oldCreatureId) {
-        auto findResult = oldToNewCreatureIds.find(oldCreatureId);
-        if (findResult != oldToNewCreatureIds.end()) {
-            oldCreatureId = findResult->second;
-        } else {
-            auto newCreatureId = NumberGenerator::get().createCreatureId();
-            oldToNewCreatureIds.emplace(oldCreatureId, newCreatureId);
-            oldCreatureId = newCreatureId;
-        }
-    };
-    for (auto& creature : data._creatures) {
-        replaceCreatureId(creature._id);
-    }
-    data.forEachCell([&](CellDescription& cell) {
-        auto newObjectId = NumberGenerator::get().createObjectId();
-        oldToNewObjectIds.emplace(cell._id, newObjectId);
-        cell._id = newObjectId;
-    });
-
-    data.forEachCell([&](CellDescription& cell) {
-        for (auto& connection : cell._connections) {
-            auto findResult = oldToNewObjectIds.find(connection._cellId);
-            if (findResult != oldToNewObjectIds.end()) {
-                connection._cellId = findResult->second;
-            }
-        }
-    });
-
-    for (auto& particle : data._particles) {
-        particle._id = NumberGenerator::get().createObjectId();
     }
 }
 

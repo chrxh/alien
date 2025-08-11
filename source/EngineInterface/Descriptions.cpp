@@ -208,31 +208,36 @@ bool CollectionDescription::isEmpty() const
     return numCells == 0 && _particles.empty();
 }
 
-std::unordered_set<uint64_t> CollectionDescription::getCellIds() const
+void CollectionDescription::add(CollectionDescription&& other)
 {
-    std::unordered_set<uint64_t> result;
-    for (auto const& cell : _cells) {
-        result.insert(cell._id);
-    }
-    return result;
+    other.assignNewIds();
+
+    _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
+    _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
+    _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
 }
-    
-void CollectionDescription::add(CollectionDescription const& other)
+
+void CollectionDescription::assignNewIds()
 {
-    auto insertedCellIt = _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
-    for (; insertedCellIt != _cells.end(); ++insertedCellIt) {
-        insertedCellIt->_id = NumberGenerator::get().createObjectId();
-    }
-    auto insertedParticlesIt = _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
-    for (; insertedParticlesIt != _particles.end(); ++insertedCellIt) {
-        insertedParticlesIt->_id = NumberGenerator::get().createObjectId();
-    }
-    auto insertedCreatureIt = _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
-    for (; insertedCreatureIt != _creatures.end(); ++insertedCreatureIt) {
-        insertedCreatureIt->_id = NumberGenerator::get().createObjectId();
-        for (auto& cell : insertedCreatureIt->_cells) {
-            cell._id = NumberGenerator::get().createObjectId();
+    std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
+    forEachCell([&](CellDescription& cell) {
+        auto newId = NumberGenerator::get().createObjectId();
+        oldToNewCellId.insert({cell._id, newId});
+        cell._id = newId;
+    });
+    forEachCell([&](CellDescription& cell) {
+        for (auto& connection : cell._connections) {
+            auto it = oldToNewCellId.find(connection._cellId);
+            if (it != oldToNewCellId.end()) {
+                connection._cellId = it->second;
+            }
         }
+    });
+    for (auto& particle : _particles) {
+        particle._id = NumberGenerator::get().createObjectId();
+    }
+    for (auto& creature : _creatures) {
+        creature._id = NumberGenerator::get().createCreatureId();
     }
 }
 
