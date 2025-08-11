@@ -116,12 +116,70 @@ std::set<int> GenomeDescriptionInfoService::getReferencedGenesInRootGeneHull(Gen
     return alreadyInspectedGeneIndices;
 }
 
-ReferencedGenesInNonSeparatingGeneHull GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDescription const& genome, int startGeneIndex) const
+auto GenomeDescriptionInfoService::getGenesForCreatureParts(GenomeDescription const& genome) const -> std::vector<GeneIndicesForCreaturePart>
+{
+    if (genome._genes.empty()) {
+        return {};
+    }
+
+    std::set<int> nonInspectedGeneIndices;
+    for (int i = 0; i < genome._genes.size(); ++i) {
+        nonInspectedGeneIndices.insert(i);
+    }
+
+    std::vector<GeneIndicesForCreaturePart> result;
+    while (!nonInspectedGeneIndices.empty()) {
+        auto startGeneIndex = *nonInspectedGeneIndices.begin();
+        
+        auto genesForPart = getGenesForCreatureParts(genome, startGeneIndex);
+        for (auto const& geneIndices : genesForPart) {
+            for (auto const& geneIndex : geneIndices) {
+                nonInspectedGeneIndices.erase(geneIndex);
+            }
+        }
+        result.insert(result.end(), genesForPart.begin(), genesForPart.end());
+    }
+
+    return result;
+}
+
+auto GenomeDescriptionInfoService::getGenesForCreatureParts(GenomeDescription const& genome, int startGeneIndex) const
+    -> std::vector<GeneIndicesForCreaturePart>
 {
     CHECK(!genome._genes.empty());
     CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());
 
-    ReferencedGenesInNonSeparatingGeneHull result;
+    std::vector<GeneIndicesForCreaturePart> result;
+
+    std::set<int> alreadyInspectedGeneIndices = {startGeneIndex};
+    std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
+    do {
+        std::set<int> newGeneIndices;
+        for (auto const& geneIndex : toInspectedGeneIndices) {
+            if (geneIndex >= genome._genes.size()) {
+                continue;
+            }
+            ReferencedGenes referenced = getReferencedGenesInNonSeparatingGeneHull(genome, geneIndex);
+            result.emplace_back(referenced.nonSeparatingGeneIndices);
+            newGeneIndices.insert(referenced.separatingGeneIndices.begin(), referenced.separatingGeneIndices.end());
+        }
+        toInspectedGeneIndices.clear();
+        std::set_difference(
+            newGeneIndices.begin(),
+            newGeneIndices.end(),
+            alreadyInspectedGeneIndices.begin(),
+            alreadyInspectedGeneIndices.end(),
+            std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
+
+        alreadyInspectedGeneIndices.insert(newGeneIndices.begin(), newGeneIndices.end());
+    } while (!toInspectedGeneIndices.empty());
+
+    return result;
+}
+
+auto GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(GenomeDescription const& genome, int startGeneIndex) const -> ReferencedGenes
+{
+    ReferencedGenes result;
     std::set<int> alreadyInspectedGeneIndices = {startGeneIndex};
     std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;
     

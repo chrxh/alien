@@ -8,12 +8,6 @@
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
 
-struct ReferencedGenesInNonSeparatingGeneHull 
-{
-    std::vector<int> nonSeparatingGeneIndices;
-    std::vector<int> separatingGeneIndices;
-};
-
 class GenomeDescriptionInfoService
 {
     MAKE_SINGLETON(GenomeDescriptionInfoService);
@@ -25,5 +19,18 @@ public:
     std::vector<int> getReferencedBy(GenomeDescription const& genome, int geneIndex) const;
     bool isConnectedToRoot(GenomeDescription const& genome, int startGeneIndex) const;
     std::set<int> getReferencedGenesInRootGeneHull(GenomeDescription const& genome) const;
-    ReferencedGenesInNonSeparatingGeneHull getReferencedGenesInNonSeparatingGeneHull(GenomeDescription const& genome, int startGeneIndex) const;
+
+    using GeneIndicesForCreaturePart = std::vector<int>;
+    std::vector<GeneIndicesForCreaturePart> getGenesForCreatureParts(GenomeDescription const& genome) const;
+
+private:
+    using GeneIndicesForCreaturePart = std::vector<int>;
+    std::vector<GeneIndicesForCreaturePart> getGenesForCreatureParts(GenomeDescription const& genome, int startGeneIndex) const;
+
+    struct ReferencedGenes
+    {
+        std::vector<int> nonSeparatingGeneIndices;
+        std::vector<int> separatingGeneIndices;
+    };
+    ReferencedGenes getReferencedGenesInNonSeparatingGeneHull(GenomeDescription const& genome, int startGeneIndex) const;
 };
