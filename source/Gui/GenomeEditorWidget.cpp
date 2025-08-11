@@ -81,7 +81,7 @@ void _GenomeEditorWidget::processGeneList()
         }
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
 
-        auto rootHull = GenomeDescriptionInfoService::get().calcIndicesOfRootGeneHull(_editData->genome);
+        auto rootHull = GenomeDescriptionInfoService::get().getReferencedGenesInRootGeneHull(_editData->genome);
 
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;

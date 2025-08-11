@@ -1,5 +1,6 @@
 
 #include <gtest/gtest.h>
+#include <algorithm>
 
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 #include "EngineInterface/GenomeDescription.h"
@@ -336,4 +337,103 @@ TEST_F(GenomeDescriptionInfoServiceTests, getReferencedBy)
     EXPECT_EQ(1, result.at(0));
     EXPECT_EQ(1, result.at(1));
     EXPECT_EQ(2, result.at(2));
+}
+
+TEST_F(GenomeDescriptionInfoServiceTests, getReferencedGenesInNonSeparatingGeneHull_onlyNonSeparatingGenes)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto result = GenomeDescriptionInfoService::get().getReferencedGenesInNonSeparatingGeneHull(genome, 0);
+
+    // All genes should be in non-separating list
+    ASSERT_EQ(3, result.nonSeparatingGeneIndices.size());
+    EXPECT_EQ(0, result.separatingGeneIndices.size());
+    
+    // Check if genes 0, 1, 2 are all included (order may vary)
+    std::sort(result.nonSeparatingGeneIndices.begin(), result.nonSeparatingGeneIndices.end());
+    EXPECT_EQ(0, result.nonSeparatingGeneIndices[0]);
+    EXPECT_EQ(1, result.nonSeparatingGeneIndices[1]);
+    EXPECT_EQ(2, result.nonSeparatingGeneIndices[2]);
+}
+
+TEST_F(GenomeDescriptionInfoServiceTests, getReferencedGenesInNonSeparatingGeneHull_mixedSeparatingAndNonSeparating)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+        }),
+        GeneDescription().separation(true).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto result = GenomeDescriptionInfoService::get().getReferencedGenesInNonSeparatingGeneHull(genome, 0);
+
+    // Should have genes 0,1 as non-separating and gene 2 as separating
+    ASSERT_EQ(2, result.nonSeparatingGeneIndices.size());
+    ASSERT_EQ(1, result.separatingGeneIndices.size());
+    
+    std::sort(result.nonSeparatingGeneIndices.begin(), result.nonSeparatingGeneIndices.end());
+    EXPECT_EQ(0, result.nonSeparatingGeneIndices[0]);
+    EXPECT_EQ(1, result.nonSeparatingGeneIndices[1]);
+    EXPECT_EQ(2, result.separatingGeneIndices[0]);
+}
+
+TEST_F(GenomeDescriptionInfoServiceTests, getReferencedGenesInNonSeparatingGeneHull_startFromDifferentIndex)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto result = GenomeDescriptionInfoService::get().getReferencedGenesInNonSeparatingGeneHull(genome, 1);
+
+    // Starting from gene 1, should reach genes 1 and 2 (not 0)
+    ASSERT_EQ(2, result.nonSeparatingGeneIndices.size());
+    EXPECT_EQ(0, result.separatingGeneIndices.size());
+    
+    std::sort(result.nonSeparatingGeneIndices.begin(), result.nonSeparatingGeneIndices.end());
+    EXPECT_EQ(1, result.nonSeparatingGeneIndices[0]);
+    EXPECT_EQ(2, result.nonSeparatingGeneIndices[1]);
+}
+
+TEST_F(GenomeDescriptionInfoServiceTests, getReferencedGenesInNonSeparatingGeneHull_separatingGeneBlocksTraversal)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+        }),
+        GeneDescription().separation(true).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto result = GenomeDescriptionInfoService::get().getReferencedGenesInNonSeparatingGeneHull(genome, 0);
+
+    // Should only reach gene 0 (non-separating) and gene 1 (separating, but not traversed)
+    // Gene 2 should not be reached because we don't traverse through separating gene 1
+    ASSERT_EQ(1, result.nonSeparatingGeneIndices.size());
+    ASSERT_EQ(1, result.separatingGeneIndices.size());
+    
+    EXPECT_EQ(0, result.nonSeparatingGeneIndices[0]);
+    EXPECT_EQ(1, result.separatingGeneIndices[0]);
 }
