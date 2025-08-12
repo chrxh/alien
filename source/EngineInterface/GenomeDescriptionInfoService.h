@@ -20,11 +20,11 @@ public:
     bool isConnectedToRoot(GenomeDescription const& genome, int startGeneIndex) const;
     std::set<int> getReferencedGenesInRootGeneHull(GenomeDescription const& genome) const;
 
-    using CreatureGeneIndices = std::vector<int>;
-    std::vector<CreatureGeneIndices> getCreatureGeneIndices(GenomeDescription const& genome) const;
+    using GeneIndicesForSubGenome = std::vector<int>;
+    std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDescription const& genome) const;
 
 private:
-    std::vector<CreatureGeneIndices> getCreatureGeneIndices(GenomeDescription const& genome, int startGeneIndex) const;
+    std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDescription const& genome, int startGeneIndex) const;
 
     struct ReferencedGenes
     {

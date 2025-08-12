@@ -307,15 +307,15 @@ TEST_F(GenomeDescriptionEditServiceTests, swapNodes)
     EXPECT_EQ(CellTypeGenome_Constructor, gene._nodes.at(2).getCellType());
 }
 
-TEST_F(GenomeDescriptionEditServiceTests, createDescriptionsForPreview_emptyGenome)
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_emptyGenome)
 {
     auto genome = GenomeDescription();
-    auto creatureGenomes = GenomeDescriptionEditService::get().createDescriptionsForPreview(genome, {});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {});
     
-    EXPECT_EQ(0, creatureGenomes.size());
+    EXPECT_EQ(0, subGenomes.size());
 }
 
-TEST_F(GenomeDescriptionEditServiceTests, createDescriptionsForPreview_invalidGeneReference)
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGeneReference)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -323,100 +323,100 @@ TEST_F(GenomeDescriptionEditServiceTests, createDescriptionsForPreview_invalidGe
             NodeDescription(),
         }),
     });
-    auto creatureGenomes = GenomeDescriptionEditService::get().createDescriptionsForPreview(genome, {{0}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
 
-    ASSERT_EQ(1, creatureGenomes.size());
-    auto const& creatureGenome = creatureGenomes.at(0);
+    ASSERT_EQ(1, subGenomes.size());
+    auto const& subGenome = subGenomes.at(0);
 
-    ASSERT_EQ(1, creatureGenome._genes.size());
-    ASSERT_EQ(2, creatureGenome._genes.at(0)._nodes.size());
-    ASSERT_EQ(CellTypeGenome_Constructor, creatureGenome._genes.at(0)._nodes.at(0).getCellType());
+    ASSERT_EQ(1, subGenome._genes.size());
+    ASSERT_EQ(2, subGenome._genes.at(0)._nodes.size());
+    ASSERT_EQ(CellTypeGenome_Constructor, subGenome._genes.at(0)._nodes.at(0).getCellType());
     // Invalid reference should remain unchanged (the castrate method has bounds checking)
-    EXPECT_EQ(5, std::get<ConstructorGenomeDescription>(creatureGenome._genes.at(0)._nodes.at(0)._cellTypeData)._geneIndex);
+    EXPECT_EQ(5, std::get<ConstructorGenomeDescription>(subGenome._genes.at(0)._nodes.at(0)._cellTypeData)._geneIndex);
 }
 
-TEST_F(GenomeDescriptionEditServiceTests, createDescriptionsForPreview_complexCycles)
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycles)
 {
     auto genome = createGenome_complexCycles();
-    auto creatureGenomes = GenomeDescriptionEditService::get().createDescriptionsForPreview(genome, {{0, 1, 2}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
 
-    ASSERT_EQ(1, creatureGenomes.size());
-    auto const& creatureGenome = creatureGenomes.at(0);
+    ASSERT_EQ(1, subGenomes.size());
+    auto const& subGenome = subGenomes.at(0);
 
-    auto const& gene0 = creatureGenome._genes.at(0);
+    auto const& gene0 = subGenome._genes.at(0);
     ASSERT_EQ(3, gene0._nodes.size());
     EXPECT_EQ(3, getRefGeneIndex(gene0, 0));
     EXPECT_EQ(1, getRefGeneIndex(gene0, 1));
     EXPECT_EQ(2, getRefGeneIndex(gene0, 2));
 
-    auto const& gene1 = creatureGenome._genes.at(1);
+    auto const& gene1 = subGenome._genes.at(1);
     ASSERT_EQ(4, gene1._nodes.size());
     EXPECT_EQ(3, getRefGeneIndex(gene1, 0));
     EXPECT_EQ(3, getRefGeneIndex(gene1, 1));
     EXPECT_EQ(3, getRefGeneIndex(gene1, 2));
 
-    auto const& gene2 = creatureGenome._genes.at(2);
+    auto const& gene2 = subGenome._genes.at(2);
     ASSERT_EQ(5, gene2._nodes.size());
     EXPECT_EQ(3, getRefGeneIndex(gene2, 0));
     EXPECT_EQ(3, getRefGeneIndex(gene2, 1));
     EXPECT_EQ(3, getRefGeneIndex(gene2, 2));
 }
 
-TEST_F(GenomeDescriptionEditServiceTests, createDescriptionsForPreview_subCycle)
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
 {
     auto genome = createGenome_subCycle();
-    auto creatureGenomes = GenomeDescriptionEditService::get().createDescriptionsForPreview(genome, {{0, 1}, {2}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}, {2}});
 
-    ASSERT_EQ(2, creatureGenomes.size());
+    ASSERT_EQ(2, subGenomes.size());
 
     {
-        auto const& creatureGenome = creatureGenomes.at(0);
-        ASSERT_EQ(3, creatureGenome._genes.size());
+        auto const& subGenome = subGenomes.at(0);
+        ASSERT_EQ(3, subGenome._genes.size());
 
-        auto const& gene0 = creatureGenome._genes.at(0);
+        auto const& gene0 = subGenome._genes.at(0);
         ASSERT_EQ(2, gene0._nodes.size());
         EXPECT_EQ(1, getRefGeneIndex(gene0, 0));
 
-        auto const& gene1 = creatureGenome._genes.at(1);
+        auto const& gene1 = subGenome._genes.at(1);
         ASSERT_EQ(2, gene1._nodes.size());
         EXPECT_EQ(3, getRefGeneIndex(gene1, 0));
 
-        auto const& gene2 = creatureGenome._genes.at(2);
+        auto const& gene2 = subGenome._genes.at(2);
         ASSERT_EQ(0, gene2._nodes.size());
     }
     {
-        auto const& creatureGenome = creatureGenomes.at(1);
-        ASSERT_EQ(3, creatureGenome._genes.size());
+        auto const& subGenome = subGenomes.at(1);
+        ASSERT_EQ(3, subGenome._genes.size());
 
-        auto const& gene0 = creatureGenome._genes.at(0);
+        auto const& gene0 = subGenome._genes.at(0);
         ASSERT_EQ(0, gene0._nodes.size());
 
-        auto const& gene1 = creatureGenome._genes.at(1);
+        auto const& gene1 = subGenome._genes.at(1);
         ASSERT_EQ(0, gene1._nodes.size());
 
-        auto const& gene2 = creatureGenome._genes.at(2);
+        auto const& gene2 = subGenome._genes.at(2);
         ASSERT_EQ(2, gene2._nodes.size());
     }
 }
 
-TEST_F(GenomeDescriptionEditServiceTests, createDescriptionsForPreview_noCycles)
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
 {
     auto genome = createGenome_noCycles();
-    auto creatureGenomes = GenomeDescriptionEditService::get().createDescriptionsForPreview(genome, {{0, 1, 2}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
 
-    ASSERT_EQ(1, creatureGenomes.size());
-    auto const& creatureGenome = creatureGenomes.at(0);
+    ASSERT_EQ(1, subGenomes.size());
+    auto const& subGenome = subGenomes.at(0);
 
-    ASSERT_EQ(3, creatureGenome._genes.size());
+    ASSERT_EQ(3, subGenome._genes.size());
 
-    auto const& gene0 = creatureGenome._genes.at(0);
+    auto const& gene0 = subGenome._genes.at(0);
     ASSERT_EQ(2, gene0._nodes.size());
     EXPECT_EQ(1, getRefGeneIndex(gene0, 0));
 
-    auto const& gene1 = creatureGenome._genes.at(1);
+    auto const& gene1 = subGenome._genes.at(1);
     ASSERT_EQ(2, gene1._nodes.size());
     EXPECT_EQ(2, getRefGeneIndex(gene1, 0));
 
-    auto const& gene2 = creatureGenome._genes.at(2);
+    auto const& gene2 = subGenome._genes.at(2);
     ASSERT_EQ(2, gene2._nodes.size());
 }

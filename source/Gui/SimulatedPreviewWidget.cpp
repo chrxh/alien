@@ -51,15 +51,18 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
     _previewWidget = _PreviewDescriptionWidget::create(settings);
 }
 
-void _SimulatedPreviewWidget::createGenomeForPreview()
+void _SimulatedPreviewWidget::createSubGenomesForPreview()
 {
+    auto creatureGenesVec = GenomeDescriptionInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
+    _subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, creatureGenesVec);
+
     //_genomeForPreview = _editData->genome;
     //auto startGeneIndex = _editData->selectedGeneIndex.value_or(0);
     //_rootGeneIndex = GenomeDescriptionInfoService::get().isConnectedToRoot(_genomeForPreview, startGeneIndex) ? 0 : startGeneIndex;
     //GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, _rootGeneIndex);
 }
 
-void _SimulatedPreviewWidget::setPreview()
+void _SimulatedPreviewWidget::setPreviewData()
 {
     //CollectionDescription preview;
 

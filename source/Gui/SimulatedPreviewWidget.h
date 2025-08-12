@@ -26,8 +26,8 @@ private:
         GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData);
 
-    void createGenomeForPreview();
-    void setPreview();
+    void createSubGenomesForPreview();
+    void setPreviewData();
     void calcPreview();
     void showPreview();
 
@@ -38,6 +38,8 @@ private:
     GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
+
+    std::vector<GenomeDescription> _subGenomesForPreview;
 
     GenomeDescription _genomeForPreview;
     int _rootGeneIndex = 0;
