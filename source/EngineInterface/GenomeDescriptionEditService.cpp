@@ -84,6 +84,25 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
     std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
 }
 
+std::vector<GenomeDescription> GenomeDescriptionEditService::createDescriptionsForPreview(
+    GenomeDescription const& genome,
+    std::vector<CreatureGeneIndices> const& creatureGenesVec)
+{
+    std::vector<GenomeDescription> result;
+    for (auto const& creatureGenes : creatureGenesVec) {
+        std::set creatureGeneSet(creatureGenes.begin(), creatureGenes.end());
+        auto clone = genome;
+        for (int i = 0, size = clone._genes.size(); i < size; ++i) {
+            if (!creatureGeneSet.contains(i)) {
+                clone._genes[i] = GeneDescription();
+            }
+        }
+        adaptDescriptionForPreview(clone, creatureGenes.front());
+        result.emplace_back(clone);
+    }
+    return result;
+}
+
 namespace
 {
     void castrate(GenomeDescription& genome, int startGeneIndex)

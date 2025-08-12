@@ -53,7 +53,7 @@ void _GenomeTabWidget::process()
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _layoutData->previewsHeight);
 
         if (ImGui::BeginChild("Previews", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-            processPreviews();
+            processPreview();
         }
         ImGui::EndChild();
 
@@ -197,32 +197,9 @@ void _GenomeTabWidget::processEditors()
     }
 }
 
-void _GenomeTabWidget::processPreviews()
+void _GenomeTabWidget::processPreview()
 {
-    if (ImGui::BeginChild("DesiredConfigurationPreview", ImVec2(_layoutData->desiredConfigurationPreviewWidth, 0))) {
-        processPredictedPreview();
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-    AlienGui::MovableVerticalSeparator(
-        AlienGui::MovableVerticalSeparatorParameters().additive(true), _layoutData->desiredConfigurationPreviewWidth);
-
-    ImGui::SameLine();
-    if (ImGui::BeginChild("ActualConfigurationPreview", ImVec2(0, 0))) {
-        processSimulatedPreview();
-    }
-    ImGui::EndChild();
-}
-
-void _GenomeTabWidget::processPredictedPreview()
-{
-    AlienGui::Group("Preview (predicted)");
-}
-
-void _GenomeTabWidget::processSimulatedPreview()
-{
-    AlienGui::Group("Preview (simulated)");
+    AlienGui::Group("Preview");
     _simulatedPreviewWidget->process();
 }
 

@@ -349,7 +349,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getReferencedBy)
 TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_empty)
 {
     auto genome = GenomeDescription();
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_TRUE(result.empty());
 }
 
@@ -372,7 +372,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_singleNonSepa
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}}), result);
 }
 
@@ -403,7 +403,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_twoNonSeparat
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(4)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}, {3, 4}}), result);
 }
 
@@ -434,6 +434,6 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_threeNonSepar
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(4)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}, {3}, {4}}), result);
 }

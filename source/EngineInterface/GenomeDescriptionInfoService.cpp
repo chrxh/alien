@@ -116,7 +116,7 @@ std::set<int> GenomeDescriptionInfoService::getReferencedGenesInRootGeneHull(Gen
     return alreadyInspectedGeneIndices;
 }
 
-auto GenomeDescriptionInfoService::getGenesForCreatureParts(GenomeDescription const& genome) const -> std::vector<GeneIndicesForCreaturePart>
+auto GenomeDescriptionInfoService::getCreatureGeneIndices(GenomeDescription const& genome) const -> std::vector<CreatureGeneIndices>
 {
     if (genome._genes.empty()) {
         return {};
@@ -127,11 +127,11 @@ auto GenomeDescriptionInfoService::getGenesForCreatureParts(GenomeDescription co
         nonInspectedGeneIndices.insert(i);
     }
 
-    std::vector<GeneIndicesForCreaturePart> result;
+    std::vector<CreatureGeneIndices> result;
     while (!nonInspectedGeneIndices.empty()) {
         auto startGeneIndex = *nonInspectedGeneIndices.begin();
         
-        auto genesForPart = getGenesForCreatureParts(genome, startGeneIndex);
+        auto genesForPart = getCreatureGeneIndices(genome, startGeneIndex);
         for (auto const& geneIndices : genesForPart) {
             for (auto const& geneIndex : geneIndices) {
                 nonInspectedGeneIndices.erase(geneIndex);
@@ -143,13 +143,13 @@ auto GenomeDescriptionInfoService::getGenesForCreatureParts(GenomeDescription co
     return result;
 }
 
-auto GenomeDescriptionInfoService::getGenesForCreatureParts(GenomeDescription const& genome, int startGeneIndex) const
-    -> std::vector<GeneIndicesForCreaturePart>
+auto GenomeDescriptionInfoService::getCreatureGeneIndices(GenomeDescription const& genome, int startGeneIndex) const
+    -> std::vector<CreatureGeneIndices>
 {
     CHECK(!genome._genes.empty());
     CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());
 
-    std::vector<GeneIndicesForCreaturePart> result;
+    std::vector<CreatureGeneIndices> result;
 
     std::set<int> alreadyInspectedGeneIndices;
     std::set<int> toInspectedGeneIndices = {startGeneIndex};

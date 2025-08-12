@@ -62,10 +62,7 @@ private:
         GenomeTabLayoutData const& layoutData = nullptr);
 
     void processEditors();
-    void processPreviews();
-
-    void processPredictedPreview();
-    void processSimulatedPreview();
+    void processPreview();
 
     void doLayout();
 
