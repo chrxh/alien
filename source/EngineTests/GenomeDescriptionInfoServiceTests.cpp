@@ -346,14 +346,14 @@ TEST_F(GenomeDescriptionInfoServiceTests, getReferencedBy)
     EXPECT_EQ(2, result.at(2));
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_empty)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_empty)
 {
     auto genome = GenomeDescription();
     auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_TRUE(result.empty());
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_singleNonSeparatingHull)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_singleNonSeparatingHull)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -376,7 +376,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_singleNonSepa
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_twoNonSeparatingHulls)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_twoNonSeparatingHulls)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -407,7 +407,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_twoNonSeparat
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}, {3, 4}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_threeNonSeparatingHulls)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_threeNonSeparatingHulls)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -438,7 +438,7 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_threeNonSepar
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}, {3}, {4}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_onlySeparatingGenes)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_onlySeparatingGenes)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({
@@ -451,11 +451,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_onlySeparatin
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_disconnectedComponents)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_disconnectedComponents)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -471,11 +471,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_disconnectedC
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1}, {2, 3}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_singleGeneGenome)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_singleGeneGenome)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -483,22 +483,22 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_singleGeneGen
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_genesWithoutNodes)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_genesWithoutNodes)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false),
         GeneDescription().separation(true),
         GeneDescription().separation(false),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_selfReferencingGene)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_selfReferencingGene)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -509,11 +509,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_selfReferenci
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_invalidGeneReferences)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_invalidGeneReferences)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -524,11 +524,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_invalidGeneRe
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(99)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_complexMixedSeparation)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_complexMixedSeparation)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -554,11 +554,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_complexMixedS
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(5)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
-    EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 3}, {2}, {4}, {5, 6}}), result);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 3}, {2}, {4, 6, 5}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_separatingGenesWithNonSeparatingReferences)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_separatingGenesWithNonSeparatingReferences)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({
@@ -572,11 +572,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_separatingGen
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_largeGenomeWithManyReferences)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_largeGenomeWithManyReferences)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -611,11 +611,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_largeGenomeWi
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2, 3, 5, 6, 7}, {4, 8}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_circularReferenceWithSeparation)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_circularReferenceWithSeparation)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({
@@ -628,11 +628,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_circularRefer
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
-    EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}}), result);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_circularReferenceWithoutSeparation)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_circularReferenceWithoutSeparation)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -645,11 +645,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_circularRefer
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_geneWithMultipleNodesAndDifferentCellTypes)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_geneWithMultipleNodesAndDifferentCellTypes)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -663,27 +663,27 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_geneWithMulti
             NodeDescription().cellTypeData(BaseGenomeDescription()),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_mixedReferencesNonConstructorAndConstructor)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_mixedReferencesNonConstructorAndConstructor)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
-            NodeDescription().cellTypeData(BaseGenomeDescription()),
-            NodeDescription().cellTypeData(DepotGenomeDescription()),
+            NodeDescription(),
+            NodeDescription(),
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
         }),
         GeneDescription().separation(true).nodes({
             NodeDescription().cellTypeData(BaseGenomeDescription()),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
-    EXPECT_EQ((std::vector<std::vector<int>>{{0, 1}}), result);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_emptyNodesInGenes)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_emptyNodesInGenes)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({}),
@@ -692,11 +692,11 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_emptyNodesInG
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
-    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2}}), result);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}, {2, 0}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_deepNestedReferences)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_deepNestedReferences)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -711,15 +711,15 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_deepNestedRef
         GeneDescription().separation(false).nodes({
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(4)),
         }),
-        GeneDescription().separation(true).nodes({
+        GeneDescription().separation(false).nodes({
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
     EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2, 3, 4}}), result);
 }
 
-TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_alternatingPattern)
+TEST_F(GenomeDescriptionInfoServiceTests, getCreatureGeneIndices_alternatingPattern)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -738,6 +738,6 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGenesForCreatureParts_alternatingPa
             NodeDescription(),
         }),
     });
-    auto result = _genomeDescriptionInfoService.getGenesForCreatureParts(genome);
-    EXPECT_EQ((std::vector<std::vector<int>>{{0, 1, 2}, {3, 4}}), result);
+    auto result = _genomeDescriptionInfoService.getCreatureGeneIndices(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1, 2}, {3, 4}}), result);
 }
