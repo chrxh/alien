@@ -25,11 +25,11 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 void _SimulatedPreviewWidget::process()
 {
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex) {
-        createGenomeForPreview();
-        setPreview();
+        //createGenomeForPreview();
+        //setPreview();
     }
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
-        setPreview();
+        //setPreview();
     }
     calcPreview();
     showPreview();
@@ -53,34 +53,34 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
 
 void _SimulatedPreviewWidget::createGenomeForPreview()
 {
-    _genomeForPreview = _editData->genome;
-    auto startGeneIndex = _editData->selectedGeneIndex.value_or(0);
-    _rootGeneIndex = GenomeDescriptionInfoService::get().isConnectedToRoot(_genomeForPreview, startGeneIndex) ? 0 : startGeneIndex;
-    GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, _rootGeneIndex);
+    //_genomeForPreview = _editData->genome;
+    //auto startGeneIndex = _editData->selectedGeneIndex.value_or(0);
+    //_rootGeneIndex = GenomeDescriptionInfoService::get().isConnectedToRoot(_genomeForPreview, startGeneIndex) ? 0 : startGeneIndex;
+    //GenomeDescriptionEditService::get().adaptDescriptionForPreview(_genomeForPreview, _rootGeneIndex);
 }
 
 void _SimulatedPreviewWidget::setPreview()
 {
-    CollectionDescription preview;
+    //CollectionDescription preview;
 
-    // Cache the preview data to avoid recalculating it if the genome hasn't changed
-    auto findResult = _genomeEditData->genotypeToPhenotype.find(GenomeDescriptionWithRootIndex{_genomeForPreview, _rootGeneIndex});
-    if (findResult != _genomeEditData->genotypeToPhenotype.end()) {
-        preview = findResult->second;
-    } else {
-        preview = CollectionDescription().creatures({
-            CreatureDescription()
-                .genome(_genomeForPreview)
-                .cells({
-                    CellDescription()
-                        .stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(_rootGeneIndex))
-                        .pos({100.0f, 100.0f}),
-                }),
-        });
-    }
+    //// Cache the preview data to avoid recalculating it if the genome hasn't changed
+    //auto findResult = _genomeEditData->genotypeToPhenotype.find(GenomeDescriptionWithRootIndex{_genomeForPreview, _rootGeneIndex});
+    //if (findResult != _genomeEditData->genotypeToPhenotype.end()) {
+    //    preview = findResult->second;
+    //} else {
+    //    preview = CollectionDescription().creatures({
+    //        CreatureDescription()
+    //            .genome(_genomeForPreview)
+    //            .cells({
+    //                CellDescription()
+    //                    .stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(_rootGeneIndex))
+    //                    .pos({100.0f, 100.0f}),
+    //            }),
+    //    });
+    //}
 
-    _simulationFacade->setPreviewData(preview);
-    _genomeEditData->currentPreviewId = _editData->id;
+    //_simulationFacade->setPreviewData(preview);
+    //_genomeEditData->currentPreviewId = _editData->id;
 }
 
 void _SimulatedPreviewWidget::calcPreview()

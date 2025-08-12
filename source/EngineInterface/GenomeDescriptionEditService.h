@@ -23,6 +23,6 @@ public:
     using CreatureGeneIndices = std::vector<int>;
     std::vector<GenomeDescription> createDescriptionsForPreview(GenomeDescription const& genome, std::vector<CreatureGeneIndices> const& creatureGenesVec);
 
-//private:
+private:
     void adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex);
 };
