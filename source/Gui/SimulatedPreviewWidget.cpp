@@ -29,11 +29,11 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 void _SimulatedPreviewWidget::process()
 {
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex) {
-        //createGenomeForPreview();
-        //setPreview();
+        createSubGenomesForPreview();
+        setPreviewData();
     }
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
-        //setPreview();
+        setPreviewData();
     }
     calcPreview();
     showPreview();
@@ -112,14 +112,26 @@ namespace
 
 void _SimulatedPreviewWidget::showPreview()
 {
-    auto now = std::chrono::steady_clock::now();
     auto previewRawData = _simulationFacade->getPreviewData();
-
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _subGenomesForPreview);
     for (auto const& [subGenome, phenotype] : boost::combine(_subGenomesForPreview, phenotypes)) {
         _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
     }
 
+    // Show first creature for the moment
+    auto tps = calcTpsForPreview();
+    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
+    _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
+    _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
+    _previewWidget->process(tps, previewDesc);
+    _editData->selectedGeneIndex = _previewWidget->getSelectedGene();
+    _editData->setSelectedNodeIndex(_previewWidget->getSelectedNode());
+}
+
+int _SimulatedPreviewWidget::calcTpsForPreview()
+{
+    auto now = std::chrono::steady_clock::now();
     auto timestep = _simulationFacade->getCurrentTimestepForPreview();
     int tps = 0;
     if (_previewTimestepFromPreviousMeasure.has_value() && _timepointFromPreviousMeasure.has_value()) {
@@ -137,14 +149,5 @@ void _SimulatedPreviewWidget::showPreview()
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
-
-    // Show first creature for the moment
-    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
-    _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
-    _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
-    _previewWidget->process(tps, previewDesc);
-    _editData->selectedGeneIndex = _previewWidget->getSelectedGene();
-    _editData->setSelectedNodeIndex(_previewWidget->getSelectedNode());
 }
 

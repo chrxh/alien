@@ -31,6 +31,9 @@ private:
     void calcPreview();
     void showPreview();
 
+private:
+    int calcTpsForPreview();
+
     SimulationFacade _simulationFacade;
     PreviewDescriptionWidget _previewWidget;
 
