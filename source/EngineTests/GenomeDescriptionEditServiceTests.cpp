@@ -427,3 +427,179 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
     auto const& gene2 = subGenome._genes.at(2);
     ASSERT_EQ(2, gene2._nodes.size());
 }
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 1}
+    };
+    auto preview = CollectionDescription();
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(2, result.size());
+    EXPECT_TRUE(result.at(0)._creatures.empty());
+    EXPECT_TRUE(result.at(1)._creatures.empty());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_noMatchingCreatures)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 2}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(1).geneIndex(0),
+            CellDescription().color(1).geneIndex(1)
+        }),
+        CreatureDescription().id(2).cells({
+            CellDescription().color(1).geneIndex(3)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(2, result.size());
+    EXPECT_TRUE(result.at(0)._creatures.empty());
+    EXPECT_TRUE(result.at(1)._creatures.empty());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleCreature)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 2}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(0).geneIndex(0),
+            CellDescription().color(1).geneIndex(1)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(1, result.at(0)._creatures.size());
+    EXPECT_EQ(1, result.at(0)._creatures.at(0)._id);
+    EXPECT_TRUE(result.at(1)._creatures.empty());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleCreatures)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 2},
+        {GenomeDescription(), 5}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(0).geneIndex(0),
+            CellDescription().color(1).geneIndex(1)
+        }),
+        CreatureDescription().id(2).cells({
+            CellDescription().color(0).geneIndex(2),
+            CellDescription().color(1).geneIndex(3)
+        }),
+        CreatureDescription().id(3).cells({
+            CellDescription().color(0).geneIndex(5),
+            CellDescription().color(1).geneIndex(6)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(3, result.size());
+    ASSERT_EQ(1, result.at(0)._creatures.size());
+    EXPECT_EQ(1, result.at(0)._creatures.at(0)._id);
+    ASSERT_EQ(1, result.at(1)._creatures.size());
+    EXPECT_EQ(2, result.at(1)._creatures.at(0)._id);
+    ASSERT_EQ(1, result.at(2)._creatures.size());
+    EXPECT_EQ(3, result.at(2)._creatures.at(0)._id);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleCreaturesPerSubGenome)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 2}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(0).geneIndex(0),
+            CellDescription().color(1).geneIndex(1)
+        }),
+        CreatureDescription().id(2).cells({
+            CellDescription().color(0).geneIndex(0),
+            CellDescription().color(1).geneIndex(3)
+        }),
+        CreatureDescription().id(3).cells({
+            CellDescription().color(0).geneIndex(2),
+            CellDescription().color(1).geneIndex(4)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(2, result.at(0)._creatures.size());
+    EXPECT_EQ(1, result.at(0)._creatures.at(0)._id);
+    EXPECT_EQ(2, result.at(0)._creatures.at(1)._id);
+    ASSERT_EQ(1, result.at(1)._creatures.size());
+    EXPECT_EQ(3, result.at(1)._creatures.at(0)._id);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_mixedColors)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 1}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(0).geneIndex(0),
+            CellDescription().color(1).geneIndex(0),
+            CellDescription().color(2).geneIndex(0)
+        }),
+        CreatureDescription().id(2).cells({
+            CellDescription().color(0).geneIndex(1),
+            CellDescription().color(3).geneIndex(1)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(1, result.at(0)._creatures.size());
+    EXPECT_EQ(1, result.at(0)._creatures.at(0)._id);
+    ASSERT_EQ(1, result.at(1)._creatures.size());
+    EXPECT_EQ(2, result.at(1)._creatures.at(0)._id);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_duplicateStartIndices)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 1}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(0).geneIndex(0)
+        }),
+        CreatureDescription().id(2).cells({
+            CellDescription().color(0).geneIndex(1)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(3, result.size());
+    ASSERT_EQ(1, result.at(1)._creatures.size());
+    EXPECT_EQ(1, result.at(1)._creatures.at(0)._id);
+    EXPECT_TRUE(result.at(0)._creatures.empty());
+    ASSERT_EQ(1, result.at(2)._creatures.size());
+    EXPECT_EQ(2, result.at(2)._creatures.at(0)._id);
+}
