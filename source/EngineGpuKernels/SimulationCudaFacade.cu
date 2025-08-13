@@ -59,7 +59,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     initCuda();
     CudaMemoryManager::getInstance().reset();
 
-    initPreviewData();
+    initSettingsPreviewData();
 
     _settings = settings;
     setSimulationParameters(settings.simulationParameters);
@@ -103,6 +103,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 _SimulationCudaFacade::~_SimulationCudaFacade()
 {
     _cudaSimulationData->free();
+    _cudaPreviewData->free();
     _cudaRenderingData->free();
     _cudaSimulationStatistics->free();
     _cudaSelectionResult->free();
@@ -534,7 +535,7 @@ void _SimulationCudaFacade::resizeArraysIfNecessary(ArraySizesForGpu const& size
     }
 }
 
-void _SimulationCudaFacade::initPreviewData()
+void _SimulationCudaFacade::initSettingsPreviewData()
 {
     _settingsForPreview.simulationParameters.friction.baseValue = 0.01f;
     _settingsForPreview.simulationParameters.maxVelocity.value = 0.002f;
@@ -542,8 +543,8 @@ void _SimulationCudaFacade::initPreviewData()
         _settingsForPreview.simulationParameters.radiationType1_strength.baseValue[i] = 0.0f;
         _settingsForPreview.simulationParameters.radiationType2_strength.value[i] = 0.0f;
     }
-    _settingsForPreview.worldSizeX = 400;
-    _settingsForPreview.worldSizeY = 400;
+    _settingsForPreview.worldSizeX = PREVIEW_WIDTH;
+    _settingsForPreview.worldSizeY = PREVIEW_HEIGHT;
     _settingsForPreview.cudaSettings.numBlocks = 16;
 }
 

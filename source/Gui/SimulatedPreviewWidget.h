@@ -39,7 +39,7 @@ private:
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
-    std::vector<GenomeDescription> _subGenomesForPreview;
+    std::vector<GenomeDescriptionWithStartGeneIndex> _subGenomesForPreview;
 
     GenomeDescription _genomeForPreview;
     int _rootGeneIndex = 0;

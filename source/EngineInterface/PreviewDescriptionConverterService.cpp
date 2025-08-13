@@ -40,13 +40,10 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     auto const& editService = DescriptionEditService::get();
 
     // Remove seed
-    uint64_t smallestCellId = 0xffffffffffffffff;
-    phenotype.forEachCell([&smallestCellId](auto const& cell) { smallestCellId = std::min(smallestCellId, cell._id); });
-    editService.removeCell(phenotype, smallestCellId);
-    auto cache = phenotype.createCache();
     if (phenotype.isEmpty()) {
         return result;
     }
+    auto cache = phenotype.createCache();
 
     // Center
     editService.setCenter(phenotype, {0.0f, 0.0f});

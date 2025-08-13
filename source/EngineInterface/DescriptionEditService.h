@@ -121,6 +121,7 @@ public:
     void accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta) const;
 
     void removeCell(CollectionDescription& collection, uint64_t cellId) const;
+    void removeCellIf(CollectionDescription& collection, std::function<bool(CellDescription const&)> const& predicate) const;
 
 private:
     bool isCellPresent(

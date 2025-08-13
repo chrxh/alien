@@ -98,7 +98,7 @@ public:
     void resizeArraysIfNecessary(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
 
     // Simulated preview
-    void initPreviewData();
+    void initSettingsPreviewData();
     void newPreview(CollectionTO const& dataTO);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     uint64_t getCurrentTimestepForPreview();

@@ -3,9 +3,18 @@
 #include <algorithm>
 #include <iterator>
 
+#include <boost/range/adaptors.hpp>
+
+#include "DescriptionEditService.h"
 #include "GenomeDescriptionInfoService.h"
 
-void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index, GeneDescription const& newGene)
+namespace 
+{
+    auto constexpr PreviewColor = 0;
+    auto constexpr SeedColor = 1;
+}
+
+void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index, GeneDescription const& newGene) const
 {
     if (genome._genes.empty()) {
         genome._genes.emplace_back(newGene);
@@ -27,7 +36,7 @@ void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index,
     genome._genes.insert(genome._genes.begin() + index + 1, newGene);
 }
 
-void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int index)
+void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int index) const
 {
     for (int i = 0; i < genome._genes.size(); ++i) {
         if (i == index) {
@@ -46,7 +55,7 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int ind
     genome._genes.erase(genome._genes.begin() + index);
 }
 
-void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int index)
+void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int index) const
 {
     std::swap(genome._genes.at(index), genome._genes.at(index + 1));
 
@@ -64,7 +73,7 @@ void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int inde
     }
 }
 
-void GenomeDescriptionEditService::addNode(GeneDescription& gene, int index, NodeDescription const& node)
+void GenomeDescriptionEditService::addNode(GeneDescription& gene, int index, NodeDescription const& node) const
 {
     if (gene._nodes.empty()) {
         gene._nodes.emplace_back(node);
@@ -74,21 +83,21 @@ void GenomeDescriptionEditService::addNode(GeneDescription& gene, int index, Nod
     gene._nodes.insert(gene._nodes.begin() + index + 1, node);
 }
 
-void GenomeDescriptionEditService::removeNode(GeneDescription& gene, int index)
+void GenomeDescriptionEditService::removeNode(GeneDescription& gene, int index) const
 {
     gene._nodes.erase(gene._nodes.begin() + index);
 }
 
-void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index)
+void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index) const
 {
     std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
 }
 
-std::vector<GenomeDescription> GenomeDescriptionEditService::createSubGenomesForPreview(
+std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::createSubGenomesForPreview(
     GenomeDescription const& genome,
-    std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes)
+    std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const
 {
-    std::vector<GenomeDescription> result;
+    std::vector<GenomeDescriptionWithStartGeneIndex> result;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         std::set creatureGeneSet(geneIndicesForSubGenome.begin(), geneIndicesForSubGenome.end());
         auto clone = genome;
@@ -98,9 +107,62 @@ std::vector<GenomeDescription> GenomeDescriptionEditService::createSubGenomesFor
             }
         }
         adaptDescriptionForPreview(clone, geneIndicesForSubGenome.front());
-        result.emplace_back(clone);
+        result.emplace_back(clone, geneIndicesForSubGenome.front());
     }
     return result;
+}
+
+CollectionDescription GenomeDescriptionEditService::createSeedForPreview(
+    GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex,
+    RealVector2D const& pos) const
+{
+    return CollectionDescription().creatures({
+        CreatureDescription()
+            .genome(genomeWithStartIndex.genome)
+            .cells({
+                CellDescription().color(SeedColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(genomeWithStartIndex.startIndex)).pos(pos),
+            }),
+    });
+}
+
+std::vector<CollectionDescription> GenomeDescriptionEditService::extractPhenotypesFromPreview(
+    CollectionDescription&& preview,
+    std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes) const
+{
+    // Calc startGeneIndex to subGenomeIndex map
+    std::unordered_map<int, int> startGeneIndexToSubGenomeIndex;
+    for (auto const& [index, subGenome] : subGenomes | boost::adaptors::indexed(0)) {
+        startGeneIndexToSubGenomeIndex.insert_or_assign(subGenome.startIndex, toInt(index));
+    }
+
+    // Calc creature id to each sub-genome
+    std::unordered_map<uint64_t, int> creatureIdToSubGenomeIndex;
+    for (auto const& creature : preview._creatures) {
+        for (auto const& cell : creature._cells) {
+            if (cell._color != PreviewColor) {
+                continue;
+            }
+            auto findResult = startGeneIndexToSubGenomeIndex.find(cell._geneIndex);
+            if (findResult != startGeneIndexToSubGenomeIndex.end()) {
+                auto subGenomeIndex = findResult->second;
+                creatureIdToSubGenomeIndex.insert_or_assign(creature._id, subGenomeIndex);
+            }
+        }
+    }
+
+    // Move constructed creatures to result vector
+    std::vector<CollectionDescription> result(subGenomes.size());
+    for (auto& creature : preview._creatures) {
+        auto subGenomeIndex = creatureIdToSubGenomeIndex.at(creature._id);
+        result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
+    }
+
+    return result;
+}
+
+void GenomeDescriptionEditService::removeSeedFromPhenotype(CollectionDescription& phenotype) const
+{
+    DescriptionEditService::get().removeCellIf(phenotype, [](auto const& cell) { return cell._color == SeedColor; });
 }
 
 namespace
@@ -144,7 +206,7 @@ namespace
     {
         for (auto& gene : genome._genes) {
             for (auto& node : gene._nodes) {
-                node._color = 0;
+                node._color = PreviewColor;
                 node._neuralNetwork = NeuralNetworkGenomeDescription();
                 node._signalRestriction = SignalRestrictionGenomeDescription();
                 if (node.getCellType() != CellTypeGenome_Constructor) {
@@ -159,8 +221,9 @@ namespace
     }
 }
 
-void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex)
+void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const
 {
+    genome._genes.at(startGeneIndex)._separation = false;
     castrate(genome, startGeneIndex);
     setNodeAttributesForPreview(genome);
     if (!genome._genes.empty()) {

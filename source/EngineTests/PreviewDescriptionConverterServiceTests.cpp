@@ -68,20 +68,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
     EXPECT_TRUE(result._connections.empty());
 }
 
-TEST_F(PreviewDescriptionConverterServiceTests, convertOnlySeed)
-{
-    auto input = CollectionDescription().creatures({
-        CreatureDescription().cells({
-            CellDescription().id(0).pos({10.0f, 20.0f}),
-        }),
-    });
-
-    auto result = PreviewDescriptionConverterService::get().convert(GenomeDescription(), std::move(input), 0);
-
-    EXPECT_EQ(0, result._cells.size()); // Seed is removed
-    EXPECT_EQ(0, result._connections.size());
-}
-
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated)
 {
     auto genome = GenomeDescription().genes({
@@ -89,9 +75,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
     });
 
     auto input = CollectionDescription().creatures({
-        CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
-        }),
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
@@ -125,9 +108,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     auto input = CollectionDescription().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
-        }),
-        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(1).nodeIndex(1),
         }),
@@ -158,15 +138,11 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_notSepara
     });
     auto input = CollectionDescription().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}),
-        }),
-        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         }),
     });
     input.addConnection(1, 2);
-    input.addConnection(2, 0);
     
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input), 0);
 
@@ -200,9 +176,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     auto input = CollectionDescription().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
-        }),
-        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),  // Signal restrictions are fetched from genome
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         }),
@@ -228,9 +201,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
         GeneDescription().separation(true).nodes({NodeDescription().color(2), NodeDescription().color(3), NodeDescription().color(4)}),
     });
     auto input = CollectionDescription().creatures({
-        CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}).color(1),
-        }),
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1),
@@ -271,9 +241,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
     });
     auto input = CollectionDescription().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({11.0f, 10.0f}).color(1),
-        }),
-        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ConstructorDescription().geneIndex(1)).geneIndex(0).nodeIndex(0),
         }),
         CreatureDescription().genome(genome).cells({
@@ -299,18 +266,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertOneAndTwoCellCreature)
     checkConnections(result, {{cell2._pos, cell3._pos}});
 }
 
-// TODO tests with multiple concatenations:
-// (3) Creature mit zwei Genen, eins mit einem Node und ein anderes mit mehreren Nodes und mehreren concatenations
-
 TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multipleNodes_multipleConcatenations)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numConcatenations(4).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
     });
     auto input = CollectionDescription().creatures({
-        CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}),
-        }),
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
@@ -325,7 +286,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
     for (int i = 0; i < 7; ++i) {
         input.addConnection(i + 1, i + 2);
     }
-    input.addConnection(8, 0);
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input), 0);
 
@@ -359,9 +319,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
     });
     auto input = CollectionDescription().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}),
-        }),
-        CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
@@ -375,7 +332,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
     for (int i = 0; i < 7; ++i) {
         input.addConnection(i + 1, i + 2);
     }
-    input.addConnection(8, 0);
 
     auto result = PreviewDescriptionConverterService::get().convert(genome, std::move(input), 0);
 
@@ -402,9 +358,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
     });
     auto input = CollectionDescription().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({12.0f, 10.0f}),
-        }),
-        CreatureDescription().genome(genome).cells({
             CellDescription().id(2).pos({10.0f, 4.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(3).pos({10.0f, 5.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(4).pos({10.0f, 6.0f}).geneIndex(1).nodeIndex(0),
@@ -415,7 +368,6 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
             CellDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
         }),
     });
-    input.addConnection(1, 0);
     input.addConnection(2, 3);
     input.addConnection(3, 4);
     input.addConnection(4, 5);

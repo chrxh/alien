@@ -4,6 +4,7 @@
 
 #include "Base/Singleton.h"
 
+#include "Descriptions.h"
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
 
@@ -12,17 +13,24 @@ class GenomeDescriptionEditService
     MAKE_SINGLETON(GenomeDescriptionEditService);
 
 public:
-    void addGene(GenomeDescription& genome, int index, GeneDescription const& newGene);    // Adds gene after index
-    void removeGene(GenomeDescription& genome, int index);
-    void swapGenes(GenomeDescription& genome, int index);  // Swaps gene at index with gene at index + 1
+    void addGene(GenomeDescription& genome, int index, GeneDescription const& newGene) const;  // Adds gene after index
+    void removeGene(GenomeDescription& genome, int index) const;
+    void swapGenes(GenomeDescription& genome, int index) const;  // Swaps gene at index with gene at index + 1
 
-    void addNode(GeneDescription& gene, int index, NodeDescription const& node);  // Adds node after index
-    void removeNode(GeneDescription& gene, int index);
-    void swapNodes(GeneDescription& gene, int index);  // Swaps node at index with node at index + 1
+    void addNode(GeneDescription& gene, int index, NodeDescription const& node) const;  // Adds node after index
+    void removeNode(GeneDescription& gene, int index) const;
+    void swapNodes(GeneDescription& gene, int index) const;  // Swaps node at index with node at index + 1
 
     using GeneIndicesForSubGenome = std::vector<int>;
-    std::vector<GenomeDescription> createSubGenomesForPreview(GenomeDescription const& genome, std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes);
+    std::vector<GenomeDescriptionWithStartGeneIndex> createSubGenomesForPreview(
+        GenomeDescription const& genome,
+        std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;
+    CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex, RealVector2D const& pos) const;
+    std::vector<CollectionDescription> extractPhenotypesFromPreview(
+        CollectionDescription&& preview,
+        std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes) const;
+    void removeSeedFromPhenotype(CollectionDescription& phenotype) const;
 
 private:
-    void adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex);
+    void adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const;
 };

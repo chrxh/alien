@@ -326,7 +326,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGene
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
 
     ASSERT_EQ(1, subGenomes.size());
-    auto const& subGenome = subGenomes.at(0);
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    auto const& subGenome = subGenomes.at(0).genome;
 
     ASSERT_EQ(1, subGenome._genes.size());
     ASSERT_EQ(2, subGenome._genes.at(0)._nodes.size());
@@ -341,7 +342,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycl
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
 
     ASSERT_EQ(1, subGenomes.size());
-    auto const& subGenome = subGenomes.at(0);
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    auto const& subGenome = subGenomes.at(0).genome;
 
     auto const& gene0 = subGenome._genes.at(0);
     ASSERT_EQ(3, gene0._nodes.size());
@@ -370,7 +372,9 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
     ASSERT_EQ(2, subGenomes.size());
 
     {
-        auto const& subGenome = subGenomes.at(0);
+        EXPECT_EQ(0, subGenomes.at(0).startIndex);
+
+        auto const& subGenome = subGenomes.at(0).genome;
         ASSERT_EQ(3, subGenome._genes.size());
 
         auto const& gene0 = subGenome._genes.at(0);
@@ -385,7 +389,9 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
         ASSERT_EQ(0, gene2._nodes.size());
     }
     {
-        auto const& subGenome = subGenomes.at(1);
+        EXPECT_EQ(2, subGenomes.at(1).startIndex);
+
+        auto const& subGenome = subGenomes.at(1).genome;
         ASSERT_EQ(3, subGenome._genes.size());
 
         auto const& gene0 = subGenome._genes.at(0);
@@ -405,7 +411,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
 
     ASSERT_EQ(1, subGenomes.size());
-    auto const& subGenome = subGenomes.at(0);
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    auto const& subGenome = subGenomes.at(0).genome;
 
     ASSERT_EQ(3, subGenome._genes.size());
 

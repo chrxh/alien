@@ -553,7 +553,44 @@ void DescriptionEditService::removeCell(CollectionDescription& collection, uint6
     });
 }
 
+void DescriptionEditService::removeCellIf(CollectionDescription& collection, std::function<bool(CellDescription const&)> const& predicate) const
+{
+    std::unordered_set<uint64_t> removedCellIds;
+    auto extPredicate = [&](CellDescription const& cell) {
+        auto result = predicate(cell);
+        if (result) {
+            removedCellIds.insert(cell._id);
+        }
+        return result;
+    };
 
+    std::erase_if(collection._cells, extPredicate);
+    for (auto& creature : collection._creatures) {
+        std::erase_if(creature._cells, extPredicate);
+    }
+    std::erase_if(collection._creatures, [&](auto const& creature) { return creature._cells.empty(); });
+
+    collection.forEachCell([&](CellDescription& cell) {
+        for (int i = 0, numConnections = cell._connections.size(); i < numConnections; ++i) {
+            auto const& connection = cell._connections[i];
+            if (removedCellIds.contains(connection._cellId)) {
+                auto angleToAdd = connection._angleFromPrevious;
+                for (int k = i; k < numConnections - 1; ++k) {
+                    cell._connections.at(k) = cell._connections.at(k + 1);
+                }
+
+                if (i < numConnections - 1) {
+                    cell._connections.at(i)._angleFromPrevious += angleToAdd;
+                } else {
+                    cell._connections.at(0)._angleFromPrevious += angleToAdd;
+                }
+
+                cell._connections.pop_back();
+                return;
+            }
+        }
+    });
+}
 
 bool DescriptionEditService::isCellPresent(
     Occupancy const& cellPosBySlot,

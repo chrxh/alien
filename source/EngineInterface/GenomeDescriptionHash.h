@@ -326,13 +326,13 @@ namespace std
     };
 
     template <>
-    struct hash<GenomeDescriptionWithRootIndex>
+    struct hash<GenomeDescriptionWithStartGeneIndex>
     {
-        std::size_t operator()(const GenomeDescriptionWithRootIndex& genomeWithRootIndex) const
+        std::size_t operator()(const GenomeDescriptionWithStartGeneIndex& genomeWithRootIndex) const
         {
             std::size_t seed = 0;
             hash_combine(seed, genomeWithRootIndex.genome);
-            hash_combine(seed, genomeWithRootIndex.rootIndex);
+            hash_combine(seed, genomeWithRootIndex.startIndex);
             return seed;
         }
     };
