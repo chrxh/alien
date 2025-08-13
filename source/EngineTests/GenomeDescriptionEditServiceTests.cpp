@@ -603,3 +603,27 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_duplicate
     ASSERT_EQ(1, result.at(2)._creatures.size());
     EXPECT_EQ(2, result.at(2)._creatures.at(0)._id);
 }
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_unmatchedGeneIndex)
+{
+    auto subGenomes = std::vector<GenomeDescriptionWithStartGeneIndex>{
+        {GenomeDescription(), 0},
+        {GenomeDescription(), 2}
+    };
+    auto preview = CollectionDescription().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().color(0).geneIndex(0),
+            CellDescription().color(1).geneIndex(1)
+        }),
+        CreatureDescription().id(2).cells({
+            CellDescription().color(0).geneIndex(5)
+        })
+    });
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), subGenomes);
+    
+    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(1, result.at(0)._creatures.size());
+    EXPECT_EQ(1, result.at(0)._creatures.at(0)._id);
+    EXPECT_TRUE(result.at(1)._creatures.empty());
+}
