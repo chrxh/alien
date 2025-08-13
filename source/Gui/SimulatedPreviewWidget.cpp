@@ -141,10 +141,11 @@ void _SimulatedPreviewWidget::showPreview()
     // Show first creature for the moment
     GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
     auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
-    _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
-    _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
-    _previewWidget->process(tps, previewDesc);
-    _editData->selectedGeneIndex = _previewWidget->getSelectedGene();
-    _editData->setSelectedNodeIndex(_previewWidget->getSelectedNode());
+    
+    auto selectedGene = _editData->selectedGeneIndex;
+    auto selectedNode = _editData->getSelectedNodeIndex();
+    _previewWidget->process(tps, previewDesc, selectedGene, selectedNode);
+    _editData->selectedGeneIndex = selectedGene;
+    _editData->setSelectedNodeIndex(selectedNode);
 }
 
