@@ -20,7 +20,7 @@ ChangeColorDialog::ChangeColorDialog()
 
 void ChangeColorDialog::processIntern()
 {
-    AlienGui::Group("Color transition rule");
+    AlienGui::Group(AlienGui::GroupParameters().text("Color transition rule"));
     if (ImGui::BeginTable("##", 3, ImGuiTableFlags_SizingStretchProp)) {
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 0);
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, scale(20));
@@ -42,7 +42,7 @@ void ChangeColorDialog::processIntern()
 
         ImGui::EndTable();
     }
-    AlienGui::Group("Options");
+    AlienGui::Group(AlienGui::GroupParameters().text("Options"));
     ImGui::Checkbox("##restrictToSelectedGene", &_restrictToSelectedGene);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Restrict to selected gene");

@@ -42,7 +42,7 @@ void MultiplierWindow::processIntern()
 
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
 
-        AlienGui::Group(ModeText.at(_mode));
+        AlienGui::Group(AlienGui::GroupParameters().text(ModeText.at(_mode)));
         if (_mode == MultiplierMode_Grid) {
             processGridPanel();
         }

@@ -297,7 +297,7 @@ void StatisticsWindow::processSettings()
 void StatisticsWindow::processTimelineStatistics()
 {
     ImGui::Spacing();
-    AlienGui::Group("Time step data");
+    AlienGui::Group(AlienGui::GroupParameters().text("Time step data"));
     ImGui::PushID(1);
     int row = 0;
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
@@ -383,7 +383,7 @@ void StatisticsWindow::processTimelineStatistics()
     ImGui::PopID();
 
     ImGui::Spacing();
-    AlienGui::Group("Processes per time step and active cell");
+    AlienGui::Group(AlienGui::GroupParameters().text("Processes per time step and active cell"));
     ImGui::PushID(2);
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_BordersInnerH, ImVec2(-1, 0))) {
         ImGui::TableSetupColumn("##");

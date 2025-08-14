@@ -117,7 +117,7 @@ void PatternEditorWindow::processIntern()
         ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
-        AlienGui::Group("Center position and velocity");
+        AlienGui::Group(AlienGui::GroupParameters().text("Center position and velocity"));
 
         auto const& selectionData = EditorModel::get().getSelectionShallowData();
 
@@ -159,7 +159,7 @@ void PatternEditorWindow::processIntern()
                 .format("%.3f"),
             centerVelY);
 
-        AlienGui::Group("Center rotation");
+        AlienGui::Group(AlienGui::GroupParameters().text("Center rotation"));
         auto origAngle = _angle;
         AlienGui::SliderInputFloat(
             AlienGui::SliderInputFloatParameters()
@@ -216,7 +216,7 @@ void PatternEditorWindow::processIntern()
         ImGui::EndDisabled();
 
 
-        AlienGui::Group("Color");
+        AlienGui::Group(AlienGui::GroupParameters().text("Color"));
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
             _simulationFacade->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(0);
@@ -251,7 +251,7 @@ void PatternEditorWindow::processIntern()
             _simulationFacade->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(6);
         }
-        AlienGui::Group("Tools");
+        AlienGui::Group(AlienGui::GroupParameters().text("Tools"));
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {
             _simulationFacade->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());

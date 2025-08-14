@@ -51,7 +51,7 @@ _GeneEditorWidget::_GeneEditorWidget(GenomeTabEditData const& editData, GenomeTa
 
 void _GeneEditorWidget::processNoSelection()
 {
-    AlienGui::Group("Selected gene");
+    AlienGui::Group(AlienGui::GroupParameters().text("Selected gene"));
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
@@ -66,7 +66,7 @@ void _GeneEditorWidget::processNoSelection()
 
 void _GeneEditorWidget::processHeaderData()
 {
-    AlienGui::Group("Selected gene", std::nullopt, true);
+    AlienGui::Group(AlienGui::GroupParameters().text("Selected gene").highlighted(true));
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {

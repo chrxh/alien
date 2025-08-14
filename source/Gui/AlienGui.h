@@ -330,7 +330,13 @@ public:
     };
     static void MovableVerticalSeparator(MovableVerticalSeparatorParameters const& parameters, float& width);
 
-    static void Group(std::string const& text, std::optional<std::string> const& tooltip = std::nullopt, bool highlighted = false);
+    struct GroupParameters
+    {
+        MEMBER(GroupParameters, std::string, text, "");
+        MEMBER(GroupParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(GroupParameters, bool, highlighted, false);
+    };
+    static void Group(GroupParameters const& parameters);
 
     struct ToolbarButtonParameters
     {
