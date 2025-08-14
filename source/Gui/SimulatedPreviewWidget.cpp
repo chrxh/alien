@@ -28,7 +28,7 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex) {
+    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome/* || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex*/) {
         createSubGenomesForPreview();
         setPreviewData();
     }
@@ -39,7 +39,6 @@ void _SimulatedPreviewWidget::process()
     showPreview();
 
     _genomeFromPreviousFrame = _editData->genome;
-    _selectedGeneIndexFromPreviousFrame = _editData->selectedGeneIndex;
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(
@@ -52,7 +51,7 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
     , _genomeEditData(genomeEditData)
     , _editData(editData)
 {
-    _previewWidget = _PreviewDescriptionWidget::create(settings);
+    _previewWidget = _PreviewDescriptionWidget::create(settings, editData);
 }
 
 void _SimulatedPreviewWidget::createSubGenomesForPreview()
@@ -68,7 +67,7 @@ void _SimulatedPreviewWidget::setPreviewData()
     auto const& editService = DescriptionEditService::get();
     auto const& genomeEditService = GenomeDescriptionEditService::get();
 
-    RealVector2D currentPos{PREVIEW_HEIGHT / 2, PREVIEW_HEIGHT / 2};
+    RealVector2D currentPos{toFloat(PREVIEW_HEIGHT) / 2, toFloat(PREVIEW_HEIGHT) / 2};
 
     for (auto const& subGenome : _subGenomesForPreview) {
         auto findResult = _genomeEditData->genotypeToPhenotype.find(subGenome);
@@ -80,8 +79,13 @@ void _SimulatedPreviewWidget::setPreviewData()
             auto seed = genomeEditService.createSeedForPreview(subGenome, currentPos);
             preview.add(std::move(seed));
         }
-        currentPos.x += PREVIEW_HEIGHT / 2;  // Adjust position for the next sub-genome
+        currentPos.x += toFloat(PREVIEW_HEIGHT) / 2;  // Adjust position for the next sub-genome
     }
+    _creatureIdsForPreview.clear();
+    for (auto const& creature : preview._creatures) {
+        _creatureIdsForPreview.emplace_back(creature._id);
+    }
+    
 
     _simulationFacade->setPreviewData(preview);
     _genomeEditData->currentPreviewId = _editData->id;
@@ -113,7 +117,7 @@ namespace
 void _SimulatedPreviewWidget::showPreview()
 {
     auto previewRawData = _simulationFacade->getPreviewData();
-    auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _subGenomesForPreview);
+    auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _creatureIdsForPreview);
     for (auto const& [subGenome, phenotype] : boost::combine(_subGenomesForPreview, phenotypes)) {
         _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
     }
@@ -122,11 +126,7 @@ void _SimulatedPreviewWidget::showPreview()
     auto tps = calcTpsForPreview();
     GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
     auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
-    _previewWidget->setSelectedGene(_editData->selectedGeneIndex);
-    _previewWidget->setSelectedNode(_editData->getSelectedNodeIndex());
     _previewWidget->process(tps, previewDesc);
-    _editData->selectedGeneIndex = _previewWidget->getSelectedGene();
-    _editData->setSelectedNodeIndex(_previewWidget->getSelectedNode());
 }
 
 int _SimulatedPreviewWidget::calcTpsForPreview()
@@ -149,15 +149,6 @@ int _SimulatedPreviewWidget::calcTpsForPreview()
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
-
-    // Show first creature for the moment
-    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
-    
-    auto selectedGene = _editData->selectedGeneIndex;
-    auto selectedNode = _editData->getSelectedNodeIndex();
-    _previewWidget->process(tps, previewDesc, selectedGene, selectedNode);
-    _editData->selectedGeneIndex = selectedGene;
-    _editData->setSelectedNodeIndex(selectedNode);
+    return tps;
 }
 

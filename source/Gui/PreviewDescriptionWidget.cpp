@@ -10,15 +10,16 @@
 #include "EngineInterface/Colors.h"
 
 #include "AlienGui.h"
+#include "GenomeTabEditData.h"
 #include "PreviewDescriptionWidgetSettings.h"
 #include "StyleRepository.h"
 
-PreviewDescriptionWidget _PreviewDescriptionWidget::create(PreviewDescriptionSettings const& settings)
+PreviewDescriptionWidget _PreviewDescriptionWidget::create(PreviewDescriptionSettings const& settings, GenomeTabEditData const& editData)
 {
-    return PreviewDescriptionWidget(new _PreviewDescriptionWidget(settings));
+    return PreviewDescriptionWidget(new _PreviewDescriptionWidget(settings, editData));
 }
 
-bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc, std::optional<int>& selectedGene, std::optional<int>& selectedNode)
+bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
@@ -26,19 +27,22 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc,
 
     auto result = false;
 
+    auto& selectedGene = _editData->selectedGeneIndex;
+    auto selectedNode = _editData->getSelectedNodeIndex();
+
     auto windowSize = ImGui::GetWindowSize();
     if (ImGui::BeginChild("outerPreview", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysHorizontalScrollbar)) {
 
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto const cellSize = scale(_zoom);
 
-        auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY) {
-            drawList->AddText(
-                StyleRepository::get().getLargeFont(), cellSize / 2, {posX + 1.0f, posY + 1.0f}, Const::ExecutionNumberOverlayShadowColor, text.c_str());
-            drawList->AddText(StyleRepository::get().getLargeFont(), cellSize / 2, {posX, posY}, Const::ExecutionNumberOverlayColor, text.c_str());
-        };
+        //auto drawTextWithShadow = [&drawList, &cellSize](std::string const& text, float posX, float posY) {
+        //    drawList->AddText(
+        //        StyleRepository::get().getLargeFont(), cellSize / 2, {posX + 1.0f, posY + 1.0f}, Const::ExecutionNumberOverlayShadowColor, text.c_str());
+        //    drawList->AddText(StyleRepository::get().getLargeFont(), cellSize / 2, {posX, posY}, Const::ExecutionNumberOverlayColor, text.c_str());
+        //};
 
-        auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+        //auto color = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
         auto windowPos = ImGui::GetWindowPos();
 
         RealVector2D upperLeft;
@@ -304,9 +308,12 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc,
         ImGui::PopID();
     }
     ImGui::EndChild();
+
+    _editData->setSelectedNodeIndex(selectedNode);
     return result;
 }
 
-_PreviewDescriptionWidget::_PreviewDescriptionWidget(PreviewDescriptionSettings const& settings)
+_PreviewDescriptionWidget::_PreviewDescriptionWidget(PreviewDescriptionSettings const& settings, GenomeTabEditData const& editData)
     : _settings(settings)
+    , _editData(editData)
 {}

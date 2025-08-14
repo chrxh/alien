@@ -26,9 +26,7 @@ public:
         GenomeDescription const& genome,
         std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;
     CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex, RealVector2D const& pos) const;
-    std::vector<CollectionDescription> extractPhenotypesFromPreview(
-        CollectionDescription&& preview,
-        std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes) const;
+    std::vector<CollectionDescription> extractPhenotypesFromPreview(CollectionDescription&& preview, std::vector<uint64_t> const& creatureIds) const;
     void removeSeedFromPhenotype(CollectionDescription& phenotype) const;
 
 private:
