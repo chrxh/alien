@@ -103,7 +103,7 @@ namespace
 
 void _NodeEditorWidget::processNodeAttributes()
 {
-    AlienGui::Group("Selected node", std::nullopt, true);
+    AlienGui::Group(AlienGui::GroupParameters().text("Selected node").highlighted(true));
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
@@ -388,7 +388,7 @@ void _NodeEditorWidget::processNodeAttributes()
 
 void _NodeEditorWidget::processNoSelection()
 {
-    AlienGui::Group("Selected node");
+    AlienGui::Group(AlienGui::GroupParameters().text("Selected node"));
     if (ImGui::BeginChild("overlay", ImVec2(0, 0), 0)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
@@ -405,7 +405,7 @@ void _NodeEditorWidget::processNeuralNetEditor()
 {
     AlienGui::MoveTickUp();
     AlienGui::MoveTickUp();
-    AlienGui::Group("Neural network");
+    AlienGui::Group(AlienGui::GroupParameters().text("Neural network"));
 
     auto& node = _editData->getSelectedNodeRef();
     _neuralNetWidget->process(node._neuralNetwork._weights, node._neuralNetwork._biases, node._neuralNetwork._activationFunctions);

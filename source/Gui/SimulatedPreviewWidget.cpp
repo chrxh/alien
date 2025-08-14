@@ -123,7 +123,7 @@ namespace
 
 void _SimulatedPreviewWidget::showPreview()
 {
-    AlienGui::Group("Preview", std::nullopt, true);
+    AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
 
     auto previewRawData = _simulationFacade->getPreviewData();
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _creatureIdsForPreview);
@@ -154,7 +154,7 @@ void _SimulatedPreviewWidget::processSandbox(int previewWidgetIndex, CollectionD
         if (multipleSandboxes) {
             AlienGui::MoveTickUp();
             AlienGui::MoveTickUp();
-            AlienGui::Group("Sandbox " + std::to_string(previewWidgetIndex + 1));
+            AlienGui::Group(AlienGui::GroupParameters().text("Sandbox " + std::to_string(previewWidgetIndex + 1)));
         }
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
         auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);

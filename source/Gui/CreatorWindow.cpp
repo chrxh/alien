@@ -67,7 +67,7 @@ void CreatorWindow::processIntern()
     AlienGui::Tooltip(ModeText.at(CreationMode_Drawing));
 
     if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-        AlienGui::Group(ModeText.at(_mode));
+        AlienGui::Group(AlienGui::GroupParameters().text(ModeText.at(_mode)));
 
         auto color = EditorModel::get().getDefaultColorCode();
         AlienGui::ComboColor(AlienGui::ComboColorParameters().name("Color").textWidth(RightColumnWidth).tooltip(Const::GenomeColorTooltip), color);

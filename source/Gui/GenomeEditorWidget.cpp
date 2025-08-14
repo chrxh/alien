@@ -50,7 +50,7 @@ _GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& genome, Genome
 
 void _GenomeEditorWidget::processHeaderData()
 {
-    AlienGui::Group("Genome", std::nullopt, true);
+    AlienGui::Group(AlienGui::GroupParameters().text("Genome").highlighted(true));
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GenomeHeader", ImVec2(0, -_layoutData->geneListHeight), 0)) {

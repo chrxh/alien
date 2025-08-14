@@ -1255,7 +1255,7 @@ void AlienGui::MovableVerticalSeparator(MovableVerticalSeparatorParameters const
     }
 }
 
-void AlienGui::Group(std::string const& text, std::optional<std::string> const& tooltip, bool highlighted)
+void AlienGui::Group(GroupParameters const& parameters)
 {
     auto drawList = ImGui::GetWindowDrawList();
     auto style = ImGui::GetStyle();
@@ -1264,15 +1264,15 @@ void AlienGui::Group(std::string const& text, std::optional<std::string> const& 
     ImGui::Spacing();
 
     auto cursorPos = ImGui::GetCursorScreenPos();
-    auto color = highlighted ? Const::GroupHighColor : Const::GroupDefaultColor;
+    auto color = parameters._highlighted ? Const::GroupHighColor : Const::GroupDefaultColor;
     drawList->AddRectFilled(
         ImVec2(cursorPos.x, cursorPos.y - style.FramePadding.y),
         ImVec2(cursorPos.x + scale(ImGui::GetContentRegionAvail().x), cursorPos.y + ImGui::GetTextLineHeight() + style.FramePadding.y),
         color,
         2.0f);
-    ImGui::TextUnformatted((" "  + text).c_str());
-    if (tooltip.has_value()) {
-        AlienGui::HelpMarker(*tooltip);
+    ImGui::TextUnformatted((" "  + parameters._text).c_str());
+    if (parameters._tooltip.has_value()) {
+        AlienGui::HelpMarker(*parameters._tooltip);
     }
 
     ImGui::Spacing();
