@@ -109,6 +109,7 @@ The engine follows a layered architecture with clear separation of concerns:
 
 ### Code Style
 - **Formatting**: Use `.clang-format` configuration in `source/_clang-format/`
+- **Comments**: Avoid using code comments unless it is absolutely necessary for the understanding
 - **Line Length**: 160 characters maximum
 - **Indentation**: 4 spaces, no tabs
 - **Braces**: Allman style (opening brace on new line)
