@@ -192,7 +192,7 @@ namespace
 void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const
 {
     genome._genes.at(startGeneIndex)._separation = false;
-    //castrate(genome, startGeneIndex);
+
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
     setNodeAttributesForPreview(genome);

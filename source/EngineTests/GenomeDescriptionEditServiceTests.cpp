@@ -39,43 +39,6 @@ protected:
             }),
         });
     }
-
-    GenomeDescription createGenome_subCycle() const
-    {
-        return GenomeDescription().genes({
-            GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription(),
-            }),
-            GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
-                NodeDescription(),
-            }),
-            GeneDescription().separation(false).nodes({
-                NodeDescription(),
-                NodeDescription(),
-            }),
-        });
-    }
-
-    GenomeDescription createGenome_noCycles() const
-    {
-        return GenomeDescription().genes({
-            GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription(),
-            }),
-            GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
-                NodeDescription(),
-            }),
-            GeneDescription().separation(false).nodes({
-                NodeDescription(),
-                NodeDescription(),
-            }),
-        });
-    }
-
 };
 
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_onEmptyGenome)
@@ -366,7 +329,20 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycl
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
 {
-    auto genome = createGenome_subCycle();
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+            NodeDescription(),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
+            NodeDescription(),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}, {2}});
 
     ASSERT_EQ(2, subGenomes.size());
@@ -407,7 +383,20 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
 {
-    auto genome = createGenome_noCycles();
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+            NodeDescription(),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
 
     ASSERT_EQ(1, subGenomes.size());
@@ -419,6 +408,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
     auto const& gene0 = subGenome._genes.at(0);
     ASSERT_EQ(2, gene0._nodes.size());
     EXPECT_EQ(1, getRefGeneIndex(gene0, 0));
+    EXPECT_EQ(2, getRefGeneIndex(gene0, 1));
 
     auto const& gene1 = subGenome._genes.at(1);
     ASSERT_EQ(2, gene1._nodes.size());
