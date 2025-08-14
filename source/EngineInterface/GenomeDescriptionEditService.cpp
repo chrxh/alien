@@ -182,7 +182,7 @@ namespace
                 } else {
                     auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                     constructor._autoTriggerInterval = 75;
-                    constructor._constructionActivationTime = 100;
+                    constructor._constructionActivationTime = 200;
                 }
             }
         }

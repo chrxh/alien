@@ -513,6 +513,20 @@ TEST_F(GenomeDescriptionInfoServiceTests, getGeneIndicesForSubGenomes_selfRefere
     EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}}), result);
 }
 
+TEST_F(GenomeDescriptionInfoServiceTests, getGeneIndicesForSubGenomes_referenceRootFromDifferentSubGenome)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({
+            NodeDescription(),
+        }),
+        GeneDescription().separation(false).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
+        }),
+    });
+    auto result = _genomeDescriptionInfoService.getGeneIndicesForSubGenomes(genome);
+    EXPECT_EQ((std::vector<std::vector<int>>{{0}, {1}}), result);
+}
+
 TEST_F(GenomeDescriptionInfoServiceTests, getGeneIndicesForSubGenomes_invalidGeneReferences)
 {
     auto genome = GenomeDescription().genes({
