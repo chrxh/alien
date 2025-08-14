@@ -38,14 +38,28 @@ ALIEN is an artificial life simulation tool based on a specialized 2D particle e
    - CMake 3.31+
    - CUDA Toolkit (version specified in CI)
 
-2. **Getting Sources**:
+2. **System Dependencies (Ubuntu/Debian)**
+   ```bash
+   # Install build tools and OpenGL dependencies
+   sudo apt-get update
+   sudo apt-get install -y build-essential cmake
+   sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu1-mesa-dev
+   
+   # Install CUDA Toolkit 11.2-12.4 (example for Ubuntu 22.04)
+   wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+   sudo dpkg -i cuda-keyring_1.1-1_all.deb
+   sudo apt-get update
+   sudo apt-get install -y cuda-compiler-12-4
+   ```
+
+3. **Getting Sources**:
    ```bash
    git clone --recursive https://github.com/chrxh/alien.git
    cd alien
    ```
    Note: The `--recursive` parameter is necessary to check out the vcpkg submodule. Submodules are not updated by standard `git pull` - use `git pull --recurse-submodules`.
 
-3. **Building**:
+4. **Building**:
    ```bash
    # Bootstrap vcpkg (first time only, if not using CI approach)
    git clone https://github.com/Microsoft/vcpkg.git external/vcpkg
@@ -61,7 +75,7 @@ ALIEN is an artificial life simulation tool based on a specialized 2D particle e
    cmake --build build --parallel
    ```
 
-4. **Running Tests**:
+5. **Running Tests**:
    ```bash
    cd build
    # Run specific test executables
