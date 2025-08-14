@@ -390,7 +390,7 @@ void GettingStartedWindow::processIntern()
         //auto weblink = "https://alien-project.gitbook.io/docs";
         //auto textWidth = ImGui::CalcTextSize(weblink).x;
         //ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-        //if(AlienImGui::Button(weblink)) {
+        //if(AlienGui::Button(weblink)) {
         //    openWeblink(weblink);
         //}
         //ImGui::PopFont();

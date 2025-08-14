@@ -79,7 +79,7 @@ void AutosaveWindow::processIntern()
         if (ImGui::BeginChild("##child1", {0, -scale(44.0f)})) {
             processHeader();
 
-            //AlienImGui::Separator();
+            //AlienGui::Separator();
             if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -_settingsHeight : -scale(35.0f)})) {
                 processTable();
             }

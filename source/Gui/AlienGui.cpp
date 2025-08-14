@@ -1419,7 +1419,7 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     } else if (!_filterStack.empty()) {
         _filterStack.emplace_back(_filterStack.back());
     } else {
-        // insert dummy element since AlienImGui:EndTreeNode pops last element
+        // insert dummy element since AlienGui:EndTreeNode pops last element
         _filterStack.emplace_back(FilterStackElement());
     }
 
