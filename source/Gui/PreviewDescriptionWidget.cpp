@@ -18,7 +18,7 @@ PreviewDescriptionWidget _PreviewDescriptionWidget::create(PreviewDescriptionSet
     return PreviewDescriptionWidget(new _PreviewDescriptionWidget(settings));
 }
 
-bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
+bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc, std::optional<int>& selectedGene, std::optional<int>& selectedNode)
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
@@ -77,7 +77,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
             for (auto const& cell : desc._cells) {
                 auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
-                if (_selectedGene.has_value() && cell._geneIndex == _selectedGene.value()) {
+                if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
                     drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
                 }
             }
@@ -91,7 +91,7 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                 auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-                if (_selectedGene.has_value() && _selectedNode.has_value() && cell._geneIndex == _selectedGene.value() && cell._nodeIndex == _selectedNode.value()) {
+                if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
                     if (_zoom > ZoomLevelForLabels) {
                         drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
                     } else {
@@ -102,8 +102,8 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
                 if (clickedOnPreviewWindow) {
                     if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                         && mousePos.y <= cellPos.y + cellSize / 2) {
-                        _selectedGene = cell._geneIndex;
-                        _selectedNode = cell._nodeIndex;
+                        selectedGene = cell._geneIndex;
+                        selectedNode = cell._nodeIndex;
                         result = true;
                     }
                 }
@@ -305,26 +305,6 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
     }
     ImGui::EndChild();
     return result;
-}
-
-std::optional<int> _PreviewDescriptionWidget::getSelectedGene() const
-{
-    return _selectedGene;
-}
-
-void _PreviewDescriptionWidget::setSelectedGene(std::optional<int> selectedGene)
-{
-    _selectedGene = selectedGene;
-}
-
-std::optional<int> _PreviewDescriptionWidget::getSelectedNode() const
-{
-    return _selectedNode;
-}
-
-void _PreviewDescriptionWidget::setSelectedNode(std::optional<int> selectedNode)
-{
-    _selectedNode = selectedNode;
 }
 
 _PreviewDescriptionWidget::_PreviewDescriptionWidget(PreviewDescriptionSettings const& settings)

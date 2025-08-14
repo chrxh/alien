@@ -149,5 +149,15 @@ int _SimulatedPreviewWidget::calcTpsForPreview()
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
+
+    // Show first creature for the moment
+    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
+    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
+    
+    auto selectedGene = _editData->selectedGeneIndex;
+    auto selectedNode = _editData->getSelectedNodeIndex();
+    _previewWidget->process(tps, previewDesc, selectedGene, selectedNode);
+    _editData->selectedGeneIndex = selectedGene;
+    _editData->setSelectedNodeIndex(selectedNode);
 }
 
