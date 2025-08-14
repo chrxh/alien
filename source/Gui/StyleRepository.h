@@ -57,7 +57,8 @@ namespace Const
     ImColor const DisabledOverlayColor1 = ImColor::HSV(0.0f, 0.0f, 0.35f, 0.5f);
     ImColor const DisabledOverlayColor2 = ImColor::HSV(0.0f, 0.0f, 0.06f, 0.2f);
 
-    ImColor const GroupColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const GroupDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const GroupHighColor = ImColor::HSV(0.6f, 0.6f, 0.50f);
 
     ImColor const TableHeaderColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
 

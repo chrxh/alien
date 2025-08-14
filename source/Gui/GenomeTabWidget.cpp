@@ -199,7 +199,6 @@ void _GenomeTabWidget::processEditors()
 
 void _GenomeTabWidget::processPreview()
 {
-    AlienGui::Group("Preview");
     _simulatedPreviewWidget->process();
 }
 

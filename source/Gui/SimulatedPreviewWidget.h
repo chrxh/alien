@@ -32,10 +32,12 @@ private:
     void showPreview();
 
 private:
+    void processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, int tps, float width);
+
     int calcTpsForPreview();
 
     SimulationFacade _simulationFacade;
-    PreviewDescriptionWidget _previewWidget;
+    std::vector<PreviewDescriptionWidget> _previewWidgets;
 
     PreviewDescriptionSettings _settings;
     GenomeWindowEditData _genomeEditData;

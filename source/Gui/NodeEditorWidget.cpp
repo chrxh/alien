@@ -103,7 +103,7 @@ namespace
 
 void _NodeEditorWidget::processNodeAttributes()
 {
-    AlienGui::Group("Selected node");
+    AlienGui::Group("Selected node", std::nullopt, true);
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {

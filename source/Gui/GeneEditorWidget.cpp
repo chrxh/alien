@@ -66,7 +66,7 @@ void _GeneEditorWidget::processNoSelection()
 
 void _GeneEditorWidget::processHeaderData()
 {
-    AlienGui::Group("Selected gene");
+    AlienGui::Group("Selected gene", std::nullopt, true);
 
     auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {

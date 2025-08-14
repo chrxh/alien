@@ -28,7 +28,8 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome/* || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex*/) {
+    if (!_genomeFromPreviousFrame.has_value()
+        || _genomeFromPreviousFrame.value() != _editData->genome /* || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex*/) {
         createSubGenomesForPreview();
         setPreviewData();
     }
@@ -51,7 +52,6 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
     , _genomeEditData(genomeEditData)
     , _editData(editData)
 {
-    _previewWidget = _PreviewDescriptionWidget::create(settings, editData);
 }
 
 void _SimulatedPreviewWidget::createSubGenomesForPreview()
@@ -85,10 +85,17 @@ void _SimulatedPreviewWidget::setPreviewData()
     for (auto const& creature : preview._creatures) {
         _creatureIdsForPreview.emplace_back(creature._id);
     }
-    
 
     _simulationFacade->setPreviewData(preview);
     _genomeEditData->currentPreviewId = _editData->id;
+
+    // Create preview widgets
+    if (_previewWidgets.size() != _creatureIdsForPreview.size()) {
+        _previewWidgets.clear();
+        for (int i = 0, size = toInt(_creatureIdsForPreview.size()); i < size; ++i) {
+            _previewWidgets.emplace_back(_PreviewDescriptionWidget::create(_settings, _editData));
+        }
+    }
 }
 
 void _SimulatedPreviewWidget::calcPreview()
@@ -116,17 +123,45 @@ namespace
 
 void _SimulatedPreviewWidget::showPreview()
 {
+    AlienGui::Group("Preview", std::nullopt, true);
+
     auto previewRawData = _simulationFacade->getPreviewData();
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _creatureIdsForPreview);
     for (auto const& [subGenome, phenotype] : boost::combine(_subGenomesForPreview, phenotypes)) {
         _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
     }
 
-    // Show first creature for the moment
     auto tps = calcTpsForPreview();
-    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypes.front());
-    auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotypes.front()), _rootGeneIndex);
-    _previewWidget->process(tps, previewDesc);
+    if (ImGui::BeginChild("Sandboxes", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+
+        auto space = ImGui::GetContentRegionAvail();
+        auto width = std::max(space.x / _previewWidgets.size(), space.y);
+        for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
+            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, tps, width);
+            if (i < size - 1) {
+                ImGui::SameLine();
+            }
+        }
+    }
+    ImGui::EndChild();
+}
+
+void _SimulatedPreviewWidget::processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, int tps, float width)
+{
+    ImGui::PushID(previewWidgetIndex);
+    if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
+        auto multipleSandboxes = _previewWidgets.size() > 1;
+        if (multipleSandboxes) {
+            AlienGui::MoveTickUp();
+            AlienGui::MoveTickUp();
+            AlienGui::Group("Sandbox " + std::to_string(previewWidgetIndex + 1));
+        }
+        GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+        auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
+        _previewWidgets.at(previewWidgetIndex)->process(tps, previewDesc);
+    }
+    ImGui::EndChild();
+    ImGui::PopID();
 }
 
 int _SimulatedPreviewWidget::calcTpsForPreview()
