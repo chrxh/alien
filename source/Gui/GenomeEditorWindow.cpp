@@ -6,6 +6,8 @@
 
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 
+#include "PersisterInterface/SerializerService.h"
+
 #include "AlienGui.h"
 #include "ChangeColorDialog.h"
 #include "GenomeWindowEditData.h"
@@ -13,9 +15,11 @@
 #include "GenomeTabWidget.h"
 #include "EditorController.h"
 #include "EditorModel.h"
+#include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 #include "PreviewDescriptionWidgetSettings.h"
+#include <ImFileDialog.h>
 
 void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
 {
@@ -52,8 +56,14 @@ GenomeDescription GenomeEditorWindow::getCurrentCreature() const
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
-    : AlienWindow("Creature editor", "windows.creature editor", false, true, {500.0f, 300.0f})
-{}
+    : AlienWindow("Creature editor", "windows.genome editor", false, true, {500.0f, 300.0f})
+{
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
+}
 
 void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
@@ -87,6 +97,7 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save creature to file"))) {
+        onSaveGenome();
     }
 
     ImGui::SameLine();
@@ -185,6 +196,21 @@ void GenomeEditorWindow::processTabWidget()
 
         ImGui::EndTabBar();
     }
+}
+
+void GenomeEditorWindow::onSaveGenome()
+{
+    GenericFileDialog::get().showSaveFileDialog("Save genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
+
+        auto const& selectedTab = _tabs.at(_selectedTabIndex);
+        auto genome = selectedTab->getGenomeDescription();
+        if (!SerializerService::get().serializeGenomeToFile(firstFilename.string(), genome)) {
+            GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
+        }
+    });
 }
 
 void GenomeEditorWindow::onInjectGenome()

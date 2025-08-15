@@ -26,6 +26,7 @@ private:
     void processToolbar();
     void processTabWidget();
 
+    void onSaveGenome();
     void onInjectGenome();
     void onCreateSeed();
     void onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome);
@@ -42,6 +43,7 @@ private:
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
     int _sequenceNumberForCreatedGenomes = 0;
+    std::string _startingPath;
 
     // Actions
     std::optional<GenomeTabWidget> _tabToAdd;

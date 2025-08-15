@@ -906,7 +906,7 @@ namespace cereal
     }
 }
 
-bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data)
+bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const
 {
     try {
         log(Priority::Important, "save simulation to " + filename.string());
@@ -942,7 +942,7 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
     }
 }
 
-bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename)
+bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& data, std::filesystem::path const& filename) const
 {
     try {
         log(Priority::Important, "load simulation from " + filename.string());
@@ -974,7 +974,7 @@ bool SerializerService::deserializeSimulationFromFiles(DeserializedSimulation& d
     }
 }
 
-bool SerializerService::deleteSimulation(std::filesystem::path const& filename)
+bool SerializerService::deleteSimulation(std::filesystem::path const& filename) const
 {
     try {
         log(Priority::Important, "delete simulation " + filename.string());
@@ -998,7 +998,7 @@ bool SerializerService::deleteSimulation(std::filesystem::path const& filename)
     }
 }
 
-bool SerializerService::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input)
+bool SerializerService::serializeSimulationToStrings(SerializedSimulation& output, DeserializedSimulation const& input) const
 {
     try {
         {
@@ -1027,7 +1027,7 @@ bool SerializerService::serializeSimulationToStrings(SerializedSimulation& outpu
     }
 }
 
-bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input)
+bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation& output, SerializedSimulation const& input) const
 {
     try {
         {
@@ -1052,15 +1052,15 @@ bool SerializerService::deserializeSimulationFromStrings(DeserializedSimulation&
     }
 }
 
-bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filename, std::vector<uint8_t> const& genome)
+bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filename, GenomeDescription const& genome) const
 {
     try {
         log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
         CollectionDescription data;
-        //if (!wrapGenome(data, genome)) {
-        //    return false;
-        //}
+        if (!wrapGenome(data, genome)) {
+            return false;
+        }
 
         zstr::ofstream stream(filename.string(), std::ios::binary);
         if (!stream) {
@@ -1074,7 +1074,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
     }
 }
 
-bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, std::filesystem::path const& filename)
+bool SerializerService::deserializeGenomeFromFile(GenomeDescription& genome, std::filesystem::path const& filename) const
 {
     try {
         log(Priority::Important, "load genome from " + filename.string());
@@ -1082,16 +1082,16 @@ bool SerializerService::deserializeGenomeFromFile(std::vector<uint8_t>& genome, 
         if (!deserializeDescription(data, filename)) {
             return false;
         }
-        //if (!unwrapGenome(genome, data)) {
-        //    return false;
-        //}
+        if (!unwrapGenome(genome, data)) {
+            return false;
+        }
         return true;
     } catch (...) {
         return false;
     }
 }
 
-bool SerializerService::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input)
+bool SerializerService::serializeGenomeToString(std::string& output, std::vector<uint8_t> const& input) const
 {
     try {
         std::stringstream stdStream;
@@ -1114,7 +1114,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
     }
 }
 
-bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input)
+bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output, std::string const& input) const
 {
     try {
         std::stringstream stdStream(input);
@@ -1135,7 +1135,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
     }
 }
 
-bool SerializerService::serializeSimulationParametersToFile(std::filesystem::path const& filename, SimulationParameters const& parameters)
+bool SerializerService::serializeSimulationParametersToFile(std::filesystem::path const& filename, SimulationParameters const& parameters) const
 {
     try {
         log(Priority::Important, "save simulation parameters to " + filename.string());
@@ -1151,7 +1151,7 @@ bool SerializerService::serializeSimulationParametersToFile(std::filesystem::pat
     }
 }
 
-bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::filesystem::path const& filename)
+bool SerializerService::deserializeSimulationParametersFromFile(SimulationParameters& parameters, std::filesystem::path const& filename) const
 {
     try {
         log(Priority::Important, "load simulation parameters from " + filename.string());
@@ -1167,7 +1167,7 @@ bool SerializerService::deserializeSimulationParametersFromFile(SimulationParame
     }
 }
 
-bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics)
+bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics) const
 {
     try {
         log(Priority::Important, "save statistics history to " + filename.string());
@@ -1183,7 +1183,7 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
     }
 }
 
-bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, CollectionDescription const& content)
+bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, CollectionDescription const& content) const
 {
     try {
         zstr::ofstream fileStream(filename.string(), std::ios::binary);
@@ -1198,7 +1198,7 @@ bool SerializerService::serializeContentToFile(std::filesystem::path const& file
     }
 }
 
-bool SerializerService::deserializeContentFromFile(CollectionDescription& content, std::filesystem::path const& filename)
+bool SerializerService::deserializeContentFromFile(CollectionDescription& content, std::filesystem::path const& filename) const
 {
     try {
         if (!deserializeDescription(content, filename)) {
@@ -1210,14 +1210,14 @@ bool SerializerService::deserializeContentFromFile(CollectionDescription& conten
     }
 }
 
-void SerializerService::serializeDescription(CollectionDescription const& data, std::ostream& stream)
+void SerializerService::serializeDescription(CollectionDescription const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-bool SerializerService::deserializeDescription(CollectionDescription& data, std::filesystem::path const& filename)
+bool SerializerService::deserializeDescription(CollectionDescription& data, std::filesystem::path const& filename) const
 {
     zstr::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
@@ -1227,7 +1227,7 @@ bool SerializerService::deserializeDescription(CollectionDescription& data, std:
     return true;
 }
 
-void SerializerService::deserializeDescription(CollectionDescription& data, std::istream& stream)
+void SerializerService::deserializeDescription(CollectionDescription& data, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -1242,24 +1242,24 @@ void SerializerService::deserializeDescription(CollectionDescription& data, std:
     archive(data);
 }
 
-void SerializerService::serializeSettings(SettingsForSerialization const& settings, std::ostream& stream)
+void SerializerService::serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const
 {
     boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSettings(settings));
 }
 
-void SerializerService::deserializeSettings(SettingsForSerialization& settings, std::istream& stream)
+void SerializerService::deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
     settings = SettingsParserService::get().decodeSettings(tree);
 }
 
-void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream)
+void SerializerService::serializeSimulationParameters(SimulationParameters const& parameters, std::ostream& stream) const
 {
     boost::property_tree::json_parser::write_json(stream, SettingsParserService::get().encodeSimulationParameters(parameters));
 }
 
-void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream)
+void SerializerService::deserializeSimulationParameters(SimulationParameters& parameters, std::istream& stream) const
 {
     boost::property_tree::ptree tree;
     boost::property_tree::read_json(stream, tree);
@@ -1465,7 +1465,7 @@ namespace
     }
 }
 
-void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream)
+void SerializerService::serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const
 {
     //header row
     auto writeLabelAllColors = [&stream](auto const& name) {
@@ -1501,7 +1501,7 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     }
 }
 
-void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream)
+void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const
 {
     statistics.clear();
 
@@ -1540,4 +1540,20 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 
         statistics.emplace_back(dataPoints);
     }
+}
+
+bool SerializerService::wrapGenome(CollectionDescription& output, GenomeDescription const& input) const
+{
+    output.clear();
+    output._creatures.emplace_back(CreatureDescription().genome(input));
+    return true;
+}
+
+bool SerializerService::unwrapGenome(GenomeDescription& output, CollectionDescription& input) const
+{
+    if (input._creatures.size() != 1) {
+        return false;
+    }
+    output = input._creatures.front()._genome;
+    return true;
 }
