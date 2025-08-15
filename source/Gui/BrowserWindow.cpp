@@ -792,7 +792,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         std::string resourceTypeString = [&] {
             if (treeTO->type == NetworkResourceType_Simulation) {
                 return folder.numLeafs == 1 ? "sim" : "sims";
@@ -890,7 +890,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         AlienGui::Text("(" + std::to_string(folder.numReactions) + ")");
         ImGui::PopStyleColor();
     }
@@ -1460,11 +1460,11 @@ void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
         if (VersionParserService::get().isVersionOutdated(leaf.rawTO->version)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOutdatedTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::TextDecentColor);
         } else if (VersionParserService::get().isVersionNewer(leaf.rawTO->version)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionNewerTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::TextConflictColor);
         } else {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOkTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserLeafTextColor);
         }
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserResourceTextColor);

@@ -116,15 +116,17 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::PushID(row);
                     ImGui::TableNextRow(0, scale(21.0f));
 
+                    auto isUnreachable = !rootHull.contains(row);
+                    if (isUnreachable) {
+                        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::TextConflictColor);
+                    }
+
                     // Column 0: No.
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(row + 1));
                     if (row == 0) {
                         ImGui::SameLine();
                         AlienGui::DecentText(" (root)");
-                    } else if (!rootHull.contains(row)) {
-                        ImGui::SameLine();
-                        AlienGui::DecentText(" (unreachable)");
                     }
                     ImGui::SameLine();
                     auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
@@ -196,6 +198,10 @@ void _GenomeEditorWidget::processGeneList()
                     ImGui::TableNextColumn();
                     AlienGui::Text(std::to_string(gene._nodes.size()));
 
+                    if (isUnreachable) {
+                        ImGui::PopStyleColor();
+                    }
+
                     ImGui::PopID();
                 }
             }
@@ -209,10 +215,21 @@ void _GenomeEditorWidget::processGeneListButtons()
 {
     auto cursorPos = ImGui::GetCursorScreenPos();
 
-    ImVec2 buttonGroupSize = {scale(108.0f), scale(22.0f)};
+    ImVec2 buttonGroupSize = {scale(122.0f), scale(36.0f)};
     ImGui::SetCursorScreenPos(
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
+        auto startPos = ImGui::GetCursorScreenPos();
+        auto size = ImGui::GetContentRegionAvail();
+        ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
+            {startPos.x, startPos.y},
+            {startPos.x + size.x, startPos.y + size.y},
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(7.0f));
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(7.0f));
 
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE).frame(true).transparentBackground(false))) {
             onAddGene();
@@ -273,6 +290,7 @@ void _GenomeEditorWidget::onAddGene()
             }
         }
         _editData->selectedNodeByGeneIndex = newSelectedNodeByGeneIndex;
+        _editData->setSelectedNodeIndex(0);
     }
 }
 

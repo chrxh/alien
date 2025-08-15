@@ -19,13 +19,14 @@ namespace Const
 
     ImColor const RenderingDisabledTextColor = ImColor::HSV(0.5f, 0.1f, 1.0f, 0.2f);
 
-    ImColor const TooltipTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
 
     int64_t const SimulationSliderColor_Base = 0xff4c4c4c;
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
-    int64_t const TextDecentColor = 0xff909090;
-    int64_t const TextInfoColor = 0xff308787;
-    ImColor const TextLightDecentColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
+
+    ImColor const TextTooltipColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor const TextInfoColor = ImColor::HSV(0.167f, 0.64f, 0.53f);
+    ImColor const TextDecentColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
+    ImColor const TextConflictColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
     ImColor const HeaderColor = ImColor::HSV(0.58f, 0.7f, 0.3f);
     ImColor const HeaderActiveColor = ImColor::HSV(0.58f, 0.7f, 0.5f);
@@ -112,14 +113,11 @@ namespace Const
     ImColor const BrowserAddReactionButtonTextColor = ImColor::HSV(0.375f, 0.6f, 0.7f, 1.0f);
     ImColor const BrowserDownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
     ImColor const BrowserDeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
+    ImColor const BrowserLeafTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
     ImColor const BrowserResourceTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
     ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
     ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
-
-    ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
-    ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
-    ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 }
 
 class StyleRepository

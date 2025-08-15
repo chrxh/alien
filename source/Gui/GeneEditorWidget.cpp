@@ -230,10 +230,22 @@ void _GeneEditorWidget::processNodeListButtons()
 {
     auto cursorPos = ImGui::GetCursorScreenPos();
 
-    ImVec2 buttonGroupSize = {scale(108.0f), scale(22.0f)};
+    ImVec2 buttonGroupSize = {scale(122.0f), scale(36.0f)};
     ImGui::SetCursorScreenPos(
         ImVec2(cursorPos.x + ImGui::GetContentRegionAvail().x - buttonGroupSize.x - scale(15.0f), cursorPos.y - buttonGroupSize.y - scale(20.0f)));
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
+        auto startPos = ImGui::GetCursorScreenPos();
+        auto size = ImGui::GetContentRegionAvail();
+        ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
+            {startPos.x, startPos.y},
+            {startPos.x + size.x, startPos.y + size.y},
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
+            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f));
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(7.0f));
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(7.0f));
+
         auto selectedNode = _editData->getSelectedNodeIndex();
         auto const& gene = _editData->genome._genes.at(_editData->selectedGeneIndex.value());
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS_CIRCLE).frame(true).transparentBackground(false))) {

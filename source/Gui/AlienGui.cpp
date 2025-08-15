@@ -40,7 +40,7 @@ bool AlienGui::_menuBarVisible = false;
 void AlienGui::HelpMarker(std::string const& text)
 {
     ImGui::SameLine();
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextInfoColor);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextInfoColor.Value);
     ImGui::Text(ICON_FA_QUESTION_CIRCLE);
     ImGui::PopStyleColor();
     if (ImGui::IsItemHovered()) {
@@ -938,7 +938,7 @@ void AlienGui::MonospaceText(std::string const& text)
 
 void AlienGui::DecentText(std::string const& text)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
+    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     Text(text);
     ImGui::PopStyleColor();
 }
@@ -1604,7 +1604,7 @@ void AlienGui::Tooltip(std::string const& text, bool delay, ImGuiHoveredFlags fl
 {
     if (ImGui::IsItemHovered(flags) && (!delay || (delay && GImGui->HoveredIdTimer > HoveredTimer))) {
         ImGui::BeginTooltip();
-        ImGui::PushStyleColor(ImGuiCol_Text, Const::TooltipTextColor.Value);
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextTooltipColor.Value);
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
         ImGui::TextUnformatted(text.c_str());
         ImGui::PopTextWrapPos();

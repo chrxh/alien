@@ -169,11 +169,11 @@ void AutosaveWindow::processTable()
                 // project name
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
                     AlienGui::Text("In queue");
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_InProgress) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
                     AlienGui::Text("In progress");
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_Persisted) {

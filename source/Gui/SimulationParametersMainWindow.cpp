@@ -365,7 +365,7 @@ void SimulationParametersMainWindow::processLocationTable()
                 ImGui::SameLine();
                 auto pos = ImGui::GetCursorScreenPos();
                 ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
+                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
                 if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
                     AlienGui::Text("(radiation)");
                 } else {
