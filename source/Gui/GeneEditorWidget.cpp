@@ -236,13 +236,7 @@ void _GeneEditorWidget::processNodeListButtons()
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
-        ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
-            {startPos.x, startPos.y},
-            {startPos.x + size.x, startPos.y + size.y},
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f));
+        ImGui::GetWindowDrawList()->AddRectFilled({startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y}, ImColor::HSV(0.0f, 0.0f, 0.055f, 0.5f));
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(7.0f));
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(7.0f));
 

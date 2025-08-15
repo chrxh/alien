@@ -262,9 +262,11 @@ void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab
     }
 }
 
-GenomeDescription GenomeEditorWindow::getDefaultGenome() const
+GenomeDescription GenomeEditorWindow::getDefaultGenome()
 {
-    return GenomeDescription().genes({
-        GeneDescription().nodes({NodeDescription()}).separation(true),
-    });
+    return GenomeDescription()
+        .name("Genome " + std::to_string(++_sequenceNumberForCreatedGenomes))
+        .genes({
+            GeneDescription().name("Gene 1").nodes({NodeDescription()}).separation(true),
+        });
 }

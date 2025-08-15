@@ -33,7 +33,7 @@ private:
 
     void pushStyleColorForTab(GenomeTabWidget const& creatureTab);
 
-    GenomeDescription getDefaultGenome() const;
+    GenomeDescription getDefaultGenome();
 
     SimulationFacade _simulationFacade;
 
@@ -41,6 +41,7 @@ private:
     GenomeWindowEditData _genomeEditData; 
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
+    int _sequenceNumberForCreatedGenomes = 0;
 
     // Actions
     std::optional<GenomeTabWidget> _tabToAdd;

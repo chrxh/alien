@@ -43,10 +43,23 @@ void _GenomeEditorWidget::process()
     ImGui::EndChild();
 }
 
-_GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& genome, GenomeTabLayoutData const& layoutData)
-    : _editData(genome)
+_GenomeEditorWidget::_GenomeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData)
+    : _editData(editData)
     , _layoutData(layoutData)
-{}
+{
+    for (auto const& gene : editData->genome._genes) {
+        try {
+            auto name = gene._name;
+            std::string const prefix = "Gene ";
+            if (name.starts_with(prefix)) {
+                std::string numberPart = name.substr(prefix.size());
+                int number = std::stoi(numberPart);
+                _sequenceNumberForCreatedGenes = std::max(_sequenceNumberForCreatedGenes, number);
+            }
+        } catch (...) {
+        }
+    }
+}
 
 void _GenomeEditorWidget::processHeaderData()
 {
@@ -221,13 +234,7 @@ void _GenomeEditorWidget::processGeneListButtons()
     if (ImGui::BeginChild("ButtonGroup", buttonGroupSize)) {
         auto startPos = ImGui::GetCursorScreenPos();
         auto size = ImGui::GetContentRegionAvail();
-        ImGui::GetWindowDrawList()->AddRectFilledMultiColor(
-            {startPos.x, startPos.y},
-            {startPos.x + size.x, startPos.y + size.y},
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f),
-            ImColor::HSV(0.0f, 0.0f, 0.0f, 0.5f));
+        ImGui::GetWindowDrawList()->AddRectFilled({startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y}, ImColor::HSV(0.0f, 0.0f, 0.055f, 0.5f));
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(7.0f));
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(7.0f));
 
@@ -264,8 +271,9 @@ void _GenomeEditorWidget::processGeneListButtons()
 void _GenomeEditorWidget::onAddGene()
 {
     auto& genome = _editData->genome;
+    auto name = "Gene " + std::to_string(++_sequenceNumberForCreatedGenes);
     if (genome._genes.empty()) {
-        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().separation(true).nodes({NodeDescription()}));
+        GenomeDescriptionEditService::get().addGene(genome, 0, GeneDescription().name(name).separation(true).nodes({NodeDescription()}));
         _editData->selectedGeneIndex = 0;
     } else {
         int insertIndex;
@@ -275,7 +283,8 @@ void _GenomeEditorWidget::onAddGene()
             insertIndex = toInt(genome._genes.size()) - 1;
         }
 
-        GenomeDescriptionEditService::get().addGene(genome, insertIndex, GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}));
+        GenomeDescriptionEditService::get().addGene(
+            genome, insertIndex, GeneDescription().name(name).separation(false).numBranches(1).nodes({NodeDescription()}));
 
         // Adapt gene selection
         _editData->selectedGeneIndex = insertIndex + 1;

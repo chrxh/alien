@@ -10,7 +10,7 @@ public:
     void process();
 
 private:
-    _GenomeEditorWidget(GenomeTabEditData const& genome, GenomeTabLayoutData const& layoutData);
+    _GenomeEditorWidget(GenomeTabEditData const& editData, GenomeTabLayoutData const& layoutData);
 
     void processHeaderData();
     void processGeneList();
@@ -27,6 +27,7 @@ private:
 
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
+    int _sequenceNumberForCreatedGenes = 0;
 
     std::optional<int> _selectedGeneFromPreviousFrame;
 };
