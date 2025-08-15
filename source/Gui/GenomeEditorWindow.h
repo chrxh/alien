@@ -26,6 +26,7 @@ private:
     void processToolbar();
     void processTabWidget();
 
+    void onOpenGenome();
     void onSaveGenome();
     void onInjectGenome();
     void onCreateSeed();

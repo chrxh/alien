@@ -130,15 +130,17 @@ namespace cereal
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Genome_FrontAngle = 4;
+    auto constexpr Id_Genome_Name = 0;
+    auto constexpr Id_Genome_FrontAngle = 1;
 
-    auto constexpr Id_Gene_Shape = 0;
-    auto constexpr Id_Gene_NumBranches = 1;
-    auto constexpr Id_Gene_Separation = 2;
-    auto constexpr Id_Gene_AngleAlignment = 3;
-    auto constexpr Id_Gene_Stiffness = 4;
-    auto constexpr Id_Gene_ConnectionDistance = 5;
-    auto constexpr Id_Gene_NumRepetitions = 6;
+    auto constexpr Id_Gene_Name = 0;
+    auto constexpr Id_Gene_Shape = 1;
+    auto constexpr Id_Gene_NumBranches = 2;
+    auto constexpr Id_Gene_Separation = 3;
+    auto constexpr Id_Gene_AngleAlignment = 4;
+    auto constexpr Id_Gene_Stiffness = 5;
+    auto constexpr Id_Gene_ConnectionDistance = 6;
+    auto constexpr Id_Gene_NumRepetitions = 7;
 
     auto constexpr Id_Node_ReferenceAngle = 0;
     auto constexpr Id_Node_Color = 1;
@@ -431,6 +433,7 @@ namespace cereal
     {
         GeneDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Gene_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
         loadSave(task, auxiliaries, Id_Gene_NumBranches, data._numBranches, defaultObject._numBranches);
         loadSave(task, auxiliaries, Id_Gene_Separation, data._separation, defaultObject._separation);
@@ -449,6 +452,7 @@ namespace cereal
     {
         GenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
 

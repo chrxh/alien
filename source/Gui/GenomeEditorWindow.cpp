@@ -92,11 +92,12 @@ bool GenomeEditorWindow::isShown()
 
 void GenomeEditorWindow::processToolbar()
 {
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open creature from file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_FOLDER_OPEN).tooltip("Open genome from file"))) {
+        onOpenGenome();
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save creature to file"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SAVE).tooltip("Save genome to file"))) {
         onSaveGenome();
     }
 
@@ -104,19 +105,19 @@ void GenomeEditorWindow::processToolbar()
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters()
                 .text(ICON_FA_UPLOAD)
-                .tooltip("Share your creature with other users:\nYour current creature will be uploaded to the server and made visible in the browser."))) {
+                .tooltip("Share your creature with other users:\nYour current genome will be uploaded to the server and made visible in the browser."))) {
     }
 
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy creature"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome"))) {
         printOverlayMessage("Creature copied");
     }
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste creature"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste genome"))) {
         printOverlayMessage("Creature pasted");
     }
 
@@ -196,6 +197,22 @@ void GenomeEditorWindow::processTabWidget()
 
         ImGui::EndTabBar();
     }
+}
+
+void GenomeEditorWindow::onOpenGenome()
+{
+    GenericFileDialog::get().showOpenFileDialog("Open genome", "Genome (*.genome){.genome},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
+
+        GenomeDescription genome;
+        if (!SerializerService::get().deserializeGenomeFromFile(genome, firstFilename.string())) {
+            GenericMessageDialog::get().information("Open genome", "The selected file could not be opened.");
+        } else {
+            openTab(std::nullopt, genome, false);
+        }
+    });
 }
 
 void GenomeEditorWindow::onSaveGenome()
