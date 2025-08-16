@@ -555,6 +555,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
         auto& constructor = cell->cellTypeData.constructor;
         constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
+        constructor.constructionAngle = nodeConstructor.constructionAngle;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = Constructor::LastConstructedCellId_NotSet;
         constructor.currentNodeIndex = 0;

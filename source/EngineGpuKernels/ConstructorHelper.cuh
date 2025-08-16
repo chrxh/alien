@@ -11,6 +11,7 @@ public:
     __inline__ __device__ static bool isLastNode(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool isFirstConcatenation(Constructor const& constructor);
     __inline__ __device__ static bool isLastConcatenation(Constructor const& constructor, Genome const& genome);
+    __inline__ __device__ static bool isFirstBranch(Constructor const& constructor);
     __inline__ __device__ static Gene* getCurrentGene(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static Node* getCurrentNode(Constructor const& constructor, Genome const& genome);
     __inline__ __device__ static bool hasInfiniteConcatenations(Gene* gene);
@@ -66,6 +67,11 @@ __inline__ __device__ bool ConstructorHelper::isLastConcatenation(Constructor co
 {
     auto const& gene = getCurrentGene(constructor, genome);
     return constructor.currentConcatenation == gene->numConcatenations - 1;
+}
+
+__inline__ __device__ bool ConstructorHelper::isFirstBranch(Constructor const& constructor)
+{
+    return constructor.currentBranch == 0;
 }
 
 __inline__ __device__ Gene* ConstructorHelper::getCurrentGene(Constructor const& constructor, Genome const& genome)

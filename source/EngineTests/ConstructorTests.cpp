@@ -2429,12 +2429,12 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__largeFirstReferenceAngle)
+TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__largeConstructionAngle)
 {
-    auto const FirstAngle = 180.0f;
+    auto const ConstructionAngle = 180.0f;
 
     auto genome = GenomeDescription().genes({
-        GeneDescription().nodes({NodeDescription().referenceAngle(FirstAngle)}).separation(false).numBranches(1),
+        GeneDescription().nodes({NodeDescription()}).separation(false).numBranches(1),
     });
 
     auto data = CollectionDescription().creatures({
@@ -2443,7 +2443,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
             CellDescription()
                 .id(1)
                 .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
+                .cellTypeData(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
         }),
@@ -2468,7 +2468,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
 
     auto angleSpan_cell2_cell0 = hostCell.getAngleSpan(2, 0);
     auto angleSpan_lastCell_and_cell0 = hostCell.getAngleSpan(newCell._id, 0);
-    EXPECT_TRUE(approxCompare(Math::normalizedAngle(angleSpan_lastCell_and_cell0 + FirstAngle, 0.0f), angleSpan_cell2_cell0 / 2));
+    EXPECT_TRUE(approxCompare(Math::normalizedAngle(angleSpan_lastCell_and_cell0 + ConstructionAngle, 0.0f), angleSpan_cell2_cell0 / 2));
 }
 
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__angleToFront_leftSide)
@@ -2570,14 +2570,14 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
-    auto const FirstAngle = 8.0f;
+    auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
 
     auto shape = GetParam();
 
     auto gene = GeneDescription().separation(false).numBranches(1).shape(shape);
-    gene._nodes.emplace_back(NodeDescription().referenceAngle(FirstAngle));
+    gene._nodes.emplace_back(NodeDescription());
     for (int i = 0; i < n - 2; ++i) {
         gene._nodes.emplace_back(NodeDescription());
     }
@@ -2590,7 +2590,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             CellDescription()
                 .id(1)
                 .energy(getConstructorEnergy() * n)
-                .cellTypeData(ConstructorDescription().geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
+                .cellTypeData(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
         }),
@@ -2660,7 +2660,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
         auto const& hostCell = actualData.getCellRef(1);
         auto angleSpan_cell2_cell0 = hostCell.getAngleSpan(2, 0);
         auto angleSpan_lastCell_and_cell0 = hostCell._connections.at(0)._angleFromPrevious;
-        EXPECT_TRUE(approxCompare(angleSpan_lastCell_and_cell0 + FirstAngle, angleSpan_cell2_cell0 / 2));
+        EXPECT_TRUE(approxCompare(angleSpan_lastCell_and_cell0 + ConstructionAngle, angleSpan_cell2_cell0 / 2));
     }
 
     // Check angles for last node

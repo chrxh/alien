@@ -123,8 +123,6 @@ bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescr
     return left == right;
 }
 
-
-
 CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const
 {
     auto const& type = cellParameter.cellType;
@@ -140,10 +138,10 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Depot:
         return DepotDescription();
     case CellType_Constructor: {
-        ConstructorDescription defaultConstructor;
         return ConstructorDescription()
             .autoTriggerInterval(50)
             .constructionActivationTime(75)
+            .constructionAngle(42.0f)
             .geneIndex(2)
             .lastConstructedCellId(123)
             .currentNodeIndex(1)
