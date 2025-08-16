@@ -1165,7 +1165,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
             CellDescription()
                 .id(1)
                 .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().geneIndex(0).currentBranch(1))
+                .cellTypeData(ConstructorDescription().geneIndex(0).currentBranch(1).constructionAngle(10.0f))  // constructionAngle should be ignored for the second branch
                 .pos({100.0f, 100.0f})
                 .angleToFront(FrontAngle - 180.0f),
             CellDescription().id(2).pos({99.0f, 100.0f}).angleToFront(FrontAngle - 180.0f),

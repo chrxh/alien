@@ -233,6 +233,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto& genome = constructor.offspring->genome;
 
     auto isFirstNode = ConstructorHelper::isFirstNode(constructor);
+    auto isFirstConcatenation = ConstructorHelper::isFirstConcatenation(constructor);
 
     ConstructionData result;
     result.forPreview = forPreview;
@@ -240,7 +241,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
     result.isSeparation = result.gene->separation;
-    result.isFirstNodeOfFirstConcatenation = isFirstNode && ConstructorHelper::isFirstConcatenation(constructor);
+    result.isFirstNodeOfFirstConcatenation = isFirstNode && isFirstConcatenation;
     result.isLastNode = ConstructorHelper::isLastNode(constructor, genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, genome);
     
@@ -275,6 +276,8 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     if (isFirstNode) {
         if (result.isFirstNodeOfFirstConcatenation && ConstructorHelper::isFirstBranch(constructor)) {
             result.angle = constructor.constructionAngle;
+        } else if (isFirstConcatenation) {
+            result.angle = 0;
         } else {
             result.angle = result.node->referenceAngle;
         }
