@@ -186,6 +186,10 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::InputInt(
                 AlienGui::InputIntParameters().name("Offspring activation time").textWidth(rightColumnWidth), constructor._constructionActivationTime);
 
+            // Construction angle
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
+
             AlienGui::EndIndent();
 
         } else if (nodeType == CellTypeGenome_Sensor) {
