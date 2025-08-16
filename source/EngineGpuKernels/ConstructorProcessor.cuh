@@ -711,8 +711,10 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell*
     auto& genome = constructor.offspring->genome;
 
     auto lastConstructionCell = getLastConstructedCellOnBranch(hostCell);
-    if (lastConstructionCell == nullptr) {
-        return false;
+    if (!(constructor.currentNodeIndex == 0 && constructor.currentConcatenation == 0 && constructor.currentBranch == 0)) {
+        if (lastConstructionCell == nullptr) {
+            return false;
+        }
     }
     if (lastConstructionCell && lastConstructionCell->numConnections == 1) {
         int numConstructedCells = ConstructorHelper::getNumConstructedCellsOnBranch(constructor, genome);

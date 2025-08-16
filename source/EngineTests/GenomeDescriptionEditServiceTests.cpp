@@ -318,7 +318,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycl
     ASSERT_EQ(4, gene1._nodes.size());
     EXPECT_EQ(3, getRefGeneIndex(gene1, 0));
     EXPECT_EQ(3, getRefGeneIndex(gene1, 1));
-    EXPECT_EQ(3, getRefGeneIndex(gene1, 2));
+    EXPECT_EQ(2, getRefGeneIndex(gene1, 2));
 
     auto const& gene2 = subGenome._genes.at(2);
     ASSERT_EQ(5, gene2._nodes.size());

@@ -58,11 +58,6 @@ GenomeDescription GenomeEditorWindow::getCurrentCreature() const
 GenomeEditorWindow::GenomeEditorWindow()
     : AlienWindow("Creature editor", "windows.genome editor", false, true, {500.0f, 300.0f})
 {
-    auto path = std::filesystem::current_path();
-    if (path.has_parent_path()) {
-        path = path.parent_path();
-    }
-    _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
 }
 
 void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
@@ -73,11 +68,20 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     _previewSettings = std::make_shared<_PreviewDescriptionSettings>();
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
+    auto path = std::filesystem::current_path();
+    if (path.has_parent_path()) {
+        path = path.parent_path();
+    }
+    _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
+
     // Initialize the first tab with a draft creature
     _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _previewSettings, _genomeEditData, getDefaultGenome()));
 }
 
-void GenomeEditorWindow::shutdownIntern() {}
+void GenomeEditorWindow::shutdownIntern()
+{
+    GlobalSettings::get().setValue("windows.genome editor.starting path", _startingPath);
+}
 
 void GenomeEditorWindow::processIntern()
 {
