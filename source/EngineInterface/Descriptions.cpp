@@ -232,6 +232,12 @@ void CollectionDescription::assignNewIds()
                 connection._cellId = it->second;
             }
         }
+        if (cell.getCellType() == CellType_Constructor) {
+            auto& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
+            if (constructor._lastConstructedCellId.has_value()) {
+                constructor._lastConstructedCellId = oldToNewCellId.at(constructor._lastConstructedCellId.value());
+            }
+        }
     });
     for (auto& particle : _particles) {
         particle._id = NumberGenerator::get().createObjectId();
