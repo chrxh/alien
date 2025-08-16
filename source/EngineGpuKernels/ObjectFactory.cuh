@@ -129,6 +129,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
                 node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
                 node.cellTypeData.constructor.geneIndex = nodeTO.cellTypeData.constructor.geneIndex;
                 node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
+                node.cellTypeData.constructor.constructionAngle = nodeTO.cellTypeData.constructor.constructionAngle;
                 break;
             case CellTypeGenome_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
@@ -271,6 +272,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     case CellType_Constructor: {
         cell->cellTypeData.constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
         cell->cellTypeData.constructor.constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
+        cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         cell->cellTypeData.constructor.geneIndex = cellTO.cellTypeData.constructor.geneIndex;
         cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;

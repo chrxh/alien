@@ -161,6 +161,7 @@ namespace
     auto constexpr Id_ConstructorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_ConstructorGenome_GeneIndex = 1;
     auto constexpr Id_ConstructorGenome_ConstructionActivationTime = 2;
+    auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
 
     auto constexpr Id_SensorGenome_MinDensity = 0;
     auto constexpr Id_SensorGenome_RestrictToColor = 1;
@@ -242,6 +243,7 @@ namespace cereal
             Id_ConstructorGenome_ConstructionActivationTime,
             data._constructionActivationTime,
             defaultObject._constructionActivationTime);
+        loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDescription)
@@ -517,6 +519,7 @@ namespace
     auto constexpr Id_Constructor_CurrentConcatenation = 4;
     auto constexpr Id_Constructor_LastConstructedCellId = 5;
     auto constexpr Id_Constructor_CurrentBranch = 6;
+    auto constexpr Id_Constructor_ConstructionAngle = 7;
 
     auto constexpr Id_Defender_Mode = 0;
 
@@ -658,6 +661,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Constructor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Constructor_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
+        loadSave(task, auxiliaries, Id_Constructor_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         loadSave(task, auxiliaries, Id_Constructor_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Constructor_LastConstructedCellId, data._lastConstructedCellId, defaultObject._lastConstructedCellId);
         loadSave(task, auxiliaries, Id_Constructor_CurrentNodeIndex, data._currentNodeIndex, defaultObject._currentNodeIndex);
