@@ -13,7 +13,6 @@ class _SimulatedPreviewWidget
 public:
     static SimulatedPreviewWidget create(
         SimulationFacade const& simulationFacade,
-        PreviewDescriptionSettings const& previewSettings,
         GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData);
 
@@ -22,24 +21,22 @@ public:
 private:
     _SimulatedPreviewWidget(
         SimulationFacade const& simulationFacade,
-        PreviewDescriptionSettings const& settings,
         GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData);
 
     void createSubGenomesForPreview();
     void setPreviewData();
     void calcPreview();
-    void showPreview();
+    void drawPreview();
 
 private:
-    void processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, int tps, float width);
+    void processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
 
     int calcTpsForPreview();
 
     SimulationFacade _simulationFacade;
     std::vector<PreviewDescriptionWidget> _previewWidgets;
 
-    PreviewDescriptionSettings _settings;
     GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;

@@ -11,15 +11,14 @@
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
-#include "PreviewDescriptionWidgetSettings.h"
 #include "StyleRepository.h"
 
-PreviewDescriptionWidget _PreviewDescriptionWidget::create(PreviewDescriptionSettings const& settings, GenomeTabEditData const& editData)
+PreviewDescriptionWidget _PreviewDescriptionWidget::create(GenomeTabEditData const& editData)
 {
-    return PreviewDescriptionWidget(new _PreviewDescriptionWidget(settings, editData));
+    return PreviewDescriptionWidget(new _PreviewDescriptionWidget(editData));
 }
 
-bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
+bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
@@ -276,16 +275,9 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
     }
     ImGui::EndChild();
 
-    // Draw timestep in bottom right corner of "preview" child window
-    ImGui::SetCursorPos({ImGui::GetScrollX() + windowSize.x - scale(100), ImGui::GetScrollY() + windowSize.y - scale(40)});
-    if (ImGui::BeginChild("##TPS", ImVec2(scale(100), scale(30)), false)) {
-        AlienGui::Text("TPS: " + StringHelper::format(tps));
-    }
-    ImGui::EndChild();
-
     // Action buttons
     ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
-    if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), false)) {
+    if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), 0)) {
         ImGui::SetCursorPos({0, 0});
         ImGui::PushID(1);
         if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
@@ -298,14 +290,14 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
             _zoom /= 1.5f;
         }
         ImGui::PopID();
-        ImGui::SameLine();
-        AlienGui::VerticalSeparator(23);
-        ImGui::SameLine();
-        ImGui::PushID(3);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
-            _settings->maxSpeed = !_settings->maxSpeed;
-        }
-        ImGui::PopID();
+        //ImGui::SameLine();
+        //AlienGui::VerticalSeparator(23);
+        //ImGui::SameLine();
+        //ImGui::PushID(3);
+        //if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
+        //    _settings->maxSpeed = !_settings->maxSpeed;
+        //}
+        //ImGui::PopID();
     }
     ImGui::EndChild();
 
@@ -313,7 +305,6 @@ bool _PreviewDescriptionWidget::process(int tps, PreviewDescription const& desc)
     return result;
 }
 
-_PreviewDescriptionWidget::_PreviewDescriptionWidget(PreviewDescriptionSettings const& settings, GenomeTabEditData const& editData)
-    : _settings(settings)
-    , _editData(editData)
+_PreviewDescriptionWidget::_PreviewDescriptionWidget(GenomeTabEditData const& editData)
+    : _editData(editData)
 {}

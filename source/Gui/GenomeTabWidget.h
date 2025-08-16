@@ -11,13 +11,11 @@ class _GenomeTabWidget
 public:
     static GenomeTabWidget createDraftTab(
         SimulationFacade const& simulationFacade,
-        PreviewDescriptionSettings const& previewSettings,
         GenomeWindowEditData const& genomeEditData,
         GenomeDescription const& creature,
         GenomeTabLayoutData const& layoutData = nullptr);
     static GenomeTabWidget createCreatureTab(
         SimulationFacade const& simulationFacade,
-        PreviewDescriptionSettings const& previewSettings,
         GenomeWindowEditData const& genomeEditData,
         uint64_t creatureId,
         GenomeDescription const& genome,
@@ -55,7 +53,6 @@ private:
 
     _GenomeTabWidget(
         SimulationFacade const& simulationFacade,
-        PreviewDescriptionSettings const& previewSettings,
         GenomeWindowEditData const& genomeEditData, 
         GenomeDescription const& genome,
         SpecificEditData const& specificEditData,

@@ -25,6 +25,7 @@ private:
 
     void processToolbar();
     void processTabWidget();
+    void processStatusBar();
 
     void onOpenGenome();
     void onSaveGenome();
@@ -39,7 +40,6 @@ private:
 
     SimulationFacade _simulationFacade;
 
-    PreviewDescriptionSettings _previewSettings;
     GenomeWindowEditData _genomeEditData; 
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;

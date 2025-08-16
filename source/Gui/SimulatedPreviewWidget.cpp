@@ -3,6 +3,8 @@
 #include <boost/range/adaptors.hpp>
 #include <boost/range/combine.hpp>
 
+#include "Base/StringHelper.h"
+
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
@@ -14,16 +16,15 @@
 #include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
 #include "PreviewDescriptionWidget.h"
-#include "PreviewDescriptionWidgetSettings.h"
+#include "StyleRepository.h"
 #include "WindowController.h"
 
 SimulatedPreviewWidget _SimulatedPreviewWidget::create(
     SimulationFacade const& simulationFacade,
-    PreviewDescriptionSettings const& settings,
     GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData)
 {
-    return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, settings, genomeEditData, editData));
+    return SimulatedPreviewWidget(new _SimulatedPreviewWidget(simulationFacade, genomeEditData, editData));
 }
 
 void _SimulatedPreviewWidget::process()
@@ -37,18 +38,17 @@ void _SimulatedPreviewWidget::process()
         setPreviewData();
     }
     calcPreview();
-    showPreview();
+    drawPreview();
 
+    _genomeEditData->currentTps = calcTpsForPreview();
     _genomeFromPreviousFrame = _editData->genome;
 }
 
 _SimulatedPreviewWidget::_SimulatedPreviewWidget(
     SimulationFacade const& simulationFacade,
-    PreviewDescriptionSettings const& settings,
     GenomeWindowEditData const& genomeEditData,
     GenomeTabEditData const& editData)
     : _simulationFacade(simulationFacade)
-    , _settings(settings)
     , _genomeEditData(genomeEditData)
     , _editData(editData)
 {
@@ -93,7 +93,7 @@ void _SimulatedPreviewWidget::setPreviewData()
     if (_previewWidgets.size() != _creatureIdsForPreview.size()) {
         _previewWidgets.clear();
         for (int i = 0, size = toInt(_creatureIdsForPreview.size()); i < size; ++i) {
-            _previewWidgets.emplace_back(_PreviewDescriptionWidget::create(_settings, _editData));
+            _previewWidgets.emplace_back(_PreviewDescriptionWidget::create(_editData));
         }
     }
 }
@@ -101,7 +101,7 @@ void _SimulatedPreviewWidget::setPreviewData()
 void _SimulatedPreviewWidget::calcPreview()
 {
     auto fps = WindowController::get().getFps();
-    auto duration = _settings->maxSpeed ? std::chrono::milliseconds(1000 / fps) : std::chrono::milliseconds(1000 / fps / 2);
+    auto duration = /*_settings->maxSpeed ? std::chrono::milliseconds(1000 / fps) :*/ std::chrono::milliseconds(1000 / fps / 2);
     _simulationFacade->calcTimestepsForPreview(duration);
 }
 
@@ -121,7 +121,7 @@ namespace
     }
 }
 
-void _SimulatedPreviewWidget::showPreview()
+void _SimulatedPreviewWidget::drawPreview()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
 
@@ -131,13 +131,12 @@ void _SimulatedPreviewWidget::showPreview()
         _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
     }
 
-    auto tps = calcTpsForPreview();
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         auto space = ImGui::GetContentRegionAvail();
         auto width = std::max(space.x / _previewWidgets.size(), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, tps, width);
+            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, width);
             if (i < size - 1) {
                 ImGui::SameLine();
             }
@@ -146,7 +145,7 @@ void _SimulatedPreviewWidget::showPreview()
     ImGui::EndChild();
 }
 
-void _SimulatedPreviewWidget::processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, int tps, float width)
+void _SimulatedPreviewWidget::processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, float width)
 {
     ImGui::PushID(previewWidgetIndex);
     if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
@@ -158,7 +157,7 @@ void _SimulatedPreviewWidget::processSandbox(int previewWidgetIndex, CollectionD
         }
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
         auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
-        _previewWidgets.at(previewWidgetIndex)->process(tps, previewDesc);
+        _previewWidgets.at(previewWidgetIndex)->process(previewDesc);
     }
     ImGui::EndChild();
     ImGui::PopID();

@@ -7,14 +7,13 @@
 class _PreviewDescriptionWidget
 {
 public:
-    static PreviewDescriptionWidget create(PreviewDescriptionSettings const& settings, GenomeTabEditData const& editData);
+    static PreviewDescriptionWidget create(GenomeTabEditData const& editData);
 
-    bool process(int tps, PreviewDescription const& desc);
+    bool process(PreviewDescription const& desc);
 
 private:
-    _PreviewDescriptionWidget(PreviewDescriptionSettings const& settings, GenomeTabEditData const& editData);
+    _PreviewDescriptionWidget(GenomeTabEditData const& editData);
 
-    PreviewDescriptionSettings _settings;
     GenomeTabEditData _editData;
     float _zoom = 20.0f;
 };

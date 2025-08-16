@@ -138,9 +138,6 @@ using SimulatedPreviewWidget = std::shared_ptr<_SimulatedPreviewWidget>;
 class _PreviewDescriptionWidget;
 using PreviewDescriptionWidget = std::shared_ptr<_PreviewDescriptionWidget>;
 
-class _PreviewDescriptionSettings;
-using PreviewDescriptionSettings = std::shared_ptr<_PreviewDescriptionSettings>;
-
 struct UserInfo;
 
 struct GLFWvidmode;

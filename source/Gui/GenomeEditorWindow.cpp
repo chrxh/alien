@@ -4,6 +4,8 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
+#include "Base/StringHelper.h"
+
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 
 #include "PersisterInterface/SerializerService.h"
@@ -18,7 +20,6 @@
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
-#include "PreviewDescriptionWidgetSettings.h"
 #include <ImFileDialog.h>
 
 void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
@@ -65,7 +66,6 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     ChangeColorDialog::get().setup();
 
     _simulationFacade = simulationFacade;
-    _previewSettings = std::make_shared<_PreviewDescriptionSettings>();
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
     auto path = std::filesystem::current_path();
@@ -75,7 +75,7 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _previewSettings, _genomeEditData, getDefaultGenome()));
+    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, getDefaultGenome()));
 }
 
 void GenomeEditorWindow::shutdownIntern()
@@ -87,6 +87,7 @@ void GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processTabWidget();
+    processStatusBar();
 }
 
 bool GenomeEditorWindow::isShown()
@@ -151,56 +152,70 @@ void GenomeEditorWindow::processToolbar()
 
 void GenomeEditorWindow::processTabWidget()
 {
-    if (ImGui::BeginTabBar("##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
+    if (ImGui::BeginChild("TabWidget", ImVec2(0, -scale(44.0f)), 0, 0)) {
 
-        if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
-            onScheduleAddDraftTab(getDefaultGenome());
-        }
-        AlienGui::Tooltip("New creature");
+        if (ImGui::BeginTabBar(
+                "##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
 
-        std::optional<int> tabIndexToSelect = _tabIndexToSelect;
-        std::optional<int> tabToDelete;
-        _tabIndexToSelect.reset();
-
-        // Process tabs
-        for (auto const& [index, creatureTab] : _tabs | boost::adaptors::indexed(0)) {
-
-            bool open = true;
-            bool* openPtr = nullptr;
-            if (_tabs.size() > 1) {
-                openPtr = &open;
+            if (ImGui::TabItemButton("+", ImGuiTabItemFlags_Trailing | ImGuiTabItemFlags_NoTooltip)) {
+                onScheduleAddDraftTab(getDefaultGenome());
             }
-            int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+            AlienGui::Tooltip("New creature");
 
-            pushStyleColorForTab(creatureTab);
-            if (ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags)) {
-                _selectedTabIndex = toInt(index);
-                creatureTab->process();
-                ImGui::EndTabItem();
+            std::optional<int> tabIndexToSelect = _tabIndexToSelect;
+            std::optional<int> tabToDelete;
+            _tabIndexToSelect.reset();
+
+            // Process tabs
+            for (auto const& [index, creatureTab] : _tabs | boost::adaptors::indexed(0)) {
+
+                bool open = true;
+                bool* openPtr = nullptr;
+                if (_tabs.size() > 1) {
+                    openPtr = &open;
+                }
+                int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+
+                pushStyleColorForTab(creatureTab);
+                if (ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags)) {
+                    _selectedTabIndex = toInt(index);
+                    creatureTab->process();
+                    ImGui::EndTabItem();
+                }
+                ImGui::PopStyleColor(3);
+
+                if (openPtr && *openPtr == false) {
+                    tabToDelete = toInt(index);
+                }
             }
-            ImGui::PopStyleColor(3);
 
-            if (openPtr && *openPtr == false) {
-                tabToDelete = toInt(index);
+            // Delete tab
+            if (tabToDelete.has_value()) {
+                _tabs.erase(_tabs.begin() + *tabToDelete);
+                if (_selectedTabIndex == _tabs.size()) {
+                    _selectedTabIndex = toInt(_tabs.size() - 1);
+                }
             }
-        }
 
-        // Delete tab
-        if (tabToDelete.has_value()) {
-            _tabs.erase(_tabs.begin() + *tabToDelete);
-            if (_selectedTabIndex == _tabs.size()) {
-                _selectedTabIndex = toInt(_tabs.size() - 1);
+            // Add tab
+            if (_tabToAdd.has_value()) {
+                _tabs.emplace_back(_tabToAdd.value());
+                _tabToAdd.reset();
             }
-        }
 
-        // Add tab
-        if (_tabToAdd.has_value()) {
-            _tabs.emplace_back(_tabToAdd.value());
-            _tabToAdd.reset();
+            ImGui::EndTabBar();
         }
-
-        ImGui::EndTabBar();
     }
+    ImGui::EndChild();
+}
+
+void GenomeEditorWindow::processStatusBar()
+{
+    std::vector<std::string> statusItems;
+    if (_genomeEditData->currentTps.has_value()) {
+        statusItems.emplace_back("Preview TPS: " + StringHelper::format(_genomeEditData->currentTps.value()));
+    }
+    AlienGui::StatusBar(statusItems);
 }
 
 void GenomeEditorWindow::onOpenGenome()
@@ -280,13 +295,13 @@ void GenomeEditorWindow::onCreateSeed()
 void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _previewSettings, _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _previewSettings, _genomeEditData, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)

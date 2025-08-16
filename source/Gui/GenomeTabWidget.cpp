@@ -18,24 +18,22 @@
 
 GenomeTabWidget _GenomeTabWidget::createDraftTab(
     SimulationFacade const& simulationFacade,
-    PreviewDescriptionSettings const& previewSettings,
     GenomeWindowEditData const& genomeEditData,
     GenomeDescription const& creature,
     GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, previewSettings, genomeEditData, creature, DraftData(), layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genomeEditData, creature, DraftData(), layoutData));
 }
 
 GenomeTabWidget _GenomeTabWidget::createCreatureTab(
     SimulationFacade const& simulationFacade,
-    PreviewDescriptionSettings const& previewSettings,
     GenomeWindowEditData const& genomeEditData,
     uint64_t creatureId,
     GenomeDescription const& genome,
     GenomeTabLayoutData const& layoutData)
 {
     return GenomeTabWidget(new _GenomeTabWidget(
-        simulationFacade, previewSettings, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
+        simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -143,7 +141,6 @@ void _GenomeTabWidget::resetChanges()
 
 _GenomeTabWidget::_GenomeTabWidget(
     SimulationFacade const& simulationFacade,
-    PreviewDescriptionSettings const& previewSettings,
     GenomeWindowEditData const& genomeEditData,
     GenomeDescription const& genome,
     SpecificEditData const& specificEditData,
@@ -167,7 +164,7 @@ _GenomeTabWidget::_GenomeTabWidget(
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
-    _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, previewSettings, genomeEditData, _editData);
+    _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, genomeEditData, _editData);
     _specificEditData = specificEditData;
 }
 

@@ -114,7 +114,6 @@ PUBLIC
     PatternEditorWindow.h
     PreviewDescriptionWidget.cpp
     PreviewDescriptionWidget.h
-    PreviewDescriptionWidgetSettings.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
