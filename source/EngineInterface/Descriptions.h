@@ -383,14 +383,15 @@ struct CollectionDescription
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
     CellDescription const& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr) const;
     CellDescription& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr);
-    CellDescription& getOtherCell(uint64_t id);
-    CellDescription& getOtherCell(std::set<uint64_t> const& ids);
+    CellDescription& getOtherCellRef(uint64_t id);
+    CellDescription& getOtherCellRef(std::set<uint64_t> const& ids);
+    std::vector<CellDescription> getOtherCells(std::set<uint64_t> const& ids) const;
     bool hasConnection(uint64_t id, uint64_t otherId) const;
     bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     ConnectionDescription getConnection(uint64_t id, uint64_t otherId) const;
     ConnectionDescription getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
-    CreatureDescription& getCreature(uint64_t id);
-    CreatureDescription& getOtherCreature(uint64_t id);
+    CreatureDescription& getCreatureRef(uint64_t id);
+    CreatureDescription& getOtherCreatureRef(uint64_t id);
 
 private:
     _CollectionCache::Index getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const;

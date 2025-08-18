@@ -25,7 +25,6 @@ private:
 
     void processToolbar();
     void processTabWidget();
-    void processStatusBar();
 
     void onOpenGenome();
     void onSaveGenome();

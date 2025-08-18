@@ -1,7 +1,10 @@
 #include "SimulatedPreviewWidget.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/combine.hpp>
+
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/StringHelper.h"
 
@@ -40,7 +43,8 @@ void _SimulatedPreviewWidget::process()
     calcPreview();
     drawPreview();
 
-    _genomeEditData->currentTps = calcTpsForPreview();
+    processActionBar();
+
     _genomeFromPreviousFrame = _editData->genome;
 }
 
@@ -56,8 +60,8 @@ _SimulatedPreviewWidget::_SimulatedPreviewWidget(
 
 void _SimulatedPreviewWidget::createSubGenomesForPreview()
 {
-    auto creatureGenesVec = GenomeDescriptionInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
-    _subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, creatureGenesVec);
+    _geneIndicesForSubGenomes = GenomeDescriptionInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
+    _subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, _geneIndicesForSubGenomes);
 }
 
 void _SimulatedPreviewWidget::setPreviewData()
@@ -101,7 +105,7 @@ void _SimulatedPreviewWidget::setPreviewData()
 void _SimulatedPreviewWidget::calcPreview()
 {
     auto fps = WindowController::get().getFps();
-    auto duration = /*_settings->maxSpeed ? std::chrono::milliseconds(1000 / fps) :*/ std::chrono::milliseconds(1000 / fps / 2);
+    auto duration = _fullSpeed ? std::chrono::milliseconds(1000 / fps) : std::chrono::milliseconds(1000 / fps / 2);
     _simulationFacade->calcTimestepsForPreview(duration);
 }
 
@@ -131,8 +135,7 @@ void _SimulatedPreviewWidget::drawPreview()
         _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
     }
 
-    if (ImGui::BeginChild("Sandboxes", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-
+    if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto space = ImGui::GetContentRegionAvail();
         auto width = std::max(space.x / _previewWidgets.size(), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
@@ -145,22 +148,40 @@ void _SimulatedPreviewWidget::drawPreview()
     ImGui::EndChild();
 }
 
-void _SimulatedPreviewWidget::processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, float width)
+void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width)
 {
-    ImGui::PushID(previewWidgetIndex);
+    ImGui::PushID(subGenomeIndex);
     if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
         auto multipleSandboxes = _previewWidgets.size() > 1;
         if (multipleSandboxes) {
             AlienGui::MoveTickUp();
             AlienGui::MoveTickUp();
-            AlienGui::Group(AlienGui::GroupParameters().text("Sandbox " + std::to_string(previewWidgetIndex + 1)));
+
+            auto title = "Sandbox " + std::to_string(subGenomeIndex + 1);
+            std::vector<std::string> geneIndexStrings;
+            for (auto const& geneIndex : _geneIndicesForSubGenomes.at(subGenomeIndex)) {
+                geneIndexStrings.emplace_back("Gene " + std::to_string(geneIndex));
+            }
+            title += ": " + boost::join(geneIndexStrings, ", ");
+            AlienGui::Group(AlienGui::GroupParameters().text(title));
         }
-        GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+        //GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
         auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
-        _previewWidgets.at(previewWidgetIndex)->process(previewDesc);
+        _previewWidgets.at(subGenomeIndex)->process(previewDesc);
     }
     ImGui::EndChild();
     ImGui::PopID();
+}
+
+void _SimulatedPreviewWidget::processActionBar()
+{
+    AlienGui::Separator();
+    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_GAMEPAD), _fullSimulation);
+    ImGui::SameLine();
+    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_FAN), _fullSpeed);
+    ImGui::SameLine();
+    auto tps = calcTpsForPreview();
+    AlienGui::Text("TPS: " + StringHelper::format(tps));
 }
 
 int _SimulatedPreviewWidget::calcTpsForPreview()

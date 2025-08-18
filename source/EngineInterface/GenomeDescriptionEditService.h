@@ -8,6 +8,7 @@
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
 
+using GeneIndicesForSubGenome = std::vector<int>;
 class GenomeDescriptionEditService
 {
     MAKE_SINGLETON(GenomeDescriptionEditService);
@@ -21,7 +22,6 @@ public:
     void removeNode(GeneDescription& gene, int index) const;
     void swapNodes(GeneDescription& gene, int index) const;  // Swaps node at index with node at index + 1
 
-    using GeneIndicesForSubGenome = std::vector<int>;
     std::vector<GenomeDescriptionWithStartGeneIndex> createSubGenomesForPreview(
         GenomeDescription const& genome,
         std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;

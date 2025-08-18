@@ -87,7 +87,6 @@ void GenomeEditorWindow::processIntern()
 {
     processToolbar();
     processTabWidget();
-    processStatusBar();
 }
 
 bool GenomeEditorWindow::isShown()
@@ -152,7 +151,7 @@ void GenomeEditorWindow::processToolbar()
 
 void GenomeEditorWindow::processTabWidget()
 {
-    if (ImGui::BeginChild("TabWidget", ImVec2(0, -scale(44.0f)), 0, 0)) {
+    if (ImGui::BeginChild("TabWidget", ImVec2(0, 0), 0, 0)) {
 
         if (ImGui::BeginTabBar(
                 "##CreatureTabWidget", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_Reorderable)) {
@@ -207,15 +206,6 @@ void GenomeEditorWindow::processTabWidget()
         }
     }
     ImGui::EndChild();
-}
-
-void GenomeEditorWindow::processStatusBar()
-{
-    std::vector<std::string> statusItems;
-    if (_genomeEditData->currentTps.has_value()) {
-        statusItems.emplace_back("Preview TPS: " + StringHelper::format(_genomeEditData->currentTps.value()));
-    }
-    AlienGui::StatusBar(statusItems);
 }
 
 void GenomeEditorWindow::onOpenGenome()

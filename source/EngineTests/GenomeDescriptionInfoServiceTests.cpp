@@ -300,6 +300,24 @@ TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_multipleBran
     EXPECT_EQ(2 * 5 * 10, result);
 }
 
+TEST_F(GenomeDescriptionInfoServiceTests, getNumberOfResultingCells_nestedMultipleBranches)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+        }),
+        GeneDescription().separation(false).numBranches(2).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+        }),
+        GeneDescription().separation(false).numBranches(2).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto result = _genomeDescriptionInfoService.getNumberOfResultingCells(genome);
+
+    EXPECT_EQ(1 + 2 * (1 + 2 * 1), result);
+}
+
 TEST_F(GenomeDescriptionInfoServiceTests, getReferences)
 {
     auto genome = GenomeDescription().genes({

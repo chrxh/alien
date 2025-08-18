@@ -39,7 +39,6 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
 
     auto const& editService = DescriptionEditService::get();
 
-    // Remove seed
     if (phenotype.isEmpty()) {
         return result;
     }

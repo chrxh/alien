@@ -5,6 +5,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescription.h"
+#include "EngineInterface/GenomeDescriptionEditService.h"
 
 #include "Definitions.h"
 
@@ -29,11 +30,12 @@ private:
     void calcPreview();
     void drawPreview();
 
-private:
-    void processSandbox(int previewWidgetIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
+    void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
+    void processActionBar();
 
     int calcTpsForPreview();
 
+private:
     SimulationFacade _simulationFacade;
     std::vector<PreviewDescriptionWidget> _previewWidgets;
 
@@ -41,11 +43,12 @@ private:
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
+    bool _fullSpeed = false;
+    bool _fullSimulation = false;
+
+    std::vector<GeneIndicesForSubGenome> _geneIndicesForSubGenomes;
     std::vector<GenomeDescriptionWithStartGeneIndex> _subGenomesForPreview;
     std::vector<uint64_t> _creatureIdsForPreview;
-
-    GenomeDescription _genomeForPreview;
-    int _rootGeneIndex = 0;
 
     std::optional<GenomeDescription> _genomeFromPreviousFrame;
 

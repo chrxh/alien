@@ -670,7 +670,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                     }
                     nearCell->releaseLock();
                 } else {
-                    crossingLinks = true;
+                    // crossingLinks = true;
                 }
             }
             if (!crossingLinks) {

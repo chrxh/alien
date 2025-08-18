@@ -409,12 +409,12 @@ CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, Colle
     }
 }
 
-CellDescription& CollectionDescription::getOtherCell(uint64_t id)
+CellDescription& CollectionDescription::getOtherCellRef(uint64_t id)
 {
-    return getOtherCell(std::set<uint64_t>{id});
+    return getOtherCellRef(std::set<uint64_t>{id});
 }
 
-CellDescription& CollectionDescription::getOtherCell(std::set<uint64_t> const& ids)
+CellDescription& CollectionDescription::getOtherCellRef(std::set<uint64_t> const& ids)
 {
     std::vector<uint64_t> matchingCells;
     for (auto& cell : _cells) {
@@ -444,6 +444,17 @@ CellDescription& CollectionDescription::getOtherCell(std::set<uint64_t> const& i
         }
     }
     CHECK(false);
+}
+
+std::vector<CellDescription> CollectionDescription::getOtherCells(std::set<uint64_t> const& ids) const
+{
+    std::vector<CellDescription> result;
+    forEachCell([&](auto const& cell) {
+        if (ids.contains(cell._id)) {
+            result.emplace_back(cell);
+        }
+    });
+    return result;
 }
 
 bool CollectionDescription::hasConnection(uint64_t id, uint64_t otherId) const
@@ -483,7 +494,7 @@ ConnectionDescription CollectionDescription::getConnection(CellDescription const
     CHECK(false);
 }
 
-CreatureDescription& CollectionDescription::getCreature(uint64_t id)
+CreatureDescription& CollectionDescription::getCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id == id) {
@@ -493,7 +504,7 @@ CreatureDescription& CollectionDescription::getCreature(uint64_t id)
     CHECK(false);
 }
 
-CreatureDescription& CollectionDescription::getOtherCreature(uint64_t id)
+CreatureDescription& CollectionDescription::getOtherCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id != id) {

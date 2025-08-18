@@ -281,7 +281,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -315,7 +315,7 @@ TEST_F(ConstructorTests, emptyGenome)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -349,7 +349,7 @@ TEST_F(ConstructorTests, emptyGene)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -383,7 +383,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -417,7 +417,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -450,7 +450,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -484,7 +484,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -525,10 +525,10 @@ TEST_F(ConstructorTests, insufficientSpace)
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getCreature(1);
+    auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
@@ -596,10 +596,10 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getOtherCreature(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = hostCreature._cells.front();
@@ -641,10 +641,10 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getOtherCreature(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = hostCreature._cells.front();
@@ -697,12 +697,12 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__an
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
-    auto newCreature = actualData.getOtherCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
     ASSERT_EQ(3, newCreature._cells.size());
 
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
     auto prevConstructedCell = actualData.getCellRef(2);
     auto prevPrevConstructedCell = actualData.getCellRef(3);
 
@@ -753,12 +753,12 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__an
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
-    auto newCreature = actualData.getOtherCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
     ASSERT_EQ(3, newCreature._cells.size());
 
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
     auto prevConstructedCell = actualData.getCellRef(2);
     auto prevPrevConstructedCell = actualData.getCellRef(3);
 
@@ -801,11 +801,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell(0);
+    auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront));
@@ -851,11 +851,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell(0);
+    auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront));
@@ -891,11 +891,11 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell(0);
+    auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
@@ -935,11 +935,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell(0);
+    auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
@@ -978,11 +978,11 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(3, hostCreature._cells.size());
 
     auto hostCell = hostCreature._cells.front();
-    auto newCell = actualData.getOtherCell({0, 1});
+    auto newCell = actualData.getOtherCellRef({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, 1.0f), newCell._pos));
@@ -1020,11 +1020,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell({0});
+    auto newCell = actualData.getOtherCellRef({0});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront));
@@ -1061,14 +1061,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getOtherCreature(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell({0});
+    auto newCell = actualData.getOtherCellRef({0});
 
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_FALSE(actualData.hasConnection(newCell, hostCell));
@@ -1103,10 +1103,10 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
 
-    auto newCreature = actualData.getOtherCreature(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = hostCreature._cells.front();
@@ -1141,11 +1141,11 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(3, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell({0, 1});
+    auto newCell = actualData.getOtherCellRef({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(1.0f, 0.0f), newCell._pos));
     EXPECT_TRUE(actualData.hasConnection(0, newCell._id));
@@ -1182,11 +1182,11 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1, 2});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(hostCell._pos + RealVector2D(0.0f, 1.0f), newCell._pos));
     EXPECT_TRUE(actualData.hasConnection(1, newCell._id));
@@ -1234,11 +1234,11 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1, 2});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(135.0f + FrontAngle - ConstructionAngle, newCell._angleToFront));
 
@@ -1289,15 +1289,15 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getCreature(1);
+    auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1});
+    auto newCell = actualData.getOtherCellRef({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
@@ -1339,12 +1339,12 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         ASSERT_EQ(1, actualData._creatures.size());
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-        auto creature = actualData.getCreature(0);
+        auto creature = actualData.getCreatureRef(0);
         ASSERT_EQ(3, creature._cells.size());
 
         auto hostCell = actualData.getCellRef(0);
         auto prevCell = actualData.getCellRef(1);
-        auto newCell = actualData.getOtherCell({0, 1});
+        auto newCell = actualData.getOtherCellRef({0, 1});
         EXPECT_EQ(CellState_Activating, newCell._cellState);
         EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
         EXPECT_TRUE(approxCompare(LastAngle + FrontAngle, newCell._angleToFront));
@@ -1403,12 +1403,12 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
     auto prevCell = actualData.getCellRef(3);
-    auto newCell = actualData.getOtherCell({0, 1, 2, 3});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2, 3});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(-45.0f + FrontAngle + MiddleAngle, newCell._angleToFront));
@@ -1457,12 +1457,12 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, creature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
     auto prevCell = actualData.getCellRef(3);
-    auto newCell = actualData.getOtherCell({0, 1, 2, 3});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2, 3});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(45.0f + FrontAngle + MiddleAngle, newCell._angleToFront));
@@ -1499,13 +1499,13 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, creature._cells.size());
 
     auto actualOtherCell = actualData.getCellRef(1);
     auto actualHostCell = actualData.getCellRef(2);
     auto actualPrevConstructedCell = actualData.getCellRef(3);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
     ASSERT_EQ(1, actualOtherCell._connections.size());
     ASSERT_EQ(2, actualHostCell._connections.size());
@@ -1558,15 +1558,15 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getCreature(1);
+    auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1});
+    auto newCell = actualData.getOtherCellRef({0, 1});
     
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(actualData.hasConnection(1, newCell._id));
@@ -1618,16 +1618,16 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getCreature(1);
+    auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevPrevCell = actualData.getCellRef(1);
     auto prevCell = actualData.getCellRef(2);
-    auto newCell = actualData.getOtherCell({0, 1, 2});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2});
 
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(actualData.hasConnection(prevPrevCell, prevCell));
@@ -1706,16 +1706,16 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getCreature(1);
+    auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevPrevCell = actualData.getCellRef(1);
     auto prevCell = actualData.getCellRef(2);
-    auto newCell = actualData.getOtherCell({0, 1, 2});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2});
 
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     if (angleAlignment != ConstructorAngleAlignment_180) {
@@ -1805,12 +1805,12 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(3, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1});
+    auto newCell = actualData.getOtherCellRef({0, 1});
 
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
@@ -1868,13 +1868,13 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(6, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(4);
     auto prevPrevPrevCell = actualData.getCellRef(2);
-    auto newCell = actualData.getOtherCell({0, 1, 2, 3, 4});
+    auto newCell = actualData.getOtherCellRef({0, 1, 2, 3, 4});
 
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
@@ -1930,14 +1930,14 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1_num
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, hostCreature._cells.size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualUpperConstructedCell = actualData.getCellRef(3);
     auto actualLowerConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3, 4});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(3, actualConstructedCell._connections.size());
@@ -2000,7 +2000,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3, 4});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(4, actualConstructedCell._connections.size());
@@ -2066,7 +2066,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3, 4});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(4, actualConstructedCell._connections.size());
@@ -2125,7 +2125,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, creature._cells.size());
 
     auto actualHostCell = actualData.getCellRef(1);
@@ -2133,7 +2133,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     auto origPrevPrevConstructedCell = data.getCellRef(3);
     auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3, 4});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(3, actualConstructedCell._connections.size());
@@ -2189,14 +2189,14 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, creature._cells.size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3, 4});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(3, actualConstructedCell._connections.size());
@@ -2250,13 +2250,13 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, creature._cells.size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(2, actualConstructedCell._connections.size());
@@ -2307,14 +2307,14 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, creature._cells.size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
     auto actualPrevPrevConstructedCell = actualData.getCellRef(3);
     auto actualPrevPrevPrevConstructedCell = actualData.getCellRef(4);
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3, 4});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3, 4});
 
     ASSERT_EQ(1, actualHostCell._connections.size());
     ASSERT_EQ(3, actualConstructedCell._connections.size());
@@ -2357,14 +2357,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getOtherCreature(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
-    auto newCell = actualData.getOtherCell({0});
+    auto newCell = actualData.getOtherCellRef({0});
 
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
@@ -2406,15 +2406,15 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
 
-    auto newCreature = actualData.getOtherCreature(0);
+    auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
-    auto newCell = actualData.getOtherCell({0, 1});
+    auto newCell = actualData.getOtherCellRef({0, 1});
 
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
@@ -2460,11 +2460,11 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    auto hostCreature = actualData.getCreature(0);
+    auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, hostCreature._cells.size());
 
     auto const& hostCell = actualData.getCellRef(1);
-    auto const& newCell = actualData.getOtherCell({0, 1, 2});
+    auto const& newCell = actualData.getOtherCellRef({0, 1, 2});
 
     auto angleSpan_cell2_cell0 = hostCell.getAngleSpan(2, 0);
     auto angleSpan_lastCell_and_cell0 = hostCell.getAngleSpan(newCell._id, 0);
@@ -2501,10 +2501,10 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__an
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, creature._cells.size());
 
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
     EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront));
@@ -2540,10 +2540,10 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__an
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
-    auto creature = actualData.getCreature(0);
+    auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, creature._cells.size());
 
-    auto actualConstructedCell = actualData.getOtherCell({1, 2, 3});
+    auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
     EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._angleToFront));
@@ -2612,7 +2612,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             ASSERT_EQ(1, actualData._creatures.size());
             EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-            auto hostCreature = actualData.getCreature(0);
+            auto hostCreature = actualData.getCreatureRef(0);
             ASSERT_EQ(3 + i + 1, hostCreature._cells.size());
 
             auto hostCell = actualData.getCellRef(1);
@@ -2621,7 +2621,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             knownCellIds.insert(0);
             knownCellIds.insert(1);
             knownCellIds.insert(2);
-            auto newCell = actualData.getOtherCell(knownCellIds);
+            auto newCell = actualData.getOtherCellRef(knownCellIds);
             createdCellIds.emplace_back(newCell._id);
 
             if (i < n - 1) {
@@ -2672,4 +2672,57 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
         angle = Math::normalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);
     }
+}
+
+TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().nodes({}),
+        GeneDescription()
+            .separation(false)
+            .shape(ConstructorShape_Hexagon).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription()}),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}),
+            CellDescription()
+                .id(2)
+                .pos({10.0f, 9.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(6)),
+            CellDescription().id(3).pos({11.0f, 9.0f}),
+            CellDescription()
+                .id(4)
+                .pos({11.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(
+                    ConstructorDescription().autoTriggerInterval(1).geneIndex(1).currentNodeIndex(2).lastConstructedCellId(8)),
+
+            CellDescription().id(5).pos({10.0f, 9.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
+            CellDescription().id(6).pos({10.0f, 9.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
+            CellDescription().id(7).pos({11.0f + getOffspringDistance() + 1.0f, 10.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
+            CellDescription().id(8).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+    data.addConnection(4, 1);
+
+    data.addConnection(5, 6);
+    data.addConnection(6, 2);
+
+    data.addConnection(7, 8);
+    data.addConnection(8, 4);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(10, creature._cells.size());
 }
