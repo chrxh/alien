@@ -86,8 +86,8 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
     }
 
     // Create preview cells
-    auto getNode = [&](CellDescription const& cell) -> NodeDescription const& {
-        return genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex); };
+    auto getNode = [&](CellDescription const& cell) -> NodeDescription const& { return genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex); };
+    //auto getGene = [&](CellDescription const& cell) -> GeneDescription const& { return genome._genes.at(cell._geneIndex); };
     phenotype.forEachCell([&](CellDescription const& cell) {
         auto const& node = getNode(cell);
         auto const& color = node._color;
@@ -100,6 +100,15 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
             auto signalAngleRestrictionStart = Math::normalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
             auto signalAngleRestrictionEnd = Math::normalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
+        }
+        if (cell.getCellType() == CellType_Constructor) {
+            auto constructor = std::get<ConstructorDescription>(cell._cellTypeData);
+            if (!genome._genes.empty()) {
+                auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                if (constructor._geneIndex == genome._genes.size()) {
+                    previewCell._linkToGene = nodeConstructor._geneIndex;
+                }
+            }
         }
         result._cells.emplace_back(previewCell);
     });

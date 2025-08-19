@@ -32,6 +32,7 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
     auto windowSize = ImGui::GetWindowSize();
     if (ImGui::BeginChild("outerPreview", ImVec2(0, 0), 0, ImGuiWindowFlags_AlwaysHorizontalScrollbar)) {
 
+        auto const& style = StyleRepository::get();
         ImDrawList* drawList = ImGui::GetWindowDrawList();
         auto const cellSize = scale(_zoom);
 
@@ -223,6 +224,22 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
                     }
                 }
             }
+
+            // Draw gene references
+            if (_zoom > ZoomLevelForLabels) {
+                for (auto const& cell : desc._cells) {
+                    if (cell._linkToGene.has_value()) {
+                        auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+                        drawList->AddText(
+                            style.getSmallBoldFont(),
+                            cellSize / 2,
+                            {cellPos.x + cellSize * 0.4f, cellPos.y + cellSize * 0.2f},
+                            Const::GenomePreviewInfinitySymbolColor,
+                            std::to_string(cell._linkToGene.value() + 1).c_str());
+                    }
+                }
+            }
+
 
             // Draw cell infos (start/end marks and multiple constructor marks)
             //if (zoom > ZoomLevelForLabels) {

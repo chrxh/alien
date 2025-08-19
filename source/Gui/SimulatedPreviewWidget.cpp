@@ -165,7 +165,7 @@ void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescr
             title += ": " + boost::join(geneIndexStrings, ", ");
             AlienGui::Group(AlienGui::GroupParameters().text(title));
         }
-        //GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+        GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
         auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
         _previewWidgets.at(subGenomeIndex)->process(previewDesc);
     }

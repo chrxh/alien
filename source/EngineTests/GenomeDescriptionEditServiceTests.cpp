@@ -417,3 +417,42 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
     auto const& gene2 = subGenome._genes.at(2);
     ASSERT_EQ(2, gene2._nodes.size());
 }
+
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_separation)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({
+            NodeDescription(),
+        }),
+        GeneDescription().separation(true).nodes({
+            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
+        }),
+    });
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}, {1}});
+
+    ASSERT_EQ(2, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    {
+        auto const& subGenome = subGenomes.at(0).genome;
+
+        ASSERT_EQ(2, subGenome._genes.size());
+
+        auto const& gene0 = subGenome._genes.at(0);
+        ASSERT_EQ(1, gene0._nodes.size());
+
+        auto const& gene1 = subGenome._genes.at(1);
+        ASSERT_EQ(0, gene1._nodes.size());
+    }
+    {
+        auto const& subGenome = subGenomes.at(1).genome;
+
+        ASSERT_EQ(2, subGenome._genes.size());
+
+        auto const& gene0 = subGenome._genes.at(0);
+        ASSERT_EQ(0, gene0._nodes.size());
+
+        auto const& gene1 = subGenome._genes.at(1);
+        ASSERT_EQ(1, gene1._nodes.size());
+        EXPECT_EQ(2, getRefGeneIndex(gene1, 0));  // Castrated
+    }
+}

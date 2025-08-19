@@ -101,12 +101,12 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         std::set creatureGeneSet(geneIndicesForSubGenome.begin(), geneIndicesForSubGenome.end());
         auto clone = genome;
+        adaptDescriptionForPreview(clone, geneIndicesForSubGenome.front());
         for (int i = 0, size = clone._genes.size(); i < size; ++i) {
             if (!creatureGeneSet.contains(i)) {
                 clone._genes[i] = GeneDescription();
             }
         }
-        adaptDescriptionForPreview(clone, geneIndicesForSubGenome.front());
         result.emplace_back(clone, geneIndicesForSubGenome.front());
     }
     return result;
@@ -163,6 +163,11 @@ namespace
                         constructor._geneIndex = genome._genes.size();  // Perform castration
                     } else {
                         castrate(genome, constructor._geneIndex, inspectedGeneIndices);  // Inspect further gene
+
+                        auto& refGene = genome._genes.at(constructor._geneIndex);
+                        if (refGene._separation) {
+                            constructor._geneIndex = genome._genes.size();  // Perform castration
+                        }
                     }
                 }
             }
@@ -191,12 +196,12 @@ namespace
 
 void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const
 {
-    genome._genes.at(startGeneIndex)._separation = false;
-
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
     setNodeAttributesForPreview(genome);
     if (!genome._genes.empty()) {
         genome._genes.at(startGeneIndex)._numBranches = 1;
     }
+
+    genome._genes.at(startGeneIndex)._separation = false;
 }
