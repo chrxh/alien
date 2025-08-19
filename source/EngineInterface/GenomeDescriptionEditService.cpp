@@ -160,13 +160,13 @@ namespace
                 auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex < genome._genes.size()) {
                     if (inspectedGeneIndices.contains(constructor._geneIndex)) {
-                        constructor._geneIndex = genome._genes.size();  // Perform castration
+                        constructor._geneIndex = genome._genes.size();  // Recursive part => perform castration
                     } else {
                         castrate(genome, constructor._geneIndex, inspectedGeneIndices);  // Inspect further gene
 
                         auto& refGene = genome._genes.at(constructor._geneIndex);
                         if (refGene._separation) {
-                            constructor._geneIndex = genome._genes.size();  // Perform castration
+                            constructor._geneIndex = genome._genes.size();  // Separated part => perform castration
                         }
                     }
                 }

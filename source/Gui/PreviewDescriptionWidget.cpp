@@ -230,12 +230,21 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
                 for (auto const& cell : desc._cells) {
                     if (cell._linkToGene.has_value()) {
                         auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+                        auto text = std::to_string(cell._linkToGene.value() + 1);
+                        auto textLength = text.size();
+                        drawList->AddRectFilled(
+                            {cellPos.x + cellSize * 0.3f, cellPos.y + cellSize * 0.2f},
+                            {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.5f, cellPos.y + cellSize * 0.9f},
+                            Const::GenomePreviewLinkToGeneBackgroundColor1);
+                        drawList->AddRect(
+                            {cellPos.x + cellSize * 0.3f, cellPos.y + cellSize * 0.2f},
+                            {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.5f, cellPos.y + cellSize * 0.9f},
+                            Const::GenomePreviewLinkToGeneBackgroundColor2);
                         drawList->AddText(
                             style.getSmallBoldFont(),
-                            cellSize / 2,
-                            {cellPos.x + cellSize * 0.4f, cellPos.y + cellSize * 0.2f},
-                            Const::GenomePreviewInfinitySymbolColor,
-                            std::to_string(cell._linkToGene.value() + 1).c_str());
+                            cellSize / 1.5f,
+                            {cellPos.x + cellSize * 0.4f + 0.5f, cellPos.y + cellSize * 0.2f + 0.5f},
+                            Const::GenomePreviewLinkToGeneTextColor, text.c_str());
                     }
                 }
             }
