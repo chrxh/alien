@@ -32,8 +32,7 @@ SimulatedPreviewWidget _SimulatedPreviewWidget::create(
 
 void _SimulatedPreviewWidget::process()
 {
-    if (!_genomeFromPreviousFrame.has_value()
-        || _genomeFromPreviousFrame.value() != _editData->genome /* || _selectedGeneIndexFromPreviousFrame != _editData->selectedGeneIndex*/) {
+    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         createSubGenomesForPreview();
         setPreviewData();
     }
@@ -125,18 +124,6 @@ namespace
     }
 }
 
-namespace
-{
-    std::map<int, int> getStartGeneToSubGenomeIndex(std::vector<GeneIndicesForSubGenome> const& subGenomes)
-    {
-        std::map<int, int> result;
-        for (auto const& [index, subGenome] : subGenomes | boost::adaptors::indexed(0)) {
-            result.insert({subGenome.front(), toInt(index)});
-        }
-        return result;
-    }
-}
-
 void _SimulatedPreviewWidget::drawPreview()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
@@ -148,12 +135,10 @@ void _SimulatedPreviewWidget::drawPreview()
     }
 
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-        auto startGeneToSubGenomeIndex = getStartGeneToSubGenomeIndex(_geneIndicesForSubGenomes);
-
         auto space = ImGui::GetContentRegionAvail();
         auto width = std::max(space.x / _previewWidgets.size(), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, startGeneToSubGenomeIndex, width);
+            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, width);
             if (i < size - 1) {
                 ImGui::SameLine();
             }
@@ -162,12 +147,7 @@ void _SimulatedPreviewWidget::drawPreview()
     ImGui::EndChild();
 }
 
-void _SimulatedPreviewWidget::processSandbox(
-    int subGenomeIndex,
-    CollectionDescription&& phenotype,
-    int geneStartIndex,
-    std::map<int, int> const& startGeneToSubGenomeIndex,
-    float width)
+void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width)
 {
     ImGui::PushID(subGenomeIndex);
     if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
@@ -186,7 +166,7 @@ void _SimulatedPreviewWidget::processSandbox(
         }
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
         auto previewDesc =
-            PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, startGeneToSubGenomeIndex);
+            PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
         _previewWidgets.at(subGenomeIndex)->process(previewDesc);
     }
     ImGui::EndChild();

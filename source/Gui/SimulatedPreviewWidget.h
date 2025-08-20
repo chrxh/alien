@@ -30,7 +30,7 @@ private:
     void calcPreview();
     void drawPreview();
 
-    void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, std::map<int, int> const& startGeneToSubGenomeIndex, float width);
+    void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
     void processActionBar();
 
     int calcTpsForPreview();

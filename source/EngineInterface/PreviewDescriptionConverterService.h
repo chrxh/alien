@@ -11,5 +11,5 @@ class PreviewDescriptionConverterService
 
 public:
     PreviewDescription
-    convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex, std::map<int, int> const& startGeneToSubGenomeIndex) const;
+    convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex) const;
 };

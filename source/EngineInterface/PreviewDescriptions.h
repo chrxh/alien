@@ -22,7 +22,7 @@ struct CellPreviewDescription
     MEMBER(CellPreviewDescription, int, geneIndex, 0);
     MEMBER(CellPreviewDescription, int, nodeIndex, 0);
     MEMBER(CellPreviewDescription, std::optional<SignalRestrictionPreviewDescription>, signalRestriction, std::nullopt);
-    MEMBER(CellPreviewDescription, std::optional<int>, sandboxIndex, std::nullopt);
+    MEMBER(CellPreviewDescription, std::optional<int>, constructorGeneIndex, std::nullopt);
 };
 
 struct ConnectionPreviewDescription

@@ -33,11 +33,7 @@ namespace
     }
 }
 
-PreviewDescription PreviewDescriptionConverterService::convert(
-    GenomeDescription const& genome,
-    CollectionDescription&& phenotype,
-    int startGeneIndex,
-    std::map<int, int> const& startGeneToSubGenomeIndex) const
+PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex) const
 {
     PreviewDescription result;
 
@@ -110,7 +106,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(
             if (!genome._genes.empty()) {
                 auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex == genome._genes.size()) {
-                    previewCell._sandboxIndex = startGeneToSubGenomeIndex.at(nodeConstructor._geneIndex);
+                    previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
                 }
             }
         }
