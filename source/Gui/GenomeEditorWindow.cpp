@@ -109,20 +109,15 @@ void GenomeEditorWindow::processToolbar()
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters()
                 .text(ICON_FA_UPLOAD)
-                .tooltip("Share your creature with other users:\nYour current genome will be uploaded to the server and made visible in the browser."))) {
+                .tooltip("Share your genome with other users:\nYour current genome will be uploaded to the server and made visible in the browser."))) {
     }
 
     ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome"))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
         printOverlayMessage("Creature copied");
-    }
-
-    ImGui::SameLine();
-    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste genome"))) {
-        printOverlayMessage("Creature pasted");
     }
 
     ImGui::SameLine();

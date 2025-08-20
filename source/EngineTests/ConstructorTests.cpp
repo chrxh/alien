@@ -2697,7 +2697,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
                 .pos({11.0f, 10.0f})
                 .energy(getConstructorEnergy())
                 .cellTypeData(
-                    ConstructorDescription().autoTriggerInterval(1).geneIndex(1).currentNodeIndex(2).lastConstructedCellId(8)),
+                    ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(8)),
 
             CellDescription().id(5).pos({10.0f, 9.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
             CellDescription().id(6).pos({10.0f, 9.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
@@ -2725,4 +2725,69 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(10, creature._cells.size());
+}
+
+TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().nodes({}),
+        GeneDescription().separation(false).shape(ConstructorShape_Hexagon).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(false).shape(ConstructorShape_Hexagon).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
+    });
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(1)
+                .pos({10.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(4)),
+            CellDescription()
+                .id(2)
+                .pos({11.0f, 10.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().geneIndex(2).currentNodeIndex(2).lastConstructedCellId(5)),
+
+            CellDescription().id(3).pos({10.0f, 10.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
+            CellDescription().id(4).pos({10.0f, 10.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
+            CellDescription().id(5).pos({11.0f, 10.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(2),
+            CellDescription().id(6).pos({11.0f, 10.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(2),
+        }),
+    });
+    data.addConnection(1, 2);
+
+    data.addConnection(3, 4);
+    data.addConnection(4, 1);
+
+    data.addConnection(5, 6);
+    data.addConnection(6, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(8, creature._cells.size());
+
+    auto constructedCells = actualData.getOtherCells({1, 2, 3, 4, 5, 6});
+    CellDescription cell1, cell2;
+    for (auto const& cell : constructedCells) {
+        if (cell._geneIndex == 1) {
+            cell1 = cell;
+        } else {
+            cell2 = cell;
+        }
+    }
+    EXPECT_EQ(3, cell1._connections.size());
+    EXPECT_TRUE(actualData.hasConnection(cell1._id, 1));
+    EXPECT_TRUE(actualData.hasConnection(cell1._id, 3));
+    EXPECT_TRUE(actualData.hasConnection(cell1._id, 4));
+
+    EXPECT_EQ(3, cell2._connections.size());
+    EXPECT_TRUE(actualData.hasConnection(cell2._id, 2));
+    EXPECT_TRUE(actualData.hasConnection(cell2._id, 5));
+    EXPECT_TRUE(actualData.hasConnection(cell2._id, 6));
 }
