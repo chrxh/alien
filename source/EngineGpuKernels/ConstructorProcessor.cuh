@@ -253,13 +253,15 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
 
     CudaShapeGenerator shapeGenerator;
     auto shape = result.gene->shape;
-    if (shape != ConstructorShape_Custom && !ConstructorHelper::isFirstNode(constructor) && !result.isLastNode) {
+    if (shape != ConstructorShape_Custom && !ConstructorHelper::isFirstNode(constructor) /*&& !result.isLastNode*/) {
+        result.gene->angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
         for (int i = 0; i <= constructor.currentNodeIndex; ++i) {
             auto generationResult = shapeGenerator.generateNextConstructionData(shape);
             if (i == constructor.currentNodeIndex) {
+                if (!result.isLastNode) {
+                    result.angle = generationResult.angle;
+                }
                 result.numAdditionalConnections = generationResult.numAdditionalConnections;
-                result.angle = generationResult.angle;
-                result.gene->angleAlignment = shapeGenerator.getConstructorAngleAlignment(shape);
                 result.requiredNodeId1 = generationResult.requiredNodeId1;
                 result.requiredNodeId2 = generationResult.requiredNodeId2;
             }

@@ -57,7 +57,7 @@ GenomeDescription GenomeEditorWindow::getCurrentCreature() const
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
-    : AlienWindow("Creature editor", "windows.genome editor", false, true, {500.0f, 300.0f})
+    : AlienWindow("Genome editor", "windows.genome editor", false, true, {500.0f, 300.0f})
 {
 }
 
