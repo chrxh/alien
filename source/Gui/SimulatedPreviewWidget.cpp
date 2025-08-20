@@ -125,6 +125,18 @@ namespace
     }
 }
 
+namespace
+{
+    std::map<int, int> getStartGeneToSubGenomeIndex(std::vector<GeneIndicesForSubGenome> const& subGenomes)
+    {
+        std::map<int, int> result;
+        for (auto const& [index, subGenome] : subGenomes | boost::adaptors::indexed(0)) {
+            result.insert({subGenome.front(), toInt(index)});
+        }
+        return result;
+    }
+}
+
 void _SimulatedPreviewWidget::drawPreview()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
@@ -136,10 +148,12 @@ void _SimulatedPreviewWidget::drawPreview()
     }
 
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+        auto startGeneToSubGenomeIndex = getStartGeneToSubGenomeIndex(_geneIndicesForSubGenomes);
+
         auto space = ImGui::GetContentRegionAvail();
         auto width = std::max(space.x / _previewWidgets.size(), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, width);
+            processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, startGeneToSubGenomeIndex, width);
             if (i < size - 1) {
                 ImGui::SameLine();
             }
@@ -148,7 +162,12 @@ void _SimulatedPreviewWidget::drawPreview()
     ImGui::EndChild();
 }
 
-void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width)
+void _SimulatedPreviewWidget::processSandbox(
+    int subGenomeIndex,
+    CollectionDescription&& phenotype,
+    int geneStartIndex,
+    std::map<int, int> const& startGeneToSubGenomeIndex,
+    float width)
 {
     ImGui::PushID(subGenomeIndex);
     if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
@@ -160,13 +179,14 @@ void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescr
             auto title = "Sandbox " + std::to_string(subGenomeIndex + 1);
             std::vector<std::string> geneIndexStrings;
             for (auto const& geneIndex : _geneIndicesForSubGenomes.at(subGenomeIndex)) {
-                geneIndexStrings.emplace_back("Gene " + std::to_string(geneIndex));
+                geneIndexStrings.emplace_back("Gene " + std::to_string(geneIndex + 1));
             }
             title += ": " + boost::join(geneIndexStrings, ", ");
             AlienGui::Group(AlienGui::GroupParameters().text(title));
         }
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
-        auto previewDesc = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
+        auto previewDesc =
+            PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, startGeneToSubGenomeIndex);
         _previewWidgets.at(subGenomeIndex)->process(previewDesc);
     }
     ImGui::EndChild();

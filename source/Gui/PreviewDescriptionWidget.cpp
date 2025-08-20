@@ -228,9 +228,9 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
             // Draw gene references
             if (_zoom > ZoomLevelForLabels) {
                 for (auto const& cell : desc._cells) {
-                    if (cell._linkToGene.has_value()) {
+                    if (cell._sandboxIndex.has_value()) {
                         auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
-                        auto text = std::to_string(cell._linkToGene.value() + 1);
+                        auto text = std::to_string(cell._sandboxIndex.value() + 1);
                         auto textLength = text.size();
                         drawList->AddRectFilled(
                             {cellPos.x + cellSize * 0.3f, cellPos.y + cellSize * 0.2f},

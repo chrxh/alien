@@ -10,5 +10,6 @@ class PreviewDescriptionConverterService
     MAKE_SINGLETON(PreviewDescriptionConverterService);
 
 public:
-    PreviewDescription convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex) const;
+    PreviewDescription
+    convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex, std::map<int, int> const& startGeneToSubGenomeIndex) const;
 };
