@@ -70,32 +70,46 @@ void _SimulatedPreviewWidget::setPreviewData()
     auto const& editService = DescriptionEditService::get();
     auto const& genomeEditService = GenomeDescriptionEditService::get();
 
+    // >>> Service method
     RealVector2D currentPos{toFloat(PREVIEW_HEIGHT) / 2, toFloat(PREVIEW_HEIGHT) / 2};
 
+    _seedCreatureIdsForPreview.clear();
     for (auto const& subGenome : _subGenomesForPreview) {
         auto findResult = _genomeEditData->genotypeToPhenotype.find(subGenome);
         if (findResult != _genomeEditData->genotypeToPhenotype.end()) {
             auto phenotype = findResult->second;
             editService.setCenter(phenotype, currentPos);
+
+            CHECK(phenotype._creatures.size() <= 2);
+            auto seedFirst = false;
+            if (phenotype._creatures.front()._generation == 0) {
+                seedFirst = true; // first Creature is seed
+                CHECK(phenotype._creatures.size() == 2);
+            }
             preview.add(std::move(phenotype));
+
+            if (seedFirst) {
+                _seedCreatureIdsForPreview.emplace_back(preview._creatures.at(preview._creatures.size() - phenotype._creatures.size())._id);
+            } else {
+                _seedCreatureIdsForPreview.emplace_back(preview._creatures.at(preview._creatures.size() - phenotype._creatures.size() + 1)._id);
+            }
         } else {
             auto seed = genomeEditService.createSeedForPreview(subGenome, currentPos);
             preview.add(std::move(seed));
+
+            _seedCreatureIdsForPreview.emplace_back(preview._creatures.back()._id);
         }
         currentPos.x += toFloat(PREVIEW_HEIGHT) / 2;  // Adjust position for the next sub-genome
     }
-    _creatureIdsForPreview.clear();
-    for (auto const& creature : preview._creatures) {
-        _creatureIdsForPreview.emplace_back(creature._id);
-    }
+    // <<< Service method
 
     _simulationFacade->setPreviewData(preview);
     _genomeEditData->currentPreviewId = _editData->id;
 
     // Create preview widgets
-    if (_previewWidgets.size() != _creatureIdsForPreview.size()) {
+    if (_previewWidgets.size() != _subGenomesForPreview.size()) {
         _previewWidgets.clear();
-        for (int i = 0, size = toInt(_creatureIdsForPreview.size()); i < size; ++i) {
+        for (int i = 0, size = toInt(_subGenomesForPreview.size()); i < size; ++i) {
             _previewWidgets.emplace_back(_PreviewDescriptionWidget::create(_editData));
         }
     }
@@ -129,7 +143,7 @@ void _SimulatedPreviewWidget::drawPreview()
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
 
     auto previewRawData = _simulationFacade->getPreviewData();
-    auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _creatureIdsForPreview);
+    auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _seedCreatureIdsForPreview);
     for (auto const& [subGenome, phenotype] : boost::combine(_subGenomesForPreview, phenotypes)) {
         _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
     }

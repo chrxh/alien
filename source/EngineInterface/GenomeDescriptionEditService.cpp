@@ -11,7 +11,6 @@
 namespace 
 {
     auto constexpr PreviewColor = 0;
-    auto constexpr SeedColor = 1;
 }
 
 void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index, GeneDescription const& newGene) const
@@ -120,30 +119,44 @@ CollectionDescription GenomeDescriptionEditService::createSeedForPreview(
         CreatureDescription()
             .genome(genomeWithStartIndex.genome)
             .cells({
-                CellDescription().color(SeedColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(genomeWithStartIndex.startIndex)).pos(pos),
+                CellDescription().color(PreviewColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(genomeWithStartIndex.startIndex)).pos(pos),
             }),
     });
 }
 
 std::vector<CollectionDescription> GenomeDescriptionEditService::extractPhenotypesFromPreview(
-    CollectionDescription&& preview, std::vector<uint64_t> const& creatureIds) const
+    CollectionDescription&& preview, std::vector<uint64_t> const& seedCreatureIds) const
 {
     std::unordered_map<uint64_t, int> creatureIdToIndex;
-    for (auto const& [index, creatureId] : creatureIds | boost::adaptors::indexed(0)) {
+    for (auto const& [index, creatureId] : seedCreatureIds | boost::adaptors::indexed(0)) {
         creatureIdToIndex.insert_or_assign(creatureId, toInt(index));
     }
 
-    std::vector<CollectionDescription> result(creatureIds.size());
+    std::vector<CollectionDescription> result(seedCreatureIds.size());
     for (auto& creature : preview._creatures) {
-        auto subGenomeIndex = creatureIdToIndex.at(creature._id);
-        result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
+        if (creature._generation == 0) {
+            auto subGenomeIndex = creatureIdToIndex.at(creature._id);
+            result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
+        } else {
+            CHECK(creature._generation == 1);
+            auto subGenomeIndex = creatureIdToIndex.at(creature._ancestorId);
+            result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
+        }
     }
     return result;
 }
 
 void GenomeDescriptionEditService::removeSeedFromPhenotype(CollectionDescription& phenotype) const
 {
-    DescriptionEditService::get().removeCellIf(phenotype, [](auto const& cell) { return cell._color == SeedColor; });
+    std::set<uint64_t> seedCellIds;
+    for (auto const& creature : phenotype._creatures) {
+        if (creature._generation == 0) {
+            for (auto const& cell : creature._cells) {
+                seedCellIds.insert(cell._id);
+            }
+        }
+    }
+    DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& cell) { return seedCellIds.contains(cell._id); });
 }
 
 namespace
@@ -203,5 +216,5 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
         genome._genes.at(startGeneIndex)._numBranches = 1;
     }
 
-    genome._genes.at(startGeneIndex)._separation = false;
+    genome._genes.at(startGeneIndex)._separation = true;
 }

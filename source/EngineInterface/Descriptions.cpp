@@ -168,6 +168,7 @@ ParticleDescription::ParticleDescription()
 CreatureDescription::CreatureDescription()
 {
     _id = NumberGenerator::get().createCreatureId();
+    _ancestorId = _id;
 }
 
 void CollectionDescription::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
@@ -219,6 +220,7 @@ void CollectionDescription::add(CollectionDescription&& other)
 
 void CollectionDescription::assignNewIds()
 {
+    // Assign new cell ids
     std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
     forEachCell([&](CellDescription& cell) {
         auto newId = NumberGenerator::get().createObjectId();
@@ -239,11 +241,21 @@ void CollectionDescription::assignNewIds()
             }
         }
     });
-    for (auto& particle : _particles) {
-        particle._id = NumberGenerator::get().createObjectId();
+
+    // Assign new creature ids
+    std::unordered_map<uint64_t, uint64_t> oldToNewCreatureId;
+    for (auto& creature : _creatures) {
+        auto newId = NumberGenerator::get().createCreatureId();
+        oldToNewCreatureId.insert({creature._id, newId});
+        creature._id = newId;
     }
     for (auto& creature : _creatures) {
-        creature._id = NumberGenerator::get().createCreatureId();
+        creature._ancestorId = oldToNewCreatureId.at(creature._ancestorId);
+    }
+
+    // Assign new particle ids
+    for (auto& particle : _particles) {
+        particle._id = NumberGenerator::get().createObjectId();
     }
 }
 
