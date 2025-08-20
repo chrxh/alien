@@ -25,10 +25,20 @@ public:
     std::vector<GenomeDescriptionWithStartGeneIndex> createSubGenomesForPreview(
         GenomeDescription const& genome,
         std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;
-    CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex, RealVector2D const& pos) const;
+
+    struct SeedCollectionResult
+    {
+        CollectionDescription data; 
+        std::vector<uint64_t> seedCreatureIds;
+    };
+    SeedCollectionResult createSeedCollectionForPreview(
+        std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes,
+        std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription> const& cache) const;
     std::vector<CollectionDescription> extractPhenotypesFromPreview(CollectionDescription&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
     void removeSeedFromPhenotype(CollectionDescription& phenotype) const;
 
 private:
+    CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const;
+
     void adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const;
 };

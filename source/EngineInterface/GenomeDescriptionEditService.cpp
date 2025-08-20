@@ -111,17 +111,41 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
     return result;
 }
 
-CollectionDescription GenomeDescriptionEditService::createSeedForPreview(
-    GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex,
-    RealVector2D const& pos) const
+auto GenomeDescriptionEditService::createSeedCollectionForPreview(
+    std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes,
+    std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription> const& cache) const -> SeedCollectionResult
 {
-    return CollectionDescription().creatures({
-        CreatureDescription()
-            .genome(genomeWithStartIndex.genome)
-            .cells({
-                CellDescription().color(PreviewColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(genomeWithStartIndex.startIndex)).pos(pos),
-            }),
-    });
+    auto const& editService = DescriptionEditService::get();
+
+    RealVector2D currentPos{toFloat(PREVIEW_HEIGHT) / 2, toFloat(PREVIEW_HEIGHT) / 2};
+
+    SeedCollectionResult result;
+    for (auto const& subGenome : subGenomes) {
+        auto findResult = cache.find(subGenome);
+        if (findResult != cache.end()) {
+            auto cachedPhenotype = findResult->second;
+            editService.setCenter(cachedPhenotype, currentPos);
+
+            CHECK(cachedPhenotype._creatures.size() <= 2);
+            auto seedFirst = false;
+            if (cachedPhenotype._creatures.front()._generation == 0) {
+                seedFirst = true;  // first Creature is seed
+                CHECK(cachedPhenotype._creatures.size() == 2);
+            }
+            result.data.add(std::move(cachedPhenotype));
+
+            auto index =
+                seedFirst ? result.data._creatures.size() - cachedPhenotype._creatures.size() : result.data._creatures.size() - cachedPhenotype._creatures.size() + 1;
+            result.seedCreatureIds.emplace_back(result.data._creatures.at(index)._id);
+        } else {
+            auto seed = createSeedForPreview(subGenome, currentPos);
+            result.data.add(std::move(seed));
+
+            result.seedCreatureIds.emplace_back(result.data._creatures.back()._id);
+        }
+        currentPos.x += toFloat(PREVIEW_HEIGHT) / 2;  // Adjust position for the next sub-genome
+    }
+    return result;
 }
 
 std::vector<CollectionDescription> GenomeDescriptionEditService::extractPhenotypesFromPreview(
@@ -205,6 +229,17 @@ namespace
             }
         }
     }
+}
+
+CollectionDescription GenomeDescriptionEditService::createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const
+{
+    return CollectionDescription().creatures({
+        CreatureDescription()
+            .genome(subGenome.genome)
+            .cells({
+                CellDescription().color(PreviewColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(subGenome.startIndex)).pos(pos),
+            }),
+    });
 }
 
 void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const

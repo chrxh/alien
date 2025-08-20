@@ -28,8 +28,7 @@ private:
     void createSubGenomesForPreview();
     void setPreviewData();
     void calcPreview();
-    void drawPreview();
-
+    void processSandboxes();
     void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
     void processActionBar();
 

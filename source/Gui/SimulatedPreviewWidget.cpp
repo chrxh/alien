@@ -40,7 +40,7 @@ void _SimulatedPreviewWidget::process()
         setPreviewData();
     }
     calcPreview();
-    drawPreview();
+    processSandboxes();
 
     processActionBar();
 
@@ -65,45 +65,12 @@ void _SimulatedPreviewWidget::createSubGenomesForPreview()
 
 void _SimulatedPreviewWidget::setPreviewData()
 {
-    CollectionDescription preview;
-
-    auto const& editService = DescriptionEditService::get();
     auto const& genomeEditService = GenomeDescriptionEditService::get();
 
-    // >>> Service method
-    RealVector2D currentPos{toFloat(PREVIEW_HEIGHT) / 2, toFloat(PREVIEW_HEIGHT) / 2};
+    auto preview = genomeEditService.createSeedCollectionForPreview(_subGenomesForPreview, _genomeEditData->genotypeToPhenotypeCache);
+    _seedCreatureIdsForPreview = preview.seedCreatureIds;
 
-    _seedCreatureIdsForPreview.clear();
-    for (auto const& subGenome : _subGenomesForPreview) {
-        auto findResult = _genomeEditData->genotypeToPhenotype.find(subGenome);
-        if (findResult != _genomeEditData->genotypeToPhenotype.end()) {
-            auto phenotype = findResult->second;
-            editService.setCenter(phenotype, currentPos);
-
-            CHECK(phenotype._creatures.size() <= 2);
-            auto seedFirst = false;
-            if (phenotype._creatures.front()._generation == 0) {
-                seedFirst = true; // first Creature is seed
-                CHECK(phenotype._creatures.size() == 2);
-            }
-            preview.add(std::move(phenotype));
-
-            if (seedFirst) {
-                _seedCreatureIdsForPreview.emplace_back(preview._creatures.at(preview._creatures.size() - phenotype._creatures.size())._id);
-            } else {
-                _seedCreatureIdsForPreview.emplace_back(preview._creatures.at(preview._creatures.size() - phenotype._creatures.size() + 1)._id);
-            }
-        } else {
-            auto seed = genomeEditService.createSeedForPreview(subGenome, currentPos);
-            preview.add(std::move(seed));
-
-            _seedCreatureIdsForPreview.emplace_back(preview._creatures.back()._id);
-        }
-        currentPos.x += toFloat(PREVIEW_HEIGHT) / 2;  // Adjust position for the next sub-genome
-    }
-    // <<< Service method
-
-    _simulationFacade->setPreviewData(preview);
+    _simulationFacade->setPreviewData(preview.data);
     _genomeEditData->currentPreviewId = _editData->id;
 
     // Create preview widgets
@@ -138,14 +105,14 @@ namespace
     }
 }
 
-void _SimulatedPreviewWidget::drawPreview()
+void _SimulatedPreviewWidget::processSandboxes()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
 
     auto previewRawData = _simulationFacade->getPreviewData();
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), _seedCreatureIdsForPreview);
     for (auto const& [subGenome, phenotype] : boost::combine(_subGenomesForPreview, phenotypes)) {
-        _genomeEditData->genotypeToPhenotype.insert_or_assign(subGenome, phenotype);
+        _genomeEditData->genotypeToPhenotypeCache.insert_or_assign(subGenome, phenotype);
     }
 
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -170,12 +137,13 @@ void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescr
             AlienGui::MoveTickUp();
             AlienGui::MoveTickUp();
 
-            auto title = "Sandbox " + std::to_string(subGenomeIndex + 1);
             std::vector<std::string> geneIndexStrings;
-            for (auto const& geneIndex : _geneIndicesForSubGenomes.at(subGenomeIndex)) {
-                geneIndexStrings.emplace_back("Gene " + std::to_string(geneIndex + 1));
+            auto geneIndices = _geneIndicesForSubGenomes.at(subGenomeIndex);
+            geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
+            for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
+                geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
             }
-            title += ": " + boost::join(geneIndexStrings, ", ");
+            auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
             AlienGui::Group(AlienGui::GroupParameters().text(title));
         }
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
