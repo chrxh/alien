@@ -248,7 +248,8 @@ struct CellTO
     bool belongToCreature;
     uint64_t creatureIndex;
     uint16_t nodeIndex;
-    int geneIndex;
+    uint16_t parentNodeIndex;
+    uint16_t geneIndex;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells
@@ -269,6 +270,7 @@ struct CellTO
 struct CreatureTO
 {
     uint64_t id;
+    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
     uint64_t ancestorId;
 
     uint32_t generation;

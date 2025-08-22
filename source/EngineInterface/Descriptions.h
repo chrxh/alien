@@ -290,7 +290,8 @@ struct CellDescription
     MEMBER(CellDescription, CellState, cellState, CellState_Ready);
 
     // Creature data
-    MEMBER(CellDescription, uint16_t, nodeIndex, 0);
+    MEMBER(CellDescription, int, nodeIndex, 0);
+    MEMBER(CellDescription, int, parentNodeIndex, 0);
     MEMBER(CellDescription, int, geneIndex, 0);
 
     // Cell type-specific data
@@ -342,7 +343,7 @@ struct CreatureDescription
     auto operator<=>(CreatureDescription const&) const = default;
 
     MEMBER(CreatureDescription, uint64_t, id, 0);
-    MEMBER(CreatureDescription, uint64_t, ancestorId, 0);
+    MEMBER(CreatureDescription, std::optional<uint64_t>, ancestorId, std::nullopt);
     MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, mutationId, 0);
     MEMBER(CreatureDescription, float, genomeComplexity, 0);

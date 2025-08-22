@@ -2741,17 +2741,37 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
                 .id(1)
                 .pos({10.0f, 10.0f})
                 .energy(getConstructorEnergy())
+                .nodeIndex(0)
                 .cellTypeData(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(4)),
             CellDescription()
                 .id(2)
                 .pos({11.0f, 10.0f})
                 .energy(getConstructorEnergy())
-                .cellTypeData(ConstructorDescription().geneIndex(2).currentNodeIndex(2).lastConstructedCellId(5)),
+                .nodeIndex(1)
+                .cellTypeData(ConstructorDescription().geneIndex(2).currentNodeIndex(2).lastConstructedCellId(6)),
 
-            CellDescription().id(3).pos({10.0f, 10.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
-            CellDescription().id(4).pos({10.0f, 10.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
-            CellDescription().id(5).pos({11.0f, 10.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(2),
-            CellDescription().id(6).pos({11.0f, 10.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(2),
+            CellDescription()
+                .id(3)
+                .pos({10.0f, 10.0f - getOffspringDistance() - 1.0f})
+                .cellState(CellState_Constructing)
+                .nodeIndex(0)
+                .geneIndex(1)
+                .parentNodeIndex(0),
+            CellDescription()
+                .id(4)
+                .pos({10.0f, 10.0f - getOffspringDistance()})
+                .cellState(CellState_Constructing)
+                .nodeIndex(1)
+                .geneIndex(1)
+                .parentNodeIndex(0),
+            CellDescription()
+                .id(5)
+                .pos({11.0f, 10.0f - getOffspringDistance() - 1.0f})
+                .cellState(CellState_Constructing)
+                .nodeIndex(0)
+                .geneIndex(2)
+                .parentNodeIndex(1),
+            CellDescription().id(6).pos({11.0f, 10.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(2).parentNodeIndex(1),
         }),
     });
     data.addConnection(1, 2);
@@ -2775,7 +2795,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     auto constructedCells = actualData.getOtherCells({1, 2, 3, 4, 5, 6});
     CellDescription cell1, cell2;
     for (auto const& cell : constructedCells) {
-        if (cell._geneIndex == 1) {
+        if (cell._parentNodeIndex == 0) {
             cell1 = cell;
         } else {
             cell2 = cell;

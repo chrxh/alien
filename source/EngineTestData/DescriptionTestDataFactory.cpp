@@ -17,9 +17,10 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .barrier(true)
                       .cellState(false)
                       .geneIndex(42)
+                      .nodeIndex(13)
+                      .parentNodeIndex(14)
                       .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
-                      .signalRestriction(
-                          SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
+                      .signalRestriction(SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
                       .cellTypeData(cellTypeDesc);
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {

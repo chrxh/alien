@@ -608,7 +608,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             [&](Cell* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
                     || (otherCell->cellState != CellState_Constructing && otherCell->activationTime == 0)
-                    || otherCell->creature != constructionData.creature) {
+                    || otherCell->creature != constructionData.creature || otherCell->parentNodeIndex != hostCell->nodeIndex) {
                     return false;
                 }
 
@@ -637,8 +637,8 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
             hostCell->detached,
             [&](Cell* const& otherCell) {
-                if (otherCell->cellState != CellState_Constructing
-                    || otherCell->creature != constructionData.creature) {
+                if (otherCell->cellState != CellState_Constructing || otherCell->creature != constructionData.creature
+                    || otherCell->parentNodeIndex != hostCell->nodeIndex) {
                     return false;
                 }
                 if (constructionData.numAdditionalConnections >= 1 && otherCell->nodeIndex == constructionData.requiredNodeId1) {
@@ -705,7 +705,7 @@ ConstructorProcessor::constructCellIntern(
     ObjectFactory factory;
     factory.init(&data);
     Cell* result = factory.createCellFromNode(
-        cellIndex, constructionData.creature, constructor.geneIndex, constructor.currentNodeIndex, posOfNewCell, hostCell->vel, constructionData.energy);
+        cellIndex, constructionData.creature, constructor.geneIndex, constructor.currentNodeIndex, hostCell->nodeIndex, posOfNewCell, hostCell->vel, constructionData.energy);
 
     constructor.lastConstructedCellId = result->id;
 

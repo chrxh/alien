@@ -163,7 +163,7 @@ std::vector<CollectionDescription> GenomeDescriptionEditService::extractPhenotyp
             result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
         } else {
             CHECK(creature._generation == 1);
-            auto subGenomeIndex = creatureIdToIndex.at(creature._ancestorId);
+            auto subGenomeIndex = creatureIdToIndex.at(creature._ancestorId.value());
             result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
         }
     }

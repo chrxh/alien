@@ -194,6 +194,7 @@ namespace
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTriggered = cell->cellTriggered;
         cellTO.nodeIndex = cell->nodeIndex;
+        cellTO.parentNodeIndex = cell->parentNodeIndex;
         cellTO.geneIndex = cell->geneIndex;
 
         cell->tempValue = cellTOIndex;

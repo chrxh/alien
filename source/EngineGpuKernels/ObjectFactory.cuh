@@ -26,7 +26,8 @@ public:
 
     __inline__ __device__ Creature* cloneCreature(Creature* creature);
 
-    __inline__ __device__ Cell* createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, float2 pos, float2 vel, float energy);
+    __inline__ __device__ Cell*
+    createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, int parentNodeIndex, float2 pos, float2 vel, float energy);
     __inline__ __device__ Creature* createEmptyCreature();
     __inline__ __device__ Gene* createEmptyGenes(int numGenes);
     __inline__ __device__ Node* createEmptyNodes(int numNodes);
@@ -243,6 +244,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& c
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTriggered = cellTO.cellTriggered;
     cell->nodeIndex = cellTO.nodeIndex;
+    cell->parentNodeIndex = cellTO.parentNodeIndex;
     cell->geneIndex = cellTO.geneIndex;
 
     cell->signalRestriction.active = cellTO.signalRestriction.active;
@@ -430,6 +432,8 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->event = CellEvent_No;
     cell->cellTriggered = CellTriggered_No;
     cell->nodeIndex = 0;
+    cell->geneIndex = 0;
+    cell->parentNodeIndex = 0;
     cell->cellType = CellType_Free;
     cell->neuralNetwork = nullptr;
 
@@ -491,7 +495,8 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    return cell;
 //}
 
-__inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, float2 pos, float2 vel, float energy)
+__inline__ __device__ Cell*
+ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, int parentNodeIndex, float2 pos, float2 vel, float energy)
 {
     auto const& gene = &creature->genome.genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
@@ -513,6 +518,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(uint64_t& cellInde
     cell->cellState = CellState_Constructing;
     cell->creature = creature;
     cell->nodeIndex = nodeIndex;
+    cell->parentNodeIndex = parentNodeIndex;
     cell->geneIndex = geneIndex;
     cell->numConnections = 0;
 

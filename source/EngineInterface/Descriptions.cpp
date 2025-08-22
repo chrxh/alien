@@ -168,7 +168,6 @@ ParticleDescription::ParticleDescription()
 CreatureDescription::CreatureDescription()
 {
     _id = NumberGenerator::get().createCreatureId();
-    _ancestorId = _id;
 }
 
 void CollectionDescription::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
@@ -250,7 +249,9 @@ void CollectionDescription::assignNewIds()
         creature._id = newId;
     }
     for (auto& creature : _creatures) {
-        creature._ancestorId = oldToNewCreatureId.at(creature._ancestorId);
+        if (creature._ancestorId.has_value()) {
+            creature._ancestorId = oldToNewCreatureId.at(creature._ancestorId.value());
+        }
     }
 
     // Assign new particle ids
@@ -462,7 +463,7 @@ std::vector<CellDescription> CollectionDescription::getOtherCells(std::set<uint6
 {
     std::vector<CellDescription> result;
     forEachCell([&](auto const& cell) {
-        if (ids.contains(cell._id)) {
+        if (!ids.contains(cell._id)) {
             result.emplace_back(cell);
         }
     });

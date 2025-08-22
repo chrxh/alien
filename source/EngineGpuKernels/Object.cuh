@@ -266,6 +266,7 @@ struct Signal
 struct Creature
 {
     uint64_t id;
+    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
     uint64_t ancestorId;
 
     uint32_t generation;
@@ -299,7 +300,8 @@ struct Cell
     // Creature data
     Creature* creature;
     uint16_t nodeIndex;
-    int geneIndex;
+    uint16_t parentNodeIndex;
+    uint16_t geneIndex;
 
     // Cell type data
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells

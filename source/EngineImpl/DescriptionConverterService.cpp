@@ -1,4 +1,5 @@
 #include "DescriptionConverterService.h"
+#include "DescriptionConverterService.h"
 
 #include <algorithm>
 #include <cmath>
@@ -287,6 +288,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTriggered = cellTO.cellTriggered;
     result._nodeIndex = cellTO.nodeIndex;
+    result._parentNodeIndex = cellTO.parentNodeIndex;
     result._geneIndex = cellTO.geneIndex;
 
     switch (cellTO.cellType) {
@@ -456,7 +458,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
 
     auto const& creatureTO = collectionTO.creatures[creatureIndex];
     result._id = creatureTO.id;
-    result._ancestorId = creatureTO.ancestorId;
+    result._ancestorId = creatureTO.ancestorId != CreatureTO::AncestorId_NotSet ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
     result._mutationId = creatureTO.mutationId;
     result._genomeComplexity = creatureTO.genomeComplexity;
@@ -636,7 +638,7 @@ void DescriptionConverterService::convertCreatureToTO(
     geneTOs.resize(geneArrayStartIndex + creatureDesc._genome._genes.size());
 
     creatureTO.id = creatureDesc._id;
-    creatureTO.ancestorId = creatureDesc._ancestorId;
+    creatureTO.ancestorId = creatureDesc._ancestorId.value_or(CreatureTO::AncestorId_NotSet);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.mutationId = creatureDesc._mutationId;
     creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
@@ -812,6 +814,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTriggered = cellDesc._cellTriggered;
     cellTO.nodeIndex = cellDesc._nodeIndex;
+    cellTO.parentNodeIndex = cellDesc._parentNodeIndex;
     cellTO.geneIndex = cellDesc._geneIndex;
     cellTO.angleToFront = cellDesc._angleToFront;
 

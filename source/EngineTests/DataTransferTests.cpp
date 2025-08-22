@@ -208,7 +208,7 @@ TEST_F(DataTransferTests, createParticleIds_sameIdsOnDescription)
     EXPECT_EQ(4, ids.size());
 }
 
-TEST_F(DataTransferTests, createGenomeIds)
+TEST_F(DataTransferTests, createCreatureIds)
 {
     CollectionDescription data;
     data.creatures({
@@ -222,8 +222,8 @@ TEST_F(DataTransferTests, createGenomeIds)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> ids;
-    for (auto const& genome : actualData._creatures) {
-        ids.insert(genome._id);
+    for (auto const& creature : actualData._creatures) {
+        ids.insert(creature._id);
     }
 
     EXPECT_EQ(4, ids.size());
