@@ -117,7 +117,6 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
-        printOverlayMessage("Creature copied");
     }
 
     ImGui::SameLine();

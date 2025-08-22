@@ -35,6 +35,7 @@ void _SimulatedPreviewWidget::process()
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         createSubGenomesForPreview();
         setPreviewData();
+        _run = true;
     }
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
         setPreviewData();
@@ -84,6 +85,10 @@ void _SimulatedPreviewWidget::setPreviewData()
 
 void _SimulatedPreviewWidget::calcPreview()
 {
+    if (!_run) {
+        return;
+    }
+
     auto fps = WindowController::get().getFps();
     auto duration = _fullSpeed ? std::chrono::milliseconds(1000 / fps) : std::chrono::milliseconds(1000 / fps / 2);
     _simulationFacade->calcTimestepsForPreview(duration);
@@ -159,8 +164,35 @@ void _SimulatedPreviewWidget::processActionBar()
 {
     AlienGui::Separator();
     AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_GAMEPAD), _fullSimulation);
+
     ImGui::SameLine();
-    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_FAN), _fullSpeed);
+    AlienGui::VerticalSeparator(20.0f);
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_run);
+    if (AlienGui::Button(ICON_FA_PLAY)) {
+        _run = true;
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!_run);
+    if (AlienGui::Button(ICON_FA_PAUSE)) {
+        _run = false;
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_FORWARD), _fullSpeed);
+
+    ImGui::SameLine();
+    AlienGui::VerticalSeparator(20.0f);
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_run);
+    AlienGui::Button(ICON_FA_CHEVRON_RIGHT);
+    ImGui::EndDisabled();
+
     ImGui::SameLine();
     auto tps = calcTpsForPreview();
     AlienGui::Text("TPS: " + StringHelper::format(tps));

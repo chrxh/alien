@@ -42,6 +42,7 @@ private:
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
+    bool _run = true;
     bool _fullSpeed = false;
     bool _fullSimulation = false;
 
