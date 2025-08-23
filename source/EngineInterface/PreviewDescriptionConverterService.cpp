@@ -33,9 +33,14 @@ namespace
     }
 }
 
-PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex) const
+auto PreviewDescriptionConverterService::convert(
+    GenomeDescription const& genome,
+    CollectionDescription&& phenotype,
+    int startGeneIndex,
+    std::optional<float> lastVisualFrontAngle) const -> ConversionResult
 {
-    PreviewDescription result;
+    ConversionResult result;
+    result.visualFrontAngle = lastVisualFrontAngle;
 
     auto const& editService = DescriptionEditService::get();
 
@@ -82,7 +87,13 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
         auto& prevLastConstructedCell = phenotype.getCellRef(prevLastConstructedCellId.value());
 
         auto angle = Math::angleOfVector(prevLastConstructedCell._pos - lastConstructedCell._pos);
-        editService.rotate(phenotype, -angle);
+        if (!result.visualFrontAngle.has_value()) {
+            result.visualFrontAngle = angle;
+        } else {
+            result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 5.0f;
+            result.visualFrontAngle.value() = Math::normalizedAngle(result.visualFrontAngle.value(), 0.0);
+        }
+        editService.rotate(phenotype, -result.visualFrontAngle.value());
     }
 
     // Create preview cells
@@ -110,7 +121,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
                 }
             }
         }
-        result._cells.emplace_back(previewCell);
+        result.description._cells.emplace_back(previewCell);
     });
 
     // Determine arrow directions for each cell
@@ -158,7 +169,7 @@ PreviewDescription PreviewDescriptionConverterService::convert(GenomeDescription
                                          .cell2(phenotype.getCellRef(cellId2, cache)._pos)
                                          .arrowToCell1(arrowToCell1)
                                          .arrowToCell2(arrowToCell2);
-            result._connections.push_back(previewConnection);
+            result.description._connections.push_back(previewConnection);
         }
     });
 

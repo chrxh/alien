@@ -62,6 +62,9 @@ void _SimulatedPreviewWidget::createSubGenomesForPreview()
 {
     _geneIndicesForSubGenomes = GenomeDescriptionInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
     _subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, _geneIndicesForSubGenomes);
+
+    _visualFrontAngles.clear();
+    _visualFrontAngles.resize(_subGenomesForPreview.size(), std::nullopt);
 }
 
 void _SimulatedPreviewWidget::setupPreviewData(bool useCache)
@@ -154,9 +157,10 @@ void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescr
             AlienGui::Group(AlienGui::GroupParameters().text(title));
         }
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
-        auto previewDesc =
-            PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex);
-        _previewWidgets.at(subGenomeIndex)->process(previewDesc);
+        auto conversionResult =
+            PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngles.at(subGenomeIndex));
+        _previewWidgets.at(subGenomeIndex)->process(conversionResult.description);
+        _visualFrontAngles.at(subGenomeIndex) = conversionResult.visualFrontAngle;
     }
     ImGui::EndChild();
     ImGui::PopID();

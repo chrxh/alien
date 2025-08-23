@@ -49,6 +49,7 @@ private:
     std::vector<GeneIndicesForSubGenome> _geneIndicesForSubGenomes;
     std::vector<GenomeDescriptionWithStartGeneIndex> _subGenomesForPreview;
     std::vector<uint64_t> _seedCreatureIdsForPreview;
+    std::vector<std::optional<float>> _visualFrontAngles;
 
     std::optional<GenomeDescription> _genomeFromPreviousFrame;
 
