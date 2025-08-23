@@ -219,14 +219,22 @@ void CollectionDescription::add(CollectionDescription&& other)
 
 void CollectionDescription::assignNewIds()
 {
+    std::map<uint64_t, uint64_t> oldToNewCellId;
+    forEachCell([&](CellDescription& cell) { oldToNewCellId.insert_or_assign(cell._id, 0); });
+    for (auto& [key, value] : oldToNewCellId) {
+        value = NumberGenerator::get().createObjectId();
+    }
+
+
     // Assign new cell ids
-    std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
+    //std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
+    //forEachCell([&](CellDescription& cell) {
+    //    auto newId = NumberGenerator::get().createObjectId();
+    //    oldToNewCellId.insert({cell._id, newId});
+    //    cell._id = newId;
+    //});
     forEachCell([&](CellDescription& cell) {
-        auto newId = NumberGenerator::get().createObjectId();
-        oldToNewCellId.insert({cell._id, newId});
-        cell._id = newId;
-    });
-    forEachCell([&](CellDescription& cell) {
+        cell._id = oldToNewCellId.at(cell._id);
         for (auto& connection : cell._connections) {
             auto it = oldToNewCellId.find(connection._cellId);
             if (it != oldToNewCellId.end()) {

@@ -19,18 +19,6 @@ namespace
     {
         return *(--(--s.end()));
     }
-
-    template <typename U, typename V>
-    V getLastValue(std::map<U, V> const& m)
-    {
-        return (--m.end())->second;
-    }
-
-    template <typename U, typename V>
-    V getSecondLastValue(std::map<U, V> const& m)
-    {
-        return (--(--m.end()))->second;
-    }
 }
 
 auto PreviewDescriptionConverterService::convert(
@@ -47,50 +35,34 @@ auto PreviewDescriptionConverterService::convert(
     if (phenotype.isEmpty()) {
         return result;
     }
+    CHECK(phenotype._creatures.size() == 1);
     auto cache = phenotype.createCache();
 
     // Center
     editService.setCenter(phenotype, {0.0f, 0.0f});
 
-    // Get last constructed cell on principal gene
-    std::map<int, std::map<int, std::set<uint64_t>>> geneAndNodeIndexToIds;  // Value has several ids in case of concantenations
-    phenotype.forEachCell([&geneAndNodeIndexToIds](auto const& cell) { geneAndNodeIndexToIds[cell._geneIndex][cell._nodeIndex].insert(cell._id); });
-    auto const& firstGene_NodeIndexToIds = geneAndNodeIndexToIds.at(startGeneIndex);
-    auto const& lastConstructedCellIds = getLastValue(firstGene_NodeIndexToIds);
-    auto const& lastConstructedCellId = getLastElement(lastConstructedCellIds);
-    auto& lastConstructedCell = phenotype.getCellRef(lastConstructedCellId);
-
-
-    // Try to get cell on principal gene with second last node index
-    std::optional<uint64_t> prevLastConstructedCellId;
-    if (firstGene_NodeIndexToIds.size() > 1) {
-        auto const& secondLastConstructedCellIds = getSecondLastValue(firstGene_NodeIndexToIds);
-        prevLastConstructedCellId = getLastElement(secondLastConstructedCellIds);
-    }
-
-    // Try to get cell on principal gene on second last concatenation 
-    else if (lastConstructedCellIds.size() > 1) {
-        prevLastConstructedCellId = getSecondLastElement(lastConstructedCellIds);
-    }
-
-    // Try to get cell which is constructed of last cell on principal gene
-    else if (lastConstructedCell.getCellType() == CellType_Constructor) {
-        auto const& constructor = std::get<ConstructorDescription>(lastConstructedCell._cellTypeData);
-        auto geneIndex = constructor._geneIndex;
-        if (geneAndNodeIndexToIds.contains(geneIndex)) {
-            auto& secondGene_NodeIndexToIds = geneAndNodeIndexToIds.at(geneIndex);
-            prevLastConstructedCellId = getLastElement(getLastValue(secondGene_NodeIndexToIds));
+    // Get last and second last constructed cell on start gene
+    std::set<uint64_t> cellIdsOnStartGene;
+    phenotype.forEachCell([&](auto const& cell) {
+        if (cell._geneIndex != startGeneIndex) {
+            return;
         }
+        cellIdsOnStartGene.insert(cell._id);
+    });
+    CHECK(!cellIdsOnStartGene.empty());
+    auto lastCell = phenotype.getCellRef(getLastElement(cellIdsOnStartGene));
+    std::optional<CellDescription> secondLastCell;
+    if (cellIdsOnStartGene.size() > 1) {
+        secondLastCell = phenotype.getCellRef(getSecondLastElement(cellIdsOnStartGene));
     }
 
-    if (prevLastConstructedCellId.has_value()) {
-        auto& prevLastConstructedCell = phenotype.getCellRef(prevLastConstructedCellId.value());
-
-        auto angle = Math::angleOfVector(prevLastConstructedCell._pos - lastConstructedCell._pos);
+    // Rotate preview
+    if (secondLastCell.has_value()) {
+        auto angle = Math::angleOfVector(secondLastCell->_pos - lastCell._pos);
         if (!result.visualFrontAngle.has_value()) {
             result.visualFrontAngle = angle;
         } else {
-            result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 5.0f;
+            result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 10.0f;
             result.visualFrontAngle.value() = Math::normalizedAngle(result.visualFrontAngle.value(), 0.0);
         }
         editService.rotate(phenotype, -result.visualFrontAngle.value());
@@ -98,7 +70,6 @@ auto PreviewDescriptionConverterService::convert(
 
     // Create preview cells
     auto getNode = [&](CellDescription const& cell) -> NodeDescription const& { return genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex); };
-    //auto getGene = [&](CellDescription const& cell) -> GeneDescription const& { return genome._genes.at(cell._geneIndex); };
     phenotype.forEachCell([&](CellDescription const& cell) {
         auto const& node = getNode(cell);
         auto const& color = node._color;
