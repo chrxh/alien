@@ -1,6 +1,14 @@
 #pragma once
 
+#include <limits>
+
 #include "Colors.h"
+
+template <typename T>
+struct Infinity
+{
+    static auto constexpr value = std::numeric_limits<T>::max();
+};
 
 struct ExpertToggle
 {

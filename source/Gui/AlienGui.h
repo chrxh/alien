@@ -45,6 +45,7 @@ public:
         MEMBER(SliderFloatParameters, std::string, format, "%.3f");
         MEMBER(SliderFloatParameters, bool, logarithmic, false);
         MEMBER(SliderFloatParameters, bool, infinity, false);
+        MEMBER(SliderFloatParameters, float, width, 0);
         MEMBER(SliderFloatParameters, float, textWidth, 100);
         MEMBER(SliderFloatParameters, bool, colorDependence, false);
         MEMBER(SliderFloatParameters, bool, readOnly, false);
@@ -63,6 +64,7 @@ public:
         MEMBER(SliderIntParameters, std::string, format, "%d");
         MEMBER(SliderIntParameters, bool, logarithmic, false);
         MEMBER(SliderIntParameters, bool, infinity, false);
+        MEMBER(SliderIntParameters, float, width, 0);
         MEMBER(SliderIntParameters, float, textWidth, 100);
         MEMBER(SliderIntParameters, bool, colorDependence, false);
         MEMBER(SliderIntParameters, bool, readOnly, false);

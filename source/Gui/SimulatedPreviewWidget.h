@@ -26,7 +26,7 @@ private:
         GenomeTabEditData const& editData);
 
     void createSubGenomesForPreview();
-    void setPreviewData();
+    void setupPreviewData(bool useCache = true);
     void calcPreview();
     void processSandboxes();
     void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
@@ -43,7 +43,7 @@ private:
     GenomeTabLayoutData _layoutData;
 
     bool _run = true;
-    bool _fullSpeed = false;
+    int _simulationSpeed = 50;  // In percent of full speed
     bool _fullSimulation = false;
 
     std::vector<GeneIndicesForSubGenome> _geneIndicesForSubGenomes;

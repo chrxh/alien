@@ -34,11 +34,11 @@ void _SimulatedPreviewWidget::process()
 {
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         createSubGenomesForPreview();
-        setPreviewData();
+        setupPreviewData();
         _run = true;
     }
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
-        setPreviewData();
+        setupPreviewData();
     }
     calcPreview();
     processSandboxes();
@@ -64,11 +64,13 @@ void _SimulatedPreviewWidget::createSubGenomesForPreview()
     _subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, _geneIndicesForSubGenomes);
 }
 
-void _SimulatedPreviewWidget::setPreviewData()
+void _SimulatedPreviewWidget::setupPreviewData(bool useCache)
 {
     auto const& genomeEditService = GenomeDescriptionEditService::get();
 
-    auto preview = genomeEditService.createSeedCollectionForPreview(_subGenomesForPreview, _genomeEditData->genotypeToPhenotypeCache);
+    auto preview = genomeEditService.createSeedCollectionForPreview(
+        _subGenomesForPreview,
+        useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription>());
     _seedCreatureIdsForPreview = preview.seedCreatureIds;
 
     _simulationFacade->setPreviewData(preview.data);
@@ -90,7 +92,7 @@ void _SimulatedPreviewWidget::calcPreview()
     }
 
     auto fps = WindowController::get().getFps();
-    auto duration = _fullSpeed ? std::chrono::milliseconds(1000 / fps) : std::chrono::milliseconds(1000 / fps / 2);
+    auto duration = std::chrono::milliseconds(1000 / fps * _simulationSpeed / 100);
     _simulationFacade->calcTimestepsForPreview(duration);
 }
 
@@ -163,10 +165,16 @@ void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescr
 void _SimulatedPreviewWidget::processActionBar()
 {
     AlienGui::Separator();
-    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_GAMEPAD), _fullSimulation);
+    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_CUBES), _fullSimulation);
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);
+
+    ImGui::SameLine();
+    if (AlienGui::Button(ICON_FA_UNDO)) {
+        setupPreviewData(false);
+        _run = true;
+    }
 
     ImGui::SameLine();
     ImGui::BeginDisabled(_run);
@@ -183,15 +191,17 @@ void _SimulatedPreviewWidget::processActionBar()
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_FORWARD), _fullSpeed);
-
-    ImGui::SameLine();
-    AlienGui::VerticalSeparator(20.0f);
-
-    ImGui::SameLine();
     ImGui::BeginDisabled(_run);
     AlienGui::Button(ICON_FA_CHEVRON_RIGHT);
     ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(scale(90.0f));
+    ImGui::SliderInt("##TPSRestriction", &_simulationSpeed, 5, 100, "%d%% speed", ImGuiSliderFlags_None);
+    _simulationSpeed = std::clamp(_simulationSpeed, 5, 100);
+
+    ImGui::SameLine();
+    AlienGui::VerticalSeparator(20.0f);
 
     ImGui::SameLine();
     auto tps = calcTpsForPreview();

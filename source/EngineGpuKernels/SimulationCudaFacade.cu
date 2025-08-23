@@ -565,13 +565,13 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
         cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     auto startTimepoint = std::chrono::steady_clock::now();
-    while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration) {
+    do {
 
         _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;
-    }
+    } while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration);
 
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));

@@ -1371,8 +1371,13 @@ void AlienGui::VerticalSeparator(float height)
     auto cursorPos = ImGui::GetCursorScreenPos();
     auto color = ImColor(ImGui::GetStyle().Colors[ImGuiCol_Border]);
     color.Value.w *= ImGui::GetStyle().Alpha;
-    drawList->AddLine(ImVec2(cursorPos.x, cursorPos.y - ImGui::GetStyle().FramePadding.y), ImVec2(cursorPos.x, cursorPos.y + scale(height)), color, 2.0f);
-    ImGui::Dummy(ImVec2(ImGui::GetStyle().FramePadding.x /** 2*/, 1));
+    auto padding = ImGui::GetStyle().FramePadding.x;
+    drawList->AddLine(
+        ImVec2(cursorPos.x + padding / 2, cursorPos.y - ImGui::GetStyle().FramePadding.y),
+        ImVec2(cursorPos.x + padding / 2, cursorPos.y + scale(height)),
+        color,
+        2.0f);
+    ImGui::Dummy(ImVec2(padding /** 2*/, 1));
 }
 
 void AlienGui::ToolbarSeparator()
@@ -2036,11 +2041,13 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
         //color field
         ImGui::PushID(color);
         auto pinnedButtonWidth = pinned ? scale(PinnedButtonWidth) + ImGui::GetStyle().FramePadding.x : 0.0f;
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - pinnedButtonWidth);
+
+        auto width = parameters._width != 0.0f ? scale(parameters._width) : ImGui::GetContentRegionAvail().x;
+        ImGui::SetNextItemWidth(width - scale(parameters._textWidth) - pinnedButtonWidth);
         if (parameters._colorDependence && isExpanded) {
             AlienGui::ColorField(Const::IndividualCellColors[color], 0);
             ImGui::SameLine();
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(parameters._textWidth));
+            ImGui::SetNextItemWidth(width - scale(parameters._textWidth));
         }
 
         //slider
