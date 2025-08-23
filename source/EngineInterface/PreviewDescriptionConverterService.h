@@ -16,5 +16,5 @@ public:
         std::optional<float> visualFrontAngle;
     };
     ConversionResult
-    convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex, std::optional<float> lastVisualFrontAngle) const;
+    convert(GenomeDescription const& genome, CollectionDescription&& phenotype, int startGeneIndex, std::optional<float> const& lastVisualFrontAngle) const;
 };

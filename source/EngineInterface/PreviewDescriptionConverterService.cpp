@@ -25,7 +25,7 @@ auto PreviewDescriptionConverterService::convert(
     GenomeDescription const& genome,
     CollectionDescription&& phenotype,
     int startGeneIndex,
-    std::optional<float> lastVisualFrontAngle) const -> ConversionResult
+    std::optional<float> const& lastVisualFrontAngle) const -> ConversionResult
 {
     ConversionResult result;
     result.visualFrontAngle = lastVisualFrontAngle;
@@ -54,6 +54,19 @@ auto PreviewDescriptionConverterService::convert(
     std::optional<CellDescription> secondLastCell;
     if (cellIdsOnStartGene.size() > 1) {
         secondLastCell = phenotype.getCellRef(getSecondLastElement(cellIdsOnStartGene));
+    } else {
+        // Only 1 cell with start gene? => try cells of referenced gene
+        if (lastCell.getCellType() == CellType_Constructor) {
+            auto refGeneIndex = std::get<ConstructorDescription>(lastCell._cellTypeData)._geneIndex;
+            phenotype.forEachCell([&](auto const& cell) {
+                if (cell._geneIndex != refGeneIndex) {
+                    return;
+                }
+                if (!secondLastCell.has_value() || cell._id > secondLastCell->_id) {
+                    secondLastCell = cell;
+                }
+            });
+        }
     }
 
     // Rotate preview
