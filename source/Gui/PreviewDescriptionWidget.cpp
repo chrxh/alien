@@ -63,10 +63,11 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
         }
         RealVector2D previewSize = RealVector2D{200.0f, 200.0f} * cellSize;  //(lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
         //ImGui::SetCursorPos({(previewSize.x - 1) / 2, (previewSize.y - 1) / 2});
-        float centerX = ImGui::GetScrollMaxX() / 2.0f;
-        float centerY = ImGui::GetScrollMaxY() / 2.0f;
-        ImGui::SetScrollX(centerX);
-        ImGui::SetScrollY(centerY);
+        // Removed automatic centering logic to allow user scrolling
+        // float centerX = ImGui::GetScrollMaxX() / 2.0f;
+        // float centerY = ImGui::GetScrollMaxY() / 2.0f;
+        // ImGui::SetScrollX(centerX);
+        // ImGui::SetScrollY(centerY);
 
         auto mousePos = ImGui::GetMousePos();
         auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y
@@ -95,7 +96,8 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
                 auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-                if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
+                if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value()
+                    && cell._nodeIndex == selectedNode.value()) {
                     if (_zoom > ZoomLevelForLabels) {
                         drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
                     } else {
@@ -244,7 +246,8 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
                             style.getSmallBoldFont(),
                             cellSize / 1.5f,
                             {cellPos.x + cellSize * 0.4f + 0.5f, cellPos.y + cellSize * 0.2f + 0.5f},
-                            Const::GenomePreviewLinkToGeneTextColor, text.c_str());
+                            Const::GenomePreviewLinkToGeneTextColor,
+                            text.c_str());
                     }
                 }
             }
