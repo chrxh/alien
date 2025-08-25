@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <ranges>
+
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
@@ -37,8 +40,7 @@ using CellParameter = DescriptionTestDataFactory::CellParameter;
 class DataTransferTests_AllCellTypes
     : public DataTransferTests
     , public testing::WithParamInterface<CellParameter>
-{
-};
+{};
 
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllCellTypes,
@@ -81,8 +83,7 @@ using NodeParameter = DescriptionTestDataFactory::NodeParameter;
 class DataTransferTests_AllNodeTypes
     : public DataTransferTests
     , public testing::WithParamInterface<NodeParameter>
-{
-};
+{};
 
 INSTANTIATE_TEST_SUITE_P(
     DataTransferTests_AllNodeTypes,
@@ -173,6 +174,33 @@ TEST_F(DataTransferTests, createCellIds_sameIdsOnDescription)
     EXPECT_EQ(4, ids.size());
 }
 
+TEST_F(DataTransferTests, createCellIds_preserveOrder)
+{
+    CollectionDescription data;
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(i).age(i));
+    }
+    std::sort(data._cells.begin(), data._cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
+    _simulationFacade->addAndSelectSimulationData(std::move(data));
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    std::map<int, CellDescription> ageToCell;
+    for (auto const& cell : actualData._cells) {
+        ageToCell.insert_or_assign(cell._age, cell);
+    }
+    EXPECT_EQ(10, ageToCell.size());
+
+    std::optional<uint64_t> lastCellId;
+    for (auto const& cell : ageToCell | std::views::values) {
+        if (!lastCellId.has_value()) {
+            lastCellId = cell._id;
+        } else {
+            EXPECT_TRUE(lastCellId.value() < cell._id);
+        }
+    }
+}
+
 TEST_F(DataTransferTests, createParticleIds_differentIdsOnDescription)
 {
     auto data = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(1)});
@@ -211,10 +239,9 @@ TEST_F(DataTransferTests, createParticleIds_sameIdsOnDescription)
 TEST_F(DataTransferTests, createCreatureIds)
 {
     CollectionDescription data;
-    data.creatures({
-        CreatureDescription().genome(GenomeDescription()).cells({CellDescription()}),
-        CreatureDescription().genome(GenomeDescription()).cells({CellDescription()})
-    });
+    data.creatures(
+        {CreatureDescription().genome(GenomeDescription()).cells({CellDescription()}),
+         CreatureDescription().genome(GenomeDescription()).cells({CellDescription()})});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -262,11 +289,10 @@ TEST_F(DataTransferTests, keepObjectIdsStable)
 
 TEST_F(DataTransferTests, createCreatureIds_differentIds)
 {
-    auto data = CollectionDescription()
-                    .creatures({
-                        CreatureDescription().id(0).cells({CellDescription()}),
-                        CreatureDescription().id(1).cells({CellDescription()}),
-                    });
+    auto data = CollectionDescription().creatures({
+        CreatureDescription().id(0).cells({CellDescription()}),
+        CreatureDescription().id(1).cells({CellDescription()}),
+    });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -341,15 +367,11 @@ TEST_F(DataTransferTests, changeGenome_failed)
 
 TEST_F(DataTransferTests, getInspectedSimulationData)
 {
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})})).cells({
-            CellDescription().id(1), 
-            CellDescription().id(2)
-        }),
-        CreatureDescription().genome(GenomeDescription()).cells({
-            CellDescription().id(3)
-        })
-    });
+    auto data = CollectionDescription().creatures(
+        {CreatureDescription()
+             .genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})}))
+             .cells({CellDescription().id(1), CellDescription().id(2)}),
+         CreatureDescription().genome(GenomeDescription()).cells({CellDescription().id(3)})});
     uint64_t cellId1 = 1;
     uint64_t cellId2 = 2;
 

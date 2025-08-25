@@ -372,6 +372,9 @@ struct CollectionDescription
 
     void forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const;
     void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
+    // First parameter of lambda is creature index, second parameter is cell index
+    void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const;
+    void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc);  
 
     void clear();
     bool isEmpty() const;
@@ -387,6 +390,7 @@ struct CollectionDescription
     CellDescription& getOtherCellRef(uint64_t id);
     CellDescription& getOtherCellRef(std::set<uint64_t> const& ids);
     std::vector<CellDescription> getOtherCells(std::set<uint64_t> const& ids) const;
+    CellDescription& getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex);
     bool hasConnection(uint64_t id, uint64_t otherId) const;
     bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     ConnectionDescription getConnection(uint64_t id, uint64_t otherId) const;

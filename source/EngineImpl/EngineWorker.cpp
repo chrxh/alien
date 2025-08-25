@@ -114,9 +114,6 @@ CollectionDescription EngineWorker::getSimulationData(IntVector2D const& rectUpp
 {
     EngineWorkerGuard access(this);
 
-    auto maxIds = _simulationCudaFacade->getMaxIds();
-    NumberGenerator::get().adaptMaxIds(maxIds);
-
     auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
     ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
 
@@ -127,9 +124,6 @@ CollectionDescription EngineWorker::getSelectedSimulationData(bool includeCluste
 {
     EngineWorkerGuard access(this);
 
-    auto maxIds = _simulationCudaFacade->getMaxIds();
-    NumberGenerator::get().adaptMaxIds(maxIds);
-
     auto dataTO = _simulationCudaFacade->getSelectedSimulationData(includeClusters);
 
     return DescriptionConverterService::get().convertTOtoDescription(dataTO);
@@ -138,9 +132,6 @@ CollectionDescription EngineWorker::getSelectedSimulationData(bool includeCluste
 CollectionDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
-
-    auto maxIds = _simulationCudaFacade->getMaxIds();
-    NumberGenerator::get().adaptMaxIds(maxIds);
 
     auto dataTO = _simulationCudaFacade->getInspectedSimulationData(objectsIds);
 

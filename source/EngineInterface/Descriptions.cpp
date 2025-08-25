@@ -172,11 +172,11 @@ CreatureDescription::CreatureDescription()
 
 void CollectionDescription::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
 {
-    for (auto& cell : _cells) {
+    for (auto const& cell : _cells) {
         applyFunc(cell);
     }
-    for (auto& creature : _creatures) {
-        for (auto& cell : creature._cells) {
+    for (auto const& creature : _creatures) {
+        for (auto const& cell : creature._cells) {
             applyFunc(cell);
         }
     }
@@ -191,6 +191,42 @@ void CollectionDescription::forEachCell(std::function<void(CellDescription&)> co
         for (auto& cell : creature._cells) {
             applyFunc(cell);
         }
+    }
+}
+
+void CollectionDescription::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const
+{
+    uint64_t cellIndex = 0;
+    for (auto const& cell : _cells) {
+        applyFunc(std::nullopt, cellIndex, cell);
+        ++cellIndex;
+    }
+    uint64_t creatureIndex = 0;
+    for (auto const& creature : _creatures) {
+        cellIndex = 0;
+        for (auto const& cell : creature._cells) {
+            applyFunc(creatureIndex, cellIndex, cell);
+            ++cellIndex;
+        }
+        ++creatureIndex;
+    }
+}
+
+void CollectionDescription::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc)
+{
+    uint64_t cellIndex = 0;
+    for (auto& cell : _cells) {
+        applyFunc(std::nullopt, cellIndex, cell);
+        ++cellIndex;
+    }
+    uint64_t creatureIndex = 0;
+    for (auto& creature : _creatures) {
+        cellIndex = 0;
+        for (auto& cell : creature._cells) {
+            applyFunc(creatureIndex, cellIndex, cell);
+            ++cellIndex;
+        }
+        ++creatureIndex;
     }
 }
 
@@ -219,45 +255,99 @@ void CollectionDescription::add(CollectionDescription&& other)
 
 void CollectionDescription::assignNewIds()
 {
-    std::map<uint64_t, uint64_t> oldToNewCellId;
-    forEachCell([&](CellDescription& cell) { oldToNewCellId.insert_or_assign(cell._id, 0); });
-    for (auto& [key, value] : oldToNewCellId) {
+    struct IndexKey
+    {
+        std::optional<uint64_t> creatureIndex;
+        uint64_t cellIndex;
+        auto operator<=>(IndexKey const&) const = default;
+    };
+
+    // Create (index, cellId) vector sorted by cell id
+    std::vector<std::pair<IndexKey, uint64_t>> indexToNewCellId;
+    forEachCell([&indexToNewCellId](std::optional<uint64_t> const& creatureIndex, uint64_t cellIndex, CellDescription const& cell) {
+       indexToNewCellId.emplace_back(IndexKey{.creatureIndex = creatureIndex, .cellIndex = cellIndex}, 0);
+    });
+    std::sort(indexToNewCellId.begin(), indexToNewCellId.end(), [this](auto const& lhs, auto const& rhs) {
+        return getCellRef(lhs.first.creatureIndex, lhs.first.cellIndex)._id < getCellRef(rhs.first.creatureIndex, rhs.first.cellIndex)._id;
+    });
+
+    // Generate new cellIds and create maps for fast access
+    struct IndexIdKey
+    {
+        std::optional<uint64_t> creatureIndex;
+        uint64_t cellId;
+
+        auto operator<=>(IndexIdKey const&) const = default;
+    };
+    std::map<IndexIdKey, uint64_t> indexIdToNewCellId;
+    std::unordered_map<uint64_t, uint64_t> oldToNewCellId_global;
+    std::unordered_set<uint64_t> nonUniqueCellIds_global;
+    for (auto& [key, value] : indexToNewCellId) {
         value = NumberGenerator::get().createObjectId();
+        auto& cell = getCellRef(key.creatureIndex, key.cellIndex);
+        auto insertionResult = oldToNewCellId_global.insert({cell._id, value});
+        if (!insertionResult.second) {
+            nonUniqueCellIds_global.insert(cell._id);
+        }
+        indexIdToNewCellId.insert({IndexIdKey{.creatureIndex = key.creatureIndex, .cellId = cell._id}, value});
+        cell._id = value;
     }
 
+    // Helper for finding new cellId (uses original cellIds)
+    auto findNewCellId = [&](std::optional<uint64_t> creatureIndex, uint64_t cellId) {
 
-    // Assign new cell ids
-    //std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
-    //forEachCell([&](CellDescription& cell) {
-    //    auto newId = NumberGenerator::get().createObjectId();
-    //    oldToNewCellId.insert({cell._id, newId});
-    //    cell._id = newId;
-    //});
-    forEachCell([&](CellDescription& cell) {
-        cell._id = oldToNewCellId.at(cell._id);
-        for (auto& connection : cell._connections) {
-            auto it = oldToNewCellId.find(connection._cellId);
-            if (it != oldToNewCellId.end()) {
-                connection._cellId = it->second;
+        // Look in cells for given creature
+        auto it = indexIdToNewCellId.find(IndexIdKey{.creatureIndex = creatureIndex, .cellId = cellId});
+        if (it != indexIdToNewCellId.end()) {
+            return it->second;
+        }
+
+        // Fallback: check in global map if unique
+        else if (!nonUniqueCellIds_global.contains(cellId)) {
+            auto findResult = oldToNewCellId_global.find(cellId);
+            if (findResult != oldToNewCellId_global.end()) {
+                return findResult->second;
             }
+
+            // Else: cell not contained in data => return old cellId
+            else {
+                return cellId;
+            }
+        }
+
+        // Else: cellId not unique => error
+        else {
+            THROW_NOT_IMPLEMENTED();
+        }
+    };
+    forEachCell([&](std::optional<uint64_t> const& creatureIndex, uint64_t cellIndex, CellDescription& cell) {
+        for (auto& connection : cell._connections) {
+            connection._cellId = findNewCellId(creatureIndex, connection._cellId);
         }
         if (cell.getCellType() == CellType_Constructor) {
             auto& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = oldToNewCellId.at(constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewCellId(creatureIndex, constructor._lastConstructedCellId.value());
             }
         }
     });
 
-    // Assign new creature ids
+    // Generate new creatureIds
     std::unordered_map<uint64_t, uint64_t> oldToNewCreatureId;
+    std::unordered_set<uint64_t> nonUniqueCreatureIds;
     for (auto& creature : _creatures) {
-        auto newId = NumberGenerator::get().createCreatureId();
-        oldToNewCreatureId.insert({creature._id, newId});
+        auto newId = NumberGenerator::get().createObjectId();
+        auto insertionResult = oldToNewCreatureId.insert({creature._id, newId});
+        if (!insertionResult.second) {
+            nonUniqueCreatureIds.insert(creature._id);
+        }
         creature._id = newId;
     }
+
+    // Assign new creatureIds
     for (auto& creature : _creatures) {
         if (creature._ancestorId.has_value()) {
+            CHECK(!nonUniqueCreatureIds.contains(creature._ancestorId.value()));
             creature._ancestorId = oldToNewCreatureId.at(creature._ancestorId.value());
         }
     }
@@ -476,6 +566,15 @@ std::vector<CellDescription> CollectionDescription::getOtherCells(std::set<uint6
         }
     });
     return result;
+}
+
+CellDescription& CollectionDescription::getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex)
+{
+    if (!creatureIndex.has_value()) {
+        return _cells.at(cellIndex);
+    } else {
+        return _creatures.at(creatureIndex.value())._cells.at(cellIndex);
+    }
 }
 
 bool CollectionDescription::hasConnection(uint64_t id, uint64_t otherId) const
