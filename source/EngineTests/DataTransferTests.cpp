@@ -140,126 +140,12 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
     EXPECT_TRUE(compare(data, actualData));
 }
 
-TEST_F(DataTransferTests, createCellIds_differentIdsOnDescription)
+TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(1)});
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::unordered_set<uint64_t> ids;
-    for (auto const& cell : actualData._cells) {
-        ids.insert(cell._id);
-    }
-
-    EXPECT_EQ(4, ids.size());
-}
-
-TEST_F(DataTransferTests, createCellIds_sameIdsOnDescription)
-{
-    auto data1 = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(0)});
-    _simulationFacade->addAndSelectSimulationData(std::move(data1));
-    auto data2 = CollectionDescription().cells({CellDescription().id(0), CellDescription().id(0)});
-    _simulationFacade->addAndSelectSimulationData(std::move(data2));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::unordered_set<uint64_t> ids;
-    for (auto const& cell : actualData._cells) {
-        ids.insert(cell._id);
-    }
-
-    EXPECT_EQ(4, ids.size());
-}
-
-TEST_F(DataTransferTests, createCellIds_preserveOrder)
-{
-    CollectionDescription data;
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(i).age(i));
-    }
-    std::sort(data._cells.begin(), data._cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::map<int, CellDescription> ageToCell;
-    for (auto const& cell : actualData._cells) {
-        ageToCell.insert_or_assign(cell._age, cell);
-    }
-    EXPECT_EQ(10, ageToCell.size());
-
-    std::optional<uint64_t> lastCellId;
-    for (auto const& cell : ageToCell | std::views::values) {
-        if (!lastCellId.has_value()) {
-            lastCellId = cell._id;
-        } else {
-            EXPECT_TRUE(lastCellId.value() < cell._id);
-        }
-    }
-}
-
-TEST_F(DataTransferTests, createParticleIds_differentIdsOnDescription)
-{
-    auto data = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(1)});
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::unordered_set<uint64_t> ids;
-    for (auto const& cell : actualData._particles) {
-        ids.insert(cell._id);
-    }
-
-    EXPECT_EQ(4, ids.size());
-}
-
-TEST_F(DataTransferTests, createParticleIds_sameIdsOnDescription)
-{
-    auto data1 = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(0)});
-    _simulationFacade->addAndSelectSimulationData(std::move(data1));
-
-    auto data2 = CollectionDescription().particles({ParticleDescription().id(0), ParticleDescription().id(0)});
-    _simulationFacade->addAndSelectSimulationData(std::move(data2));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::unordered_set<uint64_t> ids;
-    for (auto const& cell : actualData._particles) {
-        ids.insert(cell._id);
-    }
-
-    EXPECT_EQ(4, ids.size());
-}
-
-TEST_F(DataTransferTests, createCreatureIds)
-{
-    CollectionDescription data;
-    data.creatures(
-        {CreatureDescription().genome(GenomeDescription()).cells({CellDescription()}),
-         CreatureDescription().genome(GenomeDescription()).cells({CellDescription()})});
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::unordered_set<uint64_t> ids;
-    for (auto const& creature : actualData._creatures) {
-        ids.insert(creature._id);
-    }
-
-    EXPECT_EQ(4, ids.size());
-}
-
-TEST_F(DataTransferTests, keepObjectIdsStable)
-{
-    auto data =
-        CollectionDescription().cells({CellDescription().id(0), CellDescription().id(1)}).particles({ParticleDescription().id(2), ParticleDescription().id(3)});
+    auto data = CollectionDescription()
+                    .cells({CellDescription().id(0), CellDescription().id(1)})
+                    .particles({ParticleDescription().id(2), ParticleDescription().id(3)})
+                    .creatures({CreatureDescription().id(4).cells({CellDescription().id(5)}), CreatureDescription().id(5).cells({CellDescription().id(6)})});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSimulationData(data);
@@ -267,14 +153,20 @@ TEST_F(DataTransferTests, keepObjectIdsStable)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> expectedCellIds;
-    for (auto const& cell : data._cells) {
-        expectedCellIds.insert(cell._id);
-    }
+    data.forEachCell([&](auto const& cell) { expectedCellIds.insert(cell._id); });
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& cell : actualData._cells) {
-        actualCellIds.insert(cell._id);
-    }
+    actualData.forEachCell([&](auto const& cell) { actualCellIds.insert(cell._id); });
     EXPECT_EQ(expectedCellIds, actualCellIds);
+
+    std::unordered_set<uint64_t> expectedCreatureIds;
+    for (auto const& creature: data._creatures) {
+        expectedCreatureIds.insert(creature._id);
+    }
+    std::unordered_set<uint64_t> actualCreatureIds;
+    for (auto const& creature : actualData._creatures) {
+        actualCreatureIds.insert(creature._id);
+    }
+    EXPECT_EQ(expectedCreatureIds, actualCreatureIds);
 
     std::unordered_set<uint64_t> expectedParticleIds;
     for (auto const& particle : data._particles) {
@@ -287,43 +179,33 @@ TEST_F(DataTransferTests, keepObjectIdsStable)
     EXPECT_EQ(expectedParticleIds, actualParticleIds);
 }
 
-TEST_F(DataTransferTests, createCreatureIds_differentIds)
+TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).cells({CellDescription()}),
-        CreatureDescription().id(1).cells({CellDescription()}),
-    });
+    auto data = CollectionDescription()
+                    .cells({CellDescription().id(0), CellDescription().id(1)})
+                    .particles({ParticleDescription().id(2), ParticleDescription().id(3)})
+                    .creatures({CreatureDescription().id(4).cells({CellDescription().id(5)}), CreatureDescription().id(5).cells({CellDescription().id(6)})});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    std::unordered_set<uint64_t> ids;
+    std::unordered_set<uint64_t> actualCellIds;
+    actualData.forEachCell([&](auto const& cell) { actualCellIds.insert(cell._id); });
+    EXPECT_EQ(2 * 4, actualCellIds.size());
+
+    std::unordered_set<uint64_t> actualCreatureIds;
     for (auto const& creature : actualData._creatures) {
-        ids.insert(creature._id);
+        actualCreatureIds.insert(creature._id);
     }
+    EXPECT_EQ(2 * 2, actualCreatureIds.size());
 
-    EXPECT_EQ(4, ids.size());
-}
-
-TEST_F(DataTransferTests, createCreatureIds_sameIds)
-{
-    auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).cells({CellDescription(), CellDescription()}),
-    });
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    std::unordered_set<uint64_t> ids;
-    for (auto const& creature : actualData._creatures) {
-        ids.insert(creature._id);
+    std::unordered_set<uint64_t> actualParticleIds;
+    for (auto const& particle : actualData._particles) {
+        actualParticleIds.insert(particle._id);
     }
-
-    EXPECT_EQ(2, ids.size());
+    EXPECT_EQ(2 * 2, actualParticleIds.size());
 }
 
 TEST_F(DataTransferTests, changeGenome_successful)

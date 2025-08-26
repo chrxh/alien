@@ -347,8 +347,13 @@ void CollectionDescription::assignNewIds()
     // Assign new creatureIds
     for (auto& creature : _creatures) {
         if (creature._ancestorId.has_value()) {
-            CHECK(!nonUniqueCreatureIds.contains(creature._ancestorId.value()));
-            creature._ancestorId = oldToNewCreatureId.at(creature._ancestorId.value());
+            if(nonUniqueCreatureIds.contains(creature._ancestorId.value())) {
+                creature._ancestorId.reset();
+            } else {
+                if (oldToNewCreatureId.contains(creature._ancestorId.value())) {
+                    creature._ancestorId = oldToNewCreatureId.at(creature._ancestorId.value());
+                }
+            }
         }
     }
 
