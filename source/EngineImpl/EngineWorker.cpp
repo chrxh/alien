@@ -169,6 +169,10 @@ void EngineWorker::addAndSelectSimulationData(CollectionDescription&& dataToUpda
 
 void EngineWorker::setSimulationData(CollectionDescription const& dataToUpdate)
 {
+    if (!dataToUpdate.hasUniqueIds()) {
+        throw std::runtime_error("Cell ids are not unique.");
+    }
+
     EngineWorkerGuard access(this);
 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
@@ -440,6 +444,10 @@ CollectionDescription EngineWorker::getPreviewData()
 
 void EngineWorker::setPreviewData(CollectionDescription const& data)
 {
+    if (!data.hasUniqueIds()) {
+        throw std::runtime_error("Cell ids are not unique.");
+    }
+
     EngineWorkerGuard access(this);
 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);

@@ -380,7 +380,9 @@ struct CollectionDescription
     bool isEmpty() const;
 
     void add(CollectionDescription&& other);
-    void assignNewIds();    // Preserves order of cell ids
+
+    bool hasUniqueIds() const;
+    void assignNewIds();  // Preserves order of cell ids
 
     CollectionCache createCache() const;
     CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);

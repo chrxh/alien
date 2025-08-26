@@ -253,6 +253,36 @@ void CollectionDescription::add(CollectionDescription&& other)
     _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
 }
 
+bool CollectionDescription::hasUniqueIds() const
+{
+    std::unordered_set<uint64_t> cellIds;
+    uint64_t numCells = 0;
+    forEachCell([&](auto const& cell) {
+        cellIds.insert(cell._id);
+        ++numCells;
+    });
+    if (cellIds.size() != numCells) {
+        return false;
+    }
+
+    std::unordered_set<uint64_t> creatureIds;
+    for (auto const& creature : _creatures) {
+        creatureIds.insert(creature._id);
+    }
+    if (creatureIds.size() != _creatures.size()) {
+        return false;
+    }
+
+    std::unordered_set<uint64_t> particleIds;
+    for (auto const& particle : _particles) {
+        particleIds.insert(particle._id);
+    }
+    if (particleIds.size() != _particles.size()) {
+        return false;
+    }
+    return true;
+}
+
 void CollectionDescription::assignNewIds()
 {
     struct IndexKey
