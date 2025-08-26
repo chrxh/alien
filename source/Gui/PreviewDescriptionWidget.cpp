@@ -63,10 +63,22 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
         }
         RealVector2D previewSize = RealVector2D{200.0f, 200.0f} * cellSize;  //(lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
         //ImGui::SetCursorPos({(previewSize.x - 1) / 2, (previewSize.y - 1) / 2});
-        float centerX = ImGui::GetScrollMaxX() / 2.0f;
-        float centerY = ImGui::GetScrollMaxY() / 2.0f;
-        ImGui::SetScrollX(centerX);
-        ImGui::SetScrollY(centerY);
+        if (!_lastWindowSize.has_value()) {
+            //float centerX = ImGui::GetScrollMaxX() / 2.0f;
+            //float centerY = ImGui::GetScrollMaxY() / 2.0f;
+            float centerX = (previewSize.x - windowSize.x + scale(40.0f)) / 2.0f;
+            float centerY = (previewSize.y - windowSize.y + scale(70.0f)) / 2.0f;
+            ImGui::SetScrollX(centerX);
+            ImGui::SetScrollY(centerY);
+        } else {
+            auto deltaX = windowSize.x - _lastWindowSize->x;
+            auto deltaY = windowSize.y - _lastWindowSize->y;
+            auto scrollX = ImGui::GetScrollX();
+            auto scrollY = ImGui::GetScrollY();
+            ImGui::SetScrollX(scrollX - deltaX / 2);
+            ImGui::SetScrollY(scrollY - deltaY / 2);
+        }
+        _lastWindowSize = RealVector2D{windowSize.x, windowSize.y};
 
         auto mousePos = ImGui::GetMousePos();
         auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y

@@ -16,4 +16,6 @@ private:
 
     GenomeTabEditData _editData;
     float _zoom = 20.0f;
+    std::optional<RealVector2D> _lastWindowSize;
+    bool _initialScrollPositionSet = false;
 };

@@ -90,7 +90,9 @@ bool GenomeDescriptionInfoService::isConnectedToRoot(GenomeDescription const& ge
 
 std::set<int> GenomeDescriptionInfoService::getReferencedGenesInRootGeneHull(GenomeDescription const& genome) const
 {
-    CHECK(!genome._genes.empty());
+    if (genome._genes.empty()) {
+        return {};
+    }
 
     std::set<int> alreadyInspectedGeneIndices = {0};
     std::set<int> toInspectedGeneIndices = alreadyInspectedGeneIndices;

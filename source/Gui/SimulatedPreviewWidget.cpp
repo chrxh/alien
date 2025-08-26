@@ -127,7 +127,7 @@ void _SimulatedPreviewWidget::processSandboxes()
 
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto space = ImGui::GetContentRegionAvail();
-        auto width = std::max(space.x / _previewWidgets.size(), space.y);
+        auto width = std::max(space.x / _previewWidgets.size() - scale(7.0f), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
             processSandbox(i, std::move(phenotypes.at(i)), _subGenomesForPreview.at(i).startIndex, width);
             if (i < size - 1) {
@@ -159,6 +159,7 @@ void _SimulatedPreviewWidget::processSandbox(int subGenomeIndex, CollectionDescr
         GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
         auto conversionResult =
             PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngles.at(subGenomeIndex));
+
         _previewWidgets.at(subGenomeIndex)->process(conversionResult.description);
         _visualFrontAngles.at(subGenomeIndex) = conversionResult.visualFrontAngle;
     }

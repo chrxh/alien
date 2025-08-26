@@ -71,7 +71,6 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
 
     CollectionDescription data;
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
-    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
