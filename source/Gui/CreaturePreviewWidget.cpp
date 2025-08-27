@@ -8,6 +8,7 @@
 #include "Base/StringHelper.h"
 
 #include "EngineInterface/Colors.h"
+#include "EngineInterface/PreviewDescriptionConverterService.h"
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
@@ -21,8 +22,14 @@ CreaturePreviewWidget _CreaturePreviewWidget::create(
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-bool _CreaturePreviewWidget::process(PreviewDescription const& desc)
+bool _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
 {
+    auto geneStartIndex = _genomeWithStartIndex.startIndex;
+    auto conversionResult =
+        PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
+    auto& desc = conversionResult.description;
+    _visualFrontAngle = conversionResult.visualFrontAngle;
+
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
     auto const LineThickness = scale(2.0f);
@@ -374,6 +381,11 @@ GenomeDescriptionWithStartGeneIndex const& _CreaturePreviewWidget::getGenomeWith
 void _CreaturePreviewWidget::setGenomeWithStartIndex(GenomeDescriptionWithStartGeneIndex const& value)
 {
     _genomeWithStartIndex = value;
+}
+
+void _CreaturePreviewWidget::resetVisualFrontAngle()
+{
+    _visualFrontAngle.reset();
 }
 
 _CreaturePreviewWidget::_CreaturePreviewWidget(

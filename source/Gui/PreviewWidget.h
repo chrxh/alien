@@ -46,10 +46,6 @@ private:
     int _simulationSpeed = 50;  // In percent of full speed
     bool _fullSimulation = false;
 
-    //std::vector<GeneIndicesForSubGenome> _geneIndicesForSubGenomes;
-    //std::vector<GenomeDescriptionWithStartGeneIndex> _subGenomesForPreview;
-    std::vector<std::optional<float>> _visualFrontAngles;
-
     std::optional<GenomeDescription> _genomeFromPreviousFrame;
 
     std::optional<uint64_t> _previewTimestepFromPreviousMeasure;

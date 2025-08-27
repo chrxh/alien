@@ -11,7 +11,7 @@ public:
     static CreaturePreviewWidget
     create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex);
 
-    bool process(PreviewDescription const& desc);
+    bool process(CollectionDescription&& phenotype);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);
@@ -21,6 +21,8 @@ public:
 
     GenomeDescriptionWithStartGeneIndex const& getGenomeWithStartIndex() const;
     void setGenomeWithStartIndex(GenomeDescriptionWithStartGeneIndex const& value);
+
+    void resetVisualFrontAngle();
 
 private:
     _CreaturePreviewWidget(
@@ -32,6 +34,7 @@ private:
     GeneIndicesForSubGenome _geneIndices;
     GenomeDescriptionWithStartGeneIndex _genomeWithStartIndex;
     uint64_t _creatureId = 0;
+    std::optional<float> _visualFrontAngle;
 
     float _zoom = 20.0f;
     std::optional<RealVector2D> _lastWindowSize;
