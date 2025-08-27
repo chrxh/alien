@@ -1,4 +1,4 @@
-#include "PreviewDescriptionWidget.h"
+#include "CreaturePreviewWidget.h"
 
 #include <imgui.h>
 
@@ -13,12 +13,15 @@
 #include "GenomeTabEditData.h"
 #include "StyleRepository.h"
 
-PreviewDescriptionWidget _PreviewDescriptionWidget::create(GenomeTabEditData const& editData)
+CreaturePreviewWidget _CreaturePreviewWidget::create(
+    GenomeTabEditData const& editData,
+    GeneIndicesForSubGenome const& geneIndices,
+    GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex)
 {
-    return PreviewDescriptionWidget(new _PreviewDescriptionWidget(editData));
+    return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
+bool _CreaturePreviewWidget::process(PreviewDescription const& desc)
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
@@ -343,6 +346,41 @@ bool _PreviewDescriptionWidget::process(PreviewDescription const& desc)
     return result;
 }
 
-_PreviewDescriptionWidget::_PreviewDescriptionWidget(GenomeTabEditData const& editData)
+uint64_t _CreaturePreviewWidget::getCreatureId() const
+{
+    return _creatureId;
+}
+
+void _CreaturePreviewWidget::setCreatureId(uint64_t value)
+{
+    _creatureId = value;
+}
+
+GeneIndicesForSubGenome const& _CreaturePreviewWidget::getGeneIndices() const
+{
+    return _geneIndices;
+}
+
+void _CreaturePreviewWidget::setGeneIndices(GeneIndicesForSubGenome const& value)
+{
+    _geneIndices = value;
+}
+
+GenomeDescriptionWithStartGeneIndex const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
+{
+    return _genomeWithStartIndex;
+}
+
+void _CreaturePreviewWidget::setGenomeWithStartIndex(GenomeDescriptionWithStartGeneIndex const& value)
+{
+    _genomeWithStartIndex = value;
+}
+
+_CreaturePreviewWidget::_CreaturePreviewWidget(
+    GenomeTabEditData const& editData,
+    GeneIndicesForSubGenome const& geneIndices,
+    GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex)
     : _editData(editData)
+    , _geneIndices(geneIndices)
+    , _genomeWithStartIndex(genomeWithStartIndex)
 {}

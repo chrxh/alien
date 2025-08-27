@@ -67,7 +67,7 @@ private:
     GenomeEditorWidget _genomeEditorWidget;
     GeneEditorWidget _geneEditorWidget;
     NodeEditorWidget _nodeEditorWidget;
-    SimulatedPreviewWidget _simulatedPreviewWidget;
+    PreviewWidget _simulatedPreviewWidget;
 
     // Creature data
     GenomeTabEditData _editData;

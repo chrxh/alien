@@ -132,11 +132,11 @@ using NodeEditorWidget = std::shared_ptr<_NodeEditorWidget>;
 class _NeuralNetEditorWidget;
 using NeuralNetEditorWidget = std::shared_ptr<_NeuralNetEditorWidget>;
 
-class _SimulatedPreviewWidget;
-using SimulatedPreviewWidget = std::shared_ptr<_SimulatedPreviewWidget>;
+class _PreviewWidget;
+using PreviewWidget = std::shared_ptr<_PreviewWidget>;
 
-class _PreviewDescriptionWidget;
-using PreviewDescriptionWidget = std::shared_ptr<_PreviewDescriptionWidget>;
+class _CreaturePreviewWidget;
+using CreaturePreviewWidget = std::shared_ptr<_CreaturePreviewWidget>;
 
 struct UserInfo;
 

@@ -59,7 +59,7 @@ auto PreviewDescriptionConverterService::convert(
         if (lastCell.getCellType() == CellType_Constructor) {
             auto refGeneIndex = std::get<ConstructorDescription>(lastCell._cellTypeData)._geneIndex;
             phenotype.forEachCell([&](auto const& cell) {
-                if (cell._geneIndex != refGeneIndex) {
+                if (cell._geneIndex != refGeneIndex || cell._id == lastCell._id) {
                     return;
                 }
                 if (!secondLastCell.has_value() || cell._id > secondLastCell->_id) {

@@ -1,4 +1,3 @@
-
 target_sources(alien
 PUBLIC
     AboutDialog.cpp
@@ -19,6 +18,8 @@ PUBLIC
     CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
+    CreaturePreviewWidget.cpp
+    CreaturePreviewWidget.h
     Definitions.h
     DelayedExecutionController.cpp
     DelayedExecutionController.h
@@ -112,8 +113,8 @@ PUBLIC
     OverlayController.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
-    PreviewDescriptionWidget.cpp
-    PreviewDescriptionWidget.h
+    PreviewWidget.cpp
+    PreviewWidget.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
@@ -124,8 +125,6 @@ PUBLIC
     Shader.h
     ShaderWindow.cpp
     ShaderWindow.h
-    SimulatedPreviewWidget.cpp
-    SimulatedPreviewWidget.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp

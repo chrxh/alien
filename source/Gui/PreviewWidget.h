@@ -9,10 +9,10 @@
 
 #include "Definitions.h"
 
-class _SimulatedPreviewWidget
+class _PreviewWidget
 {
 public:
-    static SimulatedPreviewWidget create(
+    static PreviewWidget create(
         SimulationFacade const& simulationFacade,
         GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData);
@@ -20,7 +20,7 @@ public:
     void process();
 
 private:
-    _SimulatedPreviewWidget(
+    _PreviewWidget(
         SimulationFacade const& simulationFacade,
         GenomeWindowEditData const& genomeEditData,
         GenomeTabEditData const& editData);
@@ -29,14 +29,14 @@ private:
     void setupPreviewData(bool useCache = true);
     void calcPreview();
     void processSandboxes();
-    void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, int geneStartIndex, float width);
+    void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, float width);
     void processActionBar();
 
     int calcTpsForPreview();
 
 private:
     SimulationFacade _simulationFacade;
-    std::vector<PreviewDescriptionWidget> _previewWidgets;
+    std::vector<CreaturePreviewWidget> _creatureWidgets;
 
     GenomeWindowEditData _genomeEditData;
     GenomeTabEditData _editData;
@@ -46,9 +46,8 @@ private:
     int _simulationSpeed = 50;  // In percent of full speed
     bool _fullSimulation = false;
 
-    std::vector<GeneIndicesForSubGenome> _geneIndicesForSubGenomes;
-    std::vector<GenomeDescriptionWithStartGeneIndex> _subGenomesForPreview;
-    std::vector<uint64_t> _seedCreatureIdsForPreview;
+    //std::vector<GeneIndicesForSubGenome> _geneIndicesForSubGenomes;
+    //std::vector<GenomeDescriptionWithStartGeneIndex> _subGenomesForPreview;
     std::vector<std::optional<float>> _visualFrontAngles;
 
     std::optional<GenomeDescription> _genomeFromPreviousFrame;

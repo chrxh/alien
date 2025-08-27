@@ -13,7 +13,7 @@
 #include "GeneEditorWidget.h"
 #include "GenomeEditorWidget.h"
 #include "NodeEditorWidget.h"
-#include "SimulatedPreviewWidget.h"
+#include "PreviewWidget.h"
 #include "StyleRepository.h"
 
 GenomeTabWidget _GenomeTabWidget::createDraftTab(
@@ -164,7 +164,7 @@ _GenomeTabWidget::_GenomeTabWidget(
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
-    _simulatedPreviewWidget = _SimulatedPreviewWidget::create(simulationFacade, genomeEditData, _editData);
+    _simulatedPreviewWidget = _PreviewWidget::create(simulationFacade, genomeEditData, _editData);
     _specificEditData = specificEditData;
 }
 
