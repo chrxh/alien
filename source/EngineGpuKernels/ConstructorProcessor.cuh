@@ -182,8 +182,11 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                     ++constructor.currentBranch;
                 } else {
                     constructor.offspring = nullptr;
+
+                    // HACK for preview mode: Do not construct more than one offspring + move seed away
                     if (forPreview) {
-                        constructor.currentConcatenation = constructionData.gene->numConcatenations;  // Do not construct more than one offspring in preview
+                        constructor.currentConcatenation = constructionData.gene->numConcatenations;  
+                        cell->pos.y += toFloat(PREVIEW_HEIGHT / 3);
                     }
                 }
             }
@@ -735,6 +738,7 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell*
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
+    // HACK for preview mode: Construction does not consume energy
     if (constructionData.forPreview) {
         return true;
     }
