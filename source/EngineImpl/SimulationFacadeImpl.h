@@ -114,6 +114,7 @@ public:
     CollectionDescription getPreviewData() override;
     void setPreviewData(CollectionDescription const& data) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
+    void calcTimestepsForPreview(int numSteps) override;
     uint64_t getCurrentTimestepForPreview() override;
 
     // for tests only

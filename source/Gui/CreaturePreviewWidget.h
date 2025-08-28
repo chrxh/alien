@@ -30,6 +30,8 @@ private:
         GeneIndicesForSubGenome const& geneIndices,
         GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex);
 
+    void processActionButtons();
+
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
     GenomeDescriptionWithStartGeneIndex _genomeWithStartIndex;
@@ -37,6 +39,7 @@ private:
     std::optional<float> _visualFrontAngle;
 
     float _zoom = 20.0f;
-    std::optional<RealVector2D> _lastWindowSize;
+    std::optional<RealVector2D> _windowSizeFromPreviousFrame;
+    std::optional<float> _zoomFromPreviousFrame;
     bool _initialScrollPositionSet = false;
 };

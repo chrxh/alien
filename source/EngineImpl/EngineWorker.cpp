@@ -462,6 +462,13 @@ void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& dura
     _simulationCudaFacade->calcTimestepsForPreview(duration);
 }
 
+void EngineWorker::calcTimestepsForPreview(int numSteps)
+{
+    EngineWorkerGuard access(this);
+
+    _simulationCudaFacade->calcTimestepsForPreview(numSteps);
+}
+
 uint64_t EngineWorker::getCurrentTimestepForPreview()
 {
     return _simulationCudaFacade->getCurrentTimestepForPreview();

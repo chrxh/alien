@@ -560,7 +560,6 @@ void _SimulationCudaFacade::newPreview(CollectionTO const& dataTO)
 
 void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
 {
-    
     CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
         cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
@@ -572,6 +571,23 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
 
         ++_cudaPreviewData->timestep;
     } while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration);
+
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+}
+
+void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps)
+{
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+
+    auto startTimepoint = std::chrono::steady_clock::now();
+    for (int i = 0; i < numSteps; ++i) {
+        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics);
+        syncAndCheck();
+
+        ++_cudaPreviewData->timestep;
+    }
 
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));

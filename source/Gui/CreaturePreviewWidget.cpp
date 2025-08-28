@@ -73,22 +73,33 @@ bool _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
         }
         RealVector2D previewSize = RealVector2D{200.0f, 200.0f} * cellSize;  //(lowerRight - upperLeft) * cellSize + RealVector2D(cellSize, cellSize) * 2;
         //ImGui::SetCursorPos({(previewSize.x - 1) / 2, (previewSize.y - 1) / 2});
-        if (!_lastWindowSize.has_value()) {
-            //float centerX = ImGui::GetScrollMaxX() / 2.0f;
-            //float centerY = ImGui::GetScrollMaxY() / 2.0f;
+        if (!_windowSizeFromPreviousFrame.has_value()) {
             float centerX = (previewSize.x - windowSize.x + scale(40.0f)) / 2.0f;
             float centerY = (previewSize.y - windowSize.y + scale(70.0f)) / 2.0f;
             ImGui::SetScrollX(centerX);
             ImGui::SetScrollY(centerY);
         } else {
-            auto deltaX = windowSize.x - _lastWindowSize->x;
-            auto deltaY = windowSize.y - _lastWindowSize->y;
+            auto deltaX = windowSize.x - _windowSizeFromPreviousFrame->x;
+            auto deltaY = windowSize.y - _windowSizeFromPreviousFrame->y;
             auto scrollX = ImGui::GetScrollX();
             auto scrollY = ImGui::GetScrollY();
             ImGui::SetScrollX(scrollX - deltaX / 2);
             ImGui::SetScrollY(scrollY - deltaY / 2);
         }
-        _lastWindowSize = RealVector2D{windowSize.x, windowSize.y};
+        _windowSizeFromPreviousFrame = RealVector2D{windowSize.x, windowSize.y};
+
+        if (_zoomFromPreviousFrame.has_value() && _zoomFromPreviousFrame != _zoom) {
+            auto zoomFactor = _zoom / _zoomFromPreviousFrame.value();
+            if (zoomFactor > 1.0f) {
+                ImGui::SetScrollX(ImGui::GetScrollX() * zoomFactor + windowSize.x / 4);
+                ImGui::SetScrollY(ImGui::GetScrollY() * zoomFactor + windowSize.y / 4);
+            } else {
+                ImGui::SetScrollX((ImGui::GetScrollX() - windowSize.x / 4) * zoomFactor);
+                ImGui::SetScrollY((ImGui::GetScrollY() - windowSize.y / 4) * zoomFactor);
+            }
+        }
+        _zoomFromPreviousFrame = _zoom;
+
 
         auto mousePos = ImGui::GetMousePos();
         auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y
@@ -325,29 +336,7 @@ bool _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
 
     // Action buttons
     ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10), ImGui::GetScrollY() + windowSize.y - scale(40)});
-    if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), 0)) {
-        ImGui::SetCursorPos({0, 0});
-        ImGui::PushID(1);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
-            _zoom *= 1.5f;
-        }
-        ImGui::PopID();
-        ImGui::SameLine();
-        ImGui::PushID(2);
-        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
-            _zoom /= 1.5f;
-        }
-        ImGui::PopID();
-        //ImGui::SameLine();
-        //AlienGui::VerticalSeparator(23);
-        //ImGui::SameLine();
-        //ImGui::PushID(3);
-        //if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
-        //    _settings->maxSpeed = !_settings->maxSpeed;
-        //}
-        //ImGui::PopID();
-    }
-    ImGui::EndChild();
+    processActionButtons();
 
     _editData->setSelectedNodeIndex(selectedNode);
     return result;
@@ -396,3 +385,30 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     , _geneIndices(geneIndices)
     , _genomeWithStartIndex(genomeWithStartIndex)
 {}
+
+void _CreaturePreviewWidget::processActionButtons()
+{
+    if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), 0)) {
+        ImGui::SetCursorPos({0, 0});
+        ImGui::PushID(1);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_PLUS))) {
+            _zoom *= 1.5f;
+        }
+        ImGui::PopID();
+        ImGui::SameLine();
+        ImGui::PushID(2);
+        if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_SEARCH_MINUS))) {
+            _zoom /= 1.5f;
+        }
+        ImGui::PopID();
+        //ImGui::SameLine();
+        //AlienGui::VerticalSeparator(23);
+        //ImGui::SameLine();
+        //ImGui::PushID(3);
+        //if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
+        //    _settings->maxSpeed = !_settings->maxSpeed;
+        //}
+        //ImGui::PopID();
+    }
+    ImGui::EndChild();
+}

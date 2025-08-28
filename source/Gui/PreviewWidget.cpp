@@ -214,7 +214,9 @@ void _PreviewWidget::processActionBar()
 
     ImGui::SameLine();
     ImGui::BeginDisabled(_run);
-    AlienGui::Button(ICON_FA_CHEVRON_RIGHT);
+    if (AlienGui::Button(ICON_FA_CHEVRON_RIGHT)) {
+        _simulationFacade->calcTimestepsForPreview(1);
+    }
     ImGui::EndDisabled();
 
     ImGui::SameLine();

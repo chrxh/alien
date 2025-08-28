@@ -101,6 +101,7 @@ public:
     void initSettingsPreviewData();
     void newPreview(CollectionTO const& dataTO);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
+    void calcTimestepsForPreview(int numSteps);
     uint64_t getCurrentTimestepForPreview();
     CollectionTO getPreviewData();
 

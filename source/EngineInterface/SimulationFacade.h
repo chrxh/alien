@@ -108,6 +108,7 @@ public:
     virtual CollectionDescription getPreviewData() = 0;
     virtual void setPreviewData(CollectionDescription const& data) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
+    virtual void calcTimestepsForPreview(int numSteps) = 0;
     virtual uint64_t getCurrentTimestepForPreview() = 0;
 
     // Only for tests

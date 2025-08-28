@@ -117,6 +117,7 @@ public:
     CollectionDescription getPreviewData();
     void setPreviewData(CollectionDescription const& data);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
+    void calcTimestepsForPreview(int numSteps);
     uint64_t getCurrentTimestepForPreview();
 
     // Only for tests

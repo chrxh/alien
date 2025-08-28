@@ -373,6 +373,11 @@ void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds co
     _worker.calcTimestepsForPreview(duration);
 }
 
+void _SimulationFacadeImpl::calcTimestepsForPreview(int numSteps)
+{
+    _worker.calcTimestepsForPreview(numSteps);
+}
+
 uint64_t _SimulationFacadeImpl::getCurrentTimestepForPreview()
 {
     return _worker.getCurrentTimestepForPreview();
