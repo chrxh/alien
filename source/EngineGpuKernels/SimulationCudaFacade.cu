@@ -598,6 +598,11 @@ uint64_t _SimulationCudaFacade::getCurrentTimestepForPreview()
     return _cudaPreviewData->timestep;
 }
 
+void _SimulationCudaFacade::setCurrentTimestepForPreview(uint64_t timestep)
+{
+    _cudaPreviewData->timestep = timestep;
+}
+
 CollectionTO _SimulationCudaFacade::getPreviewData()
 {
     auto cudaDataTO = _cudaCollectionTOProvider->provideDataTO(PreviewCapacityTO);

@@ -383,6 +383,11 @@ uint64_t _SimulationFacadeImpl::getCurrentTimestepForPreview()
     return _worker.getCurrentTimestepForPreview();
 }
 
+void _SimulationFacadeImpl::setCurrentTimestepForPreview(uint64_t timestep)
+{
+    _worker.setCurrentTimestepForPreview(timestep);
+}
+
 void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     _worker.testOnly_mutate(cellId, mutationType);

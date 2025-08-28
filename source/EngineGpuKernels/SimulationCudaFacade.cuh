@@ -103,6 +103,7 @@ public:
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     void calcTimestepsForPreview(int numSteps);
     uint64_t getCurrentTimestepForPreview();
+    void setCurrentTimestepForPreview(uint64_t timestep);
     CollectionTO getPreviewData();
 
     // Only for tests

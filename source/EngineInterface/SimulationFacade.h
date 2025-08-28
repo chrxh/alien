@@ -110,6 +110,7 @@ public:
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
     virtual void calcTimestepsForPreview(int numSteps) = 0;
     virtual uint64_t getCurrentTimestepForPreview() = 0;
+    virtual void setCurrentTimestepForPreview(uint64_t timestep) = 0;
 
     // Only for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;

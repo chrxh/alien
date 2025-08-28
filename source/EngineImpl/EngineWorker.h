@@ -119,6 +119,7 @@ public:
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     void calcTimestepsForPreview(int numSteps);
     uint64_t getCurrentTimestepForPreview();
+    void setCurrentTimestepForPreview(uint64_t timestep);
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);

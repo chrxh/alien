@@ -12,7 +12,6 @@
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
 #include "EngineInterface/GenomeDescriptionInfoService.h"
-#include "EngineInterface/PreviewDescriptionConverterService.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "AlienGui.h"
@@ -36,6 +35,7 @@ void _PreviewWidget::process()
         createSubGenomesForPreview();
         setupPreviewData();
         _run = true;
+        _savepoints.clear();
     }
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
         setupPreviewData();
@@ -92,11 +92,10 @@ void _PreviewWidget::setupPreviewData(bool useCache)
         useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription>());
 
     _simulationFacade->setPreviewData(preview.data);
+    _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);
     _genomeEditData->currentPreviewId = _editData->id;
 
-    for (auto const& [index, creatureWidget] : _creatureWidgets | boost::adaptors::indexed(0)) {
-        creatureWidget->setCreatureId(preview.seedCreatureIds.at(index));
-    }
+    setSeedCreatureIds(preview.seedCreatureIds);
 }
 
 void _PreviewWidget::calcPreview()
@@ -108,6 +107,7 @@ void _PreviewWidget::calcPreview()
     auto fps = WindowController::get().getFps();
     auto duration = std::chrono::milliseconds(1000 / fps * _simulationSpeed / 100);
     _simulationFacade->calcTimestepsForPreview(duration);
+    _currentTimestep = _simulationFacade->getCurrentTimestepForPreview();
 }
 
 namespace
@@ -132,12 +132,8 @@ void _PreviewWidget::processSandboxes()
 
     auto previewRawData = _simulationFacade->getPreviewData();
 
-    std::vector<uint64_t> seedCreatureIds;
-    std::vector<GenomeDescriptionWithStartGeneIndex> subGenomesForPreview;
-    for (auto const& creatureWidget : _creatureWidgets) {
-        seedCreatureIds.emplace_back(creatureWidget->getCreatureId());
-        subGenomesForPreview.emplace_back(creatureWidget->getGenomeWithStartIndex());
-    }
+    auto seedCreatureIds = getSeedCreatureIds();
+    auto subGenomesForPreview = getSubGenomes();
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), seedCreatureIds);
     for (auto const& [subGenome, phenotype] : boost::combine(subGenomesForPreview, phenotypes)) {
         _genomeEditData->genotypeToPhenotypeCache.insert_or_assign(subGenome, phenotype);
@@ -187,21 +183,16 @@ void _PreviewWidget::processSandbox(int subGenomeIndex, CollectionDescription&& 
 void _PreviewWidget::processActionBar()
 {
     AlienGui::Separator();
-    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(/*ICON_FA_CUBES*/ICON_FA_GEM), _fullSimulation);
+    // Alternatives: ICON_FA_GEM, ICON_FA_FIRE, ICON_FA_CUDA
+    AlienGui::SelectableButton(AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20), _fullSimulation);
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);
 
     ImGui::SameLine();
-    if (AlienGui::Button(ICON_FA_UNDO)) {
-        setupPreviewData(false);
-        _run = true;
-    }
-
-    ImGui::SameLine();
     ImGui::BeginDisabled(_run);
     if (AlienGui::Button(ICON_FA_PLAY)) {
-        _run = true;
+        onRun();
     }
     ImGui::EndDisabled();
 
@@ -213,11 +204,29 @@ void _PreviewWidget::processActionBar()
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_run);
-    if (AlienGui::Button(ICON_FA_CHEVRON_RIGHT)) {
-        _simulationFacade->calcTimestepsForPreview(1);
+    AlienGui::VerticalSeparator(20.0f);
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_run || _savepoints.empty());
+    if (AlienGui::Button(ICON_FA_CHEVRON_LEFT)) {
+        onStepBackward();
     }
     ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    ImGui::BeginDisabled(_run);
+    if (AlienGui::Button(ICON_FA_CHEVRON_RIGHT)) {
+        onStepForward();
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+    AlienGui::VerticalSeparator(20.0f);
+
+    ImGui::SameLine();
+    if (AlienGui::Button(ICON_FA_REDO)) {
+        onRestart();
+    }
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(scale(90.0f));
@@ -235,23 +244,80 @@ void _PreviewWidget::processActionBar()
 int _PreviewWidget::calcTpsForPreview()
 {
     auto now = std::chrono::steady_clock::now();
-    auto timestep = _simulationFacade->getCurrentTimestepForPreview();
+    _currentTimestep = _simulationFacade->getCurrentTimestepForPreview();
     int tps = 0;
     if (_previewTimestepFromPreviousMeasure.has_value() && _timepointFromPreviousMeasure.has_value()) {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_timepointFromPreviousMeasure);
         if (duration.count() > 300) {
-            tps = calcTimestepsPerSecond(_previewTimestepFromPreviousMeasure.value(), timestep, duration);
-            _previewTimestepFromPreviousMeasure = timestep;
+            tps = calcTimestepsPerSecond(_previewTimestepFromPreviousMeasure.value(), _currentTimestep, duration);
+            _previewTimestepFromPreviousMeasure = _currentTimestep;
             _timepointFromPreviousMeasure = now;
             _tpsFromPreviousMeasure = tps;
         } else {
             tps = _tpsFromPreviousMeasure.value();
         }
     } else {
-        _previewTimestepFromPreviousMeasure = timestep;
+        _previewTimestepFromPreviousMeasure = _currentTimestep;
         _timepointFromPreviousMeasure = now;
         _tpsFromPreviousMeasure = tps;
     }
     return tps;
+}
+
+void _PreviewWidget::onRun()
+{
+    _run = true;
+    _savepoints.clear();
+}
+
+void _PreviewWidget::onStepBackward()
+{
+    auto lastSavepoint = _savepoints.back();
+    _savepoints.pop_back();
+    _simulationFacade->setCurrentTimestepForPreview(lastSavepoint.timestep);
+    _simulationFacade->setPreviewData(lastSavepoint.data);
+    setSeedCreatureIds(lastSavepoint.seedCreatureIds);
+}
+
+void _PreviewWidget::onStepForward()
+{
+    auto timestep = _simulationFacade->getCurrentTimestepForPreview();
+    auto data = _simulationFacade->getPreviewData();
+    auto seedCreatureIds = getSeedCreatureIds();
+    _savepoints.emplace_back(timestep, data, seedCreatureIds);
+
+    _simulationFacade->calcTimestepsForPreview(1);
+}
+
+void _PreviewWidget::onRestart()
+{
+    setupPreviewData(false);
+    _run = true;
+    _savepoints.clear();
+}
+
+std::vector<uint64_t> _PreviewWidget::getSeedCreatureIds() const
+{
+    std::vector<uint64_t> result;
+    for (auto const& creatureWidget : _creatureWidgets) {
+        result.emplace_back(creatureWidget->getCreatureId());
+    }
+    return result;
+}
+
+void _PreviewWidget::setSeedCreatureIds(std::vector<uint64_t> const& value)
+{
+    for (auto const& [creatureWidget, creatureId] : boost::combine(_creatureWidgets, value)) {
+        creatureWidget->setCreatureId(creatureId);
+    }
+}
+
+std::vector<GenomeDescriptionWithStartGeneIndex> _PreviewWidget::getSubGenomes() const
+{
+    std::vector<GenomeDescriptionWithStartGeneIndex> result;
+    for (auto const& creatureWidget : _creatureWidgets) {
+        result.emplace_back(creatureWidget->getGenomeWithStartIndex());
+    }
+    return result;
 }
 

@@ -14,12 +14,12 @@ class ConstructorProcessor
 {
 public:
     __inline__ __device__ static void preprocess(SimulationData& data);
-    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool forPreview);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics, bool isPreview);
 
 private:
     struct ConstructionData
     {
-        bool forPreview;
+        bool isPreview;
 
         // Creature and genome data
         Creature* creature;
@@ -44,9 +44,9 @@ private:
 //
 //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 //
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool forPreview);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Cell* cell);
-    __inline__ __device__ static ConstructionData createConstructionData(Cell* cell, bool forPreview);
+    __inline__ __device__ static ConstructionData createConstructionData(Cell* cell, bool isPreview);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -89,12 +89,12 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
     //}
 }
 
-__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool forPreview)
+__inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
     auto& operations = data.cellTypeOperations[CellType_Constructor];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, statistics, operations.at(i).cell, forPreview);
+        processCell(data, statistics, operations.at(i).cell, isPreview);
     }
 }
 
@@ -150,13 +150,13 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    constructor.isReady = (actualCells >= constructor.numExpectedCells);
 //}
 //
-__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool forPreview)
+__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool isPreview)
 {
     if (cell->creature == nullptr) {
         return;
     }
     auto& constructor = cell->cellTypeData.constructor;
-    if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval)) {
+    if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval, isPreview)) {
         constructor.offspring = findOrCreateNewCreature(data, cell);
 
         if (ConstructorHelper::isFinished(constructor, constructor.offspring->genome)) {
@@ -168,7 +168,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             constructor.currentConcatenation = 0;
         }
 
-        auto constructionData = createConstructionData(cell, forPreview);
+        auto constructionData = createConstructionData(cell, isPreview);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
@@ -184,7 +184,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                     constructor.offspring = nullptr;
 
                     // HACK for preview mode: Do not construct more than one offspring + move seed away
-                    if (forPreview) {
+                    if (isPreview) {
                         constructor.currentConcatenation = constructionData.gene->numConcatenations;  
                         cell->pos.y += toFloat(PREVIEW_HEIGHT / 3);
                     }
@@ -230,7 +230,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     return factory.cloneCreature(cell->creature);
 }
 
-__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell, bool forPreview)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell, bool isPreview)
 {
     auto& constructor = cell->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
@@ -239,7 +239,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto isFirstConcatenation = ConstructorHelper::isFirstConcatenation(constructor);
 
     ConstructionData result;
-    result.forPreview = forPreview;
+    result.isPreview = isPreview;
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
@@ -739,7 +739,7 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell*
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
     // HACK for preview mode: Construction does not consume energy
-    if (constructionData.forPreview) {
+    if (constructionData.isPreview) {
         return true;
     }
 

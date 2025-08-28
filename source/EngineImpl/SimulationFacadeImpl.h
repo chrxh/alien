@@ -116,6 +116,7 @@ public:
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
     void calcTimestepsForPreview(int numSteps) override;
     uint64_t getCurrentTimestepForPreview() override;
+    void setCurrentTimestepForPreview(uint64_t timestep) override;
 
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;

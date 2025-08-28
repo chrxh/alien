@@ -474,6 +474,11 @@ uint64_t EngineWorker::getCurrentTimestepForPreview()
     return _simulationCudaFacade->getCurrentTimestepForPreview();
 }
 
+void EngineWorker::setCurrentTimestepForPreview(uint64_t timestep)
+{
+    _simulationCudaFacade->setCurrentTimestepForPreview(timestep);
+}
+
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     EngineWorkerGuard access(this);
