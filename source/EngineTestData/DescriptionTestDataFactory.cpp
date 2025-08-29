@@ -8,7 +8,6 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
 
     auto cellTypeDesc = createNonDefaultCellTypeDescription(cellParameter);
     auto result = CellDescription()
-                      .id(1)
                       .pos({0.5f, 0.8f})
                       .vel({-0.3f, 0.7f})
                       .energy(150.0f)

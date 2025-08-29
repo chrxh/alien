@@ -71,9 +71,24 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
 
     CollectionDescription data;
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
+
+TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature_preview)
+{
+    auto cellParameter = GetParam();
+
+    CollectionDescription data;
+    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+    data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
+
+    _simulationFacade->setPreviewData(data);
+    auto actualData = _simulationFacade->getPreviewData();
 
     EXPECT_TRUE(compare(data, actualData));
 }
@@ -116,6 +131,21 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
+
+TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
+{
+    auto nodeParameter = GetParam();
+
+    auto data = CollectionDescription().creatures({
+        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
+        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
+    });
+
+    _simulationFacade->setPreviewData(data);
+    auto actualData = _simulationFacade->getPreviewData();
 
     EXPECT_TRUE(compare(data, actualData));
 }

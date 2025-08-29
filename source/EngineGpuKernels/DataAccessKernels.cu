@@ -40,6 +40,9 @@ namespace
             creatureTO.genomeComplexity = creature->genomeComplexity;
             creatureTO.genome.frontAngle = creature->genome.frontAngle;
             creatureTO.genome.numGenes = creature->genome.numGenes;
+            for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
+                creatureTO.genome.name[i] = creature->genome.name[i];
+            }
 
             auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, creature->genome.numGenes);
             creatureTO.genome.geneArrayIndex = geneTOArrayStartIndex;
@@ -54,6 +57,9 @@ namespace
                 geneTO.connectionDistance = gene.connectionDistance;
                 geneTO.numConcatenations = gene.numConcatenations;
                 geneTO.numNodes = gene.numNodes;
+                for (int i = 0; i < sizeof(gene.name); ++i) {
+                    geneTO.name[i] = gene.name[i];
+                }
                 auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
                 geneTO.nodeArrayIndex = nodeTOArrayStartIndex;
                 for (int i = 0, j = gene.numNodes; i < j; ++i) {
@@ -225,6 +231,7 @@ namespace
         case CellType_Constructor: {
             cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
+            cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
             cellTO.cellTypeData.constructor.geneIndex = cell->cellTypeData.constructor.geneIndex;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;

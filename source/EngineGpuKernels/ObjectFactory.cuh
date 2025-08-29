@@ -82,6 +82,9 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
     creature->genomeComplexity = creatureTO.genomeComplexity;
     creature->genome.frontAngle = creatureTO.genome.frontAngle;
     creature->genome.numGenes = creatureTO.genome.numGenes;
+    for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
+        creature->genome.name[i] = creatureTO.genome.name[i];
+    }
 
     auto const& geneTOs = collectionTO.genes + creatureTO.genome.geneArrayIndex;
     auto genes = _data->objects.heap.getTypedSubArray<Gene>(creatureTO.genome.numGenes);
@@ -97,6 +100,9 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
         gene.connectionDistance = geneTO.connectionDistance;
         gene.numConcatenations = geneTO.numConcatenations;
         gene.numNodes = geneTO.numNodes;
+        for (int i = 0; i < sizeof(geneTO.name); ++i) {
+            gene.name[i] = geneTO.name[i];
+        }
 
         auto const& nodeTOs = collectionTO.nodes + geneTO.nodeArrayIndex;
         auto nodes = _data->objects.heap.getTypedSubArray<Node>(geneTO.numNodes);
