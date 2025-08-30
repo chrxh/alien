@@ -641,7 +641,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    EXPECT_TRUE(getEnergy(data) < getEnergy(actualData));   // Preview specific: energy is provided for free
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
@@ -653,13 +653,13 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
-    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
+    EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);    // Preview specific: Move seed far away from construction
     EXPECT_TRUE(compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellTypeData);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(0, hostConstructor._currentConcatenation);
+    EXPECT_EQ(1, hostConstructor._currentConcatenation);    // Preview specific: marking end since preview only produces one offspring
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
