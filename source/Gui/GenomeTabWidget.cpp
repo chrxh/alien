@@ -80,7 +80,7 @@ int _GenomeTabWidget::getTabId() const
 std::string _GenomeTabWidget::getName() const
 {
     if (isDraft()) {
-        return "Draft " + std::to_string(_editData->id);
+        return _editData->genome._name;
     } else {
         auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
         auto result = "Creature " + StringHelper::formatInHex(simulatedCreatureData.creatureId);
