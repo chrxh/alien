@@ -616,6 +616,53 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
+TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)
+{
+    auto const FrontAngle = 10.0f;
+
+    auto nodeParameter = GetParam();
+    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
+
+    auto data = CollectionDescription().creatures({
+        CreatureDescription()
+            .id(0)
+            .genome(GenomeDescription()
+                        .genes({
+                            GeneDescription().separation(true).nodes({randomNode}),
+                        })
+                        .frontAngle(FrontAngle))
+            .cells({CellDescription().energy(getConstructorEnergy()).cellTypeData(ConstructorDescription()).pos({100.0f, 100.0f}).angleToFront(FrontAngle)}),
+    });
+
+    _simulationFacade->setPreviewData(data);
+    _simulationFacade->calcTimestepsForPreview(1);
+
+    auto actualData = _simulationFacade->getPreviewData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto hostCreature = actualData.getCreatureRef(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreatureRef(0);
+    ASSERT_EQ(1, newCreature._cells.size());
+
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
+    EXPECT_TRUE(compare(newCell, randomNode));
+    EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
+
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellTypeData);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
+    EXPECT_EQ(0, hostConstructor._currentBranch);
+}
+
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_1)
 {
     auto const FrontAngle = 10.0f;
