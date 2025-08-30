@@ -276,7 +276,8 @@ struct CellDescription
     auto operator<=>(CellDescription const&) const = default;
 
     // General
-    MEMBER(CellDescription, uint64_t, id, 0ull);
+    uint64_t _id = 0;
+    CellDescription id(uint64_t id);
     MEMBER(CellDescription, std::vector<ConnectionDescription>, connections, {});
     MEMBER(CellDescription, RealVector2D, pos, RealVector2D());
     MEMBER(CellDescription, RealVector2D, vel, RealVector2D());
@@ -330,7 +331,8 @@ struct ParticleDescription
     ParticleDescription();
     auto operator<=>(ParticleDescription const&) const = default;
 
-    MEMBER(ParticleDescription, uint64_t, id, 0ull);
+    uint64_t _id = 0;
+    ParticleDescription id(uint64_t id);
     MEMBER(ParticleDescription, RealVector2D, pos, RealVector2D());
     MEMBER(ParticleDescription, RealVector2D, vel, RealVector2D());
     MEMBER(ParticleDescription, float, energy, 0.0f);
@@ -342,7 +344,8 @@ struct CreatureDescription
     CreatureDescription();
     auto operator<=>(CreatureDescription const&) const = default;
 
-    MEMBER(CreatureDescription, uint64_t, id, 0);
+    uint64_t _id = 0;
+    CreatureDescription id(uint64_t id);
     MEMBER(CreatureDescription, std::optional<uint64_t>, ancestorId, std::nullopt);
     MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, mutationId, 0);

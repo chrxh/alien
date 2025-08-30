@@ -106,7 +106,6 @@ void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, Simulat
     if (selectData) {
         _editKernels->rolloutSelection(gpuSettings, data);
     }
-    KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);
 }
 
 void _DataAccessKernelsService::clearData(CudaSettings const& gpuSettings, SimulationData const& data)

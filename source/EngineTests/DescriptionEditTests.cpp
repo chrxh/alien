@@ -583,3 +583,20 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
         EXPECT_TRUE(!creature._ancestorId.has_value());
     }
 }
+
+TEST_F(DescriptionEditTests, adaptMaxIds)
+{
+    auto data = CollectionDescription()
+                    .creatures({
+                        CreatureDescription().id(3).cells({CellDescription().id(5)}),
+                        CreatureDescription().cells({CellDescription()}),
+                    })
+                    .particles({
+                        ParticleDescription().id(7),
+                        ParticleDescription(),
+                    });
+
+    EXPECT_LT(data._creatures.at(0)._id, data._creatures.at(1)._id);
+    EXPECT_LT(data._creatures.at(0)._cells.at(0)._id, data._creatures.at(1)._cells.at(0)._id);
+    EXPECT_LT(data._particles.at(0)._id, data._particles.at(1)._id);
+}

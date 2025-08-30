@@ -61,6 +61,13 @@ CellDescription::CellDescription(bool createIds)
     }
 }
 
+CellDescription CellDescription::id(uint64_t id)
+{
+    NumberGenerator::get().adaptMaxIds({.currentObjectId = id});
+    _id = id;
+    return *this;
+}
+
 CellType CellDescription::getCellType() const
 {
     if (std::holds_alternative<StructureCellDescription>(_cellTypeData)) {
@@ -165,9 +172,23 @@ ParticleDescription::ParticleDescription()
     _id = NumberGenerator::get().createObjectId();
 }
 
+ParticleDescription ParticleDescription::id(uint64_t id)
+{
+    NumberGenerator::get().adaptMaxIds({.currentObjectId = id});
+    _id = id;
+    return *this;
+}
+
 CreatureDescription::CreatureDescription()
 {
     _id = NumberGenerator::get().createCreatureId();
+}
+
+CreatureDescription CreatureDescription::id(uint64_t id)
+{
+    NumberGenerator::get().adaptMaxIds({.currentCreatureId = id});
+    _id = id;
+    return *this;
 }
 
 void CollectionDescription::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const

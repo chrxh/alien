@@ -51,9 +51,9 @@ uint64_t NumberGenerator::createCreatureId()
 
 void NumberGenerator::adaptMaxIds(Ids const& ids)
 {
-    _ids.currentObjectId = std::max(_ids.currentObjectId, ids.currentObjectId);
-    _ids.currentCreatureId = std::max(_ids.currentCreatureId, ids.currentCreatureId);
-    _ids.currentMutationId = std::max(_ids.currentMutationId, ids.currentMutationId);
+    _ids.currentObjectId = std::max(_ids.currentObjectId, ids.currentObjectId + 1);
+    _ids.currentCreatureId = std::max(_ids.currentCreatureId, ids.currentCreatureId + 1);
+    _ids.currentMutationId = std::max(_ids.currentMutationId, ids.currentMutationId + 1);
 }
 
 double NumberGenerator::getRandomDouble(double min, double max)

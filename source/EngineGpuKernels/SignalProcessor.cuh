@@ -151,7 +151,7 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
         if (isPreview) {
             return data.timestep % triggerInterval == 0;
         } else {
-            return (data.timestep + cell->creature->mutationId) % triggerInterval == 0;
+            return (data.timestep + cell->creature->id) % triggerInterval == 0;
         }
     }
     else {
