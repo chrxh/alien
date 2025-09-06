@@ -144,6 +144,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
     auto const LineThickness = scale(2.0f);
     auto const cellSize = scale(_zoom);
     auto const previewSize = RealVector2D{200.0f, 200.0f} * cellSize;
+    auto const previewCenter = previewSize / 2.0f;
     auto const& desc = conversionResult.description;
     auto& selectedGene = _editData->selectedGeneIndex;
     auto selectedNode = _editData->getSelectedNodeIndex();
@@ -161,10 +162,29 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
         auto windowPos = ImGui::GetWindowPos();
         RealVector2D offset{windowPos.x + cellSize, windowPos.y + cellSize};
 
+        // Draw front circle
+        {
+            auto dimensions = calcDimensions(desc);
+            auto center = (dimensions.upperLeft + dimensions.lowerRight) / 2.0f + offset + previewCenter;
+            auto radius = (std::max(dimensions.lowerRight.x - dimensions.upperLeft.x, dimensions.lowerRight.y - dimensions.upperLeft.y) / 2.0f + 1.0f) * cellSize;
+            radius = std::max(radius, cellSize * 4.0f);
+            drawList->AddCircle({center.x, center.y}, radius, ImColor::HSV(0, 0, 0.2f), 64);
+
+            auto frontStartPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius - cellSize / 4);
+            auto frontEndPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + cellSize / 4);
+            drawList->AddLine({frontStartPos.x, frontStartPos.y}, {frontEndPos.x, frontEndPos.y}, ImColor::HSV(0, 0, 0.4f));
+
+            AlienGui::RotateStart(drawList);
+            auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + cellSize);
+            auto textSize = scale(12.0f);
+            drawList->AddText(nullptr, textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front"); 
+            AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
+        }
+
         // Draw selected gene
         auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
         for (auto const& cell : desc._cells) {
-            auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+            auto cellPos = cell._pos * cellSize + offset + previewCenter;
             if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
             }
@@ -172,7 +192,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
 
         // Draw cells and selected cells
         for (auto const& cell : desc._cells) {
-            auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+            auto cellPos = cell._pos * cellSize + offset + previewCenter;
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
 
@@ -199,7 +219,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
         // Draw signal restrictions
         if (_zoom > ZoomLevelForConnections) {
             for (auto const& cell : desc._cells) {
-                auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+                auto cellPos = cell._pos * cellSize + offset + previewCenter;
                 auto constexpr cellRadiusFactor = 0.3f;
                 float radius = cellSize * cellRadiusFactor;
                 if (!cell._signalRestriction.has_value()) {
@@ -235,8 +255,8 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
         // Draw cell connections
         if (_zoom > ZoomLevelForConnections) {
             for (auto const& connection : desc._connections) {
-                auto cellPos1 = (connection._cell1 + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
-                auto cellPos2 = (connection._cell2 + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+                auto cellPos1 = connection._cell1 * cellSize + offset + previewCenter;
+                auto cellPos2 = connection._cell2 * cellSize + offset + previewCenter;
 
                 auto direction = cellPos1 - cellPos2;
 
@@ -282,7 +302,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
         if (_zoom > ZoomLevelForLabels) {
             for (auto const& cell : desc._cells) {
                 if (cell._constructorGeneIndex.has_value()) {
-                    auto cellPos = (cell._pos + RealVector2D{100.0f, 100.0f}) * cellSize + offset;
+                    auto cellPos = cell._pos * cellSize + offset + previewCenter;
                     auto text = std::to_string(cell._constructorGeneIndex.value() + 1);
                     auto textLength = text.size();
                     drawList->AddRectFilled(
@@ -333,4 +353,25 @@ void _CreaturePreviewWidget::processActionButtons()
         //ImGui::PopID();
     }
     ImGui::EndChild();
+}
+
+_CreaturePreviewWidget::Dimensions _CreaturePreviewWidget::calcDimensions(PreviewDescription const& desc) const
+{
+    Dimensions result;
+
+    for (auto const& cell : desc._cells) {
+        if (cell._pos.x < result.upperLeft.x) {
+            result.upperLeft.x = cell._pos.x;
+        }
+        if (cell._pos.y < result.upperLeft.y) {
+            result.upperLeft.y = cell._pos.y;
+        }
+        if (cell._pos.x > result.lowerRight.x) {
+            result.lowerRight.x = cell._pos.x;
+        }
+        if (cell._pos.y > result.lowerRight.y) {
+            result.lowerRight.y = cell._pos.y;
+        }
+    }
+    return result;
 }

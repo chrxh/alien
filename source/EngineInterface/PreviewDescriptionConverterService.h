@@ -8,6 +8,7 @@
 struct ConversionResult
 {
     PreviewDescription description;
+    float frontAngle = 0;
     std::optional<float> visualFrontAngle;
 };
 

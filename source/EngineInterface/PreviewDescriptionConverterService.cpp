@@ -28,6 +28,7 @@ ConversionResult PreviewDescriptionConverterService::convert(
     std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;
+    result.frontAngle = genome._frontAngle;
     result.visualFrontAngle = lastVisualFrontAngle;
 
     auto const& editService = DescriptionEditService::get();
