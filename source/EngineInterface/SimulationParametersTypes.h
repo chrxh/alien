@@ -162,7 +162,7 @@ enum CellColoring_
     CellColoring_LineageId,
     CellColoring_LineageId_EveryCellType,
     CellColoring_CellState,
-    CellColoring_GenomeComplexity,
+    CellColoring_NumCells,
     CellColoring_SpecificCellType,
     CellColoring_EveryCellType
 };

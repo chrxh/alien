@@ -716,7 +716,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Low genome complexity penalty")
-                        .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowGenomeComplexityPenalty).min(0.0f).max(1.0f).format("%.2f"))
+                        .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowNumCellsPenalty).min(0.0f).max(1.0f).format("%.2f"))
                         .description(
                             "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle."),
                     ParameterSpec()
@@ -934,26 +934,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .infinity(true))
                         .description("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
                                  "below this value."),
-                }),
-            ParameterGroupSpec()
-                .name("Genome complexity measurement")
-                .expertToggle(&SimulationParameters::genomeComplexityMeasurementToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Size factor")
-                        .reference(FloatSpec().member(&SimulationParameters::genomeComplexitySizeFactor).min(0.0f).max(1.0f).format("%.2f"))
-                        .description("This parameter controls how the number of encoded cells in the genome influences the calculation of its complexity."),
-                    ParameterSpec()
-                        .name("Ramification factor")
-                        .reference(FloatSpec().member(&SimulationParameters::genomeComplexityRamificationFactor).min(0.0f).max(20.0f).format("%.2f"))
-                        .description("With this parameter, the number of ramifications of the cell structure to the genome is taken into account for the "
-                                 "calculation of the genome complexity. For instance, genomes that contain many sub-genomes or many construction branches will "
-                                 "then have a high complexity value."),
-                    ParameterSpec()
-                        .name("Depth level")
-                        .reference(IntSpec().member(&SimulationParameters::genomeComplexityDepthLevel).min(1).max(20).infinity(true))
-                        .description("This allows to specify up to which level of the sub-genomes the complexity calculation should be carried out. For example, a "
-                                 "value of 2 means that the sub- and sub-sub-genomes are taken into account in addition to the main genome."),
                 }),
         });
     }

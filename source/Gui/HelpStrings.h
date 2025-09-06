@@ -349,7 +349,7 @@ namespace Const
         "values have a special meaning:\n\n" ICON_FA_CHEVRON_RIGHT " 0: This value is used for handcrafted cells. This refers to cells that have been "
         "artificially created by the user.\n\n" ICON_FA_CHEVRON_RIGHT " 1: This value is used for free cells. Free cells are cells that have not been created by a "
         "self-replication process, but by transformation from an energy particle.";
-    std::string const GenomeComplexityTooltip =
+    std::string const NumCellsTooltip =
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
         "complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.";
 
@@ -496,6 +496,6 @@ namespace Const
         "visible to all users.\n\n" ICON_FA_CHEVRON_RIGHT " Private: Each user account has its own private space. The simulations and genomes are only visible to "
         "the logged-in user.";
 
-    std::string const ParameterRadiationAbsorptionLowGenomeComplexityPenaltyTooltip =
+    std::string const ParameterRadiationAbsorptionLowNumCellsPenaltyTooltip =
         "When this parameter is increased, cells with fewer genome complexity will absorb less energy from an incoming energy particle.";
 }

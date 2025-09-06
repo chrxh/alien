@@ -2194,7 +2194,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     ImGui::PushID(parameters._name.c_str());
 
     if (enabled) {
-        ImGui::Checkbox("##cellTypeAttackerGenomeComplexityBonus", enabled);
+        ImGui::Checkbox("##cellTypeAttackerNumCellsBonus", enabled);
         if (!(*enabled)) {
             for (int i = 0; i < MAX_COLORS; ++i) {
                 for (int j = 0; j < MAX_COLORS; ++j) {

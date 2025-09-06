@@ -37,7 +37,7 @@ namespace
             creatureTO.ancestorId = creature->ancestorId;
             creatureTO.generation = creature->generation;
             creatureTO.lineageId = creature->lineageId;
-            creatureTO.genomeComplexity = creature->genomeComplexity;
+            creatureTO.numCells = creature->numCells;
             creatureTO.genome.frontAngle = creature->genome.frontAngle;
             creatureTO.genome.numGenes = creature->genome.numGenes;
             for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {

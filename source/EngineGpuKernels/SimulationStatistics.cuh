@@ -38,7 +38,7 @@ public:
         auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             _mutantToMutantStatisticsMap[index].count = 0;
-            _mutantToMutantStatisticsMap[index].genomeComplexity = 0;
+            _mutantToMutantStatisticsMap[index].numCells = 0;
             _mutantToMutantStatisticsMap[index].color = 0;
         }
     }
@@ -57,45 +57,25 @@ public:
     __inline__ __device__ void incNumFreeCells(int color) { atomicAdd(&_data->timeline.timestep.numFreeCells[color], 1); }
     __inline__ __device__ void incNumParticles(int color) { atomicAdd(&_data->timeline.timestep.numParticles[color], 1); }
     __inline__ __device__ void addEnergy(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.totalEnergy[color], valueToAdd); }
-    __inline__ __device__ void addNumGenomeNodes(int color, uint64_t valueToAdd)
-    {
-        alienAtomicAdd64(&_data->timeline.timestep.numGenomeCells[color], valueToAdd);
-    }
-    __inline__ __device__ void addGenomeComplexity(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.genomeComplexity[color], valueToAdd); }
-    __inline__ __device__ double getSummedGenomeComplexity()
+    __inline__ __device__ void addNumCells(int color, float valueToAdd) { atomicAdd(&_data->timeline.timestep.numCells[color], valueToAdd); }
+    __inline__ __device__ double getSummedNumCells()
     {
         auto result = 0.0;
         for (int i = 0; i < MAX_COLORS; ++i) {
-            result += toDouble(_data->timeline.timestep.genomeComplexity[i]);
+            result += toDouble(_data->timeline.timestep.numCells[i]);
         }
         return result;
     }
-    __inline__ __device__ void addToGenomeComplexityVariance(int color, double valueToAdd)
-    {
-        atomicAdd(&_data->timeline.timestep.genomeComplexityVariance[color], valueToAdd);
-    }
-    __inline__ __device__ void incMutant(int color, uint32_t lineageId, float genomeComplexity)
+    __inline__ __device__ void incMutant(int color, uint32_t lineageId, float numCells)
     {
         atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].count, 1);
         atomicMax(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].color, color);
-        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
+        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].numCells, numCells);
     }
     __inline__ __device__ void halveNumConnections()
     {
         for (int i = 0; i < MAX_COLORS; ++i) {
             _data->timeline.timestep.numFreeCells[i] /= 2;
-        }
-    }
-    __inline__ __device__ void calcStatisticsForColonies()
-    {
-        auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            if (_mutantToMutantStatisticsMap[index].count >= 20) {
-                auto& mutantStatistics = _mutantToMutantStatisticsMap[index];
-                atomicAdd(&_data->timeline.timestep.numColonies[mutantStatistics.color], 1);
-                alienAtomicMax(
-                    &_data->timeline.timestep.maxGenomeComplexityOfColonies[mutantStatistics.color], mutantStatistics.genomeComplexity / mutantStatistics.count);
-            }
         }
     }
 
@@ -156,7 +136,7 @@ private:
     {
         uint32_t color;
         uint32_t count;
-        float genomeComplexity;
+        float numCells;
     };
     MutantStatistics* _mutantToMutantStatisticsMap;
 };

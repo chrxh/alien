@@ -72,7 +72,7 @@ CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescript
         .ancestorId(1001)
         .lineageId(502)
         .generation(7)
-        .genomeComplexity(25)
+        .numCells(25)
         .genome(GenomeDescription()
                     .name("Test Genome")
                     .frontAngle(270.0f)

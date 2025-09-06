@@ -83,11 +83,11 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             return;
         }
         if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
+            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells >= cell->creature->numCells)) {
             return;
         }
         if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
+            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells <= cell->creature->numCells)) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {

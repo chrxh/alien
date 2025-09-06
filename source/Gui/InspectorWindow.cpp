@@ -200,8 +200,8 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                     //AlienGui::InputInt(
                     //    AlienGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellLineageIdTooltip), cell._lineageId);
                     //AlienGui::InputFloat(
-                    //    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::GenomeComplexityTooltip),
-                    //    cell._genomeComplexity);
+                    //    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::NumCellsTooltip),
+                    //    cell._numCells);
                 }
                 ImGui::TreePop();
             }

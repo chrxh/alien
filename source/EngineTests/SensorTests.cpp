@@ -620,9 +620,9 @@ TEST_F(SensorTests, scanForFreeCells_notFound)
 
 TEST_F(SensorTests, scanForLessComplexMutants_found)
 {
-    for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
+    for (int otherNumCells = 0; otherNumCells < 500; ++otherNumCells) {
         auto data = CollectionDescription().creatures({
-            CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
+            CreatureDescription().id(0).numCells(1000.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
@@ -630,7 +630,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_found)
                 CellDescription().id(2).pos({101.0f, 100.0f}),
             }),
             CreatureDescription()
-                .genomeComplexity(toFloat(otherGenomeComplexity))
+                .numCells(toFloat(otherNumCells))
                 .cells({
                     DescriptionEditService::get()
                         .createRect(DescriptionEditService::CreateRectParameters()
@@ -658,10 +658,10 @@ TEST_F(SensorTests, scanForLessComplexMutants_found)
 
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 {
-    for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
+    for (int otherNumCells = 1000; otherNumCells < 2001; ++otherNumCells) {
 
         auto data = CollectionDescription().creatures({
-            CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
+            CreatureDescription().id(0).numCells(1000.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
@@ -669,7 +669,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
                 CellDescription().id(2).pos({101.0f, 100.0f}),
             }),
             CreatureDescription()
-                .genomeComplexity(toFloat(otherGenomeComplexity) + 0.01f)
+                .numCells(toFloat(otherNumCells) + 0.01f)
                 .cells({
                     DescriptionEditService::get()
                         .createRect(DescriptionEditService::CreateRectParameters()
@@ -698,7 +698,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
+        CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -722,7 +722,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genomeComplexity(1000.0f).cells({
+        CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -745,9 +745,9 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 
 TEST_F(SensorTests, scanForMoreComplexMutants_found)
 {
-    for (int otherGenomeComplexity = 1000; otherGenomeComplexity < 2001; ++otherGenomeComplexity) {
+    for (int otherNumCells = 1000; otherNumCells < 2001; ++otherNumCells) {
         auto data = CollectionDescription().creatures({
-            CreatureDescription().id(0).genomeComplexity(500.0f).cells({
+            CreatureDescription().id(0).numCells(500.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
@@ -755,7 +755,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_found)
                 CellDescription().id(2).pos({101.0f, 100.0f}),
             }),
             CreatureDescription()
-                .genomeComplexity(toFloat(otherGenomeComplexity))
+                .numCells(toFloat(otherNumCells))
                 .cells({
                     DescriptionEditService::get()
                         .createRect(DescriptionEditService::CreateRectParameters()
@@ -783,9 +783,9 @@ TEST_F(SensorTests, scanForMoreComplexMutants_found)
 
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 {
-    for (int otherGenomeComplexity = 0; otherGenomeComplexity < 500; ++otherGenomeComplexity) {
+    for (int otherNumCells = 0; otherNumCells < 500; ++otherNumCells) {
         auto data = CollectionDescription().creatures({
-            CreatureDescription().id(0).genomeComplexity(500.0f).cells({
+            CreatureDescription().id(0).numCells(500.0f).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
@@ -793,7 +793,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
                 CellDescription().id(2).pos({101.0f, 100.0f}),
             }),
             CreatureDescription()
-                .genomeComplexity(toFloat(otherGenomeComplexity))
+                .numCells(toFloat(otherNumCells))
                 .cells({
                     DescriptionEditService::get()
                         .createRect(DescriptionEditService::CreateRectParameters()
@@ -823,7 +823,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genomeComplexity(100.0f).cells({
+        CreatureDescription().id(0).numCells(100.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -847,7 +847,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_freeCell)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).genomeComplexity(100.0f).cells({
+        CreatureDescription().id(0).numCells(100.0f).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})

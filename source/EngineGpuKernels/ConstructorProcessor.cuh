@@ -74,7 +74,7 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
 
-    //    __inline__ __device__ static float calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize);
+    //    __inline__ __device__ static float calcNumCells(int color, uint8_t* genome, uint16_t genomeSize);
 };
 
 /************************************************************************/
@@ -831,19 +831,19 @@ __inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, 
 }
 
 //
-//__inline__ __device__ float ConstructorProcessor::calcGenomeComplexity(int color, uint8_t* genome, uint16_t genomeSize)
+//__inline__ __device__ float ConstructorProcessor::calcNumCells(int color, uint8_t* genome, uint16_t genomeSize)
 //{
 //    auto result = 0.0f;
 //
 //    auto lastDepth = 0;
 //    auto numRamifications = 1;
-//    auto genomeComplexityRamificationFactor =
-//        cudaSimulationParameters.genomeComplexityMeasurementToggle.value ? cudaSimulationParameters.genomeComplexityRamificationFactor.value[color] : 0.0f;
+//    auto numCellsRamificationFactor =
+//        cudaSimulationParameters.numCellsMeasurementToggle.value ? cudaSimulationParameters.numCellsRamificationFactor.value[color] : 0.0f;
 //    auto sizeFactor =
-//        cudaSimulationParameters.genomeComplexityMeasurementToggle.value ? cudaSimulationParameters.genomeComplexitySizeFactor.value[color] : 1.0f;
-//    auto depthLevel = cudaSimulationParameters.genomeComplexityMeasurementToggle.value ? cudaSimulationParameters.genomeComplexityDepthLevel.value[color] : 3;
+//        cudaSimulationParameters.numCellsMeasurementToggle.value ? cudaSimulationParameters.numCellsSizeFactor.value[color] : 1.0f;
+//    auto depthLevel = cudaSimulationParameters.numCellsMeasurementToggle.value ? cudaSimulationParameters.numCellsDepthLevel.value[color] : 3;
 //    GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
-//        auto ramificationFactor = depth > lastDepth ? genomeComplexityRamificationFactor * toFloat(numRamifications) : 0.0f;
+//        auto ramificationFactor = depth > lastDepth ? numCellsRamificationFactor * toFloat(numRamifications) : 0.0f;
 //        if (depth <= depthLevel) {
 //            result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor);
 //        }

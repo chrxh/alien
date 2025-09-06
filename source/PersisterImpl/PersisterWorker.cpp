@@ -642,26 +642,26 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     try {
         UnlockGuard unlockGuard(lock);
 
-        auto const& requestData = request->getData();
+        //auto const& requestData = request->getData();
 
-        auto peakStatistics = requestData.peakDeserializedSimulation->getStatisticsRawData();
+        //auto peakStatistics = requestData.peakDeserializedSimulation->getStatisticsRawData();
 
         DeserializedSimulation deserializedSimulation;
         deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-        auto currentRawStatistics = _simulationFacade->getStatisticsRawData();
-        if (sumColorVector(currentRawStatistics.timeline.timestep.genomeComplexityVariance)
-            >= sumColorVector(peakStatistics.timeline.timestep.genomeComplexityVariance)) {
+        //auto currentRawStatistics = _simulationFacade->getStatisticsRawData();
+        //if (sumColorVector(currentRawStatistics.timeline.timestep.numCellsVariance)
+        //    >= sumColorVector(peakStatistics.timeline.timestep.numCellsVariance)) {
 
-            deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
-            deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
-            deserializedSimulation.auxiliaryData.center = requestData.center;
-            deserializedSimulation.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-            deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-            deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-            deserializedSimulation.mainData = _simulationFacade->getSimulationData();
-            requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
-            requestData.peakDeserializedSimulation->setLastStatisticsData(currentRawStatistics);
-        }
+        //    deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
+        //    deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
+        //    deserializedSimulation.auxiliaryData.center = requestData.center;
+        //    deserializedSimulation.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
+        //    deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
+        //    deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
+        //    deserializedSimulation.mainData = _simulationFacade->getSimulationData();
+        //    requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
+        //    requestData.peakDeserializedSimulation->setLastStatisticsData(currentRawStatistics);
+        //}
         return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(

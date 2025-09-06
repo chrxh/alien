@@ -478,7 +478,7 @@ namespace
     auto constexpr Id_Creature_AncestorId = 1;
     auto constexpr Id_Creature_Generation = 2;
     auto constexpr Id_Creature_LineageId = 3;
-    auto constexpr Id_Creature_GenomeComplexity = 4;
+    auto constexpr Id_Creature_NumCells = 4;
 
     auto constexpr Id_Cell_Id = 0;
     auto constexpr Id_Cell_Energy = 1;
@@ -887,7 +887,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
-        loadSave(task, auxiliaries, Id_Creature_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
+        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
         
         processLoadSaveMap(task, ar, auxiliaries);
 
@@ -1368,11 +1368,11 @@ namespace
         } else if (colIndex == 22) {
             return &dataPoints.numColonies;
         } else if (colIndex == 23) {
-            return &dataPoints.averageGenomeComplexity;
+            return &dataPoints.averageNumCells;
         } else if (colIndex == 24) {
-            return &dataPoints.maxGenomeComplexityOfColonies;
+            return &dataPoints.maxNumCellsOfColonies;
         } else if (colIndex == 25) {
-            return &dataPoints.varianceGenomeComplexity;
+            return &dataPoints.varianceNumCells;
         } else if (colIndex == 26) {
             return &dataPoints.systemClock;
         }

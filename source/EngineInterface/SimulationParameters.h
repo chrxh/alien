@@ -216,7 +216,7 @@ struct SimulationParameters
 
     // Expert settings: Advanced absorption control
     ExpertToggle advancedAbsorptionControlToggle = {false};
-    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowGenomeComplexityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowNumCellsPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
@@ -298,12 +298,6 @@ struct SimulationParameters
     BaseParameter<bool> externalEnergyInflowOnlyForNonSelfReplicators = {false};
     BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
-
-    // Expert settings: Genome complexity measurement
-    ExpertToggle genomeComplexityMeasurementToggle = {false};
-    BaseParameter<ColorVector<float>> genomeComplexitySizeFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    BaseParameter<ColorVector<float>> genomeComplexityRamificationFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseParameter<ColorVector<int>> genomeComplexityDepthLevel = {{3, 3, 3, 3, 3, 3, 3}};
 
     bool operator==(SimulationParameters const&) const = default;
 

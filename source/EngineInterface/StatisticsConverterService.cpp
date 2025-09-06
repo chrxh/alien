@@ -97,10 +97,7 @@ DataPointCollection StatisticsConverterService::convert(
     result.numViruses = getDataPointBySummation(data.timestep.numViruses);
     result.numFreeCells = getDataPointBySummation(data.timestep.numFreeCells);
     result.numParticles = getDataPointBySummation(data.timestep.numParticles);
-    result.averageGenomeCells = getDataPointByAveraging(data.timestep.numGenomeCells, data.timestep.numSelfReplicators);
-    result.averageGenomeComplexity = getDataPointByAveraging(data.timestep.genomeComplexity, data.timestep.numSelfReplicators);
-    result.varianceGenomeComplexity = getDataPointBySummation(data.timestep.genomeComplexityVariance);
-    result.maxGenomeComplexityOfColonies = getDataPointByMaximation(data.timestep.maxGenomeComplexityOfColonies);
+    result.averageNumCells = getDataPointByAveraging(data.timestep.numCells, data.timestep.numSelfReplicators);
     result.totalEnergy = getDataPointBySummation(data.timestep.totalEnergy);
 
     auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;

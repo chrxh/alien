@@ -103,14 +103,14 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
         }
         if (restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants) {
             if (cell->creature != nullptr) {
-                result = densityMap.getLessComplexMutantDensity(scanPos, cell->creature->genomeComplexity);
+                result = densityMap.getLessComplexMutantDensity(scanPos, cell->creature->numCells);
             } else {
                 result = 0;
             }
         }
         if (restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
             if (cell->creature != nullptr)
-                result = densityMap.getMoreComplexMutantDensity(scanPos, cell->creature->genomeComplexity);
+                result = densityMap.getMoreComplexMutantDensity(scanPos, cell->creature->numCells);
             else {
                 result = 0;
             }
@@ -267,11 +267,11 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                 continue;
             }
             if (restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
-                && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells >= cell->creature->numCells)) {
                 continue;
             }
             if (restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants
-                && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells <= cell->creature->numCells)) {
                 continue;
             }
 

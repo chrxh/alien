@@ -20,10 +20,10 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.addEnergy(cell->color, cell->energy);
             //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
             //    statistics.incNumReplicator(cell->color);
-            //    statistics.incMutant(cell->color, cell->lineageId, cell->genomeComplexity);
+            //    statistics.incMutant(cell->color, cell->lineageId, cell->numCells);
             //    auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, true, true);
             //    statistics.addNumGenomeNodes(cell->color, numNodes);
-            //    statistics.addGenomeComplexity(cell->color, cell->genomeComplexity);
+            //    statistics.addNumCells(cell->color, cell->numCells);
             //}
             //if (cell->cellType == CellType_Injector && GenomeDecoder::containsSelfReplication(cell->cellTypeData.injector)) {
             //    statistics.incNumViruses(cell->color);
@@ -47,23 +47,22 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         statistics.halveNumConnections();
     }
-    statistics.calcStatisticsForColonies();
 
     {
-        auto& cells = data.objects.cells;
-        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+        //auto& cells = data.objects.cells;
+        //auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
-        auto numReplicators = toDouble(statistics.getNumReplicators());
-        auto averageGenomeComplexity = statistics.getSummedGenomeComplexity() / numReplicators;
+        //auto numReplicators = toDouble(statistics.getNumReplicators());
+        //auto averageNumCells = statistics.getSummedNumCells() / numReplicators;
 
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cell = cells.at(index);
+        //for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        //    auto& cell = cells.at(index);
             //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
-            //    auto variance = toDouble(cell->genomeComplexity) - averageGenomeComplexity;
+            //    auto variance = toDouble(cell->numCells) - averageNumCells;
             //    variance = variance * variance / numReplicators;
-            //    statistics.addToGenomeComplexityVariance(cell->color, variance);
+            //    statistics.addToNumCellsVariance(cell->color, variance);
             //}
-        }
+        //}
     }
 }
 

@@ -349,7 +349,7 @@ struct CreatureDescription
     MEMBER(CreatureDescription, std::optional<uint64_t>, ancestorId, std::nullopt);
     MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, lineageId, 0);
-    MEMBER(CreatureDescription, float, genomeComplexity, 0);
+    MEMBER(CreatureDescription, int, numCells, 0);
     MEMBER(CreatureDescription, GenomeDescription, genome, {});
     MEMBER(CreatureDescription, std::vector<CellDescription>, cells, {});
 };

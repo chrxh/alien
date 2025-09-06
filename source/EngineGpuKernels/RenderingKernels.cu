@@ -157,8 +157,8 @@ namespace
             }
         }
 
-        if (cellColoring == CellColoring_GenomeComplexity) {
-            //auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + powf(cell->genomeComplexity, 0.3f) * 15.0f)),  1.0f, 1.0f);
+        if (cellColoring == CellColoring_NumCells) {
+            //auto rgb = convertHSVtoRGB(toFloat(min(360.0f, 240.0f + powf(cell->numCells, 0.3f) * 15.0f)),  1.0f, 1.0f);
             auto rgb = convertHSVtoRGB(0.0f,  1.0f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
         }

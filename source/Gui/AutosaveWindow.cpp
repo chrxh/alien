@@ -1,12 +1,11 @@
 #include "AutosaveWindow.h"
 
-#include <filesystem>
-
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/Resources.h"
 #include "Base/GlobalSettings.h"
+#include "Base/Resources.h"
 #include "Base/StringHelper.h"
+
 #include "PersisterInterface/SavepointTableService.h"
 #include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/TaskProcessor.h"
@@ -17,6 +16,8 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+
+#include <filesystem>
 
 namespace
 {
@@ -135,9 +136,7 @@ void AutosaveWindow::processToolbar()
     AlienGui::Separator();
 }
 
-void AutosaveWindow::processHeader()
-{
-}
+void AutosaveWindow::processHeader() {}
 
 void AutosaveWindow::processTable()
 {
@@ -237,8 +236,7 @@ void AutosaveWindow::processSettings()
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
-    _settingsOpen =
-        AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
+    _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
             if (AlienGui::InputInt(
@@ -324,7 +322,10 @@ void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
     if (usePeakSimulation && !_peakDeserializedSimulation->isEmpty()) {
         auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveDeserializedSimulationRequestData{
-            .filename = _directory, .sharedDeserializedSimulation = _peakDeserializedSimulation, .generateNameFromTimestep = true, .resetDeserializedSimulation = true};
+            .filename = _directory,
+            .sharedDeserializedSimulation = _peakDeserializedSimulation,
+            .generateNameFromTimestep = true,
+            .resetDeserializedSimulation = true};
         requestId = _persisterFacade->scheduleSaveDeserializedSimulation(senderInfo, saveData);
     } else {
         auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
@@ -474,7 +475,7 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
                     newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
-                    newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.statisticsRawData.timeline.timestep.genomeComplexityVariance)), 2);
+                    //newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.statisticsRawData.timeline.timestep.numCellsVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
                 }
             }

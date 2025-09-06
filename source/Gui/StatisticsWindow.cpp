@@ -348,19 +348,19 @@ void StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::averageGenomeComplexity, 2);
+        processPlot(row++, &DataPointCollection::averageNumCells, 2);
         ImGui::TableSetColumnIndex(1);
         AlienGui::Text("Genome complexity\naverage");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::varianceGenomeComplexity, 2);
+        processPlot(row++, &DataPointCollection::varianceNumCells, 2);
         ImGui::TableSetColumnIndex(1);
         AlienGui::Text("Genome complexity\nvariance");
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::maxGenomeComplexityOfColonies, 2);
+        processPlot(row++, &DataPointCollection::maxNumCellsOfColonies, 2);
         ImGui::TableSetColumnIndex(1);
         AlienGui::Text("Genome complexity\nmaximum");
 

@@ -79,7 +79,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
     creature->ancestorId = creatureTO.ancestorId;
     creature->generation = creatureTO.generation;
     creature->lineageId = creatureTO.lineageId;
-    creature->genomeComplexity = creatureTO.genomeComplexity;
+    creature->numCells = creatureTO.numCells;
     creature->genome.frontAngle = creatureTO.genome.frontAngle;
     creature->genome.numGenes = creatureTO.genome.numGenes;
     for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {

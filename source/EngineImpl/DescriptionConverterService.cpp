@@ -461,7 +461,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     result._ancestorId = creatureTO.ancestorId != CreatureTO::AncestorId_NotSet ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
     result._lineageId = creatureTO.lineageId;
-    result._genomeComplexity = creatureTO.genomeComplexity;
+    result._numCells = creatureTO.numCells;
     result._genome._name = char64ToString(creatureTO.genome.name);
     result._genome._frontAngle = creatureTO.genome.frontAngle;
     result._genome._genes.reserve(creatureTO.genome.numGenes);
@@ -641,7 +641,7 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(CreatureTO::AncestorId_NotSet);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.lineageId = creatureDesc._lineageId;
-    creatureTO.genomeComplexity = creatureDesc._genomeComplexity;
+    creatureTO.numCells = creatureDesc._numCells;
     stringToChar64(creatureDesc._genome._name, creatureTO.genome.name);
     creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
     creatureTO.genome.numGenes = toInt(creatureDesc._genome._genes.size());
