@@ -71,7 +71,7 @@ Further information and artwork:
 An Nvidia graphics card with compute capability 6.0 or higher is needed. Please check [https://en.wikipedia.org/wiki/CUDA#GPUs_supported](https://en.wikipedia.org/wiki/CUDA#GPUs_supported).
 
 # 💽 Installer
-Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2025-01-03)
+Installer for Windows: [alien-installer.msi](https://alien-project.org/media/files/alien-installer.msi) (updated: 2025-09-06)
 
 In the case that the program crashes for an unknown reason, please refer to the troubleshooting section below.
 
@@ -81,7 +81,7 @@ The build process is mostly automated using the cross-platform CMake build syste
 ### Getting the sources
 To obtain the sources, please open a command prompt in a suitable directory (which should not contain whitespace characters) and enter the following command:
 ```
-git clone --recursive https://github.com/chrxh/alien.git
+git clone --branch release/v4.12 --recursive https://github.com/chrxh/alien.git
 ```
 Note: The `--recursive` parameter is necessary to check out the vcpkg submodule as well. Besides that, submodules are not normally updated by the standard `git pull` command. Instead, you need to write `git pull --recurse-submodules`.
 
