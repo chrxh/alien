@@ -1,12 +1,15 @@
 #pragma once
+
+#include "ArraySizesForGpu.h"
 #include "Definitions.h"
 #include "OverlayDescriptions.h"
 #include "SelectionShallowData.h"
-#include "Settings.h"
+#include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationFacade.h"
 #include "MutationType.h"
 #include "DataPointCollection.h"
+#include "PreviewDescriptions.h"
 #include "StatisticsHistory.h"
 #include "SimulationParametersUpdateConfig.h"
 
@@ -15,7 +18,7 @@ class _SimulationFacade
 public:
     virtual ~_SimulationFacade() = default;
 
-    virtual void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& simulationParameters) = 0;
+    virtual void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& simulationParameters) = 0;
     virtual int getSessionId() const = 0;
 
     virtual void clear() = 0;
@@ -36,15 +39,12 @@ public:
     virtual int getSyncSimulationWithRenderingRatio() const = 0;
     virtual void setSyncSimulationWithRenderingRatio(int value) = 0;
 
-    virtual ClusteredDataDescription getClusteredSimulationData() = 0;
-    virtual DataDescription getSimulationData() = 0;
-    virtual ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) = 0;
-    virtual DataDescription getSelectedSimulationData(bool includeClusters) = 0;
-    virtual DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
+    virtual CollectionDescription getSimulationData() = 0;
+    virtual CollectionDescription getSelectedSimulationData(bool includeClusters) = 0;
+    virtual CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
 
-    virtual void addAndSelectSimulationData(DataDescription const& dataToAdd) = 0;
-    virtual void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) = 0;
-    virtual void setSimulationData(DataDescription const& dataToUpdate) = 0;
+    virtual void addAndSelectSimulationData(CollectionDescription&& dataToAdd) = 0;
+    virtual void setSimulationData(CollectionDescription const& dataToUpdate) = 0;
     virtual void removeSelectedObjects(bool includeClusters) = 0;
     virtual void relaxSelectedObjects(bool includeClusters) = 0;
     virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
@@ -56,6 +56,7 @@ public:
     virtual void setDetached(bool value) = 0;
     virtual void changeCell(CellDescription const& changedCell) = 0;
     virtual void changeParticle(ParticleDescription const& changedParticle) = 0;
+    virtual bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) = 0;
 
     virtual void calcTimesteps(uint64_t timesteps) = 0;
     virtual void runSimulation() = 0;
@@ -79,9 +80,9 @@ public:
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) = 0;
     virtual void setOriginalSimulationParameters(SimulationParameters const& parameters) = 0;
 
-    virtual GpuSettings getGpuSettings() const = 0;
-    virtual GpuSettings getOriginalGpuSettings() const = 0;
-    virtual void setGpuSettings_async(GpuSettings const& gpuSettings) = 0;
+    virtual CudaSettings getGpuSettings() const = 0;
+    virtual CudaSettings getOriginalGpuSettings() const = 0;
+    virtual void setGpuSettings_async(CudaSettings const& gpuSettings) = 0;
 
     virtual void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) = 0;
 
@@ -93,9 +94,8 @@ public:
     virtual void removeSelection() = 0;
     virtual bool updateSelectionIfNecessary() = 0;
 
-    virtual GeneralSettings getGeneralSettings() const = 0;
     virtual IntVector2D getWorldSize() const = 0;
-    virtual RawStatisticsData getRawStatistics() const = 0;
+    virtual StatisticsRawData getStatisticsRawData() const = 0;
     virtual StatisticsHistory const& getStatisticsHistory() const = 0;
     virtual void setStatisticsHistory(StatisticsHistoryData const& data) = 0;
 
@@ -104,7 +104,20 @@ public:
 
     virtual float getTps() const = 0;
 
-    //for tests
+    // Simulated preview
+    virtual CollectionDescription getPreviewData() = 0;
+    virtual void setPreviewData(CollectionDescription const& data) = 0;
+    virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
+    virtual void calcTimestepsForPreview(int numSteps) = 0;
+    virtual uint64_t getCurrentTimestepForPreview() = 0;
+    virtual void setCurrentTimestepForPreview(uint64_t timestep) = 0;
+
+    // Only for tests
     virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
     virtual void testOnly_mutationCheck(uint64_t cellId) = 0;
+    virtual void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) = 0;
+    virtual void testOnly_cleanupAfterTimestep() = 0;
+    virtual void testOnly_cleanupAfterDataManipulation() = 0;
+    virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
+    virtual bool testOnly_areArraysValid() = 0;
 };

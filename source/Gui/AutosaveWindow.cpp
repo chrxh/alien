@@ -11,7 +11,7 @@
 #include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/TaskProcessor.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "FileTransferController.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
@@ -26,7 +26,7 @@ namespace
 }
 
 AutosaveWindow::AutosaveWindow()
-    : AlienWindow("Autosave", "windows.autosave", false)
+    : AlienWindow("Autosave", "windows.autosave", false, true)
 {}
 
 void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
@@ -79,7 +79,7 @@ void AutosaveWindow::processIntern()
         if (ImGui::BeginChild("##child1", {0, -scale(44.0f)})) {
             processHeader();
 
-            //AlienImGui::Separator();
+            //AlienGui::Separator();
             if (ImGui::BeginChild("##child2", {0, _settingsOpen ? -_settingsHeight : -scale(35.0f)})) {
                 processTable();
             }
@@ -99,6 +99,7 @@ void AutosaveWindow::processIntern()
 
 void AutosaveWindow::processBackground()
 {
+    processStateUpdates();
     processDeleteNonPersistentSavepoint();
     processCleanup();
     processAutomaticSavepoints();
@@ -109,29 +110,29 @@ void AutosaveWindow::processToolbar()
 {
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLUS))) {
         onCreateSavepoint(false);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Create save point");
+    AlienGui::Tooltip("Create save point");
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!static_cast<bool>(_selectedEntry));
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_MINUS))) {
         onDeleteSavepoint(_selectedEntry);
     }
-    AlienImGui::Tooltip("Delete save point");
+    AlienGui::Tooltip("Delete save point");
     ImGui::EndDisabled();
 
     ImGui::SameLine();
     ImGui::BeginDisabled(!_savepointTable.has_value() || _savepointTable->isEmpty());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_BROOM))) {
         GenericMessageDialog::get().yesNo("Delete", "Do you really want to delete all savepoints?", [&]() { scheduleCleanup(); });
     }
-    AlienImGui::Tooltip("Delete all save points");
+    AlienGui::Tooltip("Delete all save points");
     ImGui::EndDisabled();
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void AutosaveWindow::processHeader()
@@ -141,7 +142,7 @@ void AutosaveWindow::processHeader()
 void AutosaveWindow::processTable()
 {
     if (!_savepointTable.has_value()) {
-        AlienImGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
+        AlienGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
@@ -160,7 +161,6 @@ void AutosaveWindow::processTable()
         clipper.Begin(_savepointTable->getSize());
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                updateSavepoint(row);
                 auto const& entry = _savepointTable->at(row);
 
                 ImGui::PushID(row);
@@ -169,24 +169,24 @@ void AutosaveWindow::processTable()
                 // project name
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienImGui::Text("In queue");
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
+                    AlienGui::Text("In queue");
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_InProgress) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienImGui::Text("In progress");
+                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
+                    AlienGui::Text("In progress");
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_Persisted) {
-                    auto triggerLoadSavepoint = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-                    AlienImGui::Tooltip("Load save point", false);
+                    auto triggerLoadSavepoint = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
+                    AlienGui::Tooltip("Load save point", false);
                     if (triggerLoadSavepoint) {
                         onLoadSavepoint(entry);
                     }
 
                     ImGui::SameLine();
-                    AlienImGui::Text(entry->name);
+                    AlienGui::Text(entry->name);
                 } else if (entry->state == SavepointState_Error) {
-                    AlienImGui::Text("Error");
+                    AlienGui::Text("Error");
                 }
                 ImGui::SameLine();
                 ImGui::Dummy({0, scale(22.0f)});
@@ -204,24 +204,22 @@ void AutosaveWindow::processTable()
                 // timestamp
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienImGui::Text(entry->timestamp);
+                    AlienGui::Text(entry->timestamp);
                 }
 
                 // timestep
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienImGui::Text(StringHelper::format(entry->timestep));
+                    AlienGui::Text(StringHelper::format(entry->timestep));
                 }
 
                 // peak
                 ImGui::TableNextColumn();
-                AlienImGui::Text(entry->peak);
+                AlienGui::Text(entry->peak);
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextLightDecentColor.Value);
-                    AlienImGui::Text(" (" + entry->peakType + ")");
-                    ImGui::PopStyleColor();
+                    AlienGui::DecentText(" (" + entry->peakType + ")");
                 }
 
                 ImGui::PopID();
@@ -236,27 +234,27 @@ void AutosaveWindow::processSettings()
     ImGui::Spacing();
     ImGui::Spacing();
     if (_settingsOpen) {
-        AlienImGui::MovableSeparator(AlienImGui::MovableSeparatorParameters().additive(false), _settingsHeight);
+        AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
     _settingsOpen =
-        AlienImGui::BeginTreeNode(AlienImGui::TreeNodeParameters().name("Settings").rank(AlienImGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
+        AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##autosaveSettings", {scale(0), 0})) {
-            if (AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
+            if (AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Autosave interval (min)").textWidth(RightColumnWidth).defaultValue(_origAutosaveInterval),
                     _autosaveInterval,
                     &_autosaveEnabled)) {
                 if (_autosaveEnabled) {
                     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
                 }
             }
-            if (AlienImGui::Switcher(
-                    AlienImGui::SwitcherParameters()
+            if (AlienGui::Switcher(
+                    AlienGui::SwitcherParameters()
                         .name("Catch peaks")
                         .textWidth(RightColumnWidth)
                         .defaultValue(_origCatchPeaks)
-                        .disabled(!_autosaveEnabled)
+                        .readOnly(!_autosaveEnabled)
                         .values({
                             "None",
                             "Genome complexity variance",
@@ -267,8 +265,8 @@ void AutosaveWindow::processSettings()
                 _peakDeserializedSimulation->setDeserializedSimulation(DeserializedSimulation());
             }
 
-            if (AlienImGui::InputText(
-                    AlienImGui::InputTextParameters()
+            if (AlienGui::InputText(
+                    AlienGui::InputTextParameters()
                         .name("Directory")
                         .textWidth(RightColumnWidth)
                         .defaultValue(_origDirectory)
@@ -278,21 +276,21 @@ void AutosaveWindow::processSettings()
                     _directory)) {
                 updateSavepointTableFromFile();
             }
-            AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
+            AlienGui::Switcher(
+                AlienGui::SwitcherParameters()
                     .name("Mode")
                     .values({"Limited save files", "Unlimited save files"})
                     .textWidth(RightColumnWidth)
                     .defaultValue(_origSaveMode),
                 _saveMode);
             if (_saveMode == SaveMode_Circular) {
-                AlienImGui::InputInt(
-                    AlienImGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Number of files").textWidth(RightColumnWidth).defaultValue(_origNumberOfFiles), _numberOfFiles);
             }
         }
         ImGui::EndChild();
     }
-    AlienImGui::EndTreeNode();
+    AlienGui::EndTreeNode();
 }
 
 void AutosaveWindow::processStatusBar()
@@ -310,7 +308,7 @@ void AutosaveWindow::processStatusBar()
         statusItems.emplace_back(std::to_string(_savepointTable->getSize()) + " save points");
     }
 
-    AlienImGui::StatusBar(statusItems);
+    AlienGui::StatusBar(statusItems);
 }
 
 void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
@@ -356,6 +354,15 @@ void AutosaveWindow::onLoadSavepoint(SavepointEntry const& entry)
 {
     auto path = SavepointTableService::get().calcAbsolutePath(_savepointTable.value(), entry);
     FileTransferController::get().onOpenSimulation(path);
+}
+
+void AutosaveWindow::processStateUpdates()
+{
+    if (_savepointTable.has_value()) {
+        for (int row = 0, size = _savepointTable->getSize(); row < size; ++row) {
+            updateSavepoint(row);
+        }
+    }
 }
 
 void AutosaveWindow::processCleanup()
@@ -422,8 +429,10 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
     for (auto const& entry : _savepointsInProgressToDelete) {
         if (auto requestState = _persisterFacade->getRequestState(PersisterRequestId{entry->requestId})) {
             if (requestState.value() == PersisterRequestState::Finished) {
-                auto resultData = _persisterFacade->fetchSaveSimulationData(PersisterRequestId{entry->requestId});
-                SerializerService::get().deleteSimulation(resultData.filename);
+                auto requestResult = _persisterFacade->fetchPersisterRequestResult(PersisterRequestId{entry->requestId});
+                if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
+                    SerializerService::get().deleteSimulation(saveResult->getData().filename);
+                }
             } else if (requestState.value() == PersisterRequestState::Error) {
                 // do nothing
             } else {
@@ -441,8 +450,8 @@ void AutosaveWindow::scheduleCleanup()
 
 void AutosaveWindow::updateSavepoint(int row)
 {
-    auto entry = _savepointTable->at(row);
-    if (entry->state != SavepointState_Persisted) {
+    auto state = _savepointTable->at(row)->state;
+    if (state != SavepointState_Persisted) {
         auto newEntry = _savepointTable->at(row);
         auto requestState = _persisterFacade->getRequestState(PersisterRequestId{newEntry->requestId});
         if (requestState.has_value()) {
@@ -465,14 +474,16 @@ void AutosaveWindow::updateSavepoint(int row)
                     newEntry->timestamp = StringHelper::format(data.timestamp);
                     newEntry->name = data.projectName;
                     newEntry->filename = SavepointTableService::get().calcEntryPath(_savepointTable.value(), data.filename);
-                    newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.rawStatisticsData.timeline.timestep.genomeComplexityVariance)), 2);
+                    newEntry->peak = StringHelper::format(toFloat(sumColorVector(data.statisticsRawData.timeline.timestep.genomeComplexityVariance)), 2);
                     newEntry->peakType = "genome complexity variance";
                 }
             }
             if (requestState.value() == PersisterRequestState::Error) {
                 newEntry->state = SavepointState_Error;
             }
-            SavepointTableService::get().updateEntry(_savepointTable.value(), row, newEntry);
+            if (state != newEntry->state) {
+                SavepointTableService::get().updateEntry(_savepointTable.value(), row, newEntry);
+            }
         }
     }
 }

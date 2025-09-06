@@ -11,38 +11,40 @@
 
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/GlobalSettings.h"
 #include "Base/LoggingService.h"
 #include "Base/Resources.h"
 #include "Base/StringHelper.h"
 #include "Base/VersionParserService.h"
-#include "EngineInterface/GenomeDescriptionService.h"
-#include "PersisterInterface/SerializerService.h"
+
 #include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkResourceService.h"
-#include "Network/NetworkService.h"
-#include "Network/NetworkResourceParserService.h"
-#include "Network/NetworkResourceTreeTO.h"
+
+#include "PersisterInterface/SerializerService.h"
 #include "PersisterInterface/TaskProcessor.h"
 
-#include "AlienImGui.h"
-#include "StyleRepository.h"
-#include "StatisticsWindow.h"
-#include "Viewport.h"
-#include "GenericMessageDialog.h"
-#include "LoginDialog.h"
-#include "UploadSimulationDialog.h"
-#include "DelayedExecutionController.h"
-#include "EditorController.h"
-#include "EditSimulationDialog.h"
-#include "OpenGLHelper.h"
-#include "OverlayController.h"
+#include "Network/NetworkResourceParserService.h"
+#include "Network/NetworkResourceService.h"
+#include "Network/NetworkResourceTreeTO.h"
+#include "Network/NetworkService.h"
+
+#include "AlienGui.h"
 #include "GenomeEditorWindow.h"
+#include "DelayedExecutionController.h"
+#include "EditSimulationDialog.h"
+#include "EditorController.h"
+#include "GenericMessageDialog.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
+#include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "OpenGLHelper.h"
+#include "OverlayController.h"
+#include "StatisticsWindow.h"
+#include "StyleRepository.h"
+#include "UploadSimulationDialog.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -59,7 +61,7 @@ namespace
 }
 
 BrowserWindow::BrowserWindow()
-    : AlienWindow("Browser", "windows.browser", true)
+    : AlienWindow("Browser", "windows.browser", true, true)
 {}
 
 namespace
@@ -106,7 +108,8 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     refreshIntern(firstStart);
 
     for (auto& [workspaceId, workspace] : _workspaces) {
-        auto initialCollapsedSimulationFolders = NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
+        auto initialCollapsedSimulationFolders =
+            NetworkResourceService::get().convertFolderNamesToSettings(NetworkResourceService::get().getFolderNames(workspace.rawTOs));
         auto collapsedSimulationFolders = GlobalSettings::get().getValue(
             "windows.browser.collapsed folders." + networkResourceTypeToString.at(workspaceId.resourceType) + "."
                 + workspaceTypeToString.at(workspaceId.workspaceType),
@@ -194,7 +197,7 @@ void BrowserWindow::processIntern()
         processWorkspace();
 
         ImGui::SameLine();
-        processVerticalMovableSeparator();
+        AlienGui::MovableVerticalSeparator(AlienGui::MovableVerticalSeparatorParameters().additive(false).bottomSpace(BrowserBottomSpace), _userTableWidth);
 
         ImGui::SameLine();
         processUserList();
@@ -206,7 +209,7 @@ void BrowserWindow::processIntern()
     processRefreshingScreen({startPos.x, startPos.y});
 
     processEmojiWindow();
-}    
+}
 
 void BrowserWindow::processBackground()
 {
@@ -229,38 +232,38 @@ void BrowserWindow::processToolbar()
 
     //refresh button
     ImGui::BeginDisabled(_refreshProcessor->pendingTasks());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SYNC))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SYNC))) {
         onRefresh();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Refresh");
+    AlienGui::Tooltip("Refresh");
 
     //login button
     ImGui::SameLine();
     ImGui::BeginDisabled(NetworkService::get().getLoggedInUserName().has_value());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SIGN_IN_ALT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SIGN_IN_ALT))) {
         LoginDialog::get().open();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Login or register");
+    AlienGui::Tooltip("Login or register");
 
     //logout button
     ImGui::SameLine();
     ImGui::BeginDisabled(!NetworkService::get().getLoggedInUserName());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SIGN_OUT_ALT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SIGN_OUT_ALT))) {
         NetworkService::get().logout();
         onRefresh();
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Logout");
+    AlienGui::Tooltip("Logout");
 
     //separator
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     //upload button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UPLOAD))) {
         std::string prefix = [&] {
             if (_selectedTreeTO == nullptr || _selectedTreeTO->isLeaf()) {
                 return std::string();
@@ -269,79 +272,81 @@ void BrowserWindow::processToolbar()
         }();
         UploadSimulationDialog::get().open(_currentWorkspace.resourceType, prefix);
     }
-    AlienImGui::Tooltip(
+    AlienGui::Tooltip(
         "Upload your current " + resourceTypeString
         + " to the server and made visible in the browser. You can choose whether you want to share it with other users or whether it should only be visible "
-          "in your private workspace.\nIf you have already selected a folder, your " + resourceTypeString + " will be uploaded there.");
+          "in your private workspace.\nIf you have already selected a folder, your "
+        + resourceTypeString + " will be uploaded there.");
 
     //edit button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EDIT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EDIT))) {
         onEditResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Change name or description");
+    AlienGui::Tooltip("Change name or description");
 
     //replace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem || !_selectedTreeTO->isLeaf());
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXCHANGE_ALT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXCHANGE_ALT))) {
         onReplaceResource(_selectedTreeTO->getLeaf());
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
+    AlienGui::Tooltip(
+        "Replace the selected " + resourceTypeString + " with the one that is currently open. The name, description and reactions will be preserved.");
 
     //move to other workspace button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_SHARE_ALT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_SHARE_ALT))) {
         onMoveResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
+    AlienGui::Tooltip("Change visibility: public " ICON_FA_LONG_ARROW_ALT_RIGHT " private and private " ICON_FA_LONG_ARROW_ALT_RIGHT " public");
 
     //delete button
     ImGui::SameLine();
     ImGui::BeginDisabled(!isOwnerForSelectedItem);
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_TRASH))) {
         onDeleteResource(_selectedTreeTO);
     }
     ImGui::EndDisabled();
-    AlienImGui::Tooltip("Delete selected " + resourceTypeString);
+    AlienGui::Tooltip("Delete selected " + resourceTypeString);
 
     //separator
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     //expand button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_EXPAND_ARROWS_ALT))) {
         onExpandFolders();
     }
-    AlienImGui::Tooltip("Expand all folders");
+    AlienGui::Tooltip("Expand all folders");
 
     //collapse button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMPRESS_ARROWS_ALT))) {
         onCollapseFolders();
     }
-    AlienImGui::Tooltip("Collapse all folders");
+    AlienGui::Tooltip("Collapse all folders");
 
 #ifdef _WIN32
     //separator
     ImGui::SameLine();
-    AlienImGui::ToolbarSeparator();
+    AlienGui::ToolbarSeparator();
 
     //Discord button
     ImGui::SameLine();
-    if (AlienImGui::ToolbarButton(AlienImGui::ToolbarButtonParameters().text(ICON_FA_COMMENTS))) {
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COMMENTS))) {
         openWeblink(Const::DiscordURL);
     }
-    AlienImGui::Tooltip("Open ALIEN Discord server");
+    AlienGui::Tooltip("Open ALIEN Discord server");
 #endif
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void BrowserWindow::processWorkspace()
@@ -388,8 +393,8 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
         auto userName = NetworkService::get().getLoggedInUserName();
         auto privateWorkspaceString = userName.has_value() ? *userName + "'s private workspace" : "Private workspace (need to login)";
         auto workspaceType_reordered = 2 - _currentWorkspace.workspaceType;  //change the order for display
-        if (AlienImGui::Switcher(
-                AlienImGui::SwitcherParameters()
+        if (AlienGui::Switcher(
+                AlienGui::SwitcherParameters()
                     .textWidth(48.0f)
                     .tooltip(Const::BrowserWorkspaceTooltip)
                     .values({privateWorkspaceString, std::string("alien-project's workspace"), std::string("Public workspace")}),
@@ -398,10 +403,10 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
         }
         _currentWorkspace.workspaceType = 2 - workspaceType_reordered;
         ImGui::SameLine();
-        AlienImGui::VerticalSeparator();
+        AlienGui::VerticalSeparator();
 
         ImGui::TableSetColumnIndex(1);
-        if (AlienImGui::InputFilter(AlienImGui::InputFilterParameters(), _filter)) {
+        if (AlienGui::InputFilter(AlienGui::InputFilterParameters(), _filter)) {
             for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
                 for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
                     createTreeTOs(_workspaces.at(WorkspaceId{resourceType, workspaceType}));
@@ -410,15 +415,6 @@ void BrowserWindow::processWorkspaceSelectionAndFilter()
         }
 
         ImGui::EndTable();
-    }
-}
-
-void BrowserWindow::processVerticalMovableSeparator()
-{
-    auto sizeAvailable = ImGui::GetContentRegionAvail();
-    ImGui::Button("##MovableSeparator", ImVec2(scale(5.0f), sizeAvailable.y - scale(BrowserBottomSpace)));
-    if (ImGui::IsItemActive()) {
-        _userTableWidth -= ImGui::GetIO().MouseDelta.x;
     }
 }
 
@@ -478,10 +474,10 @@ void BrowserWindow::processUserList()
                             auto isBoldFont = isLoggedIn && *NetworkService::get().getLoggedInUserName() == item->userName;
 
                             if (item->online) {
-                                AlienImGui::OnlineSymbol();
+                                drawOnlineSymbol();
                                 ImGui::SameLine();
                             } else if (item->lastDayOnline) {
-                                AlienImGui::LastDayOnlineSymbol();
+                                drawLastDayOnlineSymbol();
                                 ImGui::SameLine();
                             }
                             processShortenedText(item->userName, isBoldFont);
@@ -546,15 +542,15 @@ void BrowserWindow::processStatusBar()
         statusItems.emplace_back("In order to share and upvote simulations you need to log in.");
     }
 
-    AlienImGui::StatusBar(statusItems);
+    AlienGui::StatusBar(statusItems);
 }
 
 void BrowserWindow::processSimulationList()
 {
     ImGui::PushID("SimulationList");
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Sortable
-        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV
-        | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
+        | ImGuiTableFlags_SortMulti | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY
+        | ImGuiTableFlags_ScrollX;
 
     if (ImGui::BeginTable("Browser", 11, flags, ImVec2(-1, -scale(WorkspaceBottomSpace)), 0.0f)) {
         ImGui::TableSetupColumn("Simulation", ImGuiTableColumnFlags_WidthFixed, scale(210.0f), NetworkResourceColumnId_SimulationName);
@@ -770,8 +766,8 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         processDownloadButton(leaf);
         ImGui::SameLine();
         if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType == WorkspaceType_Public) {
-            AlienImGui::Text(ICON_FA_SHARE_ALT);
-            AlienImGui::Tooltip("Visible in the public workspace");
+            AlienGui::Text(ICON_FA_SHARE_ALT);
+            AlienGui::Tooltip("Visible in the public workspace");
         }
         ImGui::SameLine();
 
@@ -781,7 +777,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
             font->Scale *= 0.65f;
             ImGui::PushFont(font);
             ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourceNewTextColor.Value);
-            AlienImGui::Text("NEW");
+            AlienGui::Text("NEW");
             ImGui::PopStyleColor();
             font->Scale = origSize;
             ImGui::PopFont();
@@ -796,7 +792,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         result |= processFolderTreeSymbols(treeTO, collapsedFolderNames);
         processShortenedText(treeTO->folderNames.back());
         ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
         std::string resourceTypeString = [&] {
             if (treeTO->type == NetworkResourceType_Simulation) {
                 return folder.numLeafs == 1 ? "sim" : "sims";
@@ -804,7 +800,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
                 return folder.numLeafs == 1 ? "genome" : "genomes";
             }
         }();
-        AlienImGui::Text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")");
+        AlienGui::Text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")");
         ImGui::PopStyleColor();
     }
     return result;
@@ -823,8 +819,8 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
 
-        auto isAddReaction = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
-        AlienImGui::Tooltip("Add a reaction", false);
+        auto isAddReaction = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_PLUS));
+        AlienGui::Tooltip("Add a reaction", false);
         if (isAddReaction) {
             _activateEmojiPopup = true;
             _emojiPopupTO = treeTO;
@@ -856,7 +852,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
             auto numLikes = leaf.rawTO->numLikesByEmojiType.at(emojiType);
 
             ImGui::SameLine();
-            AlienImGui::Text(std::to_string(numLikes));
+            AlienGui::Text(std::to_string(numLikes));
             if (emojiType < _emojis.size()) {
                 ImGui::SameLine();
                 auto const& emoji = _emojis.at(emojiType);
@@ -878,7 +874,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
                         1.0f);
                 }
                 ImGui::PopStyleColor(2);
-                AlienImGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }, false);
+                AlienGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }, false);
             }
 
             //separator except for last element
@@ -894,8 +890,8 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
 
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextLightDecentColor);
-        AlienImGui::Text("(" + std::to_string(folder.numReactions) + ")");
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
+        AlienGui::Text("(" + std::to_string(folder.numReactions) + ")");
         ImGui::PopStyleColor();
     }
 }
@@ -904,7 +900,7 @@ void BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(leaf.rawTO->timestamp);
+        AlienGui::Text(leaf.rawTO->timestamp);
     }
 }
 
@@ -920,7 +916,7 @@ void BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(std::to_string(leaf.rawTO->numDownloads));
+        AlienGui::Text(std::to_string(leaf.rawTO->numDownloads));
     }
 }
 
@@ -928,7 +924,7 @@ void BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(std::to_string(leaf.rawTO->width));
+        AlienGui::Text(std::to_string(leaf.rawTO->width));
     }
 }
 
@@ -936,7 +932,7 @@ void BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(std::to_string(leaf.rawTO->height));
+        AlienGui::Text(std::to_string(leaf.rawTO->height));
     }
 }
 
@@ -945,9 +941,9 @@ void BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, 
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
         if (kobjects) {
-            AlienImGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+            AlienGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
         } else {
-            AlienImGui::Text(StringHelper::format(leaf.rawTO->particles));
+            AlienGui::Text(StringHelper::format(leaf.rawTO->particles));
         }
     }
 }
@@ -957,9 +953,9 @@ void BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool k
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
         if (kbyte) {
-            AlienImGui::Text(StringHelper::format(leaf.rawTO->contentSize / 1024) + " KB");
+            AlienGui::Text(StringHelper::format(leaf.rawTO->contentSize / 1024) + " KB");
         } else {
-            AlienImGui::Text(StringHelper::format(leaf.rawTO->contentSize) + " Bytes");
+            AlienGui::Text(StringHelper::format(leaf.rawTO->contentSize) + " Bytes");
         }
     }
 }
@@ -968,7 +964,7 @@ void BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienImGui::Text(leaf.rawTO->version);
+        AlienGui::Text(leaf.rawTO->version);
     }
 }
 
@@ -983,13 +979,13 @@ bool BrowserWindow::processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO
         ImGuiStyle& style = ImGui::GetStyle();
         switch (folderLine) {
         case FolderTreeSymbols::Expanded: {
-            if (AlienImGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
+            if (AlienGui::Button(ICON_FA_MINUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.insert(treeTO->folderNames);
                 result = true;
             }
         } break;
         case FolderTreeSymbols::Collapsed: {
-            if (AlienImGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
+            if (AlienGui::Button(ICON_FA_PLUS_SQUARE, 20.0f)) {
                 collapsedFolderNames.erase(treeTO->folderNames);
                 result = true;
             }
@@ -1063,7 +1059,7 @@ void BrowserWindow::processEmojiWindow()
                         }
                         processEmojiButton(offset + j);
                     }
-                    AlienImGui::Separator();
+                    AlienGui::Separator();
                     offset += NumEmojisPerBlock[i];
                 }
             }
@@ -1078,7 +1074,7 @@ void BrowserWindow::processEmojiWindow()
                 }
                 ImGui::SetCursorPosY(ImGui::GetCursorPosY() + scale(8.0f));
 
-                if (AlienImGui::Button("More", ImGui::GetContentRegionAvail().x)) {
+                if (AlienGui::Button("More", ImGui::GetContentRegionAvail().x)) {
                     _showAllEmojis = true;
                 }
             }
@@ -1119,8 +1115,8 @@ void BrowserWindow::processEmojiButton(int emojiType)
 
 void BrowserWindow::processDownloadButton(BrowserLeaf const& leaf)
 {
-    auto isDownload = AlienImGui::ActionButton(AlienImGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
-    AlienImGui::Tooltip("Download", false);
+    auto isDownload = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
+    AlienGui::Tooltip("Download", false);
     if (isDownload) {
         onDownloadResource(leaf);
     }
@@ -1130,13 +1126,14 @@ namespace
 {
     std::vector<std::string> splitString(const std::string& str)
     {
-        std::vector<std::string> tokens; 
+        std::vector<std::string> tokens;
         boost::algorithm::split_regex(tokens, str, boost::regex("(\n)+"));
         return tokens;
     }
 }
 
-void BrowserWindow::processShortenedText(std::string const& text, bool bold) {
+void BrowserWindow::processShortenedText(std::string const& text, bool bold)
+{
     auto substrings = splitString(text);
     if (substrings.empty()) {
         return;
@@ -1148,7 +1145,7 @@ void BrowserWindow::processShortenedText(std::string const& text, bool bold) {
     if (bold) {
         ImGui::PushFont(styleRepository.getSmallBoldFont());
     }
-    AlienImGui::Text(substrings.at(0));
+    AlienGui::Text(substrings.at(0));
     if (bold) {
         ImGui::PopFont();
     }
@@ -1157,7 +1154,7 @@ void BrowserWindow::processShortenedText(std::string const& text, bool bold) {
         ImGui::SetCursorPosX(cursorPos);
 
         processDetailButton();
-        AlienImGui::Tooltip(text.c_str(), false);
+        AlienGui::Tooltip(text.c_str(), false);
     }
 }
 
@@ -1167,7 +1164,7 @@ bool BrowserWindow::processActionButton(std::string const& text)
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImU32)Const::ToolbarButtonHoveredColor);
     auto result = ImGui::Button(text.c_str());
     ImGui::PopStyleColor(2);
-   
+
     return result;
 }
 
@@ -1178,7 +1175,7 @@ bool BrowserWindow::processDetailButton()
     ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, h, s, v);
     ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, s, v * 0.3f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, s, v * 0.4f));
-    auto detailClicked = AlienImGui::Button("...");
+    auto detailClicked = AlienGui::Button("...");
     ImGui::PopStyleColor(2);
     return detailClicked;
 }
@@ -1186,16 +1183,14 @@ bool BrowserWindow::processDetailButton()
 void BrowserWindow::processRefreshingScreen(RealVector2D const& startPos)
 {
     if (_refreshProcessor->pendingTasks()) {
-        auto color = ImColor(ImGui::GetStyleColorVec4(ImGuiCol_WindowBg));
-        color.Value.w = 0.5f;
         auto size = ImGui::GetItemRectSize();
         auto afterTablePos = ImGui::GetCursorScreenPos();
 
         ImGui::SetCursorScreenPos({startPos.x, startPos.y});
         if (ImGui::BeginChild("##overlay", {size.x, size.y}, 0, ImGuiWindowFlags_NoScrollbar)) {
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            drawList->AddRectFilled({startPos.x, startPos.y}, {startPos.x + size.x, startPos.y + size.y}, color);
-            AlienImGui::Spinner(AlienImGui::SpinnerParameters().pos({startPos.x + size.x / 2, startPos.y + size.y / 2}));
+
+            AlienGui::DisabledField();
+            AlienGui::Spinner(AlienGui::SpinnerParameters().pos({startPos.x + size.x / 2, startPos.y + size.y / 2}));
         }
         ImGui::EndChild();
         ImGui::SetCursorScreenPos(afterTablePos);
@@ -1256,18 +1251,16 @@ void BrowserWindow::onDownloadResource(BrowserLeaf const& leaf)
 void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
 {
     auto func = [&] {
-        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::GenomeData> {
+        auto data = [&]() -> std::variant<ReplaceNetworkResourceRequestData::SimulationData, ReplaceNetworkResourceRequestData::CreatureData> {
             if (_currentWorkspace.resourceType == NetworkResourceType_Simulation) {
-                return ReplaceNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
+                return ReplaceNetworkResourceRequestData::SimulationData{
+                    .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
-                return ReplaceNetworkResourceRequestData::GenomeData{.description = GenomeEditorWindow::get().getCurrentGenome()};
+                return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentCreature()};
             }
         }();
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{
-            .resourceId = leaf.rawTO->id,
-            .workspaceType = leaf.rawTO->workspaceType,
-            .downloadCache = getSimulationCache(),
-            .data = data});
+            .resourceId = leaf.rawTO->id, .workspaceType = leaf.rawTO->workspaceType, .downloadCache = getSimulationCache(), .data = data});
     };
     GenericMessageDialog::get().yesNo("Delete", "Do you really want to replace the content of the selected item?", func);
 }
@@ -1325,7 +1318,6 @@ void BrowserWindow::onDeleteResource(NetworkResourceTreeTO const& treeTO)
 
     auto message = treeTO->isLeaf() ? "Do you really want to delete the selected item?" : "Do you really want to delete the selected folder?";
     GenericMessageDialog::get().yesNo("Delete", message, [rawTOs = rawTOs, this]() {
-
         //remove resources form workspace
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {
             auto& workspace = _workspaces.at(WorkspaceId{_currentWorkspace.resourceType, workspaceType});
@@ -1363,7 +1355,7 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
             }
             _ownEmojiTypeBySimId.erase(findResult);
             _userNamesByEmojiTypeBySimIdCache.erase(std::make_pair(leaf.rawTO->id, origEmojiType));  //invalidate cache entry
-            onlyRemoveLike = origEmojiType == emojiType;  //remove like if same like icon has been clicked
+            onlyRemoveLike = origEmojiType == emojiType;                                             //remove like if same like icon has been clicked
         }
 
         //create new like
@@ -1468,11 +1460,11 @@ void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
     if (to->isLeaf()) {
         auto const& leaf = to->getLeaf();
         if (VersionParserService::get().isVersionOutdated(leaf.rawTO->version)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOutdatedTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::TextDecentColor);
         } else if (VersionParserService::get().isVersionNewer(leaf.rawTO->version)) {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionNewerTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::TextConflictColor);
         } else {
-            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserVersionOkTextColor);
+            ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserLeafTextColor);
         }
     } else {
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::BrowserResourceTextColor);
@@ -1481,5 +1473,23 @@ void BrowserWindow::pushTextColor(NetworkResourceTreeTO const& to)
 
 void BrowserWindow::popTextColor()
 {
+    ImGui::PopStyleColor();
+}
+
+void BrowserWindow::drawOnlineSymbol()
+{
+    auto counter = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    counter = (((counter % 2000) + 2000) % 2000);
+    auto color = ImColor::HSV(0.0f, counter < 1000 ? toFloat(counter) / 1000.0f : 2.0f - toFloat(counter) / 1000.0f, 1.0f);
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+    ImGui::Text(ICON_FA_GENDERLESS);
+    ImGui::PopStyleColor();
+}
+
+void BrowserWindow::drawLastDayOnlineSymbol()
+{
+    auto color = ImColor::HSV(0.16f, 0.5f, 0.66f);
+    ImGui::PushStyleColor(ImGuiCol_Text, color.Value);
+    ImGui::Text(ICON_FA_GENDERLESS);
     ImGui::PopStyleColor();
 }

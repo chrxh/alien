@@ -4,7 +4,7 @@
 #include <imgui.h>
 
 #include "Base/Definitions.h"
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 #include "EngineInterface/StatisticsConverterService.h"
 
 std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointCollectionHistory() const

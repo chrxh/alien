@@ -127,8 +127,8 @@ DataPointCollection StatisticsConverterService::convert(
         data.accumulated.numInjectionActivities, lastDataValue.accumulated.numInjectionActivities, numNonFreeCells, deltaTimesteps);
     result.numCompletedInjections = getDataPointForProcessProperty(
         data.accumulated.numCompletedInjections, lastDataValue.accumulated.numCompletedInjections, numNonFreeCells, deltaTimesteps);
-    result.numNervePulses =
-        getDataPointForProcessProperty(data.accumulated.numNervePulses, lastDataValue.accumulated.numNervePulses, numNonFreeCells, deltaTimesteps);
+    result.numGeneratorPulses =
+        getDataPointForProcessProperty(data.accumulated.numGeneratorPulses, lastDataValue.accumulated.numGeneratorPulses, numNonFreeCells, deltaTimesteps);
     result.numNeuronActivities = getDataPointForProcessProperty(
         data.accumulated.numNeuronActivities, lastDataValue.accumulated.numNeuronActivities, numNonFreeCells, deltaTimesteps);
     result.numSensorActivities = getDataPointForProcessProperty(

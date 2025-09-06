@@ -1,0 +1,44 @@
+#pragma once
+
+#include <vector>
+
+#include "Base/Singleton.h"
+
+#include "Descriptions.h"
+#include "GenomeDescription.h"
+#include "SimulationParameters.h"
+
+using GeneIndicesForSubGenome = std::vector<int>;
+class GenomeDescriptionEditService
+{
+    MAKE_SINGLETON(GenomeDescriptionEditService);
+
+public:
+    void addGene(GenomeDescription& genome, int index, GeneDescription const& newGene) const;  // Adds gene after index
+    void removeGene(GenomeDescription& genome, int index) const;
+    void swapGenes(GenomeDescription& genome, int index) const;  // Swaps gene at index with gene at index + 1
+
+    void addNode(GeneDescription& gene, int index, NodeDescription const& node) const;  // Adds node after index
+    void removeNode(GeneDescription& gene, int index) const;
+    void swapNodes(GeneDescription& gene, int index) const;  // Swaps node at index with node at index + 1
+
+    std::vector<GenomeDescriptionWithStartGeneIndex> createSubGenomesForPreview(
+        GenomeDescription const& genome,
+        std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;
+
+    struct SeedCollectionResult
+    {
+        CollectionDescription data; 
+        std::vector<uint64_t> seedCreatureIds;
+    };
+    SeedCollectionResult createSeedCollectionForPreview(
+        std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes,
+        std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription> const& cache) const;
+    std::vector<CollectionDescription> extractPhenotypesFromPreview(CollectionDescription&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
+    void removeSeedFromPhenotype(CollectionDescription& phenotype) const;
+
+private:
+    CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const;
+
+    void adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const;
+};

@@ -6,7 +6,7 @@ enum class MutationType
     NeuronData,
     Geometry,
     CustomGeometry,
-    CellFunction,
+    CellType,
     Insertion,
     Deletion,
     Translation,

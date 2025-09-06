@@ -6,27 +6,31 @@
 #include <memory>
 #include <vector>
 
-#include "CellFunctionConstants.h"
+#include "CellTypeConstants.h"
 
 struct SimulationParameters;
+struct RadiationSource;
+struct ExpertToggles;
+struct ColorTransitionRule;
+struct ParameterSpec;
 
-struct ClusteredDataDescription;
-struct DataDescription;
+struct CollectionDescription;
 struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;
+struct GenomeDescription;
+struct GeneDescription;
 
-struct GpuSettings;
+struct CudaSettings;
 
-struct GeneralSettings;
-struct Settings;
+struct SettingsForSimulation;
 
 class _SimulationFacade;
 using SimulationFacade = std::shared_ptr<_SimulationFacade>;
 
 struct TimelineStatistics;
 struct HistogramData;
-struct RawStatisticsData;
+struct StatisticsRawData;
 
 class SpaceCalculator;
 
@@ -36,3 +40,10 @@ using ShapeGenerator = std::shared_ptr<_ShapeGenerator>;
 class ShapeGeneratorResult;
 
 class StatisticsHistory;
+
+class SimulationParametersService;
+
+struct PreviewDescription;
+
+
+struct Ids;

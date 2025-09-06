@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/GenomeDescription.h"
 #include "Network/Definitions.h"
 #include "DownloadCache.h"
 
@@ -17,9 +17,9 @@ struct ReplaceNetworkResourceRequestData
         float zoom = 1.0f;
         RealVector2D center;
     };
-    struct GenomeData
+    struct CreatureData
     {
         GenomeDescription description;
     };
-    std::variant<SimulationData, GenomeData> data;
+    std::variant<SimulationData, CreatureData> data;
 };

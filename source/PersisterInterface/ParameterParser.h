@@ -13,15 +13,6 @@ public:
     //return true if value does not exist in tree
     template <typename T>
     static bool encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task);
-
-    template <typename T>
-    static bool encodeDecodeWithEnabled(
-        boost::property_tree::ptree& tree,
-        T& value,
-        bool& isActivated,
-        T const& defaultValue,
-        std::string const& node,
-        ParserTask task);
 };
 
 namespace detail
@@ -52,83 +43,47 @@ namespace detail
     }
 
     template <>
+    inline bool
+    encodeDecodeImpl(boost::property_tree::ptree& tree, IntVector2D& value, IntVector2D const& defaultValue, std::string const& node, ParserTask task)
+    {
+        auto result = false;
+        result |= encodeDecodeImpl(tree, value.x, defaultValue.x, node + ".X", task);
+        result |= encodeDecodeImpl(tree, value.y, defaultValue.y, node + ".Y", task);
+        return result;
+    }
+
+    template <>
+    inline bool
+    encodeDecodeImpl(boost::property_tree::ptree& tree, RealVector2D& value, RealVector2D const& defaultValue, std::string const& node, ParserTask task)
+    {
+        auto result = false;
+        result |= encodeDecodeImpl(tree, value.x, defaultValue.x, node + ".X", task);
+        result |= encodeDecodeImpl(tree, value.y, defaultValue.y, node + ".Y", task);
+        return result;
+    }
+
+    template <>
+    inline bool
+    encodeDecodeImpl(boost::property_tree::ptree& tree, FloatColorRGB& value, FloatColorRGB const& defaultValue, std::string const& node, ParserTask task)
+    {
+        auto result = false;
+        result |= encodeDecodeImpl(tree, value.r, defaultValue.r, node + ".R", task);
+        result |= encodeDecodeImpl(tree, value.g, defaultValue.g, node + ".G", task);
+        result |= encodeDecodeImpl(tree, value.b, defaultValue.b, node + ".B", task);
+        return result;
+    }
+
+    template <>
     inline bool encodeDecodeImpl(
         boost::property_tree::ptree& tree,
-        ColorVector<float>& value,
-        ColorVector<float> const& defaultValue,
+        ColorTransitionRule& value,
+        ColorTransitionRule const& defaultValue,
         std::string const& node,
         ParserTask task)
     {
         auto result = false;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result |= encodeDecodeImpl(tree, value[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
-        }
-        return result;
-    }
-
-    template <>
-    inline  bool encodeDecodeImpl(
-        boost::property_tree::ptree& tree,
-        ColorVector<int>& value,
-        ColorVector<int> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = false;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result |= encodeDecodeImpl(tree, value[i], defaultValue[i], node + "[" + std::to_string(i) + "]", task);
-        }
-        return result;
-    }
-
-    template <>
-    inline  bool encodeDecodeImpl<ColorMatrix<float>>(
-        boost::property_tree::ptree& tree,
-        ColorMatrix<float>& value,
-        ColorMatrix<float> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = false;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            for (int j = 0; j < MAX_COLORS; ++j) {
-                result |= encodeDecodeImpl(tree, value[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
-            }
-        }
-        return result;
-    }
-
-    template <>
-    inline  bool encodeDecodeImpl<ColorMatrix<int>>(
-        boost::property_tree::ptree& tree,
-        ColorMatrix<int>& value,
-        ColorMatrix<int> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = false;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            for (int j = 0; j < MAX_COLORS; ++j) {
-                result |= encodeDecodeImpl(tree, value[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
-            }
-        }
-        return result;
-    }
-
-    template <>
-    inline  bool encodeDecodeImpl<ColorMatrix<bool>>(
-        boost::property_tree::ptree& tree,
-        ColorMatrix<bool>& value,
-        ColorMatrix<bool> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = false;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            for (int j = 0; j < MAX_COLORS; ++j) {
-                result |= encodeDecodeImpl(tree, value[i][j], defaultValue[i][j], node + "[" + std::to_string(i) + ", " + std::to_string(j) + "]", task);
-            }
-        }
+        result |= encodeDecodeImpl(tree, value.duration, defaultValue.duration, node + ".Duration", task);
+        result |= encodeDecodeImpl(tree, value.targetColor, defaultValue.targetColor, node + ".Target", task);
         return result;
     }
 
@@ -151,78 +106,10 @@ namespace detail
             return result;
         }
     }
-
-    template <typename T>
-    inline  bool encodeDecodeWithEnabledImpl(
-        boost::property_tree::ptree& tree,
-        T& value,
-        bool& isActivated,
-        T const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = encodeDecodeImpl(tree, isActivated, false, node + ".activated", task);
-        result |= encodeDecodeImpl(tree, value, defaultValue, node + ".value", task);
-        return result;
-    }
-
-    template <>
-    inline  bool encodeDecodeWithEnabledImpl(
-        boost::property_tree::ptree& tree,
-        ColorVector<float>& value,
-        bool& isActivated,
-        ColorVector<float> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = encodeDecodeImpl(tree, isActivated, false, node + ".activated", task);
-        result |= encodeDecodeImpl(tree, value, defaultValue, node, task);
-        return result;
-    }
-
-    template <>
-    inline  bool encodeDecodeWithEnabledImpl(
-        boost::property_tree::ptree& tree,
-        ColorVector<int>& value,
-        bool& isActivated,
-        ColorVector<int> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = encodeDecodeImpl(tree, isActivated, false, node + ".activated", task);
-        result |= encodeDecodeImpl(tree, value, defaultValue, node, task);
-        return result;
-    }
-
-    template <typename T>
-    inline  bool encodeDecodeWithEnabledImpl(
-        boost::property_tree::ptree& tree,
-        ColorMatrix<T>& value,
-        bool& isActivated,
-        ColorMatrix<bool> const& defaultValue,
-        std::string const& node,
-        ParserTask task)
-    {
-        auto result = encodeDecodeImpl(tree, isActivated, false, node + ".activated", task);
-        result |= encodeDecodeImpl(tree, value, defaultValue, node, task);
-        return result;
-    }
 };
 
 template <typename T>
 bool ParameterParser::encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task)
 {
     return detail::encodeDecodeImpl(tree, value, defaultValue, node, task);
-}
-
-template <typename T>
-bool ParameterParser::encodeDecodeWithEnabled(
-    boost::property_tree::ptree& tree,
-    T& value,
-    bool& isActivated,
-    T const& defaultValue,
-    std::string const& node,
-    ParserTask task)
-{
-    return detail::encodeDecodeWithEnabledImpl(tree, value, isActivated, defaultValue, node, task);
 }

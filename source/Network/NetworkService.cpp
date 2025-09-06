@@ -172,7 +172,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
             _password = password;
         }
 
-        errorCode = 0;
+        errorCode = LoginErrorCode_UnknownUser;
         std::stringstream stream(result->body);
         boost::property_tree::ptree tree;
         boost::property_tree::read_json(stream, tree);
@@ -181,6 +181,7 @@ bool NetworkService::login(LoginErrorCode& errorCode, std::string const& userNam
         return boolResult;
     } catch (...) {
         logNetworkError();
+        errorCode = LoginErrorCode_Other;
         return false;
     }
 }
@@ -436,7 +437,7 @@ bool NetworkService::uploadResource(
     std::string const& resourceName,
     std::string const& description,
     IntVector2D const& worldSize,
-    int numParticles,
+    int numObjects,
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics,
@@ -462,7 +463,7 @@ bool NetworkService::uploadResource(
         {"simDesc", description, "", ""},
         {"width", std::to_string(worldSize.x), "", ""},
         {"height", std::to_string(worldSize.y), "", ""},
-        {"particles", std::to_string(numParticles), "", ""},
+        {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", chunks.front(), "", "application/octet-stream"},
         {"settings", settings, "", ""},
@@ -500,7 +501,7 @@ bool NetworkService::uploadResource(
 bool NetworkService::replaceResource(
     std::string const& resourceId,
     IntVector2D const& worldSize,
-    int numParticles,
+    int numObjects,
     std::string const& mainData,
     std::string const& settings,
     std::string const& statistics)
@@ -522,7 +523,7 @@ bool NetworkService::replaceResource(
         {"simId", resourceId, "", ""},
         {"width", std::to_string(worldSize.x), "", ""},
         {"height", std::to_string(worldSize.y), "", ""},
-        {"particles", std::to_string(numParticles), "", ""},
+        {"particles", std::to_string(numObjects), "", ""},
         {"version", Const::ProgramVersion, "", ""},
         {"content", chunks.front(), "", "application/octet-stream"},
         {"settings", settings, "", ""},

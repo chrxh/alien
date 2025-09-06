@@ -4,6 +4,7 @@ add_library(Base
     Definitions.cpp
     Definitions.h
     Exceptions.h
+    ExitScopeGuard.h
     FileLogger.cpp
     FileLogger.h
     GlobalSettings.cpp
@@ -12,10 +13,9 @@ add_library(Base
     JsonParser.h
     LoggingService.cpp
     LoggingService.h
+    Macros.h
     Math.cpp
     Math.h
-    NumberGenerator.cpp
-    NumberGenerator.h
     Physics.cpp
     Physics.h
     Resources.h

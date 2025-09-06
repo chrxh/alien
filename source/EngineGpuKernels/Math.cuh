@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
 
@@ -20,16 +20,16 @@ public:
     __inline__ __device__ static void rotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static void inverseRotationMatrix(float angle, Matrix& rotMatrix);
     __inline__ __device__ static float2 applyMatrix(float2 const& vec, Matrix const& matrix);
-    __inline__ __device__ static void angleCorrection(float& angle);
-    __inline__ __device__ static void angleCorrection(int& angle);
     __inline__ __device__ static bool isInBetweenModulo(float value1, float value2, float candidate, float size);
     __inline__ __device__ static bool isAngleInBetween(float angle1, float angle2, float angleBetweenCandidate);
+    __inline__ __device__ static bool isAngleStrictInBetween(float angle1, float angle2, float angleBetweenCandidate);
     __inline__ __device__ static void rotateQuarterClockwise(float2& v);
     __inline__ __device__ static void rotateQuarterCounterClockwise(float2& v);
     __inline__ __device__ static float angleOfVector(float2 const& v);  //0 DEG corresponds to (0,-1)
     __inline__ __device__ static float2 unitVectorOfAngle(float angle);
     __inline__ __device__ static void normalize(float2& vec);
     __inline__ __device__ static float2 normalized(float2 vec);
+    __inline__ __device__ static float normalizedAngle(float angle, float base);
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
     __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
     __inline__ __device__ static float length(float2 const& v);
@@ -193,11 +193,6 @@ __inline__ __device__ float2 Math::applyMatrix(float2 const & vec, Matrix const 
     return{ vec.x * matrix[0][0] + vec.y * matrix[0][1],  vec.x * matrix[1][0] + vec.y * matrix[1][1] };
 }
 
-__inline__ __device__ void Math::angleCorrection(int &angle)
-{
-    angle = ((angle % 360) + 360) % 360;
-}
-
 __inline__ __device__ bool Math::isInBetweenModulo(float value1, float value2, float candidate, float size)
 {
     if (value2 - value1 >= size) {
@@ -235,12 +230,21 @@ __inline__ __device__ bool Math::isAngleInBetween(float angle1, float angle2, fl
     return angle2 - angle1 < 360.0f;
 }
 
-__inline__ __device__ void Math::angleCorrection(float &angle)
+__inline__ __device__ bool Math::isAngleStrictInBetween(float angle1, float angle2, float angleBetweenCandidate)
 {
-    int intPart = (int)angle;
-    float fracPart = angle - intPart;
-    angleCorrection(intPart);
-    angle = (float)intPart + fracPart;
+    if (abs(angle1 - angleBetweenCandidate) < NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle1 - angleBetweenCandidate) > 360.0 - NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle2 - angleBetweenCandidate) < NEAR_ZERO) {
+        return false;
+    }
+    if (abs(angle2 - angleBetweenCandidate) > 360.0 - NEAR_ZERO) {
+        return false;
+    }
+    return isAngleInBetween(angle1, angle2, angleBetweenCandidate);
 }
 
 __device__ __inline__ void Math::normalize(float2 &vec)
@@ -258,6 +262,18 @@ __device__ __inline__ float2 Math::normalized(float2 vec)
 {
     normalize(vec);
     return vec;
+}
+
+__device__ __inline__ float Math::normalizedAngle(float angle, float base)
+{
+    angle = Math::modulo(angle, 360.0f);
+    if (angle < base) {
+        angle += 360.0f;
+    }
+    if (angle >= base + 360.0f) {
+        angle -= 360.0f;
+    }
+    return angle;
 }
 
 __device__ __inline__ float Math::dot(float2 const &p, float2 const &q)

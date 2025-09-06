@@ -2,17 +2,16 @@
 
 #include <imgui.h>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
-#include "EngineInterface/GenomeDescriptionService.h"
-
-#include "AlienImGui.h"
+#include "AlienGui.h"
+#include "GenomeTabEditData.h"
 #include "StyleRepository.h"
 
-void ChangeColorDialog::initIntern(std::function<GenomeDescription()> getGenomeFunc, std::function<void(GenomeDescription const&)> setGenomeFunc)
+void ChangeColorDialog::open(GenomeTabEditData const& editData)
 {
-    _getGenomeFunc = getGenomeFunc;
-    _setGenomeFunc = setGenomeFunc;
+    _editData = editData;
+    AlienDialog::open();
 }
 
 ChangeColorDialog::ChangeColorDialog()
@@ -21,7 +20,7 @@ ChangeColorDialog::ChangeColorDialog()
 
 void ChangeColorDialog::processIntern()
 {
-    AlienImGui::Group("Color transition rule");
+    AlienGui::Group(AlienGui::GroupParameters().text("Color transition rule"));
     if (ImGui::BeginTable("##", 3, ImGuiTableFlags_SizingStretchProp)) {
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthStretch, 0);
         ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, scale(20));
@@ -30,52 +29,54 @@ void ChangeColorDialog::processIntern()
 
         ImGui::TableSetColumnIndex(0);
         ImGui::PushID("##1");
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().textWidth(0).width(0), _sourceColor);
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().textWidth(0).width(0), _sourceColor);
         ImGui::PopID();
 
         ImGui::TableSetColumnIndex(1);
-        AlienImGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
+        AlienGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
 
         ImGui::TableSetColumnIndex(2);
         ImGui::PushID("target color");
-        AlienImGui::ComboColor(AlienImGui::ComboColorParameters().textWidth(0).width(0), _targetColor);
+        AlienGui::ComboColor(AlienGui::ComboColorParameters().textWidth(0).width(0), _targetColor);
         ImGui::PopID();
 
         ImGui::EndTable();
     }
-    AlienImGui::Group("Options");
-    ImGui::Checkbox("##includeSubgenomes", &_includeSubGenomes);
+    AlienGui::Group(AlienGui::GroupParameters().text("Options"));
+    ImGui::Checkbox("##restrictToSelectedGene", &_restrictToSelectedGene);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienImGui::Text("Include sub-genomes");
+    AlienGui::Text("Restrict to selected gene");
     
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
-        auto genome = _getGenomeFunc();
-        onChangeColor(genome);
-        _setGenomeFunc(genome);
+    if (AlienGui::Button("OK")) {
+        onChangeColor();
         close();
     }
     ImGui::SetItemDefaultFocus();
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 }
 
-void ChangeColorDialog::onChangeColor(GenomeDescription& genome)
+void ChangeColorDialog::onChangeColor()
 {
-    for (auto& node : genome.cells) {
-        if (node.color == _sourceColor) {
-            node.color = _targetColor;
+    if (_restrictToSelectedGene && _editData->selectedGeneIndex.has_value()) {
+        auto& gene = _editData->getSelectedGeneRef();
+        for (auto& node : gene._nodes) {
+            if (node._color == _sourceColor) {
+                node._color = _targetColor;
+            }
         }
-        if (_includeSubGenomes) {
-            if (auto subGenome = node.getGenome()) {
-                auto subGenomeDesc = GenomeDescriptionService::get().convertBytesToDescription(*subGenome);
-                onChangeColor(subGenomeDesc);
-                auto newSubGenome = GenomeDescriptionService::get().convertDescriptionToBytes(subGenomeDesc);
-                node.setGenome(newSubGenome);
+    }
+    if (!_restrictToSelectedGene) {
+        for (auto& gene : _editData->genome._genes) {
+            for (auto& node : gene._nodes) {
+                if (node._color == _sourceColor) {
+                    node._color = _targetColor;
+                }
             }
         }
     }

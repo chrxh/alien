@@ -56,7 +56,6 @@ private:
     void processToolbar();
     void processWorkspaceSelectionAndFilter();
     void processWorkspace();
-    void processVerticalMovableSeparator();
     void processUserList();
     void processStatusBar();
 
@@ -111,6 +110,9 @@ private:
 
     void pushTextColor(NetworkResourceTreeTO const& to);
     void popTextColor();
+
+    void drawOnlineSymbol();
+    void drawLastDayOnlineSymbol();
 
     TaskProcessor _refreshProcessor;
     TaskProcessor _emojiUserNameProcessor;

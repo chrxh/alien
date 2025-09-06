@@ -18,32 +18,13 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
  
     processMemory.init();
-    numberGen1.init(40312357);   //some array size for random numbers (~ 40 MB)
-    numberGen2.init(1536941);  //some array size for random numbers (~ 1.5 MB)
+    primaryNumberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
+    secondaryNumberGen.init(1536941);  //some array size for random numbers (~ 1.5 MB)
 
     structuralOperations.init();
-    for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
-        cellFunctionOperations[i].init();
+    for (int i = 0; i < CellType_Count; ++i) {
+        cellTypeOperations[i].init();
     }
-}
-
-__device__ void SimulationData::prepareForNextTimestep()
-{
-    cellMap.reset();
-    particleMap.reset();
-    processMemory.reset();
-
-    auto maxStructureOperations = 1000 + objects.cellPointers.getNumEntries() / 2; //heuristic
-    auto maxCellFunctionOperations = objects.cellPointers.getNumEntries();  //heuristic
-
-    structuralOperations.setMemory(processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
-
-    for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
-        cellFunctionOperations[i].setMemory(processMemory.getTypedSubArray<CellFunctionOperation>(maxCellFunctionOperations), maxCellFunctionOperations);
-    }
-    *externalEnergy = cudaSimulationParameters.externalEnergy;
-
-    objects.saveNumEntries();
 }
 
 namespace
@@ -56,47 +37,52 @@ namespace
     }
 }
 
-bool SimulationData::shouldResize(ArraySizes const& additionals)
+bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
-    return objects.cells.shouldResize_host(cellArraySizeResult) || objects.cellPointers.shouldResize_host(cellArraySizeResult * 5)
-        || objects.particles.shouldResize_host(particleArraySizeResult) || objects.particlePointers.shouldResize_host(particleArraySizeResult * 5)
-        || objects.auxiliaryData.shouldResize_host(additionals.auxiliaryDataSize);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArray, sizeDelta.particleArray);
+    return objects.cells.shouldResize_host(cellArraySizeResult)
+        || objects.particles.shouldResize_host(particleArraySizeResult)
+        || objects.heap.shouldResize_host(sizeDelta.heap);
 }
 
-void SimulationData::resizeTargetObjects(ArraySizes const& additionals)
+void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
-    calcArraySizes(cellArraySizeResult, particleArraySizeResult, additionals.cellArraySize, additionals.particleArraySize);
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
     resizeTargetIntern(objects.cells, tempObjects.cells, cellArraySizeResult);
-    resizeTargetIntern(objects.cellPointers, tempObjects.cellPointers, cellArraySizeResult * 5);
     resizeTargetIntern(objects.particles, tempObjects.particles, particleArraySizeResult);
-    resizeTargetIntern(objects.particlePointers, tempObjects.particlePointers, particleArraySizeResult * 5);
-    resizeTargetIntern(objects.auxiliaryData, tempObjects.auxiliaryData, additionals.auxiliaryDataSize);
+    resizeTargetIntern(objects.heap, tempObjects.heap, size.heap);
 }
 
-void SimulationData::resizeObjects()
+void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
 {
-    objects.cells.resize(tempObjects.cells.getSize_host());
-    objects.cellPointers.resize(tempObjects.cellPointers.getSize_host());
-    objects.particles.resize(tempObjects.particles.getSize_host());
-    objects.particlePointers.resize(tempObjects.particlePointers.getSize_host());
-    objects.auxiliaryData.resize(tempObjects.auxiliaryData.getSize_host());
+    uint64_t cellArraySizeResult, particleArraySizeResult;
+    calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
-    auto cellArraySize = objects.cells.getSize_host();
-    cellMap.resize(cellArraySize);
-    auto particleArraySize = objects.particles.getSize_host();
-    particleMap.resize(particleArraySize);
+    objects.cells.resize(cellArraySizeResult);
+    objects.particles.resize(particleArraySizeResult);
+    objects.heap.resize(size.heap);
+    tempObjects.cells.resize(cellArraySizeResult);
+    tempObjects.particles.resize(particleArraySizeResult);
+    tempObjects.heap.resize(size.heap);
 
-    int upperBoundDynamicMemory = (sizeof(StructuralOperation) + sizeof(CellFunctionOperation) * CellFunction_Count + 200) * (cellArraySize + 1000); //heuristic
-    processMemory.resize(upperBoundDynamicMemory);
+    resizeAuxiliaryData();
+}
+
+void SimulationData::resizeObjectsByMatchingTempObjects()
+{
+    objects.cells.resize(tempObjects.cells.getCapacity_host());
+    objects.particles.resize(tempObjects.particles.getCapacity_host());
+    objects.heap.resize(tempObjects.heap.getCapacity_host());
+
+    resizeAuxiliaryData();
 }
 
 bool SimulationData::isEmpty()
 {
-    return 0 == objects.cells.getNumEntries_host() && 0 == objects.particles.getNumEntries_host();
+    return 0 == objects.heap.getNumEntries_host();
 }
 
 void SimulationData::free()
@@ -106,22 +92,34 @@ void SimulationData::free()
     preprocessedSimulationData.free();
     cellMap.free();
     particleMap.free();
-    numberGen1.free();
-    numberGen2.free();
+    primaryNumberGen.free();
+    secondaryNumberGen.free();
     processMemory.free();
     CudaMemoryManager::getInstance().freeMemory(externalEnergy);
 
     structuralOperations.free();
-    for (int i = 0; i < CellFunction_WithoutNone_Count; ++i) {
-        cellFunctionOperations[i].free();
+    for (int i = 0; i < CellType_Count; ++i) {
+        cellTypeOperations[i].free();
     }
+}
+
+void SimulationData::resizeAuxiliaryData()
+{
+    auto estimatedMaxActiveCells = objects.cells.getCapacity_host();
+    cellMap.resize(estimatedMaxActiveCells);
+    auto estimatedMaxActiveParticles = objects.particles.getCapacity_host();
+    particleMap.resize(estimatedMaxActiveParticles);
+
+    auto upperBoundDynamicMemory =
+        (sizeof(StructuralOperation) + sizeof(CellTypeOperation) * CellType_Count + 200) * (estimatedMaxActiveCells + 1000);  // Heuristic
+    processMemory.resize(upperBoundDynamicMemory);
 }
 
 template <typename Entity>
 void SimulationData::resizeTargetIntern(Array<Entity> const& sourceArray, Array<Entity>& targetArray, uint64_t additionalEntities)
 {
     if (sourceArray.shouldResize_host(additionalEntities)) {
-        auto newSize = (sourceArray.getSize_host() + additionalEntities) * 3;
-        targetArray.resize(newSize);
+        auto newSize = (sourceArray.getCapacity_host() + additionalEntities) * Const::ArrayResizePercentage;
+        targetArray.resize(toUInt64(newSize));
     }
 }

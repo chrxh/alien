@@ -9,7 +9,7 @@ namespace
     auto constexpr MaxSamples = 1000;
 }
 
-void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newRawStatistics, uint64_t timestep)
+void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatistics const& newTimelineStatistics, uint64_t timestep)
 {
     std::lock_guard lock(history.getMutex());
     auto& historyData = history.getDataRef();
@@ -18,20 +18,20 @@ void StatisticsService::addDataPoint(StatisticsHistory& history, TimelineStatist
         historyData.clear();
     }
 
-    if (!_lastRawStatistics || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta / 100 * (_numDataPoints + 1)) {
+    if (!_lastTimelineStatistics || historyData.empty() || toDouble(timestep) - historyData.back().time > _longtermTimestepDelta / 100 * (_numDataPoints + 1)) {
         auto newDataPoint = [&] {
-            if (!_lastRawStatistics && !historyData.empty()) {
+            if (!_lastTimelineStatistics && !historyData.empty()) {
 
                 //reuse last entry if no raw statistics is available
                 auto result = historyData.back();
                 result.time = toDouble(timestep);
                 return result;
             } else {
-                return StatisticsConverterService::get().convert(newRawStatistics, timestep, toDouble(timestep), _lastRawStatistics, _lastTimestep);
+                return StatisticsConverterService::get().convert(newTimelineStatistics, timestep, toDouble(timestep), _lastTimelineStatistics, _lastTimestep);
             }
         }();
 
-        _lastRawStatistics = newRawStatistics;
+        _lastTimelineStatistics = newTimelineStatistics;
         _lastTimestep = timestep;
         _accumulatedDataPoint = _accumulatedDataPoint.has_value() ? *_accumulatedDataPoint + newDataPoint : newDataPoint;
         ++_numDataPoints;
@@ -99,7 +99,7 @@ void StatisticsService::rewriteHistory(StatisticsHistory& history, StatisticsHis
 {
     _accumulatedDataPoint.reset();
     _numDataPoints = 0;
-    _lastRawStatistics.reset();
+    _lastTimelineStatistics.reset();
     _lastTimestep.reset();
     if (!newHistoryData.empty()) {
         _longtermTimestepDelta = max(DefaultTimeStepDelta, (timestep - newHistoryData.front().time) / toDouble(newHistoryData.size()));

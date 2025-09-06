@@ -1,20 +1,19 @@
 #pragma once
 
 #include "Base/Singleton.h"
-#include "EngineInterface/GenomeDescriptions.h"
-#include "EngineInterface/PreviewDescriptions.h"
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/GenomeDescription.h"
 
-#include "AlienWindow.h"
 #include "Definitions.h"
+#include "AlienWindow.h"
 
 class GenomeEditorWindow : public AlienWindow<SimulationFacade>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 
 public:
-    void openTab(GenomeDescription const& genome, bool openGenomeEditorIfClosed = true);
-    GenomeDescription const& getCurrentGenome() const;
+    void openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed = true);
+    GenomeDescription getCurrentCreature() const;
 
 private:
     GenomeEditorWindow();
@@ -25,54 +24,28 @@ private:
     bool isShown() override;
 
     void processToolbar();
-    void processEditor();
-
-    struct TabData
-    {
-        int id = 0;
-        GenomeDescription genome;
-        std::optional<int> selectedNode;
-        float previewZoom = 30.0f;
-    };
-    void processTab(TabData& tab);
-    void processGenomeHeader(TabData& tab);
-    void processConstructionSequence(TabData& tab);
-    void processNode(TabData& tab, CellGenomeDescription& cell, std::optional<ShapeGeneratorResult> const& shapeGeneratorResult, bool isFirst, bool isLast);
-    template<typename Description>
-    void processSubGenomeWidgets(TabData const& tab, Description& desc);
+    void processTabWidget();
 
     void onOpenGenome();
     void onSaveGenome();
-    void onUploadGenome();
-    void onAddNode();
-    void onDeleteNode();
-    void onNodeDecreaseSequenceNumber();
-    void onNodeIncreaseSequenceNumber();
-    void onCreateSpore();
+    void onInjectGenome();
+    void onCreateSeed();
+    void onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome);
+    void onScheduleAddDraftTab(GenomeDescription const& genome);
 
-    void showPreview(TabData& tab);
+    void pushStyleColorForTab(GenomeTabWidget const& creatureTab);
 
-    void validateAndCorrect(GenomeHeaderDescription& header) const;
-    void validateAndCorrect(CellGenomeDescription& cell) const;
-
-    void scheduleAddTab(GenomeDescription const& genome);
-
-    void updateGeometry(GenomeDescription& genome, ConstructionShape shape);
-    void setCurrentGenome(GenomeDescription const& genome);
-
-    float _previewHeight = 0;
-
-    mutable int _tabSequenceNumber = 0;
-    std::vector<TabData> _tabDatas;
-    int _selectedTabIndex = 0;
-    std::optional<std::vector<uint8_t>> _copiedGenome;
-    std::string _startingPath;
-
-    //actions
-    std::optional<int> _tabIndexToSelect;
-    std::optional<int> _nodeIndexToJump;
-    std::optional<TabData> _tabToAdd;
-    std::optional<bool> _expandNodes;
+    GenomeDescription getDefaultGenome();
 
     SimulationFacade _simulationFacade;
+
+    GenomeWindowEditData _genomeEditData; 
+    std::vector<GenomeTabWidget> _tabs;
+    int _selectedTabIndex = 0;
+    int _sequenceNumberForCreatedGenomes = 0;
+    std::string _startingPath;
+
+    // Actions
+    std::optional<GenomeTabWidget> _tabToAdd;
+    std::optional<int> _tabIndexToSelect;
 };

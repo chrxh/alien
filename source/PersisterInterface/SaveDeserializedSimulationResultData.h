@@ -9,5 +9,5 @@ struct SaveDeserializedSimulationResultData
     std::string projectName;
     uint64_t timestep = 0;
     std::chrono::system_clock::time_point timestamp;
-    RawStatisticsData rawStatisticsData;
+    StatisticsRawData statisticsRawData;
 };

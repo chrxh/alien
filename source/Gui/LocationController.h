@@ -13,9 +13,9 @@ class LocationController : public MainLoopEntity<SimulationFacade>
     MAKE_SINGLETON(LocationController);
 
 public:
-    void addLocationWindow(int locationIndex, RealVector2D const& initialPos);
-    void deleteLocationWindow(int locationIndex);
-    void remapLocationIndices(std::map<int, int> const& newByOldLocationIndex);
+    void addLocationWindow(int orderNumber, RealVector2D const& initialPos);
+    void deleteLocationWindow(int orderNumber);
+    void remapLocationIndices(std::map<int, int> const& newByOldOrderNumber);
 
 private:
     void init(SimulationFacade simulationFacade) override;

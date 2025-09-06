@@ -59,3 +59,9 @@ RealVector2D SpaceCalculator::getCorrectedDirection(RealVector2D const& pos) con
     correctPosition(result);
     return result - RealVector2D{_worldSizeFloat.x / 2, _worldSizeFloat.y / 2};
 }
+
+RealVector2D SpaceCalculator::getCorrectionIncrement(RealVector2D const& pos1, RealVector2D const& pos2) const
+{
+    auto delta = pos1 - pos2 + _worldSizeFloat / 2;
+    return {delta.x - Math::modulo(delta.x, toFloat(_worldSizeFloat.x)), delta.y - Math::modulo(delta.y, toFloat(_worldSizeFloat.y))};
+}

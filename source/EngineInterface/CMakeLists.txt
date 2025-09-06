@@ -1,8 +1,11 @@
 
 add_library(EngineInterface
-    ArraySizes.h
-    CellFunctionConstants.h
+    ArraySizesForGpu.h
+    ArraySizesForTO.h
+    CellTypeConstants.h
+    CellTypeStrings.h
     Colors.h
+    CudaSettings.h
     DataPointCollection.cpp
     DataPointCollection.h
     Definitions.h
@@ -11,46 +14,49 @@ add_library(EngineInterface
     Descriptions.cpp
     Descriptions.h
     EngineConstants.h
-    Features.cpp
-    Features.h
-    GenomeConstants.h
-    GenomeDescriptionService.cpp
-    GenomeDescriptionService.h
-    GenomeDescriptions.h
-    GeneralSettings.h
-    GpuSettings.h
+    GenomeDescription.cpp
+    GenomeDescription.h
+    GenomeDescriptionEditService.cpp
+    GenomeDescriptionEditService.h
+    GenomeDescriptionInfoService.cpp
+    GenomeDescriptionInfoService.h
+    GenomeDescriptionValidationService.cpp
+    GenomeDescriptionValidationService.h
+    Ids.h
     InspectedEntityIds.h
-    Motion.h
+    LocationHelper.cpp
+    LocationHelper.h
     MutationType.h
+    NumberGenerator.cpp
+    NumberGenerator.h
     OverlayDescriptions.h
-    PreviewDescriptionService.cpp
-    PreviewDescriptionService.h
+    ParametersEditService.cpp
+    ParametersEditService.h
+    ParametersValidationService.cpp
+    ParametersValidationService.h
     PreviewDescriptions.h
-    RadiationSource.h
-    RawStatisticsData.h
+    PreviewDescriptionConverterService.cpp
+    PreviewDescriptionConverterService.h
     SelectionShallowData.h
-    Settings.h
+    SettingsForSimulation.h
     ShallowUpdateSelectionData.h
     ShapeGenerator.cpp
     ShapeGenerator.h
     SimulationFacade.h
     SimulationParameters.cpp
     SimulationParameters.h
-    SimulationParametersEditService.cpp
-    SimulationParametersEditService.h
-    SimulationParametersZone.h
-    SimulationParametersZoneActivatedValues.h
-    SimulationParametersZoneValues.h
     SimulationParametersTypes.h
     SimulationParametersUpdateConfig.h
-    SimulationParametersValidationService.cpp
-    SimulationParametersValidationService.h
+    SimulationParametersSpecification.h
     SpaceCalculator.cpp
     SpaceCalculator.h
+    SpecificationEvaluationService.cpp
+    SpecificationEvaluationService.h
     StatisticsConverterService.cpp
     StatisticsConverterService.h
     StatisticsHistory.cpp
     StatisticsHistory.h
+    StatisticsRawData.h
     ZoomLevels.h)
 
 target_link_libraries(EngineInterface Base)

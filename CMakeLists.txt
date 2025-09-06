@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 
 # Using the vcpkg submodule
 set(CMAKE_TOOLCHAIN_FILE external/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
@@ -15,8 +15,9 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   set(CMAKE_CUDA_ARCHITECTURES 60)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
-
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CUDA_STANDARD 20)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast_math")
@@ -46,6 +47,7 @@ add_executable(alien)
 add_executable(cli)
 add_executable(EngineTests)
 add_executable(NetworkTests)
+add_executable(PersisterTests)
 
 find_package(CUDAToolkit)
 find_package(Boost REQUIRED)
@@ -67,12 +69,14 @@ add_subdirectory(source/Cli)
 add_subdirectory(source/EngineGpuKernels)
 add_subdirectory(source/EngineImpl)
 add_subdirectory(source/EngineInterface)
+add_subdirectory(source/EngineTestData)
 add_subdirectory(source/EngineTests)
 add_subdirectory(source/Gui)
 add_subdirectory(source/Network)
 add_subdirectory(source/NetworkTests)
 add_subdirectory(source/PersisterImpl)
 add_subdirectory(source/PersisterInterface)
+add_subdirectory(source/PersisterTests)
 
 # Copy resources to the build location
 add_custom_command(

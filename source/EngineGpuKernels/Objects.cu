@@ -4,26 +4,20 @@
 
 void Objects::init()
 {
-    cellPointers.init();
     cells.init();
     particles.init();
-    particlePointers.init();
-    auxiliaryData.init();
+    heap.init();
 }
 
 void Objects::free()
 {
-    cellPointers.free();
     cells.free();
     particles.free();
-    particlePointers.free();
-    auxiliaryData.free();
+    heap.free();
 }
 
 __device__ void Objects::saveNumEntries()
 {
-    cellPointers.saveNumEntries();
-    particlePointers.saveNumEntries();
     cells.saveNumEntries();
     particles.saveNumEntries();
 }

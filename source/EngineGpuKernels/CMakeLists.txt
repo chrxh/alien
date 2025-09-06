@@ -4,38 +4,44 @@ add_library(EngineGpuKernels
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
-    CellComputationProcessor.cuh
     CellConnectionProcessor.cuh
-    CellFunctionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
+    CollectionTOProvider.cu
+    CollectionTOProvider.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
+    Constants.cuh
+    ConstructorHelper.cuh
     ConstructorProcessor.cuh
+    CudaCollectionTOProvider.cu
+    CudaCollectionTOProvider.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
     CudaShapeGenerator.cuh
     DataAccessKernels.cu
     DataAccessKernels.cuh
-    DataAccessKernelsLauncher.cu
-    DataAccessKernelsLauncher.cuh
+    DataAccessKernelsService.cu
+    DataAccessKernelsService.cuh
     DebugKernels.cu
     DebugKernels.cuh
     Definitions.cuh
     Definitions.h
     DensityMap.cuh
+    DepotProcessor.cuh
     DetonatorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
-    EditKernelsLauncher.cu
-    EditKernelsLauncher.cuh
-    FlowFieldKernels.cu
-    FlowFieldKernels.cuh
+    EditKernelsService.cu
+    EditKernelsService.cuh
+    ForceFieldKernels.cu
+    ForceFieldKernels.cuh
     GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
-    GarbageCollectorKernelsLauncher.cu
-    GarbageCollectorKernelsLauncher.cuh
-    GenomeDecoder.cuh
+    GarbageCollectorKernelsService.cu
+    GarbageCollectorKernelsService.cuh
+    Genome.cuh
+    GenomeTO.cuh
     HashMap.cuh
     HashSet.cuh
     InjectorProcessor.cuh
@@ -47,14 +53,15 @@ add_library(EngineGpuKernels
     MaxAgeBalancer.cu
     MaxAgeBalancer.cuh
     MuscleProcessor.cuh
-    MutationProcessor.cuh
-    NerveProcessor.cuh
+    GeneratorProcessor.cuh
     NeuronProcessor.cuh
     Object.cuh
     Objects.cu
     Objects.cuh
+    ObjectTO.cuh
     ObjectFactory.cuh
     Operations.cuh
+    ParameterCalculator.cuh
     Physics.cuh
     PreprocessedSimulationData.cuh
     RadiationProcessor.cuh
@@ -63,34 +70,32 @@ add_library(EngineGpuKernels
     RenderingData.cuh
     RenderingKernels.cu
     RenderingKernels.cuh
-    RenderingKernelsLauncher.cu
-    RenderingKernelsLauncher.cuh
+    RenderingKernelsService.cu
+    RenderingKernelsService.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
+    SignalProcessor.cuh
     SimulationCudaFacade.cu
     SimulationCudaFacade.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu
     SimulationKernels.cuh
-    SimulationKernelsLauncher.cu
-    SimulationKernelsLauncher.cuh
+    SimulationKernelsService.cu
+    SimulationKernelsService.cuh
     SimulationParametersUpdateService.cu
     SimulationParametersUpdateService.cuh
     SimulationStatistics.cuh
-    SpotCalculator.cuh
     StatisticsService.cu
     StatisticsService.cuh
-    StatisticsKernelsLauncher.cu
-    StatisticsKernelsLauncher.cuh
+    StatisticsKernelsService.cu
+    StatisticsKernelsService.cuh
     StatisticsKernels.cu
     StatisticsKernels.cuh
     TestKernels.cu
     TestKernels.cuh
-    TestKernelsLauncher.cu
-    TestKernelsLauncher.cuh
-    TransmitterProcessor.cuh
-    TOs.cuh
+    TestKernelsService.cu
+    TestKernelsService.cuh
     Util.cuh
     )
 

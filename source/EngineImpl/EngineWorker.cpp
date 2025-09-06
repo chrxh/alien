@@ -2,23 +2,29 @@
 
 #include <chrono>
 
-#include "EngineGpuKernels/TOs.cuh"
+#include "Base/ExitScopeGuard.h"
+
+#include "EngineInterface/DescriptionEditService.h"
+#include "EngineInterface/Ids.h"
+#include "EngineInterface/NumberGenerator.h"
+
+#include "EngineGpuKernels/CollectionTOProvider.cuh"
+#include "EngineGpuKernels/ObjectTO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
-#include "AccessDataTOCache.h"
-#include "DescriptionConverter.h"
+
+#include "DescriptionConverterService.h"
 
 namespace
 {
     std::chrono::milliseconds const FrameTimeout(500);
 }
 
-void EngineWorker::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
+void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const& settings)
 {
     _accessState = 0;
-    _settings.generalSettings = generalSettings;
-    _settings.simulationParameters = parameters;
-    _dataTOCache = std::make_shared<_AccessDataTOCache>();
-    _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, _settings);
+    _settings = settings;
+    _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
+    _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
     _cudaResource = nullptr;
 }
 
@@ -73,15 +79,10 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
         _simulationCudaFacade->drawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
 
-        DataTO dataTO = provideTO();
+        auto dataTO =
+            _simulationCudaFacade->getOverlayData({toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)}, int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)});
 
-        _simulationCudaFacade->getOverlayData(
-            {toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)},
-            int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)},
-            dataTO);
-
-        DescriptionConverter converter(_settings.simulationParameters);
-        auto result = converter.convertTOtoOverlayDescription(dataTO);
+        auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
 
         syncSimulationWithRenderingIfDesired();
         return result;
@@ -109,81 +110,37 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
     _syncSimulationWithRenderingRatio = value;
 }
 
-ClusteredDataDescription EngineWorker::getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
-{
-    DataTO dataTO;
-    {
-        EngineWorkerGuard access(this);
-
-        dataTO.init(_simulationCudaFacade->getArraySizes());
-
-        _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
-    }
-    DescriptionConverter converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoClusteredDataDescription(dataTO);
-    dataTO.destroy();
-    return result;
-}
-
-DataDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+CollectionDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = provideTO();
-    _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y}, dataTO);
+    auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
+    ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
 
-    DescriptionConverter converter(_settings.simulationParameters);
-    auto result = converter.convertTOtoDataDescription(dataTO);
-    return result;
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-ClusteredDataDescription EngineWorker::getSelectedClusteredSimulationData(bool includeClusters)
+CollectionDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
-    _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
+    auto dataTO = _simulationCudaFacade->getSelectedSimulationData(includeClusters);
 
-    DescriptionConverter converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoClusteredDataDescription(dataTO);
-    return result;
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-DataDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
+CollectionDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
 
-    DataTO dataTO = provideTO();
-    
-    _simulationCudaFacade->getSelectedSimulationData(includeClusters, dataTO);
+    auto dataTO = _simulationCudaFacade->getInspectedSimulationData(objectsIds);
 
-    DescriptionConverter converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoDataDescription(dataTO);
-
-    return result;
+    return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-DataDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
+StatisticsRawData EngineWorker::getStatisticsRawData() const
 {
-    EngineWorkerGuard access(this);
-
-    DataTO dataTO = provideTO();
-    
-    _simulationCudaFacade->getInspectedSimulationData(objectsIds, dataTO);
-
-    DescriptionConverter converter(_settings.simulationParameters);
-
-    auto result = converter.convertTOtoDataDescription(dataTO);
-    return result;
-}
-
-RawStatisticsData EngineWorker::getRawStatistics() const
-{
-    return _simulationCudaFacade->getRawStatistics();
+    return _simulationCudaFacade->getStatisticsRawData();
 }
 
 StatisticsHistory const& EngineWorker::getStatisticsHistory() const
@@ -196,48 +153,29 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-void EngineWorker::addAndSelectSimulationData(DataDescription const& dataToUpdate)
+void EngineWorker::addAndSelectSimulationData(CollectionDescription&& dataToUpdate)
 {
-    DescriptionConverter converter(_settings.simulationParameters);
-
-    auto arraySizes = converter.getArraySizes(dataToUpdate);
-
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->resizeArraysIfNecessary(arraySizes);
+    auto maxIds = _simulationCudaFacade->getMaxIds();
+    NumberGenerator::get().adaptMaxIds(maxIds);
 
-    DataTO dataTO = provideTO();
+    dataToUpdate.assignNewIds();
 
-    converter.convertDescriptionToTO(dataTO, dataToUpdate);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
 
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
-void EngineWorker::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
+void EngineWorker::setSimulationData(CollectionDescription const& dataToUpdate)
 {
-    DescriptionConverter converter(_settings.simulationParameters);
+    if (!dataToUpdate.hasUniqueIds()) {
+        throw std::runtime_error("Cell ids are not unique.");
+    }
 
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
-
-    DataTO dataTO = provideTO();
-
-    converter.convertDescriptionToTO(dataTO, dataToUpdate);
-
-    _simulationCudaFacade->setSimulationData(dataTO);
-}
-
-void EngineWorker::setSimulationData(DataDescription const& dataToUpdate)
-{
-    DescriptionConverter converter(_settings.simulationParameters);
-
-    EngineWorkerGuard access(this);
-
-    _simulationCudaFacade->resizeArraysIfNecessary(converter.getArraySizes(dataToUpdate));
-
-    DataTO dataTO = provideTO();
-    converter.convertDescriptionToTO(dataTO, dataToUpdate);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(dataToUpdate);
 
     _simulationCudaFacade->setSimulationData(dataTO);
 }
@@ -288,10 +226,7 @@ void EngineWorker::changeCell(CellDescription const& changedCell)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = provideTO();
-
-    DescriptionConverter converter(_settings.simulationParameters);
-    converter.convertDescriptionToTO(dataTO, changedCell);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(changedCell);
 
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
 }
@@ -300,12 +235,18 @@ void EngineWorker::changeParticle(ParticleDescription const& changedParticle)
 {
     EngineWorkerGuard access(this);
 
-    auto dataTO = provideTO();
-
-    DescriptionConverter converter(_settings.simulationParameters);
-    converter.convertDescriptionToTO(dataTO, changedParticle);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(changedParticle);
 
     _simulationCudaFacade->changeInspectedSimulationData(dataTO);
+}
+
+bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& genome)
+{
+    EngineWorkerGuard access(this);
+
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(creatureId, genome);
+
+    return _simulationCudaFacade->changeCreature(dataTO);
 }
 
 void EngineWorker::calcTimesteps(uint64_t timesteps)
@@ -371,7 +312,7 @@ void EngineWorker::setSimulationParameters(SimulationParameters const& parameter
     _simulationCudaFacade->setSimulationParameters(parameters, updateConfig);
 }
 
-void EngineWorker::setGpuSettings_async(GpuSettings const& gpuSettings)
+void EngineWorker::setGpuSettings_async(CudaSettings const& gpuSettings)
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
     _updateGpuSettingsJob = gpuSettings;
@@ -491,6 +432,53 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
+CollectionDescription EngineWorker::getPreviewData()
+{
+    EngineWorkerGuard access(this);
+
+    auto preview = _simulationCudaFacade->getPreviewData();
+    ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview); });
+
+    return DescriptionConverterService::get().convertTOtoDescription(preview);
+}
+
+void EngineWorker::setPreviewData(CollectionDescription const& data)
+{
+    if (!data.hasUniqueIds()) {
+        throw std::runtime_error("Cell ids are not unique.");
+    }
+
+    EngineWorkerGuard access(this);
+
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);
+
+    _simulationCudaFacade->newPreview(dataTO);
+}
+
+void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
+{
+    EngineWorkerGuard access(this);
+
+    _simulationCudaFacade->calcTimestepsForPreview(duration);
+}
+
+void EngineWorker::calcTimestepsForPreview(int numSteps)
+{
+    EngineWorkerGuard access(this);
+
+    _simulationCudaFacade->calcTimestepsForPreview(numSteps);
+}
+
+uint64_t EngineWorker::getCurrentTimestepForPreview()
+{
+    return _simulationCudaFacade->getCurrentTimestepForPreview();
+}
+
+void EngineWorker::setCurrentTimestepForPreview(uint64_t timestep)
+{
+    _simulationCudaFacade->setCurrentTimestepForPreview(timestep);
+}
+
 void EngineWorker::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     EngineWorkerGuard access(this);
@@ -503,9 +491,34 @@ void EngineWorker::testOnly_mutationCheck(uint64_t cellId)
     _simulationCudaFacade->testOnly_mutationCheck(cellId);
 }
 
-DataTO EngineWorker::provideTO()
+void EngineWorker::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
 {
-    return _dataTOCache->getDataTO(_simulationCudaFacade->getArraySizes());
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_createConnection(cellId1, cellId2);
+}
+
+void EngineWorker::testOnly_cleanupAfterTimestep()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_cleanupAfterTimestep();
+}
+
+void EngineWorker::testOnly_cleanupAfterDataManipulation()
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_cleanupAfterDataManipulation();
+}
+
+void EngineWorker::testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta)
+{
+    EngineWorkerGuard access(this);
+    _simulationCudaFacade->testOnly_resizeArrays(sizeDelta);
+}
+
+bool EngineWorker::testOnly_areArraysValid()
+{
+    EngineWorkerGuard access(this);
+    return _simulationCudaFacade->testOnly_areArraysValid();
 }
 
 void EngineWorker::resetTimeIntervalStatistics()

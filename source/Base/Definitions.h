@@ -15,6 +15,7 @@
 
 #include "Exceptions.h"
 #include "Vector2D.h"
+#include "Macros.h"
 
 using std::int32_t;
 using std::int64_t;
@@ -24,7 +25,7 @@ using std::uint64_t;
 class _FileLogger;
 using FileLogger = std::shared_ptr<_FileLogger>;
 
-constexpr float NEAR_ZERO = 1.0e-4f;
+inline constexpr float NEAR_ZERO = 1.0e-4f;
 
 template <typename T>
 inline float toFloat(T const& value)
@@ -50,22 +51,15 @@ inline uint8_t toUInt8(T const& value)
     return static_cast<uint8_t>(value);
 }
 
-#define THROW_NOT_IMPLEMENTED() throw std::runtime_error("not implemented")
+template <typename T>
+inline uint16_t toUInt16(T const& value)
+{
+    return static_cast<uint16_t>(value);
+}
 
-#define CHECK(expression) \
-    if (!(expression)) { \
-        throw std::runtime_error("check failed"); \
-    }
+template <typename T>
+inline uint32_t toUInt32(T const& value)
+{
+    return static_cast<uint32_t>(value);
+}
 
-#define MEMBER_DECLARATION(className, type, name, initialValue) \
-    type _##name = initialValue; \
-    className& name(type const& name) \
-    { \
-        _##name = name; \
-        return *this; \
-    } \
-    className& name(type&& name) \
-    { \
-        _##name = std::move(name); \
-        return *this; \
-    }

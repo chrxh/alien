@@ -4,7 +4,7 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 #include "Definitions.h"
 #include "AlienWindow.h"

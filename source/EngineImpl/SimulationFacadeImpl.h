@@ -4,7 +4,7 @@
 #include <chrono>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/OverlayDescriptions.h"
@@ -16,7 +16,7 @@
 class _SimulationFacadeImpl : public _SimulationFacade
 {
 public:
-    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters) override;
+    void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters) override;
     int getSessionId() const override;
 
     void clear() override;
@@ -45,15 +45,12 @@ public:
     int getSyncSimulationWithRenderingRatio() const override;
     void setSyncSimulationWithRenderingRatio(int value) override;
 
-    ClusteredDataDescription getClusteredSimulationData() override;
-    DataDescription getSimulationData() override;
-    ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters) override;
-    DataDescription getSelectedSimulationData(bool includeClusters) override;
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
+    CollectionDescription getSimulationData() override;
+    CollectionDescription getSelectedSimulationData(bool includeClusters) override;
+    CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectIds) override;
 
-    void addAndSelectSimulationData(DataDescription const& dataToAdd) override;
-    void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate) override;
-    void setSimulationData(DataDescription const& dataToUpdate) override;
+    void addAndSelectSimulationData(CollectionDescription&& dataToAdd) override;
+    void setSimulationData(CollectionDescription const& dataToUpdate) override;
     void removeSelectedObjects(bool includeClusters) override;
     void relaxSelectedObjects(bool includeClusters) override;
     void uniformVelocitiesForSelectedObjects(bool includeClusters) override;
@@ -65,6 +62,7 @@ public:
     void setDetached(bool value) override;
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
+    bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) override;
 
     void calcTimesteps(uint64_t timesteps) override;
     void runSimulation() override;
@@ -88,9 +86,9 @@ public:
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All) override;
     void setOriginalSimulationParameters(SimulationParameters const& parameters) override;
 
-    GpuSettings getGpuSettings() const override;
-    GpuSettings getOriginalGpuSettings() const override;
-    void setGpuSettings_async(GpuSettings const& gpuSettings) override;
+    CudaSettings getGpuSettings() const override;
+    CudaSettings getOriginalGpuSettings() const override;
+    void setGpuSettings_async(CudaSettings const& gpuSettings) override;
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius) override;
 
@@ -102,9 +100,8 @@ public:
     void removeSelection() override;
     bool updateSelectionIfNecessary() override;
 
-    GeneralSettings getGeneralSettings() const override;
     IntVector2D getWorldSize() const override;
-    RawStatisticsData getRawStatistics() const override;
+    StatisticsRawData getStatisticsRawData() const override;
     StatisticsHistory const& getStatisticsHistory() const override;
     void setStatisticsHistory(StatisticsHistoryData const& data) override;
 
@@ -113,17 +110,32 @@ public:
 
     float getTps() const override;
 
+    // Simulated preview
+    CollectionDescription getPreviewData() override;
+    void setPreviewData(CollectionDescription const& data) override;
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration) override;
+    void calcTimestepsForPreview(int numSteps) override;
+    uint64_t getCurrentTimestepForPreview() override;
+    void setCurrentTimestepForPreview(uint64_t timestep) override;
+
     // for tests only
     void testOnly_mutate(uint64_t cellId, MutationType mutationType) override;
     void testOnly_mutationCheck(uint64_t cellId) override;
+    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) override;
+    void testOnly_cleanupAfterTimestep() override;
+    void testOnly_cleanupAfterDataManipulation() override;
+    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;
+    bool testOnly_areArraysValid() override;
 
 private:
     bool _selectionNeedsUpdate = false;
     int _sessionId = 0;
 
-    Settings _origSettings;
-    GeneralSettings _generalSettings;
-    GpuSettings _gpuSettings;
+    IntVector2D _worldSize;
+    CudaSettings _gpuSettings;
+
+    SettingsForSimulation _origSettings;
+
     std::chrono::milliseconds _realTime;
     std::optional<std::chrono::time_point<std::chrono::system_clock>> _simRunTimePoint;
 

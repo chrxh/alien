@@ -41,17 +41,17 @@ bool EditorModel::existsInspectedEntity(uint64_t id) const
     return _inspectedEntityById.find(id) != _inspectedEntityById.end();
 }
 
-CellOrParticleDescription EditorModel::getInspectedEntity(uint64_t id) const
+ExtendedCellOrParticleDescription EditorModel::getInspectedEntity(uint64_t id) const
 {
     return _inspectedEntityById.at(id);
 }
 
-void EditorModel::addInspectedEntity(CellOrParticleDescription const& entity)
+void EditorModel::addInspectedEntity(ExtendedCellOrParticleDescription const& entity)
 {
     _inspectedEntityById.emplace(DescriptionEditService::get().getId(entity), entity);
 }
 
-void EditorModel::setInspectedEntities(std::vector<CellOrParticleDescription> const& inspectedEntities)
+void EditorModel::setInspectedEntities(std::vector<ExtendedCellOrParticleDescription> const& inspectedEntities)
 {
     _inspectedEntityById.clear();
     for (auto const& entity : inspectedEntities) {

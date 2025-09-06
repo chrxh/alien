@@ -22,21 +22,20 @@ private:
     bool isCell() const;
     std::string generateTitle() const;
 
-    void processCell(CellDescription cell);
-    void processCellBaseTab(CellDescription& cell);
-    void processCellFunctionTab(CellDescription& cell);
-    void processCellFunctionPropertiesTab(CellDescription& cell);
+    void processCell(ExtendedCellDescription& creatureCell);
+    void processCellGeneralTab(ExtendedCellDescription& creatureCell);
+    void processCellTypeTab(CellDescription& cell);
+    void processCellTypePropertiesTab(CellDescription& cell);
     template <typename Description>
     void processCellGenomeTab(Description& desc);
-    void processCellMetadataTab(CellDescription& cell);
 
-    void processNerveContent(NerveDescription& nerve);
-    void processNeuronContent(NeuronDescription& neuron);
+    void processGeneratorContent(GeneratorDescription& generator);
+    void processNeuronContent(CellDescription& cell);
     void processConstructorContent(ConstructorDescription& constructor);
     void processInjectorContent(InjectorDescription& injector);
     void processAttackerContent(AttackerDescription& attacker);
     void processDefenderContent(DefenderDescription& defender);
-    void processTransmitterContent(TransmitterDescription& transmitter);
+    void processTransmitterContent(DepotDescription& transmitter);
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
     void processReconnectorContent(ReconnectorDescription& reconnector);

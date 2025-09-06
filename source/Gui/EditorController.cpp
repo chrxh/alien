@@ -14,8 +14,8 @@
 #include "SelectionWindow.h"
 #include "PatternEditorWindow.h"
 #include "CreatorWindow.h"
-#include "MultiplierWindow.h"
 #include "GenomeEditorWindow.h"
+#include "MultiplierWindow.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 #include "MainLoopEntityController.h"
@@ -77,7 +77,7 @@ void EditorController::onInspectSelectedObjects()
 {
     auto selection = EditorModel::get().getSelectionShallowData();
     if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
-        DataDescription selectedData = _simulationFacade->getSelectedSimulationData(false);
+        CollectionDescription selectedData = _simulationFacade->getSelectedSimulationData(false);
         onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false);
     } else {
         showMessage(
@@ -89,20 +89,20 @@ void EditorController::onInspectSelectedObjects()
 
 void EditorController::onInspectSelectedGenomes()
 {
-    DataDescription selectedData = _simulationFacade->getSelectedSimulationData(true);
-    auto constructors = DescriptionEditService::get().getConstructorToMainGenomes(selectedData);
+    CollectionDescription selectedData = _simulationFacade->getSelectedSimulationData(true);
+    auto constructors = DescriptionEditService::get().getCellsForCreatureRepresentatives(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};
     }
     onInspectObjects(constructors, true);
 }
 
-void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> const& entities, bool selectGenomeTab)
+void EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return;
     }
-    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering;
+    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
 
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {
@@ -113,7 +113,7 @@ void EditorController::onInspectObjects(std::vector<CellOrParticleDescription> c
         inspectedIds.insert(DescriptionEditService::get().getId(entity));
     }
 
-    std::vector<CellOrParticleDescription> newEntities;
+    std::vector<ExtendedCellOrParticleDescription> newEntities;
     for (auto const& entity : entities) {
         if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
@@ -199,7 +199,7 @@ void EditorController::processInspectorWindows()
 
     //inspector windows closed?
     std::vector<InspectorWindow> inspectorWindows;
-    std::vector<CellOrParticleDescription> inspectedEntities;
+    std::vector<ExtendedCellOrParticleDescription> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
             inspectorWindows.emplace_back(inspectorWindow);

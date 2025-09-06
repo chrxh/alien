@@ -1,0 +1,22 @@
+#pragma once
+
+#include "Definitions.h"
+
+struct _GenomeTabLayoutData
+{
+    bool initialized = false;
+    float genomeEditorWidth = 0;
+    float geneEditorWidth = 0;
+    float previewsHeight = 0;
+    float desiredConfigurationPreviewWidth = 300.0f;
+    float geneListHeight = 0;
+    float nodeListHeight = 0;
+    float neuralNetEditorHeight = 0;
+
+    GenomeTabLayoutData clone() const
+    {
+        auto result = std::make_shared<_GenomeTabLayoutData>();
+        *result = *this;
+        return result;
+    }
+};

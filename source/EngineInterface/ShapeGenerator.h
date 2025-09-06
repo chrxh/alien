@@ -3,13 +3,13 @@
 #include <memory>
 #include <optional>
 
-#include "CellFunctionConstants.h"
+#include "CellTypeConstants.h"
 #include "Definitions.h"
 
 struct ShapeGeneratorResult
 {
     float angle;
-    std::optional<int> numRequiredAdditionalConnections;
+    int numAdditionalConnections = 0;
 };
 
 class _ShapeGenerator
@@ -23,5 +23,5 @@ public:
 class ShapeGeneratorFactory
 {
 public:
-    static ShapeGenerator create(ConstructionShape shape);
+    static ShapeGenerator create(ConstructorShape shape);
 };

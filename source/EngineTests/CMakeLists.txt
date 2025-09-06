@@ -1,30 +1,36 @@
 target_sources(EngineTests
 PUBLIC
-    AttackerTests.cpp
     CellConnectionTests.cpp
+    CellStateTransitionTests.cpp
     ConstructorTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
-    DescriptionHelperTests.cpp
+    DescriptionEditTests.cpp
     DetonatorTests.cpp
+    EnergyFlowTests.cpp
+    GarbageCollectorTests.cpp
+    GenomeDescriptionEditServiceTests.cpp
+    GenomeDescriptionInfoServiceTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
-    LivingStateTransitionTests.cpp
     MuscleTests.cpp
-    MutationTests.cpp
-    NerveTests.cpp
     NeuronTests.cpp
+    GeneratorTests.cpp
+    ParametersEditServiceTests.cpp
+    PreviewDescriptionConverterServiceTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
+    SignalTests.cpp
     StatisticsTests.cpp
     Testsuite.cpp
-    TransmitterTests.cpp)
+    DepotTests.cpp)
 
 target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineGpuKernels)
 target_link_libraries(EngineTests EngineImpl)
 target_link_libraries(EngineTests EngineInterface)
+target_link_libraries(EngineTests EngineTestData)
 
 target_link_libraries(EngineTests CUDA::cudart_static)
 target_link_libraries(EngineTests CUDA::cuda_driver)

@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 namespace Const
 {
@@ -51,8 +51,8 @@ namespace Const
         "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
         "of the last match (0 = far away, 1 = close)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
-    std::string const NerveTooltip =
-        "By default, a nerve cell forwards signals from connected cells (and summing it up if "
+    std::string const GeneratorTooltip =
+        "By default, a generator cell forwards signals from connected cells (and summing it up if "
         "there are multiple such cells) and thus directly providing it as input to other cells. Independently of this, one can specify "
         "that it also generates a signal in channel #0 at regular intervals. This can be used to trigger other sensor cells, "
         "attacker cells, etc.";
@@ -90,7 +90,7 @@ namespace Const
     std::string const DetonatorTooltip = "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then its counter "
                                          "is decreasing after each executing until it reaches 0. After that the detonator cell will explode and the surrounding cells are highly accelerated.";
 
-    std::string const CellFunctionTooltip =
+    std::string const CellTypeTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
         "take action. All cell functions have in common that they obtain the input from connected cells whose execution number matches the input "
         "execution number of the current cell. For this purpose, each channel from #0 to #7 of those cells is summed and the result is written "
@@ -167,10 +167,9 @@ namespace Const
         "Signal in channel #0 is not necessary.\n\n In both cases, if there is not enough energy available for the cell being "
         "created, the construction process will pause until the next triggering.";
 
-    std::string const GenomeConstructorIntervalTooltip =
-        "This value specifies the time interval for automatic triggering of the constructor cell. It is given in multiples "
-        "of 6 (which is a complete execution cycle). This means that a value of 1 indicates that the constructor cell will be activated "
-        "every 6 time steps.";
+    std::string const GenomeConstructorIntervalTooltip = "This value specifies the time interval for automatic activation of the function of the cell. For "
+                                                         "example a value of 30 indicates that the cell will be automatically triggered "
+                                                         "every 30 time steps. A signal is generated each time.";
 
     std::string const GenomeConstructorOffspringActivationTime =
         "When a new cell network has been fully constructed by a constructor cell, one can define the time steps until activation. Before activation, the cell "
@@ -198,7 +197,7 @@ namespace Const
 
     std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
 
-    std::string const SensorRestrictToMutantsTooltip =
+    std::string const SensorRestrictToCreaturesTooltip =
         "The following options can be used to only detect cells with certain properties:\n\n"
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
@@ -215,17 +214,17 @@ namespace Const
     std::string const GenomeSensorMinRangeTooltip = "If activated, the sensor detects only objects with a distance equal or greater than the specified value.";
     std::string const GenomeSensorMaxRangeTooltip = "If activated, the sensor detects only objects with a distance equal or less than the specified value.";
 
-    std::string const GenomeNerveGeneratePulsesTooltip = "If enabled, a signal in channel #0 will be generated at regular time intervals.";
+    std::string const GenomeGeneratorGeneratePulsesTooltip = "If enabled, a signal in channel #0 will be generated at regular time intervals.";
 
-    std::string const GenomeNervePulseIntervalTooltip =
+    std::string const GenomeGeneratorPulseIntervalTooltip =
         "The intervals between two pulses can be set here. It is specified in cycles, which corresponds to 6 time steps each.";
 
-    std::string const GenomeNerveAlternatingPulsesTooltip =
+    std::string const GenomeGeneratorAlternatingPulsesTooltip =
         "By default, the generated pulses consist of a positive value in channel #0. When 'Alternating pulses' is enabled, the "
         "sign of this value alternates at specific time intervals. This can be used, for example, to easily create signals for back-and-forth movements or "
         "bending in muscle cells.";
 
-    std::string const GenomeNervePulsesPerPhaseTooltip = "This value indicates the number of pulses until the sign will be changed in channel #0.";
+    std::string const GenomeGeneratorPulsesPerPhaseTooltip = "This value indicates the number of pulses until the sign will be changed in channel #0.";
 
     std::string const GenomeAttackerEnergyDistributionTooltip =
         "Attacker cells can distribute the acquired energy through two different methods. The energy distribution is analogous to "
@@ -254,7 +253,7 @@ namespace Const
 
     std::string const GenomeReconnectorRestrictToColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
 
-    std::string const ReconnectorRestrictToMutantsTooltip =
+    std::string const ReconnectorRestrictToCreaturesTooltip =
         "The following options can be used to only bind to cells with certain properties:\n\n"
         ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
         ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
@@ -354,7 +353,7 @@ namespace Const
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
         "complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.";
 
-    std::string const CellLivingStateTooltip =
+    std::string const CellCellStateTooltip =
         "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "
         "is completed, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
         "network is in the process of dying, its cells are in the 'Dying' state.\n\n"
@@ -362,46 +361,33 @@ namespace Const
         "its organism where the constructor cell for self-replication is located. However, if a non-dying cell for self-replication is still present, a detached cell will "
         "transition into the 'Reviving' state and then into 'Ready' state shortly after.";
 
-    std::string const ColoringParameterTooltip =
-        "Here, one can set how the cells are to be colored during rendering. \n\n" ICON_FA_CHEVRON_RIGHT
-        " Energy: The more energy a cell has, the brighter it is displayed. A grayscale is used.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Standard cell colors: Each cell is assigned one of 7 default colors, which is displayed with this option. \n\n" ICON_FA_CHEVRON_RIGHT
-        " Mutants: Different mutants are represented by different colors (only larger structural mutations such as translations or duplications are taken into "
-        "account).\n\n" ICON_FA_CHEVRON_RIGHT " Mutants and cell functions: Combination of mutants and cell function coloring.\n\n" ICON_FA_CHEVRON_RIGHT
-        " Cell states: blue = ready, green = under construction, white = activating, pink = detached, pale blue = reviving, red = dying\n\n" ICON_FA_CHEVRON_RIGHT
-        " Genome complexities: This property can be utilized by attacker cells when the parameter 'Complex creature protection' is "
-        "activated (see tooltip there). The coloring is as follows: blue = creature with low bonus (usually small or simple genome structure), red = large "
-        "bonus\n\n" ICON_FA_CHEVRON_RIGHT
-        " Single cell function: A specific type of cell function can be highlighted, which is selected in the next parameter.\n\n" ICON_FA_CHEVRON_RIGHT
-        " All cell functions: The cells are colored according to their cell function.";
-
-    inline std::string getCellFunctionTooltip(CellFunction cellFunction)
+    inline std::string getCellTypeTooltip(CellType cellType)
     {
-        switch (cellFunction) {
-        case CellFunction_Neuron:
+        switch (cellType) {
+        case CellType_Base:
             return Const::NeuronTooltip;
-        case CellFunction_Transmitter:
+        case CellType_Depot:
             return Const::TransmitterTooltip;
-        case CellFunction_Constructor:
+        case CellType_Constructor:
             return Const::ConstructorTooltip;
-        case CellFunction_Sensor:
+        case CellType_Sensor:
             return Const::SensorTooltip;
-        case CellFunction_Nerve:
-            return Const::NerveTooltip;
-        case CellFunction_Attacker:
+        case CellType_Generator:
+            return Const::GeneratorTooltip;
+        case CellType_Attacker:
             return Const::AttackerTooltip;
-        case CellFunction_Injector:
+        case CellType_Injector:
             return Const::InjectorTooltip;
-        case CellFunction_Muscle:
+        case CellType_Muscle:
             return Const::MuscleTooltip;
-        case CellFunction_Defender:
+        case CellType_Defender:
             return Const::DefenderTooltip;
-        case CellFunction_Reconnector:
+        case CellType_Reconnector:
             return Const::ReconnectorTooltip;
-        case CellFunction_Detonator:
+        case CellType_Detonator:
             return Const::DetonatorTooltip;
         default:
-            return Const::CellFunctionTooltip;
+            return Const::CellTypeTooltip;
         }
     };
 
@@ -417,7 +403,7 @@ namespace Const
     std::string const GenomeCurrentBranchTooltip = "This number specifies the current branch on which the construction process takes place. Each branch is "
                                                    "connected to the constructor cell and consists of repetitions of the encoded cell network.";
 
-    std::string const GenomeCurrentRepetitionTooltip =
+    std::string const GenomeCurrentConcatenationTooltip =
         "The cell network encoded in the genome can be repeatedly built by specifying a number of "
         "repetitions. This value indicates the index of the current repetition.";
 
@@ -470,9 +456,6 @@ namespace Const
 
     std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of cells.";
 
-    std::string const CreatorAscendingExecutionOrderNumberTooltip =
-        "Each generated cell has an 'execution order number' that is one greater than the previous generated cell.";
-
     std::string const CreatorRectangleWidthTooltip = "The width of the rectangle in cells.";
 
     std::string const CreatorRectangleHeightTooltip = "The height of the rectangle in cells.";
@@ -505,8 +488,6 @@ namespace Const
         "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
     std::string const LoginShareGpuInfoTooltip2 =
         "As a result, you will be able to see the GPU information of other registered users who have shared it.";
-
-    std::vector<std::string> const ActivationFunctions = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
 
     std::string const BrowserWorkspaceTooltip =
         "There are three different workspaces where you can find and possibly upload simulations and genomes:\n\n" ICON_FA_CHEVRON_RIGHT " alien-project: This "

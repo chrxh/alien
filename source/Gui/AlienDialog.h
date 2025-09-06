@@ -92,6 +92,10 @@ void AlienDialog<Dependencies...>::process()
         ImGui::OpenPopup(_title.c_str());
         _state = DialogState::Open;
     }
+    auto& style = ImGui::GetStyle();
+    auto origWindowMinSize = style.WindowMinSize;
+    style.WindowMinSize.x = scale(350.0f);
+    style.WindowMinSize.y = scale(150.0f);
 
     if (ImGui::BeginPopupModal(_title.c_str(), NULL, 0)) {
         if (!_sizeInitialized) {
@@ -101,12 +105,15 @@ void AlienDialog<Dependencies...>::process()
             _sizeInitialized = true;
         }
 
+
         ImGui::PushID(_title.c_str());
         processIntern();
         ImGui::PopID();
 
         ImGui::EndPopup();
     }
+
+    style.WindowMinSize = origWindowMinSize;
 }
 
 template <typename ... Dependencies>

@@ -2,7 +2,7 @@
 
 #include "SimulationData.cuh"
 
-__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_prepare(SimulationData data);
 __global__ void cudaNextTimestep_physics_init(SimulationData data);
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data);  //requires threads/block = (ceilf(smoothingLength * 2) * 2 + 1)^2
@@ -11,20 +11,23 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data);
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data);
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles);
 __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData data);
-__global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data);
-__global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data);
-__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_defender(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_reconnector(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_signal_calcFutureSignals(SimulationData data);
+__global__ void cudaNextTimestep_signal_updateSignals(SimulationData data);
+__global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_energyFlow(SimulationData data);
+__global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data);
+__global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data);
+__global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics, bool forPreview);
+__global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_defender(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_transmitter(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_muscle(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_sensor(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data);
 __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data);

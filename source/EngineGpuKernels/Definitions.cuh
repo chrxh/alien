@@ -2,46 +2,58 @@
 
 #include <memory>
 
-#include "EngineInterface/ArraySizes.h"
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <cuda/helper_cuda.h>
+
+#include "EngineInterface/CellTypeConstants.h"
 
 struct Cell;
 struct Token;
 struct Particle;
 struct Objects;
+struct Creature;
 
 struct SimulationData;
 struct RenderingData;
 class SelectionResult;
 struct CellTO;
 struct ClusterAccessTO;
-struct DataTO;
+struct CollectionTO;
 struct SimulationParameters;
-struct GpuSettings;
+struct CudaSettings;
 class SimulationStatistics;
 
-class _SimulationKernelsLauncher;
-using SimulationKernelsLauncher = std::shared_ptr<_SimulationKernelsLauncher>;
+class _SimulationKernelsService;
+using SimulationKernelsService = std::shared_ptr<_SimulationKernelsService>;
 
-class _DataAccessKernelsLauncher;
-using DataAccessKernelsLauncher = std::shared_ptr<_DataAccessKernelsLauncher>;
+class _DataAccessKernelsService;
+using DataAccessKernelsService = std::shared_ptr<_DataAccessKernelsService>;
 
-class _GarbageCollectorKernelsLauncher;
-using GarbageCollectorKernelsLauncher = std::shared_ptr<_GarbageCollectorKernelsLauncher>;
+class _GarbageCollectorKernelsService;
+using GarbageCollectorKernelsService = std::shared_ptr<_GarbageCollectorKernelsService>;
 
-class _RenderingKernelsLauncher;
-using RenderingKernelsLauncher = std::shared_ptr<_RenderingKernelsLauncher>;
+class _RenderingKernelsService;
+using RenderingKernelsService = std::shared_ptr<_RenderingKernelsService>;
 
-class _EditKernelsLauncher;
-using EditKernelsLauncher = std::shared_ptr<_EditKernelsLauncher>;
+class _EditKernelsService;
+using EditKernelsService = std::shared_ptr<_EditKernelsService>;
 
-class _StatisticsKernelsLauncher;
-using StatisticsKernelsLauncher = std::shared_ptr<_StatisticsKernelsLauncher>;
+class _StatisticsKernelsService;
+using StatisticsKernelsService = std::shared_ptr<_StatisticsKernelsService>;
 
-class _TestKernelsLauncher;
-using TestKernelsLauncher = std::shared_ptr<_TestKernelsLauncher>;
+class _TestKernelsService;
+using TestKernelsService = std::shared_ptr<_TestKernelsService>;
 
 class _MaxAgeBalancer;
 using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
+
+class _CudaCollectionTOProvider;
+using CudaCollectionTOProvider = std::shared_ptr<_CudaCollectionTOProvider>;
+
+class _CollectionTOProvider;
+using CollectionTOProvider = std::shared_ptr<_CollectionTOProvider>;
+
 
 struct ApplyForceData
 {

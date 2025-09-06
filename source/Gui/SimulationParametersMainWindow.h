@@ -5,8 +5,8 @@
 #include "EngineInterface/SimulationParameters.h"
 
 #include "AlienWindow.h"
-#include "SimulationParametersBaseWidgets.h"
-#include "ZoneColorPalette.h"
+#include "SimulationParametersBaseWidget.h"
+#include "LayerColorPalette.h"
 
 class SimulationParametersMainWindow : public AlienWindow<SimulationFacade>
 {
@@ -25,16 +25,10 @@ private:
     void processExpertWidget();
     void processStatusBar();
 
-    enum class LocationType
-    {
-        Base,
-        ParameterZone,
-        RadiationSource
-    };
     struct Location
     {
         std::string name;
-        LocationType type = LocationType::ParameterZone;
+        LocationType type = LocationType::Layer;
         std::string position;
         std::string strength;
     };
@@ -44,22 +38,20 @@ private:
 
     void onOpenParameters();
     void onSaveParameters();
-    void onAddZone();
-    void onAddSource();
+    void onInsertDefaultLayer();
+    void onInsertDefaultSource();
     void onCloneLocation();
     void onDeleteLocation();
-    void onDecreaseLocationIndex();
-    void onIncreaseLocationIndex();
+    void onDecreaseOrderNumber();
+    void onIncreaseOrderNumber();
     void onOpenInLocationWindow();
-    void onCenterLocation(int locationIndex);
+    void onCenterLocation(int orderNumber);
 
     void updateLocations();
 
-    void setDefaultShapeDataForZone(SimulationParametersZone& spot) const;
-
     void correctLayout(float origMasterHeight, float origExpertWidgetHeight);
 
-    bool checkNumZones(SimulationParameters const& parameters);
+    bool checkNumLayers(SimulationParameters const& parameters);
     bool checkNumSources(SimulationParameters const& parameters);
 
     float getMasterWidgetRefHeight() const;
@@ -71,9 +63,9 @@ private:
 private:
     SimulationFacade _simulationFacade;
 
-    LocationWidgets _baseWidgets;
-    LocationWidgets _zoneWidgets;
-    LocationWidgets _sourceWidgets;
+    LocationWidget _baseWidgets;
+    LocationWidget _layerWidgets;
+    LocationWidget _sourceWidgets;
 
     bool _masterWidgetOpen = true;
     bool _detailWidgetOpen = true;
@@ -81,15 +73,16 @@ private:
     float _masterWidgetHeight = 0;
     float _expertWidgetHeight = 0;
 
-    ZoneColorPalette _zoneColorPalette;
+    LayerColorPalette _layerColorPalette;
 
     std::optional<SimulationParameters> _copiedParameters;
     std::optional<int> _sessionId;
 
     std::vector<Location> _locations;
-    int _selectedLocationIndex = 0;
+    int _selectedOrderNumber = 0;
 
     int _locationWindowCounter = 0;
+    int _insertedLocationCounter = 0;
 
     std::string _fileDialogPath;
 

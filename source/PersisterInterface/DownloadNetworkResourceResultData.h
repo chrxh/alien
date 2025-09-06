@@ -3,7 +3,7 @@
 #include <string>
 
 #include "PersisterInterface/DeserializedSimulation.h"
-#include "EngineInterface/GenomeDescriptions.h"
+#include "EngineInterface/GenomeDescription.h"
 
 struct DownloadNetworkResourceResultData
 {

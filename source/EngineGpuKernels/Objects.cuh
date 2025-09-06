@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/GpuSettings.h"
+#include "EngineInterface/CudaSettings.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -8,13 +8,10 @@
 
 struct Objects
 {
-    Array<Cell*> cellPointers;
-    Array<Particle*> particlePointers;
+    Array<Cell*> cells;
+    Array<Particle*> particles;
 
-    Array<Cell> cells;
-    Array<Particle> particles;
-
-    RawMemory auxiliaryData;
+    Heap heap;
 
     void init();
     void free();

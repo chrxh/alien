@@ -42,16 +42,12 @@ private:
     void validateAndCorrect();
 
     RealVector2D getRandomPos() const;
-    void incExecutionNumber();
 
     float _energy = 100.0f;
     float _stiffness = 1.0f;
     bool _barrier = false;
     float _cellDistance = 1.0f;
     bool _makeSticky = false;
-    int _maxConnections = 6;
-    bool _ascendingExecutionNumbers = true;
-    int _lastExecutionNumber = 0;
 
     //rectangle
     int _rectHorizontalCells = 10;
@@ -65,7 +61,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    DataDescription _drawingDataDescription;
+    CollectionDescription _drawingDescription;
     DescriptionEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 

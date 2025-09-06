@@ -14,7 +14,7 @@
 #include "Fonts/Cousine-Regular.h"
 #include "Fonts/AlienIconFont.h"
 #include "Fonts/FontAwesomeSolid.h"
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 #include "Fonts/Reef.h"
 
 #include "WindowController.h"

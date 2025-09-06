@@ -1,23 +1,25 @@
 #pragma once
 
 #include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
 #include "Base.cuh"
+#include "Genome.cuh"
+#include "Math.cuh"
 
 struct Particle
 {
     uint64_t id;
-    float2 absPos;
+    float2 pos;
     float2 vel;
     uint8_t color;
     float energy;
     Cell* lastAbsorbedCell;  //could be invalid
 
-    //editing data
+    // Editing data
     uint8_t selected;  //0 = no, 1 = selected
 
-    //auxiliary data
+    // Auxiliary data
     int locked;  //0 = unlocked, 1 = locked
 
     __device__ __inline__ bool tryLock()
@@ -38,7 +40,7 @@ struct Particle
 
 struct GenomeHeader
 {
-    ConstructionShape shape;
+    ConstructorShape shape;
     int numBranches;
     bool separateConstruction;
     ConstructorAngleAlignment angleAlignment;
@@ -47,17 +49,9 @@ struct GenomeHeader
     int numRepetitions;
     float concatenationAngle1;
     float concatenationAngle2;
+    float frontAngle;
 
     __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == 0x7fffffff; }
-};
-
-struct CellMetadataDescription
-{
-    uint16_t nameSize;
-    uint8_t* name;
-
-    uint16_t descriptionSize;
-    uint8_t* description;
 };
 
 struct CellConnection
@@ -67,233 +61,335 @@ struct CellConnection
     float angleFromPrevious;
 };
 
-struct Signal
+struct NeuralNetwork
 {
-    float channels[MAX_CHANNELS];
-    SignalOrigin origin;
-    float targetX;
-    float targetY;
+    float weights[MAX_CHANNELS * MAX_CHANNELS];
+    float biases[MAX_CHANNELS];
+    ActivationFunction activationFunctions[MAX_CHANNELS];
 };
 
-struct NeuronFunction
-{
-    struct NeuronState
-    {
-        float weights[MAX_CHANNELS * MAX_CHANNELS];
-        float biases[MAX_CHANNELS];
-    };
+struct Base
+{};
 
-    NeuronState* neuronState;
-    NeuronActivationFunction activationFunctions[MAX_CHANNELS];
-};
-
-struct TransmitterFunction
+struct Depot
 {
     EnergyDistributionMode mode;
 };
 
-struct ConstructorFunction
+struct Constructor
 {
-    //settings
-    uint32_t activationMode;  //0 = manual, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    uint32_t constructionActivationTime;
+    // Properties
+    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
+    uint16_t constructionActivationTime;
+    float constructionAngle;
 
-    //genome
-    uint16_t genomeSize;
-    uint16_t numInheritedGenomeNodes;
-    uint8_t* genome;
-    uint32_t genomeGeneration;
-    float constructionAngle1;
-    float constructionAngle2;
+    // Genome data
+    uint16_t geneIndex;
 
-    //process data
+    // Process data
     uint64_t lastConstructedCellId;
-    uint16_t genomeCurrentNodeIndex;
-    uint16_t genomeCurrentRepetition;
+    static auto constexpr LastConstructedCellId_NotSet = 0xffffffffffffffff;
+    uint16_t currentNodeIndex;
+    uint16_t currentConcatenation;
     uint8_t currentBranch;
-    uint32_t offspringCreatureId;  //will be filled when self-replication starts
-    uint32_t offspringMutationId;
 
-    //temp
+     // Temp data
     bool isReady;
+    Creature* offspring;    // Must be reset if separated construction is finished
 };
 
-struct SensorFunction
+struct Sensor
 {
+    uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     float minDensity;
-    int8_t minRange;          //< 0 = no restriction
-    int8_t maxRange;          //< 0 = no restriction
-    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
-    SensorRestrictToMutants restrictToMutants;
-
-    //process data
-    float memoryChannel1;
-    float memoryChannel2;
-    float memoryChannel3;
-    float memoryTargetX;
-    float memoryTargetY;
+    int8_t minRange;          // < 0 = no restriction
+    int8_t maxRange;          // < 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    SensorRestrictToCreatures restrictToCreatures;
 };
 
-struct NerveFunction
+struct Generator
 {
-    uint8_t pulseMode;   //0 = none, 1 = every cycle, 2 = every second cycle, 3 = every third cycle, etc.
-    uint8_t alternationMode;  //0 = none, 1 = alternate after each pulse, 2 = alternate after second pulse, 3 = alternate after third pulse, etc.
+    uint32_t autoTriggerInterval;
+    GeneratorPulseType pulseType;
+    uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+
+    // Process data
+    uint32_t numPulses;
 };
 
-struct AttackerFunction
+struct Attacker
 {
-    EnergyDistributionMode mode;
 };
 
-struct InjectorFunction
+struct Injector
 {
     InjectorMode mode;
     uint32_t counter;
-    uint16_t genomeSize;
-    uint8_t* genome;
-    uint32_t genomeGeneration;
 };
 
-struct MuscleFunction
+struct AutoBending
 {
-    MuscleMode mode;
-    MuscleBendingDirection lastBendingDirection;
-    uint8_t lastBendingSourceIndex;
-    float consecutiveBendingAngle;
+    // Fixed data
+    float maxAngleDeviation; // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
 
-    //additional rendering data
+    // Process data
+    float initialAngle;
+    float lastActualAngle;
+    bool forward;  // Current direction
+    float activation;
+    uint8_t activationCountdown;
+    bool impulseAlreadyApplied;
+};
+
+struct ManualBending
+{
+    // Fixed data
+    float maxAngleDeviation;  // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
+
+    // Process data
+    float initialAngle;
+    float lastActualAngle;
+    float lastAngleDelta;
+    bool impulseAlreadyApplied;
+};
+
+struct AngleBending
+{
+    // Fixed data
+    float maxAngleDeviation;  // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
+
+    // Process data
+    float initialAngle;
+};
+
+struct AutoCrawling
+{
+    // Fixed data
+    float maxDistanceDeviation;  // Between 0 and 1
+    float frontBackVelRatio;  // Between 0 and 1
+
+    // Process data
+    float initialDistance;
+    float lastActualDistance;
+    bool forward;  // Current direction
+    float activation;
+    uint8_t activationCountdown;
+    bool impulseAlreadyApplied;
+};
+
+struct ManualCrawling
+{
+    // Fixed data
+    float maxDistanceDeviation;  // Between 0 and 1
+    float frontBackVelRatio;     // Between 0 and 1
+
+    // Process data
+    float initialDistance;
+    float lastActualDistance;
+    float lastDistanceDelta;
+    bool impulseAlreadyApplied;
+};
+
+struct DirectMovement
+{};
+
+union MuscleModeData
+{
+    AutoBending autoBending;
+    ManualBending manualBending;
+    AngleBending angleBending;
+    AutoCrawling autoCrawling;
+    ManualCrawling manualCrawling;
+    DirectMovement directMovement;
+};
+
+struct Muscle
+{
+    // Fixed data
+    MuscleMode mode;
+    MuscleModeData modeData;
+
+    // Additional rendering data
     float lastMovementX;
     float lastMovementY;
 };
 
-struct DefenderFunction
+struct Defender
 {
     DefenderMode mode;
 };
 
-struct ReconnectorFunction
+struct Reconnector
 {
-    uint8_t restrictToColor;  //0 ... 6 = color restriction, 255 = no restriction
-    ReconnectorRestrictToMutants restrictToMutants;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    ReconnectorRestrictToCreatures restrictToCreatures;
 };
 
-struct DetonatorFunction
+struct Detonator
 {
     DetonatorState state;
     int32_t countdown;
 };
 
-union CellFunctionData
+union CellTypeData
 {
-    NeuronFunction neuron;
-    TransmitterFunction transmitter;
-    ConstructorFunction constructor;
-    SensorFunction sensor;
-    NerveFunction nerve;
-    AttackerFunction attacker;
-    InjectorFunction injector;
-    MuscleFunction muscle;
-    DefenderFunction defender;
-    ReconnectorFunction reconnector;
-    DetonatorFunction detonator;
+    Base base;
+    Depot depot;
+    Constructor constructor;
+    Sensor sensor;
+    Generator generator;
+    Attacker attacker;
+    Injector injector;
+    Muscle muscle;
+    Defender defender;
+    Reconnector reconnector;
+    Detonator detonator;
+};
+
+struct SignalRestriction
+{
+    bool active;
+    float baseAngle;
+    float openingAngle;
+};
+
+struct Signal
+{
+    bool active;
+    float channels[MAX_CHANNELS];
+};
+
+struct Creature
+{
+    uint64_t id;
+    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
+    uint64_t ancestorId;
+
+    uint32_t generation;
+    uint32_t mutationId;
+    float genomeComplexity;
+
+    Genome genome;
+
+    // Temporary data
+    uint64_t creatureIndex;
+    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
 };
 
 struct Cell
 {
+    // General
     uint64_t id;
-
-    //general
+    uint8_t numConnections;
     CellConnection connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
-    uint8_t maxConnections;
-    uint8_t numConnections;
     float energy;
     float stiffness;
     uint8_t color;
+    float angleToFront;
     bool barrier;
+    bool sticky;
     uint32_t age;
-    LivingState livingState;
-    uint32_t creatureId;
-    uint32_t mutationId;
-    uint8_t ancestorMutationId; //only the first 8 bits from ancestor mutation id
-    float genomeComplexity;
+    CellState cellState;
 
-    //cell function
-    uint8_t executionOrderNumber;
-    int8_t inputExecutionOrderNumber;
-    bool outputBlocked;
-    CellFunction cellFunction;
-    CellFunctionData cellFunctionData;
+    // Creature data
+    Creature* creature;
+    uint16_t nodeIndex;
+    uint16_t parentNodeIndex;
+    uint16_t geneIndex;
+
+    // Cell type data
+    NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
+    CellType cellType;
+    CellTypeData cellTypeData;
+    SignalRestriction signalRestriction;
+    uint8_t signalRelaxationTime;
     Signal signal;
     uint32_t activationTime;
-    CellFunctionUsed cellFunctionUsed;
+    CellTriggered cellTriggered;
 
-    //process data
-    uint16_t detectedByCreatureId;  //only the first 16 bits from the creature id
+    // Process data
+    Signal futureSignal;
+    uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
 
-    //annotations
-    CellMetadataDescription metadata;
-
-    //additional rendering data
+    // Additional rendering data
     CellEvent event;
     uint8_t eventCounter;
     float2 eventPos;
 
-    //editing data
-    uint8_t selected;  //0 = no, 1 = selected, 2 = cluster selected
-    uint8_t detached;  //0 = no, 1 = yes
+    // Editing data
+    uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
+    uint8_t detached;  // 0 = no, 1 = yes
 
-    //internal algorithm data
-    int locked;  //0 = unlocked, 1 = locked
-    int tag;
+    // Internal algorithm data
+    int locked;  // 0 = unlocked, 1 = locked
+    int64_t tempValue;
     float density;
-    Cell* nextCell; //linked list for finding all overlapping cells
+    Cell* nextCell;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
-    float2 shared1; //variable with different meanings depending on context
+    float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
 
-    //cluster data
+    // Cluster data
     uint32_t clusterIndex;
-    int32_t clusterBoundaries;  //1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
     float2 clusterPos;
     float2 clusterVel;
     float clusterAngularMomentum;
     float clusterAngularMass;
     uint32_t numCellsInCluster;
 
-    __device__ __inline__ bool isActive()
+    __device__ __inline__ bool isSameCreature(Cell* otherCell)
     {
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            if (abs(signal.channels[i]) > NEAR_ZERO) {
-                return true;
+        return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
+            || (otherCell->creature == nullptr && this->creature == nullptr);
+    }
+
+    __device__ __inline__ float getRefDistance(Cell* connectedCell)
+    {
+        for (int i = 0; i < numConnections; i++) {
+            if (connections[i].cell == connectedCell) {
+                return connections[i].distance;
             }
         }
-        return false;
-    }
-
-    __device__ __inline__ uint8_t* getGenome()
-    {
-        if (cellFunction == CellFunction_Constructor) {
-            return cellFunctionData.constructor.genome;
-        }
-        if (cellFunction == CellFunction_Injector) {
-            return cellFunctionData.injector.genome;
-        }
-        CUDA_THROW_NOT_IMPLEMENTED();
-        return nullptr;
-    }
-
-    __device__ __inline__ int getGenomeSize()
-    {
-        if (cellFunction == CellFunction_Constructor) {
-            return cellFunctionData.constructor.genomeSize;
-        }
-        if (cellFunction == CellFunction_Injector) {
-            return cellFunctionData.injector.genomeSize;
-        }
-        CUDA_THROW_NOT_IMPLEMENTED();
+        CUDA_CHECK(false);
         return 0;
+    }
+
+    __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
+    {
+        auto result = 0.0f;
+        for (int i = connectionIndex1 + 1; i < connectionIndex1 + numConnections; i++) {
+            auto index = i % numConnections;
+            result += connections[index].angleFromPrevious;
+            if (index == connectionIndex2) {
+                break;
+            }
+        }
+        return Math::normalizedAngle(result, -180.0f);
+    }
+
+    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
+    {
+        auto connectionIndex1 = -1;
+        auto connectionIndex2 = -1;
+        for (int i = 0; i < numConnections; i++) {
+            if (connections[i].cell == connectedCell1) {
+                connectionIndex1 = i;
+            }
+            if (connections[i].cell == connectedCell2) {
+                connectionIndex2 = i;
+            }
+        }
+        if (connectionIndex1 == -1 || connectionIndex2 == -1) {
+            return 0;
+        }
+        return getAngelSpan(connectionIndex1, connectionIndex2);
     }
 
     __device__ __inline__ void getLock()
@@ -325,4 +421,3 @@ struct HashFunctor<Cell*>
         return abs(static_cast<int>(cell->id));
     }
 };
-

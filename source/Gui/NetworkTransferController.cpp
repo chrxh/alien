@@ -8,8 +8,8 @@
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
 #include "EditorController.h"
-#include "GenomeEditorWindow.h"
 #include "BrowserWindow.h"
+#include "GenomeEditorWindow.h"
 #include "OverlayController.h"
 
 void NetworkTransferController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
@@ -44,10 +44,10 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 try {
                     _simulationFacade->newSimulation(
                         deserializedSimulation.auxiliaryData.timestep,
-                        deserializedSimulation.auxiliaryData.generalSettings,
+                        deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                     _simulationFacade->setRealTime(deserializedSimulation.auxiliaryData.realTime);
-                    _simulationFacade->setClusteredSimulationData(deserializedSimulation.mainData);
+                    _simulationFacade->setSimulationData(deserializedSimulation.mainData);
                     _simulationFacade->setStatisticsHistory(deserializedSimulation.statistics);
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();
@@ -59,7 +59,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                     _simulationFacade->closeSimulation();
                     _simulationFacade->newSimulation(
                         deserializedSimulation.auxiliaryData.timestep,
-                        deserializedSimulation.auxiliaryData.generalSettings,
+                        deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                 }
                 _persisterFacade->restart();
@@ -71,7 +71,7 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 printOverlayMessage(data.resourceName);
             } else {
                 EditorController::get().setOn(true);
-                GenomeEditorWindow::get().openTab(std::get<GenomeDescription>(data.resourceData));
+                GenomeEditorWindow::get().openTab(std::nullopt, std::get<GenomeDescription>(data.resourceData));
             }
             if (VersionParserService::get().isVersionNewer(data.resourceVersion)) {
                 std::string dataTypeString = data.resourceType == NetworkResourceType_Simulation ? "simulation" : "genome";

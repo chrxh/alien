@@ -3,204 +3,310 @@
 #include <cstdint>
 #include <cstring>
 
-#include "CellFunctionConstants.h"
-#include "Features.h"
-#include "Motion.h"
-#include "RadiationSource.h"
+#include "Base/Vector2D.h"
+
+#include "CellTypeConstants.h"
 #include "SimulationParametersTypes.h"
-#include "SimulationParametersZone.h"
-#include "SimulationParametersZoneValues.h"
+
+struct ParametersSpec;
 
 /**
  * NOTE: header is also included in kernel code
  */
-
 struct SimulationParameters
 {
-    //general
-    Char64 projectName = "<unnamed>";
+    int numLayers = 0;
+    int numSources = 0;
+    int layerOrderNumbers[MAX_LAYERS] = {};
+    int sourceOrderNumbers[MAX_SOURCES] = {};
 
-    //feature list
-    Features features;
+    // General
+    BaseParameter<Char64> projectName = {"<unnamed>"};
+    LayerParameter<Char64> layerName = {{"<unnamed>"}};
+    SourceParameter<Char64> sourceName = {{"<unnamed>"}};
+    LayerParameter<float> layerOpacity = {{1.0f}};
+    PinnableSourceParameter<float> sourceRelativeStrength = {{{.value = 0.0f, .pinned = false}}};
 
-    //particle sources
-    int numRadiationSources = 0;
-    RadiationSource radiationSource[MAX_RADIATION_SOURCES];
-    bool baseStrengthRatioPinned = false;
+    // Visualization
+    BaseLayerParameter<FloatColorRGB> backgroundColor = {.baseValue = {0.0f, 0.0f, 0.106f}};
+    BaseParameter<CellColoring> primaryCellColoring = {CellColoring_CellColor};
+    BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
+    BaseParameter<float> cellRadius = {0.25f};
+    BaseParameter<float> zoomLevelForNeuronVisualization = {2.0f};
+    BaseParameter<bool> attackVisualization = {false};
+    BaseParameter<bool> muscleMovementVisualization = {false};
+    BaseParameter<bool> borderlessRendering = {false};
+    BaseParameter<bool> gridLines = {false};
+    BaseParameter<bool> markReferenceDomain = {true};
+    SourceParameter<bool> sourceShowRadiationCenter = {true};
 
-    float externalEnergy = 0.0f;
-    ColorVector<float> externalEnergyInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> externalEnergyConditionalInflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> externalEnergyBackflowFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    bool externalEnergyInflowOnlyForNonSelfReplicators = false;
-    float externalEnergyBackflowLimit = Infinity<float>::value;
+    // Location
+    LayerParameter<RealVector2D> layerPosition;
+    LayerParameter<RealVector2D> layerVelocity;
+    LayerParameter<LayerShapeType> layerShape = {{LayerShapeType_Circular}};
+    LayerParameter<float> layerCoreRadius = {{100.0f}};                 // for LayerShapeType_Circular
+    LayerParameter<RealVector2D> layerCoreRect = {{{100.0f, 100.0f}}};  // for LayerShapeType_Rectangular
+    LayerParameter<float> layerFadeoutRadius = {{100.0f}};
+    SourceParameter<SourceShapeType> sourceShapeType = {{SourceShapeType_Circular}};
+    SourceParameter<float> sourceCircularRadius = {{1.0f}};                    // for SourceShapeType_Circular
+    SourceParameter<RealVector2D> sourceRectangularRect = {{{30.0f, 60.0f}}};  // for SourceShapeType_Rectangular
+    SourceParameter<RealVector2D> sourcePosition;
+    SourceParameter<RealVector2D> sourceVelocity;
 
-    //spots
-    int numZones = 0;
-    SimulationParametersZone zone[MAX_ZONES];
+    // Force field
+    EnableableLayerParameter<ForceField> layerForceFieldType = {.layerValues = {{ForceField_None, false}}};
+    LayerParameter<Orientation> layerRadialForceFieldOrientation = {{Orientation_Clockwise}};  // for ForceField_Radial
+    LayerParameter<float> layerRadialForceFieldStrength = {{0.001f}};                          // for ForceField_Radial
+    LayerParameter<float> layerRadialForceFieldDriftAngle = {{0.0f}};                          // for ForceField_Radial
+    LayerParameter<float> layerCentralForceFieldStrength = {{0.05f}};                          // for ForceField_Central
+    LayerParameter<float> layerLinearForceFieldAngle = {{0}};
+    LayerParameter<float> layerLinearForceFieldStrength = {{0.01f}};
 
-    //rendering
-    uint32_t backgroundColor = 0x1b0000;
-    bool borderlessRendering = false;
-    bool markReferenceDomain = true;
-    bool gridLines = false;
-    CellColoring cellColoring = CellColoring_CellColor;
-    CellColoring cellGlowColoring = CellColoring_CellColor;
-    float cellGlowRadius = 4.0f;
-    float cellGlowStrength = 0.1f;
-    CellFunction highlightedCellFunction = CellFunction_Constructor;
-    float zoomLevelNeuronalActivity = 2.0f;
-    bool attackVisualization = false;
-    bool muscleMovementVisualization = false;
-    float cellRadius = 0.25f;
-    bool showRadiationSources = true;
+    // Numerics
+    BaseParameter<float> timestepSize = {1.0f};
 
-    //all other parameters
-    SimulationParametersZoneValues baseValues;
+    // Physics: Motion
+    BaseParameter<MotionType> motionType = {MotionType_Fluid};
+    BaseParameter<float> smoothingLength = {0.8f};       // for MotionType_Fluid
+    BaseParameter<float> viscosityStrength = {0.1f};     // for MotionType_Fluid
+    BaseParameter<float> pressureStrength = {0.1f};      // for MotionType_Fluid
+    BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
+    BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
+    BaseLayerParameter<float> friction = {.baseValue = 0.001f};
+    BaseParameter<float> innerFriction = {0.3f};
+    BaseLayerParameter<float> rigidity = {.baseValue = 0.0f};
 
-    float timestepSize = 1.0f;
-    MotionType motionType = MotionType_Fluid;
-    MotionData motionData = {FluidMotion()};
+    // Physics: Thresholds
+    BaseParameter<float> maxVelocity = {2.0f};
+    BaseLayerParameter<ColorVector<float>> maxForce = {.baseValue = {0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f, 0.8f}};
+    BaseParameter<float> minCellDistance = {0.3f};
+    static float constexpr maxForceDecayProbability = 0.2f;
 
-    float innerFriction = 0.3f;
-    float cellMaxVelocity = 2.0f;
-    ColorVector<float> cellMaxBindingDistance = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
+    // Physics: Binding
+    BaseParameter<ColorVector<float>> maxBindingDistance = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
+    BaseLayerParameter<float> cellFusionVelocity = {.baseValue = 0.1f};
+    BaseLayerParameter<float> cellMaxBindingEnergy = {.baseValue = Infinity<float>::value};
 
-    ColorVector<float> cellNormalEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
-    float cellMinDistance = 0.3f;
-    float cellMaxForceDecayProb = 0.2f;
-    int cellNumExecutionOrderNumbers = 6;
+    // Radiation
+    PinBaseParameter relativeStrengthBasePin = {false};
+    LayerParameter<bool> disableRadiationSources = {{false}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorption = {.baseValue = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationType1_strength = {.baseValue = {0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f, 0.00002f}};
+    BaseParameter<ColorVector<int>> radiationType1_minimumAge = {{0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorVector<float>> radiationType2_strength = {{0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorVector<float>> radiationType2_energyThreshold = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
+    BaseParameter<ColorVector<float>> particleSplitEnergy = {
+        {Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value,
+         Infinity<float>::value}};
+    BaseParameter<bool> particleTransformationAllowed = {false};
+    EnableableSourceParameter<float> sourceRadiationAngle = {{{.value = 0.0f, .enabled = false}}};
+    static float constexpr radiationProbability = 0.03f;
+    static float constexpr radiationVelocityMultiplier = 1.0f;
+    static float constexpr radiationVelocityPerturbation = 0.5f;
 
-    ColorVector<float> genomeComplexitySizeFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorVector<float> genomeComplexityRamificationFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> genomeComplexityNeuronFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<int> genomeComplexityDepthLevel = {3, 3, 3, 3, 3, 3, 3};
+    // Cell life cycle
+    BaseParameter<ColorVector<int>> maxCellAge = {
+        {Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value}};
+    BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
+    BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
+    BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
+    BaseParameter<CellDeathConsquences> cellDeathConsequences = {CellDeathConsquences_DetachedPartsDie};
 
-    float radiationProb = 0.03f;
-    float radiationVelocityMultiplier = 1.0f;
-    float radiationVelocityPerturbation = 0.5f;
-    ColorVector<int> radiationMinCellAge = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> radiationAbsorptionHighVelocityPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> radiationAbsorptionLowConnectionPenalty = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    ColorVector<float> highRadiationFactor = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<float> highRadiationMinCellEnergy = {500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f, 500.0f};
-    CellDeathConsquences cellDeathConsequences = CellDeathConsquences_DetachedPartsDie;
-    ColorVector<int> cellMaxAge = {
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value};
-    bool cellInactiveMaxAgeActivated = false;
-    bool cellEmergentMaxAgeActivated = false;
-    ColorVector<int> cellEmergentMaxAge = {
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value,
-        Infinity<int>::value};
+    // Mutations
+    BaseLayerParameter<ColorVector<float>> copyMutationNeuronData = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCellProperties = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCustomGeometry = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCellType = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationInsertion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationDeletion = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationTranslation = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationDuplication = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationCellColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationSubgenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorVector<float>> copyMutationGenomeColor = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorMatrix<bool>> copyMutationColorTransitions = {
+        {{true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true},
+         {true, true, true, true, true, true, true}}};
+    BaseParameter<bool> copyMutationPreventDepthIncrease = {false};
+    BaseParameter<bool> copyMutationSelfReplication = {false};
 
-    bool cellMaxAgeBalancer = false;
-    int cellMaxAgeBalancerInterval = 10000;
-    bool cellResetAgeAfterActivation = false;
+    // Cell type: Attacker
+    BaseLayerParameter<ColorVector<float>> attackerEnergyCost = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    BaseLayerParameter<ColorMatrix<float>> attackerFoodChainColorMatrix = {
+        .baseValue = {
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1, 1, 1}}};
+    BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
+    BaseParameter<ColorVector<float>> attackerRadius = {{1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f}};
+    BaseLayerParameter<ColorMatrix<float>> attackerComplexCreatureProtection = {
+        .baseValue = {
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
+    BaseParameter<bool> attackerDestroyCells = {true};
 
-    bool particleTransformationAllowed = false;
-    bool particleTransformationRandomCellFunction = false;
-    int particleTransformationMaxGenomeSize = 300;
-    ColorVector<float> particleSplitEnergy = {
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value,
-        Infinity<float>::value};
+    // Cell type: Constructor
+    BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
+    BaseParameter<bool> constructorCompletenessCheck = {false};
+    static float constexpr constructorAdditionalOffspringDistance = 0.8f;
 
-    ColorVector<float> cellFunctionConstructorConnectingCellMaxDistance = {1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f, 1.8f};
-    ColorVector<float> cellFunctionConstructorSignalThreshold = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
-    bool cellFunctionConstructorCheckCompletenessForSelfReplication = false;
+    // Cell type: Defender
+    BaseParameter<ColorVector<float>> defenderAntiAttackerStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
+    BaseParameter<ColorVector<float>> defenderAntiInjectorStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
 
-    ColorMatrix<bool> cellCopyMutationColorTransitions = {
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true},
-        {true, true, true, true, true, true, true}};
-    bool cellCopyMutationPreventDepthIncrease = false;
-    bool cellCopyMutationSelfReplication = false;
+    // Cell type: Injector
+    BaseParameter<ColorVector<float>> injectorInjectionRadius = {{3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f}};
+    BaseParameter<ColorMatrix<int>> injectorInjectionTime = {
+        {{3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3},
+         {3, 3, 3, 3, 3, 3, 3}}};
 
-    // customize neuron mutations setting
-    float cellCopyMutationNeuronDataWeight = 0.2f;
-    float cellCopyMutationNeuronDataBias = 0.2f;
-    float cellCopyMutationNeuronDataActivationFunction = 0.05f;
-    float cellCopyMutationNeuronDataReinforcement = 1.05f;
-    float cellCopyMutationNeuronDataDamping = 1.05f;
-    float cellCopyMutationNeuronDataOffset = 0.05f;
+    // Cell type: Muscle
+    BaseParameter<ColorVector<float>> muscleEnergyCost = {{0, 0, 0, 0, 0, 0, 0}};
+    BaseParameter<ColorVector<float>> muscleMovementAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> muscleCrawlingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> muscleBendingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    static float constexpr cellTypeMuscleThreshold = 0.2f;
+    static int constexpr cellTypeMuscleActivationCountdown = 10;
 
-    // customize deletion mutations setting
-    int cellCopyMutationDeletionMinSize = 0;
+    // Cell type: Sensor
+    BaseParameter<ColorVector<float>> sensorRadius = {{255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f}};
 
-    ColorVector<float> cellFunctionInjectorRadius = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
-    ColorMatrix<int> cellFunctionInjectorDurationColorMatrix = {
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3},
-        {3, 3, 3, 3, 3, 3, 3}};
-    float cellFunctionInjectorSignalThreshold = 0.1f;
+    // Cell type: Transmitter
+    BaseParameter<ColorVector<float>> transmitterEnergyDistributionRadius = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
+    BaseParameter<ColorVector<float>> transmitterEnergyDistributionValue = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
+    BaseParameter<bool> transmitterEnergyDistributionSameCreature = {true};
 
-    ColorVector<float> cellFunctionAttackerRadius = {1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f};
-    ColorVector<float> cellFunctionAttackerStrength = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
-    ColorVector<float> cellFunctionAttackerEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
-    ColorVector<float> cellFunctionAttackerEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
-    ColorVector<float> cellFunctionAttackerColorInhomogeneityFactor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    ColorMatrix<float> cellFunctionAttackerSameMutantPenalty = {
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    ColorVector<float> cellFunctionAttackerSensorDetectionFactor = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    float cellFunctionAttackerSignalThreshold = 0.1f;
-    bool cellFunctionAttackerDestroyCells = false;
+    // Cell type: Reconnector
+    BaseParameter<ColorVector<float>> reconnectorRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};
 
-    ColorVector<float> cellFunctionDefenderAgainstAttackerStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
-    ColorVector<float> cellFunctionDefenderAgainstInjectorStrength = {1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f, 1.5f};
+    // Cell type: Detonator
+    BaseParameter<ColorVector<float>> detonatorRadius = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
+    BaseParameter<ColorVector<float>> detonatorChainExplosionProbability = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
-    bool cellFunctionTransmitterEnergyDistributionSameCreature = true;
-    ColorVector<float> cellFunctionTransmitterEnergyDistributionRadius = {3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f};
-    ColorVector<float> cellFunctionTransmitterEnergyDistributionValue = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
+    // Expert settings: Advanced absorption control
+    ExpertToggle advancedAbsorptionControlToggle = {false};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowGenomeComplexityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
 
-    ColorVector<float> cellFunctionMuscleContractionExpansionDelta = {0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f};
-    ColorVector<float> cellFunctionMuscleMovementAcceleration = {0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f, 0.02f};
-    ColorVector<float> cellFunctionMuscleBendingAngle = {5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f, 5.0f};
-    ColorVector<float> cellFunctionMuscleBendingAcceleration = {0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
-    float cellFunctionMuscleBendingAccelerationThreshold = 0.1f;
-    bool cellFunctionMuscleMovementTowardTargetedObject = true;
-    ColorVector<float> cellFunctionMuscleEnergyCost = {0, 0, 0, 0, 0, 0, 0};
+    // Expert settings: Advanced attacker control
+    ExpertToggle advancedAttackerControlToggle = {false};
+    BaseParameter<ColorMatrix<float>> attackerSameMutantProtection = {
+        {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
+    BaseLayerParameter<ColorMatrix<float>> attackerNewComplexMutantProtection = {
+        .baseValue = {
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
+            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
+    BaseParameter<ColorVector<float>> attackerSensorDetectionFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> attackerGeometryDeviationProtection = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseLayerParameter<ColorVector<float>> attackerConnectionsMismatchProtection = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
+    static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
-    ColorVector<float> cellFunctionSensorRange = {255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f};
-    float cellFunctionSensorSignalThreshold = 0.1f;
+    // Expert settings: Cell age limiter
+    ExpertToggle cellAgeLimiterToggle = {false};
+    BaseLayerParameter<ColorVector<float>> maxAgeForInactiveCells = {
+        .baseValue = {// Candidate for deletion
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value,
+                      Infinity<float>::value}};
+    BaseParameter<ColorVector<int>> freeCellMaxAge = {
+        {Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value,
+         Infinity<int>::value}};
+    BaseParameter<bool> resetCellAgeAfterActivation = {false};  // Candidate for deletion
+    EnableableBaseParameter<int> maxCellAgeBalancerInterval = {.value = 10000, .enabled = false};
 
-    ColorVector<float> cellFunctionReconnectorRadius = {2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f};
-    float cellFunctionReconnectorSignalThreshold = 0.1f;
+    // Expert settings: Cell color transition rules
+    ExpertToggle colorTransitionRulesToggle = {false};
+    BaseLayerParameter<ColorVector<ColorTransitionRule>> colorTransitionRules;
 
-    ColorVector<float> cellFunctionDetonatorRadius = {10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f};
-    ColorVector<float> cellFunctionDetonatorChainExplosionProbability = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
-    float cellFunctionDetonatorSignalThreshold = 0.1f;
+    // Expert settings: Cell glow
+    ExpertToggle cellGlowToggle = {false};
+    BaseParameter<CellColoring> cellGlowColoring = {CellColoring_CellColor};
+    BaseParameter<float> cellGlowRadius = {4.0f};
+    BaseParameter<ColorVector<float>> cellGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 
-    bool legacyCellFunctionMuscleMovementAngleFromSensor = false;
+    // Expert settings: Customize deletion mutations setting
+    ExpertToggle customizeDeletionMutationsToggle = {false};
+    BaseParameter<int> cellCopyMutationDeletionMinSize = {0};
 
-    bool operator==(SimulationParameters const& other) const;
-    bool operator!=(SimulationParameters const& other) const { return !operator==(other); }
+    // Expert settings: Customize neuron mutations setting
+    ExpertToggle customizeNeuronMutationsToggle = {false};
+    BaseParameter<float> cellCopyMutationNeuronDataWeight = {0.2f};
+    BaseParameter<float> cellCopyMutationNeuronDataBias = {0.2f};
+    BaseParameter<float> cellCopyMutationNeuronDataActivationFunction = {0.05f};
+    BaseParameter<float> cellCopyMutationNeuronDataReinforcement = {1.05f};
+    BaseParameter<float> cellCopyMutationNeuronDataDamping = {1.05f};
+    BaseParameter<float> cellCopyMutationNeuronDataOffset = {0.05f};
+
+    // Expert settings: External energy settings
+    ExpertToggle externalEnergyControlToggle = {false};
+    BaseParameter<float> externalEnergy = {0.0f};
+    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<bool> externalEnergyInflowOnlyForNonSelfReplicators = {false};
+    BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<float> externalEnergyBackflowLimit = {Infinity<float>::value};
+
+    // Expert settings: Genome complexity measurement
+    ExpertToggle genomeComplexityMeasurementToggle = {false};
+    BaseParameter<ColorVector<float>> genomeComplexitySizeFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
+    BaseParameter<ColorVector<float>> genomeComplexityRamificationFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<int>> genomeComplexityDepthLevel = {{3, 3, 3, 3, 3, 3, 3}};
+
+    bool operator==(SimulationParameters const&) const = default;
+
+    static ParametersSpec const& getSpec();
 };
+

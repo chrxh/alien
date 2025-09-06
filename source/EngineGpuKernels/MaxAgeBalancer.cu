@@ -13,10 +13,10 @@ namespace
     auto constexpr MinReplicatorsLowerValue = 20;
 }
 
-bool _MaxAgeBalancer::balance(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep)
+bool _MaxAgeBalancer::balance(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep)
 {
     auto result = false;
-    if (parameters.features.cellAgeLimiter && parameters.cellMaxAgeBalancer) {
+    if (parameters.cellAgeLimiterToggle.value && parameters.maxCellAgeBalancerInterval.enabled) {
         initializeIfNecessary(parameters, timestep);
         result |= doAdaptionIfNecessary(parameters, statistics, timestep);
     }
@@ -30,30 +30,30 @@ void _MaxAgeBalancer::initializeIfNecessary(SimulationParameters const& paramete
 {
     auto needsInitialization = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        if (parameters.cellMaxAge[i] != _lastCellMaxAge[i]) {
+        if (parameters.maxCellAge.value[i] != _lastCellMaxAge[i]) {
             needsInitialization = true;
         }
     }
-    if (parameters.cellMaxAgeBalancer != _lastAdaptiveCellMaxAge) {
+    if (parameters.maxCellAgeBalancerInterval.enabled != _lastAdaptiveCellMaxAge) {
         needsInitialization = true;
     }
 
     if (needsInitialization) {
         for (int i = 0; i < MAX_COLORS; ++i) {
-            _cellMaxAge[i] = parameters.cellMaxAge[i];
+            _cellMaxAge[i] = parameters.maxCellAge.value[i];
         }
         startNewMeasurement(timestep);
     }
 }
 
-bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, RawStatisticsData const& statistics, uint64_t timestep)
+bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, StatisticsRawData const& statistics, uint64_t timestep)
 {
     auto result = false;
     for (int i = 0; i < MAX_COLORS; ++i) {
         _numReplicators[i] += statistics.timeline.timestep.numSelfReplicators[i];
     }
     ++_numMeasurements;
-    if (timestep - *_lastTimestep > parameters.cellMaxAgeBalancerInterval) {
+    if (timestep - *_lastTimestep > parameters.maxCellAgeBalancerInterval.value) {
         uint64_t maxReplicators = 0;
         uint64_t averageReplicators = 0;
         int numAveragedReplicators = 0;
@@ -85,7 +85,7 @@ bool _MaxAgeBalancer::doAdaptionIfNecessary(SimulationParameters& parameters, Ra
             }
 
             for (int i = 0; i < MAX_COLORS; ++i) {
-                parameters.cellMaxAge[i] = toInt(_cellMaxAge[i]);
+                parameters.maxCellAge.value[i] = toInt(_cellMaxAge[i]);
             }
             result = true;
         }
@@ -106,7 +106,7 @@ void _MaxAgeBalancer::startNewMeasurement(uint64_t timestep)
 void _MaxAgeBalancer::saveLastState(SimulationParameters const& parameters)
 {
     for (int i = 0; i < MAX_COLORS; ++i) {
-        _lastCellMaxAge[i] = parameters.cellMaxAge[i];
+        _lastCellMaxAge[i] = parameters.maxCellAge.value[i];
     }
-    _lastAdaptiveCellMaxAge = parameters.cellMaxAgeBalancer;
+    _lastAdaptiveCellMaxAge = parameters.maxCellAgeBalancerInterval.enabled;
 }

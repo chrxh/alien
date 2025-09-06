@@ -1,8 +1,8 @@
 #pragma once
 
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -11,17 +11,19 @@
 
 #include "Base/Definitions.h"
 
+#include "EngineInterface/ArraySizesForGpu.h"
+#include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/GpuSettings.h"
-#include "EngineInterface/RawStatisticsData.h"
-#include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/Settings.h"
-#include "EngineInterface/SelectionShallowData.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/MutationType.h"
-#include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/OverlayDescriptions.h"
+#include "EngineInterface/PreviewDescriptions.h"
+#include "EngineInterface/SelectionShallowData.h"
+#include "EngineInterface/SettingsForSimulation.h"
+#include "EngineInterface/ShallowUpdateSelectionData.h"
+#include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
+#include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 #include "EngineGpuKernels/Definitions.h"
 
@@ -33,13 +35,14 @@ struct ExceptionData
     std::optional<std::string> errorMessage;
 };
 
-struct DataTO;
+struct CollectionTO;
 
 class EngineWorker
 {
     friend class EngineWorkerGuard;
+
 public:
-    void newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters);
+    void newSimulation(uint64_t timestep, SettingsForSimulation const& _settings);
     void clear();
 
     void setImageResource(void* image);
@@ -54,18 +57,15 @@ public:
     int getSyncSimulationWithRenderingRatio() const;
     void setSyncSimulationWithRenderingRatio(int value);
 
-    ClusteredDataDescription getClusteredSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    DataDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    ClusteredDataDescription getSelectedClusteredSimulationData(bool includeClusters);
-    DataDescription getSelectedSimulationData(bool includeClusters);
-    DataDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
-    RawStatisticsData getRawStatistics() const;
+    CollectionDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    CollectionDescription getSelectedSimulationData(bool includeClusters);
+    CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
+    StatisticsRawData getStatisticsRawData() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
 
-    void addAndSelectSimulationData(DataDescription const& dataToUpdate);
-    void setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate);
-    void setSimulationData(DataDescription const& dataToUpdate);
+    void addAndSelectSimulationData(CollectionDescription&& dataToUpdate);
+    void setSimulationData(CollectionDescription const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
@@ -74,11 +74,12 @@ public:
     void setBarrier(bool value, bool includeClusters);
     void changeCell(CellDescription const& changedCell);
     void changeParticle(ParticleDescription const& changedParticle);
+    bool changeCreature(uint64_t creatureId, GenomeDescription const& genome);
 
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);
 
-    void beginShutdown(); //caller should wait for termination of thread
+    void beginShutdown();  //caller should wait for termination of thread
     void endShutdown();
 
     int getTpsRestriction() const;
@@ -92,7 +93,7 @@ public:
     void setSimulationParameters(
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
-    void setGpuSettings_async(GpuSettings const& gpuSettings);
+    void setGpuSettings_async(CudaSettings const& gpuSettings);
 
     void applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius);
 
@@ -112,12 +113,24 @@ public:
     void pauseSimulation();
     bool isSimulationRunning() const;
 
-    // for tests only
+    // Simulated preview
+    CollectionDescription getPreviewData();
+    void setPreviewData(CollectionDescription const& data);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
+    void calcTimestepsForPreview(int numSteps);
+    uint64_t getCurrentTimestepForPreview();
+    void setCurrentTimestepForPreview(uint64_t timestep);
+
+    // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);
+    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
+    void testOnly_cleanupAfterTimestep();
+    void testOnly_cleanupAfterDataManipulation();
+    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
+    bool testOnly_areArraysValid();
 
 private:
-    DataTO provideTO(); 
     void resetTimeIntervalStatistics();
     void processJobs();
 
@@ -131,20 +144,21 @@ private:
     CudaSimulationFacade _simulationCudaFacade;
 
     //settings
-    Settings _settings;
+    SettingsForSimulation _settings;
 
     //sync
     std::atomic<bool> _syncSimulationWithRendering{false};
     std::atomic<int> _syncSimulationWithRenderingRatio{2};
     std::atomic<int> _accessState{0};  //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
     std::atomic<bool> _isSimulationRunning{false};
+    std::atomic<bool> _isPreviewRunning{false};
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
 
     //async jobs
     std::mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
-    std::optional<GpuSettings> _updateGpuSettingsJob;
+    std::optional<CudaSettings> _updateGpuSettingsJob;
 
     struct ApplyForceJob
     {
@@ -162,11 +176,11 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _measureTimepoint;
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
-  
+
     //internals
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;
-    AccessDataTOCache _dataTOCache;
+    CollectionTOProvider _collectionTOProvider;
 };
 
 class EngineWorkerGuard

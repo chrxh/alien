@@ -11,6 +11,7 @@
 namespace Const
 {
     float const WindowAlpha = 0.9f;
+    float const MaximizedWindowAlpha = 0.95f;
     float const SliderBarWidth = 30.0f;
     float const WindowsRounding = 10.0f;
 
@@ -18,13 +19,13 @@ namespace Const
 
     ImColor const RenderingDisabledTextColor = ImColor::HSV(0.5f, 0.1f, 1.0f, 0.2f);
 
-    ImColor const TooltipTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
-
     int64_t const SimulationSliderColor_Base = 0xff4c4c4c;
     int64_t const SimulationSliderColor_Active = 0xff6c6c6c;
-    int64_t const TextDecentColor = 0xff909090;
-    int64_t const TextInfoColor = 0xff308787;
-    ImColor const TextLightDecentColor = ImColor::HSV(0.0f, 0.0f, 0.5f, 1.0f);
+
+    ImColor const TextTooltipColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
+    ImColor const TextInfoColor = ImColor::HSV(0.167f, 0.64f, 0.53f);
+    ImColor const TextDecentColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
+    ImColor const TextConflictColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 
     ImColor const HeaderColor = ImColor::HSV(0.58f, 0.7f, 0.3f);
     ImColor const HeaderActiveColor = ImColor::HSV(0.58f, 0.7f, 0.5f);
@@ -53,6 +54,12 @@ namespace Const
     ImColor const TreeNodeLowHoveredColor = ImColor::HSV(0.0f, 0.0f, 0.25f);
     ImColor const TreeNodeLowActiveColor = ImColor::HSV(0.0f, 0.0f, 0.35f);
 
+    ImColor const DisabledOverlayColor1 = ImColor::HSV(0.0f, 0.0f, 0.35f, 0.5f);
+    ImColor const DisabledOverlayColor2 = ImColor::HSV(0.0f, 0.0f, 0.06f, 0.2f);
+
+    ImColor const GroupDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
+    ImColor const GroupHighColor = ImColor::HSV(0.6f, 0.6f, 0.50f);
+
     ImColor const TableHeaderColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
 
     ImColor const MonospaceColor = ImColor::HSV(0.3f, 1.0f, 1.0f);
@@ -62,8 +69,8 @@ namespace Const
     ImColor const SelectionAreaFillColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 0.6f);
     ImColor const SelectionAreaBorderColor = ImColor::HSV(0.33f, 0.0f, 1.0f, 1.0f);
 
-    ImColor const CellFunctionOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
-    ImColor const CellFunctionOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
+    ImColor const CellTypeOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.5f);
+    ImColor const CellTypeOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
     ImColor const ExecutionNumberOverlayColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 0.8f);
     ImColor const ExecutionNumberOverlayShadowColor = ImColor::HSV(0.0f, 0.0f, 0.0f, 0.7f);
 
@@ -74,9 +81,10 @@ namespace Const
     ImColor const ToolbarButtonHoveredColor = ImColor::HSV(0, 0, 1, 0.35f);
 
     ImColor const ActionButtonTextColor = ImColor::HSV(0.54f, 0.43f, 1.0f, 1.0f);
-    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0.54f, 0.43f, 0.0f, 0.0f);
-    ImColor const ActionButtonHoveredColor = ImColor::HSV(0.54f, 0.43f, 0.3f, 1.0f);
-    ImColor const ActionButtonActiveColor = ImColor::HSV(0.54f, 0.43f, 0.45f, 1.0f);
+    ImColor const ActionButtonHighlightedTextColor = ImColor::HSV(0.9f, 0.6f, 1.0f, 1.0f);
+    ImColor const ActionButtonBackgroundColor = ImColor::HSV(0.54f, 0.43f, 0.2f, 1.0f);
+    ImColor const ActionButtonHoveredColor = ImColor::HSV(0.54f, 0.43f, 0.4f, 1.0f);
+    ImColor const ActionButtonActiveColor = ImColor::HSV(0.54f, 0.43f, 0.55f, 1.0f);
 
     ImColor const ButtonColor = ImColor::HSV(0.54f, 0.33f, 1.0f, 1.0f);
     ImColor const ToggleColor = ImColor::HSV(0.58f, 0.83f, 1.0f, 1.0f);
@@ -90,7 +98,9 @@ namespace Const
 
     ImColor const GenomePreviewConnectionColor = ImColor::HSV(0, 0, 0.5f);
     ImColor const GenomePreviewDotSymbolColor = ImColor::HSV(0, 0, 0.7f);
-    ImColor const GenomePreviewInfinitySymbolColor = ImColor::HSV(0, 0, 0.7f);
+    ImColor const GenomePreviewLinkToGeneBackgroundColor1 = ImColor::HSV(0, 0, 1.0f);
+    ImColor const GenomePreviewLinkToGeneBackgroundColor2 = ImColor::HSV(0, 0, 0.6f);
+    ImColor const GenomePreviewLinkToGeneTextColor = ImColor::HSV(0, 0, 0);
     ImColor const GenomePreviewStartColor = ImColor::HSV(0.58f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewEndColor = ImColor::HSV(0.0f, 0.8f, 1.0f, 1.0f);
     ImColor const GenomePreviewMultipleConstructorColor = ImColor::HSV(0.375f, 0.8f, 1.0f, 1.0f);
@@ -104,14 +114,11 @@ namespace Const
     ImColor const BrowserAddReactionButtonTextColor = ImColor::HSV(0.375f, 0.6f, 0.7f, 1.0f);
     ImColor const BrowserDownloadButtonTextColor = ImColor::HSV(0.55f, 0.6f, 1.0f, 1.0f);
     ImColor const BrowserDeleteButtonTextColor = ImColor::HSV(0.0f, 0.6f, 0.8f, 1.0f);
+    ImColor const BrowserLeafTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
     ImColor const BrowserResourceTextColor = ImColor::HSV(0.0f, 0.0f, 1.0f);
     ImColor const BrowserResourceLineColor = ImColor::HSV(0.0f, 0.0f, 0.5f);
     ImColor const BrowserResourceNewTextColor = ImColor::HSV(0.15f, 0.8f, 1.0f);
     ImColor const BrowserResourceSymbolColor = ImColor::HSV(0.0f, 0.0f, 1.0f, 1.0f);
-
-    ImColor const BrowserVersionOkTextColor = ImColor::HSV(0.58f, 0.2f, 1.0f);
-    ImColor const BrowserVersionOutdatedTextColor = ImColor::HSV(0.0f, 0.0f, 0.6f);
-    ImColor const BrowserVersionNewerTextColor = ImColor::HSV(0.0f, 0.2f, 1.0f);
 }
 
 class StyleRepository

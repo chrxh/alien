@@ -1,39 +1,44 @@
 #pragma once
+
+#include <vector>
+
 #include "Base/Definitions.h"
+#include "Base/Macros.h"
+
+struct SignalRestrictionPreviewDescription
+{
+    auto operator<=>(SignalRestrictionPreviewDescription const&) const = default;
+
+    MEMBER(SignalRestrictionPreviewDescription, float, startAngle, 0);
+    MEMBER(SignalRestrictionPreviewDescription, float, endAngle, 0);
+};
 
 struct CellPreviewDescription
 {
-    RealVector2D pos;
-    int executionOrderNumber = 0;
-    int color = 0;
-    int nodeIndex = 0;
-    bool partStart = false;
-    bool partEnd = false;
-    bool multipleConstructor = false;
-    bool selfReplicator = false;
+    auto operator<=>(CellPreviewDescription const&) const = default;
+    
+    MEMBER(CellPreviewDescription, RealVector2D, pos, {});
+    MEMBER(CellPreviewDescription, int, color, 0);
+    MEMBER(CellPreviewDescription, int, geneIndex, 0);
+    MEMBER(CellPreviewDescription, int, nodeIndex, 0);
+    MEMBER(CellPreviewDescription, std::optional<SignalRestrictionPreviewDescription>, signalRestriction, std::nullopt);
+    MEMBER(CellPreviewDescription, std::optional<int>, constructorGeneIndex, std::nullopt);
 };
 
 struct ConnectionPreviewDescription
 {
-    RealVector2D cell1;
-    RealVector2D cell2;
-    bool arrowToCell1 = false;
-    bool arrowToCell2 = false;
-};
-
-struct SymbolPreviewDescription
-{
-    enum class Type
-    {
-        Dot,
-        Infinity
-    } type;
-    RealVector2D pos;
+    auto operator<=>(ConnectionPreviewDescription const&) const = default;
+    
+    MEMBER(ConnectionPreviewDescription, RealVector2D, cell1, {});
+    MEMBER(ConnectionPreviewDescription, RealVector2D, cell2, {});
+    MEMBER(ConnectionPreviewDescription, bool, arrowToCell1, false);
+    MEMBER(ConnectionPreviewDescription, bool, arrowToCell2, false);
 };
 
 struct PreviewDescription
 {
-    std::vector<CellPreviewDescription> cells;
-    std::vector<ConnectionPreviewDescription> connections;
-    std::vector<SymbolPreviewDescription> symbols;
+    auto operator<=>(PreviewDescription const&) const = default;
+    
+    MEMBER(PreviewDescription, std::vector<CellPreviewDescription>, cells, {});
+    MEMBER(PreviewDescription, std::vector<ConnectionPreviewDescription>, connections, {});
 };

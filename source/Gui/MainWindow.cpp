@@ -19,7 +19,7 @@
 
 #include "ImFileDialog.h"
 #include "implot.h"
-#include "Fonts/IconsFontAwesome5.h"
+#include <Fonts/IconsFontAwesome5.h>
 
 #include "Base/Resources.h"
 #include "Base/Exceptions.h"
@@ -38,7 +38,7 @@
 #include "Viewport.h"
 #include "NewSimulationDialog.h"
 #include "MainLoopController.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "AboutDialog.h"
 #include "MassOperationsDialog.h"
 #include "LogWindow.h"
@@ -52,7 +52,6 @@
 #include "WindowController.h"
 #include "CreatorWindow.h"
 #include "MultiplierWindow.h"
-#include "PatternAnalysisDialog.h"
 #include "GenericMessageDialog.h"
 #include "FpsController.h"
 #include "BrowserWindow.h"
@@ -69,7 +68,6 @@
 #include "ImageToPatternDialog.h"
 #include "GenericFileDialog.h"
 #include "ShaderWindow.h"
-#include "GenomeEditorWindow.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
@@ -133,7 +131,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
     NewSimulationDialog::get().setup(_simulationFacade);
-    PatternAnalysisDialog::get().setup(_simulationFacade);
     BrowserWindow::get().setup(_simulationFacade, _persisterFacade);
     ActivateUserDialog::get().setup(_simulationFacade);
     NewPasswordDialog::get().setup(_simulationFacade);

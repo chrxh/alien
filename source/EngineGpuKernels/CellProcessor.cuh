@@ -3,17 +3,17 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 
-#include "TOs.cuh"
+#include "ObjectTO.cuh"
 #include "Base.cuh"
 #include "ObjectFactory.cuh"
 #include "Map.cuh"
 #include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
-#include "GenomeDecoder.cuh"
+#include "ConstructorHelper.cuh"
 #include "RadiationProcessor.cuh"
-#include "SpotCalculator.cuh"
+#include "ParameterCalculator.cuh"
 
 class CellProcessor
 {
@@ -34,8 +34,8 @@ public:
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
 
     __inline__ __device__ static void aging(SimulationData& data);
-    __inline__ __device__ static void livingStateTransition_calcFutureState(SimulationData& data);
-    __inline__ __device__ static void livingStateTransition_applyNextState(SimulationData& data);
+    __inline__ __device__ static void cellStateTransition_calcFutureState(SimulationData& data);
+    __inline__ __device__ static void cellStateTransition_applyNextState(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
@@ -44,6 +44,10 @@ public:
     __inline__ __device__ static void decay(SimulationData& data);
 
     __inline__ __device__ static void resetDensity(SimulationData& data);
+
+    __inline__ __device__ static void updateRenderingData(SimulationData& data);
+
+    __inline__ __device__ static void performEnergyFlow(SimulationData& data);
 
 private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
@@ -55,7 +59,7 @@ private:
 
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -63,14 +67,14 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
         cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
-        cell->tag = 0;
+        cell->tempValue = 0;
     }
 }
 
 __inline__ __device__ void CellProcessor::updateMap(SimulationData& data)
 {
-    auto const partition = calcPartition(data.objects.cellPointers.getNumEntries(), blockIdx.x, gridDim.x);
-    Cell** cellPointers = &data.objects.cellPointers.at(partition.startIndex);
+    auto const partition = calcPartition(data.objects.cells.getNumEntries(), blockIdx.x, gridDim.x);
+    Cell** cellPointers = &data.objects.cells.at(partition.startIndex);
     data.cellMap.set_block(partition.numElements(), cellPointers);
 }
 
@@ -81,9 +85,9 @@ __inline__ __device__ void CellProcessor::clearDensityMap(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cellPointers.at(index));
+        data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cells.at(index));
     }
 }
 
@@ -121,9 +125,9 @@ namespace
 
 __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto blockPartition = calcBlockPartition(cells.getNumEntries());
-    auto const& smoothingLength = cudaSimulationParameters.motionData.fluidMotion.smoothingLength;
+    auto const& smoothingLength = cudaSimulationParameters.smoothingLength.value;
 
     for (int cellIndex = blockPartition.startIndex; cellIndex <= blockPartition.endIndex; ++cellIndex) {
         auto& cell = cells.at(cellIndex);
@@ -146,10 +150,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             F_viscosity = {0, 0};
             cellPosDelta = {0, 0};
             density = 0;
-            cellMaxBindingEnergy = SpotCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellMaxBindingEnergy, &SimulationParametersZoneActivatedValues::cellMaxBindingEnergy, data, cell->pos);
-            cellFusionVelocity = SpotCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellFusionVelocity, &SimulationParametersZoneActivatedValues::cellFusionVelocity, data, cell->pos);
+            cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+            cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
             int radiusInt = ceilf(smoothingLength * 2);
             scanLength = radiusInt * 2 + 1;
@@ -185,9 +187,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                 if (cell != otherCell) {
 
                     //overlap correction
-                    if (!cell->barrier && distance < cudaSimulationParameters.cellMinDistance) {
-                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.cellMinDistance / 5);
-                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.cellMinDistance / 5);
+                    if (!cell->barrier && distance < cudaSimulationParameters.minCellDistance.value) {
+                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.minCellDistance.value / 5);
+                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.minCellDistance.value / 5);
                     }
 
                     bool isConnected = false;
@@ -218,8 +220,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                         }
 
                         //fusion
-                        if (Math::length(velDelta) >= cellFusionVelocity && cell->numConnections < cell->maxConnections
-                            && otherCell->numConnections < otherCell->maxConnections && cell->energy <= cellMaxBindingEnergy
+                        if (Math::length(velDelta) >= cellFusionVelocity && cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
+                            && (cell->sticky || otherCell->sticky)
+                            && cell->energy <= cellMaxBindingEnergy
                             && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier && !otherCell->barrier) {
                             CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                         }
@@ -274,8 +277,8 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
 
             cell->pos += cellPosDelta;
-            cell->shared1 += F_pressure * cudaSimulationParameters.motionData.fluidMotion.pressureStrength
-                + F_viscosity * cudaSimulationParameters.motionData.fluidMotion.viscosityStrength;
+            cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value
+                + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             cell->shared2.x = density;
         }
         __syncthreads();
@@ -284,13 +287,13 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
 __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctOverlap(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         data.cellMap.executeForEach(
-            cell->pos, cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance, cell->detached, [&](auto const& otherCell) {
+            cell->pos, cudaSimulationParameters.maxCollisionDistance.value, cell->detached, [&](auto const& otherCell) {
                 if (otherCell == cell) {
                     return;
                 }
@@ -302,8 +305,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
                 //overlap correction
                 if (!cell->barrier) {
-                    if (distance < cudaSimulationParameters.cellMinDistance) {
-                        cell->pos += posDelta * cudaSimulationParameters.cellMinDistance / 5;
+                    if (distance < cudaSimulationParameters.minCellDistance.value) {
+                        cell->pos += posDelta * cudaSimulationParameters.minCellDistance.value / 5;
                     }
                 }
 
@@ -332,8 +335,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                         atomicAdd(&otherCell->shared1.y, -force.y);
                     } else {
                         auto force = Math::normalized(posDelta)
-                            * (cudaSimulationParameters.motionData.collisionMotion.cellMaxCollisionDistance - Math::length(posDelta))
-                            * cudaSimulationParameters.motionData.collisionMotion.cellRepulsionStrength * barrierFactor;
+                            * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
+                            * cudaSimulationParameters.repulsionStrength.value * barrierFactor;
                         atomicAdd(&cell->shared1.x, force.x);
                         atomicAdd(&cell->shared1.y, force.y);
                         atomicAdd(&otherCell->shared1.x, -force.x);
@@ -341,19 +344,11 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                     }
 
                     //fusion
-                    auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-                        &SimulationParametersZoneValues::cellMaxBindingEnergy,
-                        &SimulationParametersZoneActivatedValues::cellMaxBindingEnergy,
-                        data,
-                        cell->pos);
+                    auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+                    auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
-                    auto cellFusionVelocity = SpotCalculator::calcParameter(
-                        &SimulationParametersZoneValues::cellFusionVelocity,
-                        &SimulationParametersZoneActivatedValues::cellFusionVelocity,
-                        data,
-                        cell->pos);
-
-                    if (cell->numConnections < cell->maxConnections && otherCell->numConnections < otherCell->maxConnections
+                    if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
+                        && (cell->sticky || otherCell->sticky)
                         && Math::length(velDelta) >= cellFusionVelocity
                         && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
                         && !otherCell->barrier) {
@@ -366,7 +361,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
 __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -376,9 +371,8 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
             continue;
         }
 
-        if (Math::length(cell->shared1) > SpotCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellMaxForce, &SimulationParametersZoneActivatedValues::cellMaxForce, data, cell->pos, cell->color)) {
-            if (data.numberGen1.random() < cudaSimulationParameters.cellMaxForceDecayProb) {
+        if (Math::length(cell->shared1) > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, cell->pos, cell->color)) {
+            if (data.primaryNumberGen.random() < cudaSimulationParameters.maxForceDecayProbability) {
                 CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             }
         }
@@ -387,7 +381,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -398,8 +392,8 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
         }
 
         cell->vel += cell->shared1;
-        if (Math::length(cell->vel) > cudaSimulationParameters.cellMaxVelocity) {
-            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.cellMaxVelocity;
+        if (Math::length(cell->vel) > cudaSimulationParameters.maxVelocity.value) {
+            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.maxVelocity.value;
         }
         cell->shared1 = {0, 0};
     }
@@ -407,7 +401,7 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data, bool considerAngles)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -459,11 +453,11 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
                     auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellStiffnessSquared;
 
-                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.cellMinDistance) * strength;
+                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.minCellDistance.value) * strength;
                     Math::rotateQuarterClockwise(force1);
 
                     auto force2 =
-                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.cellMinDistance) * strength;
+                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.minCellDistance.value) * strength;
                     Math::rotateQuarterCounterClockwise(force2);
 
                     if (referenceAngleFromPrevious < actualAngleFromPrevious) {
@@ -492,7 +486,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
 __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -508,7 +502,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             auto displacement = connectedCell->pos - cell->pos;
             data.cellMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
-            if (actualDistance > cudaSimulationParameters.cellMaxBindingDistance[cell->color]) {
+            if (actualDistance > cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
                 scheduleForDestruction = true;
             }
         }
@@ -516,7 +510,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             for (int i = 0; i < cell->numConnections; ++i) {
                 auto connectedCell = cell->connections[i].cell;
-                connectedCell->livingState = LivingState_Detaching;
+                connectedCell->cellState = CellState_Detaching;
             }
         }
     }
@@ -524,18 +518,18 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
-            cell->pos += cell->vel * cudaSimulationParameters.timestepSize;
+            cell->pos += cell->vel * cudaSimulationParameters.timestepSize.value;
             data.cellMap.correctPosition(cell->pos);
         } else {
-            cell->pos += cell->vel * cudaSimulationParameters.timestepSize
-                + cell->shared1 * cudaSimulationParameters.timestepSize * cudaSimulationParameters.timestepSize / 2;
+            cell->pos += cell->vel * cudaSimulationParameters.timestepSize.value
+                + cell->shared1 * cudaSimulationParameters.timestepSize.value * cudaSimulationParameters.timestepSize.value / 2;
             data.cellMap.correctPosition(cell->pos);
             cell->shared2 = cell->shared1;  //forces
             cell->shared1 = {0, 0};
@@ -545,7 +539,7 @@ __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& d
 
 __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -554,48 +548,48 @@ __inline__ __device__ void CellProcessor::verletVelocityUpdate(SimulationData& d
             continue;
         }
         auto acceleration = (cell->shared1 + cell->shared2) / 2;
-        cell->vel += acceleration * cudaSimulationParameters.timestepSize;
+        cell->vel += acceleration * cudaSimulationParameters.timestepSize.value;
     }
 }
 
 __inline__ __device__ void CellProcessor::aging(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.objects.cellPointers.at(index);
+        auto& cell = data.objects.cells.at(index);
         if (cell->barrier) {
             continue;
         }
         ++cell->age;
 
 
-        if (cudaSimulationParameters.features.cellColorTransitionRules) {
+        if (cudaSimulationParameters.colorTransitionRulesToggle.value) {
             int transitionDuration;
             int targetColor;
             auto color = calcMod(cell->color, MAX_COLORS);
-            auto spotIndex = SpotCalculator::getFirstMatchingSpotOrBase(data, cell->pos, &SimulationParametersZoneActivatedValues::cellColorTransition);
-            if (spotIndex == -1) {
-                transitionDuration = cudaSimulationParameters.baseValues.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.baseValues.cellColorTransitionTargetColor[color];
+            auto index = ParameterCalculator::getFirstMatchingLayerOrBase(data, cell->pos, cudaSimulationParameters.colorTransitionRules);
+            if (index == -1) {
+                transitionDuration = cudaSimulationParameters.colorTransitionRules.baseValue[color].duration;
+                targetColor = cudaSimulationParameters.colorTransitionRules.baseValue[color].targetColor;
             } else {
-                transitionDuration = cudaSimulationParameters.zone[spotIndex].values.cellColorTransitionDuration[color];
-                targetColor = cudaSimulationParameters.zone[spotIndex].values.cellColorTransitionTargetColor[color];
+                transitionDuration = cudaSimulationParameters.colorTransitionRules.layerValues[index].value[color].duration;
+                targetColor = cudaSimulationParameters.colorTransitionRules.layerValues[index].value[color].targetColor;
             }
             if (transitionDuration > 0 && cell->age > transitionDuration) {
                 cell->color = targetColor;
                 cell->age = 0;
             }
         }
-        if (cell->livingState == LivingState_Ready && cell->activationTime > 0) {
+        if (cell->cellState == CellState_Ready && cell->activationTime > 0) {
             --cell->activationTime;
         }
     }
 }
 
 
-__inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(SimulationData& data)
+__inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -605,83 +599,103 @@ __inline__ __device__ void CellProcessor::livingStateTransition_calcFutureState(
         bool isOtherCreatureNeighborDetaching = false;
         bool isSameCreatureNeighborReviving= false;
         bool isNeighborActivating = false;
+        int activatingCellConnection = -1;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
-            if (connectedCell->creatureId == cell->creatureId) {
-                auto connectedLivingState = connectedCell->livingState;
-                if (connectedLivingState == LivingState_Detaching) {
+            if (cell->isSameCreature(connectedCell)) {
+                auto connectedCellState = connectedCell->cellState;
+                if (connectedCellState == CellState_Detaching) {
                     isSameCreatureNeighborDetaching = true;
-                } else if (connectedLivingState == LivingState_Reviving) {
+                } else if (connectedCellState == CellState_Reviving) {
                     isSameCreatureNeighborReviving = true;
-                } else if (connectedLivingState == LivingState_Activating) {
-                    isNeighborActivating = true;
+                } else if (connectedCellState == CellState_Activating) {
+                    if (connectedCell->connections[0].cell == cell) {
+                        isNeighborActivating = true;
+                        activatingCellConnection = i;
+                    }
                 }
             } else {
-                if (connectedCell->livingState == LivingState_Detaching) {
+                if (connectedCell->cellState == CellState_Detaching) {
                     isOtherCreatureNeighborDetaching = true;
                 }
             }
         }
 
-        auto origLivingState = cell->livingState;
-        auto livingState = origLivingState;
+        auto origCellState = cell->cellState;
+        auto cellState = origCellState;
 
         if (cell->barrier) {
-            livingState = LivingState_Ready;
-        } else if (origLivingState == LivingState_Activating) {
-            livingState = LivingState_Ready;
-            if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellResetAgeAfterActivation) {
+            cellState = CellState_Ready;
+        } else if (origCellState == CellState_Activating) {
+            cellState = CellState_Ready;
+            if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
                 atomicExch(&cell->age, 0);
             }
-        } else if (origLivingState == LivingState_Reviving) {
-            livingState = LivingState_Ready;
-        } else if (origLivingState == LivingState_UnderConstruction) {
+        } else if (origCellState == CellState_Reviving) {
+            cellState = CellState_Ready;
+        } else if (origCellState == CellState_Constructing) {
             if (isNeighborActivating) {
-                livingState = LivingState_Activating;
-            }
-            if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
-                livingState = LivingState_Detaching;
-            }
-        } else if (origLivingState == LivingState_Detaching) {
-            if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie) {
-                livingState = LivingState_Reviving;
-            }
-            if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_None) {
-                livingState = LivingState_Ready;
-            }
-        } else if (origLivingState == LivingState_Ready) {
-            if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences != CellDeathConsquences_None) {
-                if (cudaSimulationParameters.cellDeathConsequences == CellDeathConsquences_DetachedPartsDie && cell->cellFunction == CellFunction_Constructor
-                    && GenomeDecoder::containsSelfReplication(cell->cellFunctionData.constructor)) {
-                    livingState = LivingState_Reviving;
+                cellState = CellState_Activating;
+                auto prevCell = cell->connections[activatingCellConnection].cell;
+                if (prevCell != cell->connections[0].cell) {
+                    cell->angleToFront =
+                        Math::normalizedAngle(prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
                 } else {
-                    livingState = LivingState_Detaching;
+                    cell->angleToFront = Math::normalizedAngle(prevCell->angleToFront + 180.0f, -180.0f);
+                }
+                cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
+            }
+            if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
+                cellState = CellState_Detaching;
+            }
+        } else if (origCellState == CellState_Detaching) {
+            if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie) {
+                cellState = CellState_Reviving;
+            }
+            if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_None) {
+                cellState = CellState_Ready;
+            }
+        } else if (origCellState == CellState_Ready) {
+            if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
+                auto isSeparation = false;
+                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->creature != nullptr
+                    && cell->cellType == CellType_Constructor) {
+                    auto const& constructor = cell->cellTypeData.constructor;
+                    auto const& gene = ConstructorHelper::getCurrentGene(constructor, cell->creature->genome);
+                    if (gene->separation) {
+                        isSeparation = true;
+                    }
+                }
+                if (isSeparation) {
+                    cellState = CellState_Reviving;
+                } else {
+                    cellState = CellState_Detaching;
                 }
             }
         }
-        cell->tag = livingState;
+        cell->tempValue = cellState;
     }
 }
 
-__inline__ __device__ void CellProcessor::livingStateTransition_applyNextState(SimulationData& data)
+__inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        cell->livingState = cell->tag;
-        cell->tag = 0;
+        cell->cellState = cell->tempValue;
+        cell->tempValue = 0;
     }
 }
 
 __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
-    auto const innerFriction = cudaSimulationParameters.innerFriction;
+    auto const innerFriction = cudaSimulationParameters.innerFriction.value;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
@@ -706,7 +720,7 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
 
 __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto const partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -716,15 +730,14 @@ __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
             continue;
         }
 
-        auto friction = SpotCalculator::calcParameter(
-            &SimulationParametersZoneValues::friction, &SimulationParametersZoneActivatedValues::friction, data, cell->pos);
+        auto friction = ParameterCalculator::calcParameter(cudaSimulationParameters.friction, data, cell->pos);
         cell->vel = cell->vel * (1.0f - friction);
     }
 }
 
 __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
 
     auto partition =
         calcAllThreadsPartition(cells.getNumEntries());
@@ -733,31 +746,26 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        if (data.numberGen1.random() < cudaSimulationParameters.radiationProb) {
+        if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
 
             auto radiationFactor = 0.0f;
-            if (cell->energy > cudaSimulationParameters.highRadiationMinCellEnergy[cell->color]) {
-                radiationFactor += cudaSimulationParameters.highRadiationFactor[cell->color];
+            if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold.value[cell->color]) {
+                radiationFactor += cudaSimulationParameters.radiationType2_strength.value[cell->color];
             }
-            if (cell->age > cudaSimulationParameters.radiationMinCellAge[cell->color]) {
-                radiationFactor += SpotCalculator::calcParameter(
-                    &SimulationParametersZoneValues::radiationCellAgeStrength,
-                    &SimulationParametersZoneActivatedValues::radiationCellAgeStrength,
-                    data,
-                    cell->pos,
-                    cell->color);
+            if (cell->age > cudaSimulationParameters.radiationType1_minimumAge.value[cell->color]) {
+                radiationFactor += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
             }
 
             if (radiationFactor > 0) {
 
                 auto const& cellEnergy = cell->energy;
                 auto energyLoss = cellEnergy * radiationFactor;
-                energyLoss = energyLoss / cudaSimulationParameters.radiationProb;
-                energyLoss = 2 * energyLoss * data.numberGen1.random();
+                energyLoss = energyLoss / cudaSimulationParameters.radiationProbability;
+                energyLoss = 2 * energyLoss * data.primaryNumberGen.random();
                 if (cellEnergy > 1) {
 
                     float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
-                        + Math::unitVectorOfAngle(data.numberGen1.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                        + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
                     float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f
                         - particleVel;  // minus particleVel because particle will still be moved in current time step
                     data.cellMap.correctPosition(particlePos);
@@ -774,7 +782,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
 __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition =
         calcAllThreadsPartition(cells.getNumEntries());
 
@@ -783,23 +791,16 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         if (cell->barrier) {
             continue;
         }
-        auto cellMaxBindingEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersZoneValues::cellMaxBindingEnergy, &SimulationParametersZoneActivatedValues::cellMaxBindingEnergy, data, cell->pos);
+        auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
         if (cell->energy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
 
-        auto cellMinEnergy = SpotCalculator::calcParameter(
-            &SimulationParametersZoneValues::cellMinEnergy, &SimulationParametersZoneActivatedValues::cellMinEnergy, data, cell->pos, cell->color);
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-        if (cell->livingState == LivingState_Dying || cell->livingState == LivingState_Detaching) {
-            auto cellDeathProbability = SpotCalculator::calcParameter(
-                &SimulationParametersZoneValues::cellDeathProbability,
-                &SimulationParametersZoneActivatedValues::cellDeathProbability,
-                data,
-                cell->pos,
-                cell->color);
-            if (data.numberGen1.random() < cellDeathProbability) {
+        if (cell->cellState == CellState_Dying || cell->cellState == CellState_Detaching) {
+            auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
+            if (data.primaryNumberGen.random() < cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }
@@ -809,62 +810,103 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             cellDestruction = true;
         }
 
-        auto cellMaxAge = cudaSimulationParameters.cellMaxAge[cell->color];
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellInactiveMaxAgeActivated && cell->mutationId != 1
-            && cell->cellFunctionUsed == CellFunctionUsed_No && cell->livingState == LivingState_Ready && cell->activationTime == 0) {
+        auto cellMaxAge = cudaSimulationParameters.maxCellAge.value[cell->color];
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->cellType != CellType_Free && cell->cellType != CellType_Structure
+            && cell->cellTriggered == CellTriggered_No && cell->cellState == CellState_Ready && cell->activationTime == 0) {
             bool adjacentCellsUsed = false;
             for (int i = 0; i < cell->numConnections; ++i) {
-                if (cell->connections[i].cell->cellFunctionUsed == CellFunctionUsed_Yes) {
+                if (cell->connections[i].cell->cellTriggered == CellTriggered_Yes) {
                     adjacentCellsUsed = true;
                     break;
                 }
             }
             if (!adjacentCellsUsed) {
-                auto cellInactiveMaxAge = SpotCalculator::calcParameter(
-                    &SimulationParametersZoneValues::cellInactiveMaxAge,
-                    &SimulationParametersZoneActivatedValues::cellInactiveMaxAge,
-                    data,
-                    cell->pos,
-                    cell->color);
+                auto cellInactiveMaxAge = ParameterCalculator::calcParameter(cudaSimulationParameters.maxAgeForInactiveCells, data, cell->pos, cell->color);
 
                 cellMaxAge = toInt(cellInactiveMaxAge);
             }
         }
-        if (cudaSimulationParameters.features.cellAgeLimiter && cudaSimulationParameters.cellEmergentMaxAgeActivated && cell->mutationId == 1) {
-            cellMaxAge = cudaSimulationParameters.cellEmergentMaxAge[cell->color];
+        if (cudaSimulationParameters.cellAgeLimiterToggle.value && cell->cellType == CellType_Free) {
+            cellMaxAge = cudaSimulationParameters.freeCellMaxAge.value[cell->color];
         }
         if (cellMaxAge > 0 && cell->age > cellMaxAge) {
             cellDestruction = true;
         }
 
         if (cellDestruction) {
-            auto orig = atomicExch(&cell->livingState, LivingState_Dying);
-            if (orig != LivingState_Dying) {
+            auto orig = atomicExch(&cell->cellState, CellState_Dying);
+            if (orig != CellState_Dying) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto const& connectedCell = cell->connections[i].cell;
-                    auto origConnected = atomicExch(&connectedCell->livingState, LivingState_Detaching);
-                    if (origConnected == LivingState_Dying) {
-                        atomicExch(&connectedCell->livingState, LivingState_Dying);
+                    auto origConnected = atomicExch(&connectedCell->cellState, CellState_Detaching);
+                    if (origConnected == CellState_Dying) {
+                        atomicExch(&connectedCell->cellState, CellState_Dying);
                     }
                 }
             }
-            //else {
-            //    if (data.numberGen1.random() < cudaSimulationParameters.clusterDecayProb[cell->color]) {
-            //        CellConnectionProcessor::scheduleDeleteCell(data, index);
-            //    }
-            //}
         }
     }
 }
 
 __inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
 {
-    auto& cells = data.objects.cellPointers;
+    auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
 
         cell->density = 1.0f;
+    }
+}
+
+__inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& data)
+{
+    auto& cells = data.objects.cells;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->eventCounter > 0) {
+            --cell->eventCounter;
+        }
+    }
+}
+
+__inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data)
+{
+    auto& cells = data.objects.cells;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->numConnections == 0) {
+            continue;
+        }
+        auto i = data.timestep % cell->numConnections;
+        auto& connectedCell = cell->connections[i].cell;
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+
+        auto canConnectedCellHaveEnergy = connectedCell->cellType == CellType_Constructor && connectedCell->creature
+            && !ConstructorHelper::isFinished(connectedCell->cellTypeData.constructor, connectedCell->creature->genome)
+            && cell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        auto canCellProvideEnergy =
+            (cell->cellType != CellType_Constructor
+                                     || (cell->creature && ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome)))
+            && cell->energy > connectedCell->energy;
+        float flow = 0;
+        if (canConnectedCellHaveEnergy) {
+            flow = cell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        } else if (canCellProvideEnergy) {
+            flow = (cell->energy - connectedCell->energy) / 2;
+        }
+        if (flow > 0) {
+            auto orig = atomicAdd(&cell->energy, -flow);
+            if (orig < cellMinEnergy) {
+                atomicAdd(&cell->energy, flow);
+            } else {
+                atomicAdd(&connectedCell->energy, flow);
+            }
+        }
     }
 }

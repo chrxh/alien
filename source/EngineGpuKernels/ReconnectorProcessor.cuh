@@ -2,9 +2,9 @@
 
 
 #include "CellConnectionProcessor.cuh"
-#include "CellFunctionProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
-#include "EngineInterface/CellFunctionConstants.h"
+#include "EngineInterface/CellTypeConstants.h"
 #include "Object.cuh"
 #include "RadiationProcessor.cuh"
 #include "SimulationData.cuh"
@@ -18,8 +18,8 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
-    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal);
+    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -28,7 +28,7 @@ private:
 
 __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
-    auto& operations = data.cellFunctionOperations[CellFunction_Reconnector];
+    auto& operations = data.cellTypeOperations[CellType_Reconnector];
     auto partition = calcAllThreadsPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, result, operations.at(i).cell);
@@ -37,24 +37,20 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto signal = CellFunctionProcessor::calcInputSignal(cell);
-    CellFunctionProcessor::updateInvocationState(cell, signal);
-
-    if (signal.channels[0] >= cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
-        tryCreateConnection(data, statistics, cell, signal);
-    } else if (signal.channels[0] <= -cudaSimulationParameters.cellFunctionReconnectorSignalThreshold) {
-        removeConnections(data, statistics, cell, signal);
+    if (cell->signal.channels[0] >= TRIGGER_THRESHOLD) {
+        tryCreateConnection(data, statistics, cell);
+    } else if (cell->signal.channels[0] <= -TRIGGER_THRESHOLD) {
+        removeConnections(data, statistics, cell);
     }
-    CellFunctionProcessor::setSignal(cell, signal);
 }
 
-__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)
+__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto const& reconnector = cell->cellFunctionData.reconnector;
+    auto const& reconnector = cell->cellTypeData.reconnector;
     Cell* closestCell = nullptr;
     float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.cellFunctionReconnectorRadius[cell->color], cell->detached, [&](Cell* const& otherCell) {
-        if (cell->creatureId != 0 && otherCell->creatureId == cell->creatureId) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.reconnectorRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
+        if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
             return;
         }
         if (otherCell->barrier) {
@@ -63,25 +59,35 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToSameMutants && otherCell->mutationId != cell->mutationId) {
+        if (reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants
+            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
+            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
+            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
+            if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
+                return;
+            }
+        }
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToOtherMutants
-            && (otherCell->mutationId == cell->mutationId || otherCell->mutationId == 0 || otherCell->mutationId == 1)) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
+                || cell->creature->mutationId == otherCell->creature->ancestorId)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToHandcraftedCells && otherCell->mutationId != 0) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToFreeCells && otherCell->mutationId != 1) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToStructures && otherCell->cellType != CellType_Structure) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToLessComplexMutants
-            && otherCell->genomeComplexity >= cell->genomeComplexity) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity >= cell->creature->genomeComplexity)) {
             return;
         }
-        if (reconnector.restrictToMutants == ReconnectorRestrictToMutants_RestrictToMoreComplexMutants
-            && otherCell->genomeComplexity <= cell->genomeComplexity) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants
+            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->genomeComplexity <= cell->creature->genomeComplexity)) {
             return;
         }
         if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
@@ -94,16 +100,14 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         }
     });
 
-    signal.channels[0] = 0;
+    cell->signal.channels[0] = 0;
     if (closestCell) {
         SystemDoubleLock lock;
         lock.init(&cell->locked, &closestCell->locked);
         if (lock.tryLock()) {
             if (cell->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
-                closestCell->maxConnections = min(max(closestCell->maxConnections, closestCell->numConnections + 1), MAX_CELL_BONDS);
-                cell->maxConnections = min(max(cell->maxConnections, cell->numConnections + 1), MAX_CELL_BONDS);
                 CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
-                signal.channels[0] = 1;
+                cell->signal.channels[0] = 1;
                 statistics.incNumReconnectorCreated(cell->color);
             }
             lock.releaseLock();
@@ -111,15 +115,18 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
     }
 }
 
-__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell, Signal& signal)
+__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    signal.channels[0] = 0;
+    cell->signal.channels[0] = 0;
     if (cell->tryLock()) {
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->creatureId != cell->creatureId) {
+            if (connectedCell->creature == nullptr) {
+                continue;
+            }
+            if (connectedCell->creature->id != cell->creature->id) {
                 CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
-                signal.channels[0] = 1;
+                cell->signal.channels[0] = 1;
                 statistics.incNumReconnectorRemoved(cell->color);
             }
         }

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "Network/NetworkResourceRawTO.h"
 #include "Network/NetworkResourceService.h"
 

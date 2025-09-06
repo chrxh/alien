@@ -4,7 +4,7 @@
 #include <Fonts/IconsFontAwesome5.h>
 
 #include "StyleRepository.h"
-#include "AlienImGui.h"
+#include "AlienGui.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -182,7 +182,7 @@ void GettingStartedWindow::processIntern()
         drawItemText("Constructor: A constructor can build a cell network based on a built-in genome. The construction is done cell by cell and requires "
                      "energy. A constructor can either be controlled via signals or become active automatically (default).");
         drawItemText("Injector: It can infect other constructor cells to inject its own built-in genome.");
-        drawItemText("Nerve: On the one hand, it transfers signals from connected input cells and on the other hand, it can optionally generate "
+        drawItemText("Generator: On the one hand, it transfers signals from connected input cells and on the other hand, it can optionally generate "
                      "signals at specific intervals.");
         drawItemText("Attacker: It attacks surrounding cells from other cell networks by stealing energy from them.");
         drawItemText("Defender: It reduces the attack strength when another cell in the vicinity performs an attack.");
@@ -238,8 +238,8 @@ void GettingStartedWindow::processIntern()
         drawHeading1("Simulation parameters");
         drawParagraph(
             "All parameters relevant to the simulation can be adjusted here. By default, the parameters are set uniformly for the entire world. However, it is "
-            "also possible to allow certain parameters to vary locally in special zones. To do this, you can create a new tab in the simulation parameter window by clicking on "
-            "the '+' button. It adds a spatially (fuzzy) delimited area where the global parameters can be overwritten. This zone is also visible by a "
+            "also possible to allow certain parameters to vary locally in special layers. To do this, you can create a new tab in the simulation parameter window by clicking on "
+            "the '+' button. It adds a spatially (fuzzy) delimited area where the global parameters can be overwritten. This layer is also visible by a "
             "different color.");
         drawParagraph("Regardless of this, many parameters can also be set depending on the cell color. For this purpose click the '+' button beside the "
                       "parameter. This customization is useful when you want to define different classes of species.");
@@ -375,7 +375,7 @@ void GettingStartedWindow::processIntern()
         drawHeading2("How can I create a cell signal in the first place?");
         drawParagraph("To activate most cell functions, an input from a connected cell in the form of a signal is required. The simplest methods "
                       "to generate a signal are as follows:");
-        drawItemText("The most direct approach involves using a nerve cell that generates an signal at regular time intervals. The advantage here is that "
+        drawItemText("The most direct approach involves using a generator cell that generates an signal at regular time intervals. The advantage here is that "
             "you can precisely configure the length of the time intervals.");
         drawItemText("Signals can also be generated within a neuron cell using bias values.");
         drawParagraph("Additionally, other cells such as constructor cells provide an output signal as soon as they are triggered (automatically).");
@@ -390,7 +390,7 @@ void GettingStartedWindow::processIntern()
         //auto weblink = "https://alien-project.gitbook.io/docs";
         //auto textWidth = ImGui::CalcTextSize(weblink).x;
         //ImGui::SetCursorPosX((windowWidth - textWidth) * 0.5f);
-        //if(AlienImGui::Button(weblink)) {
+        //if(AlienGui::Button(weblink)) {
         //    openWeblink(weblink);
         //}
         //ImGui::PopFont();
@@ -401,8 +401,8 @@ void GettingStartedWindow::processIntern()
     }
     ImGui::EndChild();
 
-    AlienImGui::Separator();
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
+    AlienGui::Separator();
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Show after startup"), _showAfterStartup);
 }
 
 void GettingStartedWindow::drawTitle()
@@ -414,72 +414,72 @@ void GettingStartedWindow::drawTitle()
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("A");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
-    AlienImGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("rtificial ");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("LI");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
-    AlienImGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("fe ");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumBoldFont());
     ImGui::Text("EN");
     ImGui::PopFont();
 
     ImGui::SameLine();
-    AlienImGui::NegativeSpacing();
-    AlienImGui::NegativeSpacing();
+    AlienGui::MoveTickLeft();
+    AlienGui::MoveTickLeft();
     ImGui::PushFont(StyleRepository::get().getMediumFont());
     ImGui::Text("vironment ?");
     ImGui::PopFont();
 
     ImGui::PopStyleColor();
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void GettingStartedWindow::drawHeading1(std::string const& text)
 {
-    AlienImGui::Separator();
+    AlienGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
-    AlienImGui::BoldText(text);
+    AlienGui::BoldText(text);
     ImGui::PopStyleColor();
-    AlienImGui::Separator();
+    AlienGui::Separator();
 }
 
 void GettingStartedWindow::drawHeading2(std::string const& text)
 {
     ImGui::Spacing();
-    AlienImGui::BoldText(text);
+    AlienGui::BoldText(text);
 }
 
 void GettingStartedWindow::drawItemText(std::string const& text)
 {
     ImGui::Text(ICON_FA_CHEVRON_RIGHT);
     ImGui::SameLine();
-    AlienImGui::Text(text);
+    AlienGui::Text(text);
 }
 
 void GettingStartedWindow::drawParagraph(std::string const& text)
 {
-    AlienImGui::Text(text);
+    AlienGui::Text(text);
 }
  

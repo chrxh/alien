@@ -45,5 +45,5 @@ private:
 
     bool _randomizeMutationId = false;
 
-    bool _restrictToSelectedClusters = false;
+    bool _restrictToSelectedCreatures = false;
 };

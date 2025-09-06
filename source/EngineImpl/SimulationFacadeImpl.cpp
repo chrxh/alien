@@ -2,12 +2,13 @@
 
 #include "EngineInterface/Descriptions.h"
 
-void _SimulationFacadeImpl::newSimulation(uint64_t timestep, GeneralSettings const& generalSettings, SimulationParameters const& parameters)
+void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
-    _generalSettings = generalSettings;
-    _origSettings.generalSettings = generalSettings;
+    _worldSize = worldSize;
+    _origSettings.worldSizeX = worldSize.x;
+    _origSettings.worldSizeY = worldSize.y;
     _origSettings.simulationParameters = parameters;
-    _worker.newSimulation(timestep, generalSettings, parameters);
+    _worker.newSimulation(timestep, _origSettings);
 
     _thread = new std::thread(&EngineWorker::runThreadLoop, &_worker);
 
@@ -78,47 +79,29 @@ void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-ClusteredDataDescription _SimulationFacadeImpl::getClusteredSimulationData()
-{
-    auto size = getWorldSize();
-    return _worker.getClusteredSimulationData({-10, -10}, {size.x + 10, size.y + 10});
-}
-
-DataDescription _SimulationFacadeImpl::getSimulationData()
+CollectionDescription _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-ClusteredDataDescription _SimulationFacadeImpl::getSelectedClusteredSimulationData(bool includeClusters)
-{
-    _worker.updateSelection();
-    return _worker.getSelectedClusteredSimulationData(includeClusters);
-}
-
-DataDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
+CollectionDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-DataDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
+CollectionDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationFacadeImpl::addAndSelectSimulationData(DataDescription const& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(CollectionDescription&& dataToAdd)
 {
-    _worker.addAndSelectSimulationData(dataToAdd);
+    _worker.addAndSelectSimulationData(std::move(dataToAdd));
 }
 
-void _SimulationFacadeImpl::setClusteredSimulationData(ClusteredDataDescription const& dataToUpdate)
-{
-    _worker.setClusteredSimulationData(dataToUpdate);
-    _selectionNeedsUpdate = true;
-}
-
-void _SimulationFacadeImpl::setSimulationData(DataDescription const& dataToUpdate)
+void _SimulationFacadeImpl::setSimulationData(CollectionDescription const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
@@ -180,6 +163,11 @@ void _SimulationFacadeImpl::changeParticle(ParticleDescription const& changedPar
     _worker.changeParticle(changedParticle);
 }
 
+bool _SimulationFacadeImpl::changeCreature(uint64_t creatureId, GenomeDescription const& genome)
+{
+    return _worker.changeCreature(creatureId, genome);
+}
+
 void _SimulationFacadeImpl::calcTimesteps(uint64_t timesteps)
 {
     _worker.calcTimesteps(timesteps);
@@ -213,11 +201,13 @@ bool _SimulationFacadeImpl::isSimulationRunning() const
 
 void _SimulationFacadeImpl::closeSimulation()
 {
-    _worker.beginShutdown();
-    _thread->join();
-    delete _thread;
-    _worker.endShutdown();
-    _selectionNeedsUpdate = true;
+    if (_thread) {
+        _worker.beginShutdown();
+        _thread->join();
+        delete _thread;
+        _worker.endShutdown();
+        _selectionNeedsUpdate = true;
+    }
 }
 
 uint64_t _SimulationFacadeImpl::getCurrentTimestep() const
@@ -267,17 +257,17 @@ void _SimulationFacadeImpl::setOriginalSimulationParameters(SimulationParameters
     _origSettings.simulationParameters = parameters;
 }
 
-GpuSettings _SimulationFacadeImpl::getGpuSettings() const
+CudaSettings _SimulationFacadeImpl::getGpuSettings() const
 {
     return _gpuSettings;
 }
 
-GpuSettings _SimulationFacadeImpl::getOriginalGpuSettings() const
+CudaSettings _SimulationFacadeImpl::getOriginalGpuSettings() const
 {
-    return _origSettings.gpuSettings;
+    return _origSettings.cudaSettings;
 }
 
-void _SimulationFacadeImpl::setGpuSettings_async(GpuSettings const& gpuSettings)
+void _SimulationFacadeImpl::setGpuSettings_async(CudaSettings const& gpuSettings)
 {
     _gpuSettings = gpuSettings;
     _worker.setGpuSettings_async(gpuSettings);
@@ -332,19 +322,14 @@ bool _SimulationFacadeImpl::updateSelectionIfNecessary()
     return result;
 }
 
-GeneralSettings _SimulationFacadeImpl::getGeneralSettings() const
-{
-    return _generalSettings;
-}
-
 IntVector2D _SimulationFacadeImpl::getWorldSize() const
 {
-    return {_generalSettings.worldSizeX, _generalSettings.worldSizeY};
+    return _worldSize;
 }
 
-RawStatisticsData _SimulationFacadeImpl::getRawStatistics() const
+StatisticsRawData _SimulationFacadeImpl::getStatisticsRawData() const
 {
-    return _worker.getRawStatistics();
+    return _worker.getStatisticsRawData();
 }
 
 StatisticsHistory const& _SimulationFacadeImpl::getStatisticsHistory() const
@@ -373,6 +358,36 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
+CollectionDescription _SimulationFacadeImpl::getPreviewData()
+{
+    return _worker.getPreviewData();
+}
+
+void _SimulationFacadeImpl::setPreviewData(CollectionDescription const& data)
+{
+    _worker.setPreviewData(data);
+}
+
+void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
+{
+    _worker.calcTimestepsForPreview(duration);
+}
+
+void _SimulationFacadeImpl::calcTimestepsForPreview(int numSteps)
+{
+    _worker.calcTimestepsForPreview(numSteps);
+}
+
+uint64_t _SimulationFacadeImpl::getCurrentTimestepForPreview()
+{
+    return _worker.getCurrentTimestepForPreview();
+}
+
+void _SimulationFacadeImpl::setCurrentTimestepForPreview(uint64_t timestep)
+{
+    _worker.setCurrentTimestepForPreview(timestep);
+}
+
 void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     _worker.testOnly_mutate(cellId, mutationType);
@@ -381,4 +396,29 @@ void _SimulationFacadeImpl::testOnly_mutate(uint64_t cellId, MutationType mutati
 void _SimulationFacadeImpl::testOnly_mutationCheck(uint64_t cellId)
 {
     _worker.testOnly_mutationCheck(cellId);
+}
+
+void _SimulationFacadeImpl::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
+{
+    _worker.testOnly_createConnection(cellId1, cellId2);
+}
+
+void _SimulationFacadeImpl::testOnly_cleanupAfterTimestep()
+{
+    _worker.testOnly_cleanupAfterTimestep();
+}
+
+void _SimulationFacadeImpl::testOnly_cleanupAfterDataManipulation()
+{
+    _worker.testOnly_cleanupAfterDataManipulation();
+}
+
+void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta)
+{
+    _worker.testOnly_resizeArrays(sizeDelta);
+}
+
+bool _SimulationFacadeImpl::testOnly_areArraysValid()
+{
+    return _worker.testOnly_areArraysValid();
 }

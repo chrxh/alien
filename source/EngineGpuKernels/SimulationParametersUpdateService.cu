@@ -17,23 +17,23 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
     auto result = changedParameters;
 
     if (updateConfig == SimulationParametersUpdateConfig::AllExceptChangingPositions) {
-        auto numSpots = std::min(currentParameters.numZones, changedParameters.numZones);
+        auto numSpots = std::min(currentParameters.numLayers, changedParameters.numLayers);
         for (int i = 0; i < numSpots; ++i) {
-            if (currentParameters.zone[i].velX != 0) {
-                result.zone[i].posX = currentParameters.zone[i].posX;
+            if (currentParameters.layerVelocity.layerValues[i].x != 0) {
+                result.layerPosition.layerValues[i].x = currentParameters.layerPosition.layerValues[i].x;
             }
-            if (currentParameters.zone[i].velY != 0) {
-                result.zone[i].posY = currentParameters.zone[i].posY;
+            if (currentParameters.layerVelocity.layerValues[i].y != 0) {
+                result.layerPosition.layerValues[i].y = currentParameters.layerPosition.layerValues[i].y;
             }
         }
 
-        auto numRadiationSources = std::min(currentParameters.numRadiationSources, changedParameters.numRadiationSources);
+        auto numRadiationSources = std::min(currentParameters.numLayers, changedParameters.numLayers);
         for (int i = 0; i < numRadiationSources; ++i) {
-            if (currentParameters.radiationSource[i].velX != 0) {
-                result.radiationSource[i].posX = currentParameters.radiationSource[i].posX;
+            if (currentParameters.sourceVelocity.sourceValues[i].x != 0) {
+                result.sourcePosition.sourceValues[i].x = currentParameters.sourcePosition.sourceValues[i].x;
             }
-            if (currentParameters.radiationSource[i].velY != 0) {
-                result.radiationSource[i].posY = currentParameters.radiationSource[i].posY;
+            if (currentParameters.sourceVelocity.sourceValues[i].y != 0) {
+                result.sourcePosition.sourceValues[i].y = currentParameters.sourcePosition.sourceValues[i].y;
             }
         }
     }
@@ -41,54 +41,53 @@ SimulationParameters SimulationParametersUpdateService::integrateChanges(
 }
 
 bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
-    Settings& settings,
+    SettingsForSimulation& settings,
     MaxAgeBalancer const& maxAgeBalancer,
     SimulationData const& simulationData,
-    RawStatisticsData const& statistics)
+    StatisticsRawData const& statistics)
 {
     auto result = false;
 
-    auto const& worldSizeX = settings.generalSettings.worldSizeX;
-    auto const& worldSizeY = settings.generalSettings.worldSizeY;
+    auto const& worldSizeX = settings.worldSizeX;
+    auto const& worldSizeY = settings.worldSizeY;
     SpaceCalculator space({worldSizeX, worldSizeY});
-    for (int i = 0; i < settings.simulationParameters.numRadiationSources; ++i) {
-        auto& source = settings.simulationParameters.radiationSource[i];
-        if (abs(source.velX) > NEAR_ZERO) {
-            source.posX += source.velX * settings.simulationParameters.timestepSize;
+    for (int i = 0; i < settings.simulationParameters.numSources; ++i) {
+        auto& sourcePos = settings.simulationParameters.sourcePosition.sourceValues[i];
+        auto& sourceVel = settings.simulationParameters.sourceVelocity.sourceValues[i];
+        if (abs(sourceVel.x) > NEAR_ZERO) {
+            sourcePos.x += sourceVel.x * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        if (abs(source.velY) > NEAR_ZERO) {
-            source.posY += source.velY * settings.simulationParameters.timestepSize;
+        if (abs(sourceVel.y) > NEAR_ZERO) {
+            sourcePos.y += sourceVel.y * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        auto correctedPosition = space.getCorrectedPosition({source.posX, source.posY});
-        source.posX = correctedPosition.x;
-        source.posY = correctedPosition.y;
+        auto correctedPosition = space.getCorrectedPosition(sourcePos);
+        sourcePos = correctedPosition;
     }
-    for (int i = 0; i < settings.simulationParameters.numZones; ++i) {
-        auto& spot = settings.simulationParameters.zone[i];
-        if (abs(spot.velX) > NEAR_ZERO) {
-            spot.posX += spot.velX * settings.simulationParameters.timestepSize;
+    for (int i = 0; i < settings.simulationParameters.numLayers; ++i) {
+        auto& layerPosition = settings.simulationParameters.layerPosition.layerValues[i];
+        auto& layerVelocity = settings.simulationParameters.layerVelocity.layerValues[i];
+        if (abs(layerVelocity.x) > NEAR_ZERO) {
+            layerPosition.x += layerVelocity.x * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        if (abs(spot.velY) > NEAR_ZERO) {
-            spot.posY += spot.velY * settings.simulationParameters.timestepSize;
+        if (abs(layerVelocity.y) > NEAR_ZERO) {
+            layerPosition.y += layerVelocity.y * settings.simulationParameters.timestepSize.value;
             result = true;
         }
-        auto correctedPosition = space.getCorrectedPosition({spot.posX, spot.posY});
-        spot.posX = correctedPosition.x;
-        spot.posY = correctedPosition.y;
+        layerPosition = space.getCorrectedPosition(layerPosition);
     }
 
-    auto externalEnergyPresent = settings.simulationParameters.externalEnergy > 0;
+    auto externalEnergyPresent = settings.simulationParameters.externalEnergy.value > 0;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor[i] > 0;
+        externalEnergyPresent |= settings.simulationParameters.externalEnergyBackflowFactor.value[i] > 0;
     }
-    externalEnergyPresent &= settings.simulationParameters.features.externalEnergyControl;
+    externalEnergyPresent &= settings.simulationParameters.externalEnergyControlToggle.value;
     if (externalEnergyPresent) {
         double temp;
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(&temp, simulationData.externalEnergy, sizeof(double), cudaMemcpyDeviceToHost));
-        settings.simulationParameters.externalEnergy = toFloat(temp);
+        settings.simulationParameters.externalEnergy.value = toFloat(temp);
         result = true;
     }
 

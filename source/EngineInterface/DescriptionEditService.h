@@ -12,121 +12,121 @@ class DescriptionEditService
 public:
     struct CreateRectParameters
     {
-        MEMBER_DECLARATION(CreateRectParameters, int, width, 10);
-        MEMBER_DECLARATION(CreateRectParameters, int, height, 10);
-        MEMBER_DECLARATION(CreateRectParameters, float, cellDistance, 1.0f);
-        MEMBER_DECLARATION(CreateRectParameters, float, energy, 100.0f);
-        MEMBER_DECLARATION(CreateRectParameters, float, stiffness, 1.0f);
-        MEMBER_DECLARATION(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateRectParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateRectParameters, int, maxConnections, 6);
-        MEMBER_DECLARATION(CreateRectParameters, int, color, 0);
-        MEMBER_DECLARATION(CreateRectParameters, bool, barrier, false);
-        MEMBER_DECLARATION(CreateRectParameters, bool, randomCreatureId, true);
-        MEMBER_DECLARATION(CreateRectParameters, int, mutationId, 0);
-        MEMBER_DECLARATION(CreateRectParameters, float, genomeComplexity, 0);
+        MEMBER(CreateRectParameters, int, width, 10);
+        MEMBER(CreateRectParameters, int, height, 10);
+        MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateRectParameters, float, energy, 100.0f);
+        MEMBER(CreateRectParameters, float, stiffness, 1.0f);
+        MEMBER(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateRectParameters, bool, sticky, false);
+        MEMBER(CreateRectParameters, int, color, 0);
+        MEMBER(CreateRectParameters, bool, barrier, false);
     };
-    DataDescription createRect(CreateRectParameters const& parameters);
+    CollectionDescription createRect(CreateRectParameters const& parameters) const;
 
     struct CreateHexParameters
     {
-        MEMBER_DECLARATION(CreateHexParameters, int, layers, 10);
-        MEMBER_DECLARATION(CreateHexParameters, float, cellDistance, 1.0f);
-        MEMBER_DECLARATION(CreateHexParameters, float, energy, 100.0f);
-        MEMBER_DECLARATION(CreateHexParameters, float, stiffness, 1.0f);
-        MEMBER_DECLARATION(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateHexParameters, bool, removeStickiness, false);
-        MEMBER_DECLARATION(CreateHexParameters, int, maxConnections, 6);
-        MEMBER_DECLARATION(CreateHexParameters, int, color, 0);
-        MEMBER_DECLARATION(CreateHexParameters, bool, barrier, false);
-        MEMBER_DECLARATION(CreateHexParameters, bool, randomCreatureId, true);
+        MEMBER(CreateHexParameters, int, layers, 10);
+        MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureCellDescription());
+        MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateHexParameters, float, energy, 100.0f);
+        MEMBER(CreateHexParameters, float, stiffness, 1.0f);
+        MEMBER(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateHexParameters, bool, sticky, false);
+        MEMBER(CreateHexParameters, int, color, 0);
+        MEMBER(CreateHexParameters, bool, barrier, false);
     };
-    DataDescription createHex(CreateHexParameters const& parameters);
+    CollectionDescription createHex(CreateHexParameters const& parameters) const;
 
     struct CreateUnconnectedCircleParameters
     {
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, radius, 3.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, energy, 100.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, maxConnections, 6);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, int, color, 0);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, barrier, false);
-        MEMBER_DECLARATION(CreateUnconnectedCircleParameters, bool, randomCreatureId, true);
+        MEMBER(CreateUnconnectedCircleParameters, float, radius, 3.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, energy, 100.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
+        MEMBER(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
+        MEMBER(CreateUnconnectedCircleParameters, int, color, 0);
+        MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
+        MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
     };
-    DataDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters);
+    CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
 
-    void duplicate(ClusteredDataDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize);
+    void duplicate(CollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {
-        MEMBER_DECLARATION(GridMultiplyParameters, int, horizontalNumber, 10);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalDistance, 50.0f);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalAngleInc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalVelXinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalVelYinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, horizontalAngularVelInc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, int, verticalNumber, 10);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalDistance, 50.0f);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalAngleInc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalVelXinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalVelYinc, 0);
-        MEMBER_DECLARATION(GridMultiplyParameters, float, verticalAngularVelInc, 0);
+        MEMBER(GridMultiplyParameters, int, horizontalNumber, 10);
+        MEMBER(GridMultiplyParameters, float, horizontalDistance, 50.0f);
+        MEMBER(GridMultiplyParameters, float, horizontalAngleInc, 0);
+        MEMBER(GridMultiplyParameters, float, horizontalVelXinc, 0);
+        MEMBER(GridMultiplyParameters, float, horizontalVelYinc, 0);
+        MEMBER(GridMultiplyParameters, float, horizontalAngularVelInc, 0);
+        MEMBER(GridMultiplyParameters, int, verticalNumber, 10);
+        MEMBER(GridMultiplyParameters, float, verticalDistance, 50.0f);
+        MEMBER(GridMultiplyParameters, float, verticalAngleInc, 0);
+        MEMBER(GridMultiplyParameters, float, verticalVelXinc, 0);
+        MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
+        MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    DataDescription gridMultiply(DataDescription const& input, GridMultiplyParameters const& parameters);
+    CollectionDescription gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters) const;
 
     struct RandomMultiplyParameters
     {
-        MEMBER_DECLARATION(RandomMultiplyParameters, int, number, 100);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngle, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngle, 360.0f);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelX, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelX, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minVelY, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxVelY, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, minAngularVel, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, float, maxAngularVel, 0);
-        MEMBER_DECLARATION(RandomMultiplyParameters, bool, overlappingCheck, false);
+        MEMBER(RandomMultiplyParameters, int, number, 100);
+        MEMBER(RandomMultiplyParameters, float, minAngle, 0);
+        MEMBER(RandomMultiplyParameters, float, maxAngle, 360.0f);
+        MEMBER(RandomMultiplyParameters, float, minVelX, 0);
+        MEMBER(RandomMultiplyParameters, float, maxVelX, 0);
+        MEMBER(RandomMultiplyParameters, float, minVelY, 0);
+        MEMBER(RandomMultiplyParameters, float, maxVelY, 0);
+        MEMBER(RandomMultiplyParameters, float, minAngularVel, 0);
+        MEMBER(RandomMultiplyParameters, float, maxAngularVel, 0);
+        MEMBER(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    DataDescription randomMultiply(
-        DataDescription const& input,
+    CollectionDescription randomMultiply(
+        CollectionDescription const& input,
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
-        DataDescription&& existentData,
-        bool& overlappingCheckSuccessful);
+        CollectionDescription&& existentData,
+        bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    void
-    addIfSpaceAvailable(DataDescription& result, Occupancy& cellOccupancy, DataDescription const& toAdd, float distance, IntVector2D const& worldSize);
+    void addIfSpaceAvailable(
+        CollectionDescription& result,
+        Occupancy& cellOccupancy,
+        CollectionDescription const& toAdd,
+        float distance,
+        IntVector2D const& worldSize) const;
 
-    void reconnectCells(DataDescription& data, float maxDistance);
-    void removeStickiness(DataDescription& data);
-    void correctConnections(ClusteredDataDescription& data, IntVector2D const& worldSize);
+    void reconnectCells(CollectionDescription& data, float maxDistance) const;  // For non-creatures
 
-    void randomizeCellColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
-    void randomizeGenomeColors(ClusteredDataDescription& data, std::vector<int> const& colorCodes);
-    void randomizeEnergies(ClusteredDataDescription& data, float minEnergy, float maxEnergy);
-    void randomizeAges(ClusteredDataDescription& data, int minAge, int maxAge);
-    void randomizeCountdowns(ClusteredDataDescription& data, int minValue, int maxValue);
-    void randomizeMutationIds(ClusteredDataDescription& data);
+    void randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;
+    void randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;
+    void randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy) const;
+    void randomizeAges(CollectionDescription& data, int minAge, int maxAge) const;
+    void randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue) const;
+    void randomizeMutationIds(CollectionDescription& data) const;
 
-    void generateExecutionOrderNumbers(DataDescription& data, std::unordered_set<uint64_t> const& cellIds, int maxBranchNumbers);
+    uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
+    RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;
+    std::vector<ExtendedCellOrParticleDescription> getObjects(CollectionDescription const& data) const;
+    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(CollectionDescription const& data) const;
 
-    uint64_t getId(CellOrParticleDescription const& entity);
-    RealVector2D getPos(CellOrParticleDescription const& entity);
-    std::vector<CellOrParticleDescription> getObjects(DataDescription const& data);
-    std::vector<CellOrParticleDescription> getConstructorToMainGenomes(DataDescription const& data);
+    void setCenter(CollectionDescription& collection, RealVector2D const& center) const;
+    RealVector2D calcCenter(CollectionDescription const& collection) const;
+    RealVector2D calcCenter(CreatureDescription const& creature) const;
+    void shift(CollectionDescription& collection, RealVector2D const& delta) const;
+    void rotate(CollectionDescription& collection, float angle) const;
+    void accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta) const;
 
-    void removeMetadata(DataDescription& data);
-    void generateNewCreatureIds(DataDescription& data);
-    void generateNewCreatureIds(ClusteredDataDescription& data);
+    void removeCell(CollectionDescription& collection, uint64_t cellId) const;
+    void removeCellIf(CollectionDescription& collection, std::function<bool(CellDescription const&)> const& predicate) const;
 
 private:
-    void removeMetadata(CellDescription& cell);
     bool isCellPresent(
         Occupancy const& cellPosBySlot,
         SpaceCalculator const& spaceCalculator,
         RealVector2D const& posToCheck,
-        float distance);
+        float distance) const;
 };

@@ -1,23 +1,38 @@
 ﻿#include "SimulationKernels.cuh"
-#include "FlowFieldKernels.cuh"
+#include "ForceFieldKernels.cuh"
 #include "ClusterProcessor.cuh"
-#include "CellFunctionProcessor.cuh"
-#include "NerveProcessor.cuh"
+#include "SignalProcessor.cuh"
+#include "GeneratorProcessor.cuh"
 #include "NeuronProcessor.cuh"
-#include "ConstructorProcessor.cuh"
 #include "AttackerProcessor.cuh"
 #include "InjectorProcessor.cuh"
-#include "TransmitterProcessor.cuh"
+#include "DepotProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "CellProcessor.cuh"
+#include "ConstructorProcessor.cuh"
 #include "RadiationProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "DetonatorProcessor.cuh"
 
-__global__ void cudaNextTimestep_prepare(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_prepare(SimulationData data)
 {
-    data.prepareForNextTimestep();
+    data.cellMap.reset();
+    data.particleMap.reset();
+    data.processMemory.reset();
+
+    // Heuristics
+    auto maxStructureOperations = 1000 + data.objects.cells.getNumEntries() / 2;
+    auto maxCellTypeOperations = data.objects.cells.getNumEntries();
+
+    data.structuralOperations.setMemory(data.processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
+
+    for (int i = CellType_Base; i < CellType_Count; ++i) {
+        data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
+    }
+    *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
+
+    data.objects.saveNumEntries();
 }
 
 __global__ void cudaNextTimestep_physics_init(SimulationData data)
@@ -76,71 +91,85 @@ __global__ void cudaNextTimestep_physics_verletVelocityUpdate(SimulationData dat
     CellProcessor::verletVelocityUpdate(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_prepare_substep1(SimulationData data)
+__global__ void cudaNextTimestep_signal_calcFutureSignals(SimulationData data)
 {
-    CellProcessor::aging(data);
-    MutationProcessor::applyRandomMutations(data);
-    CellProcessor::livingStateTransition_calcFutureState(data);
+    SignalProcessor::calcFutureSignals(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_prepare_substep2(SimulationData data)
+__global__ void cudaNextTimestep_signal_updateSignals(SimulationData data)
 {
-    CellProcessor::livingStateTransition_applyNextState(data);
-    CellFunctionProcessor::collectCellFunctionOperations(data);
-    CellFunctionProcessor::updateRenderingData(data);
+    SignalProcessor::updateSignals(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_nerve(SimulationData data, SimulationStatistics statistics)
-{
-    NerveProcessor::process(data, statistics);
-}
-
-__global__ void cudaNextTimestep_cellFunction_neuron(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_signal_neuralNetworks(SimulationData data, SimulationStatistics statistics)
 {
     NeuronProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_energyFlow(SimulationData data)
 {
-    ConstructorProcessor::preprocess(data, statistics);
+    CellProcessor::performEnergyFlow(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_constructor(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_prepare_substep1(SimulationData data)
 {
-    ConstructorProcessor::process(data, statistics);
+    CellProcessor::aging(data);
+    CellProcessor::cellStateTransition_calcFutureState(data);
 }
 
-__global__ void cudaNextTimestep_cellFunction_injector(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
+{
+    SignalProcessor::collectCellTypeOperations(data);
+    CellProcessor::cellStateTransition_applyNextState(data);
+    CellProcessor::updateRenderingData(data);
+}
+
+__global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics)
+{
+    GeneratorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
+{
+    ConstructorProcessor::preprocess(data);
+}
+
+__global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics, bool forPreview)
+{
+    ConstructorProcessor::process(data, statistics, forPreview);
+}
+
+__global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics)
 {
     InjectorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_attacker(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics)
 {
     AttackerProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_transmitter(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_transmitter(SimulationData data, SimulationStatistics statistics)
 {
-    TransmitterProcessor::process(data, statistics);
+    DepotProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_muscle(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_muscle(SimulationData data, SimulationStatistics statistics)
 {
     MuscleProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_sensor(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_sensor(SimulationData data, SimulationStatistics statistics)
 {
     SensorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_reconnector(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics)
 {
     ReconnectorProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellFunction_detonator(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics)
 {
     DetonatorProcessor::process(data, statistics);
 }
@@ -152,7 +181,6 @@ __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 
 __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data)
 {
-    CellFunctionProcessor::resetFetchedSignals(data);
     CellProcessor::applyFriction(data);
     CellProcessor::decay(data);
 }

@@ -5,7 +5,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "TemporalControlWindow.h"
 
 void ResizeWorldDialog::initIntern(SimulationFacade simulationFacade)
@@ -54,18 +54,18 @@ void ResizeWorldDialog::processIntern()
 
         ImGui::EndTable();
     }
-    AlienImGui::ToggleButton(AlienImGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
+    AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Scale content"), _scaleContent);
 
-    AlienImGui::Separator();
+    AlienGui::Separator();
 
-    if (AlienImGui::Button("OK")) {
+    if (AlienGui::Button("OK")) {
         onResizing();
         close();
     }
     ImGui::SetItemDefaultFocus();
 
     ImGui::SameLine();
-    if (AlienImGui::Button("Cancel")) {
+    if (AlienGui::Button("Cancel")) {
         close();
     }
 
@@ -76,24 +76,23 @@ void ResizeWorldDialog::processIntern()
 void ResizeWorldDialog::onResizing()
 {
     auto timestep = _simulationFacade->getCurrentTimestep();
-    auto generalSettings = _simulationFacade->getGeneralSettings();
+    auto worldSize = _simulationFacade->getWorldSize();
     auto parameters = _simulationFacade->getSimulationParameters();
-    auto content = _simulationFacade->getClusteredSimulationData();
+    auto content = _simulationFacade->getSimulationData();
     auto realtime = _simulationFacade->getRealTime();
     auto const& statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
     _simulationFacade->closeSimulation();
 
-    IntVector2D origWorldSize{generalSettings.worldSizeX, generalSettings.worldSizeY};
-    generalSettings.worldSizeX = _width;
-    generalSettings.worldSizeY = _height;
+    IntVector2D origWorldSize = worldSize;
+    worldSize.x = _width;
+    worldSize.y = _height;
 
-    _simulationFacade->newSimulation(timestep, generalSettings, parameters);
+    _simulationFacade->newSimulation(timestep, worldSize, parameters);
 
-    DescriptionEditService::get().correctConnections(content, {_width, _height});
     if (_scaleContent) {
         DescriptionEditService::get().duplicate(content, origWorldSize, {_width, _height});
     }
-    _simulationFacade->setClusteredSimulationData(content);
+    _simulationFacade->setSimulationData(content);
     _simulationFacade->setStatisticsHistory(statistics);
     _simulationFacade->setRealTime(realtime);
     TemporalControlWindow::get().onSnapshot();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/RawStatisticsData.h"
+#include "EngineInterface/StatisticsRawData.h"
 
 struct DataPoint
 {
@@ -35,7 +35,7 @@ struct DataPointCollection
     DataPoint numTransmitterActivities;
     DataPoint numInjectionActivities;
     DataPoint numCompletedInjections;
-    DataPoint numNervePulses;
+    DataPoint numGeneratorPulses;
     DataPoint numNeuronActivities;
     DataPoint numSensorActivities;
     DataPoint numSensorMatches;

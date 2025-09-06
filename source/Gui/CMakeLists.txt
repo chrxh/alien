@@ -1,4 +1,3 @@
-
 target_sources(alien
 PUBLIC
     AboutDialog.cpp
@@ -6,20 +5,21 @@ PUBLIC
     ActivateUserDialog.cpp
     ActivateUserDialog.h
     AlienDialog.h
-    AlienImGui.cpp
-    AlienImGui.h
+    AlienGui.cpp
+    AlienGui.h
     AlienWindow.h
     AutosaveWindow.cpp
     AutosaveWindow.h
     BrowserWindow.cpp
     BrowserWindow.h
-    CellFunctionStrings.h
     ChangeColorDialog.cpp
     ChangeColorDialog.h
     CreateUserDialog.cpp
     CreateUserDialog.h
     CreatorWindow.cpp
     CreatorWindow.h
+    CreaturePreviewWidget.cpp
+    CreaturePreviewWidget.h
     Definitions.h
     DelayedExecutionController.cpp
     DelayedExecutionController.h
@@ -43,8 +43,17 @@ PUBLIC
     GenericFileDialog.h
     GenericMessageDialog.cpp
     GenericMessageDialog.h
+    GeneEditorWidget.cpp
+    GeneEditorWidget.h
+    GenomeEditorWidget.cpp
+    GenomeEditorWidget.h
     GenomeEditorWindow.cpp
     GenomeEditorWindow.h
+    GenomeTabEditData.h
+    GenomeTabLayoutData.h
+    GenomeTabWidget.cpp
+    GenomeTabWidget.h
+    GenomeWindowEditData.h
     GettingStartedWindow.cpp
     GettingStartedWindow.h
     GpuSettingsDialog.cpp
@@ -60,11 +69,11 @@ PUBLIC
     InspectorWindow.h
     LastSessionBrowserData.cpp
     LastSessionBrowserData.h
+    LayerColorPalette.cpp
+    LayerColorPalette.h
     LocationController.cpp
     LocationController.h
-    LocationHelper.cpp
-    LocationHelper.h
-    LocationWidgets.h
+    LocationWidget.h
     LocationWindow.cpp
     LocationWindow.h
     LoginController.cpp
@@ -90,18 +99,22 @@ PUBLIC
     NetworkSettingsDialog.h
     NetworkTransferController.cpp
     NetworkTransferController.h
+    NeuralNetEditorWidget.cpp
+    NeuralNetEditorWidget.h
     NewSimulationDialog.cpp
     NewSimulationDialog.h
     NewPasswordDialog.cpp
     NewPasswordDialog.h
+    NodeEditorWidget.cpp
+    NodeEditorWidget.h
     OpenGLHelper.cpp
     OpenGLHelper.h
     OverlayController.cpp
     OverlayController.h
-    PatternAnalysisDialog.cpp
-    PatternAnalysisDialog.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PreviewWidget.cpp
+    PreviewWidget.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
@@ -114,20 +127,22 @@ PUBLIC
     ShaderWindow.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
-    SimulationParametersBaseWidgets.cpp
-    SimulationParametersBaseWidgets.h
+    SimulationParametersBaseWidget.cpp
+    SimulationParametersBaseWidget.h
     SimulationParametersMainWindow.cpp
     SimulationParametersMainWindow.h
-    SimulationParametersSourceWidgets.cpp
-    SimulationParametersSourceWidgets.h
-    SimulationParametersZoneWidgets.cpp
-    SimulationParametersZoneWidgets.h
+    SimulationParametersSourceWidget.cpp
+    SimulationParametersSourceWidget.h
+    SimulationParametersLayerWidget.cpp
+    SimulationParametersLayerWidget.h
     SimulationScrollbar.cpp
     SimulationScrollbar.h
     SimulationView.cpp
     SimulationView.h
     SpatialControlWindow.cpp
     SpatialControlWindow.h
+    SpecificationGuiService.cpp
+    SpecificationGuiService.h
     StartupCheckService.cpp
     StartupCheckService.h
     StatisticsWindow.cpp
@@ -147,9 +162,7 @@ PUBLIC
     Viewport.cpp
     Viewport.h
     WindowController.cpp
-    WindowController.h
-    ZoneColorPalette.cpp
-    ZoneColorPalette.h)
+    WindowController.h)
 
 target_link_libraries(alien Base)
 target_link_libraries(alien EngineGpuKernels)

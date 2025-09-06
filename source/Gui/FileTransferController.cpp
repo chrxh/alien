@@ -28,7 +28,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
     _openSimulationProcessor->executeTask(
         [&](auto const& senderId) {
             auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
-            auto readData = ReadSimulationRequestData{filename.string()};
+            auto readData = ReadSimulationRequestData{.filename = filename.string(), .initSimulation = false};
             return _persisterFacade->scheduleReadSimulation(senderInfo, readData);
         },
         [&](auto const& requestId) {
@@ -41,9 +41,9 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
             try {
                 _simulationFacade->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
-                    data.deserializedSimulation.auxiliaryData.generalSettings,
+                    data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
-                _simulationFacade->setClusteredSimulationData(data.deserializedSimulation.mainData);
+                _simulationFacade->setSimulationData(data.deserializedSimulation.mainData);
                 _simulationFacade->setStatisticsHistory(data.deserializedSimulation.statistics);
                 _simulationFacade->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
             } catch (CudaMemoryAllocationException const& exception) {
@@ -57,7 +57,7 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
                 _simulationFacade->closeSimulation();
                 _simulationFacade->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
-                    data.deserializedSimulation.auxiliaryData.generalSettings,
+                    data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
             }
             _persisterFacade->restart();

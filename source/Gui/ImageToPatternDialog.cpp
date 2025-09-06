@@ -7,13 +7,13 @@
 
 #include "Base/Definitions.h"
 #include "Base/GlobalSettings.h"
-#include "Base/NumberGenerator.h"
+#include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Colors.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "Viewport.h"
 #include "GenericFileDialog.h"
 
@@ -42,7 +42,7 @@ namespace
         static std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
-            AlienImGui::ConvertRGBtoHSV(color, h, s, v);
+            AlienGui::ConvertRGBtoHSV(color, h, s, v);
             return Color{h, s, v}; 
         };
         if (cellColors.empty()) {
@@ -89,7 +89,7 @@ void ImageToPatternDialog::show()
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
 
-        DataDescription dataDesc;
+        CollectionDescription dataDesc;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 auto address = (x + y * width) * nrChannels;
@@ -101,21 +101,21 @@ void ImageToPatternDialog::show()
                     int matchedCellColor;
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc.addCell(CellDescription()
-                                         .setId(NumberGenerator::get().getId())
-                                         .setEnergy(matchedCellIntensity * 200)
-                                         .setPos({toFloat(x) + xOffset, toFloat(y)})
-                                         .setMaxConnections(MAX_CELL_BONDS)
-                                         .setColor(matchedCellColor)
-                                         .setBarrier(false));
+                    dataDesc._cells.emplace_back(CellDescription()
+                                         .id(NumberGenerator::get().createObjectId())
+                                         .cellTypeData(StructureCellDescription())
+                                         .energy(matchedCellIntensity * 200)
+                                         .pos({toFloat(x) + xOffset, toFloat(y)})
+                                         .color(matchedCellColor)
+                                         .barrier(false));
                 }
             }
         }
 
         DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
-        dataDesc.setCenter(Viewport::get().getCenterInWorldPos());
+        DescriptionEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
-        _simulationFacade->addAndSelectSimulationData(dataDesc);
+        _simulationFacade->addAndSelectSimulationData(std::move(dataDesc));
         //TODO: update pattern editor
     });
 }

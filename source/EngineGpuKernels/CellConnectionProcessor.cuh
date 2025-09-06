@@ -4,7 +4,7 @@
 #include "Definitions.cuh"
 #include "SimulationData.cuh"
 #include "ConstantMemory.cuh"
-#include "SpotCalculator.cuh"
+#include "ParameterCalculator.cuh"
 #include "ObjectFactory.cuh"
 #include "RadiationProcessor.cuh"
 
@@ -31,10 +31,17 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color);
-    __inline__ __device__ static bool wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos);
+    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
+    __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Cell* cell, float angle, ConstructorAngleAlignment angleAlignment);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
+
+    struct ReferenceAndActualAngle
+    {
+        float referenceAngle;
+        float actualAngle;
+    };
+    __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
 private:
     static int constexpr MaxOperationsPerCell = 30;
@@ -152,7 +159,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             auto cellIndex = operation.data.delCell.cellIndex;
 
             Cell* empty = nullptr;
-            auto origCell = alienAtomicExch(&data.objects.cellPointers.at(cellIndex), empty);
+            auto origCell = alienAtomicExch(&data.objects.cells.at(cellIndex), empty);
             if (origCell) {
                 RadiationProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
 
@@ -175,10 +182,10 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.cellPointers.getNumEntries());
+    auto partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cell = data.objects.cellPointers.at(index);
+        auto& cell = data.objects.cells.at(index);
         if (!cell) {
             continue;
         }
@@ -261,8 +268,7 @@ CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* ce
             }
         }
 
-        if (!alreadyConnected && cell1->numConnections < cell1->maxConnections
-            && cell2->numConnections < cell2->maxConnections) {
+        if (!alreadyConnected && cell1->numConnections < MAX_CELL_BONDS && cell2->numConnections < MAX_CELL_BONDS) {
 
             tryAddConnections(data, cell1, cell2, 0, 0, 0);
         }
@@ -287,9 +293,10 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         return false;
     }
 
-    if (wouldResultInOverlappingConnection(cell1, cell2->pos)) {
-        return false;
-    }
+    // !!! Performance intensive !!!
+    //if (checkConnectedCellsForCrossingConnection(cell1, cell2->pos)) {
+    //    return false;
+    //}
 
     angleAlignment %= ConstructorAngleAlignment_Count;
 
@@ -316,7 +323,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         auto connectedCellDelta = cell1->connections[0].cell->pos - cell1->pos;
         data.cellMap.correctDirection(connectedCellDelta);
         auto prevAngle = Math::angleOfVector(connectedCellDelta);
-        auto angleDiff = newAngle - prevAngle;
+        auto angleDiff = Math::subtractAngle(newAngle, prevAngle);
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
         }
@@ -377,7 +384,10 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     }
     newConnection.angleFromPrevious = angleFromPrevious;
 
-    // insert new connection to a clone of the existing connection array
+    // insert new connection
+    if (index == 0) {
+        index = cell1->numConnections;  // connection at index 0 should be an invariant
+    }
     if (index == 0) {
         index = cell1->numConnections;  // connection at index 0 should be an invariant
     }
@@ -387,16 +397,27 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
     cell1->connections[index] = newConnection;
     cell1->connections[(index + 1) % (cell1->numConnections + 1)].angleFromPrevious = refAngle - angleFromPrevious;
 
-    // align angles
+    // alignment
     if (angleAlignment != ConstructorAngleAlignment_None) {
         auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
-        for (int i = 0; i < cell1->numConnections + 1; ++i) {
-            cell1->connections[i].angleFromPrevious = Math::alignAngle(cell1->connections[i].angleFromPrevious, angleAlignment);
-            if (abs(cell1->connections[i].angleFromPrevious) < NEAR_ZERO) {
-                cell1->connections[i].angleFromPrevious = angleUnit;
+
+        // align angles
+        auto angleAdded = 0.0f;
+        for (int i = 0; i < cell1->numConnections + 2; ++i) {
+            auto index = i % (cell1->numConnections + 1);
+            cell1->connections[index].angleFromPrevious = Math::alignAngle(cell1->connections[index].angleFromPrevious, angleAlignment);
+            if (angleAdded > NEAR_ZERO && cell1->connections[index].angleFromPrevious - angleAdded > NEAR_ZERO) {
+                cell1->connections[index].angleFromPrevious -= angleUnit;
+            }
+            if (abs(cell1->connections[index].angleFromPrevious) < NEAR_ZERO) {
+                cell1->connections[index].angleFromPrevious = angleUnit;
+                angleAdded = angleUnit;
+            } else {
+                angleAdded = 0;
             }
         }
 
+        // ensure that sum of angles is 360 deg
         for (int repetition = 0; repetition < MAX_CELL_BONDS; ++repetition) {
             float sumAngle = 0;
             for (int i = 0, j = cell1->numConnections + 1; i < j; ++i) {
@@ -447,33 +468,28 @@ __inline__ __device__ void CellConnectionProcessor::deleteConnectionOneWay(Cell*
     }
 }
 
-__inline__ __device__ bool CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 pos1, float2 pos2, int detached, int color)
+__inline__ __device__ bool
+CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached)
 {
-    auto distance = Math::length(pos1 - pos2);
-    if (distance > cudaSimulationParameters.cellMaxBindingDistance[color]) {
-        return false;
-    }
-
-    bool result = false;
-    data.cellMap.executeForEach((pos1 + pos2) / 2, distance, detached, [&](auto const& otherCell) {
-        if ((otherCell->pos.x == pos1.x && otherCell->pos.y == pos1.y) || (otherCell->pos.x == pos2.x && otherCell->pos.y == pos2.y)) {
+    auto result = false;
+    data.cellMap.executeForEach(pos2, radius, detached, [&](auto const& nearCell) {
+        if (!nearCell->tryLock()) {
             return;
         }
-        if (otherCell->tryLock()) {
-            for (int i = 0; i < otherCell->numConnections; ++i) {
-                if (Math::crossing(pos1, pos2, otherCell->pos, otherCell->connections[i].cell->pos)) {
-                    otherCell->releaseLock();
-                    result = true;
-                    return;
-                }
+        for (int j = 0; j < nearCell->numConnections; ++j) {
+            auto const& connectedNearCell = nearCell->connections[j].cell;
+            if (Math::crossing(pos1, pos1, nearCell->pos, connectedNearCell->pos)) {
+                nearCell->releaseLock();
+                result = true;
+                return;
             }
-            otherCell->releaseLock();
         }
+        nearCell->releaseLock();
     });
     return result;
 }
 
-__inline__ __device__ bool CellConnectionProcessor::wouldResultInOverlappingConnection(Cell* cell1, float2 otherCellPos)
+__inline__ __device__ bool CellConnectionProcessor::checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos)
 {
     auto const& n = cell1->numConnections;
     if (n < 2) {
@@ -545,6 +561,56 @@ __inline__ __device__ bool CellConnectionProcessor::isConnectedConnected(Cell* c
         }
     }
     return result;
+}
+
+__inline__ __device__ CellConnectionProcessor::ReferenceAndActualAngle
+CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation)
+{
+    if (0 == cell->numConnections) {
+        return ReferenceAndActualAngle{0, data.primaryNumberGen.random() * 360};
+    }
+    auto displacement = cell->connections[0].cell->pos - cell->pos;
+    data.cellMap.correctDirection(displacement);
+    auto angle = Math::angleOfVector(displacement);
+    int index = 0;
+    float largestAngleGap = 0;
+    float angleOfLargestAngleGap = 0;
+    auto numConnections = cell->numConnections;
+    for (int i = 1; i <= numConnections; ++i) {
+        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
+        if (angleDiff > largestAngleGap) {
+            largestAngleGap = angleDiff;
+            index = i % numConnections;
+            angleOfLargestAngleGap = angle;
+        }
+        angle += angleDiff;
+    }
+
+    auto angleFromPrev = cell->connections[index].angleFromPrevious;
+    for (int i = 0; i < numConnections - 1; ++i) {
+        if (angleDeviation > angleFromPrev / 2) {
+            angleDeviation -= angleFromPrev / 2;
+            index = (index + 1) % numConnections;
+            angleOfLargestAngleGap += angleFromPrev;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
+            angleDeviation = angleDeviation - angleFromPrev / 2;
+        }
+        if (angleDeviation < -angleFromPrev / 2) {
+            angleDeviation += angleFromPrev / 2;
+            index = (index + numConnections - 1) % numConnections;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
+            angleDeviation = angleDeviation + angleFromPrev / 2;
+            angleOfLargestAngleGap -= angleFromPrev;
+        }
+    }
+    auto angleFromPreviousConnection = angleFromPrev / 2 + angleDeviation;
+
+    if (angleFromPreviousConnection > 360.0f) {
+        angleFromPreviousConnection -= 360;
+    }
+    angleFromPreviousConnection = max(30.0f, min(angleFromPrev - 30.0f, angleFromPreviousConnection));
+
+    return ReferenceAndActualAngle{angleFromPreviousConnection, angleOfLargestAngleGap + angleFromPreviousConnection};
 }
 
 __inline__ __device__ void CellConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Cell* cell, int operationIndex)

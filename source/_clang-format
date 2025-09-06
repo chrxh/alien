@@ -59,60 +59,61 @@ ForEachMacros:
 IncludeBlocks: Regroup
 IncludeIsMainRegex:  '(Test|Tests)?$'
 IncludeCategories:
-  - Regex:           '(stdafx|bif_config)'
-    Priority:        -100
-  - Regex:           '^(<(afx|atl))'
-    Priority:        2
-  - Regex:           '^(<boost/)'
-    Priority:        3
-  - Regex:           '^(<Qt)'
-    Priority:        5
-# all remaining third party libraries in external/sinstall/inc
-  - Regex:           '^(<(adobe|AtlServer|dbghelp|gdal|geos|gmock|Grid|gsl|gtest|hacon|idm|java)/)'
-    Priority:        7
-  - Regex:           '^(<(libmb2|mb2|mockitopp|oci|openssl|proj4|python|t1lib|tbb|TreeListCtrl|xercesc|zlib)/)'
-    Priority:        7
-  - Regex:           '^(("|<)configurations/)'
-    Priority:        100
-  - Regex:           '^(("|<)common/)'
-    Priority:        101
-  - Regex:           '^(("|<)core/)'
-    Priority:        102
-  - Regex:           '^(("|<)opm/)'
-    Priority:        103
-  - Regex:           '^(("|<)cal/)'
-    Priority:        104
-  - Regex:           '^(("|<)tnw/)'
-    Priority:        105
-  - Regex:           '^(("|<)ttp/)'
-    Priority:        106
-  - Regex:           '^(("|<)vws/)'
-    Priority:        107
-  - Regex:           '^(("|<)ds/)'
-    Priority:        108
-  - Regex:           '^(("|<)vd/)'
-    Priority:        109
-  - Regex:           '^(("|<)pdp/)'
-    Priority:        110
-  - Regex:           '^(("|<)rl/)'
-    Priority:        111
-  - Regex:           '^(("|<)pry/)'
-    Priority:        112
-  - Regex:           '^(("|<)intf/)'
-    Priority:        113
-  - Regex:           '^(("|<)statistics/)'
-    Priority:        114
-  - Regex:           '^(("|<)printing/)'
-    Priority:        115
-  - Regex:           '^(<((experimental/)?[[:alpha:]_]+)>)$'
-    Priority:        1
-# remaining files at the root of external/sinstall/inc
-  - Regex:           '^(<.+/)'
-    Priority:        6
-  - Regex:           '^(<)'
-    Priority:        4
-  - Regex:           '^(")'
-    Priority:        200
+  # The corresponding header for the source file (e.g. "MyClass.h" in "MyClass.cpp")
+  - Regex: '^[^<"].*\.h"$'
+    Priority: 0
+
+  # C/C++ standard library headers (e.g. <vector>, <string>)
+  - Regex: '^<(algorithm|string|vector|map|set|ranges|unordered_map|unordered_set|memory|utility|tuple|array|iterator|limits|type_traits|cstddef|cstdint|cmath|cassert|iostream|fstream|sstream|iomanip|chrono|thread|mutex|atomic|condition_variable)>$'
+    Priority: 1
+
+  # Boost headers
+  - Regex: '^<boost/.*>$'
+    Priority: 100
+
+  # Boost headers
+  - Regex: '^<gtest/.*>$'
+    Priority: 101
+
+  # ImGui main header
+  - Regex: '^<imgui\.h>$'
+    Priority: 103
+
+  # Fonts module includes
+  - Regex: '^<Fonts/.*>$'
+    Priority: 104
+
+  # Base module includes
+  - Regex: '^"Base/.*"$'
+    Priority: 200
+
+  # Engine interface includes
+  - Regex: '^"EngineInterface/.*"$'
+    Priority: 201
+
+  # Engine interface includes
+  - Regex: '^"EngineTestData/.*"$'
+    Priority: 202
+
+  # Engine implementation includes
+  - Regex: '^"EngineImpl/.*"$'
+    Priority: 203
+
+  # Persister interface includes
+  - Regex: '^"PersisterInterface/.*"$'
+    Priority: 204
+
+  # Persister implementation includes
+  - Regex: '^"PersisterImpl/.*"$'
+    Priority: 205
+
+  # Network module includes
+  - Regex: '^"Network/.*"$'
+    Priority: 206
+
+  # All other local project includes without path (from current directory)
+  - Regex: '^"[a-zA-Z0-9_]+\.h"$'
+    Priority: 300
 IndentCaseLabels: false
 IndentPPDirectives: None
 IndentWidth:     4

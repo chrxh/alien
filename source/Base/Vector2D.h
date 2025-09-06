@@ -8,9 +8,7 @@ struct IntVector2D
     int x = 0;
     int y = 0;
 
-    IntVector2D() = default;
-    IntVector2D(std::initializer_list<int> l);
-    bool operator==(IntVector2D const& vec) const;
+    bool operator==(IntVector2D const& vec) const = default;
     void operator-=(IntVector2D const& vec);
 };
 
@@ -38,10 +36,8 @@ struct RealVector2D
     float x = 0.0f;
     float y = 0.0f;
 
-    RealVector2D() = default;
-    RealVector2D(float x_, float y_);
-    RealVector2D(std::initializer_list<float> l);
-    bool operator==(RealVector2D const& other) const;
+    auto operator<=>(RealVector2D const& other) const = default;
+    bool operator==(RealVector2D const& other) const = default;
     void operator+=(RealVector2D const& vec);
     void operator-=(RealVector2D const& vec);
     template <typename T>

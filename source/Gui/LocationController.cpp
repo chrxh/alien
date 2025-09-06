@@ -1,55 +1,55 @@
 #include "LocationController.h"
 
 #include "EngineInterface/SimulationFacade.h"
+#include "EngineInterface/LocationHelper.h"
 
-#include "LocationHelper.h"
-#include "SimulationParametersBaseWidgets.h"
-#include "SimulationParametersSourceWidgets.h"
-#include "SimulationParametersZoneWidgets.h"
+#include "SimulationParametersBaseWidget.h"
+#include "SimulationParametersSourceWidget.h"
+#include "SimulationParametersLayerWidget.h"
 
-void LocationController::addLocationWindow(int locationIndex, RealVector2D const& initialPos)
+void LocationController::addLocationWindow(int orderNumber, RealVector2D const& initialPos)
 {
     LocationWindow window;
-    LocationWidgets widgets;
-    if (locationIndex == 0) {
-        auto baseWidgets = std::make_shared<_SimulationParametersBaseWidgets>();
+    LocationWidget widget;
+    if (orderNumber == 0) {
+        auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
         baseWidgets->init(_simulationFacade);
-        widgets = baseWidgets;
+        widget = baseWidgets;
     } else {
         auto parameters = _simulationFacade->getSimulationParameters();
-        auto location = LocationHelper::findLocation(parameters, locationIndex);
-        if (std::holds_alternative<SimulationParametersZone*>(location)) {
-            auto zoneWidgets = std::make_shared<_SimulationParametersZoneWidgets>();
-            zoneWidgets->init(_simulationFacade, locationIndex);
-            widgets = zoneWidgets;
+        auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+        if (locationType == LocationType::Layer) {
+            auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
+            layerWidgets->init(_simulationFacade, orderNumber);
+            widget = layerWidgets;
         } else {
             auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
-            sourceWidgets->init(_simulationFacade, locationIndex);
-            widgets = sourceWidgets;
+            sourceWidgets->init(_simulationFacade, orderNumber);
+            widget = sourceWidgets;
         }
     }
 
-    window.init(widgets, initialPos);
+    window.init(widget, initialPos);
     _locationWindows.emplace_back(std::move(window));
 }
 
-void LocationController::deleteLocationWindow(int locationIndex)
+void LocationController::deleteLocationWindow(int orderNumber)
 {
     std::vector<LocationWindow> newlocationWindows;
     newlocationWindows.reserve(_locationWindows.size());
 
     for (auto& locationWindow : _locationWindows) {
-        if (locationWindow.getLocationIndex() != locationIndex) {
+        if (locationWindow.getOrderNumber() != orderNumber) {
             newlocationWindows.emplace_back(std::move(locationWindow));
         }
     }
     _locationWindows.swap(newlocationWindows);
 }
 
-void LocationController::remapLocationIndices(std::map<int, int> const& newByOldLocationIndex)
+void LocationController::remapLocationIndices(std::map<int, int> const& newByOldOrderNumber)
 {
     for (auto& locationWindow : _locationWindows) {
-        locationWindow.setLocationIndex(newByOldLocationIndex.at(locationWindow.getLocationIndex()));
+        locationWindow.setOrderNumber(newByOldOrderNumber.at(locationWindow.getOrderNumber()));
     }
 }
 

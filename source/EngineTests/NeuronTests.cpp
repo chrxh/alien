@@ -18,85 +18,103 @@ public:
 protected:
     float scaledSigmoid(float value) const { return 2.0f / (1.0f + std::exp(-value)) - 1.0f; }
     float binaryStep(float value) const { return value >= NEAR_ZERO ? 1.0f : 0.0f; }
+    std::vector<float> applyActivationFunction(ActivationFunction af, std::vector<float> const& values)
+    {
+        std::vector<float> result;
+        for (auto const& value : values) {
+            switch (af) {
+            case ActivationFunction_Sigmoid:
+                result.emplace_back(scaledSigmoid(value));
+                break;
+            case ActivationFunction_BinaryStep:
+                result.emplace_back(binaryStep(value));
+                break;
+            case ActivationFunction_Identity:
+                result.emplace_back(value);
+                break;
+            case ActivationFunction_Abs:
+                result.emplace_back(std::abs(value));
+                break;
+            case ActivationFunction_Gaussian:
+                result.emplace_back(std::expf(-2 * value * value));
+                break;
+            default:
+                THROW_NOT_IMPLEMENTED();
+            }
+        }
+        return result;
+    }
 };
 
-TEST_F(NeuronTests, bias)
+class NeuronTests_AllActivationFunctions
+    : public NeuronTests
+    , public testing::WithParamInterface<ActivationFunction>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    NeuronTests_AllActivationFunctions,
+    NeuronTests_AllActivationFunctions,
+    ::testing::Values(
+        ActivationFunction_Sigmoid,
+        ActivationFunction_BinaryStep,
+        ActivationFunction_Identity,
+        ActivationFunction_Abs,
+        ActivationFunction_Gaussian));
+
+TEST_P(NeuronTests_AllActivationFunctions, weights)
 {
-    NeuronDescription neuron;
-    neuron.biases = {0, 0, 1, 0, 0, 0, 0, -1};
+    auto activationFunction = GetParam();
 
-    auto data = DataDescription().addCells({CellDescription().setId(1).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0)});
+    NeuralNetworkDescription nn;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        nn._activationFunctions[i] = activationFunction;
+        for (int j = 0; j < MAX_CHANNELS; ++j) {
+            nn.weight(i, j, 0.0f);
+        }
+    }
+    nn.weight(2, 3, 1.0f);
+    nn.weight(2, 7, 0.5f);
+    nn.weight(5, 3, -1.5f);
 
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
-
-    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1), 0, 0, 0, 0, scaledSigmoid(-1)}, actualCellById.at(1).signal.channels));
-}
-
-TEST_F(NeuronTests, weight)
-{
-    NeuronDescription neuron;
-    neuron.weights[2][3] = 1;
-    neuron.weights[2][7] = 0.5f;
-    neuron.weights[5][3] = -3.5f;
-
-    SignalDescription signal;
-    signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
-
-    auto data = DataDescription().addCells({
-        CellDescription()
-            .setId(1)
-            .setPos({1.0f, 1.0f})
-            .setCellFunction(NerveDescription())
-            .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
-            .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
-    });
+    CollectionDescription data;
+    data._cells = { 
+        CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
+        CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 1, 0, 0, 0, 0.5f}),
+    };
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare({0, 0, scaledSigmoid(1.0f + 0.5f * 0.5f), 0, 0, scaledSigmoid(-3.5f), 0, 0}, actualCellById.at(2).signal.channels));
+    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getCellRef(1)._signal->_channels));
 }
 
-TEST_F(NeuronTests, activationFunctionBinaryStep)
+TEST_P(NeuronTests_AllActivationFunctions, bias)
 {
-    NeuronDescription neuron;
-    neuron.weights[2][3] = 1;
-    neuron.weights[2][7] = 0.5f;
-    neuron.weights[5][3] = -3.5f;
-    neuron.activationFunctions[2] = NeuronActivationFunction_BinaryStep;
-    neuron.activationFunctions[5] = NeuronActivationFunction_BinaryStep;
+    auto activationFunction = GetParam();
 
+    NeuralNetworkDescription nn;
+    for (int i = 0; i < MAX_CHANNELS; ++i) {
+        nn._activationFunctions[i] = activationFunction;
+        for (int j = 0; j < MAX_CHANNELS; ++j) {
+            nn.weight(i, j, 0.0f);
+        }
+    }
+    nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    SignalDescription signal;
-    signal.channels = {0, 0, 0, 1, 0, 0, 0, 0.5f};
-
-    auto data = DataDescription().addCells({
-        CellDescription()
-            .setId(1)
-            .setPos({1.0f, 1.0f})
-            .setCellFunction(NerveDescription())
-            .setMaxConnections(2)
-            .setExecutionOrderNumber(5)
-            .setSignal(signal),
-        CellDescription().setId(2).setPos({2.0f, 1.0f}).setCellFunction(neuron).setMaxConnections(2).setExecutionOrderNumber(0).setInputExecutionOrderNumber(5),
-    });
+    CollectionDescription data;
+    data._cells = { 
+        CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
+        CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 0, 0, 0, 0, 0}),
+    };
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualCellById = getCellById(actualData);
 
-    EXPECT_TRUE(approxCompare({0, 0, binaryStep(1.0f + 0.5f * 0.5f), 0, 0, binaryStep(-3.5f), 0, 0}, actualCellById.at(2).signal.channels));
+    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualData.getCellRef(1)._signal->_channels));
 }

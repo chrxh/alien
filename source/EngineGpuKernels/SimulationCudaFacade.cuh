@@ -12,15 +12,19 @@
 #include <vector_types.h>
 #include <GL/gl.h>
 
-#include "EngineInterface/RawStatisticsData.h"
-#include "EngineInterface/Settings.h"
+#include "EngineInterface/MutationType.h"
+#include "EngineInterface/ArraySizesForGpu.h"
+#include "EngineInterface/ArraySizesForTO.h"
+#include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/MutationType.h"
-#include "EngineInterface/StatisticsHistory.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"
+#include "EngineInterface/StatisticsRawData.h"
+#include "EngineInterface/StatisticsHistory.h"
+#include "EngineInterface/Definitions.h"
 
 #include "Definitions.cuh"
+#include "ObjectTO.cuh"
 
 struct cudaGraphicsResource;
 
@@ -34,7 +38,7 @@ public:
     };
     static GpuInfo checkAndReturnGpuInfo();
 
-    _SimulationCudaFacade(uint64_t timestep, Settings const& settings);
+    _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);
     ~_SimulationCudaFacade();
 
     void* registerImageResource(GLuint image);
@@ -42,20 +46,23 @@ public:
     void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
 
+    Ids getMaxIds() const;
+
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    void getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
-    void getSelectedSimulationData(bool includeClusters, DataTO const& dataTO);
-    void getInspectedSimulationData(std::vector<uint64_t> entityIds, DataTO const& dataTO);
-    void getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight, DataTO const& dataTO);
-    void addAndSelectSimulationData(DataTO const& dataTO);
-    void setSimulationData(DataTO const& dataTO);
+    CollectionTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
+    CollectionTO getSelectedSimulationData(bool includeClusters);
+    CollectionTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
+    CollectionTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    void addAndSelectSimulationData(CollectionTO const& dataTO);
+    void setSimulationData(CollectionTO const& dataTO);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeInspectedSimulationData(DataTO const& changeDataTO);
+    void changeInspectedSimulationData(CollectionTO const& changeDataTO);
+    bool changeCreature(CollectionTO const& dataTO);  // dataTO only contains 1 genome
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
@@ -69,15 +76,15 @@ public:
     void reconnectSelectedObjects();
     void setDetached(bool value);
 
-    void setGpuConstants(GpuSettings const& cudaConstants);
+    void setGpuConstants(CudaSettings const& cudaConstants);
     SimulationParameters getSimulationParameters() const;
     void setSimulationParameters(
         SimulationParameters const& parameters,
         SimulationParametersUpdateConfig const& updateConfig = SimulationParametersUpdateConfig::All);
 
-    ArraySizes getArraySizes() const;
+    ArraySizesForTO estimateCapacityNeededForTO() const;
 
-    RawStatisticsData getRawStatistics();
+    StatisticsRawData getStatisticsRawData();
     void updateStatistics();
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
@@ -88,23 +95,37 @@ public:
 
     void clear();
 
-    void resizeArraysIfNecessary(ArraySizes const& additionals = ArraySizes());
+    void resizeArraysIfNecessary(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
 
-    // only for tests
+    // Simulated preview
+    void initSettingsPreviewData();
+    void newPreview(CollectionTO const& dataTO);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
+    void calcTimestepsForPreview(int numSteps);
+    uint64_t getCurrentTimestepForPreview();
+    void setCurrentTimestepForPreview(uint64_t timestep);
+    CollectionTO getPreviewData();
+
+    // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(uint64_t cellId);
+    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
+    void testOnly_cleanupAfterTimestep();
+    void testOnly_cleanupAfterDataManipulation();
+    void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
+    bool testOnly_areArraysValid();
 
 private:
     void initCuda();
 
     void syncAndCheck();
-    void copyDataTOtoDevice(DataTO const& dataTO);
-    void copyDataTOtoHost(DataTO const& dataTO);
+    void copyDataTOtoGpu(CollectionTO const& cudaDataTO, CollectionTO const& dataTO);
+    void copyDataTOtoHost(CollectionTO const& dataTO, CollectionTO const& cudaDataTO);
     void automaticResizeArrays();
-    void resizeArrays(ArraySizes const& additionals = ArraySizes());
+    void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
 
-    SimulationData getSimulationDataIntern() const;
+    SimulationData getSimulationDataPtrCopy() const;
 
     GpuInfo _gpuInfo;
     cudaGraphicsResource* _cudaResource = nullptr;
@@ -113,27 +134,30 @@ private:
     std::optional<SimulationParameters> _newSimulationParameters;
     SimulationParametersUpdateConfig _simulationParametersUpdateConfig = SimulationParametersUpdateConfig::All;
 
-    Settings _settings;
+    SettingsForSimulation _settings;
+    SettingsForSimulation _settingsForPreview;
 
     mutable std::mutex _mutexForSimulationData;
-    std::shared_ptr<SimulationData> _cudaSimulationData;
-
+    std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
+    std::shared_ptr<SimulationData> _cudaPreviewData;
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
-    std::shared_ptr<DataTO> _cudaAccessTO;
+    CudaCollectionTOProvider _cudaCollectionTOProvider;
+    CollectionTOProvider _collectionTOProvider;
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;
-    std::optional<RawStatisticsData> _statisticsData;
+    std::optional<StatisticsRawData> _statisticsData;
     StatisticsHistory _statisticsHistory;
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
+    std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
     MaxAgeBalancer _maxAgeBalancer;
 
-    SimulationKernelsLauncher _simulationKernels;
-    DataAccessKernelsLauncher _dataAccessKernels;
-    GarbageCollectorKernelsLauncher _garbageCollectorKernels;
-    RenderingKernelsLauncher _renderingKernels;
-    EditKernelsLauncher _editKernels;
-    StatisticsKernelsLauncher _statisticsKernels;
-    TestKernelsLauncher _testKernels;
+    SimulationKernelsService _simulationKernels;
+    DataAccessKernelsService _dataAccessKernels;
+    GarbageCollectorKernelsService _garbageCollectorKernels;
+    RenderingKernelsService _renderingKernels;
+    EditKernelsService _editKernels;
+    StatisticsKernelsService _statisticsKernels;
+    TestKernelsService _testKernels;
 };

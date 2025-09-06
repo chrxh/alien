@@ -39,7 +39,7 @@ struct StructuralOperation
     int nextOperationIndex; //linked list, = -1 end
 };
 
-struct CellFunctionOperation
+struct CellTypeOperation
 {
     Cell* cell;
 };

@@ -5,8 +5,6 @@
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 
-//class AlienWindow;
-
 class SimulationView;
 
 class _Shader;
@@ -71,8 +69,6 @@ class CreatorWindow;
 
 class MultiplierWindow;
 
-class PatternAnalysisDialog;
-
 class FpsController;
 
 class BrowserWindow;
@@ -99,18 +95,48 @@ class NewPasswordDialog;
 
 class ImageToPatternDialog;
 
-class GenomeEditorWindow;
-
 class RadiationSourcesWindow;
 
 class ChangeColorDialog;
 
 class AutosaveWindow;
 
+class GenomeEditorWindow;
+
 class FileTransferController;
 
-class _LocationWidgets;
-using LocationWidgets = std::shared_ptr<_LocationWidgets>;
+class _LocationWidget;
+using LocationWidget = std::shared_ptr<_LocationWidget>;
+
+class _GenomeTabWidget;
+using GenomeTabWidget = std::shared_ptr<_GenomeTabWidget>;
+
+struct _GenomeTabLayoutData;
+using GenomeTabLayoutData = std::shared_ptr<_GenomeTabLayoutData>;
+
+struct _GenomeWindowEditData;
+using GenomeWindowEditData = std::shared_ptr<_GenomeWindowEditData>;
+
+struct _GenomeTabEditData;
+using GenomeTabEditData = std::shared_ptr<_GenomeTabEditData>;
+
+class _GenomeEditorWidget;
+using GenomeEditorWidget = std::shared_ptr<_GenomeEditorWidget>;
+
+class _GeneEditorWidget;
+using GeneEditorWidget = std::shared_ptr<_GeneEditorWidget>;
+
+class _NodeEditorWidget;
+using NodeEditorWidget = std::shared_ptr<_NodeEditorWidget>;
+
+class _NeuralNetEditorWidget;
+using NeuralNetEditorWidget = std::shared_ptr<_NeuralNetEditorWidget>;
+
+class _PreviewWidget;
+using PreviewWidget = std::shared_ptr<_PreviewWidget>;
+
+class _CreaturePreviewWidget;
+using CreaturePreviewWidget = std::shared_ptr<_CreaturePreviewWidget>;
 
 struct UserInfo;
 

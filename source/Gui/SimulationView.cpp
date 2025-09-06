@@ -9,13 +9,12 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
 
-#include "AlienImGui.h"
+#include "AlienGui.h"
 #include "Shader.h"
 #include "SimulationScrollbar.h"
 #include "Viewport.h"
 #include "SimulationInteractionController.h"
 #include "StyleRepository.h"
-#include "CellFunctionStrings.h"
 
 namespace
 {
@@ -38,8 +37,6 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _scrollbarY = std::make_shared<_SimulationScrollbar>(
         "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simulationFacade);
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
     float vertices[] = {
         // positions        // texture coordinates
         1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
@@ -155,14 +152,14 @@ void SimulationView::draw()
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _shader->setInt("phase", 0);
+        _shader->setInt("phase", 10);
         glBindVertexArray(_vao);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _shader->setInt("phase", 1);
+        _shader->setInt("phase", 11);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
         glActiveTexture(GL_TEXTURE1);
@@ -172,12 +169,12 @@ void SimulationView::draw()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _shader->setInt("phase", 2);
+        _shader->setInt("phase", 12);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        if (_simulationFacade->getSimulationParameters().markReferenceDomain) {
+        if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
@@ -193,7 +190,7 @@ void SimulationView::draw()
         auto bottom = ImGui::GetMainViewport()->Pos.y + ImGui::GetMainViewport()->Size.y;
         auto maxLength = std::max(right, bottom);
 
-        AlienImGui::RotateStart(drawList);
+        AlienGui::RotateStart(drawList);
         auto font = styleRep.getReefLargeFont();
         auto text = "Rendering disabled";
         ImVec4 clipRect(-100000.0f, -100000.0f, 100000.0f, 100000.0f);
@@ -211,7 +208,7 @@ void SimulationView::draw()
                     false);
             }
         }
-        AlienImGui::RotateEnd(45.0f, drawList);
+        AlienGui::RotateEnd(45.0f, drawList);
     }
 }
 
@@ -304,53 +301,29 @@ void SimulationView::updateImageFromSimulation()
     if (_overlay) {
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto parameters = _simulationFacade->getSimulationParameters();
-        auto timestep = _simulationFacade->getCurrentTimestep();
         for (auto const& overlayElement : _overlay->elements) {
             if (_cellDetailOverlayActive && overlayElement.cell) {
                 {
-                    auto fontSizeUnit = std::min(40.0f, Viewport::get().getZoomFactor()) / 2;
-                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering);
-                    if (overlayElement.cellType != CellFunction_None) {
-                        auto text = Const::CellFunctionToStringMap.at(overlayElement.cellType);
-                        if (overlayElement.executionOrderNumber == toInt((timestep - 1) % parameters.cellNumExecutionOrderNumbers)) {
-                            drawList->AddCircleFilled(
-                                {viewPos.x - 2.0f * fontSizeUnit, viewPos.y + 0.5f * fontSizeUnit}, fontSizeUnit / 5, ImColor::HSV(0.0f, 1.0f, 0.7f, 1.0f));
-                        }
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
-                            Const::CellFunctionOverlayShadowColor,
-                            text.c_str());
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
-                            Const::CellFunctionOverlayColor,
-                            text.c_str());
-                    }
-                }
-                {
-                    auto viewPos =
-                        Viewport::get().mapWorldToViewPosition({overlayElement.pos.x - 0.12f, overlayElement.pos.y - 0.25f}, parameters.borderlessRendering);
-                    auto fontSize = Viewport::get().getZoomFactor() / 2;
+                    auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
+                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
+                    auto text = Const::CellTypeStrings.at(overlayElement.cellType);
                     drawList->AddText(
-                        StyleRepository::get().getLargeFont(),
-                        fontSize,
-                        {viewPos.x, viewPos.y},
-                        Const::ExecutionNumberOverlayShadowColor,
-                        std::to_string(overlayElement.executionOrderNumber).c_str());
+                        StyleRepository::get().getMediumFont(),
+                        fontSizeUnit,
+                        {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
+                        Const::CellTypeOverlayShadowColor,
+                        text.c_str());
                     drawList->AddText(
-                        StyleRepository::get().getLargeFont(),
-                        fontSize,
-                        {viewPos.x + 1, viewPos.y + 1},
-                        Const::ExecutionNumberOverlayColor,
-                        std::to_string(overlayElement.executionOrderNumber).c_str());
+                        StyleRepository::get().getMediumFont(),
+                        fontSizeUnit,
+                        {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
+                        Const::CellTypeOverlayColor,
+                        text.c_str());
                 }
             }
 
             if (overlayElement.selected == 1) {
-                auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering);
+                auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
                 if (Viewport::get().isVisible(viewPos)) {
                     drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
                 }
