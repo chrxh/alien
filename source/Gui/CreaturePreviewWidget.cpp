@@ -164,9 +164,12 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
 
         // Draw front circle
         {
-            auto dimensions = calcDimensions(desc);
-            auto center = (dimensions.upperLeft + dimensions.lowerRight) / 2.0f + offset + previewCenter;
-            auto radius = (std::max(dimensions.lowerRight.x - dimensions.upperLeft.x, dimensions.lowerRight.y - dimensions.upperLeft.y) / 2.0f + 1.0f) * cellSize;
+            auto maxDistance = 0.0f;
+            for (auto const& cell : desc._cells) {
+                maxDistance = std::max(maxDistance, Math::length(cell._pos));
+            }
+            auto center = offset + previewCenter;
+            auto radius = (maxDistance + 1.0f) * cellSize;
             radius = std::max(radius, cellSize * 4.0f);
             drawList->AddCircle({center.x, center.y}, radius, ImColor::HSV(0, 0, 0.2f), 64);
 
@@ -354,25 +357,4 @@ void _CreaturePreviewWidget::processActionButtons()
         //ImGui::PopID();
     }
     ImGui::EndChild();
-}
-
-_CreaturePreviewWidget::Dimensions _CreaturePreviewWidget::calcDimensions(PreviewDescription const& desc) const
-{
-    Dimensions result;
-
-    for (auto const& cell : desc._cells) {
-        if (cell._pos.x < result.upperLeft.x) {
-            result.upperLeft.x = cell._pos.x;
-        }
-        if (cell._pos.y < result.upperLeft.y) {
-            result.upperLeft.y = cell._pos.y;
-        }
-        if (cell._pos.x > result.lowerRight.x) {
-            result.lowerRight.x = cell._pos.x;
-        }
-        if (cell._pos.y > result.lowerRight.y) {
-            result.lowerRight.y = cell._pos.y;
-        }
-    }
-    return result;
 }

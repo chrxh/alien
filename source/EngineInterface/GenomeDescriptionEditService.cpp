@@ -246,7 +246,7 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
     setNodeAttributesForPreview(genome);
-    genome._frontAngle = 0;
+    genome._frontAngle = 0;     // frontAngle is not used => set to 0 for better caching
     if (!genome._genes.empty()) {
         genome._genes.at(startGeneIndex)._numBranches = 1;
     }

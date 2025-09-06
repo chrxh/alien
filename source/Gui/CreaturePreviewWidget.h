@@ -33,13 +33,6 @@ private:
     void processContent(ConversionResult const& conversionResult);
     void processActionButtons();
 
-    struct Dimensions
-    {
-        RealVector2D upperLeft;
-        RealVector2D lowerRight;
-    };
-    Dimensions calcDimensions(PreviewDescription const& desc) const;
-
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
     GenomeDescriptionWithStartGeneIndex _genomeWithStartIndex;

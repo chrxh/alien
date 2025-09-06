@@ -40,7 +40,7 @@ ConversionResult PreviewDescriptionConverterService::convert(
     auto cache = phenotype.createCache();
 
     // Center
-    editService.setCenter(phenotype, {0.0f, 0.0f});
+    editService.setCenter(phenotype, {0, 0});
 
     // Get last and second last constructed cell on start gene
     std::set<uint64_t> cellIdsOnStartGene;
