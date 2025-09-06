@@ -78,7 +78,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
     creature->id = creatureTO.id;
     creature->ancestorId = creatureTO.ancestorId;
     creature->generation = creatureTO.generation;
-    creature->mutationId = creatureTO.mutationId;
+    creature->lineageId = creatureTO.lineageId;
     creature->genomeComplexity = creatureTO.genomeComplexity;
     creature->genome.frontAngle = creatureTO.genome.frontAngle;
     creature->genome.numGenes = creatureTO.genome.numGenes;

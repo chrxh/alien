@@ -36,7 +36,7 @@ namespace
             creatureTO.id = creature->id;
             creatureTO.ancestorId = creature->ancestorId;
             creatureTO.generation = creature->generation;
-            creatureTO.mutationId = creature->mutationId;
+            creatureTO.lineageId = creature->lineageId;
             creatureTO.genomeComplexity = creature->genomeComplexity;
             creatureTO.genome.frontAngle = creature->genome.frontAngle;
             creatureTO.genome.numGenes = creature->genome.numGenes;
@@ -694,7 +694,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, Collecti
                 auto const& creature = collectionTO.creatures[cell.creatureIndex];
                 maxIds.currentCreatureId = max(maxIds.currentCreatureId, creature.id);
             }
-            //maxIds.currentMutationId = max(maxIds.currentMutationId, cell.mutationId);
+            //maxIds.currentLineageId = max(maxIds.currentLineageId, cell.lineageId);
         }
     }
     {

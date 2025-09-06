@@ -70,7 +70,7 @@ CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescript
 
     return CreatureDescription()
         .ancestorId(1001)
-        .mutationId(502)
+        .lineageId(502)
         .generation(7)
         .genomeComplexity(25)
         .genome(GenomeDescription()

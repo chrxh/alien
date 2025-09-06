@@ -90,13 +90,13 @@ public:
 
     __device__ __inline__ uint64_t createObjectId() { return atomicAdd(&_ids->currentObjectId, 1); }
     __device__ __inline__ uint64_t createCreatureId() { return atomicAdd(&_ids->currentCreatureId, 1); }
-    __device__ __inline__ uint32_t createMutationId() { return atomicAdd(&_ids->currentMutationId, 1); }
+    __device__ __inline__ uint32_t createLineageId() { return atomicAdd(&_ids->currentLineageId, 1); }
 
     __device__ __inline__ void adaptMaxIds(Ids const& ids)
     {
         atomicMax(&_ids->currentObjectId, ids.currentObjectId + 1);
         atomicMax(&_ids->currentCreatureId, ids.currentCreatureId + 1);
-        atomicMax(&_ids->currentMutationId, ids.currentMutationId + 1);
+        atomicMax(&_ids->currentLineageId, ids.currentLineageId + 1);
     }
 
 private:

@@ -83,14 +83,14 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
     } else {
         if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants) {
             if (cell->creature != nullptr) {
-                result = densityMap.getSameMutantDensity(scanPos, cell->creature->mutationId);
+                result = densityMap.getSameMutantDensity(scanPos, cell->creature->lineageId);
             } else {
                 result = 0;
             }
         }
         if (restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants) {
             if (cell->creature != nullptr) {
-                result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->creature->mutationId);
+                result = densityMap.getOtherMutantDensity(timestep, scanPos, cell->creature->lineageId);
             } else {
                 result = 0;
             }
@@ -252,12 +252,12 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
                 }
             }
             if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants
-                && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId != otherCell->creature->lineageId)) {
                 continue;
             }
             if (restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
-                && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
-                    || cell->creature->mutationId == otherCell->creature->ancestorId)) {
+                && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId == otherCell->creature->lineageId
+                    || cell->creature->lineageId == otherCell->creature->ancestorId)) {
                 continue;
             }
             if (restrictToCreatures == SensorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {

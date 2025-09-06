@@ -70,23 +70,23 @@ public:
         return 0;
     }
 
-    __device__ __inline__ uint32_t getOtherMutantDensity(uint64_t const& timestep, float2 const& pos, uint32_t mutationId) const
+    __device__ __inline__ uint32_t getOtherMutantDensity(uint64_t const& timestep, float2 const& pos, uint32_t lineageId) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            uint64_t bucket = calcOtherMutantsBucket(mutationId, timestep);
+            uint64_t bucket = calcOtherMutantsBucket(lineageId, timestep);
             return static_cast<uint32_t>((_otherMutantDensityMap[index] >> (bucket * 8)) & 0xff);
         }
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getSameMutantDensity(float2 const& pos, uint32_t mutationId) const
+    __device__ __inline__ uint32_t getSameMutantDensity(float2 const& pos, uint32_t lineageId) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            uint64_t bucket1 = mutationId % 3;
-            uint64_t bucket2 = mutationId % 5;
-            uint64_t bucket3 = mutationId % 7;
+            uint64_t bucket1 = lineageId % 3;
+            uint64_t bucket2 = lineageId % 5;
+            uint64_t bucket3 = lineageId % 7;
             auto densityMapEntry = _sameMutantDensityMap1[index];
             auto density1 = (densityMapEntry >> (bucket1 * 8)) & 0xff;
             auto density2 = (densityMapEntry >> ((bucket2 + 3) * 8)) & 0xff;
@@ -156,13 +156,13 @@ public:
             } else {
                 if (cell->creature != nullptr) {
                     {
-                        uint64_t bucket = calcOtherMutantsBucket(cell->creature->mutationId, timestep);
+                        uint64_t bucket = calcOtherMutantsBucket(cell->creature->lineageId, timestep);
                         alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(0x0101010101010101ull ^ (1ull << (bucket * 8))));
                     }
                     {
-                        uint64_t bucket1 = cell->creature->mutationId % 3;
-                        uint64_t bucket2 = cell->creature->mutationId % 5;
-                        uint64_t bucket3 = cell->creature->mutationId % 7;
+                        uint64_t bucket1 = cell->creature->lineageId % 3;
+                        uint64_t bucket2 = cell->creature->lineageId % 5;
+                        uint64_t bucket3 = cell->creature->lineageId % 7;
                         alienAtomicAdd64(&_sameMutantDensityMap1[index], static_cast<uint64_t>((1ull << (bucket1 * 8)) | (1ull << ((bucket2 + 3) * 8))));
                         alienAtomicAdd64(&_sameMutantDensityMap2[index], static_cast<uint64_t>(1ull << (bucket3 * 8)));
                     }
@@ -208,10 +208,10 @@ public:
     }
 
 private:
-    // timestep is used as an offset to avoid same buckets for different mutationIds for all times
-    __device__ __inline__ uint64_t calcOtherMutantsBucket(uint32_t const& mutationId, uint64_t const& timestep) const
+    // timestep is used as an offset to avoid same buckets for different lineageIds for all times
+    __device__ __inline__ uint64_t calcOtherMutantsBucket(uint32_t const& lineageId, uint64_t const& timestep) const
     {
-        return mutationId != 0 ? (static_cast<uint64_t>(mutationId) + timestep / 23) % 8 : 0;
+        return lineageId != 0 ? (static_cast<uint64_t>(lineageId) + timestep / 23) % 8 : 0;
     }
 
     __device__ __inline__ uint32_t convertGenomeComplexityToIntValue(float genomeComplexity) const { return toInt(genomeComplexity * 10); }

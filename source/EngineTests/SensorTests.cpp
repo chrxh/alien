@@ -246,14 +246,14 @@ TEST_F(SensorTests, foundMassWithMatchingDensity)
 TEST_F(SensorTests, scanForOtherMutants_found)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(6).cells({
+        CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }),
-        CreatureDescription().mutationId(7).cells({
+        CreatureDescription().lineageId(7).cells({
             DescriptionEditService::get()
                 .createRect(
                     DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
@@ -279,14 +279,14 @@ TEST_F(SensorTests, scanForOtherMutants_found)
 TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(6).cells({
+        CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }),
-        CreatureDescription().mutationId(7).cells({
+        CreatureDescription().lineageId(7).cells({
             DescriptionEditService::get()
                 .createRect(
                     DescriptionEditService::CreateRectParameters().center({200.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
@@ -309,14 +309,14 @@ TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(6).cells({
+        CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }),
-        CreatureDescription().mutationId(7).cells({
+        CreatureDescription().lineageId(7).cells({
             DescriptionEditService::get()
                 .createRect(
                     DescriptionEditService::CreateRectParameters().center({200.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
@@ -336,17 +336,17 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
     EXPECT_TRUE(approxCompare(0.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, scanForOtherMutants_notFound_sameMutationId)
+TEST_F(SensorTests, scanForOtherMutants_notFound_sameLineageId)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(7).cells({
+        CreatureDescription().id(0).lineageId(7).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToOtherMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }),
-        CreatureDescription().mutationId(7).cells({
+        CreatureDescription().lineageId(7).cells({
             DescriptionEditService::get()
                 .createRect(
                     DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
@@ -367,7 +367,7 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_sameMutationId)
 TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(7).cells({
+        CreatureDescription().id(0).lineageId(7).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -391,7 +391,7 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(7).cells({
+        CreatureDescription().id(0).lineageId(7).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -415,13 +415,13 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 TEST_F(SensorTests, scanForSameMutants_found)
 {
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(6).cells({
+        CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }),
-        CreatureDescription().mutationId(6).cells({
+        CreatureDescription().lineageId(6).cells({
             DescriptionEditService::get()
                 .createRect(
                     DescriptionEditService::CreateRectParameters().center({10.0f, 100.0f}).width(16).height(16).cellDistance(0.5f).cellType(BaseDescription()))
@@ -439,7 +439,7 @@ TEST_F(SensorTests, scanForSameMutants_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensorCell._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, scanForSameMutants_notFound_otherMutationId)
+TEST_F(SensorTests, scanForSameMutants_notFound_otherLineageId)
 {
     auto const MutantId = 6;
     for (int otherMutantId = 0; otherMutantId < 100; ++otherMutantId) {
@@ -448,7 +448,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_otherMutationId)
         }
 
         auto data = CollectionDescription().creatures({
-            CreatureDescription().id(0).mutationId(MutantId).cells({
+            CreatureDescription().id(0).lineageId(MutantId).cells({
                 CellDescription()
                     .id(1)
                     .pos({100.0f, 100.0f})
@@ -456,7 +456,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_otherMutationId)
                 CellDescription().id(2).pos({101.0f, 100.0f}),
             }),
             CreatureDescription()
-                .mutationId(otherMutantId)
+                .lineageId(otherMutantId)
                 .cells({
                     DescriptionEditService::get()
                         .createRect(DescriptionEditService::CreateRectParameters()
@@ -487,7 +487,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_structure)
     auto const MutantId = 6;
 
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(MutantId).cells({
+        CreatureDescription().id(0).lineageId(MutantId).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
@@ -514,7 +514,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_freeCell)
     auto const MutantId = 6;
 
     auto data = CollectionDescription().creatures({
-        CreatureDescription().id(0).mutationId(MutantId).cells({
+        CreatureDescription().id(0).lineageId(MutantId).cells({
             CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }),

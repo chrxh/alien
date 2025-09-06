@@ -274,7 +274,7 @@ struct CreatureTO
     uint64_t ancestorId;
 
     uint32_t generation;
-    uint32_t mutationId;
+    uint32_t lineageId;
     float genomeComplexity;
 
     GenomeTO genome;

@@ -96,7 +96,7 @@ void MassOperationsDialog::processIntern()
     ImGui::EndDisabled();
 
     AlienGui::Group(AlienGui::GroupParameters().text("Mutants"));
-    ImGui::Checkbox("##mutationId", &_randomizeMutationId);
+    ImGui::Checkbox("##lineageId", &_randomizeLineageId);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Randomize mutation ids");
 
@@ -178,8 +178,8 @@ void MassOperationsDialog::onExecute()
     if (_randomizeCountdowns) {
         DescriptionEditService::get().randomizeCountdowns(content, _minCountdown, _maxCountdown);
     }
-    if (_randomizeMutationId) {
-        DescriptionEditService::get().randomizeMutationIds(content);
+    if (_randomizeLineageId) {
+        DescriptionEditService::get().randomizeLineageIds(content);
     }
 
     if (_restrictToSelectedCreatures) {
@@ -215,7 +215,7 @@ bool MassOperationsDialog::isOkEnabled()
     if (_randomizeCountdowns) {
         result = true;
     }
-    if (_randomizeMutationId) {
+    if (_randomizeLineageId) {
         result = true;
     }
     return result;

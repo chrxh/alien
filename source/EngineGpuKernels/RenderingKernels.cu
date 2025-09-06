@@ -123,9 +123,9 @@ namespace
             }
             }
         }
-        if (cellColoring == CellColoring_MutationId || (cellColoring == CellColoring_MutationId_EveryCellType && primary)) {
+        if (cellColoring == CellColoring_LineageId || (cellColoring == CellColoring_LineageId_EveryCellType && primary)) {
             auto colorNumber = 30;
-            //cell->mutationId == 0 ? 30 : (cell->mutationId == 1 ? 18 : cell->mutationId + 17);  //6 for zero mutant color
+            //cell->lineageId == 0 ? 30 : (cell->lineageId == 1 ? 18 : cell->lineageId + 17);  //6 for zero mutant color
             auto h = abs(toInt((colorNumber * 12107) % 360));
             auto s = 0.6f + toFloat(abs(toInt(colorNumber * 13111)) % 400) / 1000;
             auto rgb = convertHSVtoRGB(toFloat(h), s, 1.0f);
@@ -174,7 +174,7 @@ namespace
             }
         }
 
-        if (cellColoring == CellColoring_EveryCellType || (cellColoring == CellColoring_MutationId_EveryCellType && !primary)) {
+        if (cellColoring == CellColoring_EveryCellType || (cellColoring == CellColoring_LineageId_EveryCellType && !primary)) {
             auto h = (toFloat(cell->cellType) / toFloat(CellType_Count - 1)) * 360.0f;
             auto rgb = convertHSVtoRGB(toFloat(h), 0.7f, 1.0f);
             cellColor = (rgb.x << 16) | (rgb.y << 8) | rgb.z;
@@ -442,7 +442,7 @@ __global__ void cudaDrawCells(
 
         // draw secondary color for cell
         auto secondaryColor =
-            coloring == CellColoring_MutationId_EveryCellType ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
+            coloring == CellColoring_LineageId_EveryCellType ? calcColor(cell, cell->selected, coloring, false) * 0.5f : primaryColor * 0.6f;
         drawCircle(imageData, imageSize, cellImagePos, secondaryColor, cellRadius, shadedCells, true);
 
         // draw signal restrictions

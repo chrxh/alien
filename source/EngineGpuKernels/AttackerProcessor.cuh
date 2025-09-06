@@ -77,13 +77,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             // Evaluate same mutant penalty
             //if (cudaSimulationParameters.advancedAttackerControlToggle.value
-            //    && ((otherCell->mutationId == cell->mutationId) || (otherCell->ancestorMutationId == static_cast<uint8_t>(cell->mutationId & 0xff)))
-            //    && cell->mutationId != 0) {
+            //    && ((otherCell->lineageId == cell->lineageId) || (otherCell->ancestorLineageId == static_cast<uint8_t>(cell->lineageId & 0xff)))
+            //    && cell->lineageId != 0) {
             //    energyToTransfer *= (1.0f - cudaSimulationParameters.attackerSameMutantProtection.value[color][otherColor]);
             //}
 
             // Evaluate new complex mutant penalty
-            //if (cudaSimulationParameters.advancedAttackerControlToggle.value && cell->mutationId < otherCell->mutationId
+            //if (cudaSimulationParameters.advancedAttackerControlToggle.value && cell->lineageId < otherCell->lineageId
             //    && cell->genomeComplexity <= otherCell->genomeComplexity) {
             //    auto cellTypeAttackerArisingComplexMutantPenalty =
             //        ParameterCalculator::calcParameter(cudaSimulationParameters.attackerNewComplexMutantProtection, data, cell->pos, color, otherColor);

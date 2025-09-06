@@ -442,10 +442,10 @@ void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, in
     }
 }
 
-void DescriptionEditService::randomizeMutationIds(CollectionDescription& data) const
+void DescriptionEditService::randomizeLineageIds(CollectionDescription& data) const
 {
     for (auto& creature : data._creatures) {
-        creature._mutationId = NumberGenerator::get().getRandomInt();
+        creature._lineageId = NumberGenerator::get().getRandomInt();
     }
 }
 

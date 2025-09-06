@@ -74,11 +74,11 @@ public:
     {
         atomicAdd(&_data->timeline.timestep.genomeComplexityVariance[color], valueToAdd);
     }
-    __inline__ __device__ void incMutant(int color, uint32_t mutationId, float genomeComplexity)
+    __inline__ __device__ void incMutant(int color, uint32_t lineageId, float genomeComplexity)
     {
-        atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].count, 1);
-        atomicMax(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].color, color);
-        atomicAdd(&_mutantToMutantStatisticsMap[mutationId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
+        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].count, 1);
+        atomicMax(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].color, color);
+        atomicAdd(&_mutantToMutantStatisticsMap[lineageId % MutantToColorCountMapSize].genomeComplexity, genomeComplexity);
     }
     __inline__ __device__ void halveNumConnections()
     {

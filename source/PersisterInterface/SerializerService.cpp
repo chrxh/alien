@@ -477,7 +477,7 @@ namespace
     auto constexpr Id_Creature_Id = 0;
     auto constexpr Id_Creature_AncestorId = 1;
     auto constexpr Id_Creature_Generation = 2;
-    auto constexpr Id_Creature_MutationId = 3;
+    auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_GenomeComplexity = 4;
 
     auto constexpr Id_Cell_Id = 0;
@@ -886,7 +886,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
-        loadSave(task, auxiliaries, Id_Creature_MutationId, data._mutationId, defaultObject._mutationId);
+        loadSave(task, auxiliaries, Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Creature_GenomeComplexity, data._genomeComplexity, defaultObject._genomeComplexity);
         
         processLoadSaveMap(task, ar, auxiliaries);

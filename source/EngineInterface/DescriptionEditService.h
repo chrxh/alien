@@ -106,7 +106,7 @@ public:
     void randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy) const;
     void randomizeAges(CollectionDescription& data, int minAge, int maxAge) const;
     void randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue) const;
-    void randomizeMutationIds(CollectionDescription& data) const;
+    void randomizeLineageIds(CollectionDescription& data) const;
 
     uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
     RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;

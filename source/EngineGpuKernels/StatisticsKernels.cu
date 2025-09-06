@@ -20,7 +20,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
             statistics.addEnergy(cell->color, cell->energy);
             //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
             //    statistics.incNumReplicator(cell->color);
-            //    statistics.incMutant(cell->color, cell->mutationId, cell->genomeComplexity);
+            //    statistics.incMutant(cell->color, cell->lineageId, cell->genomeComplexity);
             //    auto numNodes = GenomeDecoder::getNumNodesRecursively(cell->cellTypeData.constructor.genome, cell->cellTypeData.constructor.genomeSize, true, true);
             //    statistics.addNumGenomeNodes(cell->color, numNodes);
             //    statistics.addGenomeComplexity(cell->color, cell->genomeComplexity);

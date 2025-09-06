@@ -53,7 +53,7 @@ void NumberGenerator::adaptMaxIds(Ids const& ids)
 {
     _ids.currentObjectId = std::max(_ids.currentObjectId, ids.currentObjectId + 1);
     _ids.currentCreatureId = std::max(_ids.currentCreatureId, ids.currentCreatureId + 1);
-    _ids.currentMutationId = std::max(_ids.currentMutationId, ids.currentMutationId + 1);
+    _ids.currentLineageId = std::max(_ids.currentLineageId, ids.currentLineageId + 1);
 }
 
 double NumberGenerator::getRandomDouble(double min, double max)

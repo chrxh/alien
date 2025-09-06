@@ -68,12 +68,12 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
             }
         }
         if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId != otherCell->creature->mutationId)) {
+            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId != otherCell->creature->lineageId)) {
             return;
         }
         if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->mutationId == otherCell->creature->mutationId
-                || cell->creature->mutationId == otherCell->creature->ancestorId)) {
+            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId == otherCell->creature->lineageId
+                || cell->creature->lineageId == otherCell->creature->ancestorId)) {
             return;
         }
         if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {

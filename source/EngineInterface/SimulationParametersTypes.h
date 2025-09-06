@@ -159,8 +159,8 @@ enum CellColoring_
 {
     CellColoring_None,
     CellColoring_CellColor,
-    CellColoring_MutationId,
-    CellColoring_MutationId_EveryCellType,
+    CellColoring_LineageId,
+    CellColoring_LineageId_EveryCellType,
     CellColoring_CellState,
     CellColoring_GenomeComplexity,
     CellColoring_SpecificCellType,

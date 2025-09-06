@@ -344,7 +344,7 @@ namespace Const
     std::string const CellCreatureIdTooltip =
         "This value loosely identifies a specific creature. While not guaranteed, it is very likely that two creatures will have different creature ids.";
 
-    std::string const CellMutationIdTooltip =
+    std::string const CellLineageIdTooltip =
         "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes. A few "
         "values have a special meaning:\n\n" ICON_FA_CHEVRON_RIGHT " 0: This value is used for handcrafted cells. This refers to cells that have been "
         "artificially created by the user.\n\n" ICON_FA_CHEVRON_RIGHT " 1: This value is used for free cells. Free cells are cells that have not been created by a "
