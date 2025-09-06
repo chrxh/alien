@@ -142,7 +142,7 @@ private:
     ExceptionData _exceptionData;
 
     //async jobs
-    std::mutex _mutexForEngineWorkerGuard;
+    std::recursive_mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<GpuSettings> _updateGpuSettingsJob;
 
