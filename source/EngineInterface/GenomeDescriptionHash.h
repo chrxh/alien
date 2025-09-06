@@ -44,7 +44,10 @@ namespace std
     template <>
     struct hash<BaseGenomeDescription>
     {
-        std::size_t operator()(const BaseGenomeDescription& desc) const { return 0; }
+        std::size_t operator()(const BaseGenomeDescription& desc) const { 
+            (void)desc; // Parameter unused - returns constant hash
+            return 0; 
+        }
     };
 
     template <>
@@ -118,7 +121,10 @@ namespace std
     template <>
     struct hash<AttackerGenomeDescription>
     {
-        std::size_t operator()(const AttackerGenomeDescription& desc) const { return 1; }
+        std::size_t operator()(const AttackerGenomeDescription& desc) const { 
+            (void)desc; // Parameter unused - returns constant hash
+            return 1; 
+        }
     };
 
     template <>
@@ -190,7 +196,10 @@ namespace std
     template <>
     struct hash<DirectMovementGenomeDescription>
     {
-        std::size_t operator()(const DirectMovementGenomeDescription& desc) const { return 2; }
+        std::size_t operator()(const DirectMovementGenomeDescription& desc) const { 
+            (void)desc; // Parameter unused - returns constant hash
+            return 2; 
+        }
     };
 
     template <>
