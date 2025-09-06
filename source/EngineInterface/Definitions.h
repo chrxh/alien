@@ -45,5 +45,7 @@ class SimulationParametersService;
 
 struct PreviewDescription;
 
+struct ConversionResult;
+
 
 struct Ids;

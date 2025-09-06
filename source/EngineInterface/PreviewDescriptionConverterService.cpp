@@ -21,11 +21,11 @@ namespace
     }
 }
 
-auto PreviewDescriptionConverterService::convert(
+ConversionResult PreviewDescriptionConverterService::convert(
     GenomeDescription const& genome,
     CollectionDescription&& phenotype,
     int startGeneIndex,
-    std::optional<float> const& lastVisualFrontAngle) const -> ConversionResult
+    std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;
     result.visualFrontAngle = lastVisualFrontAngle;
