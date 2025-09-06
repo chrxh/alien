@@ -445,7 +445,7 @@ void DescriptionEditService::randomizeCountdowns(CollectionDescription& data, in
 void DescriptionEditService::randomizeMutationIds(CollectionDescription& data) const
 {
     for (auto& creature : data._creatures) {
-        creature._mutationId = NumberGenerator::get().getRandomInt() % 0xffff;
+        creature._mutationId = NumberGenerator::get().getRandomInt();
     }
 }
 

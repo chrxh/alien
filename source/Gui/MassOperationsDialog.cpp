@@ -101,7 +101,7 @@ void MassOperationsDialog::processIntern()
     AlienGui::Text("Randomize mutation ids");
 
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));
-    ImGui::Checkbox("##restrictToSelectedCreatures", &_restrictToSelectedClusters);
+    ImGui::Checkbox("##restrictToSelectedCreatures", &_restrictToSelectedCreatures);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Restrict to selected creatures");
 
@@ -147,7 +147,7 @@ void MassOperationsDialog::onExecute()
     auto parameters = _simulationFacade->getSimulationParameters();
     auto worldSize = _simulationFacade->getWorldSize();
     auto content = [&] {
-        if (_restrictToSelectedClusters) {
+        if (_restrictToSelectedCreatures) {
             return _simulationFacade->getSelectedSimulationData(true);
         } else {
             return _simulationFacade->getSimulationData();
@@ -182,7 +182,7 @@ void MassOperationsDialog::onExecute()
         DescriptionEditService::get().randomizeMutationIds(content);
     }
 
-    if (_restrictToSelectedClusters) {
+    if (_restrictToSelectedCreatures) {
         _simulationFacade->removeSelectedObjects(true);
         _simulationFacade->addAndSelectSimulationData(std::move(content));
     } else {
