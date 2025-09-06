@@ -20,5 +20,6 @@ _FileLogger::~_FileLogger()
 
 void _FileLogger::newLogMessage(Priority priority, std::string const& message)
 {
+    (void)priority; // Parameter unused in this implementation
     _outfile << message << std::endl;
 }

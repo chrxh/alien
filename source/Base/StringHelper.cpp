@@ -106,11 +106,11 @@ std::string StringHelper::formatInHex(uint64_t value)
 
 void StringHelper::copy(char* target, int maxSize, std::string const& source)
 {
-    auto sourceSize = source.size();
+    auto sourceSize = static_cast<int>(source.size());
     if (sourceSize >= maxSize) {
         sourceSize = maxSize - 1;
     }
-    source.copy(target, sourceSize);
+    source.copy(target, static_cast<size_t>(sourceSize));
     target[sourceSize] = 0;
 }
 
@@ -148,7 +148,7 @@ StringHelper::Decomposition StringHelper::decomposeCaseInsensitiveMatch(std::str
 
     auto findResult = strLower.find(toMatchLower);
     if (findResult == std::string::npos) {
-        return {.beforeMatch = str};
+        return {.beforeMatch = str, .match = ""};
     }
 
     return {.beforeMatch = str.substr(0, findResult), .match = str.substr(findResult, toMatch.size())};

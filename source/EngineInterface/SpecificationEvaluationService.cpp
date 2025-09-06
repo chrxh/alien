@@ -22,6 +22,9 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
                 .disabledValue = &(parameters.**std::get<BoolBaseLayerMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<BoolBaseLayerMember>(member)).layerValues[index].enabled};
         }
+        case LocationType::Source:
+            // Source type should not reach here due to outer condition
+            break;
         }
     } else if (locationType == LocationType::Layer && std::holds_alternative<BoolLayerMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
@@ -86,6 +89,9 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
                 .disabledValue = &(parameters.**std::get<FloatBaseLayerMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<FloatBaseLayerMember>(member)).layerValues[index].enabled};
         }
+        case LocationType::Source:
+            // Source type should not reach here due to outer condition
+            break;
         }
     } else if (locationType == LocationType::Base && std::holds_alternative<FloatPinMember>(member)) {
         return ValueRef<float>{
@@ -125,6 +131,9 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
                 .enabled = &(parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).layerValues[index].enabled,
                 .colorDependence = ColorDependence::ColorVector};
         }
+        case LocationType::Source:
+            // Source type should not reach here due to outer condition
+            break;
         }
     }
 
@@ -145,6 +154,9 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
                 .enabled = &(parameters.**std::get<ColorMatrixFloatBaseLayerMember>(member)).layerValues[index].enabled,
                 .colorDependence = ColorDependence::ColorMatrix};
         }
+        case LocationType::Source:
+            // Source type should not reach here due to outer condition
+            break;
         }
     }
 
@@ -222,6 +234,9 @@ SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member,
                 .disabledValue = &(parameters.**std::get<FloatColorRGBBaseLayerMember>(member)).baseValue,
                 .enabled = &(parameters.**std::get<FloatColorRGBBaseLayerMember>(member)).layerValues[index].enabled};
         }
+        case LocationType::Source:
+            // Source type should not reach here due to outer condition
+            break;
         }
     }
     return {};
@@ -244,6 +259,9 @@ ValueRef<ColorTransitionRule> SpecificationEvaluationService::getRef(ColorTransi
                 .enabled = &(parameters.**std::get<ColorTransitionRulesBaseLayerMember>(member)).layerValues[index].enabled,
                 .colorDependence = ColorDependence::ColorVector};
         }
+        case LocationType::Source:
+            // Source type should not reach here due to outer condition
+            break;
         }
     }
     return {};
