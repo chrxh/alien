@@ -20,7 +20,7 @@ namespace
             CudaMemoryManager::getInstance().freeMemory(array);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity, array);
             actualCapacity = requiredCapacity;
-            setValueToDevice(&actualSize, 0ull);
+            setValueToDevice(&actualSize, static_cast<uint64_t>(0));
         }
     };
 }
@@ -50,12 +50,12 @@ CollectionTO _CudaCollectionTOProvider::provideDataTO(ArraySizesForTO const& req
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.genes, result.genes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.nodes, result.nodes);
             CudaMemoryManager::getInstance().acquireMemory(requiredCapacity.heap, result.heap);
-            setValueToDevice(result.numCells, 0ull);
-            setValueToDevice(result.numParticles, 0ull);
-            setValueToDevice(result.numCreatures, 0ull);
-            setValueToDevice(result.numGenes, 0ull);
-            setValueToDevice(result.numNodes, 0ull);
-            setValueToDevice(result.heapSize, 0ull);
+            setValueToDevice(result.numCells, static_cast<uint64_t>(0));
+            setValueToDevice(result.numParticles, static_cast<uint64_t>(0));
+            setValueToDevice(result.numCreatures, static_cast<uint64_t>(0));
+            setValueToDevice(result.numGenes, static_cast<uint64_t>(0));
+            setValueToDevice(result.numNodes, static_cast<uint64_t>(0));
+            setValueToDevice(result.heapSize, static_cast<uint64_t>(0));
 
             _collectionTO = result;
         }
