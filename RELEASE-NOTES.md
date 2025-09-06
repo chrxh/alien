@@ -1,5 +1,9 @@
 # Release notes
 
+## [4.12.3] - 2025-09-06
+### Fixed
+- engine: fix crash in "Sync with rendering" mode
+
 ## [4.12.2] - 2025-05-26
 ### Fixed
 - engine: Nvidia Blackwell support (compatibility with CUDA Toolkit v12.8)
