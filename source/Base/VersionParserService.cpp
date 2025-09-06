@@ -44,6 +44,9 @@ VersionParserService::VersionParts VersionParserService::getVersionParts(std::st
     VersionParts result{
         .major = std::stoi(versionParts.at(0)),
         .minor = std::stoi(versionParts.at(1)),
+        .patch = 0,
+        .versionType = VersionType_Release,
+        .preRelease = std::nullopt
     };
 
     if (versionParts.size() == 3) {

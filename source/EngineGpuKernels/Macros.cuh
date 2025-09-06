@@ -53,7 +53,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
     }
 }
 
-#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__))
 
 #define CHECK_FOR_CUDA_ERROR(val) \
     checkAndThrowError( (val), #val, __FILENAME__, __LINE__ )

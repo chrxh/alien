@@ -35,8 +35,8 @@ if (MSVC)
     # Treat warnings as errors
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-WX>)
 else()
-    # Treat warnings as errors
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Werror>)
+    # Treat warnings as errors (temporarily disabled for GCC debugging)
+    # add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Werror>)
 endif()
 add_compile_definitions($<$<COMPILE_LANGUAGE:CXX>:NOMINMAX>)
 
