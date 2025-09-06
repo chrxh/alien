@@ -127,10 +127,31 @@ __device__ __inline__ T alienAtomicAdd64(T* address, T const& value)
 }
 
 template <typename T>
+__device__ __inline__ T alienAtomicAdd32(T* address, T value)
+{
+    static_assert(sizeof(unsigned int) == sizeof(T));
+    return reinterpret_cast<T>(atomicAdd(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
+}
+
+template <typename T>
 __device__ __inline__ T alienAtomicMin64(T* address, T const& value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T));
     return atomicMin(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value));
+}
+
+template <typename T>
+__device__ __inline__ T alienAtomicMax64(T* address, T const& value)
+{
+    static_assert(sizeof(unsigned long long) == sizeof(T));
+    return atomicMax(reinterpret_cast<unsigned long long*>(address), static_cast<unsigned long long>(value));
+}
+
+template <typename T>
+__device__ __inline__ T alienAtomicMax32(T* address, T const& value)
+{
+    static_assert(sizeof(unsigned int) == sizeof(T));
+    return atomicMax(reinterpret_cast<unsigned int*>(address), static_cast<unsigned int>(value));
 }
 
 template <typename T>
@@ -145,13 +166,6 @@ __device__ __inline__ T* alienAtomicExch(T** address, T* value)
 {
     static_assert(sizeof(unsigned long long) == sizeof(T*));
     return reinterpret_cast<T*>(atomicExch(reinterpret_cast<unsigned long long int*>(address), reinterpret_cast<unsigned long long int>(value)));
-}
-
-template <typename T>
-__device__ __inline__ T alienAtomicAdd32(T* address, T value)
-{
-    static_assert(sizeof(unsigned int) == sizeof(T));
-    return reinterpret_cast<T>(atomicAdd(reinterpret_cast<unsigned int*>(address), reinterpret_cast<unsigned int>(value)));
 }
 
 __device__ __forceinline__ float alienAtomicMax(float* addr, float value)

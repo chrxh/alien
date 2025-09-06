@@ -88,15 +88,15 @@ public:
         }
     }
 
-    __device__ __inline__ uint64_t createObjectId() { return atomicAdd(&_ids->currentObjectId, 1); }
-    __device__ __inline__ uint64_t createCreatureId() { return atomicAdd(&_ids->currentCreatureId, 1); }
-    __device__ __inline__ uint32_t createLineageId() { return atomicAdd(&_ids->currentLineageId, 1); }
+    __device__ __inline__ uint64_t createObjectId() { return alienAtomicAdd64(&_ids->currentObjectId, static_cast<uint64_t>(1)); }
+    __device__ __inline__ uint64_t createCreatureId() { return alienAtomicAdd64(&_ids->currentCreatureId, static_cast<uint64_t>(1)); }
+    __device__ __inline__ uint32_t createLineageId() { return alienAtomicAdd32(&_ids->currentLineageId, static_cast<uint32_t>(1)); }
 
     __device__ __inline__ void adaptMaxIds(Ids const& ids)
     {
-        atomicMax(&_ids->currentObjectId, ids.currentObjectId + 1);
-        atomicMax(&_ids->currentCreatureId, ids.currentCreatureId + 1);
-        atomicMax(&_ids->currentLineageId, ids.currentLineageId + 1);
+        alienAtomicMax64(&_ids->currentObjectId, ids.currentObjectId + 1);
+        alienAtomicMax64(&_ids->currentCreatureId, ids.currentCreatureId + 1);
+        alienAtomicMax32(&_ids->currentLineageId, ids.currentLineageId + 1);
     }
 
 private:

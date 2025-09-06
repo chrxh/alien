@@ -23,10 +23,10 @@ namespace
 
     __device__ void createCreatureTO(Cell* cell, CollectionTO& collectionTO)
     {
-        auto origCreatureIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
+        uint64_t origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
 
-            auto creatureTOIndex = atomicAdd(collectionTO.numCreatures, 1ull);
+            auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
             if (creatureTOIndex >= collectionTO.capacities.creatures) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
@@ -44,7 +44,7 @@ namespace
                 creatureTO.genome.name[i] = creature->genome.name[i];
             }
 
-            auto geneTOArrayStartIndex = atomicAdd(collectionTO.numGenes, creature->genome.numGenes);
+            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(creature->genome.numGenes));
             creatureTO.genome.geneArrayIndex = geneTOArrayStartIndex;
             for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
@@ -60,7 +60,7 @@ namespace
                 for (int i = 0; i < sizeof(gene.name); ++i) {
                     geneTO.name[i] = gene.name[i];
                 }
-                auto nodeTOArrayStartIndex = atomicAdd(collectionTO.numNodes, gene.numNodes);
+                auto nodeTOArrayStartIndex = alienAtomicAdd64(collectionTO.numNodes, static_cast<uint64_t>(gene.numNodes));
                 geneTO.nodeArrayIndex = nodeTOArrayStartIndex;
                 for (int i = 0, j = gene.numNodes; i < j; ++i) {
                     auto& nodeTO = collectionTO.nodes[nodeTOArrayStartIndex + i];
@@ -156,9 +156,9 @@ namespace
                 }
             }
 
-            atomicExch(&cell->creature->creatureIndex, creatureTOIndex);
+            alienAtomicExch64(&cell->creature->creatureIndex, creatureTOIndex);
         } else if (origCreatureIndex != 0) {
-            atomicExch(&cell->creature->creatureIndex, origCreatureIndex);
+            alienAtomicExch64(&cell->creature->creatureIndex, origCreatureIndex);
         }
     }
 
