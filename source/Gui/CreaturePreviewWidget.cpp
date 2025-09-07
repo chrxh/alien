@@ -1,5 +1,7 @@
 #include "CreaturePreviewWidget.h"
 
+#include <cmath>
+
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -14,7 +16,7 @@
 #include "GenomeTabEditData.h"
 #include "StyleRepository.h"
 
-namespace 
+namespace
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
@@ -32,8 +34,7 @@ CreaturePreviewWidget _CreaturePreviewWidget::create(
 void _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
 {
     auto geneStartIndex = _genomeWithStartIndex.startIndex;
-    auto conversionResult =
-        PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
+    auto conversionResult = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
     auto& desc = conversionResult.description;
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
@@ -181,7 +182,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
 
             AlienGui::RotateStart(drawList);
             auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
-            drawList->AddText(nullptr, textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front"); 
+            drawList->AddText(nullptr, textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front");
             AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
         }
 
@@ -247,7 +248,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
                     arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
                     for (int i = 0; i <= numSegments; ++i) {
                         float angle = startRad + i * angleStep;
-                        arcPoints.push_back(ImVec2(cellPos.x + radius * sin(angle), cellPos.y - radius * cos(angle)));
+                        arcPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
                     }
 
                     // Draw filled polygon (pie segment)
