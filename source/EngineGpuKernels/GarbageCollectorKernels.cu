@@ -139,7 +139,7 @@ __global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
         auto& cell = cells.at(index);
         
         if (cell->creature) {
-            auto origCreatureIndex = atomicExch(&cell->creature->creatureIndex, 0);  // 0 = member is currently initialized
+            auto origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
             if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
                 auto newCreature = newHeap.getTypedSubArray<Creature>(1);
                 *newCreature = *cell->creature;
@@ -163,9 +163,9 @@ __global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
                     }
                 }
                 auto newCreatureIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature) - newHeap.getArray());
-                atomicExch(&cell->creature->creatureIndex, newCreatureIndex);
+                alienAtomicExch64(&cell->creature->creatureIndex, newCreatureIndex);
             } else if (origCreatureIndex != 0) {
-                atomicExch(&cell->creature->creatureIndex, origCreatureIndex);
+                alienAtomicExch64(&cell->creature->creatureIndex, origCreatureIndex);
             }
         }
     }
