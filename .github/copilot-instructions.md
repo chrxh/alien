@@ -73,54 +73,68 @@ cd build && ./cli -i ../resources/autosave.sim -o test.sim -t 10
 - **Full build**: 45-90 minutes expected - NEVER CANCEL, set timeout to 120+ minutes
 - **Test execution**: 5-15 minutes per test suite - NEVER CANCEL, set timeout to 30+ minutes
 
-### Bootstrap and Build Process
-Run these commands in sequence. **CRITICAL: Do not cancel any step even if it appears to hang.**
+### Bootstrap and Build Process (Based on ubuntu-ci.yml)
+Follow the exact CI workflow. **CRITICAL: Do not cancel any step even if it appears to hang.**
 
 1. **Install system dependencies** (2-3 minutes):
    ```bash
-   # VALIDATED: These commands work correctly
-   sudo apt-get update
-   sudo apt-get install -y build-essential cmake
-   sudo apt-get install -y libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu1-mesa-dev
-   sudo apt-get install -y nvidia-cuda-toolkit  # Installs CUDA 12.0.140
+   # VALIDATED: Package installation from CI workflow
+   sudo apt-get update -qq
+   sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
    ```
 
-2. **Clone with submodules** (if not already done):
+2. **Install CUDA (CI Method - BLOCKED in sandboxed environments)**:
    ```bash
-   # VALIDATED: Recursive clone is required for vcpkg submodule
+   # NETWORK LIMITATION: These commands fail due to DNS restrictions
+   # blocking developer.download.nvidia.com in sandboxed environments
+   sudo apt-get install -y gnupg software-properties-common wget
+   wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+   sudo dpkg -i cuda-keyring_1.1-1_all.deb
+   sudo apt-get update
+   sudo apt-get install -y cuda-compiler-12-5
+   echo "/usr/local/cuda/bin" >> $GITHUB_PATH
+   echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+   ```
+   
+   **Alternative for restricted environments (LIMITED FUNCTIONALITY)**:
+   ```bash
+   # Fallback: Use system CUDA packages (may not provide full functionality)
+   sudo apt-get install -y nvidia-cuda-toolkit  # Installs CUDA 12.0.140 to /usr/bin/nvcc
+   ```
+
+3. **Clone with submodules** (if not already done):
+   ```bash
+   # VALIDATED: Recursive clone is required
    git clone --recursive https://github.com/chrxh/alien.git
    cd alien
    # For existing clones: git pull --recurse-submodules
    ```
 
-3. **Bootstrap vcpkg** (2-3 minutes - NEVER CANCEL):
+4. **Bootstrap vcpkg** (30 seconds - VALIDATED):
    ```bash
-   # VALIDATED: This process works but takes 2-3 minutes
-   rm -rf external/vcpkg  # Clean any incomplete vcpkg
+   # VALIDATED: Fast bootstrap process from CI
    git clone https://github.com/Microsoft/vcpkg.git external/vcpkg
    cd external/vcpkg
-   ./bootstrap-vcpkg.sh -disableMetrics  # NEVER CANCEL - takes 2-3 minutes
+   ./bootstrap-vcpkg.sh -disableMetrics  # NEVER CANCEL - completes in ~30 seconds
    cd ../..
    ```
 
-4. **Configure build** (3-5 minutes or may fail with network issues):
+5. **Configure build (CI Method - FAILS in sandboxed environments)**:
    ```bash
-   # CRITICAL WARNING: May fail due to DNS restrictions blocking sourceware.org
-   # This is a known limitation in sandboxed environments
-   time cmake -S . -B build \
+   # NETWORK LIMITATION: Fails when vcpkg tries to download from sourceware.org
+   # This matches the CI configuration but requires unrestricted internet access
+   cmake -S . -B build \
      -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake \
      -DCMAKE_BUILD_TYPE=Release \
-     -DCMAKE_C_COMPILER=gcc \
-     -DCMAKE_CXX_COMPILER=g++ \
-     -DCMAKE_CUDA_COMPILER=/usr/bin/nvcc
+     -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
    ```
-   **If this fails with sourceware.org DNS errors**: This is a known network limitation. Document the failure but note that the steps above are correct for environments with proper internet access.
+   **Known Failure**: vcpkg cannot download bzip2 from `sourceware.org` due to DNS restrictions.
 
-5. **Build all targets** (45-90 minutes - NEVER CANCEL):
+6. **Build all targets** (45-90 minutes - NEVER CANCEL):
    ```bash
    # CRITICAL: Set timeout to 120+ minutes, build takes 45-90 minutes
    # NEVER CANCEL even if it appears stuck
-   time cmake --build build --config Release --parallel
+   cmake --build build
    ```
 
 ### Running Tests (After Successful Build)
@@ -385,17 +399,23 @@ All dependencies are managed through vcpkg manifest mode (`vcpkg.json`):
 - [Dear ImGui Documentation](https://github.com/ocornut/imgui)
 
 ## CRITICAL TIMING SUMMARY - NEVER CANCEL
-**These are VALIDATED timings from actual runs:**
+**Timings based on ubuntu-ci.yml validation:**
 
-| Operation | Time Required | Timeout Setting | Never Cancel |
-|-----------|---------------|-----------------|--------------|
-| System package install | 2-5 minutes | 10 minutes | ✓ |
-| vcpkg clone | 1-2 minutes | 5 minutes | ✓ |
-| vcpkg bootstrap | 2-3 minutes | 10 minutes | ✓ |
-| CMake configure | 3-5 minutes | 15 minutes | ✓ |
-| Full build | 45-90 minutes | 120 minutes | ✓ |
-| EngineTests | 10-15 minutes | 30 minutes | ✓ |
-| NetworkTests | 5-10 minutes | 20 minutes | ✓ |
-| PersisterTests | 5-10 minutes | 20 minutes | ✓ |
+| Operation | Time Required | Timeout Setting | Status | Never Cancel |
+|-----------|---------------|-----------------|---------|--------------|
+| System package install | 2-5 minutes | 10 minutes | ✅ VALIDATED | ✓ |
+| vcpkg clone | 1-2 minutes | 5 minutes | ✅ VALIDATED | ✓ |
+| vcpkg bootstrap | ~30 seconds | 5 minutes | ✅ VALIDATED | ✓ |
+| CMake configure | FAILS | N/A | ❌ BLOCKED (sourceware.org) | ✓ |
+| Full build | 45-90 minutes | 120 minutes | ⚠️ UNTESTED (deps fail) | ✓ |
+| EngineTests | 10-15 minutes | 30 minutes | ⚠️ UNTESTED (build fails) | ✓ |
+| NetworkTests | 5-10 minutes | 20 minutes | ⚠️ UNTESTED (build fails) | ✓ |
+| PersisterTests | 5-10 minutes | 20 minutes | ⚠️ UNTESTED (build fails) | ✓ |
+
+**KEY INSIGHTS FROM CI VALIDATION**:
+- vcpkg bootstrap is much faster than originally documented (~30 seconds vs 2-3 minutes)
+- The CI workflow is the authoritative build process but requires unrestricted internet access
+- Network restrictions in sandboxed environments block both NVIDIA CUDA downloads and vcpkg package downloads
+- Package installation works correctly and follows CI specifications exactly
 
 **REMEMBER**: If any step appears to hang, wait. Build times up to 90 minutes are NORMAL.
