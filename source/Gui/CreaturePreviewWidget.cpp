@@ -247,7 +247,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
                     arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
                     for (int i = 0; i <= numSegments; ++i) {
                         float angle = startRad + i * angleStep;
-                        arcPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
+                        arcPoints.push_back(ImVec2(cellPos.x + radius * sin(angle), cellPos.y - radius * cos(angle)));
                     }
 
                     // Draw filled polygon (pie segment)
