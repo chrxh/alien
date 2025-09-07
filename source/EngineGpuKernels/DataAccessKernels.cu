@@ -164,7 +164,7 @@ namespace
 
     __device__ void createCellTO(Cell* cell, CollectionTO& collectionTO, uint8_t* heap)
     {
-        auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, 1ull);
+        auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, static_cast<uint64_t>(1));
         if (cellTOIndex >= collectionTO.capacities.cells) {
             printf("Insufficient cell memory for transfer objects.\n");
             ABORT();
@@ -759,10 +759,10 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             }
         }
     }
-    atomicAdd(&arraySizes->creatures, numGenomes);
-    atomicAdd(&arraySizes->genes, numGenes);
-    atomicAdd(&arraySizes->nodes, numNodes);
-    atomicAdd(&arraySizes->heap, heapBytes);
+    alienAtomicAdd64(&arraySizes->creatures, numGenomes);
+    alienAtomicAdd64(&arraySizes->genes, numGenes);
+    alienAtomicAdd64(&arraySizes->nodes, numNodes);
+    alienAtomicAdd64(&arraySizes->heap, heapBytes);
 }
 
 __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, ArraySizesForGpu* arraySizes)
@@ -770,7 +770,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, Arra
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         arraySizes->cellArray = *collectionTO.numCells;
         arraySizes->particleArray = *collectionTO.numParticles;
-        atomicAdd(
+        alienAtomicAdd64(
             &arraySizes->heap,
             *collectionTO.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *collectionTO.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
                 + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
@@ -787,6 +787,6 @@ __global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, Arra
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }
         }
-        atomicAdd(&arraySizes->heap, heapBytes);
+        alienAtomicAdd64(&arraySizes->heap, heapBytes);
     }
 }
