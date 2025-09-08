@@ -744,7 +744,7 @@ ConstructorProcessor::constructCellIntern(
         GenomeDecoder::copyGenome(data, constructor, genomeCurrentBytePosition, newConstructor);
         auto numInheritedGenomeNodes = 
             GenomeDecoder::getNumNodesRecursively(newConstructor.genome, newConstructor.genomeSize, true, false);
-        newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(min(NPP_MAX_16U, numInheritedGenomeNodes));
+        newConstructor.numInheritedGenomeNodes = static_cast<uint16_t>(min(0xffff, numInheritedGenomeNodes));
         newConstructor.genomeGeneration = constructor.genomeGeneration + 1;
         newConstructor.offspringMutationId = constructor.offspringMutationId;
         if (GenomeDecoder::containsSelfReplication(newConstructor)) {
