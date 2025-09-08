@@ -100,7 +100,7 @@ namespace
 
         // Trim nodes if limit is exceeded
         if (nodeCounter + toInt(gene._nodes.size()) > nodeLimit) {
-            auto newSize = std::max(0, nodeCounter + toInt(gene._nodes.size()) - nodeLimit);
+            auto newSize = std::max(0, nodeLimit - nodeCounter);
             gene._nodes.resize(newSize);
             gene._numConcatenations = 1;
             for (auto& node : gene._nodes) {
