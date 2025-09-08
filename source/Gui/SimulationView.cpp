@@ -13,7 +13,6 @@
 #include "SimulationScrollbars.h"
 #include "Shader.h"
 #include "Viewport.h"
-#include "SimulationInteractionController.h"
 #include "StyleRepository.h"
 
 namespace
@@ -32,7 +31,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
 
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
-    _scrollbars = std::make_shared<_SimulationScrollbars>();
+    _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
     float vertices[] = {
         // positions        // texture coordinates
@@ -220,9 +219,14 @@ void SimulationView::processSimulationScrollbars()
         auto visibleWorldRect = Viewport::get().getVisibleWorldRect();
         auto viewRect =
             RealRect{{viewport->Pos.x, viewport->Pos.y + mainMenubarHeight}, {viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y}};
-        _scrollbars->process(worldCenter, worldRect, visibleWorldRect, viewRect, ImGui::GetBackgroundDrawList());
+        _scrollbars->process(worldCenter, worldRect, visibleWorldRect, viewRect);
         Viewport::get().setCenterInWorldPos({worldCenter.x, worldCenter.y});
     }
+}
+
+bool SimulationView::isScrollbarDragging() const
+{
+    return _scrollbars->isHoveredOrDragged();
 }
 
 bool SimulationView::isRenderSimulation() const

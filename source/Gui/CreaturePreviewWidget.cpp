@@ -103,7 +103,7 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     , _geneIndices(geneIndices)
     , _subGenome(genomeWithStartIndex)
 {
-    _scrollbars = std::make_shared<_SimulationScrollbars>();
+    _scrollbars = std::make_shared<_SimulationScrollbars>(false);
 }
 
 void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
@@ -130,7 +130,7 @@ void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
             mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
         };
         RealRect viewRect{windowPos, windowPos + windowSize};
-        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect, ImGui::GetWindowDrawList());
+        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
     }
     ImGui::EndChild();
 

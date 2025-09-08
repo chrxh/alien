@@ -13,15 +13,26 @@ namespace
     auto const ScrollbarThickness = 17.0f;
 }
 
-void _SimulationScrollbars::process(
-    RealVector2D& worldCenter,
-    RealRect const& worldRect,
-    RealRect const& visibleWorldRect,
-    RealRect const& viewRect,
-    ImDrawList* drawList)
+void _SimulationScrollbars::process(RealVector2D& worldCenter, RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect)
 {
-    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Horizontal, drawList);
-    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Vertical, drawList);
+    _isOneScrollbarHovered = false;
+
+    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Horizontal);
+    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Vertical);
+}
+
+_SimulationScrollbars::_SimulationScrollbars(bool onBackground)
+    : _onBackground(onBackground)
+{}
+
+bool _SimulationScrollbars::isHoveredOrDragged() const
+{
+    return _isOneScrollbarHovered || isDragged();
+}
+
+bool _SimulationScrollbars::isDragged() const
+{
+    return _worldCenterForDragging.has_value();
 }
 
 void _SimulationScrollbars::processScrollbar(
@@ -29,8 +40,7 @@ void _SimulationScrollbars::processScrollbar(
     RealRect const& worldRect,
     RealRect const& visibleWorldRect,
     RealRect const& viewRect,
-    Orientation orientation,
-    ImDrawList* drawList)
+    Orientation orientation)
 {
     auto scrollbarRect = calcScrollbarRect(viewRect, orientation);
     auto sliderbarRect = calcSliderbarRect(worldRect, visibleWorldRect, viewRect, orientation);  // Relative to scrollbarRect
@@ -46,17 +56,19 @@ void _SimulationScrollbars::processScrollbar(
         }
     }
 
-    auto mouseCursorIntersectSliderbar = doesMouseCursorIntersectSliderBar(scrollbarRect, sliderbarRect);
+    auto hovered = doesMouseCursorIntersectSliderBar(scrollbarRect, sliderbarRect);
+    _isOneScrollbarHovered |= hovered;
 
-    processEvents(worldCenter, worldRect, viewRect, mouseCursorIntersectSliderbar, orientation);
+    processEvents(worldCenter, worldRect, viewRect, hovered, orientation);
 
+    auto drawList = _onBackground ? ImGui::GetBackgroundDrawList() : ImGui::GetWindowDrawList();
     drawList->AddRectFilled(
         ImVec2(scrollbarRect.topLeft.x, scrollbarRect.topLeft.y),
         ImVec2(scrollbarRect.bottomRight.x, scrollbarRect.bottomRight.y),
         ImColor::HSV(0, 0, 0, 0.5f * ImGui::GetStyle().Alpha),
         scale(8.0f));
 
-    ImColor sliderColor = mouseCursorIntersectSliderbar ? ImColor(Const::SimulationSliderColor_Active) : ImColor(Const::SimulationSliderColor_Base);
+    ImColor sliderColor = hovered || isDragged() ? ImColor(Const::SimulationSliderColor_Active) : ImColor(Const::SimulationSliderColor_Base);
     sliderColor.Value.w *= ImGui::GetStyle().Alpha;
     drawList->AddRectFilled(
         ImVec2(scrollbarRect.topLeft.x + sliderbarRect.topLeft.x, scrollbarRect.topLeft.y + sliderbarRect.topLeft.y),
@@ -89,8 +101,9 @@ void _SimulationScrollbars::processEvents(
         if (mouseCursorIntersectSliderbar) {
             _worldCenterForDragging = worldCenter;
             _orientationForDragging = orientation;
-            ImGui::SetActiveID(ImGui::GetID("SimulationScrollbar"), ImGui::GetCurrentWindow());
-            // Optional: ImGui::ClearActiveID(); falls du den Input sofort "verbrauchen" willst
+            if (!_onBackground) {
+                ImGui::SetActiveID(ImGui::GetID("SimulationScrollbar"), ImGui::GetCurrentWindow());
+            }
         }
     }
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging && _orientationForDragging == orientation) {

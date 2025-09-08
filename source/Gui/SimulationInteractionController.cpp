@@ -111,7 +111,7 @@ void SimulationInteractionController::processEvents()
     IntVector2D mousePosInt{toInt(mousePos.x), toInt(mousePos.y)};
     IntVector2D prevMousePosInt = _prevMousePosInt ? *_prevMousePosInt : mousePosInt;
 
-    if (!ImGui::GetIO().WantCaptureMouse) {
+    if (!ImGui::GetIO().WantCaptureMouse && !SimulationView::get().isScrollbarDragging()) {
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
             leftMouseButtonPressed(mousePosInt);
         }

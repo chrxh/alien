@@ -22,6 +22,8 @@ public:
     void draw();
     void processSimulationScrollbars();
 
+    bool isScrollbarDragging() const;
+
     bool isRenderSimulation() const;
     void setRenderSimulation(bool value);
 
