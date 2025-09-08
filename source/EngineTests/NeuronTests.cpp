@@ -1,9 +1,11 @@
 #include <cmath>
+
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Descriptions.h"
 #include "EngineInterface/SimulationFacade.h"
+
 #include "IntegrationTestFramework.h"
 
 class NeuronTests : public IntegrationTestFramework
@@ -36,7 +38,7 @@ protected:
                 result.emplace_back(std::abs(value));
                 break;
             case ActivationFunction_Gaussian:
-                result.emplace_back(std::expf(-2 * value * value));
+                result.emplace_back(expf(-2 * value * value));
                 break;
             default:
                 THROW_NOT_IMPLEMENTED();
