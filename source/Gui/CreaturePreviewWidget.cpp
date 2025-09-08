@@ -171,7 +171,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
             }
             auto center = offset + previewCenter;
             auto radius = (maxDistance + 1.0f) * cellSize;
-            radius = std::max(radius, cellSize * 4.0f);
+            radius = std::max(radius, cellSize * 3.0f);
             drawList->AddCircle({center.x, center.y}, radius, ImColor::HSV(0, 0, 0.2f), 64);
 
             auto textSize = scale(12.0f);
@@ -182,7 +182,7 @@ void _CreaturePreviewWidget::processContent(ConversionResult const& conversionRe
 
             AlienGui::RotateStart(drawList);
             auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
-            drawList->AddText(nullptr, textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front");
+            drawList->AddText(nullptr, textSize, {textPos.x - textSize + 0.5f, textPos.y - textSize / 2 + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
             AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
         }
 

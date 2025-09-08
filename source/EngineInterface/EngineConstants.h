@@ -14,3 +14,4 @@ auto constexpr TRIGGER_THRESHOLD = 0.1f;
 
 auto constexpr PREVIEW_WIDTH = 10000;
 auto constexpr PREVIEW_HEIGHT = 200;
+auto constexpr PREVIEW_MAX_CELLS = 50;

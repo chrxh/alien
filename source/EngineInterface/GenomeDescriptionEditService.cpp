@@ -92,22 +92,72 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index) c
     std::swap(gene._nodes.at(index), gene._nodes.at(index + 1));
 }
 
+namespace
+{
+    void trimNodes(GenomeDescription& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    {
+        auto& gene = genome._genes.at(startGeneIndex);
+
+        // Trim nodes if limit is exceeded
+        if (nodeCounter + toInt(gene._nodes.size()) > nodeLimit) {
+            auto newSize = std::max(0, nodeCounter + toInt(gene._nodes.size()) - nodeLimit);
+            gene._nodes.resize(newSize);
+            gene._numConcatenations = 1;
+            for (auto& node : gene._nodes) {
+                if (node.getCellType() == CellTypeGenome_Constructor) {
+                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                    constructor._geneIndex = toInt(genome._genes.size());  // Castrate further construction
+                }
+            }
+            return;
+        }
+
+        // Trim concatenations if limit is exceeded
+        if (nodeCounter + gene._nodes.size() * gene._numConcatenations > nodeLimit) {
+            gene._numConcatenations = (nodeLimit - nodeCounter) / toInt(gene._nodes.size());
+        }
+
+        nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
+
+        // Continue with constructor nodes
+        for (auto const& node : gene._nodes) {
+            if (node.getCellType() == CellTypeGenome_Constructor) {
+                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                if (constructor._geneIndex < genome._genes.size()) {
+                    trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
+                }
+            }
+        }
+    }
+}
+
 std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::createSubGenomesForPreview(
     GenomeDescription const& genome,
     std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const
 {
     std::vector<GenomeDescriptionWithStartGeneIndex> result;
+    int sumNumResultingCells = 0;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
-        std::set creatureGeneSet(geneIndicesForSubGenome.begin(), geneIndicesForSubGenome.end());
-        auto clone = genome;
-        adaptDescriptionForPreview(clone, geneIndicesForSubGenome.front());
-        for (int i = 0, size = clone._genes.size(); i < size; ++i) {
-            if (!creatureGeneSet.contains(i)) {
-                clone._genes[i] = GeneDescription();
-            }
-        }
-        result.emplace_back(clone, geneIndicesForSubGenome.front());
+        auto subGenome = genome;
+        adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome);
+        result.emplace_back(subGenome, geneIndicesForSubGenome.front());
+
+        auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
+        sumNumResultingCells += resultingCells;
     }
+
+    if (sumNumResultingCells > PREVIEW_MAX_CELLS) {
+
+        // Use simple heuristics
+        for (int i = 0, numSubGenomes = toInt(result.size()); i < numSubGenomes; ++i) {
+            auto& subGenome = result.at(i).genome;
+            auto startGeneIndex = result.at(i).startIndex;
+
+            int nodeCounter = 0;
+            trimNodes(subGenome, nodeCounter, startGeneIndex, PREVIEW_MAX_CELLS / numSubGenomes);
+        }
+    }
+
     return result;
 }
 
@@ -182,6 +232,17 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(CollectionDescription
     DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& cell) { return seedCellIds.contains(cell._id); });
 }
 
+CollectionDescription GenomeDescriptionEditService::createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const
+{
+    return CollectionDescription().creatures({
+        CreatureDescription()
+            .genome(subGenome.genome)
+            .cells({
+                CellDescription().color(PreviewColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(subGenome.startIndex)).pos(pos),
+            }),
+    });
+}
+
 namespace
 {
     void castrate(GenomeDescription& genome, int geneIndex, std::set<int>& inspectedGeneIndices)
@@ -228,21 +289,22 @@ namespace
             }
         }
     }
+
+    void resetUnusedGenes(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices)
+    {
+        std::set<int> geneIndexSet(geneIndices.begin(), geneIndices.end());
+        for (int i = 0, size = genome._genes.size(); i < size; ++i) {
+            if (!geneIndexSet.contains(i)) {
+                genome._genes[i] = GeneDescription();
+            }
+        }
+    }
 }
 
-CollectionDescription GenomeDescriptionEditService::createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const
+void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices) const
 {
-    return CollectionDescription().creatures({
-        CreatureDescription()
-            .genome(subGenome.genome)
-            .cells({
-                CellDescription().color(PreviewColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(subGenome.startIndex)).pos(pos),
-            }),
-    });
-}
+    auto startGeneIndex = geneIndices.front();
 
-void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const
-{
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
     setNodeAttributesForPreview(genome);
@@ -252,4 +314,6 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
     }
 
     genome._genes.at(startGeneIndex)._separation = true;
+
+    resetUnusedGenes(genome, geneIndices);
 }

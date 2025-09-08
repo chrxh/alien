@@ -40,5 +40,5 @@ public:
 private:
     CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const;
 
-    void adaptDescriptionForPreview(GenomeDescription& genome, int startGeneIndex) const;
+    void adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices) const;
 };
