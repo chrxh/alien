@@ -18,6 +18,7 @@
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
 #include "StyleRepository.h"
+#include "SimulationScrollbars.h"
 
 namespace
 {
@@ -36,7 +37,7 @@ CreaturePreviewWidget _CreaturePreviewWidget::create(
 
 void _CreaturePreviewWidget::process(CollectionDescription&& phenotype, float width)
 {
-    if (ImGui::BeginChild("CreatureWidget", ImVec2(width, 0), 0, 0)) {
+    if (ImGui::BeginChild("CreaturePreviewWidget", ImVec2(width, 0), 0, 0)) {
 
         AlienGui::MoveTickUp();
         AlienGui::MoveTickUp();
@@ -101,7 +102,9 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     : _editData(editData)
     , _geneIndices(geneIndices)
     , _subGenome(genomeWithStartIndex)
-{}
+{
+    _scrollbars = std::make_shared<_SimulationScrollbars>();
+}
 
 void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
 {
@@ -109,19 +112,28 @@ void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
     auto conversionResult = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
-    auto windowSize = ImGui::GetWindowSize();
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
-    if (ImGui::BeginChild("outerPreview", ImVec2(0, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
+    if (ImGui::BeginChild("CellGraphWidget", ImVec2(0, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
 
         processCellGraph(conversionResult);
 
-        // Action buttons
         ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowSize().y - scale(40.0f)});
-        //auto zoom = _zoom;
         processActionButtons();
+
+        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+        RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
+
+        RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
+        RealRect visibleWorldRect{
+            mapViewToWorldPosition(windowPos, windowSize, windowPos),
+            mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
+        };
+        RealRect viewRect{windowPos, windowPos + windowSize};
+        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
     }
     ImGui::EndChild();
+
     ImGui::PopStyleColor();
 }
 
@@ -343,4 +355,13 @@ RealVector2D _CreaturePreviewWidget::mapWorldToViewPosition(RealVector2D const& 
     return {
         (worldPos.x - _worldCenter.x) * scaleFactor + viewSize.x / 2 + viewStartPos.x,
         (worldPos.y - _worldCenter.y) * scaleFactor + viewSize.y / 2 + viewStartPos.y};
+}
+
+RealVector2D _CreaturePreviewWidget::mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const
+{
+    auto scaleFactor = scale(_zoom);
+    return {
+        (viewPos.x - viewStartPos.x - viewSize.x / 2) / scaleFactor + _worldCenter.x,
+        (viewPos.y - viewStartPos.y - viewSize.y / 2) / scaleFactor + _worldCenter.y
+    };
 }

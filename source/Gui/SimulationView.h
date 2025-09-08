@@ -48,15 +48,14 @@ private:
 
     SimulationFacade _simulationFacade;
 
-    //widgets
-    SimulationScrollbar _scrollbarX;
-    SimulationScrollbar _scrollbarY;
+    // Widgets
+    SimulationScrollbars _scrollbars;
 
-    //overlay
+    // Overlay
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    //shader data
+    // Shader data
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo1, _fbo2;
     Shader _shader;
@@ -70,6 +69,6 @@ private:
     float _contrast = DefaultContrast;
     float _motionBlur = DefaultMotionBlur;
 
-    //settings
+    // Settings
     bool _renderSimulation = true;
 };

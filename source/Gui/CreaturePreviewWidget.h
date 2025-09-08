@@ -34,6 +34,9 @@ private:
     void processCellGraph(ConversionResult const& conversionResult);
     void processActionButtons();
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
+    RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
+
+    SimulationScrollbars _scrollbars;
 
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;

@@ -10,8 +10,8 @@ class SimulationView;
 class _Shader;
 using Shader = std::shared_ptr<_Shader>;
 
-class _SimulationScrollbar;
-using SimulationScrollbar = std::shared_ptr<_SimulationScrollbar>;
+class _SimulationScrollbars;
+using SimulationScrollbars = std::shared_ptr<_SimulationScrollbars>;
 
 class Viewport;
 

@@ -135,8 +135,8 @@ PUBLIC
     SimulationParametersSourceWidget.h
     SimulationParametersLayerWidget.cpp
     SimulationParametersLayerWidget.h
-    SimulationScrollbar.cpp
-    SimulationScrollbar.h
+    SimulationScrollbars.cpp
+    SimulationScrollbars.h
     SimulationView.cpp
     SimulationView.h
     SpatialControlWindow.cpp

@@ -10,8 +10,8 @@
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "AlienGui.h"
+#include "SimulationScrollbars.h"
 #include "Shader.h"
-#include "SimulationScrollbar.h"
 #include "Viewport.h"
 #include "SimulationInteractionController.h"
 #include "StyleRepository.h"
@@ -32,10 +32,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
 
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
 
-    _scrollbarX = std::make_shared<_SimulationScrollbar>(
-        "SimScrollbarX", _SimulationScrollbar ::Orientation::Horizontal, _simulationFacade);
-    _scrollbarY = std::make_shared<_SimulationScrollbar>(
-        "SimScrollbarY", _SimulationScrollbar::Orientation::Vertical, _simulationFacade);
+    _scrollbars = std::make_shared<_SimulationScrollbars>();
 
     float vertices[] = {
         // positions        // texture coordinates
@@ -217,9 +214,14 @@ void SimulationView::processSimulationScrollbars()
     if (_renderSimulation) {
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         auto mainMenubarHeight = scale(22);
-        auto scrollbarThickness = 17;  //fixed
-        _scrollbarX->process({{viewport->Pos.x, viewport->Size.y - scrollbarThickness}, {viewport->Size.x - 1 - scrollbarThickness, 1}});
-        _scrollbarY->process({{viewport->Size.x - scrollbarThickness, viewport->Pos.y + mainMenubarHeight}, {1, viewport->Size.y - 1 - scrollbarThickness}});
+
+        auto worldCenter = Viewport::get().getCenterInWorldPos();
+        auto worldRect = RealRect{{0,0}, toRealVector2D(_simulationFacade->getWorldSize())};
+        auto visibleWorldRect = Viewport::get().getVisibleWorldRect();
+        auto viewRect =
+            RealRect{{viewport->Pos.x, viewport->Pos.y + mainMenubarHeight}, {viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y}};
+        _scrollbars->process(worldCenter, worldRect, visibleWorldRect, viewRect);
+        Viewport::get().setCenterInWorldPos({worldCenter.x, worldCenter.y});
     }
 }
 
