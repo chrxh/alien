@@ -1,19 +1,27 @@
+#include "SimulationScrollbars.h"
+
 #include <algorithm>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
-#include "SimulationScrollbars.h"
 #include "StyleRepository.h"
+
 
 namespace 
 {
     auto const ScrollbarThickness = 17.0f;
 }
 
-void _SimulationScrollbars::process(RealVector2D& worldCenter, RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect)
+void _SimulationScrollbars::process(
+    RealVector2D& worldCenter,
+    RealRect const& worldRect,
+    RealRect const& visibleWorldRect,
+    RealRect const& viewRect,
+    ImDrawList* drawList)
 {
-    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Horizontal);
-    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Vertical);
+    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Horizontal, drawList);
+    processScrollbar(worldCenter, worldRect, visibleWorldRect, viewRect, Orientation::Vertical, drawList);
 }
 
 void _SimulationScrollbars::processScrollbar(
@@ -21,7 +29,8 @@ void _SimulationScrollbars::processScrollbar(
     RealRect const& worldRect,
     RealRect const& visibleWorldRect,
     RealRect const& viewRect,
-    Orientation orientation)
+    Orientation orientation,
+    ImDrawList* drawList)
 {
     auto scrollbarRect = calcScrollbarRect(viewRect, orientation);
     auto sliderbarRect = calcSliderbarRect(worldRect, visibleWorldRect, viewRect, orientation);  // Relative to scrollbarRect
@@ -32,37 +41,28 @@ void _SimulationScrollbars::processScrollbar(
             sliderbarRect.bottomRight.x = scrollbarRect.bottomRight.x - scale(6.0f);
         }
     } else {
-        if (sliderbarRect.bottomRight.y > scrollbarRect.bottomRight.y - scale(10.0f + ScrollbarThickness)) {
-            sliderbarRect.bottomRight.y = scrollbarRect.bottomRight.y - scale(10.0f + ScrollbarThickness);
+        if (scrollbarRect.topLeft.y + sliderbarRect.bottomRight.y > scrollbarRect.bottomRight.y - scale(6.0f)) {
+            sliderbarRect.bottomRight.y = scrollbarRect.bottomRight.y - scrollbarRect.topLeft.y - scale(6.0f);
         }
     }
-
-    auto size = scrollbarRect.bottomRight - scrollbarRect.topLeft;
 
     auto mouseCursorIntersectSliderbar = doesMouseCursorIntersectSliderBar(scrollbarRect, sliderbarRect);
 
     processEvents(worldCenter, worldRect, viewRect, mouseCursorIntersectSliderbar, orientation);
 
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoDecoration;
-
-    ImGui::SetNextWindowPos(ImVec2(scrollbarRect.topLeft.x, scrollbarRect.topLeft.y));
-    ImGui::SetNextWindowSize(
-        orientation == Orientation::Horizontal ? ImVec2(size.x, scale(ScrollbarThickness + 5.0f)) : ImVec2(scale(ScrollbarThickness + 5.0f), size.y));
-    ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
-
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
-    ImGui::Begin(orientation == Orientation::Horizontal ? "horizontal" : "vertical", NULL, windowFlags);
+    drawList->AddRectFilled(
+        ImVec2(scrollbarRect.topLeft.x, scrollbarRect.topLeft.y),
+        ImVec2(scrollbarRect.bottomRight.x, scrollbarRect.bottomRight.y),
+        ImColor::HSV(0, 0, 0, 0.5f * ImGui::GetStyle().Alpha),
+        scale(8.0f));
 
     ImColor sliderColor = mouseCursorIntersectSliderbar ? ImColor(Const::SimulationSliderColor_Active) : ImColor(Const::SimulationSliderColor_Base);
     sliderColor.Value.w *= ImGui::GetStyle().Alpha;
-    ImGui::GetForegroundDrawList()->AddRectFilled(
+    drawList->AddRectFilled(
         ImVec2(scrollbarRect.topLeft.x + sliderbarRect.topLeft.x, scrollbarRect.topLeft.y + sliderbarRect.topLeft.y),
-        ImVec2(scrollbarRect.topLeft.x + sliderbarRect.bottomRight.x,scrollbarRect.topLeft.y + sliderbarRect.bottomRight.y),
+        ImVec2(scrollbarRect.topLeft.x + sliderbarRect.bottomRight.x, scrollbarRect.topLeft.y + sliderbarRect.bottomRight.y),
         sliderColor,
-        5.0f);
-
-    ImGui::End();
-    ImGui::PopStyleVar();
+        scale(5.0f));
 }
 
 RealRect _SimulationScrollbars::calcScrollbarRect(RealRect const& viewRect, Orientation orientation) const
@@ -89,6 +89,8 @@ void _SimulationScrollbars::processEvents(
         if (mouseCursorIntersectSliderbar) {
             _worldCenterForDragging = worldCenter;
             _orientationForDragging = orientation;
+            ImGui::SetActiveID(ImGui::GetID("SimulationScrollbar"), ImGui::GetCurrentWindow());
+            // Optional: ImGui::ClearActiveID(); falls du den Input sofort "verbrauchen" willst
         }
     }
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging && _orientationForDragging == orientation) {
@@ -116,8 +118,9 @@ RealRect _SimulationScrollbars::calcSliderbarRect(RealRect const& worldRect, Rea
     auto worldSize = Orientation::Horizontal == orientation ? worldRect.bottomRight.x - worldRect.topLeft.x : worldRect.bottomRight.y - worldRect.topLeft.y;
     auto size = Orientation::Horizontal == orientation ? size2d.x : size2d.y;
 
-    auto startWorldPos = Orientation::Horizontal == orientation ? visibleWorldRect.topLeft.x : visibleWorldRect.topLeft.y;
-    auto endWorldPos = Orientation::Horizontal == orientation ? visibleWorldRect.bottomRight.x : visibleWorldRect.bottomRight.y;
+    auto startWorldPos =
+        Orientation::Horizontal == orientation ? visibleWorldRect.topLeft.x - worldRect.topLeft.x : visibleWorldRect.topLeft.y - worldRect.topLeft.y;
+    auto endWorldPos = Orientation::Horizontal == orientation ? visibleWorldRect.bottomRight.x - worldRect.topLeft.x : visibleWorldRect.bottomRight.y - worldRect.topLeft.y;
 
     auto sliderBarStartPos = std::min(std::max(startWorldPos / worldSize * size, 0.0f), size);
     auto sliderBarEndPos = std::min(std::max(endWorldPos / worldSize * size, 0.0f), size);

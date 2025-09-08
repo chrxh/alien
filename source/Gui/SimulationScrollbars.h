@@ -2,10 +2,13 @@
 
 #include "Definitions.h"
 
+
+struct ImDrawList;
+
 class _SimulationScrollbars
 {
 public:
-    void process(RealVector2D& worldCenter, RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect);
+    void process(RealVector2D& worldCenter, RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect, ImDrawList* drawList);
 
 private:
     enum class Orientation
@@ -13,7 +16,13 @@ private:
         Horizontal,
         Vertical
     };
-    void processScrollbar(RealVector2D& worldCenter, RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect, Orientation orientation);
+    void processScrollbar(
+        RealVector2D& worldCenter,
+        RealRect const& worldRect,
+        RealRect const& visibleWorldRect,
+        RealRect const& viewRect,
+        Orientation orientation,
+        ImDrawList* drawList);
 
     RealRect calcScrollbarRect(RealRect const& viewRect, Orientation orientation) const;
 

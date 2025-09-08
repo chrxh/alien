@@ -220,7 +220,7 @@ void SimulationView::processSimulationScrollbars()
         auto visibleWorldRect = Viewport::get().getVisibleWorldRect();
         auto viewRect =
             RealRect{{viewport->Pos.x, viewport->Pos.y + mainMenubarHeight}, {viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y}};
-        _scrollbars->process(worldCenter, worldRect, visibleWorldRect, viewRect);
+        _scrollbars->process(worldCenter, worldRect, visibleWorldRect, viewRect, ImGui::GetBackgroundDrawList());
         Viewport::get().setCenterInWorldPos({worldCenter.x, worldCenter.y});
     }
 }

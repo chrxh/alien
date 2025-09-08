@@ -130,7 +130,7 @@ void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
             mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
         };
         RealRect viewRect{windowPos, windowPos + windowSize};
-        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
+        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect, ImGui::GetWindowDrawList());
     }
     ImGui::EndChild();
 
