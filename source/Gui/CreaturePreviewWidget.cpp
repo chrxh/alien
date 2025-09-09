@@ -2,6 +2,9 @@
 
 #include <cmath>
 
+#include <boost/range/adaptor/sliced.hpp>
+#include <boost/algorithm/string/join.hpp>
+
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
@@ -31,7 +34,76 @@ CreaturePreviewWidget _CreaturePreviewWidget::create(
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
+void _CreaturePreviewWidget::process(CollectionDescription&& phenotype, float width)
+{
+    if (ImGui::BeginChild("CreatureWidget", ImVec2(width, 0), 0, 0)) {
+
+        AlienGui::MoveTickUp();
+        AlienGui::MoveTickUp();
+
+        std::vector<std::string> geneIndexStrings;
+        auto geneIndices = getGeneIndices();
+        geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
+        for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
+            geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
+        }
+        auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
+        if (_subGenome.trimmed) {
+            title += "  -- trimmed";
+        }
+        AlienGui::Group(AlienGui::GroupParameters().text(title));
+        GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+
+        processPreview(std::move(phenotype));
+    }
+    ImGui::EndChild();
+}
+
+uint64_t _CreaturePreviewWidget::getCreatureId() const
+{
+    return _creatureId;
+}
+
+void _CreaturePreviewWidget::setCreatureId(uint64_t value)
+{
+    _creatureId = value;
+}
+
+GeneIndicesForSubGenome const& _CreaturePreviewWidget::getGeneIndices() const
+{
+    return _geneIndices;
+}
+
+void _CreaturePreviewWidget::setGeneIndices(GeneIndicesForSubGenome const& value)
+{
+    _geneIndices = value;
+}
+
+SubGenomeDescription const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
+{
+    return _subGenome;
+}
+
+void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDescription const& value)
+{
+    _subGenome = value;
+}
+
+void _CreaturePreviewWidget::resetVisualFrontAngle()
+{
+    _visualFrontAngle.reset();
+}
+
+_CreaturePreviewWidget::_CreaturePreviewWidget(
+    GenomeTabEditData const& editData,
+    GeneIndicesForSubGenome const& geneIndices,
+    SubGenomeDescription const& genomeWithStartIndex)
+    : _editData(editData)
+    , _geneIndices(geneIndices)
+    , _subGenome(genomeWithStartIndex)
+{}
+
+void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
 {
     auto geneStartIndex = _subGenome.startIndex;
     auto conversionResult = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
@@ -87,7 +159,7 @@ void _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
         }
         _zoomFromPreviousFrame = _zoom;
 
-        processContent(conversionResult);
+        processCellGraph(conversionResult);
     }
     ImGui::EndChild();
 
@@ -96,51 +168,7 @@ void _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
     processActionButtons();
 }
 
-uint64_t _CreaturePreviewWidget::getCreatureId() const
-{
-    return _creatureId;
-}
-
-void _CreaturePreviewWidget::setCreatureId(uint64_t value)
-{
-    _creatureId = value;
-}
-
-GeneIndicesForSubGenome const& _CreaturePreviewWidget::getGeneIndices() const
-{
-    return _geneIndices;
-}
-
-void _CreaturePreviewWidget::setGeneIndices(GeneIndicesForSubGenome const& value)
-{
-    _geneIndices = value;
-}
-
-SubGenomeDescription const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
-{
-    return _subGenome;
-}
-
-void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDescription const& value)
-{
-    _subGenome = value;
-}
-
-void _CreaturePreviewWidget::resetVisualFrontAngle()
-{
-    _visualFrontAngle.reset();
-}
-
-_CreaturePreviewWidget::_CreaturePreviewWidget(
-    GenomeTabEditData const& editData,
-    GeneIndicesForSubGenome const& geneIndices,
-    SubGenomeDescription const& genomeWithStartIndex)
-    : _editData(editData)
-    , _geneIndices(geneIndices)
-    , _subGenome(genomeWithStartIndex)
-{}
-
-void _CreaturePreviewWidget::processContent(ConversionResult const& conversionResult)
+void _CreaturePreviewWidget::processCellGraph(ConversionResult const& conversionResult)
 {
     auto const LineThickness = scale(2.0f);
     auto const cellSize = scale(_zoom);

@@ -155,28 +155,30 @@ void _PreviewWidget::processCreaturePreviews()
 void _PreviewWidget::processCreaturePreview(int subGenomeIndex, CollectionDescription&& phenotype, float width)
 {
     ImGui::PushID(subGenomeIndex);
-    if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
-        auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
+    auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
+    creatureWidget->process(std::move(phenotype), width);
+    //if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
+    //    auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
 
-        auto multiplePreviews = _creatureWidgets.size() > 1;
-        if (multiplePreviews) {
-            AlienGui::MoveTickUp();
-            AlienGui::MoveTickUp();
+    //    auto multiplePreviews = _creatureWidgets.size() > 1;
+    //    if (multiplePreviews) {
+    //        AlienGui::MoveTickUp();
+    //        AlienGui::MoveTickUp();
 
-            std::vector<std::string> geneIndexStrings;
-            auto geneIndices = creatureWidget->getGeneIndices();
-            geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
-            for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
-                geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
-            }
-            auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
-            AlienGui::Group(AlienGui::GroupParameters().text(title));
-        }
-        GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+    //        std::vector<std::string> geneIndexStrings;
+    //        auto geneIndices = creatureWidget->getGeneIndices();
+    //        geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
+    //        for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
+    //            geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
+    //        }
+    //        auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
+    //        AlienGui::Group(AlienGui::GroupParameters().text(title));
+    //    }
+    //    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
 
-        creatureWidget->process(std::move(phenotype));
-    }
-    ImGui::EndChild();
+    //    creatureWidget->process(std::move(phenotype));
+    //}
+    //ImGui::EndChild();
     ImGui::PopID();
 }
 
