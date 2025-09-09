@@ -137,12 +137,18 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
     std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const
 {
     std::vector<GenomeDescriptionWithStartGeneIndex> result;
-    int sumNumResultingCells = 0;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         auto subGenome = genome;
         auto startGeneIndex = geneIndicesForSubGenome.front();
         adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome);
         result.emplace_back(subGenome, startGeneIndex);
+    }
+
+    // Trim sub-genomes if too many cells (use simple heuristics)
+    int sumNumResultingCells = 0;
+    for (auto const& subGenomeWithStartGeneIndex : result) {
+        auto subGenome = subGenomeWithStartGeneIndex.genome;
+        auto startGeneIndex = subGenomeWithStartGeneIndex.startIndex;
 
         auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
         if (resultingCells != -1) {
@@ -152,10 +158,8 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
             sumNumResultingCells = PREVIEW_MAX_CELLS + 1;
         }
     }
-
     if (sumNumResultingCells > PREVIEW_MAX_CELLS) {
 
-        // Use simple heuristics
         for (int i = 0, numSubGenomes = toInt(result.size()); i < numSubGenomes; ++i) {
             auto& subGenome = result.at(i).genome;
             auto startGeneIndex = result.at(i).startIndex;
