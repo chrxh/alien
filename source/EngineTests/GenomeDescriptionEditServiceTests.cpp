@@ -488,10 +488,10 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_wi
     // Should not be trimmed since it's exactly at the limit
     ASSERT_EQ(1, subGenome._genes.size());
     EXPECT_EQ(10, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(5, subGenome._genes.at(0)._numConcatenations);
+    EXPECT_EQ(PREVIEW_MAX_CELLS / 10, subGenome._genes.at(0)._numConcatenations);
     
     auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(50, resultingCells);
+    EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_concatenations)
