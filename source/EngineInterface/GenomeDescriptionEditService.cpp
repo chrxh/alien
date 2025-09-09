@@ -113,7 +113,8 @@ namespace
         }
 
         // Trim concatenations if limit is exceeded
-        if (nodeCounter + gene._nodes.size() * gene._numConcatenations > nodeLimit) {
+        auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
+        if (nodeCounter + gene._nodes.size() * truncatedNumConcatenations > nodeLimit) {
             gene._numConcatenations = (nodeLimit - nodeCounter) / toInt(gene._nodes.size());
         }
 
@@ -144,7 +145,12 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
         result.emplace_back(subGenome, startGeneIndex);
 
         auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
-        sumNumResultingCells += resultingCells;
+        if (resultingCells != -1) {
+            sumNumResultingCells += resultingCells;
+        } else {
+            // Infinite number of cells => force trimming
+            sumNumResultingCells = PREVIEW_MAX_CELLS + 1;
+        }
     }
 
     if (sumNumResultingCells > PREVIEW_MAX_CELLS) {

@@ -525,6 +525,37 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
     EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
 }
 
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_infiniteConcatenations)
+{
+    // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many concatenations
+    // Gene 0: 5 nodes, PREVIEW_MAX_CELLS / 5 + 1 concatenations = exceeds limit of PREVIEW_MAX_CELLS
+    auto genome = GenomeDescription().genes({
+        GeneDescription()
+            .separation(false)
+            .numConcatenations(std::numeric_limits<int>::max())
+            .nodes({
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+            }),
+    });
+
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
+
+    ASSERT_EQ(1, subGenomes.size());
+    auto const& subGenome = subGenomes.at(0).genome;
+
+    // Should be trimmed by reducing concatenations
+    ASSERT_EQ(1, subGenome._genes.size());
+    EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
+    EXPECT_EQ(PREVIEW_MAX_CELLS / 5, subGenome._genes.at(0)._numConcatenations);
+
+    auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
+    EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
+}
+
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_nodes)
 {
     // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many nodes
