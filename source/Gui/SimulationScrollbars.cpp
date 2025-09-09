@@ -47,12 +47,18 @@ void _SimulationScrollbars::processScrollbar(
 
     // Trim slider bar position to be within scrollbar rect (considering padding)
     if (orientation == Orientation::Horizontal) {
-        if (sliderbarRect.bottomRight.x > scrollbarRect.bottomRight.x - scale(6.0f)) {
-            sliderbarRect.bottomRight.x = scrollbarRect.bottomRight.x - scale(6.0f);
+        if (scrollbarRect.topLeft.x + sliderbarRect.bottomRight.x > scrollbarRect.bottomRight.x - scale(6.0f)) {
+            sliderbarRect.bottomRight.x = scrollbarRect.bottomRight.x - scrollbarRect.topLeft.x - scale(6.0f);
+        }
+        if (scrollbarRect.topLeft.x + sliderbarRect.topLeft.x > scrollbarRect.bottomRight.x - scale(16.0f)) {
+            sliderbarRect.topLeft.x = scrollbarRect.bottomRight.x - scrollbarRect.topLeft.x - scale(16.0f);
         }
     } else {
         if (scrollbarRect.topLeft.y + sliderbarRect.bottomRight.y > scrollbarRect.bottomRight.y - scale(6.0f)) {
             sliderbarRect.bottomRight.y = scrollbarRect.bottomRight.y - scrollbarRect.topLeft.y - scale(6.0f);
+        }
+        if (scrollbarRect.topLeft.y + sliderbarRect.topLeft.y > scrollbarRect.bottomRight.y - scale(16.0f)) {
+            sliderbarRect.topLeft.y = scrollbarRect.bottomRight.y - scrollbarRect.topLeft.y - scale(16.0f);
         }
     }
 
