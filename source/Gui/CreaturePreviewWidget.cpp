@@ -14,6 +14,7 @@
 
 #include "EngineInterface/Colors.h"
 #include "EngineInterface/PreviewDescriptionConverterService.h"
+#include "EngineInterface/SpaceCalculator.h"
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
@@ -37,27 +38,39 @@ CreaturePreviewWidget _CreaturePreviewWidget::create(
 
 void _CreaturePreviewWidget::process(CollectionDescription&& phenotype, float width)
 {
-    if (ImGui::BeginChild("CreaturePreviewWidget", ImVec2(width, 0), 0, 0)) {
+    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
 
-        AlienGui::MoveTickUp();
-        AlienGui::MoveTickUp();
+    auto geneStartIndex = _subGenome.startIndex;
 
-        std::vector<std::string> geneIndexStrings;
-        auto geneIndices = getGeneIndices();
-        geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
-        for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
-            geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
-        }
-        auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
-        if (_subGenome.trimmed) {
-            title += "  -- trimmed";
-        }
-        AlienGui::Group(AlienGui::GroupParameters().text(title));
-        GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+    auto conversionResult =
+        PreviewDescriptionConverterService::get().convertToPreviewDescription(_editData->genome, geneStartIndex, std::move(phenotype), _visualFrontAngle);
+    _visualFrontAngle = conversionResult.visualFrontAngle;
 
-        processPreview(std::move(phenotype));
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
+
+    if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
+
+        processCellGraph(conversionResult);
+
+        ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowSize().y - scale(40.0f)});
+        processActionButtons();
+
+        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+        RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
+
+        RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
+        RealRect visibleWorldRect{
+            mapViewToWorldPosition(windowPos, windowSize, windowPos),
+            mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
+        };
+        RealRect viewRect{windowPos, windowPos + windowSize};
+        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
+
+        processTitle();
     }
     ImGui::EndChild();
+
+    ImGui::PopStyleColor();
 }
 
 uint64_t _CreaturePreviewWidget::getCreatureId() const
@@ -104,37 +117,6 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     , _subGenome(genomeWithStartIndex)
 {
     _scrollbars = std::make_shared<_SimulationScrollbars>(false);
-}
-
-void _CreaturePreviewWidget::processPreview(CollectionDescription&& phenotype)
-{
-    auto geneStartIndex = _subGenome.startIndex;
-    auto conversionResult = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
-    _visualFrontAngle = conversionResult.visualFrontAngle;
-
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
-
-    if (ImGui::BeginChild("CellGraphWidget", ImVec2(0, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
-
-        processCellGraph(conversionResult);
-
-        ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowSize().y - scale(40.0f)});
-        processActionButtons();
-
-        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
-        RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-
-        RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
-        RealRect visibleWorldRect{
-            mapViewToWorldPosition(windowPos, windowSize, windowPos),
-            mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
-        };
-        RealRect viewRect{windowPos, windowPos + windowSize};
-        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
-    }
-    ImGui::EndChild();
-
-    ImGui::PopStyleColor();
 }
 
 void _CreaturePreviewWidget::processCellGraph(ConversionResult const& conversionResult)
@@ -347,6 +329,22 @@ void _CreaturePreviewWidget::processActionButtons()
         //ImGui::PopID();
     }
     ImGui::EndChild();
+}
+
+void _CreaturePreviewWidget::processTitle()
+{
+    ImGui::SetCursorPos({scale(7.0f), scale(7.0f)});
+    std::vector<std::string> geneIndexStrings;
+    auto geneIndices = getGeneIndices();
+    geneIndexStrings.emplace_back(std::to_string(geneIndices.front() + 1) + " (start)");
+    for (auto const& geneIndex : geneIndices | boost::adaptors::sliced(1, geneIndices.size())) {
+        geneIndexStrings.emplace_back(std::to_string(geneIndex + 1));
+    }
+    auto title = "Genes: " + boost::join(geneIndexStrings, ", ");
+    if (_subGenome.trimmed) {
+        title += "  -- trimmed";
+    }
+    AlienGui::Text(title.c_str());
 }
 
 RealVector2D _CreaturePreviewWidget::mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const

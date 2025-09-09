@@ -99,6 +99,8 @@ public:
         float distance,
         IntVector2D const& worldSize) const;
 
+    void flattenTopology(CollectionDescription& data, SpaceCalculator const& space) const;
+
     void reconnectCells(CollectionDescription& data, float maxDistance) const;  // For non-creatures
 
     void randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;

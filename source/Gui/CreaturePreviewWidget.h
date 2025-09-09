@@ -30,9 +30,9 @@ private:
         GeneIndicesForSubGenome const& geneIndices,
         SubGenomeDescription const& genomeWithStartIndex);
 
-    void processPreview(CollectionDescription&& phenotype);
     void processCellGraph(ConversionResult const& conversionResult);
     void processActionButtons();
+    void processTitle();
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
 

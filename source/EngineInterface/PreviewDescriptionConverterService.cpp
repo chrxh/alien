@@ -6,6 +6,8 @@
 
 #include "EngineInterface/DescriptionEditService.h"
 
+#include "SpaceCalculator.h"
+
 namespace
 {
     template <typename U>
@@ -21,10 +23,10 @@ namespace
     }
 }
 
-ConversionResult PreviewDescriptionConverterService::convert(
+ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription(
     GenomeDescription const& genome,
-    CollectionDescription&& phenotype,
     int startGeneIndex,
+    CollectionDescription&& phenotype,
     std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;
@@ -37,6 +39,10 @@ ConversionResult PreviewDescriptionConverterService::convert(
         return result;
     }
     CHECK(phenotype._creatures.size() == 1);
+
+    SpaceCalculator space({PREVIEW_WIDTH, PREVIEW_HEIGHT});
+    editService.flattenTopology(phenotype, space);
+
     auto cache = phenotype.createCache();
 
     // Center

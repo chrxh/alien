@@ -337,6 +337,10 @@ void DescriptionEditService::addIfSpaceAvailable(
     }
 }
 
+void DescriptionEditService::flattenTopology(CollectionDescription& data, SpaceCalculator const& space) const
+{
+}
+
 void DescriptionEditService::reconnectCells(CollectionDescription& data, float maxDistance) const
 {
     std::unordered_map<int, std::unordered_map<int, std::vector<int>>> cellIndicesBySlot;
