@@ -31,6 +31,11 @@ private:
 
     bool _onBackground = true;
     bool _isOneScrollbarHovered = false;
-    std::optional<RealVector2D> _worldCenterForDragging;
-    std::optional<Orientation> _orientationForDragging;
+
+    struct DragInfo
+    {
+        Orientation orientation = Orientation::Horizontal;
+        float worldCenter = 0;  // x for horizontal, y for vertical
+    };
+    std::optional<DragInfo> _dragInfo;
 };

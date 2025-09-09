@@ -7,7 +7,6 @@
 
 #include "StyleRepository.h"
 
-
 namespace 
 {
     auto const ScrollbarThickness = 17.0f;
@@ -32,7 +31,7 @@ bool _SimulationScrollbars::isHoveredOrDragged() const
 
 bool _SimulationScrollbars::isDragged() const
 {
-    return _worldCenterForDragging.has_value();
+    return _dragInfo.has_value();
 }
 
 void _SimulationScrollbars::processScrollbar(
@@ -105,29 +104,34 @@ void _SimulationScrollbars::processEvents(
 {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         if (mouseCursorIntersectSliderbar) {
-            _worldCenterForDragging = worldCenter;
-            _orientationForDragging = orientation;
+            DragInfo dragInfo;
+            if (orientation == Orientation::Horizontal) {
+                dragInfo.worldCenter = worldCenter.x;
+            } else {
+                dragInfo.worldCenter = worldCenter.y;
+            }
+            dragInfo.orientation = orientation;
+            _dragInfo = dragInfo;
             if (!_onBackground) {
                 ImGui::SetActiveID(ImGui::GetID("SimulationScrollbar"), ImGui::GetCurrentWindow());
             }
         }
     }
-    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _worldCenterForDragging && _orientationForDragging == orientation) {
+    if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && _dragInfo.has_value() && _dragInfo->orientation == orientation) {
         auto dragViewDelta = ImGui::GetMouseDragDelta();
         auto scrollbarSize = viewRect.bottomRight - viewRect.topLeft;
         auto worldSize = worldRect.bottomRight - worldRect.topLeft;
         auto dragWorldDelta = RealVector2D{dragViewDelta.x / scrollbarSize.x * worldSize.x, dragViewDelta.y / scrollbarSize.y * worldSize.y};
         auto newWorldCenter = worldCenter;
         if (Orientation::Horizontal == orientation) {
-            newWorldCenter.x = _worldCenterForDragging->x + dragWorldDelta.x;
+            newWorldCenter.x = _dragInfo->worldCenter + dragWorldDelta.x;
         } else {
-            newWorldCenter.y = _worldCenterForDragging->y + dragWorldDelta.y;
+            newWorldCenter.y = _dragInfo->worldCenter + dragWorldDelta.y;
         }
         worldCenter = newWorldCenter;
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        _worldCenterForDragging.reset();
-        _orientationForDragging.reset();
+        _dragInfo.reset();
     }
 }
 
