@@ -460,21 +460,24 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_separation)
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_withinLimit)
 {
-    // Create a genome that produces exactly PREVIEW_MAX_CELLS (50) cells
-    // Gene 0: 10 nodes, 5 concatenations = 50 cells total
+    // Create a genome that produces exactly PREVIEW_MAX_CELLS cells
+    // Gene 0: 10 nodes, PREVIEW_MAX_CELLS / 10 concatenations = PREVIEW_MAX_CELLS cells total
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numConcatenations(5).nodes({
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-        }),
+        GeneDescription()
+            .separation(false)
+            .numConcatenations(PREVIEW_MAX_CELLS / 10)
+            .nodes({
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+            }),
     });
     
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
@@ -494,14 +497,17 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_wi
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_concatenations)
 {
     // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many concatenations
-    // Gene 0: 5 nodes, 15 concatenations = 75 cells (exceeds limit of 50)
+    // Gene 0: 5 nodes, PREVIEW_MAX_CELLS / 5 + 1 concatenations = exceeds limit of PREVIEW_MAX_CELLS
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numConcatenations(15).nodes({
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
+        GeneDescription()
+            .separation(false)
+            .numConcatenations(PREVIEW_MAX_CELLS / 5 + 1)
+            .nodes({
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
         }),
     });
     
@@ -510,26 +516,25 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
     ASSERT_EQ(1, subGenomes.size());
     auto const& subGenome = subGenomes.at(0).genome;
     
-    // Should be trimmed by reducing concatenations: 50 / 1 subgenome = 50 cells max
-    // With 5 nodes: max concatenations = 50 / 5 = 10
+    // Should be trimmed by reducing concatenations
     ASSERT_EQ(1, subGenome._genes.size());
     EXPECT_EQ(5, subGenome._genes.at(0)._nodes.size());
-    EXPECT_EQ(10, subGenome._genes.at(0)._numConcatenations);
+    EXPECT_EQ(PREVIEW_MAX_CELLS / 5, subGenome._genes.at(0)._numConcatenations);
     
     auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(50, resultingCells);
+    EXPECT_EQ(PREVIEW_MAX_CELLS / 5 * 5, resultingCells);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_exceedsLimit_nodes)
 {
     // Create a genome that exceeds PREVIEW_MAX_CELLS by having too many nodes
-    // Gene 0: 100 nodes, 1 concatenation = 100 cells (exceeds limit of 50)
+    // Gene 0: PREVIEW_MAX_CELLS + 1 nodes, 1 concatenation
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numConcatenations(1),
     });
     
     // Add 100 nodes to exceed the limit
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < PREVIEW_MAX_CELLS + 1; ++i) {
         genome._genes[0]._nodes.emplace_back(NodeDescription());
     }
     
@@ -538,16 +543,13 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
     ASSERT_EQ(1, subGenomes.size());
     auto const& subGenome = subGenomes.at(0).genome;
     
-    // Should be trimmed by reducing nodes: 50 / 1 subgenome = 50 cells max
-    // With 1 concatenation: max nodes = 50
-    // trimNodes calculates newSize = max(0, nodeCounter + nodes.size() - nodeLimit)
-    // newSize = max(0, 0 + 100 - 50) = 50, so resize(50) keeps 50 nodes
+    // Should be trimmed by reducing nodes
     ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_EQ(50, subGenome._genes.at(0)._nodes.size());
+    EXPECT_EQ(PREVIEW_MAX_CELLS, subGenome._genes.at(0)._nodes.size());
     EXPECT_EQ(1, subGenome._genes.at(0)._numConcatenations);
     
     auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_EQ(50, resultingCells);
+    EXPECT_EQ(PREVIEW_MAX_CELLS, resultingCells);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_constructorCastration)
@@ -562,7 +564,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
     });
     
     // Add nodes to gene 0 including constructor nodes, exceeding the limit
-    for (int i = 0; i < 60; ++i) {
+    for (int i = 0; i < PREVIEW_MAX_CELLS + 10; ++i) {
         if (i % 10 == 0) {
             // Add constructor nodes that reference gene 1
             genome._genes[0]._nodes.emplace_back(
@@ -577,9 +579,9 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
     ASSERT_EQ(1, subGenomes.size());
     auto const& subGenome = subGenomes.at(0).genome;
     
-    // Should be trimmed to 50 nodes, constructor nodes should be castrated
+    // Should be trimmed to PREVIEW_MAX_CELLS nodes, constructor nodes should be castrated
     ASSERT_EQ(2, subGenome._genes.size());
-    EXPECT_EQ(50, subGenome._genes.at(0)._nodes.size());
+    EXPECT_EQ(PREVIEW_MAX_CELLS, subGenome._genes.at(0)._nodes.size());
     EXPECT_EQ(1, subGenome._genes.at(0)._numConcatenations);
     
     // Check that constructor nodes have been castrated (gene index set beyond genome size)
@@ -599,16 +601,16 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_multipleSubGenomes)
 {
     // Create multiple subgenomes that together exceed PREVIEW_MAX_CELLS
-    // Each gene has 30 nodes, 1 concatenation = 30 cells each
-    // Total: 30 + 30 = 60 cells (exceeds limit of 50)
+    // Each gene has PREVIEW_MAX_CELLS / 2 + 2 nodes, 1 concatenation
+    // Total: PREVIEW_MAX_CELLS + 4 exceeds limit
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).numConcatenations(1),
         GeneDescription().separation(true).numConcatenations(1),
     });
     
-    // Add 30 nodes to each gene
+    // Add PREVIEW_MAX_CELLS / 2 + 2 nodes to each gene
     for (int geneIdx = 0; geneIdx < 2; ++geneIdx) {
-        for (int i = 0; i < 30; ++i) {
+        for (int i = 0; i < PREVIEW_MAX_CELLS / 2 + 2; ++i) {
             genome._genes[geneIdx]._nodes.emplace_back(NodeDescription());
         }
     }
@@ -617,19 +619,19 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_mu
 
     ASSERT_EQ(2, subGenomes.size());
     
-    // Each subgenome should be trimmed to 50 / 2 = 25 cells max
+    // Each subgenome should be trimmed to PREVIEW_MAX_CELLS / 2 nodes
     for (int i = 0; i < 2; ++i) {
         auto const& subGenome = subGenomes.at(i).genome;
         ASSERT_EQ(2, subGenome._genes.size());
         
         if (i == 0) {
             // First subgenome: gene 0 should be trimmed to 25 nodes, gene 1 should be empty
-            EXPECT_EQ(25, subGenome._genes.at(0)._nodes.size());
+            EXPECT_EQ(PREVIEW_MAX_CELLS / 2, subGenome._genes.at(0)._nodes.size());
             EXPECT_EQ(0, subGenome._genes.at(1)._nodes.size());
         } else {
             // Second subgenome: gene 0 should be empty, gene 1 should be trimmed to 25 nodes
             EXPECT_EQ(0, subGenome._genes.at(0)._nodes.size());
-            EXPECT_EQ(25, subGenome._genes.at(1)._nodes.size());
+            EXPECT_EQ(PREVIEW_MAX_CELLS / 2, subGenome._genes.at(1)._nodes.size());
         }
     }
 }
@@ -642,11 +644,14 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
-        GeneDescription().separation(false).numConcatenations(20).nodes({
-            NodeDescription(),
-            NodeDescription(),
-            NodeDescription(),
-        }),
+        GeneDescription()
+            .separation(false)
+            .numConcatenations(PREVIEW_MAX_CELLS / 3 + 3)
+            .nodes({
+                NodeDescription(),
+                NodeDescription(),
+                NodeDescription(),
+            }),
     });
     
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}});
@@ -654,67 +659,11 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
     ASSERT_EQ(1, subGenomes.size());
     auto const& subGenome = subGenomes.at(0).genome;
     
-    // Original: gene 0 (2 cells) + gene 1 (3 nodes * 20 concatenations = 60 cells) = 62 total
-    // Should be trimmed to 50 cells max
-    // The trimming should reduce gene 1's concatenations from 20 to fit within limit
-    
+    // The trimming should reduce gene 1's concatenations to fit within limit
     ASSERT_EQ(2, subGenome._genes.size());
     EXPECT_EQ(2, subGenome._genes.at(0)._nodes.size());
-    EXPECT_LE(subGenome._genes.at(1)._numConcatenations, 20); // Should be reduced
+    EXPECT_LE(subGenome._genes.at(1)._numConcatenations, PREVIEW_MAX_CELLS / 3 + 3);  // Should be reduced
     
     auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, 50);
-}
-
-TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_basicExceeding)
-{
-    // Simple test: create a genome that clearly exceeds the limit
-    // Gene 0: 60 nodes, 1 concatenation = 60 cells (exceeds limit of 50)
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numConcatenations(1),
-    });
-    
-    // Add 60 nodes to clearly exceed the 50 cell limit
-    for (int i = 0; i < 60; ++i) {
-        genome._genes[0]._nodes.emplace_back(NodeDescription());
-    }
-    
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
-
-    ASSERT_EQ(1, subGenomes.size());
-    auto const& subGenome = subGenomes.at(0).genome;
-    
-    // Verify that trimming occurred - the genome should have fewer than 60 cells
-    auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LT(resultingCells, 60);
-    EXPECT_LE(resultingCells, 50);  // Should not exceed the limit
-    
-    // The gene should have been modified
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_LE(subGenome._genes.at(0)._nodes.size(), 60);  // Should be smaller than original
-}
-
-TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_emptyGeneAfterTrimming)
-{
-    // Create a genome where trimming results in an empty gene
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numConcatenations(1),
-    });
-    
-    // Add exactly 51 nodes to exceed the limit by 1
-    for (int i = 0; i < 51; ++i) {
-        genome._genes[0]._nodes.emplace_back(NodeDescription());
-    }
-    
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
-
-    ASSERT_EQ(1, subGenomes.size());
-    auto const& subGenome = subGenomes.at(0).genome;
-    
-    // Should be trimmed to stay within limit
-    auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
-    EXPECT_LE(resultingCells, 50);
-    
-    ASSERT_EQ(1, subGenome._genes.size());
-    EXPECT_LT(subGenome._genes.at(0)._nodes.size(), 51);  // Should be smaller than original
+    EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }

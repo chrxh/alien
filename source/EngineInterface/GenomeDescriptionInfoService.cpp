@@ -19,6 +19,9 @@ namespace
         if (std::ranges::find(lastGenes, geneIndex) != lastGenes.end()) {
             return -1;
         }
+        if (geneIndex >= genome._genes.size()) {
+            return 0;
+        }
         lastGenes.emplace_back(geneIndex);
 
         auto const& gene = genome._genes[geneIndex];
@@ -44,13 +47,13 @@ namespace
     }
 }
 
-int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription const& genome) const
+int GenomeDescriptionInfoService::getNumberOfResultingCells(GenomeDescription const& genome, int startGeneIndex) const
 {
     if (genome._genes.empty()) {
         return 0;
     }
     std::vector<int> lastGenes;
-    return countNodes(genome, 0, lastGenes);
+    return countNodes(genome, startGeneIndex, lastGenes);
 }
 
 std::vector<int> GenomeDescriptionInfoService::getReferences(GeneDescription const& gene) const

@@ -139,10 +139,11 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
     int sumNumResultingCells = 0;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         auto subGenome = genome;
+        auto startGeneIndex = geneIndicesForSubGenome.front();
         adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome);
-        result.emplace_back(subGenome, geneIndicesForSubGenome.front());
+        result.emplace_back(subGenome, startGeneIndex);
 
-        auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
+        auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome, startGeneIndex);
         sumNumResultingCells += resultingCells;
     }
 
