@@ -229,12 +229,13 @@ struct GenomeDescription
     MEMBER(GenomeDescription, float, frontAngle, 0.0f);
 };
 
-struct GenomeDescriptionWithStartGeneIndex
+struct SubGenomeDescription
 {
     GenomeDescription genome;
-    int startIndex;
+    int startIndex = 0;
+    bool trimmed = false;
 
-    bool operator==(const GenomeDescriptionWithStartGeneIndex&) const = default;
+    bool operator==(const SubGenomeDescription&) const = default;
 };
 
 

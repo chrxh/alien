@@ -291,6 +291,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGene
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     ASSERT_EQ(1, subGenome._genes.size());
@@ -307,6 +308,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycl
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     auto const& gene0 = subGenome._genes.at(0);
@@ -350,6 +352,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
 
     {
         EXPECT_EQ(0, subGenomes.at(0).startIndex);
+        EXPECT_FALSE(subGenomes.at(0).trimmed);
 
         auto const& subGenome = subGenomes.at(0).genome;
         ASSERT_EQ(3, subGenome._genes.size());
@@ -367,6 +370,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
     }
     {
         EXPECT_EQ(2, subGenomes.at(1).startIndex);
+        EXPECT_FALSE(subGenomes.at(1).trimmed);
 
         auto const& subGenome = subGenomes.at(1).genome;
         ASSERT_EQ(3, subGenome._genes.size());
@@ -402,6 +406,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     ASSERT_EQ(3, subGenome._genes.size());
@@ -433,6 +438,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_separation)
 
     ASSERT_EQ(2, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     {
         auto const& subGenome = subGenomes.at(0).genome;
 
@@ -483,6 +489,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_wi
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
 
     ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_FALSE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
     
     // Should not be trimmed since it's exactly at the limit
@@ -514,6 +522,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
 
     ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
     
     // Should be trimmed by reducing concatenations
@@ -545,6 +555,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
 
     ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
 
     // Should be trimmed by reducing concatenations
@@ -572,6 +584,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
 
     ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
     
     // Should be trimmed by reducing nodes
@@ -608,6 +622,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}});
 
     ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
     
     // Should be trimmed to PREVIEW_MAX_CELLS nodes, constructor nodes should be castrated
@@ -652,6 +668,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_mu
     
     // Each subgenome should be trimmed to PREVIEW_MAX_CELLS / 2 nodes
     for (int i = 0; i < 2; ++i) {
+        EXPECT_EQ(i, subGenomes.at(i).startIndex);
+        EXPECT_TRUE(subGenomes.at(i).trimmed);
         auto const& subGenome = subGenomes.at(i).genome;
         ASSERT_EQ(2, subGenome._genes.size());
         
@@ -688,6 +706,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}});
 
     ASSERT_EQ(1, subGenomes.size());
+    EXPECT_EQ(0, subGenomes.at(0).startIndex);
+    EXPECT_TRUE(subGenomes.at(0).trimmed);
     auto const& subGenome = subGenomes.at(0).genome;
     
     // The trimming should reduce gene 1's concatenations to fit within limit

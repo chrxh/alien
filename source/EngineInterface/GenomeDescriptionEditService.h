@@ -22,7 +22,7 @@ public:
     void removeNode(GeneDescription& gene, int index) const;
     void swapNodes(GeneDescription& gene, int index) const;  // Swaps node at index with node at index + 1
 
-    std::vector<GenomeDescriptionWithStartGeneIndex> createSubGenomesForPreview(
+    std::vector<SubGenomeDescription> createSubGenomesForPreview(
         GenomeDescription const& genome,
         std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;
 
@@ -32,13 +32,13 @@ public:
         std::vector<uint64_t> seedCreatureIds;
     };
     SeedCollectionResult createSeedCollectionForPreview(
-        std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes,
-        std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription> const& cache) const;
+        std::vector<SubGenomeDescription> const& subGenomes,
+        std::unordered_map<SubGenomeDescription, CollectionDescription> const& cache) const;
     std::vector<CollectionDescription> extractPhenotypesFromPreview(CollectionDescription&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
     void removeSeedFromPhenotype(CollectionDescription& phenotype) const;
 
 private:
-    CollectionDescription createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const;
+    CollectionDescription createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const;
 
     void adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices) const;
 };

@@ -41,7 +41,7 @@ void _PreviewWidget::process()
         setupPreviewData();
     }
     calcPreview();
-    processSandboxes();
+    processCreaturePreviews();
 
     processActionBar();
 
@@ -83,13 +83,13 @@ void _PreviewWidget::setupPreviewData(bool useCache)
 {
     auto const& genomeEditService = GenomeDescriptionEditService::get();
 
-    std::vector<GenomeDescriptionWithStartGeneIndex> subGenomesForPreview;
+    std::vector<SubGenomeDescription> subGenomesForPreview;
     for (auto const& creatureWidget : _creatureWidgets) {
         subGenomesForPreview.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }
     auto preview = genomeEditService.createSeedCollectionForPreview(
         subGenomesForPreview,
-        useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription>());
+        useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<SubGenomeDescription, CollectionDescription>());
 
     _simulationFacade->setPreviewData(preview.data);
     _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);
@@ -126,7 +126,7 @@ namespace
     }
 }
 
-void _PreviewWidget::processSandboxes()
+void _PreviewWidget::processCreaturePreviews()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
 
@@ -143,7 +143,7 @@ void _PreviewWidget::processSandboxes()
         auto space = ImGui::GetContentRegionAvail();
         auto width = std::max(space.x / _creatureWidgets.size() - scale(7.0f), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processSandbox(i, std::move(phenotypes.at(i)), width);
+            processCreaturePreview(i, std::move(phenotypes.at(i)), width);
             if (i < size - 1) {
                 ImGui::SameLine();
             }
@@ -152,14 +152,14 @@ void _PreviewWidget::processSandboxes()
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(int subGenomeIndex, CollectionDescription&& phenotype, float width)
 {
     ImGui::PushID(subGenomeIndex);
     if (ImGui::BeginChild("Sandbox", ImVec2(width, 0), 0, 0)) {
         auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
 
-        auto multipleSandboxes = _creatureWidgets.size() > 1;
-        if (multipleSandboxes) {
+        auto multiplePreviews = _creatureWidgets.size() > 1;
+        if (multiplePreviews) {
             AlienGui::MoveTickUp();
             AlienGui::MoveTickUp();
 
@@ -312,9 +312,9 @@ void _PreviewWidget::setSeedCreatureIds(std::vector<uint64_t> const& value)
     }
 }
 
-std::vector<GenomeDescriptionWithStartGeneIndex> _PreviewWidget::getSubGenomes() const
+std::vector<SubGenomeDescription> _PreviewWidget::getSubGenomes() const
 {
-    std::vector<GenomeDescriptionWithStartGeneIndex> result;
+    std::vector<SubGenomeDescription> result;
     for (auto const& creatureWidget : _creatureWidgets) {
         result.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }

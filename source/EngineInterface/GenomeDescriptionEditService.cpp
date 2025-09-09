@@ -94,8 +94,10 @@ void GenomeDescriptionEditService::swapNodes(GeneDescription& gene, int index) c
 
 namespace
 {
-    void trimNodes(GenomeDescription& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
+    // Returns true if genome has been trimmed
+    bool trimNodes(GenomeDescription& genome, int& nodeCounter, int startGeneIndex, int nodeLimit)
     {
+        auto result = false;
         auto& gene = genome._genes.at(startGeneIndex);
 
         // Trim nodes if limit is exceeded
@@ -109,13 +111,14 @@ namespace
                     constructor._geneIndex = toInt(genome._genes.size());  // Castrate further construction
                 }
             }
-            return;
+            return true;
         }
 
         // Trim concatenations if limit is exceeded
         auto truncatedNumConcatenations = std::min(1000000, gene._numConcatenations);  // Prevent overflow
         if (nodeCounter + gene._nodes.size() * truncatedNumConcatenations > nodeLimit) {
             gene._numConcatenations = (nodeLimit - nodeCounter) / toInt(gene._nodes.size());
+            result = true;
         }
 
         nodeCounter += toInt(gene._nodes.size()) * gene._numConcatenations;
@@ -125,23 +128,24 @@ namespace
             if (node.getCellType() == CellTypeGenome_Constructor) {
                 auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                 if (constructor._geneIndex < genome._genes.size()) {
-                    trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
+                    result |= trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
                 }
             }
         }
+
+        return result;
     }
 }
 
-std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::createSubGenomesForPreview(
+std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomesForPreview(
     GenomeDescription const& genome,
     std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const
 {
-    std::vector<GenomeDescriptionWithStartGeneIndex> result;
+    std::vector<SubGenomeDescription> result;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         auto subGenome = genome;
-        auto startGeneIndex = geneIndicesForSubGenome.front();
         adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome);
-        result.emplace_back(subGenome, startGeneIndex);
+        result.emplace_back(subGenome, geneIndicesForSubGenome.front());
     }
 
     // Trim sub-genomes if too many cells (use simple heuristics)
@@ -165,7 +169,10 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
             auto startGeneIndex = result.at(i).startIndex;
 
             int nodeCounter = 0;
-            trimNodes(subGenome, nodeCounter, startGeneIndex, PREVIEW_MAX_CELLS / numSubGenomes);
+            auto trimmed = trimNodes(subGenome, nodeCounter, startGeneIndex, PREVIEW_MAX_CELLS / numSubGenomes);
+            if (trimmed) {
+                result.at(i).trimmed = true;
+            }
         }
     }
 
@@ -173,8 +180,8 @@ std::vector<GenomeDescriptionWithStartGeneIndex> GenomeDescriptionEditService::c
 }
 
 auto GenomeDescriptionEditService::createSeedCollectionForPreview(
-    std::vector<GenomeDescriptionWithStartGeneIndex> const& subGenomes,
-    std::unordered_map<GenomeDescriptionWithStartGeneIndex, CollectionDescription> const& cache) const -> SeedCollectionResult
+    std::vector<SubGenomeDescription> const& subGenomes,
+    std::unordered_map<SubGenomeDescription, CollectionDescription> const& cache) const -> SeedCollectionResult
 {
     auto const& editService = DescriptionEditService::get();
 
@@ -243,7 +250,7 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(CollectionDescription
     DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& cell) { return seedCellIds.contains(cell._id); });
 }
 
-CollectionDescription GenomeDescriptionEditService::createSeedForPreview(GenomeDescriptionWithStartGeneIndex const& subGenome, RealVector2D const& pos) const
+CollectionDescription GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const
 {
     return CollectionDescription().creatures({
         CreatureDescription()

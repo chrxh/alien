@@ -16,7 +16,7 @@ namespace std
     template <typename... Types>
     struct variant_hasher
     {
-        std::size_t operator()(const std::variant<Types...>& v) const
+        std::size_t operator()(std::variant<Types...> const& v) const
         {
             return std::visit([](const auto& val) -> std::size_t { return std::hash<std::decay_t<decltype(val)>>{}(val); }, v);
         }
@@ -25,7 +25,7 @@ namespace std
     template <>
     struct hash<NeuralNetworkGenomeDescription>
     {
-        std::size_t operator()(const NeuralNetworkGenomeDescription& desc) const
+        std::size_t operator()(NeuralNetworkGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             for (const auto& weight : desc._weights) {
@@ -44,19 +44,19 @@ namespace std
     template <>
     struct hash<BaseGenomeDescription>
     {
-        std::size_t operator()(const BaseGenomeDescription& desc) const { return 0; }
+        std::size_t operator()(BaseGenomeDescription const& desc) const { return 0; }
     };
 
     template <>
     struct hash<DepotGenomeDescription>
     {
-        std::size_t operator()(const DepotGenomeDescription& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+        std::size_t operator()(DepotGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
     };
 
     template <>
     struct hash<ConstructorGenomeDescription>
     {
-        std::size_t operator()(const ConstructorGenomeDescription& desc) const
+        std::size_t operator()(ConstructorGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             if (desc._autoTriggerInterval) {
@@ -73,7 +73,7 @@ namespace std
     template <>
     struct hash<SensorGenomeDescription>
     {
-        std::size_t operator()(const SensorGenomeDescription& desc) const
+        std::size_t operator()(SensorGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             if (desc._autoTriggerInterval) {
@@ -105,7 +105,7 @@ namespace std
     template <>
     struct hash<GeneratorGenomeDescription>
     {
-        std::size_t operator()(const GeneratorGenomeDescription& desc) const
+        std::size_t operator()(GeneratorGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._autoTriggerInterval);
@@ -118,19 +118,19 @@ namespace std
     template <>
     struct hash<AttackerGenomeDescription>
     {
-        std::size_t operator()(const AttackerGenomeDescription& desc) const { return 1; }
+        std::size_t operator()(AttackerGenomeDescription const& desc) const { return 1; }
     };
 
     template <>
     struct hash<InjectorGenomeDescription>
     {
-        std::size_t operator()(const InjectorGenomeDescription& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+        std::size_t operator()(InjectorGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
     };
 
     template <>
     struct hash<AutoBendingGenomeDescription>
     {
-        std::size_t operator()(const AutoBendingGenomeDescription& desc) const
+        std::size_t operator()(AutoBendingGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxAngleDeviation);
@@ -142,7 +142,7 @@ namespace std
     template <>
     struct hash<ManualBendingGenomeDescription>
     {
-        std::size_t operator()(const ManualBendingGenomeDescription& desc) const
+        std::size_t operator()(ManualBendingGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxAngleDeviation);
@@ -154,7 +154,7 @@ namespace std
     template <>
     struct hash<AngleBendingGenomeDescription>
     {
-        std::size_t operator()(const AngleBendingGenomeDescription& desc) const
+        std::size_t operator()(AngleBendingGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxAngleDeviation);
@@ -166,7 +166,7 @@ namespace std
     template <>
     struct hash<AutoCrawlingGenomeDescription>
     {
-        std::size_t operator()(const AutoCrawlingGenomeDescription& desc) const
+        std::size_t operator()(AutoCrawlingGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxDistanceDeviation);
@@ -178,7 +178,7 @@ namespace std
     template <>
     struct hash<ManualCrawlingGenomeDescription>
     {
-        std::size_t operator()(const ManualCrawlingGenomeDescription& desc) const
+        std::size_t operator()(ManualCrawlingGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxDistanceDeviation);
@@ -190,13 +190,13 @@ namespace std
     template <>
     struct hash<DirectMovementGenomeDescription>
     {
-        std::size_t operator()(const DirectMovementGenomeDescription& desc) const { return 2; }
+        std::size_t operator()(DirectMovementGenomeDescription const& desc) const { return 2; }
     };
 
     template <>
     struct hash<MuscleModeGenomeDescription>
     {
-        std::size_t operator()(const MuscleModeGenomeDescription& desc) const
+        std::size_t operator()(MuscleModeGenomeDescription const& desc) const
         {
             return variant_hasher<
                 AutoBendingGenomeDescription,
@@ -211,19 +211,19 @@ namespace std
     template <>
     struct hash<MuscleGenomeDescription>
     {
-        std::size_t operator()(const MuscleGenomeDescription& desc) const { return std::hash<MuscleModeGenomeDescription>{}(desc._mode); }
+        std::size_t operator()(MuscleGenomeDescription const& desc) const { return std::hash<MuscleModeGenomeDescription>{}(desc._mode); }
     };
 
     template <>
     struct hash<DefenderGenomeDescription>
     {
-        std::size_t operator()(const DefenderGenomeDescription& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+        std::size_t operator()(DefenderGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
     };
 
     template <>
     struct hash<ReconnectorGenomeDescription>
     {
-        std::size_t operator()(const ReconnectorGenomeDescription& desc) const
+        std::size_t operator()(ReconnectorGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             if (desc._restrictToColor) {
@@ -239,13 +239,13 @@ namespace std
     template <>
     struct hash<DetonatorGenomeDescription>
     {
-        std::size_t operator()(const DetonatorGenomeDescription& desc) const { return std::hash<int>{}(desc._countdown); }
+        std::size_t operator()(DetonatorGenomeDescription const& desc) const { return std::hash<int>{}(desc._countdown); }
     };
 
     template <>
     struct hash<CellTypeGenomeDescription>
     {
-        std::size_t operator()(const CellTypeGenomeDescription& desc) const
+        std::size_t operator()(CellTypeGenomeDescription const& desc) const
         {
             return variant_hasher<
                 BaseGenomeDescription,
@@ -265,7 +265,7 @@ namespace std
     template <>
     struct hash<SignalRestrictionGenomeDescription>
     {
-        std::size_t operator()(const SignalRestrictionGenomeDescription& desc) const
+        std::size_t operator()(SignalRestrictionGenomeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._active);
@@ -278,7 +278,7 @@ namespace std
     template <>
     struct hash<NodeDescription>
     {
-        std::size_t operator()(const NodeDescription& desc) const
+        std::size_t operator()(NodeDescription const& desc) const
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._referenceAngle);
@@ -294,10 +294,10 @@ namespace std
     template <>
     struct hash<GeneDescription>
     {
-        std::size_t operator()(const GeneDescription& desc) const
+        std::size_t operator()(GeneDescription const& desc) const
         {
             std::size_t seed = 0;
-            for (const auto& node : desc._nodes) {
+            for (auto const& node : desc._nodes) {
                 hash_combine(seed, std::hash<NodeDescription>{}(node));
             }
             hash_combine(seed, static_cast<int>(desc._shape));
@@ -314,10 +314,10 @@ namespace std
     template <>
     struct hash<GenomeDescription>
     {
-        std::size_t operator()(const GenomeDescription& desc) const
+        std::size_t operator()(GenomeDescription const& desc) const
         {
             std::size_t seed = 0;
-            for (const auto& gene : desc._genes) {
+            for (auto const& gene : desc._genes) {
                 hash_combine(seed, std::hash<GeneDescription>{}(gene));
             }
             hash_combine(seed, desc._frontAngle);
@@ -326,12 +326,13 @@ namespace std
     };
 
     template <>
-    struct hash<GenomeDescriptionWithStartGeneIndex>
+    struct hash<SubGenomeDescription>
     {
-        std::size_t operator()(const GenomeDescriptionWithStartGeneIndex& genomeWithRootIndex) const
+        std::size_t operator()(SubGenomeDescription const& genomeWithRootIndex) const
         {
             std::size_t seed = 0;
             hash_combine(seed, genomeWithRootIndex.genome);
+            hash_combine(seed, genomeWithRootIndex.trimmed);
             hash_combine(seed, genomeWithRootIndex.startIndex);
             return seed;
         }

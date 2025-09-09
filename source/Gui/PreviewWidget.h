@@ -28,8 +28,8 @@ private:
     void createSubGenomesForPreview();
     void setupPreviewData(bool useCache = true);
     void calcPreview();
-    void processSandboxes();
-    void processSandbox(int subGenomeIndex, CollectionDescription&& phenotype, float width);
+    void processCreaturePreviews();
+    void processCreaturePreview(int subGenomeIndex, CollectionDescription&& phenotype, float width);
     void processActionBar();
 
     int calcTpsForPreview();
@@ -43,7 +43,7 @@ private:
     std::vector<uint64_t> getSeedCreatureIds() const;
     void setSeedCreatureIds(std::vector<uint64_t> const& value);
 
-    std::vector<GenomeDescriptionWithStartGeneIndex> getSubGenomes() const;
+    std::vector<SubGenomeDescription> getSubGenomes() const;
 
     SimulationFacade _simulationFacade;
     std::vector<CreaturePreviewWidget> _creatureWidgets;

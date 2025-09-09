@@ -26,14 +26,14 @@ namespace
 CreaturePreviewWidget _CreaturePreviewWidget::create(
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
-    GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex)
+    SubGenomeDescription const& genomeWithStartIndex)
 {
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
 void _CreaturePreviewWidget::process(CollectionDescription&& phenotype)
 {
-    auto geneStartIndex = _genomeWithStartIndex.startIndex;
+    auto geneStartIndex = _subGenome.startIndex;
     auto conversionResult = PreviewDescriptionConverterService::get().convert(_editData->genome, std::move(phenotype), geneStartIndex, _visualFrontAngle);
     auto& desc = conversionResult.description;
     _visualFrontAngle = conversionResult.visualFrontAngle;
@@ -116,14 +116,14 @@ void _CreaturePreviewWidget::setGeneIndices(GeneIndicesForSubGenome const& value
     _geneIndices = value;
 }
 
-GenomeDescriptionWithStartGeneIndex const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
+SubGenomeDescription const& _CreaturePreviewWidget::getGenomeWithStartIndex() const
 {
-    return _genomeWithStartIndex;
+    return _subGenome;
 }
 
-void _CreaturePreviewWidget::setGenomeWithStartIndex(GenomeDescriptionWithStartGeneIndex const& value)
+void _CreaturePreviewWidget::setGenomeWithStartIndex(SubGenomeDescription const& value)
 {
-    _genomeWithStartIndex = value;
+    _subGenome = value;
 }
 
 void _CreaturePreviewWidget::resetVisualFrontAngle()
@@ -134,10 +134,10 @@ void _CreaturePreviewWidget::resetVisualFrontAngle()
 _CreaturePreviewWidget::_CreaturePreviewWidget(
     GenomeTabEditData const& editData,
     GeneIndicesForSubGenome const& geneIndices,
-    GenomeDescriptionWithStartGeneIndex const& genomeWithStartIndex)
+    SubGenomeDescription const& genomeWithStartIndex)
     : _editData(editData)
     , _geneIndices(geneIndices)
-    , _genomeWithStartIndex(genomeWithStartIndex)
+    , _subGenome(genomeWithStartIndex)
 {}
 
 void _CreaturePreviewWidget::processContent(ConversionResult const& conversionResult)
