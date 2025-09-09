@@ -33,6 +33,7 @@ private:
     void processPreview(CollectionDescription&& phenotype);
     void processCellGraph(ConversionResult const& conversionResult);
     void processActionButtons();
+    RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
 
     GenomeTabEditData _editData;
     GeneIndicesForSubGenome _geneIndices;
@@ -40,8 +41,7 @@ private:
     uint64_t _creatureId = 0;
     std::optional<float> _visualFrontAngle;
 
+    RealVector2D _worldCenter;
     float _zoom = 20.0f;
-    std::optional<RealVector2D> _windowSizeFromPreviousFrame;
-    std::optional<float> _zoomFromPreviousFrame;
     bool _initialScrollPositionSet = false;
 };
