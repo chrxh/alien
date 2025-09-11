@@ -8,7 +8,7 @@
 #include "Base/Definitions.h"
 #include "Base/GlobalSettings.h"
 #include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/Colors.h"
@@ -89,7 +89,7 @@ void ImageToPatternDialog::show()
         int width, height, nrChannels;
         unsigned char* dataImage = stbi_load(firstFilename.string().c_str(), &width, &height, &nrChannels, 0);
 
-        CollectionDescription dataDesc;
+        Description dataDesc;
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; ++y) {
                 auto address = (x + y * width) * nrChannels;

@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/PreviewDescriptionConverterService.h"
 
 #include <boost/range/combine.hpp>
@@ -62,7 +62,7 @@ public:
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 {
-    CollectionDescription input;
+    Description input;
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(GenomeDescription(), 0, std::move(input), std::nullopt);
 
@@ -76,7 +76,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
         GeneDescription().separation(true).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
     });
 
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
@@ -108,7 +108,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
         GeneDescription().separation(true).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
     });
 
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(1).nodeIndex(1),
@@ -138,7 +138,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
@@ -176,7 +176,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
         }),
     });
 
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),  // Signal restrictions are fetched from genome
             CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
@@ -202,7 +202,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({NodeDescription().color(2), NodeDescription().color(3), NodeDescription().color(4)}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1),
@@ -240,7 +240,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numConcatenations(4).nodes({NodeDescription().color(2), NodeDescription().color(3)}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
@@ -286,7 +286,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numConcatenations(8).nodes({NodeDescription().color(2)}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(0),
@@ -325,7 +325,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
         GeneDescription().separation(false).nodes({NodeDescription().color(2).cellTypeData(ConstructorGenomeDescription().geneIndex(1))}),
         GeneDescription().separation(false).numConcatenations(7).nodes({NodeDescription().color(3)}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(2).pos({10.0f, 4.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(3).pos({10.0f, 5.0f}).geneIndex(1).nodeIndex(0),
@@ -367,7 +367,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numConcatenations(4).nodes({NodeDescription(), NodeDescription()}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
             CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
@@ -411,12 +411,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_withSep
         GeneDescription().separation(true).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0))}),
     });
 
-    auto inputCreature1 = CollectionDescription().creatures({
+    auto inputCreature1 = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(2)),
         }),
     });
-    auto inputCreature2 = CollectionDescription().creatures({
+    auto inputCreature2 = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(2)),
         }),
@@ -447,7 +447,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
         GeneDescription().separation(false).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1))}),
         GeneDescription().separation(false).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0))}),
     });
-    auto input = CollectionDescription().creatures({
+    auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(2)),

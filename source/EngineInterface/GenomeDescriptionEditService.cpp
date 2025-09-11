@@ -181,7 +181,7 @@ std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomes
 
 auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     std::vector<SubGenomeDescription> const& subGenomes,
-    std::unordered_map<SubGenomeDescription, CollectionDescription> const& cache) const -> SeedCollectionResult
+    std::unordered_map<SubGenomeDescription, Description> const& cache) const -> SeedCollectionResult
 {
     auto const& editService = DescriptionEditService::get();
 
@@ -215,15 +215,15 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     return result;
 }
 
-std::vector<CollectionDescription> GenomeDescriptionEditService::extractPhenotypesFromPreview(
-    CollectionDescription&& preview, std::vector<uint64_t> const& seedCreatureIds) const
+std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPreview(
+    Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const
 {
     std::unordered_map<uint64_t, int> creatureIdToIndex;
     for (auto const& [index, creatureId] : seedCreatureIds | boost::adaptors::indexed(0)) {
         creatureIdToIndex.insert_or_assign(creatureId, toInt(index));
     }
 
-    std::vector<CollectionDescription> result(seedCreatureIds.size());
+    std::vector<Description> result(seedCreatureIds.size());
     for (auto& creature : preview._creatures) {
         if (creature._generation == 0) {
             auto subGenomeIndex = creatureIdToIndex.at(creature._id);
@@ -237,7 +237,7 @@ std::vector<CollectionDescription> GenomeDescriptionEditService::extractPhenotyp
     return result;
 }
 
-void GenomeDescriptionEditService::removeSeedFromPhenotype(CollectionDescription& phenotype) const
+void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotype) const
 {
     std::set<uint64_t> seedCellIds;
     for (auto const& creature : phenotype._creatures) {
@@ -250,9 +250,9 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(CollectionDescription
     DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& cell) { return seedCellIds.contains(cell._id); });
 }
 
-CollectionDescription GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const
+Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const
 {
-    return CollectionDescription().creatures({
+    return Description().creatures({
         CreatureDescription()
             .genome(subGenome.genome)
             .cells({

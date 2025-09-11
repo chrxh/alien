@@ -1,4 +1,4 @@
-#include "Descriptions.h"
+#include "Description.h"
 
 #include <boost/range/adaptors.hpp>
 
@@ -191,7 +191,7 @@ CreatureDescription CreatureDescription::id(uint64_t id)
     return *this;
 }
 
-void CollectionDescription::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
+void Description::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
 {
     for (auto const& cell : _cells) {
         applyFunc(cell);
@@ -203,7 +203,7 @@ void CollectionDescription::forEachCell(std::function<void(CellDescription const
     }
 }
 
-void CollectionDescription::forEachCell(std::function<void(CellDescription&)> const& applyFunc)
+void Description::forEachCell(std::function<void(CellDescription&)> const& applyFunc)
 {
     for (auto& cell : _cells) {
         applyFunc(cell);
@@ -215,7 +215,7 @@ void CollectionDescription::forEachCell(std::function<void(CellDescription&)> co
     }
 }
 
-void CollectionDescription::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const
+void Description::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const
 {
     uint64_t cellIndex = 0;
     for (auto const& cell : _cells) {
@@ -233,7 +233,7 @@ void CollectionDescription::forEachCell(std::function<void(std::optional<uint64_
     }
 }
 
-void CollectionDescription::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc)
+void Description::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc)
 {
     uint64_t cellIndex = 0;
     for (auto& cell : _cells) {
@@ -251,21 +251,21 @@ void CollectionDescription::forEachCell(std::function<void(std::optional<uint64_
     }
 }
 
-void CollectionDescription::clear()
+void Description::clear()
 {
     _cells.clear();
     _particles.clear();
     _creatures.clear();
 }
 
-bool CollectionDescription::isEmpty() const
+bool Description::isEmpty() const
 {
     auto numCells = 0;
     forEachCell([&numCells](auto const& cell) { ++numCells; });
     return numCells == 0 && _particles.empty();
 }
 
-void CollectionDescription::add(CollectionDescription&& other)
+void Description::add(Description&& other)
 {
     other.assignNewIds();
 
@@ -274,7 +274,7 @@ void CollectionDescription::add(CollectionDescription&& other)
     _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
 }
 
-bool CollectionDescription::hasUniqueIds() const
+bool Description::hasUniqueIds() const
 {
     std::unordered_set<uint64_t> cellIds;
     uint64_t numCells = 0;
@@ -304,7 +304,7 @@ bool CollectionDescription::hasUniqueIds() const
     return true;
 }
 
-void CollectionDescription::assignNewIds()
+void Description::assignNewIds()
 {
     struct IndexKey
     {
@@ -414,7 +414,7 @@ void CollectionDescription::assignNewIds()
     }
 }
 
-CollectionCache CollectionDescription::createCache() const
+CollectionCache Description::createCache() const
 {
     CollectionCache result = std::make_shared<_CollectionCache>();
     for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
@@ -428,14 +428,14 @@ CollectionCache CollectionDescription::createCache() const
     return result;
 }
 
-CollectionDescription& CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache)
+Description& Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache)
 {
     auto& cell2 = getCellRef(cellId2, cache);
     return addConnection(cellId1, cellId2, cell2._pos, cache);
 }
 
-CollectionDescription&
-CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache)
+Description&
+Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
@@ -524,7 +524,7 @@ CollectionDescription::addConnection(uint64_t const& cellId1, uint64_t const& ce
     return *this;
 }
 
-CellDescription const& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache) const
+CellDescription const& Description::getCellRef(uint64_t const& cellId, CollectionCache const& cache) const
 {
     if (cache != nullptr) {
         auto index = getCellIndex(cellId, cache);
@@ -550,7 +550,7 @@ CellDescription const& CollectionDescription::getCellRef(uint64_t const& cellId,
     }
 }
 
-CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
+CellDescription& Description::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
 {
     if (cache != nullptr) {
         auto index = getCellIndex(cellId, cache);
@@ -576,12 +576,12 @@ CellDescription& CollectionDescription::getCellRef(uint64_t const& cellId, Colle
     }
 }
 
-CellDescription& CollectionDescription::getOtherCellRef(uint64_t id)
+CellDescription& Description::getOtherCellRef(uint64_t id)
 {
     return getOtherCellRef(std::set<uint64_t>{id});
 }
 
-CellDescription& CollectionDescription::getOtherCellRef(std::set<uint64_t> const& ids)
+CellDescription& Description::getOtherCellRef(std::set<uint64_t> const& ids)
 {
     std::vector<uint64_t> matchingCells;
     for (auto& cell : _cells) {
@@ -613,7 +613,7 @@ CellDescription& CollectionDescription::getOtherCellRef(std::set<uint64_t> const
     CHECK(false);
 }
 
-std::vector<CellDescription> CollectionDescription::getOtherCells(std::set<uint64_t> const& ids) const
+std::vector<CellDescription> Description::getOtherCells(std::set<uint64_t> const& ids) const
 {
     std::vector<CellDescription> result;
     forEachCell([&](auto const& cell) {
@@ -624,7 +624,7 @@ std::vector<CellDescription> CollectionDescription::getOtherCells(std::set<uint6
     return result;
 }
 
-CellDescription& CollectionDescription::getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex)
+CellDescription& Description::getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex)
 {
     if (!creatureIndex.has_value()) {
         return _cells.at(cellIndex);
@@ -633,7 +633,7 @@ CellDescription& CollectionDescription::getCellRef(std::optional<uint64_t> const
     }
 }
 
-bool CollectionDescription::hasConnection(uint64_t id, uint64_t otherId) const
+bool Description::hasConnection(uint64_t id, uint64_t otherId) const
 {
     auto const& cell = getCellRef(id);
     for (auto const& connection : cell._connections) {
@@ -644,12 +644,12 @@ bool CollectionDescription::hasConnection(uint64_t id, uint64_t otherId) const
     return false;
 }
 
-bool CollectionDescription::hasConnection(CellDescription const& cell1, CellDescription const& cell2) const
+bool Description::hasConnection(CellDescription const& cell1, CellDescription const& cell2) const
 {
     return hasConnection(cell1._id, cell2._id);
 }
 
-ConnectionDescription CollectionDescription::getConnection(uint64_t id, uint64_t otherId) const
+ConnectionDescription Description::getConnection(uint64_t id, uint64_t otherId) const
 {
     auto cell = getCellRef(id);
     for (auto const& connection : cell._connections) {
@@ -660,7 +660,7 @@ ConnectionDescription CollectionDescription::getConnection(uint64_t id, uint64_t
     CHECK(false);
 }
 
-ConnectionDescription CollectionDescription::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
+ConnectionDescription Description::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
 {
     for (auto const& connection : cell1._connections) {
         if (connection._cellId == cell2._id) {
@@ -670,7 +670,7 @@ ConnectionDescription CollectionDescription::getConnection(CellDescription const
     CHECK(false);
 }
 
-CreatureDescription& CollectionDescription::getCreatureRef(uint64_t id)
+CreatureDescription& Description::getCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id == id) {
@@ -680,7 +680,7 @@ CreatureDescription& CollectionDescription::getCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-CreatureDescription& CollectionDescription::getOtherCreatureRef(uint64_t id)
+CreatureDescription& Description::getOtherCreatureRef(uint64_t id)
 {
     for (auto& creature : _creatures) {
         if (creature._id != id) {
@@ -690,7 +690,7 @@ CreatureDescription& CollectionDescription::getOtherCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-_CollectionCache::Index CollectionDescription::getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const
+_CollectionCache::Index Description::getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const
 {
     _CollectionCache::Index result;
     auto findResult = cache->cellIdToIndex.find(cellId);

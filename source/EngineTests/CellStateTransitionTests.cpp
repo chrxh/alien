@@ -3,7 +3,7 @@
 #include "Base/Math.h"
 #include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
@@ -40,7 +40,7 @@ TEST_P(CellStateTransitionTests, ready_ready)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Ready),
     });
@@ -58,7 +58,7 @@ TEST_P(CellStateTransitionTests, ready_dying)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Dying),
     });
@@ -76,7 +76,7 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
     });
@@ -103,7 +103,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().creatures(
+    auto data = Description().creatures(
         {CreatureDescription()
              .genome(GenomeDescription().genes({
                  GeneDescription().separation(true).nodes({NodeDescription()}),
@@ -135,7 +135,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().cells({CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready)}),
         CreatureDescription().cells({CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}),
@@ -163,7 +163,7 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Detaching),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Reviving),
     });
@@ -190,7 +190,7 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Constructing),
         CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Activating),
     });
@@ -208,7 +208,7 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).barrier(true).pos({10.0f, 10.0f}).cellState(CellState_Dying),
     });
 

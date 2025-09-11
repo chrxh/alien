@@ -6,7 +6,7 @@ namespace
 {
     template <typename T>
     __device__ void
-    copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, CollectionTO& collectionTO)
+    copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TO& collectionTO)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -21,7 +21,7 @@ namespace
         }
     }
 
-    __device__ void createCreatureTO(Cell* cell, CollectionTO& collectionTO)
+    __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
     {
         uint64_t origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
@@ -162,7 +162,7 @@ namespace
         }
     }
 
-    __device__ void createCellTO(Cell* cell, CollectionTO& collectionTO, uint8_t* heap)
+    __device__ void createCellTO(Cell* cell, TO& collectionTO, uint8_t* heap)
     {
         auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, static_cast<uint64_t>(1));
         if (cellTOIndex >= collectionTO.capacities.cells) {
@@ -318,7 +318,7 @@ namespace
         }
     }
 
-    __device__ void createParticleTO(Particle* particle, CollectionTO& collectionTO)
+    __device__ void createParticleTO(Particle* particle, TO& collectionTO)
     {
         int particleTOIndex = alienAtomicAdd64(collectionTO.numParticles, uint64_t(1));
         if (particleTOIndex >= collectionTO.capacities.particles) {
@@ -389,7 +389,7 @@ __global__ void cudaPrepareCreaturesForConversionToTO(InspectedEntityIds ids, Si
     }
 }
 
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, CollectionTO collectionTO)
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -405,7 +405,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     }
 }
 
-__global__ void cudaGetSelectedParticleData(SimulationData data, CollectionTO access)
+__global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
 {
     PartitionData particleBlock = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -419,7 +419,7 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, CollectionTO ac
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -450,7 +450,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
     }
 }
 
-__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, CollectionTO access)
+__global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, TO access)
 {
     PartitionData particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
@@ -473,7 +473,7 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
     }
 }
 
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
 {
     {
         auto const& cells = data.objects.cells;
@@ -520,7 +520,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
-__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -540,7 +540,7 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, CollectionTO collectionTO)
+__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -558,7 +558,7 @@ __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClu
     }
 }
 
-__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -587,7 +587,7 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
 }
 
 // tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO collectionTO)
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -607,7 +607,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
     }
 }
 
-__global__ void cudaResolveConnections(SimulationData data, CollectionTO collectionTO)
+__global__ void cudaResolveConnections(SimulationData data, TO collectionTO)
 {
     auto const partition = calcAllThreadsPartition(*collectionTO.numCells);
 
@@ -621,7 +621,7 @@ __global__ void cudaResolveConnections(SimulationData data, CollectionTO collect
     }
 }
 
-__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, CollectionTO access)
+__global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access)
 {
     PartitionData particleBlock = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
@@ -637,12 +637,12 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray)
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO collectionTO, Cell** cellArray)
 {
     *cellArray = data.objects.heap.getTypedSubArray<Cell>(*collectionTO.numCells);
 }
 
-__global__ void cudaSetCreatureDataFromTO(SimulationData data, CollectionTO collectionTO)
+__global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -656,7 +656,7 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, CollectionTO coll
     }
 }
 
-__global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO, Cell** cellArray, bool selectNewData)
+__global__ void cudaSetDataFromTO(SimulationData data, TO collectionTO, Cell** cellArray, bool selectNewData)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -681,7 +681,7 @@ __global__ void cudaSetDataFromTO(SimulationData data, CollectionTO collectionTO
     }
 }
 
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, CollectionTO collectionTO)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO collectionTO)
 {
     Ids maxIds;
     {
@@ -708,7 +708,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, Collecti
     numberGen.adaptMaxIds(maxIds);
 }
 
-__global__ void cudaClearDataTO(CollectionTO collectionTO)
+__global__ void cudaClearDataTO(TO collectionTO)
 {
     *collectionTO.numCells = 0;
     *collectionTO.numParticles = 0;
@@ -765,7 +765,7 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
     alienAtomicAdd64(&arraySizes->heap, heapBytes);
 }
 
-__global__ void cudaEstimateCapacityNeededForGpu(CollectionTO collectionTO, ArraySizesForGpu* arraySizes)
+__global__ void cudaEstimateCapacityNeededForGpu(TO collectionTO, ArraySizesForGpu* arraySizes)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         arraySizes->cellArray = *collectionTO.numCells;

@@ -22,7 +22,7 @@
 #include "Base/Resources.h"
 #include "Base/VersionParserService.h"
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineInterface/GenomeDescription.h"
 
@@ -910,7 +910,7 @@ namespace cereal
     SPLIT_SERIALIZATION(ParticleDescription)
 
     template <class Archive>
-    void serialize(Archive& ar, CollectionDescription& data)
+    void serialize(Archive& ar, Description& data)
     {
         ar(data._cells, data._particles, data._creatures);
     }
@@ -1067,7 +1067,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
     try {
         log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
-        CollectionDescription data;
+        Description data;
         if (!wrapGenome(data, genome)) {
             return false;
         }
@@ -1088,7 +1088,7 @@ bool SerializerService::deserializeGenomeFromFile(GenomeDescription& genome, std
 {
     try {
         log(Priority::Important, "load genome from " + filename.string());
-        CollectionDescription data;
+        Description data;
         if (!deserializeDescription(data, filename)) {
             return false;
         }
@@ -1110,7 +1110,7 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
             return false;
         }
 
-        CollectionDescription data;
+        Description data;
         //if (!wrapGenome(data, input)) {
         //    return false;
         //}
@@ -1133,7 +1133,7 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
             return false;
         }
 
-        CollectionDescription data;
+        Description data;
         deserializeDescription(data, stream);
 
         //if (!unwrapGenome(output, data)) {
@@ -1193,7 +1193,7 @@ bool SerializerService::serializeStatisticsToFile(std::filesystem::path const& f
     }
 }
 
-bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, CollectionDescription const& content) const
+bool SerializerService::serializeContentToFile(std::filesystem::path const& filename, Description const& content) const
 {
     try {
         zstr::ofstream fileStream(filename.string(), std::ios::binary);
@@ -1208,7 +1208,7 @@ bool SerializerService::serializeContentToFile(std::filesystem::path const& file
     }
 }
 
-bool SerializerService::deserializeContentFromFile(CollectionDescription& content, std::filesystem::path const& filename) const
+bool SerializerService::deserializeContentFromFile(Description& content, std::filesystem::path const& filename) const
 {
     try {
         if (!deserializeDescription(content, filename)) {
@@ -1220,14 +1220,14 @@ bool SerializerService::deserializeContentFromFile(CollectionDescription& conten
     }
 }
 
-void SerializerService::serializeDescription(CollectionDescription const& data, std::ostream& stream) const
+void SerializerService::serializeDescription(Description const& data, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
     archive(data);
 }
 
-bool SerializerService::deserializeDescription(CollectionDescription& data, std::filesystem::path const& filename) const
+bool SerializerService::deserializeDescription(Description& data, std::filesystem::path const& filename) const
 {
     zstr::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
@@ -1237,7 +1237,7 @@ bool SerializerService::deserializeDescription(CollectionDescription& data, std:
     return true;
 }
 
-void SerializerService::deserializeDescription(CollectionDescription& data, std::istream& stream) const
+void SerializerService::deserializeDescription(Description& data, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -1552,14 +1552,14 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     }
 }
 
-bool SerializerService::wrapGenome(CollectionDescription& output, GenomeDescription const& input) const
+bool SerializerService::wrapGenome(Description& output, GenomeDescription const& input) const
 {
     output.clear();
     output._creatures.emplace_back(CreatureDescription().genome(input));
     return true;
 }
 
-bool SerializerService::unwrapGenome(GenomeDescription& output, CollectionDescription& input) const
+bool SerializerService::unwrapGenome(GenomeDescription& output, Description& input) const
 {
     if (input._creatures.size() != 1) {
         return false;

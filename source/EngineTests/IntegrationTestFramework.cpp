@@ -29,7 +29,7 @@ IntegrationTestFramework::~IntegrationTestFramework()
     _simulationFacade->closeSimulation();
 }
 
-double IntegrationTestFramework::getEnergy(CollectionDescription const& data) const
+double IntegrationTestFramework::getEnergy(Description const& data) const
 {
     double result = 0;
     for (auto const& cell : data._cells) {
@@ -78,7 +78,7 @@ bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected,
     return true;
 }
 
-bool IntegrationTestFramework::compare(CollectionDescription left, CollectionDescription right) const
+bool IntegrationTestFramework::compare(Description left, Description right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }

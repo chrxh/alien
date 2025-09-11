@@ -9,7 +9,7 @@
 #include "Fonts/AlienIconFont.h"
 
 #include "Base/Math.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -209,7 +209,7 @@ void CreatorWindow::onDrawing()
         }
     }
     DescriptionEditService::get().reconnectCells(_drawingDescription, 1.5f);
-    _simulationFacade->addAndSelectSimulationData(CollectionDescription(_drawingDescription));
+    _simulationFacade->addAndSelectSimulationData(Description(_drawingDescription));
 
     _simulationFacade->reconnectSelectedObjects();
     EditorModel::get().update();
@@ -234,7 +234,7 @@ void CreatorWindow::createCell()
                     .color(EditorModel::get().getDefaultColorCode())
                     .barrier(_barrier)
                     .sticky(_makeSticky);
-    CollectionDescription data;
+    Description data;
     data._cells.emplace_back(cell);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
@@ -242,7 +242,7 @@ void CreatorWindow::createCell()
 void CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
-    CollectionDescription data;
+    Description data;
     data._particles.emplace_back(particle);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
 }
@@ -272,7 +272,7 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    CollectionDescription data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
+    Description data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
                                                             .layers(_layers)
                                                             .cellDistance(_cellDistance)
                                                             .energy(_energy)
@@ -290,7 +290,7 @@ void CreatorWindow::createDisc()
         return;
     }
 
-    CollectionDescription data;
+    Description data;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc =

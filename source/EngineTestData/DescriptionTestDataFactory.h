@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Base/Singleton.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/GenomeDescription.h"
 
 class DescriptionTestDataFactory
@@ -27,7 +27,7 @@ public:
     NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
     CreatureDescription createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
 
-    bool compare(CollectionDescription left, CollectionDescription right) const;
+    bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;
     bool compare(ParticleDescription left, ParticleDescription right) const;
 

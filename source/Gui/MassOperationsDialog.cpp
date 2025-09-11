@@ -4,7 +4,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Colors.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 

@@ -2,7 +2,7 @@
 
 #include "Base/Singleton.h"
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/PreviewDescriptions.h"
 
 struct ConversionResult
@@ -20,6 +20,6 @@ public:
     ConversionResult convertToPreviewDescription(
         GenomeDescription const& genome,
         int startGeneIndex,
-        CollectionDescription&& phenotype,
+        Description&& phenotype,
         std::optional<float> const& lastVisualFrontAngle) const;
 };

@@ -1,7 +1,7 @@
 //#include <gtest/gtest.h>
 //
 //#include "EngineInterface/DescriptionEditService.h"
-//#include "EngineInterface/Descriptions.h"
+//#include "EngineInterface/Description.h"
 //#include "EngineInterface/SimulationFacade.h"
 //#include "EngineInterface/GenomeDescriptionConverterService.h"
 //
@@ -33,7 +33,7 @@
 //
 //TEST_F(InjectorTests, nothingFound)
 //{
-//    CollectionDescription data;
+//    Description data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -64,7 +64,7 @@
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.addCells(
 //        {CellDescription()
 //             .id(1)
@@ -104,7 +104,7 @@
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -144,7 +144,7 @@
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -187,7 +187,7 @@
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)

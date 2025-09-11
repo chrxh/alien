@@ -1,13 +1,13 @@
 #pragma once
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/StatisticsHistory.h"
 
 #include "SettingsForSerialization.h"
 
 struct DeserializedSimulation
 {
-    CollectionDescription mainData;
+    Description mainData;
     SettingsForSerialization auxiliaryData;
     StatisticsHistoryData statistics;
 };

@@ -19,7 +19,7 @@ struct RenderingData;
 class SelectionResult;
 struct CellTO;
 struct ClusterAccessTO;
-struct CollectionTO;
+struct TO;
 struct SimulationParameters;
 struct CudaSettings;
 class SimulationStatistics;
@@ -48,11 +48,11 @@ using TestKernelsService = std::shared_ptr<_TestKernelsService>;
 class _MaxAgeBalancer;
 using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
 
-class _CudaCollectionTOProvider;
-using CudaCollectionTOProvider = std::shared_ptr<_CudaCollectionTOProvider>;
+class _CudaTOProvider;
+using CudaTOProvider = std::shared_ptr<_CudaTOProvider>;
 
-class _CollectionTOProvider;
-using CollectionTOProvider = std::shared_ptr<_CollectionTOProvider>;
+class _TOProvider;
+using TOProvider = std::shared_ptr<_TOProvider>;
 
 
 struct ApplyForceData

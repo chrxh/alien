@@ -14,7 +14,7 @@ struct ExpertToggles;
 struct ColorTransitionRule;
 struct ParameterSpec;
 
-struct CollectionDescription;
+struct Description;
 struct ClusterDescription;
 struct CellDescription;
 struct ParticleDescription;

@@ -9,7 +9,7 @@
 #include "Base/StringHelper.h"
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 #include "EngineInterface/SimulationFacade.h"
@@ -89,7 +89,7 @@ void _PreviewWidget::setupPreviewData(bool useCache)
     }
     auto preview = genomeEditService.createSeedCollectionForPreview(
         subGenomesForPreview,
-        useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<SubGenomeDescription, CollectionDescription>());
+        useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<SubGenomeDescription, Description>());
 
     _simulationFacade->setPreviewData(preview.data);
     _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);
@@ -152,7 +152,7 @@ void _PreviewWidget::processCreaturePreviews()
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processCreaturePreview(int subGenomeIndex, CollectionDescription&& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(int subGenomeIndex, Description&& phenotype, float width)
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);

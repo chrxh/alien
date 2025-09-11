@@ -4,7 +4,7 @@
 
 #include "Base/Math.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
@@ -87,7 +87,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
 
     auto [side, channel0, channel1] = GetParam();
 
-    CollectionDescription data;
+    Description data;
     std::vector<CellDescription> cellsToAdd = {
         CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription()
@@ -156,7 +156,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
     auto [side, channel0, channel1] = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
         CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
@@ -244,7 +244,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 
     auto [side, channel0] = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription()
             .id(2)
@@ -334,7 +334,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
 
     auto [side, channel0] = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
         CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
@@ -451,7 +451,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto [side, targetAngle] = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
@@ -496,7 +496,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
 
     auto [side, targetAngle] = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}),
         CellDescription().id(2).pos({10.0f, 11.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription().id(3).pos({10.0f, 12.0f}),
@@ -558,7 +558,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
@@ -623,7 +623,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
@@ -692,7 +692,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 
     auto channel0 = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
@@ -742,7 +742,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
 
     auto channel0 = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
@@ -808,7 +808,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     auto constexpr AnglePrecision = 1.0f;
     auto [channel0, channel1] = GetParam();
 
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(3)),
         CellDescription()
             .id(2)

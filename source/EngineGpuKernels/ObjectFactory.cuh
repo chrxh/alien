@@ -5,7 +5,7 @@
 
 #include "Base.cuh"
 #include "ConstantMemory.cuh"
-#include "ObjectTO.cuh"
+#include "TO.cuh"
 #include "Map.cuh"
 #include "Object.cuh"
 #include "Physics.cuh"
@@ -16,9 +16,9 @@ class ObjectFactory
 public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO);
-    __inline__ __device__ Creature* createCreatureFromTO(CollectionTO const& collectionTO, int creatureIndex);
-    __inline__ __device__ Cell* createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray);
-    __inline__ __device__ void changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell);
+    __inline__ __device__ Creature* createCreatureFromTO(TO const& collectionTO, int creatureIndex);
+    __inline__ __device__ Cell* createCellFromTO(TO const& collectionTO, int cellIndex, Cell* cellArray);
+    __inline__ __device__ void changeCellFromTO(TO const& collectionTO, CellTO const& cellTO, Cell* cell);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
 
     __inline__ __device__ Particle* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
@@ -69,7 +69,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     return particle;
 }
 
-__inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO const& collectionTO, int creatureIndex)
+__inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& collectionTO, int creatureIndex)
 {
     auto& creatureTO = collectionTO.creatures[creatureIndex];
     auto creature = _data->objects.heap.getTypedSubArray<Creature>(1);
@@ -200,7 +200,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(CollectionTO
     return creature;
 }
 
-__inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& collectionTO, int cellIndex, Cell* cellArray)
+__inline__ __device__ Cell* ObjectFactory::createCellFromTO(TO const& collectionTO, int cellIndex, Cell* cellArray)
 {
     auto cellTO = collectionTO.cells[cellIndex];
     Cell** cellPointer = _data->objects.cells.getNewElement();
@@ -231,7 +231,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromTO(CollectionTO const& 
     return cell;
 }
 
-__inline__ __device__ void ObjectFactory::changeCellFromTO(CollectionTO const& collectionTO, CellTO const& cellTO, Cell* cell)
+__inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionTO, CellTO const& cellTO, Cell* cell)
 {
     cell->id = cellTO.id;
     cell->pos = cellTO.pos;

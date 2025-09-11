@@ -365,13 +365,13 @@ struct _CollectionCache
 };
 using CollectionCache = std::shared_ptr<_CollectionCache>;
 
-struct CollectionDescription
+struct Description
 {
-    auto operator<=>(CollectionDescription const&) const = default;
+    auto operator<=>(Description const&) const = default;
 
-    MEMBER(CollectionDescription, std::vector<CellDescription>, cells, {});
-    MEMBER(CollectionDescription, std::vector<ParticleDescription>, particles, {});
-    MEMBER(CollectionDescription, std::vector<CreatureDescription>, creatures, {});
+    MEMBER(Description, std::vector<CellDescription>, cells, {});
+    MEMBER(Description, std::vector<ParticleDescription>, particles, {});
+    MEMBER(Description, std::vector<CreatureDescription>, creatures, {});
 
     void forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const;
     void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
@@ -382,14 +382,14 @@ struct CollectionDescription
     void clear();
     bool isEmpty() const;
 
-    void add(CollectionDescription&& other);
+    void add(Description&& other);
 
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
     CollectionCache createCache() const;
-    CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
-    CollectionDescription& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
+    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
+    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
     CellDescription const& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr) const;
     CellDescription& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr);
     CellDescription& getOtherCellRef(uint64_t id);

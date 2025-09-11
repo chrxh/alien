@@ -2,7 +2,7 @@
 
 #include "EngineInterface/NumberGenerator.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/StatisticsRawData.h"
 
@@ -30,7 +30,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
     //            CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
     //        }));
 
-    //CollectionDescription data;
+    //Description data;
     //data.cells() = {
     //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
@@ -55,7 +55,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
     //            CellGenomeDescription().cellType(ConstructorGenomeDescription().makeSelfCopy()),
     //        }));
 
-    //CollectionDescription data;
+    //Description data;
     //data.cells() = {
     //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
@@ -79,7 +79,7 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
     //            CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(subGenome)),
     //        }));
 
-    //CollectionDescription data;
+    //Description data;
     //data.cells() = {
     //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
     //});

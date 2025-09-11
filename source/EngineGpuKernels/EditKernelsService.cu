@@ -235,7 +235,7 @@ void _EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationD
     updateSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& changeDataTO)
+void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& changeDataTO)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 
@@ -259,7 +259,7 @@ void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, 
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-bool _EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO)
+bool _EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TO const& dataTO)
 {
     setValueToDevice(_result, false);
     KERNEL_CALL_1_1(cudaAddCreature, data, dataTO, _genomePtr);

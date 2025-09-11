@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 #include "EngineInterface/GenomeDescription.h"
@@ -30,7 +30,7 @@ public:
 
 //TEST_F(DepotTests, distributeToOtherTransmitter)
 //{
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -72,7 +72,7 @@ public:
 //    SignalDescription signal;
 //    signal.channels({0.5f, -0.7f, 0, 0, 0, 0, 0, 0});
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -114,7 +114,7 @@ public:
 //
 //TEST_F(DepotTests, distributeToConnectedCells)
 //{
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -154,7 +154,7 @@ public:
 //{
 //    //auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -191,7 +191,7 @@ public:
 //{
 //    //auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
 //    
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -229,7 +229,7 @@ public:
 //
 //TEST_F(DepotTests, distributeToTwoTransmittersWithDifferentColor)
 //{
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -275,7 +275,7 @@ public:
 //        CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
 //    });
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -328,7 +328,7 @@ public:
 //    //    CellGenomeDescription().cellType(ConstructorGenomeDescription().genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))),
 //    //});
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)

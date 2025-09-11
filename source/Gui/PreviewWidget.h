@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/GenomeDescription.h"
 #include "EngineInterface/GenomeDescriptionEditService.h"
 
@@ -29,7 +29,7 @@ private:
     void setupPreviewData(bool useCache = true);
     void calcPreview();
     void processCreaturePreviews();
-    void processCreaturePreview(int subGenomeIndex, CollectionDescription&& phenotype, float width);
+    void processCreaturePreview(int subGenomeIndex, Description&& phenotype, float width);
     void processActionBar();
 
     int calcTpsForPreview();
@@ -59,7 +59,7 @@ private:
     struct Savepoint
     {
         uint64_t timestep = 0;
-        CollectionDescription data;
+        Description data;
         std::vector<uint64_t> seedCreatureIds;
     };
     std::vector<Savepoint> _savepoints;

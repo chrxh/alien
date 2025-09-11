@@ -6,7 +6,7 @@
 #include "Base/StringHelper.h"
 #include "EngineInterface/ParametersEditService.h"
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/LocationHelper.h"
 
 #include "IntegrationTestFramework.h"

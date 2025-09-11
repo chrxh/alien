@@ -4,7 +4,7 @@
 #include "EngineInterface/NumberGenerator.h"
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/ShapeGenerator.h"
 #include "EngineInterface/SimulationFacade.h"
 
@@ -259,7 +259,7 @@ protected:
 
 TEST_F(ConstructorTests, alreadyFinished)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
@@ -293,7 +293,7 @@ TEST_F(ConstructorTests, alreadyFinished)
 
 TEST_F(ConstructorTests, emptyGenome)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription())
@@ -327,7 +327,7 @@ TEST_F(ConstructorTests, emptyGenome)
 
 TEST_F(ConstructorTests, emptyGene)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({GeneDescription().separation(true)}))
@@ -361,7 +361,7 @@ TEST_F(ConstructorTests, emptyGene)
 
 TEST_F(ConstructorTests, nodeIndexOutOfRange)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({GeneDescription().separation(true)}))
@@ -395,7 +395,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
 
 TEST_F(ConstructorTests, geneIndexOutOfRange)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({GeneDescription().separation(true)}))
@@ -429,7 +429,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
 
 TEST_F(ConstructorTests, insufficientEnergy)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription()})}))
@@ -462,7 +462,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
 
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()})}))
@@ -499,7 +499,7 @@ TEST_F(ConstructorTests, insufficientSpace)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -572,7 +572,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto nodeParameter = GetParam();
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription()
@@ -623,7 +623,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto nodeParameter = GetParam();
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription()
@@ -667,7 +667,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 {
     auto const FrontAngle = 10.0f;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription()
@@ -716,7 +716,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__an
                       })
                       .frontAngle(45.0f);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -772,7 +772,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__an
                       })
                       .frontAngle(45.0f);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -823,7 +823,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 {
     auto const FrontAngle = 10.0f;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription()
@@ -872,7 +872,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 {
     auto const FrontAngle = 10.0f;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription()
@@ -920,7 +920,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
 TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
@@ -960,7 +960,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
@@ -1008,7 +1008,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(2).nodes({NodeDescription()}),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}).angleToFront(FrontAngle),
             CellDescription().id(1).pos({100.0f, 101.0f}).angleToFront(FrontAngle - 180.0f),
@@ -1052,7 +1052,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(2).nodes({NodeDescription()}),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}).angleToFront(FrontAngle),
         }),
@@ -1094,7 +1094,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
             NodeDescription().referenceAngle(0).numAdditionalConnections(1),
         }),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
         }),
@@ -1128,7 +1128,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
 
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
@@ -1167,7 +1167,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
@@ -1206,7 +1206,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(2).nodes({NodeDescription()}),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).pos({101.0f, 100.0f}).angleToFront(FrontAngle),
             CellDescription()
@@ -1250,7 +1250,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     auto const ConstructionAngle = 0;
     //20.0f;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription()
@@ -1309,7 +1309,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
                           GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
                       })
                       .frontAngle(FrontAngle);
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -1362,7 +1362,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
                           GeneDescription().nodes({NodeDescription(), NodeDescription().referenceAngle(LastAngle)}).separation(false).numBranches(1),
                       })
                       .frontAngle(FrontAngle);
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(0)
@@ -1420,7 +1420,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
                           GeneDescription().nodes({NodeDescription(), NodeDescription().referenceAngle(MiddleAngle)}).separation(false).numBranches(1),
                       })
                       .frontAngle(FrontAngle);
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).pos({101.0f, 100.0f}).cellState(CellState_Constructing).angleToFront(FrontAngle),
             CellDescription()
@@ -1474,7 +1474,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
                           GeneDescription().nodes({NodeDescription(), NodeDescription().referenceAngle(MiddleAngle)}).separation(false).numBranches(1),
                       })
                       .frontAngle(FrontAngle);
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).pos({100.0f, 101.0f}).angleToFront(FrontAngle),
             CellDescription()
@@ -1525,7 +1525,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
         GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription().numAdditionalConnections(0)}),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}),
             CellDescription()
@@ -1579,7 +1579,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
             NodeDescription().referenceAngle(0.0f)
         }),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -1637,7 +1637,7 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
             NodeDescription(),
         }),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -1725,7 +1725,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
             })
             .angleAlignment(angleAlignment),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -1832,7 +1832,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
     auto genome = GenomeDescription().genes({
         GeneDescription().nodes({NodeDescription().referenceAngle(ConcatenationAngle)}).numConcatenations(3).separation(false).numBranches(1),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(0)
@@ -1889,7 +1889,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
             .angleAlignment(ConstructorAngleAlignment_90),
     });
     auto addDistance = _parameters.constructorAdditionalOffspringDistance;
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(0)
@@ -1943,7 +1943,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
 
 TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1_numAdditionalConnections_bothSidesPresent)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .id(0)
             .genome(GenomeDescription().genes({
@@ -2012,7 +2012,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 {
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
-    auto data = CollectionDescription().creatures(
+    auto data = Description().creatures(
         {CreatureDescription()
              .id(0)
              .genome(GenomeDescription().genes({
@@ -2075,7 +2075,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
 TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_2__threeCellsWithSmallAngles__variant_2)
 {
-    auto data = CollectionDescription().creatures(
+    auto data = Description().creatures(
         {CreatureDescription()
              .id(0)
              .genome(GenomeDescription().genes({
@@ -2147,7 +2147,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(1)
@@ -2212,7 +2212,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             .nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(1)
@@ -2276,7 +2276,7 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
             .nodes({NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(0)}),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(1)
@@ -2330,7 +2330,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             .nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(1)
@@ -2390,7 +2390,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).energy(getConstructorEnergy()).cellTypeData(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
         }),
@@ -2427,7 +2427,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
     });
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
 
         // Parent
         CreatureDescription().id(0).genome(genome).cells({
@@ -2484,7 +2484,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
         GeneDescription().nodes({NodeDescription()}).separation(false).numBranches(1),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
@@ -2526,7 +2526,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__an
                       })
                       .frontAngle(45.0f);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}),
             CellDescription()
@@ -2565,7 +2565,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__an
                       })
                       .frontAngle(-45.0f);
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(1).pos({8.0f, 10.0f}),
             CellDescription()
@@ -2631,7 +2631,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     gene._nodes.emplace_back(NodeDescription().referenceAngle(LastAngle));
     auto genome = GenomeDescription().genes({gene});
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
@@ -2730,7 +2730,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
             .shape(ConstructorShape_Hexagon).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription()}),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}),
             CellDescription()
@@ -2782,7 +2782,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
         GeneDescription().separation(false).shape(ConstructorShape_Hexagon).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
     });
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(1)

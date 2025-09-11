@@ -258,7 +258,7 @@ void GenomeEditorWindow::onCreateSeed()
     auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
     auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription()
             .cells({
                 CellDescription()

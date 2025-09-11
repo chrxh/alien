@@ -7,7 +7,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "ObjectTO.cuh"
+#include "TO.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
@@ -19,9 +19,9 @@
 #include "SimulationData.cuh"
 
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters);
-__global__ void cudaChangeCell(SimulationData data, CollectionTO changeDataTO);  // changeDataTO contains only 1 cell
-__global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataTO); // changeDataTO contains only 1 particle
-__global__ void cudaAddCreature(SimulationData data, CollectionTO dataTO, Creature** newCreature);  // changeDataTO contains only 1 genome
+__global__ void cudaChangeCell(SimulationData data, TO changeDataTO);  // changeDataTO contains only 1 cell
+__global__ void cudaChangeParticle(SimulationData data, TO changeDataTO); // changeDataTO contains only 1 particle
+__global__ void cudaAddCreature(SimulationData data, TO dataTO, Creature** newCreature);  // changeDataTO contains only 1 genome
 __global__ void cudaSetCreature(SimulationData data, Creature** newCreature, bool* result);
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);
 __global__ void cudaRemoveSelectedCellConnections(SimulationData data, bool includeClusters);

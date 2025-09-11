@@ -8,8 +8,8 @@
 #include "EngineInterface/Ids.h"
 #include "EngineInterface/NumberGenerator.h"
 
-#include "EngineGpuKernels/CollectionTOProvider.cuh"
-#include "EngineGpuKernels/ObjectTO.cuh"
+#include "EngineGpuKernels/TOProvider.cuh"
+#include "EngineGpuKernels/TO.cuh"
 #include "EngineGpuKernels/SimulationCudaFacade.cuh"
 
 #include "DescriptionConverterService.h"
@@ -23,7 +23,7 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
 {
     _accessState = 0;
     _settings = settings;
-    _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
+    _collectionTOProvider = std::make_shared<_TOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
     _cudaResource = nullptr;
 }
@@ -110,17 +110,17 @@ void EngineWorker::setSyncSimulationWithRenderingRatio(int value)
     _syncSimulationWithRenderingRatio = value;
 }
 
-CollectionDescription EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
+Description EngineWorker::getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight)
 {
     EngineWorkerGuard access(this);
 
     auto dataTO = _simulationCudaFacade->getSimulationData({rectUpperLeft.x, rectUpperLeft.y}, int2{rectLowerRight.x, rectLowerRight.y});
-    ExitScopeGuard guard([&dataTO]() { _CollectionTOProvider::destroyUnmanagedDataTO(dataTO); });
+    ExitScopeGuard guard([&dataTO]() { _TOProvider::destroyUnmanagedDataTO(dataTO); });
 
     return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-CollectionDescription EngineWorker::getSelectedSimulationData(bool includeClusters)
+Description EngineWorker::getSelectedSimulationData(bool includeClusters)
 {
     EngineWorkerGuard access(this);
 
@@ -129,7 +129,7 @@ CollectionDescription EngineWorker::getSelectedSimulationData(bool includeCluste
     return DescriptionConverterService::get().convertTOtoDescription(dataTO);
 }
 
-CollectionDescription EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
+Description EngineWorker::getInspectedSimulationData(std::vector<uint64_t> objectsIds)
 {
     EngineWorkerGuard access(this);
 
@@ -153,7 +153,7 @@ void EngineWorker::setStatisticsHistory(StatisticsHistoryData const& data)
     _simulationCudaFacade->setStatisticsHistory(data);
 }
 
-void EngineWorker::addAndSelectSimulationData(CollectionDescription&& dataToUpdate)
+void EngineWorker::addAndSelectSimulationData(Description&& dataToUpdate)
 {
     EngineWorkerGuard access(this);
 
@@ -167,7 +167,7 @@ void EngineWorker::addAndSelectSimulationData(CollectionDescription&& dataToUpda
     _simulationCudaFacade->addAndSelectSimulationData(dataTO);
 }
 
-void EngineWorker::setSimulationData(CollectionDescription const& dataToUpdate)
+void EngineWorker::setSimulationData(Description const& dataToUpdate)
 {
     if (!dataToUpdate.hasUniqueIds()) {
         throw std::runtime_error("Cell ids are not unique.");
@@ -432,17 +432,17 @@ bool EngineWorker::isSimulationRunning() const
     return _isSimulationRunning.load();
 }
 
-CollectionDescription EngineWorker::getPreviewData()
+Description EngineWorker::getPreviewData()
 {
     EngineWorkerGuard access(this);
 
     auto preview = _simulationCudaFacade->getPreviewData();
-    ExitScopeGuard guard([&preview]() { _CollectionTOProvider::destroyUnmanagedDataTO(preview); });
+    ExitScopeGuard guard([&preview]() { _TOProvider::destroyUnmanagedDataTO(preview); });
 
     return DescriptionConverterService::get().convertTOtoDescription(preview);
 }
 
-void EngineWorker::setPreviewData(CollectionDescription const& data)
+void EngineWorker::setPreviewData(Description const& data)
 {
     if (!data.hasUniqueIds()) {
         throw std::runtime_error("Cell ids are not unique.");
