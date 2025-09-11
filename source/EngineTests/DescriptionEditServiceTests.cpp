@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <map>
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
@@ -226,4 +227,214 @@ TEST_F(DescriptionEditServiceTests, flattenTopology_disconnectedComponents_withW
     bool bothOnLeft = (cell1Pos.x < 50.0f && cell2Pos.x < 50.0f);
     bool bothOnRight = (cell1Pos.x > 50.0f && cell2Pos.x > 50.0f);
     EXPECT_TRUE(bothOnLeft || bothOnRight);
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_cellsWithoutConnections)
+{
+    // Cells without connections should not be affected
+    Description data = Description().cells({
+        CellDescription().id(1).pos({10.0f, 20.0f}),
+        CellDescription().id(2).pos({90.0f, 80.0f}),
+        CellDescription().id(3).pos({50.0f, 50.0f})
+    });
+    IntVector2D worldSize{100, 100};
+    
+    auto originalPositions = std::vector<RealVector2D>();
+    for (const auto& cell : data._cells) {
+        originalPositions.push_back(cell._pos);
+    }
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(3, data._cells.size());
+    // Positions should remain unchanged since there are no connections
+    for (size_t i = 0; i < data._cells.size(); ++i) {
+        EXPECT_FLOAT_EQ(originalPositions[i].x, data._cells[i]._pos.x);
+        EXPECT_FLOAT_EQ(originalPositions[i].y, data._cells[i]._pos.y);
+    }
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_ring_topology)
+{
+    // Create a ring: cell1 -> cell2 -> cell3 -> cell1, where cell3 wraps around
+    std::vector<CellDescription> cells;
+    cells.push_back(CellDescription().id(1).pos({10.0f, 50.0f}).connections({
+        ConnectionDescription().cellId(2), ConnectionDescription().cellId(3)
+    }));
+    cells.push_back(CellDescription().id(2).pos({20.0f, 50.0f}).connections({
+        ConnectionDescription().cellId(1), ConnectionDescription().cellId(3)
+    }));
+    cells.push_back(CellDescription().id(3).pos({95.0f, 50.0f}).connections({  // This one wraps
+        ConnectionDescription().cellId(1), ConnectionDescription().cellId(2)
+    }));
+    
+    Description data = Description().cells(cells);
+    IntVector2D worldSize{100, 100};
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(3, data._cells.size());
+    
+    // After flattening, cell3 should be corrected to be near the other cells
+    // Find positions after correction
+    std::map<uint64_t, RealVector2D> posById;
+    for (const auto& cell : data._cells) {
+        posById[cell._id] = cell._pos;
+    }
+    
+    // All cells should be on the same "side" of the world
+    float maxX = std::max({posById[1].x, posById[2].x, posById[3].x});
+    float minX = std::min({posById[1].x, posById[2].x, posById[3].x});
+    
+    // The range should be reasonable (much less than world size)
+    EXPECT_LT(maxX - minX, 50.0f);
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_complex_wrapping_both_axes)
+{
+    // Test wrapping in both X and Y dimensions
+    Description data = createConnectedPair({5.0f, 5.0f}, {95.0f, 95.0f});
+    IntVector2D worldSize{100, 100};
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(2, data._cells.size());
+    
+    auto pos1 = data._cells[0]._pos;
+    auto pos2 = data._cells[1]._pos;
+    
+    // After correction, cells should be close in both dimensions
+    float xDist = std::abs(pos1.x - pos2.x);
+    float yDist = std::abs(pos1.y - pos2.y);
+    
+    // Distances should be much smaller than half the world size
+    EXPECT_LT(xDist, 50.0f);
+    EXPECT_LT(yDist, 50.0f);
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_mixed_connected_and_unconnected)
+{
+    // Mix of connected and unconnected cells
+    Description data;
+    data._cells = {
+        // Connected pair that needs correction
+        CellDescription().id(1).pos({5.0f, 50.0f}).connections({ConnectionDescription().cellId(2)}),
+        CellDescription().id(2).pos({95.0f, 50.0f}).connections({ConnectionDescription().cellId(1)}),
+        // Isolated cells that should not change
+        CellDescription().id(3).pos({30.0f, 30.0f}),
+        CellDescription().id(4).pos({70.0f, 70.0f})
+    };
+    IntVector2D worldSize{100, 100};
+    
+    auto isolatedPos3 = data._cells[2]._pos;
+    auto isolatedPos4 = data._cells[3]._pos;
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(4, data._cells.size());
+    
+    // Find cells by ID after processing
+    std::map<uint64_t, RealVector2D> posById;
+    for (const auto& cell : data._cells) {
+        posById[cell._id] = cell._pos;
+    }
+    
+    // Isolated cells should not have moved
+    EXPECT_FLOAT_EQ(isolatedPos3.x, posById[3].x);
+    EXPECT_FLOAT_EQ(isolatedPos3.y, posById[3].y);
+    EXPECT_FLOAT_EQ(isolatedPos4.x, posById[4].x);
+    EXPECT_FLOAT_EQ(isolatedPos4.y, posById[4].y);
+    
+    // Connected cells should be corrected to be on the same side
+    bool bothOnLeft = (posById[1].x < 50.0f && posById[2].x < 50.0f);
+    bool bothOnRight = (posById[1].x > 50.0f && posById[2].x > 50.0f);
+    EXPECT_TRUE(bothOnLeft || bothOnRight);
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_cells_in_creatures)
+{
+    // Test topology correction for cells within creatures
+    Description data = Description().creatures({
+        CreatureDescription().id(1).cells({
+            CellDescription().id(10).pos({5.0f, 50.0f}).connections({ConnectionDescription().cellId(11)}),
+            CellDescription().id(11).pos({95.0f, 50.0f}).connections({ConnectionDescription().cellId(10)})
+        })
+    });
+    IntVector2D worldSize{100, 100};
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(1, data._creatures.size());
+    ASSERT_EQ(2, data._creatures[0]._cells.size());
+    
+    auto cell1Pos = data._creatures[0]._cells[0]._pos;
+    auto cell2Pos = data._creatures[0]._cells[1]._pos;
+    
+    // After flattening, both cells should be on the same side
+    bool bothOnLeft = (cell1Pos.x < 50.0f && cell2Pos.x < 50.0f);
+    bool bothOnRight = (cell1Pos.x > 50.0f && cell2Pos.x > 50.0f);
+    EXPECT_TRUE(bothOnLeft || bothOnRight);
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_mixed_individual_and_creature_cells)
+{
+    // Test with both individual cells and creature cells
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({10.0f, 50.0f}).connections({ConnectionDescription().cellId(2)}),
+        CellDescription().id(2).pos({90.0f, 50.0f}).connections({ConnectionDescription().cellId(1)})
+    };
+    data._creatures = {
+        CreatureDescription().id(10).cells({
+            CellDescription().id(3).pos({15.0f, 25.0f}).connections({ConnectionDescription().cellId(4)}),
+            CellDescription().id(4).pos({85.0f, 25.0f}).connections({ConnectionDescription().cellId(3)})
+        })
+    };
+    IntVector2D worldSize{100, 100};
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(2, data._cells.size());
+    ASSERT_EQ(1, data._creatures.size());
+    ASSERT_EQ(2, data._creatures[0]._cells.size());
+    
+    // Check individual cells
+    std::map<uint64_t, RealVector2D> cellPosById;
+    for (const auto& cell : data._cells) {
+        cellPosById[cell._id] = cell._pos;
+    }
+    bool individualCellsBothOnLeft = (cellPosById[1].x < 50.0f && cellPosById[2].x < 50.0f);
+    bool individualCellsBothOnRight = (cellPosById[1].x > 50.0f && cellPosById[2].x > 50.0f);
+    EXPECT_TRUE(individualCellsBothOnLeft || individualCellsBothOnRight);
+    
+    // Check creature cells
+    std::map<uint64_t, RealVector2D> creatureCellPosById;
+    for (const auto& cell : data._creatures[0]._cells) {
+        creatureCellPosById[cell._id] = cell._pos;
+    }
+    bool creatureCellsBothOnLeft = (creatureCellPosById[3].x < 50.0f && creatureCellPosById[4].x < 50.0f);
+    bool creatureCellsBothOnRight = (creatureCellPosById[3].x > 50.0f && creatureCellPosById[4].x > 50.0f);
+    EXPECT_TRUE(creatureCellsBothOnLeft || creatureCellsBothOnRight);
+}
+
+TEST_F(DescriptionEditServiceTests, flattenTopology_manual_validation_simple_case)
+{
+    // Manual validation: ensure our understanding of the function is correct
+    // Case: two cells connected, one at each side of a 10x10 world
+    Description data = createConnectedPair({1.0f, 5.0f}, {9.0f, 5.0f});
+    IntVector2D worldSize{10, 10};
+    
+    DescriptionEditService::get().flattenTopology(data, worldSize);
+    
+    ASSERT_EQ(2, data._cells.size());
+    
+    // One of the cells should have been moved to be near the other
+    // In a 10x10 world, position 9 should be corrected to -1 (equivalent to 9 but on the left side)
+    // or position 1 should be corrected to 11 (equivalent to 1 but on the right side)
+    auto pos1 = data._cells[0]._pos;
+    auto pos2 = data._cells[1]._pos;
+    
+    // The distance between the cells should be small after correction
+    float distance = std::abs(pos1.x - pos2.x);
+    EXPECT_LT(distance, 5.0f);  // Should be much less than half the world size
 }
