@@ -20,7 +20,7 @@ __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color,
 }
 
 //assumes that *changeDataTO.numCells == 1
-__global__ void cudaChangeCell(SimulationData data, CollectionTO changeDataTO)
+__global__ void cudaChangeCell(SimulationData data, TO changeDataTO)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -35,7 +35,7 @@ __global__ void cudaChangeCell(SimulationData data, CollectionTO changeDataTO)
 }
 
 //assumes that *changeDataTO.numParticles == 1
-__global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataTO)
+__global__ void cudaChangeParticle(SimulationData data, TO changeDataTO)
 {
     auto const partition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -49,7 +49,7 @@ __global__ void cudaChangeParticle(SimulationData data, CollectionTO changeDataT
     }
 }
 
-__global__ void cudaAddCreature(SimulationData data, CollectionTO dataTO, Creature** newCreature)
+__global__ void cudaAddCreature(SimulationData data, TO dataTO, Creature** newCreature)
 {
     ObjectFactory factory;
     factory.init(&data);

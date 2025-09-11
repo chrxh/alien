@@ -1,7 +1,7 @@
 //#include <gtest/gtest.h>
 //
 //#include "EngineInterface/DescriptionEditService.h"
-//#include "EngineInterface/Descriptions.h"
+//#include "EngineInterface/Description.h"
 //#include "EngineInterface/GenomeDescriptionConverterService.h"
 //#include "EngineInterface/SimulationFacade.h"
 //#include "IntegrationTestFramework.h"
@@ -33,7 +33,7 @@
 //
 //TEST_F(DefenderTests, attackerVsAntiAttacker)
 //{
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -72,7 +72,7 @@
 //
 //TEST_F(DefenderTests, attackerVsAntiInjector)
 //{
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -110,7 +110,7 @@
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)
@@ -155,7 +155,7 @@
 //{
 //    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
 //
-//    CollectionDescription data;
+//    Description data;
 //    data.cells() = {
 //        CellDescription()
 //            .id(1)

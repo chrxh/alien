@@ -283,7 +283,7 @@ struct CreatureTO
     uint64_t creatureIndexOnGpu;
 };
 
-struct CollectionTO
+struct TO
 {
     ArraySizesForTO capacities;
 
@@ -300,6 +300,6 @@ struct CollectionTO
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-	bool operator==(CollectionTO const& other) const = default;
+	bool operator==(TO const& other) const = default;
 };
 

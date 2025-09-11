@@ -4,7 +4,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationParameters.h"
 
 namespace std
@@ -28,14 +28,14 @@ public:
     virtual ~IntegrationTestFramework();
 
 protected:
-    double getEnergy(CollectionDescription const& data) const;
+    double getEnergy(Description const& data) const;
 
     bool approxCompare(double expected, double actual, float precision = 0.001f) const;
     bool approxCompare(float expected, float actual, float precision = 0.001f) const;
     bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const;
     bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const;
 
-    bool compare(CollectionDescription left, CollectionDescription right) const;
+    bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;
     bool compare(ParticleDescription left, ParticleDescription right) const;
 

@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "Base/Singleton.h"
 
-#include "Descriptions.h"
+#include "Description.h"
 
 class DescriptionEditService
 {
@@ -23,7 +23,7 @@ public:
         MEMBER(CreateRectParameters, int, color, 0);
         MEMBER(CreateRectParameters, bool, barrier, false);
     };
-    CollectionDescription createRect(CreateRectParameters const& parameters) const;
+    Description createRect(CreateRectParameters const& parameters) const;
 
     struct CreateHexParameters
     {
@@ -37,7 +37,7 @@ public:
         MEMBER(CreateHexParameters, int, color, 0);
         MEMBER(CreateHexParameters, bool, barrier, false);
     };
-    CollectionDescription createHex(CreateHexParameters const& parameters) const;
+    Description createHex(CreateHexParameters const& parameters) const;
 
     struct CreateUnconnectedCircleParameters
     {
@@ -50,9 +50,9 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
     };
-    CollectionDescription createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
+    Description createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
 
-    void duplicate(CollectionDescription& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
+    void duplicate(Description& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {
@@ -69,7 +69,7 @@ public:
         MEMBER(GridMultiplyParameters, float, verticalVelYinc, 0);
         MEMBER(GridMultiplyParameters, float, verticalAngularVelInc, 0);
     };
-    CollectionDescription gridMultiply(CollectionDescription const& input, GridMultiplyParameters const& parameters) const;
+    Description gridMultiply(Description const& input, GridMultiplyParameters const& parameters) const;
 
     struct RandomMultiplyParameters
     {
@@ -84,46 +84,46 @@ public:
         MEMBER(RandomMultiplyParameters, float, maxAngularVel, 0);
         MEMBER(RandomMultiplyParameters, bool, overlappingCheck, false);
     };
-    CollectionDescription randomMultiply(
-        CollectionDescription const& input,
+    Description randomMultiply(
+        Description const& input,
         RandomMultiplyParameters const& parameters,
         IntVector2D const& worldSize,
-        CollectionDescription&& existentData,
+        Description&& existentData,
         bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
     void addIfSpaceAvailable(
-        CollectionDescription& result,
+        Description& result,
         Occupancy& cellOccupancy,
-        CollectionDescription const& toAdd,
+        Description const& toAdd,
         float distance,
         IntVector2D const& worldSize) const;
 
-    void flattenTopology(CollectionDescription& data, SpaceCalculator const& space) const;
+    void flattenTopology(Description& data, SpaceCalculator const& space) const;
 
-    void reconnectCells(CollectionDescription& data, float maxDistance) const;  // For non-creatures
+    void reconnectCells(Description& data, float maxDistance) const;  // For non-creatures
 
-    void randomizeCellColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;
-    void randomizeGenomeColors(CollectionDescription& data, std::vector<int> const& colorCodes) const;
-    void randomizeEnergies(CollectionDescription& data, float minEnergy, float maxEnergy) const;
-    void randomizeAges(CollectionDescription& data, int minAge, int maxAge) const;
-    void randomizeCountdowns(CollectionDescription& data, int minValue, int maxValue) const;
-    void randomizeLineageIds(CollectionDescription& data) const;
+    void randomizeCellColors(Description& data, std::vector<int> const& colorCodes) const;
+    void randomizeGenomeColors(Description& data, std::vector<int> const& colorCodes) const;
+    void randomizeEnergies(Description& data, float minEnergy, float maxEnergy) const;
+    void randomizeAges(Description& data, int minAge, int maxAge) const;
+    void randomizeCountdowns(Description& data, int minValue, int maxValue) const;
+    void randomizeLineageIds(Description& data) const;
 
     uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
     RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;
-    std::vector<ExtendedCellOrParticleDescription> getObjects(CollectionDescription const& data) const;
-    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(CollectionDescription const& data) const;
+    std::vector<ExtendedCellOrParticleDescription> getObjects(Description const& data) const;
+    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(Description const& data) const;
 
-    void setCenter(CollectionDescription& collection, RealVector2D const& center) const;
-    RealVector2D calcCenter(CollectionDescription const& collection) const;
+    void setCenter(Description& collection, RealVector2D const& center) const;
+    RealVector2D calcCenter(Description const& collection) const;
     RealVector2D calcCenter(CreatureDescription const& creature) const;
-    void shift(CollectionDescription& collection, RealVector2D const& delta) const;
-    void rotate(CollectionDescription& collection, float angle) const;
-    void accelerate(CollectionDescription& collection, RealVector2D const& velDelta, float angularVelDelta) const;
+    void shift(Description& collection, RealVector2D const& delta) const;
+    void rotate(Description& collection, float angle) const;
+    void accelerate(Description& collection, RealVector2D const& velDelta, float angularVelDelta) const;
 
-    void removeCell(CollectionDescription& collection, uint64_t cellId) const;
-    void removeCellIf(CollectionDescription& collection, std::function<bool(CellDescription const&)> const& predicate) const;
+    void removeCell(Description& collection, uint64_t cellId) const;
+    void removeCellIf(Description& collection, std::function<bool(CellDescription const&)> const& predicate) const;
 
 private:
     bool isCellPresent(

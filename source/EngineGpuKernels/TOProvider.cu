@@ -1,14 +1,14 @@
-#include "CollectionTOProvider.cuh"
+#include "TOProvider.cuh"
 
 #include <stdexcept>
 
-_CollectionTOProvider::_CollectionTOProvider()
+_TOProvider::_TOProvider()
 {}
 
-_CollectionTOProvider::~_CollectionTOProvider()
+_TOProvider::~_TOProvider()
 {
-    if (_collectionTO) {
-        destroy(_collectionTO.value());
+    if (_to) {
+        destroy(_to.value());
     }
 }
 
@@ -26,29 +26,29 @@ namespace
     };
 }
 
-CollectionTO _CollectionTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
+TO _TOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
 {
     try {
-        if (_collectionTO.has_value()) {
-            checkAndExtendCapacity(_collectionTO->cells, *_collectionTO->numCells, _collectionTO->capacities.cells, requiredCapacity.cells);
-            checkAndExtendCapacity(_collectionTO->particles, *_collectionTO->numParticles, _collectionTO->capacities.particles, requiredCapacity.particles);
-            checkAndExtendCapacity(_collectionTO->creatures, *_collectionTO->numCreatures, _collectionTO->capacities.creatures, requiredCapacity.creatures);
-            checkAndExtendCapacity(_collectionTO->genes, *_collectionTO->numGenes, _collectionTO->capacities.genes, requiredCapacity.genes);
-            checkAndExtendCapacity(_collectionTO->nodes, *_collectionTO->numNodes, _collectionTO->capacities.nodes, requiredCapacity.nodes);
-            checkAndExtendCapacity(_collectionTO->heap, *_collectionTO->heapSize, _collectionTO->capacities.heap, requiredCapacity.heap);
+        if (_to.has_value()) {
+            checkAndExtendCapacity(_to->cells, *_to->numCells, _to->capacities.cells, requiredCapacity.cells);
+            checkAndExtendCapacity(_to->particles, *_to->numParticles, _to->capacities.particles, requiredCapacity.particles);
+            checkAndExtendCapacity(_to->creatures, *_to->numCreatures, _to->capacities.creatures, requiredCapacity.creatures);
+            checkAndExtendCapacity(_to->genes, *_to->numGenes, _to->capacities.genes, requiredCapacity.genes);
+            checkAndExtendCapacity(_to->nodes, *_to->numNodes, _to->capacities.nodes, requiredCapacity.nodes);
+            checkAndExtendCapacity(_to->heap, *_to->heapSize, _to->capacities.heap, requiredCapacity.heap);
         } else {
-            _collectionTO = provideNewUnmanagedDataTO(requiredCapacity);
+            _to = provideNewUnmanagedDataTO(requiredCapacity);
         }
-        return _collectionTO.value();
+        return _to.value();
     } catch (std::bad_alloc const&) {
         throw std::runtime_error("There is not sufficient CPU memory available.");
     }
 }
 
-CollectionTO _CollectionTOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity)
+TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity)
 {
     try {
-        CollectionTO result;
+        TO result;
 
         result.capacities = requiredCapacity;
 
@@ -80,12 +80,12 @@ CollectionTO _CollectionTOProvider::provideNewUnmanagedDataTO(ArraySizesForTO co
     }
 }
 
-void _CollectionTOProvider::destroyUnmanagedDataTO(CollectionTO const& dataTO)
+void _TOProvider::destroyUnmanagedDataTO(TO const& dataTO)
 {
     destroy(dataTO);
 }
 
-void _CollectionTOProvider::destroy(CollectionTO const& dataTO)
+void _TOProvider::destroy(TO const& dataTO)
 {
     delete dataTO.numCells;
     delete dataTO.numParticles;

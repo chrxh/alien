@@ -7,5 +7,5 @@
 struct _GenomeWindowEditData
 {
     std::optional<int> currentPreviewId;   // TabId of the current preview
-    std::unordered_map<SubGenomeDescription, CollectionDescription> genotypeToPhenotypeCache;
+    std::unordered_map<SubGenomeDescription, Description> genotypeToPhenotypeCache;
 };

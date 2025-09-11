@@ -24,7 +24,7 @@
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.cuh"
-#include "ObjectTO.cuh"
+#include "TO.cuh"
 
 struct cudaGraphicsResource;
 
@@ -49,20 +49,20 @@ public:
     Ids getMaxIds() const;
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    CollectionTO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
-    CollectionTO getSelectedSimulationData(bool includeClusters);
-    CollectionTO getInspectedSimulationData(std::vector<uint64_t> entityIds);
-    CollectionTO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-    void addAndSelectSimulationData(CollectionTO const& dataTO);
-    void setSimulationData(CollectionTO const& dataTO);
+    TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
+    TO getSelectedSimulationData(bool includeClusters);
+    TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
+    TO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    void addAndSelectSimulationData(TO const& dataTO);
+    void setSimulationData(TO const& dataTO);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeInspectedSimulationData(CollectionTO const& changeDataTO);
-    bool changeCreature(CollectionTO const& dataTO);  // dataTO only contains 1 genome
+    void changeInspectedSimulationData(TO const& changeDataTO);
+    bool changeCreature(TO const& dataTO);  // dataTO only contains 1 genome
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
@@ -99,12 +99,12 @@ public:
 
     // Simulated preview
     void initSettingsPreviewData();
-    void newPreview(CollectionTO const& dataTO);
+    void newPreview(TO const& dataTO);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     void calcTimestepsForPreview(int numSteps);
     uint64_t getCurrentTimestepForPreview();
     void setCurrentTimestepForPreview(uint64_t timestep);
-    CollectionTO getPreviewData();
+    TO getPreviewData();
 
     // Only for tests
     void testOnly_mutate(uint64_t cellId, MutationType mutationType);
@@ -119,8 +119,8 @@ private:
     void initCuda();
 
     void syncAndCheck();
-    void copyDataTOtoGpu(CollectionTO const& cudaDataTO, CollectionTO const& dataTO);
-    void copyDataTOtoHost(CollectionTO const& dataTO, CollectionTO const& cudaDataTO);
+    void copyDataTOtoGpu(TO const& cudaDataTO, TO const& dataTO);
+    void copyDataTOtoHost(TO const& dataTO, TO const& cudaDataTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
@@ -142,8 +142,8 @@ private:
     std::shared_ptr<SimulationData> _cudaPreviewData;
     std::shared_ptr<RenderingData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
-    CudaCollectionTOProvider _cudaCollectionTOProvider;
-    CollectionTOProvider _collectionTOProvider;
+    CudaTOProvider _cudaTOProvider;
+    TOProvider _collectionTOProvider;
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;

@@ -36,7 +36,7 @@ CreaturePreviewWidget _CreaturePreviewWidget::create(
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(CollectionDescription&& phenotype, float width)
+void _CreaturePreviewWidget::process(Description&& phenotype, float width)
 {
     GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
 

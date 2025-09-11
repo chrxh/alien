@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
@@ -17,7 +17,7 @@ public:
 
 TEST_F(SignalTests, noSignal)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1),
     };
@@ -34,7 +34,7 @@ TEST_F(SignalTests, noSignal)
 TEST_F(SignalTests, forwardSignal)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
         CellDescription().id(2).pos({1, 0}),
@@ -58,7 +58,7 @@ TEST_F(SignalTests, forwardSignal)
 TEST_F(SignalTests, vanishSignal_singleCell)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
     };
@@ -74,7 +74,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
 TEST_F(SignalTests, vanishSignal_relaxationNeeded)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}).signal(SignalDescription().channels(signal)),
         CellDescription().id(2).pos({1, 0}).signalRelaxationTime(1),
@@ -93,7 +93,7 @@ TEST_F(SignalTests, mergeSignals)
 {
     std::vector<float> signal1 = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 1.0f, -1.0f, 0.0f};
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal1),
         CellDescription().id(2).pos({1, 0}),
@@ -129,7 +129,7 @@ TEST_F(SignalTests, mergeSignals)
 TEST_F(SignalTests, forkSignals)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal),
@@ -174,7 +174,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 {
     auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
@@ -205,7 +205,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 {
     auto side = GetParam();
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
         CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),

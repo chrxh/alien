@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/ParametersEditService.h"
 #include "EngineInterface/SimulationParametersUpdateConfig.h"

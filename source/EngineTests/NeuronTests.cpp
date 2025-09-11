@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "IntegrationTestFramework.h"
@@ -78,7 +78,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     nn.weight(2, 7, 0.5f);
     nn.weight(5, 3, -1.5f);
 
-    CollectionDescription data;
+    Description data;
     data._cells = { 
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
         CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 1, 0, 0, 0, 0.5f}),
@@ -106,7 +106,7 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     }
     nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
-    CollectionDescription data;
+    Description data;
     data._cells = { 
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
         CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 0, 0, 0, 0, 0}),

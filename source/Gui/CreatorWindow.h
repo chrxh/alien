@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/DescriptionEditService.h"
 
 #include "Definitions.h"
@@ -61,7 +61,7 @@ private:
     float _innerRadius = 5.0f;
 
     //drawing
-    CollectionDescription _drawingDescription;
+    Description _drawingDescription;
     DescriptionEditService::Occupancy _drawingOccupancy;
     RealVector2D _lastDrawPos;
 

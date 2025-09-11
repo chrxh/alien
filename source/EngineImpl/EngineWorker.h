@@ -35,7 +35,7 @@ struct ExceptionData
     std::optional<std::string> errorMessage;
 };
 
-struct CollectionTO;
+struct TO;
 
 class EngineWorker
 {
@@ -57,15 +57,15 @@ public:
     int getSyncSimulationWithRenderingRatio() const;
     void setSyncSimulationWithRenderingRatio(int value);
 
-    CollectionDescription getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
-    CollectionDescription getSelectedSimulationData(bool includeClusters);
-    CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds);
+    Description getSimulationData(IntVector2D const& rectUpperLeft, IntVector2D const& rectLowerRight);
+    Description getSelectedSimulationData(bool includeClusters);
+    Description getInspectedSimulationData(std::vector<uint64_t> objectsIds);
     StatisticsRawData getStatisticsRawData() const;
     StatisticsHistory const& getStatisticsHistory() const;
     void setStatisticsHistory(StatisticsHistoryData const& data);
 
-    void addAndSelectSimulationData(CollectionDescription&& dataToUpdate);
-    void setSimulationData(CollectionDescription const& dataToUpdate);
+    void addAndSelectSimulationData(Description&& dataToUpdate);
+    void setSimulationData(Description const& dataToUpdate);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
@@ -114,8 +114,8 @@ public:
     bool isSimulationRunning() const;
 
     // Simulated preview
-    CollectionDescription getPreviewData();
-    void setPreviewData(CollectionDescription const& data);
+    Description getPreviewData();
+    void setPreviewData(Description const& data);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
     void calcTimestepsForPreview(int numSteps);
     uint64_t getCurrentTimestepForPreview();
@@ -180,7 +180,7 @@ private:
     //internals
     std::optional<GLuint> _imageResource;
     void* _cudaResource = nullptr;
-    CollectionTOProvider _collectionTOProvider;
+    TOProvider _collectionTOProvider;
 };
 
 class EngineWorkerGuard

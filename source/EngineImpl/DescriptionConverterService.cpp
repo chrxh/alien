@@ -10,10 +10,10 @@
 
 #include "Base/Exceptions.h"
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/NumberGenerator.h"
 
-#include "EngineGpuKernels/CollectionTOProvider.cuh"
+#include "EngineGpuKernels/TOProvider.cuh"
 
 
 namespace
@@ -103,9 +103,9 @@ namespace
 
 }
 
-CollectionDescription DescriptionConverterService::convertTOtoDescription(CollectionTO const& collectionTO) const
+Description DescriptionConverterService::convertTOtoDescription(TO const& collectionTO) const
 {
-    CollectionDescription result;
+    Description result;
 
     // Creatures
     std::vector<GenomeDescription> genomes;
@@ -139,7 +139,7 @@ CollectionDescription DescriptionConverterService::convertTOtoDescription(Collec
     return result;
 }
 
-OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(CollectionTO const& collectionTO) const
+OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(TO const& collectionTO) const
 {
     OverlayDescription result;
     result.elements.reserve(*collectionTO.numCells + *collectionTO.numParticles);
@@ -166,7 +166,7 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(Co
     return result;
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescription const& data) const
+TO DescriptionConverterService::convertDescriptionToTO(Description const& data) const
 {
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
@@ -199,7 +199,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CollectionDescr
     return provideDataTO(creatureTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
+TO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
 {
     std::vector<CellTO> cellTOs;
     std::vector<uint8_t> heap;
@@ -211,7 +211,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(CellDescription
     return provideDataTO({}, {}, {}, cellTOs, {}, heap);
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
+TO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
 {
     std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
@@ -220,7 +220,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(ParticleDescrip
     return provideDataTO({}, {}, {}, {}, particleTOs, heap);
 }
 
-CollectionTO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const
+TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const
 {
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
@@ -238,7 +238,7 @@ CollectionTO DescriptionConverterService::convertDescriptionToTO(uint64_t creatu
 
 DescriptionConverterService::DescriptionConverterService()
 {
-    _collectionTOProvider = std::make_shared<_CollectionTOProvider>();
+    _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
 namespace
@@ -253,7 +253,7 @@ namespace
 }
 
 CellDescription DescriptionConverterService::createCellDescription(
-    CollectionTO const& collectionTO,
+    TO const& collectionTO,
     int cellIndex) const
 {
     CellDescription result(false);
@@ -452,7 +452,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     return result;
 }
 
-CreatureDescription DescriptionConverterService::createCreatureDescription(CollectionTO const& collectionTO, int creatureIndex) const
+CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& collectionTO, int creatureIndex) const
 {
     CreatureDescription result;
 
@@ -609,7 +609,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(Colle
     return result;
 }
 
-ParticleDescription DescriptionConverterService::createParticleDescription(CollectionTO const& collectionTO, int particleIndex) const
+ParticleDescription DescriptionConverterService::createParticleDescription(TO const& collectionTO, int particleIndex) const
 {
     auto const& particle = collectionTO.particles[particleIndex];
     return ParticleDescription()
@@ -1001,7 +1001,7 @@ void DescriptionConverterService::setConnections(
     cellTO.numConnections = index;
 }
 
-CollectionTO DescriptionConverterService::provideDataTO(
+TO DescriptionConverterService::provideDataTO(
     std::vector<CreatureTO> const& creatureTOs,
     std::vector<GeneTO> const& geneTOs,
     std::vector<NodeTO> const& nodeTOs,
@@ -1009,7 +1009,7 @@ CollectionTO DescriptionConverterService::provideDataTO(
     std::vector<ParticleTO> const& particleTOs,
     std::vector<uint8_t> const& heap) const
 {
-    CollectionTO result = _collectionTOProvider->provideDataTO(
+    TO result = _collectionTOProvider->provideDataTO(
         {.creatures = creatureTOs.size(),
          .genes = geneTOs.size(),
          .nodes = nodeTOs.size(),

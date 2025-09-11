@@ -1,12 +1,12 @@
-#include "CudaCollectionTOProvider.cuh"
+#include "CudaTOProvider.cuh"
 
 #include "CudaMemoryManager.cuh"
 
-_CudaCollectionTOProvider::_CudaCollectionTOProvider() {}
+_CudaTOProvider::_CudaTOProvider() {}
 
-_CudaCollectionTOProvider::~_CudaCollectionTOProvider()
+_CudaTOProvider::~_CudaTOProvider()
 {
-    if (_collectionTO) {
+    if (_to) {
         destroy();
     }
 }
@@ -25,18 +25,18 @@ namespace
     };
 }
 
-CollectionTO _CudaCollectionTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
+TO _CudaTOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
 {
     try {
-        if (_collectionTO.has_value()) {
-            checkAndExtendCapacity(_collectionTO->cells, *_collectionTO->numCells, _collectionTO->capacities.cells, requiredCapacity.cells);
-            checkAndExtendCapacity(_collectionTO->particles, *_collectionTO->numParticles, _collectionTO->capacities.particles, requiredCapacity.particles);
-            checkAndExtendCapacity(_collectionTO->creatures, *_collectionTO->numCreatures, _collectionTO->capacities.creatures, requiredCapacity.creatures);
-            checkAndExtendCapacity(_collectionTO->genes, *_collectionTO->numGenes, _collectionTO->capacities.genes, requiredCapacity.genes);
-            checkAndExtendCapacity(_collectionTO->nodes, *_collectionTO->numNodes, _collectionTO->capacities.nodes, requiredCapacity.nodes);
-            checkAndExtendCapacity(_collectionTO->heap, *_collectionTO->heapSize, _collectionTO->capacities.heap, requiredCapacity.heap);
+        if (_to.has_value()) {
+            checkAndExtendCapacity(_to->cells, *_to->numCells, _to->capacities.cells, requiredCapacity.cells);
+            checkAndExtendCapacity(_to->particles, *_to->numParticles, _to->capacities.particles, requiredCapacity.particles);
+            checkAndExtendCapacity(_to->creatures, *_to->numCreatures, _to->capacities.creatures, requiredCapacity.creatures);
+            checkAndExtendCapacity(_to->genes, *_to->numGenes, _to->capacities.genes, requiredCapacity.genes);
+            checkAndExtendCapacity(_to->nodes, *_to->numNodes, _to->capacities.nodes, requiredCapacity.nodes);
+            checkAndExtendCapacity(_to->heap, *_to->heapSize, _to->capacities.heap, requiredCapacity.heap);
         } else {
-            CollectionTO result;
+            TO result;
             result.capacities = requiredCapacity;
             CudaMemoryManager::getInstance().acquireMemory(1, result.numCells);
             CudaMemoryManager::getInstance().acquireMemory(1, result.numParticles);
@@ -57,27 +57,27 @@ CollectionTO _CudaCollectionTOProvider::provideDataTO(ArraySizesForTO const& req
             setValueToDevice(result.numNodes, static_cast<uint64_t>(0));
             setValueToDevice(result.heapSize, static_cast<uint64_t>(0));
 
-            _collectionTO = result;
+            _to = result;
         }
-        return _collectionTO.value();
+        return _to.value();
     } catch (...) {
         throw std::runtime_error("GPU memory could not be allocated.");
     }
 }
 
-void _CudaCollectionTOProvider::destroy()
+void _CudaTOProvider::destroy()
 {
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->cells);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->particles);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->creatures);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->genes);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->nodes);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->heap);
+    CudaMemoryManager::getInstance().freeMemory(_to->cells);
+    CudaMemoryManager::getInstance().freeMemory(_to->particles);
+    CudaMemoryManager::getInstance().freeMemory(_to->creatures);
+    CudaMemoryManager::getInstance().freeMemory(_to->genes);
+    CudaMemoryManager::getInstance().freeMemory(_to->nodes);
+    CudaMemoryManager::getInstance().freeMemory(_to->heap);
 
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numCells);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numParticles);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numCreatures);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numGenes);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->numNodes);
-    CudaMemoryManager::getInstance().freeMemory(_collectionTO->heapSize);
+    CudaMemoryManager::getInstance().freeMemory(_to->numCells);
+    CudaMemoryManager::getInstance().freeMemory(_to->numParticles);
+    CudaMemoryManager::getInstance().freeMemory(_to->numCreatures);
+    CudaMemoryManager::getInstance().freeMemory(_to->numGenes);
+    CudaMemoryManager::getInstance().freeMemory(_to->numNodes);
+    CudaMemoryManager::getInstance().freeMemory(_to->heapSize);
 }

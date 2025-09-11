@@ -4,7 +4,7 @@
 
 #include "Base/Singleton.h"
 
-#include "Descriptions.h"
+#include "Description.h"
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
 
@@ -28,17 +28,17 @@ public:
 
     struct SeedCollectionResult
     {
-        CollectionDescription data; 
+        Description data; 
         std::vector<uint64_t> seedCreatureIds;
     };
     SeedCollectionResult createSeedCollectionForPreview(
         std::vector<SubGenomeDescription> const& subGenomes,
-        std::unordered_map<SubGenomeDescription, CollectionDescription> const& cache) const;
-    std::vector<CollectionDescription> extractPhenotypesFromPreview(CollectionDescription&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
-    void removeSeedFromPhenotype(CollectionDescription& phenotype) const;
+        std::unordered_map<SubGenomeDescription, Description> const& cache) const;
+    std::vector<Description> extractPhenotypesFromPreview(Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
+    void removeSeedFromPhenotype(Description& phenotype) const;
 
 private:
-    CollectionDescription createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const;
+    Description createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const;
 
     void adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices) const;
 };

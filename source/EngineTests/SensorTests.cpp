@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "IntegrationTestFramework.h"
@@ -18,7 +18,7 @@ public:
 
 TEST_F(SensorTests, autoTriggered)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(15)),
     };
@@ -48,7 +48,7 @@ TEST_F(SensorTests, autoTriggered)
 
 TEST_F(SensorTests, manuallyTriggered_noSignal)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(0)),
     };
@@ -63,7 +63,7 @@ TEST_F(SensorTests, manuallyTriggered_noSignal)
 
 TEST_F(SensorTests, manuallyTriggered_signal)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(0)),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -78,7 +78,7 @@ TEST_F(SensorTests, manuallyTriggered_signal)
 
 TEST_F(SensorTests, aboveMinDensity)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -102,7 +102,7 @@ TEST_F(SensorTests, aboveMinDensity)
 
 TEST_F(SensorTests, belowMinDensity)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.1f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -121,7 +121,7 @@ TEST_F(SensorTests, belowMinDensity)
 
 TEST_F(SensorTests, targetAbove)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -146,7 +146,7 @@ TEST_F(SensorTests, targetAbove)
 
 TEST_F(SensorTests, targetBelow)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -171,7 +171,7 @@ TEST_F(SensorTests, targetBelow)
 
 TEST_F(SensorTests, targetConcealed)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 101.0f}),
@@ -194,7 +194,7 @@ TEST_F(SensorTests, targetConcealed)
 
 TEST_F(SensorTests, targetNotConcealed)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.2f)),
         CellDescription().id(2).pos({101.0f, 101.0f}),
@@ -217,7 +217,7 @@ TEST_F(SensorTests, targetNotConcealed)
 
 TEST_F(SensorTests, foundMassWithMatchingDensity)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().autoTriggerInterval(3).minDensity(0.7f)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -245,7 +245,7 @@ TEST_F(SensorTests, foundMassWithMatchingDensity)
 
 TEST_F(SensorTests, scanForOtherMutants_found)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
@@ -278,7 +278,7 @@ TEST_F(SensorTests, scanForOtherMutants_found)
 
 TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
@@ -308,7 +308,7 @@ TEST_F(SensorTests, scanForOtherMutants_found_wallBehind)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
@@ -338,7 +338,7 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_wallInBetween)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_sameLineageId)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(7).cells({
             CellDescription()
                 .id(1)
@@ -366,7 +366,7 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_sameLineageId)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(7).cells({
             CellDescription()
                 .id(1)
@@ -390,7 +390,7 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_structure)
 
 TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(7).cells({
             CellDescription()
                 .id(1)
@@ -414,7 +414,7 @@ TEST_F(SensorTests, scanForOtherMutants_notFound_freeCell)
 
 TEST_F(SensorTests, scanForSameMutants_found)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(6).cells({
             CellDescription()
                 .id(1)
@@ -447,7 +447,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_otherLineageId)
             continue;
         }
 
-        auto data = CollectionDescription().creatures({
+        auto data = Description().creatures({
             CreatureDescription().id(0).lineageId(MutantId).cells({
                 CellDescription()
                     .id(1)
@@ -486,7 +486,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_structure)
 {
     auto const MutantId = 6;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(MutantId).cells({
             CellDescription()
                 .id(1)
@@ -513,7 +513,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_freeCell)
 {
     auto const MutantId = 6;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).lineageId(MutantId).cells({
             CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToSameMutants)),
             CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -536,7 +536,7 @@ TEST_F(SensorTests, scanForSameMutants_notFound_freeCell)
 
 TEST_F(SensorTests, scanForStructures_found)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -557,7 +557,7 @@ TEST_F(SensorTests, scanForStructures_found)
 
 TEST_F(SensorTests, scanForStructures_notFound)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -578,7 +578,7 @@ TEST_F(SensorTests, scanForStructures_notFound)
 
 TEST_F(SensorTests, scanForFreeCells_found)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -599,7 +599,7 @@ TEST_F(SensorTests, scanForFreeCells_found)
 
 TEST_F(SensorTests, scanForFreeCells_notFound)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().restrictToCreatures(SensorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -621,7 +621,7 @@ TEST_F(SensorTests, scanForFreeCells_notFound)
 TEST_F(SensorTests, scanForLessComplexMutants_found)
 {
     for (int otherNumCells = 0; otherNumCells < 500; ++otherNumCells) {
-        auto data = CollectionDescription().creatures({
+        auto data = Description().creatures({
             CreatureDescription().id(0).numCells(1000.0f).cells({
                 CellDescription()
                     .id(1)
@@ -660,7 +660,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 {
     for (int otherNumCells = 1000; otherNumCells < 2001; ++otherNumCells) {
 
-        auto data = CollectionDescription().creatures({
+        auto data = Description().creatures({
             CreatureDescription().id(0).numCells(1000.0f).cells({
                 CellDescription()
                     .id(1)
@@ -697,7 +697,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
 
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
                 .id(1)
@@ -721,7 +721,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_structure)
 
 TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
                 .id(1)
@@ -746,7 +746,7 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_freeCell)
 TEST_F(SensorTests, scanForMoreComplexMutants_found)
 {
     for (int otherNumCells = 1000; otherNumCells < 2001; ++otherNumCells) {
-        auto data = CollectionDescription().creatures({
+        auto data = Description().creatures({
             CreatureDescription().id(0).numCells(500.0f).cells({
                 CellDescription()
                     .id(1)
@@ -784,7 +784,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_found)
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 {
     for (int otherNumCells = 0; otherNumCells < 500; ++otherNumCells) {
-        auto data = CollectionDescription().creatures({
+        auto data = Description().creatures({
             CreatureDescription().id(0).numCells(500.0f).cells({
                 CellDescription()
                     .id(1)
@@ -822,7 +822,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
 
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).numCells(100.0f).cells({
             CellDescription()
                 .id(1)
@@ -846,7 +846,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_structure)
 
 TEST_F(SensorTests, scanForMoreComplexMutants_notFound_freeCell)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().id(0).numCells(100.0f).cells({
             CellDescription()
                 .id(1)
@@ -870,7 +870,7 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_freeCell)
 
 TEST_F(SensorTests, minRange_found)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().minRange(50)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -891,7 +891,7 @@ TEST_F(SensorTests, minRange_found)
 
 TEST_F(SensorTests, minRange_notFound)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().minRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -912,7 +912,7 @@ TEST_F(SensorTests, minRange_notFound)
 
 TEST_F(SensorTests, maxRange_found)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().maxRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -933,7 +933,7 @@ TEST_F(SensorTests, maxRange_found)
 
 TEST_F(SensorTests, maxRange_notFound)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellTypeData(SensorDescription().maxRange(50)),
         CellDescription().id(2).pos({101.0f, 100.0f}),

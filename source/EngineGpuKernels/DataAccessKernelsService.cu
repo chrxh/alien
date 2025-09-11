@@ -36,7 +36,7 @@ void _DataAccessKernelsService::getData(
     SimulationData const& data,
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight,
-    CollectionTO const& dataTO)
+    TO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaPrepareCreaturesForConversionToTO, rectUpperLeft, rectLowerRight, data);
@@ -50,7 +50,7 @@ void _DataAccessKernelsService::getSelectedData(
     CudaSettings const& gpuSettings,
     SimulationData const& data,
     bool includeClusters,
-    CollectionTO const& dataTO)
+    TO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaPrepareSelectedCreaturesForConversionToTO, includeClusters, data);
@@ -64,7 +64,7 @@ void _DataAccessKernelsService::getInspectedData(
     CudaSettings const& gpuSettings,
     SimulationData const& data,
     InspectedEntityIds entityIds,
-    CollectionTO const& dataTO)
+    TO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaPrepareCreaturesForConversionToTO, entityIds, data);
@@ -79,13 +79,13 @@ void _DataAccessKernelsService::getOverlayData(
     SimulationData const& data,
     int2 rectUpperLeft,
     int2 rectLowerRight,
-    CollectionTO const& dataTO)
+    TO const& dataTO)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, dataTO);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, dataTO);
 }
 
-ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, CollectionTO const& dataTO)
+ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TO const& dataTO)
 {
     setValueToDevice(_arraySizesGPU, ArraySizesForGpu{});
     KERNEL_CALL(cudaEstimateCapacityNeededForGpu, dataTO, _arraySizesGPU);
@@ -94,7 +94,7 @@ ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSet
     return copyToHost(_arraySizesGPU);
 }
 
-void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, SimulationData const& data, CollectionTO const& dataTO, bool selectData)
+void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& dataTO, bool selectData)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
     KERNEL_CALL(cudaAdaptNumberGenerator, data.primaryNumberGen, dataTO);

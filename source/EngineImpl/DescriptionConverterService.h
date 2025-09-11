@@ -4,10 +4,10 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineGpuKernels/ObjectTO.cuh"
+#include "EngineGpuKernels/TO.cuh"
 #include "EngineGpuKernels/Definitions.h"
 #include "Definitions.h"
 
@@ -16,19 +16,19 @@ class DescriptionConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
-    CollectionDescription convertTOtoDescription(CollectionTO const& collectionTO) const;
-    OverlayDescription convertTOtoOverlayDescription(CollectionTO const& collectionTO) const;
-    CollectionTO convertDescriptionToTO(CollectionDescription const& data) const;
-    CollectionTO convertDescriptionToTO(CellDescription const& cell) const;
-    CollectionTO convertDescriptionToTO(ParticleDescription const& particle) const;
-    CollectionTO convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const;
+    Description convertTOtoDescription(TO const& collectionTO) const;
+    OverlayDescription convertTOtoOverlayDescription(TO const& collectionTO) const;
+    TO convertDescriptionToTO(Description const& data) const;
+    TO convertDescriptionToTO(CellDescription const& cell) const;
+    TO convertDescriptionToTO(ParticleDescription const& particle) const;
+    TO convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const;
 
 private:
     DescriptionConverterService();
 
-    CellDescription createCellDescription(CollectionTO const& collectionTO, int cellIndex) const;
-    CreatureDescription createCreatureDescription(CollectionTO const& collectionTO, int creatureIndex) const;
-    ParticleDescription createParticleDescription(CollectionTO const& collectionTO, int particleIndex) const;
+    CellDescription createCellDescription(TO const& collectionTO, int cellIndex) const;
+    CreatureDescription createCreatureDescription(TO const& collectionTO, int creatureIndex) const;
+    ParticleDescription createParticleDescription(TO const& collectionTO, int particleIndex) const;
 
     void convertCreatureToTO(
         std::vector<CreatureTO>& genomeTOs,
@@ -48,7 +48,7 @@ private:
 
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
-    CollectionTO provideDataTO(
+    TO provideDataTO(
         std::vector<CreatureTO> const& genomeTOs,
         std::vector<GeneTO> const& geneTOs,
         std::vector<NodeTO> const& nodeTOs,
@@ -57,5 +57,5 @@ private:
         std::vector<uint8_t> const& heap) const;
 
 private:
-    mutable CollectionTOProvider _collectionTOProvider;
+    mutable TOProvider _collectionTOProvider;
 };

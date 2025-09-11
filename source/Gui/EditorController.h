@@ -3,7 +3,7 @@
 #include "Base/Definitions.h"
 #include "Base/Singleton.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
@@ -49,5 +49,5 @@ private:
     bool _on = false;   //#TODO weg!
 
     std::vector<InspectorWindow> _inspectorWindows;
-    CollectionDescription _drawing;
+    Description _drawing;
 };

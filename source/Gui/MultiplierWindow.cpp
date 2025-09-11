@@ -180,7 +180,7 @@ void MultiplierWindow::onBuild()
 void MultiplierWindow::onUndo()
 {
     _simulationFacade->removeSelectedObjects(true);
-    _simulationFacade->addAndSelectSimulationData(CollectionDescription(_origSelection));
+    _simulationFacade->addAndSelectSimulationData(Description(_origSelection));
     _selectionDataAfterMultiplication = std::nullopt;
 }
 

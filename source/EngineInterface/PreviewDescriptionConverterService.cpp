@@ -26,7 +26,7 @@ namespace
 ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription(
     GenomeDescription const& genome,
     int startGeneIndex,
-    CollectionDescription&& phenotype,
+    Description&& phenotype,
     std::optional<float> const& lastVisualFrontAngle) const
 {
     ConversionResult result;

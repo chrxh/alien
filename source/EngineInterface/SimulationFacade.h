@@ -39,12 +39,12 @@ public:
     virtual int getSyncSimulationWithRenderingRatio() const = 0;
     virtual void setSyncSimulationWithRenderingRatio(int value) = 0;
 
-    virtual CollectionDescription getSimulationData() = 0;
-    virtual CollectionDescription getSelectedSimulationData(bool includeClusters) = 0;
-    virtual CollectionDescription getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
+    virtual Description getSimulationData() = 0;
+    virtual Description getSelectedSimulationData(bool includeClusters) = 0;
+    virtual Description getInspectedSimulationData(std::vector<uint64_t> objectsIds) = 0;
 
-    virtual void addAndSelectSimulationData(CollectionDescription&& dataToAdd) = 0;
-    virtual void setSimulationData(CollectionDescription const& dataToUpdate) = 0;
+    virtual void addAndSelectSimulationData(Description&& dataToAdd) = 0;
+    virtual void setSimulationData(Description const& dataToUpdate) = 0;
     virtual void removeSelectedObjects(bool includeClusters) = 0;
     virtual void relaxSelectedObjects(bool includeClusters) = 0;
     virtual void uniformVelocitiesForSelectedObjects(bool includeClusters) = 0;
@@ -105,8 +105,8 @@ public:
     virtual float getTps() const = 0;
 
     // Simulated preview
-    virtual CollectionDescription getPreviewData() = 0;
-    virtual void setPreviewData(CollectionDescription const& data) = 0;
+    virtual Description getPreviewData() = 0;
+    virtual void setPreviewData(Description const& data) = 0;
     virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
     virtual void calcTimestepsForPreview(int numSteps) = 0;
     virtual uint64_t getCurrentTimestepForPreview() = 0;

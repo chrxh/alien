@@ -77,7 +77,7 @@ void EditorController::onInspectSelectedObjects()
 {
     auto selection = EditorModel::get().getSelectionShallowData();
     if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
-        CollectionDescription selectedData = _simulationFacade->getSelectedSimulationData(false);
+        Description selectedData = _simulationFacade->getSelectedSimulationData(false);
         onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false);
     } else {
         showMessage(
@@ -89,7 +89,7 @@ void EditorController::onInspectSelectedObjects()
 
 void EditorController::onInspectSelectedGenomes()
 {
-    CollectionDescription selectedData = _simulationFacade->getSelectedSimulationData(true);
+    Description selectedData = _simulationFacade->getSelectedSimulationData(true);
     auto constructors = DescriptionEditService::get().getCellsForCreatureRepresentatives(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};

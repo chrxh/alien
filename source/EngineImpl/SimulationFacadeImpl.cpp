@@ -1,6 +1,6 @@
 #include "SimulationFacadeImpl.h"
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
@@ -79,29 +79,29 @@ void _SimulationFacadeImpl::setSyncSimulationWithRenderingRatio(int value)
     _worker.setSyncSimulationWithRenderingRatio(value);
 }
 
-CollectionDescription _SimulationFacadeImpl::getSimulationData()
+Description _SimulationFacadeImpl::getSimulationData()
 {
     auto size = getWorldSize();
     return _worker.getSimulationData({-10, -10}, {size.x + 10, size.y + 10});
 }
 
-CollectionDescription _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
+Description _SimulationFacadeImpl::getSelectedSimulationData(bool includeClusters)
 {
     _worker.updateSelection();
     return _worker.getSelectedSimulationData(includeClusters);
 }
 
-CollectionDescription _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
+Description _SimulationFacadeImpl::getInspectedSimulationData(std::vector<uint64_t> objectIds)
 {
     return _worker.getInspectedSimulationData(objectIds);
 }
 
-void _SimulationFacadeImpl::addAndSelectSimulationData(CollectionDescription&& dataToAdd)
+void _SimulationFacadeImpl::addAndSelectSimulationData(Description&& dataToAdd)
 {
     _worker.addAndSelectSimulationData(std::move(dataToAdd));
 }
 
-void _SimulationFacadeImpl::setSimulationData(CollectionDescription const& dataToUpdate)
+void _SimulationFacadeImpl::setSimulationData(Description const& dataToUpdate)
 {
     _worker.setSimulationData(dataToUpdate);
     _selectionNeedsUpdate = true;
@@ -358,12 +358,12 @@ float _SimulationFacadeImpl::getTps() const
     return _worker.getTps();
 }
 
-CollectionDescription _SimulationFacadeImpl::getPreviewData()
+Description _SimulationFacadeImpl::getPreviewData()
 {
     return _worker.getPreviewData();
 }
 
-void _SimulationFacadeImpl::setPreviewData(CollectionDescription const& data)
+void _SimulationFacadeImpl::setPreviewData(Description const& data)
 {
     _worker.setPreviewData(data);
 }

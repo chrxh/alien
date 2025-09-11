@@ -14,7 +14,7 @@ public:
         _serializerService = &SerializerService::get();
     }
 
-    void testSerializationAndDeserialization(CollectionDescription const& data)
+    void testSerializationAndDeserialization(Description const& data)
     {
         DeserializedSimulation deserializedSimulationBefore{.mainData = data};
         SerializedSimulation serializedSimulation;
@@ -33,7 +33,7 @@ protected:
 
 TEST_F(SerializerServiceTests, singleParticle)
 {
-    CollectionDescription data;
+    Description data;
     data._particles.emplace_back(_descriptionTestDataFactory->createNonDefaultParticleDescription());
 
     testSerializationAndDeserialization(data);
@@ -72,7 +72,7 @@ TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
 {
     auto cellParameter = GetParam();
 
-    CollectionDescription data;
+    Description data;
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
     testSerializationAndDeserialization(data);
@@ -109,7 +109,7 @@ TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
 {
     auto nodeParameter = GetParam();
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()})
     });
 

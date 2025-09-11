@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/GenomeDescription.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
@@ -27,7 +27,7 @@ public:
 
 TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription()),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -49,7 +49,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
 
 TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription()),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -76,7 +76,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToColor(1)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -101,7 +101,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToColor(1)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -128,7 +128,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).id(0).lineageId(5).cells({
             CellDescription()
@@ -162,7 +162,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).lineageId(5).cells({
             CellDescription()
@@ -193,7 +193,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).lineageId(5).cells({
             CellDescription()
@@ -226,7 +226,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).lineageId(5).cells({
             CellDescription()
@@ -257,7 +257,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToStructures_success)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -283,7 +283,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToStructures_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToStructures)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -307,7 +307,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToZeroMutants_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_success)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -333,7 +333,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_success)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_failed)
 {
-    CollectionDescription data;
+    Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToFreeCells)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -357,7 +357,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_failed)
 
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_success)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
@@ -381,7 +381,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
 
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
@@ -405,7 +405,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
 
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_success)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
@@ -429,7 +429,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
 
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).numCells(1000.0f).cells({
             CellDescription()
@@ -453,7 +453,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
 
 TEST_F(ReconnectorTests, deleteConnections_success)
 {
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription().id(0).cells({
             CellDescription()

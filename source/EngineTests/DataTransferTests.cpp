@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "EngineTestData/DescriptionTestDataFactory.h"
@@ -27,7 +27,7 @@ protected:
 
 TEST_F(DataTransferTests, singleParticle)
 {
-    CollectionDescription data;
+    Description data;
     data._particles.emplace_back(_descriptionTestDataFactory->createNonDefaultParticleDescription());
 
     _simulationFacade->setSimulationData(data);
@@ -69,7 +69,7 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
 {
     auto cellParameter = GetParam();
 
-    CollectionDescription data;
+    Description data;
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
@@ -83,7 +83,7 @@ TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature_preview)
 {
     auto cellParameter = GetParam();
 
-    CollectionDescription data;
+    Description data;
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
     data._cells.emplace_back(_descriptionTestDataFactory->createNonDefaultCellDescription(cellParameter));
 
@@ -124,7 +124,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
 {
     auto nodeParameter = GetParam();
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
         _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
     });
@@ -139,7 +139,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 {
     auto nodeParameter = GetParam();
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
         _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
     });
@@ -153,7 +153,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
-    CollectionDescription data;
+    Description data;
     data.creatures({
         CreatureDescription()
             .genome(GenomeDescription().genes({
@@ -171,7 +171,7 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
-    auto data = CollectionDescription()
+    auto data = Description()
                     .cells({CellDescription().id(0), CellDescription().id(1)})
                     .particles({ParticleDescription().id(2), ParticleDescription().id(3)})
                     .creatures({CreatureDescription().id(4).cells({CellDescription().id(5)}), CreatureDescription().id(5).cells({CellDescription().id(6)})});
@@ -210,7 +210,7 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
-    auto data = CollectionDescription()
+    auto data = Description()
                     .cells({CellDescription().id(0), CellDescription().id(1)})
                     .particles({ParticleDescription().id(2), ParticleDescription().id(3)})
                     .creatures({CreatureDescription().id(4).cells({CellDescription().id(5)}), CreatureDescription().id(5).cells({CellDescription().id(6)})});
@@ -240,7 +240,7 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto const CreatureId = 1;
-    auto data = CollectionDescription().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
+    auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
 
     _simulationFacade->setSimulationData(data);
 
@@ -267,7 +267,7 @@ TEST_F(DataTransferTests, changeGenome_failed)
 {
     auto const CreatureId = 1;
     auto const WrongCreatureId = 2;
-    auto data = CollectionDescription().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
+    auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
 
     _simulationFacade->setSimulationData(data);
 
@@ -278,7 +278,7 @@ TEST_F(DataTransferTests, changeGenome_failed)
 
 TEST_F(DataTransferTests, getInspectedSimulationData)
 {
-    auto data = CollectionDescription().creatures(
+    auto data = Description().creatures(
         {CreatureDescription()
              .genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})}))
              .cells({CellDescription().id(1), CellDescription().id(2)}),

@@ -4,7 +4,7 @@
 
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationParameters.h"
 
 #include "Definitions.h"
@@ -40,7 +40,7 @@ private:
         uint64_t timestep;
         std::chrono::milliseconds realTime;
         SimulationParameters parameters;
-        CollectionDescription data;
+        Description data;
     };
     Snapshot createSnapshot();
     void applySnapshot(Snapshot const& snapshot);

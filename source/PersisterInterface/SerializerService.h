@@ -4,7 +4,7 @@
 
 #include "Base/Definitions.h"
 
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/StatisticsHistory.h"
 
 #include "DeserializedSimulation.h"
@@ -36,13 +36,13 @@ public:
 
     bool serializeStatisticsToFile(std::filesystem::path const& filename, StatisticsHistoryData const& statistics) const;
 
-    bool serializeContentToFile(std::filesystem::path const& filename, CollectionDescription const& content) const;
-    bool deserializeContentFromFile(CollectionDescription& content, std::filesystem::path const& filename) const;
+    bool serializeContentToFile(std::filesystem::path const& filename, Description const& content) const;
+    bool deserializeContentFromFile(Description& content, std::filesystem::path const& filename) const;
 
 private:
-    void serializeDescription(CollectionDescription const& data, std::ostream& stream) const;
-    bool deserializeDescription(CollectionDescription& data, std::filesystem::path const& filename) const;
-    void deserializeDescription(CollectionDescription& data, std::istream& stream) const;
+    void serializeDescription(Description const& data, std::ostream& stream) const;
+    bool deserializeDescription(Description& data, std::filesystem::path const& filename) const;
+    void deserializeDescription(Description& data, std::istream& stream) const;
 
     void serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const;
     void deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const;
@@ -53,6 +53,6 @@ private:
     void serializeStatistics(StatisticsHistoryData const& statistics, std::ostream& stream) const;
     void deserializeStatistics(StatisticsHistoryData& statistics, std::istream& stream) const;
 
-    bool wrapGenome(CollectionDescription& output, GenomeDescription const& input) const;
-    bool unwrapGenome(GenomeDescription& output, CollectionDescription& input) const;
+    bool wrapGenome(Description& output, GenomeDescription const& input) const;
+    bool unwrapGenome(GenomeDescription& output, Description& input) const;
 };

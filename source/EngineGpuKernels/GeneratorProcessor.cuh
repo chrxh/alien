@@ -3,7 +3,7 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "ObjectTO.cuh"
+#include "TO.cuh"
 #include "Base.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "SignalProcessor.cuh"

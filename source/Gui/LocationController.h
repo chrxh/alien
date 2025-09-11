@@ -2,7 +2,7 @@
 
 #include "Base/Definitions.h"
 #include "Base/Singleton.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 
 #include "Definitions.h"
 #include "LocationWindow.h"

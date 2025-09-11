@@ -92,7 +92,7 @@ CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescript
                     }));
 }
 
-bool DescriptionTestDataFactory::compare(CollectionDescription left, CollectionDescription right) const
+bool DescriptionTestDataFactory::compare(Description left, Description right) const
 {
     std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });

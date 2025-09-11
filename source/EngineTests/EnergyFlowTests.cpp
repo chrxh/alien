@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Descriptions.h"
+#include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescription.h"
 
@@ -19,7 +19,7 @@ public:
 
 TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
 {
-    CollectionDescription data;
+    Description data;
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         data._cells.emplace_back(cell);
@@ -42,7 +42,7 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
 
 TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
     }))});
@@ -83,7 +83,7 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
 
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         })),
@@ -124,7 +124,7 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
 
 TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 {
-    auto data = CollectionDescription().creatures({
+    auto data = Description().creatures({
         CreatureDescription().genome(GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         })),
@@ -156,7 +156,7 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 
 TEST_F(EnergyFlowTests, energyFlowsBranches)
 {
-    auto data = CollectionDescription().cells({
+    auto data = Description().cells({
         CellDescription().id(0).pos({100.0f, 99.0f}).energy(100.0f),
         CellDescription().id(1).pos({100.0f, 100.0f}).energy(2400.0f),
         CellDescription().id(2).pos({100.0f, 101.0f}).energy(100.0f),
