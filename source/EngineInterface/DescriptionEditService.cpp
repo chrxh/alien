@@ -339,6 +339,40 @@ void DescriptionEditService::addIfSpaceAvailable(
 
 void DescriptionEditService::flattenTopology(CollectionDescription& data, SpaceCalculator const& space) const
 {
+    auto cache = data.createCache();
+
+    std::unordered_set<uint64_t> finishedCellIds;
+    std::unordered_set<uint64_t> workingCellIds;
+    std::unordered_set<uint64_t> freeCellIds;
+
+    data.forEachCell([&](auto const& cell) { freeCellIds.insert(cell._id); });
+    while (!workingCellIds.empty() || !freeCellIds.empty()) {
+
+        // Take an arbitrary cell to start with
+        if (workingCellIds.empty()) {
+            workingCellIds.insert(*freeCellIds.begin());
+            freeCellIds.erase(freeCellIds.begin());
+        }
+
+        // Process working cells: find connected free cells and correct topology
+        std::unordered_set<uint64_t> newWorkingCellIds;
+        for (auto const& cellId : workingCellIds) {
+            auto& cell = data.getCellRef(cellId, cache);
+
+            for (auto const& connection : cell._connections) {
+                if (freeCellIds.contains(connection._cellId)) {
+                    // Do topology correction
+                    auto& otherCell = data.getCellRef(connection._cellId, cache);
+                    otherCell._pos += space.getCorrectionIncrement(cell._pos, otherCell._pos);
+
+                    freeCellIds.erase(connection._cellId);
+                    newWorkingCellIds.insert(connection._cellId);
+                }
+            }
+        }
+        finishedCellIds.insert(workingCellIds.begin(), workingCellIds.end());
+        workingCellIds = newWorkingCellIds;
+    }
 }
 
 void DescriptionEditService::reconnectCells(CollectionDescription& data, float maxDistance) const
