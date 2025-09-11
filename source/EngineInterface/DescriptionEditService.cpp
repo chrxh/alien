@@ -337,8 +337,9 @@ void DescriptionEditService::addIfSpaceAvailable(
     }
 }
 
-void DescriptionEditService::flattenTopology(Description& data, SpaceCalculator const& space) const
+void DescriptionEditService::flattenTopology(Description& data, IntVector2D const& worldSize) const
 {
+    SpaceCalculator space(worldSize);
     auto cache = data.createCache();
 
     std::unordered_set<uint64_t> finishedCellIds;

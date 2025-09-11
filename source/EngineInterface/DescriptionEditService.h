@@ -99,7 +99,7 @@ public:
         float distance,
         IntVector2D const& worldSize) const;
 
-    void flattenTopology(Description& data, SpaceCalculator const& space) const;
+    void flattenTopology(Description& data, IntVector2D const& worldSize) const;
 
     void reconnectCells(Description& data, float maxDistance) const;  // For non-creatures
 

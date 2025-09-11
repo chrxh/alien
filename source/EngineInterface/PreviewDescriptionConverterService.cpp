@@ -40,8 +40,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     }
     CHECK(phenotype._creatures.size() == 1);
 
-    SpaceCalculator space({PREVIEW_WIDTH, PREVIEW_HEIGHT});
-    editService.flattenTopology(phenotype, space);
+    editService.flattenTopology(phenotype, {PREVIEW_WIDTH, PREVIEW_HEIGHT});
 
     auto cache = phenotype.createCache();
 
