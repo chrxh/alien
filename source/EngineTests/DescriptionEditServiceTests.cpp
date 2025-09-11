@@ -1,3 +1,19 @@
+/*
+ * Tests for DescriptionEditService::flattenTopology function
+ * 
+ * The flattenTopology function corrects cell positions in a wrapped/toroidal world
+ * to ensure that connected cells are positioned correctly relative to each other.
+ * When cells are connected but positioned on opposite sides of the world boundaries,
+ * the function applies topology corrections to move them to the same "side".
+ *
+ * Test coverage includes:
+ * - Basic scenarios: empty, single cell, connected pairs
+ * - World boundary wrapping corrections (horizontal, vertical, both)
+ * - Complex topologies: chains, rings, disconnected components
+ * - Edge cases: unconnected cells, mixed scenarios
+ * - Integration with creatures: cells within CreatureDescription objects
+ */
+
 #include <gtest/gtest.h>
 #include <map>
 
