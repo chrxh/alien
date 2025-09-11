@@ -11,8 +11,8 @@ add_library(EngineInterface
     Definitions.h
     DescriptionEditService.cpp
     DescriptionEditService.h
-    Descriptions.cpp
-    Descriptions.h
+    Description.cpp
+    Description.h
     EngineConstants.h
     GenomeDescription.cpp
     GenomeDescription.h

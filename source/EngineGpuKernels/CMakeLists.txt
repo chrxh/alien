@@ -7,15 +7,15 @@ add_library(EngineGpuKernels
     CellConnectionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
-    CollectionTOProvider.cu
-    CollectionTOProvider.cuh
+    TOProvider.cu
+    TOProvider.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
     Constants.cuh
     ConstructorHelper.cuh
     ConstructorProcessor.cuh
-    CudaCollectionTOProvider.cu
-    CudaCollectionTOProvider.cuh
+    CudaTOProvider.cu
+    CudaTOProvider.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
     CudaShapeGenerator.cuh
@@ -58,7 +58,7 @@ add_library(EngineGpuKernels
     Object.cuh
     Objects.cu
     Objects.cuh
-    ObjectTO.cuh
+    TO.cuh
     ObjectFactory.cuh
     Operations.cuh
     ParameterCalculator.cuh
