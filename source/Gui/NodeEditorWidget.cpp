@@ -232,7 +232,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Pulse type").values({"Positive", "Alternation"}).textWidth(rightColumnWidth), generator._pulseType);
 
-            if (generator._pulseType != GeneratorPulseType_Alternation) {
+            if (generator._pulseType == GeneratorPulseType_Alternation) {
 
                 AlienGui::BeginIndent();
 
