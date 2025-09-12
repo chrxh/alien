@@ -138,7 +138,9 @@ void _CreaturePreviewWidget::processNavigation()
             moveCenter(worldPos, mousePos, windowSize, windowPos);
         }
         if (ImGui::GetIO().MouseWheel < 0) {
+            auto worldPos = mapViewToWorldPosition(mousePos, windowSize, windowPos);
             _zoom /= sqrt(1.5f);
+            moveCenter(worldPos, mousePos, windowSize, windowPos);
         }
     }
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
