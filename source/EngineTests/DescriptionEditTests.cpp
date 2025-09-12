@@ -600,3 +600,63 @@ TEST_F(DescriptionEditTests, adaptMaxIds)
     EXPECT_LT(data._creatures.at(0)._cells.at(0)._id, data._creatures.at(1)._cells.at(0)._id);
     EXPECT_LT(data._particles.at(0)._id, data._particles.at(1)._id);
 }
+
+
+TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
+{
+    auto const& WorldWidth = 346;
+    auto const& WorldHeight = 100;
+
+    CreatureDescription creature;
+    for (int i = 0; i < 1000; ++i) {
+        creature._cells.emplace_back(CellDescription().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
+    }
+    auto data = Description().creatures({creature});
+    for (int i = 1; i < 1000; ++i) {
+        data.addConnection(i - 1, i);
+    }
+
+    DescriptionEditService::get().flattenTopology(data, IntVector2D{WorldWidth, WorldHeight});
+
+    ASSERT_EQ(1, data._creatures.size());
+
+    auto creatureAfter = data._creatures.front();
+    ASSERT_EQ(1000, creatureAfter._cells.size());
+
+    for (int i = 0; i < 1000; ++i) {
+        auto const& refCell = data.getCellRef(0);
+        auto const& cell = data.getCellRef(i);
+        EXPECT_TRUE(approxCompare(toFloat(i), cell._pos.x - refCell._pos.x));
+        EXPECT_TRUE(approxCompare(toFloat(i), cell._pos.y - refCell._pos.y));
+    }
+
+}
+
+TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
+{
+    auto const& WorldWidth = 346;
+    auto const& WorldHeight = 100;
+
+    CreatureDescription creature;
+    for (int i = 0; i < 1000; ++i) {
+        creature._cells.emplace_back(CellDescription().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
+    }
+    auto data = Description().creatures({creature});
+    for (int i = 1; i < 1000; ++i) {
+        data.addConnection(i - 1, i);
+    }
+
+    DescriptionEditService::get().flattenTopology(data, IntVector2D{WorldWidth, WorldHeight});
+
+    ASSERT_EQ(1, data._creatures.size());
+
+    auto creatureAfter = data._creatures.front();
+    ASSERT_EQ(1000, creatureAfter._cells.size());
+
+    for (int i = 0; i < 1000; ++i) {
+        auto const& refCell = data.getCellRef(0);
+        auto const& cell = data.getCellRef(i);
+        EXPECT_TRUE(approxCompare(toFloat(i), refCell._pos.x - cell._pos.x));
+        EXPECT_TRUE(approxCompare(toFloat(i), refCell._pos.y - cell._pos.y));
+    }
+}
