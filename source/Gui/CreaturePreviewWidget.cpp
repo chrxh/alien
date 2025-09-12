@@ -25,7 +25,6 @@ namespace
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
-
 }
 
 CreaturePreviewWidget _CreaturePreviewWidget::create(
@@ -175,14 +174,14 @@ void _CreaturePreviewWidget::processCellGraph(ConversionResult const& conversion
         AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
 
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
-        drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * cellRadiusFactor, ImColor::HSV(h, s * 1.2f, v * 1.0f));
+        drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
         if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
             if (_zoom > ZoomLevelForLabels) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
             } else {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor::HSV(h, s * 0.8f, v * 1.2f));
-            }
+                drawList->AddCircle({cellPos.x, cellPos.y}, std::max(1.0f, cellSize / 2), ImColor::HSV(h, s * 0.8f, v * 1.2f));
+            } 
         }
 
         if (clickedOnPreviewWindow) {
