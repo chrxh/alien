@@ -293,7 +293,7 @@ struct SimulationParameters
     // Expert settings: External energy settings
     ExpertToggle externalEnergyControlToggle = {false};
     BaseParameter<float> externalEnergy = {0.0f};
-    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    BaseParameter<ColorVector<float>> externalEnergyInflowFactor = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseParameter<ColorVector<float>> externalEnergyConditionalInflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<bool> externalEnergyInflowOnlyForNonSelfReplicators = {false};
     BaseParameter<ColorVector<float>> externalEnergyBackflowFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};

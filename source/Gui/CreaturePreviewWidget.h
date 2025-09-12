@@ -30,11 +30,13 @@ private:
         GeneIndicesForSubGenome const& geneIndices,
         SubGenomeDescription const& genomeWithStartIndex);
 
-    void processCellGraph(ConversionResult const& conversionResult);
+    void processNavigation();
+    void processCellGraphAndSelection(ConversionResult const& conversionResult);
     void processActionButtons();
     void processTitle();
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
+    void moveCenter(RealVector2D const& startWorldPosition, RealVector2D const& endViewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos);
 
     SimulationScrollbars _scrollbars;
 
@@ -47,4 +49,6 @@ private:
     RealVector2D _worldCenter;
     float _zoom = 20.0f;
     bool _initialScrollPositionSet = false;
+
+    std::optional<RealVector2D> _worldPosForPanning;
 };

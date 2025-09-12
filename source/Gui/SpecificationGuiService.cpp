@@ -54,7 +54,7 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();
 
-    auto rightColumnWidth = ImGui::GetContentRegionAvail().x - scale(30);
+    auto rightColumnWidth = ImGui::GetContentRegionAvail().x - scale(26);
     for (auto const& groupSpec : parametersSpecs._groups) {
         if (groupSpec._expertToggle) {
             auto expertToggleValue = evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);

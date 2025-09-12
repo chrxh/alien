@@ -25,12 +25,12 @@ void Viewport::setZoomFactor(float zoomFactor)
 
 RealVector2D Viewport::getCenterInWorldPos()
 {
-    return _worldCenter;
+    return _centerInWorldPos;
 }
 
 void Viewport::setCenterInWorldPos(RealVector2D const& worldCenter)
 {
-    _worldCenter = worldCenter;
+    _centerInWorldPos = worldCenter;
 }
 
 IntVector2D Viewport::getViewSize()
@@ -48,7 +48,7 @@ void Viewport::zoom(IntVector2D const& viewPos, float factor)
     if ((factor > 1.0f && _zoomFactor < 200.0f) || (factor < 1.0f && _zoomFactor > 0.02f)) {
         auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
         _zoomFactor *= factor;
-        centerTo(worldPos, viewPos);
+        moveCenter(worldPos, viewPos);
     }
 }
 
@@ -62,32 +62,32 @@ void Viewport::setZoomSensitivity(float value)
     _zoomSensitivity = std::min(10.0f, std::max(1.0f, value));
 }
 
-void Viewport::centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos)
+void Viewport::moveCenter(RealVector2D const& startWorldPosition, IntVector2D const& endViewPos)
 {
     RealVector2D deltaViewPos{
-        toFloat(viewPos.x) - toFloat(_viewSize.x) / 2.0f, toFloat(viewPos.y) - toFloat(_viewSize.y) / 2.0f};
+        toFloat(endViewPos.x) - toFloat(_viewSize.x) / 2.0f, toFloat(endViewPos.y) - toFloat(_viewSize.y) / 2.0f};
     auto deltaWorldPos = deltaViewPos / _zoomFactor;
-    _worldCenter = worldPosition - deltaWorldPos;
+    _centerInWorldPos = startWorldPosition - deltaWorldPos;
 }
 
 RealVector2D Viewport::mapViewToWorldPosition(RealVector2D const& viewPos)
 {
     RealVector2D relCenter{toFloat(_viewSize.x / (2.0 * _zoomFactor)), toFloat(_viewSize.y / (2.0 * _zoomFactor))};
     RealVector2D relWorldPos{viewPos.x / _zoomFactor, viewPos.y / _zoomFactor};
-    return _worldCenter - relCenter + relWorldPos;
+    return _centerInWorldPos - relCenter + relWorldPos;
 }
 
 RealVector2D Viewport::mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering)
 {
     if (borderlessRendering) {
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
-        auto offset = _worldCenter - worldSize / 2;
+        auto offset = _centerInWorldPos - worldSize / 2;
         worldPos.x = Math::modulo(worldPos.x - offset.x, worldSize.x) + offset.x;
         worldPos.y = Math::modulo(worldPos.y - offset.y, worldSize.y) + offset.y;
     }
     return {
-        (worldPos.x - _worldCenter.x) * _zoomFactor + toFloat(_viewSize.x) / 2,
-        (worldPos.y - _worldCenter.y) * _zoomFactor + toFloat(_viewSize.y) / 2};
+        (worldPos.x - _centerInWorldPos.x) * _zoomFactor + toFloat(_viewSize.x) / 2,
+        (worldPos.y - _centerInWorldPos.y) * _zoomFactor + toFloat(_viewSize.y) / 2};
 }
 
 RealRect Viewport::getVisibleWorldRect()

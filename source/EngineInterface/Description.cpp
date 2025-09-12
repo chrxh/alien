@@ -23,10 +23,6 @@ NeuralNetworkDescription& NeuralNetworkDescription::weight(int row, int col, flo
     return *this;
 }
 
-ConstructorDescription::ConstructorDescription()
-{
-}
-
 SignalDescription::SignalDescription()
 {
     _channels.resize(MAX_CHANNELS, 0);

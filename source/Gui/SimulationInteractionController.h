@@ -68,7 +68,7 @@ private:
     Modes _modesAtClick;
 
     //navigation
-    std::optional<RealVector2D> _worldPosForMovement;
+    std::optional<RealVector2D> _worldPosForPanning;
     std::optional<RealVector2D> _worldPosOnClick;
     std::optional<IntVector2D> _prevMousePosInt;
     std::optional<RealVector2D> _selectionPositionOnClick;

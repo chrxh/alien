@@ -317,17 +317,17 @@ void SimulationInteractionController::processMouseWheel(IntVector2D const& mouse
 
 void SimulationInteractionController::middleMouseButtonPressed(IntVector2D const& mousePos)
 {
-    _worldPosForMovement = Viewport::get().mapViewToWorldPosition({toFloat(mousePos.x), toFloat(mousePos.y)});
+    _worldPosForPanning = Viewport::get().mapViewToWorldPosition({toFloat(mousePos.x), toFloat(mousePos.y)});
 }
 
 void SimulationInteractionController::middleMouseButtonHold(IntVector2D const& mousePos)
 {
-    Viewport::get().centerTo(*_worldPosForMovement, mousePos);
+    Viewport::get().moveCenter(*_worldPosForPanning, mousePos);
 }
 
 void SimulationInteractionController::middleMouseButtonReleased()
 {
-    _worldPosForMovement = std::nullopt;
+    _worldPosForPanning.reset();
 }
 
 void SimulationInteractionController::drawCursor()

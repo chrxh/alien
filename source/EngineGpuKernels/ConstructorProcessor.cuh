@@ -72,7 +72,7 @@ private:
 
     __inline__ __device__ static bool checkForValidConstruction(Cell* hostCell);
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static void activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static void activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
 
     //    __inline__ __device__ static float calcNumCells(int color, uint8_t* genome, uint16_t genomeSize);
 };
@@ -375,7 +375,7 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
-    activateNewCell(newCell, hostCell, constructionData);
+    activateNewCellOnLastNode(newCell, hostCell, constructionData);
 
     newCell->releaseLock();
     return newCell;
@@ -551,7 +551,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
         }
     }
 
-    activateNewCell(newCell, hostCell, constructionData);
+    activateNewCellOnLastNode(newCell, hostCell, constructionData);
 
     newCell->releaseLock();
     return newCell;
@@ -803,11 +803,10 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     return true;
 }
 
-__inline__ __device__ void ConstructorProcessor::activateNewCell(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
+__inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (constructionData.isLastNodeOfLastConcatenation || (constructionData.isLastNode && constructionData.hasInfiniteConcatenations)) {
+    if (/*constructionData.isLastNodeOfLastConcatenation || */(constructionData.isLastNode /*&& constructionData.hasInfiniteConcatenations*/)) {
         newCell->cellState = CellState_Activating;
-
         if (constructionData.isSeparation) {
             newCell->angleToFront = constructionData.creature->genome.frontAngle;
         } else {

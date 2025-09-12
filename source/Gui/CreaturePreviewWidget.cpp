@@ -48,15 +48,16 @@ void _CreaturePreviewWidget::process(Description&& phenotype, float width)
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
     if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
+        processNavigation();
 
-        processCellGraph(conversionResult);
+        processCellGraphAndSelection(conversionResult);
 
         ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowSize().y - scale(40.0f)});
         processActionButtons();
 
-        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
         RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-
+        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+        
         RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
         RealRect visibleWorldRect{
             mapViewToWorldPosition(windowPos, windowSize, windowPos),
@@ -118,7 +119,34 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     _scrollbars = std::make_shared<_SimulationScrollbars>(false);
 }
 
-void _CreaturePreviewWidget::processCellGraph(ConversionResult const& conversionResult)
+void _CreaturePreviewWidget::processNavigation()
+{
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+        RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
+        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+        RealVector2D mousePos = {ImGui::GetMousePos().x, ImGui::GetMousePos().y};
+
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle)) {
+            _worldPosForPanning = mapViewToWorldPosition(mousePos, windowSize, windowPos);
+        }
+        if (ImGui::IsMouseDown(ImGuiMouseButton_Middle) && _worldPosForPanning.has_value()) {
+            moveCenter(_worldPosForPanning.value(), mousePos, windowSize, windowPos);
+        }
+        if (ImGui::GetIO().MouseWheel > 0) {
+            auto worldPos = mapViewToWorldPosition(mousePos, windowSize, windowPos);
+            _zoom *= sqrt(1.5f);
+            moveCenter(worldPos, mousePos, windowSize, windowPos);
+        }
+        if (ImGui::GetIO().MouseWheel < 0) {
+            _zoom /= sqrt(1.5f);
+        }
+    }
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Middle)) {
+        _worldPosForPanning.reset();
+    }
+}
+
+void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const& conversionResult)
 {
     auto const LineThickness = scale(2.0f);
     auto const cellSize = scale(_zoom);
@@ -131,8 +159,7 @@ void _CreaturePreviewWidget::processCellGraph(ConversionResult const& conversion
     RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
     RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
     auto mousePos = ImGui::GetMousePos();
-    auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && mousePos.x >= windowPos.x && mousePos.y >= windowPos.y
-        && mousePos.x <= windowPos.x + windowSize.x && mousePos.y <= windowPos.y + windowSize.y;
+    auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 
     // Draw front circle
     {
@@ -361,4 +388,15 @@ RealVector2D _CreaturePreviewWidget::mapViewToWorldPosition(RealVector2D const& 
         (viewPos.x - viewStartPos.x - viewSize.x / 2) / scaleFactor + _worldCenter.x,
         (viewPos.y - viewStartPos.y - viewSize.y / 2) / scaleFactor + _worldCenter.y
     };
+}
+
+void _CreaturePreviewWidget::moveCenter(
+    RealVector2D const& startWorldPosition,
+    RealVector2D const& endViewPos,
+    RealVector2D const& viewSize,
+    RealVector2D const& viewStartPos)
+{
+    auto deltaViewPos = endViewPos - viewStartPos - viewSize / 2.0f;
+    auto deltaWorldPos = deltaViewPos / _zoom;
+    _worldCenter = startWorldPosition - deltaWorldPos;
 }

@@ -26,7 +26,7 @@ public:
     float getZoomSensitivity();
     void setZoomSensitivity(float value);
 
-    void centerTo(RealVector2D const& worldPosition, IntVector2D const& viewPos);
+    void moveCenter(RealVector2D const& startWorldPosition, IntVector2D const& endViewPos);
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos);
     RealVector2D mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering = true);
     RealRect getVisibleWorldRect();
@@ -37,6 +37,6 @@ private:
 
     float _zoomFactor = 1.0f;
     float _zoomSensitivity = 1.07f;
-    RealVector2D _worldCenter;
+    RealVector2D _centerInWorldPos;
     IntVector2D _viewSize;
 };

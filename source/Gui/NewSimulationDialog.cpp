@@ -6,14 +6,13 @@
 #include "EngineInterface/SimulationFacade.h"
 
 #include "Viewport.h"
-#include "StatisticsWindow.h"
 #include "TemporalControlWindow.h"
 #include "AlienGui.h"
 #include "StyleRepository.h"
 
 namespace
 {
-    auto const ContentTextInputWidth = 100.0f;
+    auto const ContentTextInputWidth = 130.0f;
     auto const ProjectNameSize = sizeof(Char64) / sizeof(char);
 }
 
@@ -38,8 +37,7 @@ void NewSimulationDialog::processIntern()
     AlienGui::InputText(AlienGui::InputTextParameters().name("Project name").textWidth(ContentTextInputWidth), _projectName, ProjectNameSize);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Width").textWidth(ContentTextInputWidth), _width);
     AlienGui::InputInt(AlienGui::InputIntParameters().name("Height").textWidth(ContentTextInputWidth), _height);
-    AlienGui::Checkbox(
-        AlienGui::CheckboxParameters().name("Adopt simulation parameters").textWidth(0), _adoptSimulationParameters);
+    AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Adopt parameters").textWidth(ContentTextInputWidth), _adoptSimulationParameters);
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();

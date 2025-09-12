@@ -56,7 +56,6 @@ struct DepotDescription
 
 struct ConstructorDescription
 {
-    ConstructorDescription();
     auto operator<=>(ConstructorDescription const&) const = default;
 
     // Properties
