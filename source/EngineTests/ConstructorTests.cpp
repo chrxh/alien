@@ -1941,7 +1941,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
-TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1_numAdditionalConnections_bothSidesPresent)
+TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_bothSidesPresent)
 {
     auto data = Description().creatures({
         CreatureDescription()

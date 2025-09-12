@@ -11,13 +11,13 @@ namespace
 
     __device__ __inline__ void drawPixel(uint64_t* imageData, unsigned int index, float3 const& color)
     {
-        imageData[index] = toUInt64(color.y * 225.0f) << 16 | toUInt64(color.x * 225.0f) << 0 | toUInt64(color.z * 225.0f) << 32;
+        imageData[index] = toUInt64(color.y * 145.0f) << 16 | toUInt64(color.x * 145.0f) << 0 | toUInt64(color.z * 145.0f) << 32;
     }
 
     __device__ __inline__ void drawAddingPixel(uint64_t* imageData, unsigned int const& numPixels, unsigned int index, float3 const& colorToAdd)
     {
         if (index < numPixels) {
-            uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 255.0f) << 16 | toUInt64(colorToAdd.x * 255.0f) << 0 | toUInt64(colorToAdd.z * 255.0f) << 32;
+            uint64_t rawColorToAdd = toUInt64(colorToAdd.y * 145.0f) << 16 | toUInt64(colorToAdd.x * 145.0f) << 0 | toUInt64(colorToAdd.z * 145.0f) << 32;
             alienAtomicAdd64(&imageData[index], rawColorToAdd);
         }
     }
@@ -706,7 +706,7 @@ __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUp
     }
 }
 
-__global__ void cudaDrawSpotsAndGridlines(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight)
+__global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSize, float zoom, float2 rectUpperLeft, float2 rectLowerRight)
 {
     BaseMap map;
     map.init(worldSize);
