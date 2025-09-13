@@ -455,18 +455,18 @@ void EngineWorker::setPreviewData(Description const& data)
     _simulationCudaFacade->newPreview(dataTO);
 }
 
-void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
+void EngineWorker::calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->calcTimestepsForPreview(duration);
+    _simulationCudaFacade->calcTimestepsForPreview(duration, detailSimulation);
 }
 
-void EngineWorker::calcTimestepsForPreview(int numSteps)
+void EngineWorker::calcTimestepsForPreview(int numSteps, bool detailSimulation)
 {
     EngineWorkerGuard access(this);
 
-    _simulationCudaFacade->calcTimestepsForPreview(numSteps);
+    _simulationCudaFacade->calcTimestepsForPreview(numSteps, detailSimulation);
 }
 
 uint64_t EngineWorker::getCurrentTimestepForPreview()

@@ -139,12 +139,13 @@ namespace
 
 std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomesForPreview(
     GenomeDescription const& genome,
-    std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const
+    std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes,
+    bool detailSimulation) const
 {
     std::vector<SubGenomeDescription> result;
     for (auto const& geneIndicesForSubGenome : geneIndicesForSubGenomes) {
         auto subGenome = genome;
-        adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome);
+        adaptDescriptionForPreview(subGenome, geneIndicesForSubGenome, detailSimulation);
         result.emplace_back(subGenome, geneIndicesForSubGenome.front());
     }
 
@@ -290,15 +291,19 @@ namespace
         inspectedGeneIndices.erase(geneIndex);
     }
 
-    void setNodeAttributesForPreview(GenomeDescription& genome)
+    void adaptNodeAttributesForPreview(GenomeDescription& genome, bool detailSimulation)
     {
         for (auto& gene : genome._genes) {
             for (auto& node : gene._nodes) {
                 node._color = PreviewColor;
-                node._neuralNetwork = NeuralNetworkGenomeDescription();
-                node._signalRestriction = SignalRestrictionGenomeDescription();
+                if (!detailSimulation) {
+                    node._neuralNetwork = NeuralNetworkGenomeDescription();
+                    node._signalRestriction = SignalRestrictionGenomeDescription();
+                }
                 if (node.getCellType() != CellTypeGenome_Constructor) {
-                    node._cellTypeData = BaseGenomeDescription();
+                    if (!detailSimulation) {
+                        node._cellTypeData = BaseGenomeDescription();
+                    }
                 } else {
                     auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
                     constructor._autoTriggerInterval = 75;
@@ -319,13 +324,14 @@ namespace
     }
 }
 
-void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices) const
+void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation)
+    const
 {
     auto startGeneIndex = geneIndices.front();
 
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
-    setNodeAttributesForPreview(genome);
+    adaptNodeAttributesForPreview(genome, detailSimulation);
     genome._frontAngle = 0;     // frontAngle is not used => set to 0 for better caching
     if (!genome._genes.empty()) {
         genome._genes.at(startGeneIndex)._numBranches = 1;

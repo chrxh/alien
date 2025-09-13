@@ -24,7 +24,8 @@ public:
 
     std::vector<SubGenomeDescription> createSubGenomesForPreview(
         GenomeDescription const& genome,
-        std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes) const;
+        std::vector<GeneIndicesForSubGenome> const& geneIndicesForSubGenomes,
+        bool detailSimulation) const;
 
     struct SeedCollectionResult
     {
@@ -40,5 +41,5 @@ public:
 private:
     Description createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const;
 
-    void adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices) const;
+    void adaptDescriptionForPreview(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices, bool detailSimulation) const;
 };

@@ -11,7 +11,11 @@ public:
     _SimulationKernelsService();
 
     void calcTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
-    void calcTimestepForPreview(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
+    void calcTimestepForPreview(
+        SettingsForSimulation const& settings,
+        SimulationData const& simulationData,
+        SimulationStatistics const& statistics,
+        bool detailSimulation);
     void prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& simulationData);
 
 private:

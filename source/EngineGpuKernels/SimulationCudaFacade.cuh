@@ -100,8 +100,8 @@ public:
     // Simulated preview
     void initSettingsPreviewData();
     void newPreview(TO const& dataTO);
-    void calcTimestepsForPreview(std::chrono::milliseconds const& duration);
-    void calcTimestepsForPreview(int numSteps);
+    void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation);
+    void calcTimestepsForPreview(int numSteps, bool detailSimulation);
     uint64_t getCurrentTimestepForPreview();
     void setCurrentTimestepForPreview(uint64_t timestep);
     TO getPreviewData();

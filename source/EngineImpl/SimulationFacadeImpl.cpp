@@ -368,14 +368,14 @@ void _SimulationFacadeImpl::setPreviewData(Description const& data)
     _worker.setPreviewData(data);
 }
 
-void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds const& duration)
+void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation)
 {
-    _worker.calcTimestepsForPreview(duration);
+    _worker.calcTimestepsForPreview(duration, detailSimulation);
 }
 
-void _SimulationFacadeImpl::calcTimestepsForPreview(int numSteps)
+void _SimulationFacadeImpl::calcTimestepsForPreview(int numSteps, bool detailSimulation)
 {
-    _worker.calcTimestepsForPreview(numSteps);
+    _worker.calcTimestepsForPreview(numSteps, detailSimulation);
 }
 
 uint64_t _SimulationFacadeImpl::getCurrentTimestepForPreview()

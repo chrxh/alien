@@ -52,9 +52,9 @@ private:
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
+    bool _detailSimulation = false;
     bool _run = true;
     int _simulationSpeed = 50;  // In percent of full speed
-    bool _fullSimulation = false;
 
     struct Savepoint
     {

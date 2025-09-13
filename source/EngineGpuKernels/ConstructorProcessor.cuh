@@ -805,7 +805,8 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
 __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
 {
-    if (/*constructionData.isLastNodeOfLastConcatenation || */(constructionData.isLastNode /*&& constructionData.hasInfiniteConcatenations*/)) {
+    // TODO implement better logic for angleToFront setting
+    if (/*constructionData.isLastNodeOfLastConcatenation || (*/constructionData.isLastNode /*&& constructionData.hasInfiniteConcatenations)*/) {
         newCell->cellState = CellState_Activating;
         if (constructionData.isSeparation) {
             newCell->angleToFront = constructionData.creature->genome.frontAngle;

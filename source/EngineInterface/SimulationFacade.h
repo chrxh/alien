@@ -107,8 +107,8 @@ public:
     // Simulated preview
     virtual Description getPreviewData() = 0;
     virtual void setPreviewData(Description const& data) = 0;
-    virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration) = 0;
-    virtual void calcTimestepsForPreview(int numSteps) = 0;
+    virtual void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation = false) = 0;
+    virtual void calcTimestepsForPreview(int numSteps, bool detailSimulation = false) = 0;
     virtual uint64_t getCurrentTimestepForPreview() = 0;
     virtual void setCurrentTimestepForPreview(uint64_t timestep) = 0;
 
