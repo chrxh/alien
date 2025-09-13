@@ -23,7 +23,7 @@ __global__ void cudaNextTimestep_cellType_constructor(SimulationData data, Simul
 __global__ void cudaNextTimestep_cellType_injector(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_defender(SimulationData data, SimulationStatistics statistics);
-__global__ void cudaNextTimestep_cellType_transmitter(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_depot(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_muscle(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_sensor(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics);

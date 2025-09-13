@@ -149,7 +149,7 @@ __global__ void cudaNextTimestep_cellType_attacker(SimulationData data, Simulati
     AttackerProcessor::process(data, statistics);
 }
 
-__global__ void cudaNextTimestep_cellType_transmitter(SimulationData data, SimulationStatistics statistics)
+__global__ void cudaNextTimestep_cellType_depot(SimulationData data, SimulationStatistics statistics)
 {
     DepotProcessor::process(data, statistics);
 }

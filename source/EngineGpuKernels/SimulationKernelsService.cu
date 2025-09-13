@@ -68,7 +68,7 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
     KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics, false);
     KERNEL_CALL(cudaNextTimestep_cellType_injector, data, statistics);
     KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, 4, data, statistics);
-    KERNEL_CALL_MOD(cudaNextTimestep_cellType_transmitter, 4, data, statistics);
+    KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, 4, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellType_muscle, data, statistics);
     KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, 64, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellType_reconnector, data, statistics);
@@ -180,24 +180,24 @@ void _SimulationKernelsService::calcTimestepForPreview(
             KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, data, statistics);
         }
         KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, 4, data, statistics, true);
-        KERNEL_CALL(cudaNextTimestep_cellType_injector, data, statistics);
-        KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, 4, data, statistics);
-        KERNEL_CALL_MOD(cudaNextTimestep_cellType_transmitter, 4, data, statistics);
+        //KERNEL_CALL(cudaNextTimestep_cellType_injector, data, statistics);
+        //KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, 4, data, statistics);
+        //KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, 4, data, statistics);
         KERNEL_CALL(cudaNextTimestep_cellType_muscle, data, statistics);
-        KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, 64, data, statistics);
-        KERNEL_CALL(cudaNextTimestep_cellType_reconnector, data, statistics);
-        KERNEL_CALL(cudaNextTimestep_cellType_detonator, data, statistics);
+        //KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, 64, data, statistics);
+        //KERNEL_CALL(cudaNextTimestep_cellType_reconnector, data, statistics);
+        //KERNEL_CALL(cudaNextTimestep_cellType_detonator, data, statistics);
 
         if (considerInnerFriction) {
             KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, 16, data);
         }
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
 
-        KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
-        KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
-        KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
-        KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
-        KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
+        //KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
+        //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);
+        //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, data);
+        //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
+        //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
         _garbageCollector->cleanupAfterTimestep(settings.cudaSettings, data);
     }
