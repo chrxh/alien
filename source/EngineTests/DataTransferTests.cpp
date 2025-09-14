@@ -302,3 +302,24 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto gene = creature._genome._genes.front();
     EXPECT_EQ(2, gene._nodes.size());
 }
+TEST_F(DataTransferTests, clusterDescription_frontAngleFields)
+{
+    auto cellParameter = CellParameter{CellType_Base};
+    auto cluster = _descriptionTestDataFactory->createNonDefaultClusterDescription(cellParameter);
+    
+    // Verify the fields are set to non-default values
+    EXPECT_EQ(23, cluster._frontAngleId);
+    EXPECT_TRUE(cluster._frontAngleRefCell);
+    
+    // Verify compare works for clusters
+    auto clusterCopy = cluster;
+    EXPECT_TRUE(_descriptionTestDataFactory->compare(cluster, clusterCopy));
+    
+    // Verify fields are different when changed
+    clusterCopy._frontAngleId = 42;
+    EXPECT_FALSE(_descriptionTestDataFactory->compare(cluster, clusterCopy));
+    
+    clusterCopy._frontAngleId = 23;
+    clusterCopy._frontAngleRefCell = false;
+    EXPECT_FALSE(_descriptionTestDataFactory->compare(cluster, clusterCopy));
+}

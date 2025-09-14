@@ -46,6 +46,19 @@ ParticleDescription DescriptionTestDataFactory::createNonDefaultParticleDescript
         .color(5);
 }
 
+ClusterDescription DescriptionTestDataFactory::createNonDefaultClusterDescription(CellParameter cellParameter) const
+{
+    ClusterDescription result;
+    result._frontAngleId = 23;
+    result._frontAngleRefCell = true;
+    
+    // Add some test cells to the cluster
+    result.addCell(createNonDefaultCellDescription(cellParameter));
+    result.addCell(createNonDefaultCellDescription(cellParameter));
+    
+    return result;
+}
+
 NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(NodeParameter nodeParameter) const
 {
     NodeDescription defaultNode;
@@ -123,6 +136,23 @@ bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescr
     left._id = 0;
     right._id = 0;
     return left == right;
+}
+
+bool DescriptionTestDataFactory::compare(ClusterDescription left, ClusterDescription right) const
+{
+    // Compare cells using existing comparison logic
+    if (left._cells.size() != right._cells.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < left._cells.size(); ++i) {
+        if (!compare(left._cells[i], right._cells[i])) {
+            return false;
+        }
+    }
+    
+    // Compare cluster-specific fields directly
+    return left._frontAngleId == right._frontAngleId && 
+           left._frontAngleRefCell == right._frontAngleRefCell;
 }
 
 CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const

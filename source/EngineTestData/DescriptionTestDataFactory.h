@@ -18,6 +18,7 @@ public:
     };
     CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
     ParticleDescription createNonDefaultParticleDescription() const;
+    ClusterDescription createNonDefaultClusterDescription(CellParameter cellParameter) const;
 
     struct NodeParameter
     {
@@ -30,6 +31,7 @@ public:
     bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;
     bool compare(ParticleDescription left, ParticleDescription right) const;
+    bool compare(ClusterDescription left, ClusterDescription right) const;
 
 private:
     CellTypeDescription createNonDefaultCellTypeDescription(CellParameter cellParameter) const;
