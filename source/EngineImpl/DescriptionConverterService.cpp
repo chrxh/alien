@@ -287,6 +287,8 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._angleToFront = cellTO.angleToFront;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTriggered = cellTO.cellTriggered;
+    result._frontAngleId = cellTO.frontAngleId;
+    result._frontAngleRefCell = cellTO.frontAngleRefCell;
     result._nodeIndex = cellTO.nodeIndex;
     result._parentNodeIndex = cellTO.parentNodeIndex;
     result._geneIndex = cellTO.geneIndex;
@@ -813,6 +815,8 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.cellType = cellDesc.getCellType();
     cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTriggered = cellDesc._cellTriggered;
+    cellTO.frontAngleId = cellDesc._frontAngleId;
+    cellTO.frontAngleRefCell = cellDesc._frontAngleRefCell;
     cellTO.nodeIndex = cellDesc._nodeIndex;
     cellTO.parentNodeIndex = cellDesc._parentNodeIndex;
     cellTO.geneIndex = cellDesc._geneIndex;

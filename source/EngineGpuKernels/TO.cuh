@@ -263,6 +263,10 @@ struct CellTO
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     CellTriggered cellTriggered;
 
+    // Process data
+    int frontAngleId;
+    bool frontAngleRefCell;
+
     // Editing data
     uint8_t selected;
 };

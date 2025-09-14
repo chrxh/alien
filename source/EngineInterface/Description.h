@@ -323,6 +323,10 @@ struct ClusterDescription
 
     MEMBER(ClusterDescription, std::vector<CellDescription>, cells, {});
 
+    // Process data
+    MEMBER(ClusterDescription, int, frontAngleId, 0);
+    MEMBER(ClusterDescription, bool, frontAngleRefCell, false);
+
     ClusterDescription& addCells(std::vector<CellDescription> const& value);
     ClusterDescription& addCell(CellDescription const& value);
 

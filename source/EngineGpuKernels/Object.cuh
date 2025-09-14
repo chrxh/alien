@@ -316,6 +316,8 @@ struct Cell
     // Process data
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
+    int frontAngleId;
+    bool frontAngleRefCell;
 
     // Additional rendering data
     CellEvent event;

@@ -199,6 +199,8 @@ namespace
         cellTO.activationTime = cell->activationTime;
         cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTriggered = cell->cellTriggered;
+        cellTO.frontAngleId = cell->frontAngleId;
+        cellTO.frontAngleRefCell = cell->frontAngleRefCell;
         cellTO.nodeIndex = cell->nodeIndex;
         cellTO.parentNodeIndex = cell->parentNodeIndex;
         cellTO.geneIndex = cell->geneIndex;

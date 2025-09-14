@@ -249,6 +249,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
     cell->activationTime = cellTO.activationTime;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTriggered = cellTO.cellTriggered;
+    cell->frontAngleId = cellTO.frontAngleId;
+    cell->frontAngleRefCell = cellTO.frontAngleRefCell;
     cell->nodeIndex = cellTO.nodeIndex;
     cell->parentNodeIndex = cellTO.parentNodeIndex;
     cell->geneIndex = cellTO.geneIndex;
