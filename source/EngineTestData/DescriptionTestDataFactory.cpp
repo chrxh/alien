@@ -160,7 +160,6 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             .minDensity(0.3f)
             .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellType_Generator: {
-        GeneratorDescription defaultGenerator;
         return GeneratorDescription()
             .autoTriggerInterval(60)
             .alternationInterval(3)

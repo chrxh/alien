@@ -36,6 +36,7 @@ public:
     __inline__ __device__ static void aging(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_calcFutureState(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_applyNextState(SimulationData& data);
+    __inline__ __device__ static void frontAngleUpdate(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
@@ -67,7 +68,7 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
         cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
-        cell->tempValue = 0;
+        cell->tempValue.asUint64 = 0;
     }
 }
 
@@ -673,7 +674,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 }
             }
         }
-        cell->tempValue = cellState;
+        cell->tempValue.asInt2.x = cellState;
     }
 }
 
@@ -684,8 +685,36 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        cell->cellState = cell->tempValue;
-        cell->tempValue = 0;
+        cell->cellState = cell->tempValue.asInt2.x;
+        cell->tempValue.asInt2.x = 0;
+    }
+}
+
+__inline__ __device__ void CellProcessor::frontAngleUpdate(SimulationData& data)
+{
+    auto& cells = data.objects.cells;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->creature == nullptr) {
+            continue;
+        }
+        if (cell->creature->frontAngleId != cell->frontAngleId) {
+            if (cell->isFrontAngleRefCell) {
+                cell->frontAngleId = cell->creature->frontAngleId;
+            } else {
+                for (int i = 0, j = cell->numConnections; i < j; ++i) {
+                    auto const& otherCell = cell->connections[i].cell;
+                    if (cell->isSameCreature(otherCell)) {
+                        continue;
+                    }
+                    if (otherCell->frontAngleId == cell->creature->frontAngleId) {
+                        // TODO calc new frontAngle
+                    }
+                }
+            }
+        }
     }
 }
 

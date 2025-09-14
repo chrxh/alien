@@ -2,6 +2,9 @@
 #include <gtest/gtest.h>
 
 #include "EngineInterface/GenomeDescriptionEditService.h"
+
+#include <boost/range/adaptors.hpp>
+
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 #include "EngineInterface/GenomeDescription.h"
 #include "EngineInterface/EngineConstants.h"
@@ -274,7 +277,7 @@ TEST_F(GenomeDescriptionEditServiceTests, swapNodes)
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_emptyGenome)
 {
     auto genome = GenomeDescription();
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {}, false);
     
     EXPECT_EQ(0, subGenomes.size());
 }
@@ -287,7 +290,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGene
             NodeDescription(),
         }),
     });
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -301,10 +304,40 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGene
     EXPECT_EQ(5, std::get<ConstructorGenomeDescription>(subGenome._genes.at(0)._nodes.at(0)._cellTypeData)._geneIndex);
 }
 
+TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstructor)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription()
+            .separation(false)
+            .nodes({
+                NodeDescription().cellTypeData(ConstructorGenomeDescription()).neuralNetwork(NeuralNetworkGenomeDescription().weight(2, 3, 0.4f)),
+                NodeDescription().cellTypeData(DepotGenomeDescription()),
+                NodeDescription().cellTypeData(BaseGenomeDescription()),
+                NodeDescription().cellTypeData(SensorGenomeDescription()),
+                NodeDescription().cellTypeData(GeneratorGenomeDescription()),
+                NodeDescription().cellTypeData(AttackerGenomeDescription()),
+                NodeDescription().cellTypeData(InjectorGenomeDescription()),
+                NodeDescription().cellTypeData(MuscleGenomeDescription()),
+                NodeDescription().cellTypeData(DefenderGenomeDescription()),
+                NodeDescription().cellTypeData(ReconnectorGenomeDescription()),
+                NodeDescription().cellTypeData(DetonatorGenomeDescription()),
+            }),
+    });
+
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
+
+    EXPECT_EQ(1, subGenomes.size());
+    auto const& subGenome = subGenomes.at(0).genome;
+    auto const& gene0 = subGenome._genes.at(0);
+    for (auto const& [index, node] : gene0._nodes | boost::adaptors::indexed(0)) {
+        EXPECT_EQ(index == 0 ? CellTypeGenome_Constructor : CellTypeGenome_Base, node.getCellType());
+    }
+}
+
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycles)
 {
     auto genome = createGenome_complexCycles();
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -346,7 +379,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
             NodeDescription(),
         }),
     });
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}, {2}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}, {2}}, false);
 
     ASSERT_EQ(2, subGenomes.size());
 
@@ -402,7 +435,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
             NodeDescription(),
         }),
     });
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1, 2}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -434,7 +467,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_separation)
             NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
         }),
     });
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}, {1}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}, {1}}, false);
 
     ASSERT_EQ(2, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -486,7 +519,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_wi
             }),
     });
     
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -519,7 +552,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
         }),
     });
     
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -552,7 +585,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
             }),
     });
 
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -581,7 +614,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_ex
         genome._genes[0]._nodes.emplace_back(NodeDescription());
     }
     
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -619,7 +652,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
         }
     }
     
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);
@@ -662,7 +695,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_mu
         }
     }
     
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}, {1}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}, {1}}, false);
 
     ASSERT_EQ(2, subGenomes.size());
     
@@ -703,7 +736,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
             }),
     });
     
-    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}});
+    auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0, 1}}, false);
 
     ASSERT_EQ(1, subGenomes.size());
     EXPECT_EQ(0, subGenomes.at(0).startIndex);

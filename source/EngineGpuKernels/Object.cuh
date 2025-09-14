@@ -263,7 +263,32 @@ struct Signal
     float channels[MAX_CHANNELS];
 };
 
-struct Creature;
+union TempValue
+{
+    uint64_t asUint64;
+    int2 asInt2;
+};
+
+struct Creature
+{
+    uint64_t id;
+    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
+    uint64_t ancestorId;
+
+    uint32_t generation;
+    uint32_t lineageId;
+    uint32_t numCells;
+
+    Genome genome;
+
+    // Process data
+    uint32_t frontAngleId;
+
+    // Temporary data
+    uint64_t creatureIndex;
+    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
+};
+
 struct Cell
 {
     // General
@@ -314,7 +339,7 @@ struct Cell
 
     // Internal algorithm data
     int locked;  // 0 = unlocked, 1 = locked
-    int64_t tempValue;
+    TempValue tempValue;
     float density;
     Cell* nextCell;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
@@ -397,26 +422,6 @@ struct Cell
         __threadfence();
         atomicExch(&locked, 0);
     }
-};
-
-struct Creature
-{
-    uint64_t id;
-    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
-    uint64_t ancestorId;
-
-    uint32_t generation;
-    uint32_t lineageId;
-    uint32_t numCells;
-
-    Genome genome;
-
-    // Process data
-    uint32_t frontAngleId;
-
-    // Temporary data
-    uint64_t creatureIndex;
-    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
 };
 
 template<>
