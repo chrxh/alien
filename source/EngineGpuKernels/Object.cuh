@@ -263,23 +263,7 @@ struct Signal
     float channels[MAX_CHANNELS];
 };
 
-struct Creature
-{
-    uint64_t id;
-    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
-    uint64_t ancestorId;
-
-    uint32_t generation;
-    uint32_t lineageId;
-    uint32_t numCells;
-
-    Genome genome;
-
-    // Temporary data
-    uint64_t creatureIndex;
-    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
-};
-
+struct Creature;
 struct Cell
 {
     // General
@@ -316,6 +300,8 @@ struct Cell
     // Process data
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
+    int frontAngleId;
+    bool isFrontAngleRefCell;
 
     // Additional rendering data
     CellEvent event;
@@ -411,6 +397,26 @@ struct Cell
         __threadfence();
         atomicExch(&locked, 0);
     }
+};
+
+struct Creature
+{
+    uint64_t id;
+    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
+    uint64_t ancestorId;
+
+    uint32_t generation;
+    uint32_t lineageId;
+    uint32_t numCells;
+
+    Genome genome;
+
+    // Process data
+    uint32_t frontAngleId;
+
+    // Temporary data
+    uint64_t creatureIndex;
+    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
 };
 
 template<>

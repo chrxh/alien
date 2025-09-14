@@ -306,7 +306,7 @@ struct CellDescription
 
     // Process data
     MEMBER(CellDescription, int, frontAngleId, 0);
-    MEMBER(CellDescription, bool, frontAngleRefCell, false);
+    MEMBER(CellDescription, bool, isFrontAngleRefCell, false);
 
     CellType getCellType() const;
     CellDescription& signalAndRelaxTime(std::vector<float> const& value);
@@ -314,19 +314,6 @@ struct CellDescription
 
     bool isConnectedTo(uint64_t id) const;
     float getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const;
-};
-
-struct ClusterDescription
-{
-    ClusterDescription() = default;
-    auto operator<=>(ClusterDescription const&) const = default;
-
-    MEMBER(ClusterDescription, std::vector<CellDescription>, cells, {});
-
-    ClusterDescription& addCells(std::vector<CellDescription> const& value);
-    ClusterDescription& addCell(CellDescription const& value);
-
-    RealVector2D getClusterPosFromCells() const;
 };
 
 struct ParticleDescription

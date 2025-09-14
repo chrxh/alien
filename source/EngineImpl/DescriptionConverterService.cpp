@@ -290,6 +290,8 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._nodeIndex = cellTO.nodeIndex;
     result._parentNodeIndex = cellTO.parentNodeIndex;
     result._geneIndex = cellTO.geneIndex;
+    result._frontAngleId = cellTO.frontAngleId;
+    result._isFrontAngleRefCell = cellTO.isFrontAngleRefCell;
 
     switch (cellTO.cellType) {
     case CellType_Structure: {
@@ -462,6 +464,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
     result._generation = creatureTO.generation;
     result._lineageId = creatureTO.lineageId;
     result._numCells = creatureTO.numCells;
+    result._frontAngleId = creatureTO.frontAngleId;
     result._genome._name = char64ToString(creatureTO.genome.name);
     result._genome._frontAngle = creatureTO.genome.frontAngle;
     result._genome._genes.reserve(creatureTO.genome.numGenes);
@@ -641,6 +644,7 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.ancestorId = creatureDesc._ancestorId.value_or(CreatureTO::AncestorId_NotSet);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.lineageId = creatureDesc._lineageId;
+    creatureTO.frontAngleId = creatureDesc._frontAngleId;
     creatureTO.numCells = creatureDesc._numCells;
     stringToChar64(creatureDesc._genome._name, creatureTO.genome.name);
     creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
@@ -817,6 +821,8 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.parentNodeIndex = cellDesc._parentNodeIndex;
     cellTO.geneIndex = cellDesc._geneIndex;
     cellTO.angleToFront = cellDesc._angleToFront;
+    cellTO.frontAngleId = cellDesc._frontAngleId;
+    cellTO.isFrontAngleRefCell = cellDesc._isFrontAngleRefCell;
 
     auto cellType = cellDesc.getCellType();
     if (cellDesc._neuralNetwork.has_value()) {

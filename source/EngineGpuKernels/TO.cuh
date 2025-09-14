@@ -244,12 +244,17 @@ struct CellTO
     uint32_t age;
     CellState cellState;
 
-    // Creature data
+    // Creature/Genome data
     bool belongToCreature;
     uint64_t creatureIndex;
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;
     uint16_t geneIndex;
+
+    // Process data
+    uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
+    int frontAngleId;
+    bool isFrontAngleRefCell;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells
@@ -260,7 +265,6 @@ struct CellTO
     uint8_t signalRelaxationTime;
     SignalTO signal;
     uint32_t activationTime;
-    uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     CellTriggered cellTriggered;
 
     // Editing data
@@ -278,6 +282,9 @@ struct CreatureTO
     uint32_t numCells;
 
     GenomeTO genome;
+
+    // Process data
+    uint32_t frontAngleId;
 
     // Temporary data
     uint64_t creatureIndexOnGpu;

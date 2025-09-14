@@ -80,6 +80,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
     creature->generation = creatureTO.generation;
     creature->lineageId = creatureTO.lineageId;
     creature->numCells = creatureTO.numCells;
+    creature->frontAngleId = creatureTO.frontAngleId;
     creature->genome.frontAngle = creatureTO.genome.frontAngle;
     creature->genome.numGenes = creatureTO.genome.numGenes;
     for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
@@ -252,6 +253,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
     cell->nodeIndex = cellTO.nodeIndex;
     cell->parentNodeIndex = cellTO.parentNodeIndex;
     cell->geneIndex = cellTO.geneIndex;
+    cell->frontAngleId = cellTO.frontAngleId;
+    cell->isFrontAngleRefCell = cellTO.isFrontAngleRefCell;
 
     cell->signalRestriction.active = cellTO.signalRestriction.active;
     cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
@@ -426,6 +429,8 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->scheduledOperationIndex = -1;
     cell->color = 0;
     cell->angleToFront = 0;
+    cell->frontAngleId = 0;
+    cell->isFrontAngleRefCell = false;
     cell->barrier = false;
     cell->sticky = false;
     cell->age = 0;
@@ -527,6 +532,8 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
     cell->parentNodeIndex = parentNodeIndex;
     cell->geneIndex = geneIndex;
     cell->numConnections = 0;
+    cell->frontAngleId = 0;
+    cell->isFrontAngleRefCell = false;
 
     cell->neuralNetwork = _data->objects.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {

@@ -38,6 +38,7 @@ namespace
             creatureTO.generation = creature->generation;
             creatureTO.lineageId = creature->lineageId;
             creatureTO.numCells = creature->numCells;
+            creatureTO.frontAngleId = creature->frontAngleId;
             creatureTO.genome.frontAngle = creature->genome.frontAngle;
             creatureTO.genome.numGenes = creature->genome.numGenes;
             for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
@@ -202,6 +203,8 @@ namespace
         cellTO.nodeIndex = cell->nodeIndex;
         cellTO.parentNodeIndex = cell->parentNodeIndex;
         cellTO.geneIndex = cell->geneIndex;
+        cellTO.frontAngleId = cell->frontAngleId;
+        cellTO.isFrontAngleRefCell = cell->isFrontAngleRefCell;
 
         cell->tempValue = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {

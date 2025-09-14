@@ -141,28 +141,6 @@ CellDescription& CellDescription::signalRestriction(float baseAngle, float openi
     return *this;
 }
 
-ClusterDescription& ClusterDescription::addCells(std::vector<CellDescription> const& value)
-{
-    _cells.insert(_cells.end(), value.begin(), value.end());
-    return *this;
-}
-
-ClusterDescription& ClusterDescription::addCell(CellDescription const& value)
-{
-    addCells({value});
-    return *this;
-}
-
-RealVector2D ClusterDescription::getClusterPosFromCells() const
-{
-    RealVector2D result;
-    for (auto const& cell : _cells) {
-        result += cell._pos;
-    }
-    result /= _cells.size();
-    return result;
-}
-
 ParticleDescription::ParticleDescription()
 {
     _id = NumberGenerator::get().createObjectId();
