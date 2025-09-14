@@ -297,7 +297,7 @@ struct Cell
     uint32_t age;
     CellState cellState;
 
-    // Creature data
+    // Creature/genome data
     Creature* creature;
     uint16_t nodeIndex;
     uint16_t parentNodeIndex;

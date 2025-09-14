@@ -289,7 +289,7 @@ struct CellDescription
     MEMBER(CellDescription, int, age, 0);
     MEMBER(CellDescription, CellState, cellState, CellState_Ready);
 
-    // Creature data
+    // Creature/genome data
     MEMBER(CellDescription, int, nodeIndex, 0);
     MEMBER(CellDescription, int, parentNodeIndex, 0);
     MEMBER(CellDescription, int, geneIndex, 0);
@@ -303,6 +303,10 @@ struct CellDescription
     MEMBER(CellDescription, int, activationTime, 0);
     MEMBER(CellDescription, int, detectedByCreatureId, 0);  // Only the first 16 bits from the creature id
     MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
+
+    // Process data
+    MEMBER(CellDescription, int, frontAngleId, 0);
+    MEMBER(CellDescription, bool, frontAngleRefCell, false);
 
     CellType getCellType() const;
     CellDescription& signalAndRelaxTime(std::vector<float> const& value);
@@ -351,6 +355,9 @@ struct CreatureDescription
     MEMBER(CreatureDescription, int, numCells, 0);
     MEMBER(CreatureDescription, GenomeDescription, genome, {});
     MEMBER(CreatureDescription, std::vector<CellDescription>, cells, {});
+
+    // Process data
+    MEMBER(CreatureDescription, int, frontAngleId, 0);
 };
 
 struct _CollectionCache
