@@ -20,6 +20,8 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .parentNodeIndex(14)
                       .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
                       .signalRestriction(SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
+                      .frontAngleId(17)
+                      .frontAngleRefCell(true)
                       .cellTypeData(cellTypeDesc);
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {

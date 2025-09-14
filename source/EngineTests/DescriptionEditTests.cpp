@@ -661,46 +661,4 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     }
 }
 
-TEST_F(DescriptionEditTests, frontAngleId_and_frontAngleRefCell_preservation)
-{
-    // Create test data with the new fields
-    auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(42).frontAngleRefCell(true),
-        CellDescription().id(2).pos({20.0f, 20.0f}).frontAngleId(13).frontAngleRefCell(false),
-    });
-    
-    // Store data in simulation and retrieve it to test serialization/deserialization
-    _simulationFacade->setSimulationData(data);
-    auto retrievedData = _simulationFacade->getSimulationData();
-    
-    // Verify the new fields are preserved
-    ASSERT_EQ(2, retrievedData._cells.size());
-    
-    auto& cell1 = retrievedData._cells[0];
-    auto& cell2 = retrievedData._cells[1];
-    
-    // Sort by id to ensure consistent order
-    if (cell1._id > cell2._id) {
-        std::swap(cell1, cell2);
-    }
-    
-    EXPECT_EQ(42, cell1._frontAngleId);
-    EXPECT_TRUE(cell1._frontAngleRefCell);
-    
-    EXPECT_EQ(13, cell2._frontAngleId);
-    EXPECT_FALSE(cell2._frontAngleRefCell);
-}
 
-TEST_F(DescriptionEditTests, clusterDescription_frontAngle_fields)
-{
-    // Test ClusterDescription with new fields
-    auto cluster = ClusterDescription()
-        .frontAngleId(99)
-        .frontAngleRefCell(true)
-        .addCell(CellDescription().id(1).pos({10.0f, 10.0f}));
-    
-    // Verify the fields are set correctly
-    EXPECT_EQ(99, cluster._frontAngleId);
-    EXPECT_TRUE(cluster._frontAngleRefCell);
-    EXPECT_EQ(1, cluster._cells.size());
-}
