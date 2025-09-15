@@ -705,7 +705,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
             if (!cell->isFrontAngleRefCell) {
                 for (int i = 0, j = cell->numConnections; i < j; ++i) {
                     auto const& otherCell = cell->connections[i].cell;
-                    if (cell->isSameCreature(otherCell)) {
+                    if (!cell->isSameCreature(otherCell)) {
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
@@ -737,7 +737,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
             } else {
                 for (int i = 0, j = cell->numConnections; i < j; ++i) {
                     auto const& otherCell = cell->connections[i].cell;
-                    if (cell->isSameCreature(otherCell)) {
+                    if (!cell->isSameCreature(otherCell)) {
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
