@@ -263,10 +263,15 @@ struct Signal
     float channels[MAX_CHANNELS];
 };
 
+struct uint32_float
+{
+    uint32_t uint32Part;
+    float floatPart;
+};
 union TempValue
 {
-    uint64_t asUint64;
-    int2 asInt2;
+    uint64_t as_uint64;
+    uint32_float as_uint32_float;
 };
 
 struct Creature
@@ -325,7 +330,7 @@ struct Cell
     // Process data
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
-    int frontAngleId;
+    uint32_t frontAngleId;
     bool isFrontAngleRefCell;
 
     // Additional rendering data

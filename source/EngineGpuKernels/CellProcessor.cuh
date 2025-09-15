@@ -36,7 +36,8 @@ public:
     __inline__ __device__ static void aging(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_calcFutureState(SimulationData& data);
     __inline__ __device__ static void cellStateTransition_applyNextState(SimulationData& data);
-    __inline__ __device__ static void frontAngleUpdate(SimulationData& data);
+    __inline__ __device__ static void frontAngleUpdate_calcFutureValue(SimulationData& data);
+    __inline__ __device__ static void frontAngleUpdate_applyFutureValue(SimulationData& data);
 
     __inline__ __device__ static void applyInnerFriction(SimulationData& data);
     __inline__ __device__ static void applyFriction(SimulationData& data);
@@ -68,7 +69,7 @@ __inline__ __device__ void CellProcessor::init(SimulationData& data)
 
         cell->shared1 = {0, 0};
         cell->nextCell = nullptr;
-        cell->tempValue.asUint64 = 0;
+        cell->tempValue.as_uint64 = 0;
     }
 }
 
@@ -600,7 +601,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
         bool isOtherCreatureNeighborDetaching = false;
         bool isSameCreatureNeighborReviving= false;
         bool isNeighborActivating = false;
-        int activatingCellConnection = -1;
+        //int activatingCellConnection = -1;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto const& connectedCell = cell->connections[i].cell;
             if (cell->isSameCreature(connectedCell)) {
@@ -612,7 +613,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 } else if (connectedCellState == CellState_Activating) {
                     if (connectedCell->connections[0].cell == cell) {
                         isNeighborActivating = true;
-                        activatingCellConnection = i;
+                        //activatingCellConnection = i;
                     }
                 }
             } else {
@@ -637,14 +638,14 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
         } else if (origCellState == CellState_Constructing) {
             if (isNeighborActivating) {
                 cellState = CellState_Activating;
-                auto prevCell = cell->connections[activatingCellConnection].cell;
-                if (prevCell != cell->connections[0].cell) {
-                    cell->angleToFront =
-                        Math::normalizedAngle(prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
-                } else {
-                    cell->angleToFront = Math::normalizedAngle(prevCell->angleToFront + 180.0f, -180.0f);
-                }
-                cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
+                //auto prevCell = cell->connections[activatingCellConnection].cell;
+                //if (prevCell != cell->connections[0].cell) {
+                //    cell->angleToFront =
+                //        Math::normalizedAngle(prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
+                //} else {
+                //    cell->angleToFront = Math::normalizedAngle(prevCell->angleToFront + 180.0f, -180.0f);
+                //}
+                //cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
             }
             if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
                 cellState = CellState_Detaching;
@@ -674,7 +675,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 }
             }
         }
-        cell->tempValue.asInt2.x = cellState;
+        cell->tempValue.as_uint32_float.uint32Part = cellState;
     }
 }
 
@@ -685,12 +686,12 @@ __inline__ __device__ void CellProcessor::cellStateTransition_applyNextState(Sim
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        cell->cellState = cell->tempValue.asInt2.x;
-        cell->tempValue.asInt2.x = 0;
+        cell->cellState = cell->tempValue.as_uint32_float.uint32Part;
+        cell->tempValue.as_uint32_float.uint32Part = 0;
     }
 }
 
-__inline__ __device__ void CellProcessor::frontAngleUpdate(SimulationData& data)
+__inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(SimulationData& data)
 {
     auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -700,9 +701,39 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate(SimulationData& data)
         if (cell->creature == nullptr) {
             continue;
         }
-        if (cell->creature->frontAngleId != cell->frontAngleId) {
+        if (cell->frontAngleId != cell->creature->frontAngleId) {
+            if (!cell->isFrontAngleRefCell) {
+                for (int i = 0, j = cell->numConnections; i < j; ++i) {
+                    auto const& otherCell = cell->connections[i].cell;
+                    if (cell->isSameCreature(otherCell)) {
+                        continue;
+                    }
+                    if (otherCell->frontAngleId == cell->creature->frontAngleId) {
+                        auto frontAngle_otherCell_cell = otherCell->angleToFront + otherCell->getAngelSpan(cell, otherCell->connections[0].cell);
+                        auto frontAngle_cell_otherCell = Math::normalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
+                        auto frontAngle_cell_connection0 = frontAngle_cell_otherCell + otherCell->getAngelSpan(0, i);
+                        cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+__inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(SimulationData& data)
+{
+    auto& cells = data.objects.cells;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->creature == nullptr) {
+            continue;
+        }
+        if (cell->frontAngleId != cell->creature->frontAngleId) {
             if (cell->isFrontAngleRefCell) {
                 cell->frontAngleId = cell->creature->frontAngleId;
+                cell->angleToFront = cell->creature->genome.frontAngle;
             } else {
                 for (int i = 0, j = cell->numConnections; i < j; ++i) {
                     auto const& otherCell = cell->connections[i].cell;
@@ -710,7 +741,9 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate(SimulationData& data)
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-                        // TODO calc new frontAngle
+                        cell->frontAngleId = cell->creature->frontAngleId;
+                        cell->angleToFront = cell->tempValue.as_uint32_float.floatPart;
+                        cell->tempValue.as_uint32_float.floatPart = 0;
                     }
                 }
             }

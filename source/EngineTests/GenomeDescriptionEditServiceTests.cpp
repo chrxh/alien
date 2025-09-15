@@ -310,18 +310,21 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_onlyBaseAnd
         GeneDescription()
             .separation(false)
             .nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription()).neuralNetwork(NeuralNetworkGenomeDescription().weight(2, 3, 0.4f)),
-                NodeDescription().cellTypeData(DepotGenomeDescription()),
-                NodeDescription().cellTypeData(BaseGenomeDescription()),
-                NodeDescription().cellTypeData(SensorGenomeDescription()),
-                NodeDescription().cellTypeData(GeneratorGenomeDescription()),
-                NodeDescription().cellTypeData(AttackerGenomeDescription()),
-                NodeDescription().cellTypeData(InjectorGenomeDescription()),
-                NodeDescription().cellTypeData(MuscleGenomeDescription()),
-                NodeDescription().cellTypeData(DefenderGenomeDescription()),
-                NodeDescription().cellTypeData(ReconnectorGenomeDescription()),
-                NodeDescription().cellTypeData(DetonatorGenomeDescription()),
-            }),
+            NodeDescription()
+                .cellTypeData(ConstructorGenomeDescription())
+                .neuralNetwork(NeuralNetworkGenomeDescription().weight(2, 3, 0.4f))
+                .signalRestriction(SignalRestrictionGenomeDescription().active(true).openingAngle(3.0f)),
+            NodeDescription().cellTypeData(DepotGenomeDescription()),
+            NodeDescription().cellTypeData(BaseGenomeDescription()),
+            NodeDescription().cellTypeData(SensorGenomeDescription()),
+            NodeDescription().cellTypeData(GeneratorGenomeDescription()),
+            NodeDescription().cellTypeData(AttackerGenomeDescription()),
+            NodeDescription().cellTypeData(InjectorGenomeDescription()),
+            NodeDescription().cellTypeData(MuscleGenomeDescription()),
+            NodeDescription().cellTypeData(DefenderGenomeDescription()),
+            NodeDescription().cellTypeData(ReconnectorGenomeDescription()),
+            NodeDescription().cellTypeData(DetonatorGenomeDescription()),
+        }),
     });
 
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}}, false);
@@ -332,6 +335,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_onlyBaseAnd
     for (auto const& [index, node] : gene0._nodes | boost::adaptors::indexed(0)) {
         EXPECT_EQ(index == 0 ? CellTypeGenome_Constructor : CellTypeGenome_Base, node.getCellType());
     }
+    EXPECT_EQ(NeuralNetworkGenomeDescription(), gene0._nodes.front()._neuralNetwork);
+    EXPECT_EQ(SignalRestrictionGenomeDescription(), gene0._nodes.front()._signalRestriction);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_complexCycles)

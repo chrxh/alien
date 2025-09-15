@@ -253,7 +253,7 @@ struct CellTO
 
     // Process data
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
-    int frontAngleId;
+    uint32_t frontAngleId;
     bool isFrontAngleRefCell;
 
     // Cell type data

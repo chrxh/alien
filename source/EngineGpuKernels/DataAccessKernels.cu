@@ -206,7 +206,7 @@ namespace
         cellTO.frontAngleId = cell->frontAngleId;
         cellTO.isFrontAngleRefCell = cell->isFrontAngleRefCell;
 
-        cell->tempValue.asUint64 = cellTOIndex;
+        cell->tempValue.as_uint64 = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectingCell = cell->connections[i].cell;
             cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
@@ -401,7 +401,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
-            cell->tempValue.asUint64 = ConnectionTO::CellIndex_NotSet;
+            cell->tempValue.as_uint64 = ConnectionTO::CellIndex_NotSet;
             continue;
         }
         createCellTO(cell, collectionTO, cellArrayStart);
@@ -445,7 +445,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
             }
         }
         if (!found) {
-            cell->tempValue.asUint64 = ConnectionTO::CellIndex_NotSet;
+            cell->tempValue.as_uint64 = ConnectionTO::CellIndex_NotSet;
             continue;
         }
 
@@ -602,7 +602,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
         auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->tempValue.asUint64 = ConnectionTO::CellIndex_NotSet;
+            cell->tempValue.as_uint64 = ConnectionTO::CellIndex_NotSet;
             continue;
         }
 
@@ -619,7 +619,7 @@ __global__ void cudaResolveConnections(SimulationData data, TO collectionTO)
 
         for (int i = 0; i < cellTO.numConnections; ++i) {
             auto const cellIndex = cellTO.connections[i].cellIndex;
-            cellTO.connections[i].cellIndex = data.objects.heap.atType<Cell>(cellIndex).tempValue.asUint64;
+            cellTO.connections[i].cellIndex = data.objects.heap.atType<Cell>(cellIndex).tempValue.as_uint64;
         }
     }
 }

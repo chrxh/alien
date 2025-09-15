@@ -375,6 +375,9 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
+    if (constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
+        newCell->isFrontAngleRefCell = true;
+    }
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
 
     newCell->releaseLock();
@@ -808,25 +811,26 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
     // TODO implement better logic for angleToFront setting
     if (/*constructionData.isLastNodeOfLastConcatenation || (*/constructionData.isLastNode /*&& constructionData.hasInfiniteConcatenations)*/) {
         newCell->cellState = CellState_Activating;
-        if (constructionData.isSeparation) {
-            newCell->angleToFront = constructionData.creature->genome.frontAngle;
-        } else {
-            if (hostCell->numConnections > 1) {
-                newCell->angleToFront =
-                    Math::normalizedAngle(hostCell->angleToFront + (180.0f - hostCell->getAngelSpan(hostCell->connections[0].cell, newCell)), -180.0f);
-                if (newCell->numConnections > 1) {
-                    newCell->angleToFront =
-                        Math::normalizedAngle(newCell->angleToFront + newCell->getAngelSpan(newCell->connections[0].cell, hostCell), -180.0f);
-                }
-            } else {
-                if (newCell->numConnections > 1) {
-                    newCell->angleToFront =
-                        Math::normalizedAngle(hostCell->angleToFront + (180.0f - newCell->getAngelSpan(hostCell, newCell->connections[0].cell)), -180.0f);
-                } else {
-                    newCell->angleToFront = hostCell->angleToFront - 180.0f;
-                }
-            }
-        }
+        ++newCell->creature->frontAngleId;
+        //if (constructionData.isSeparation) {
+        //    newCell->angleToFront = constructionData.creature->genome.frontAngle;
+        //} else {
+        //    if (hostCell->numConnections > 1) {
+        //        newCell->angleToFront =
+        //            Math::normalizedAngle(hostCell->angleToFront + (180.0f - hostCell->getAngelSpan(hostCell->connections[0].cell, newCell)), -180.0f);
+        //        if (newCell->numConnections > 1) {
+        //            newCell->angleToFront =
+        //                Math::normalizedAngle(newCell->angleToFront + newCell->getAngelSpan(newCell->connections[0].cell, hostCell), -180.0f);
+        //        }
+        //    } else {
+        //        if (newCell->numConnections > 1) {
+        //            newCell->angleToFront =
+        //                Math::normalizedAngle(hostCell->angleToFront + (180.0f - newCell->getAngelSpan(hostCell, newCell->connections[0].cell)), -180.0f);
+        //        } else {
+        //            newCell->angleToFront = hostCell->angleToFront - 180.0f;
+        //        }
+        //    }
+        //}
     }
 }
 

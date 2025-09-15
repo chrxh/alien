@@ -500,7 +500,7 @@ namespace
     auto constexpr Id_Cell_AngleToFront = 16;
     auto constexpr Id_Cell_Sticky = 17;
     auto constexpr Id_Cell_FrontAngleId = 18;
-    auto constexpr Id_Cell_FrontAngleRefCell = 19;
+    auto constexpr Id_Cell_IsFrontAngleRefCell = 19;
 
     auto constexpr Id_Signal_Channels = 0;
 
@@ -876,7 +876,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
-        loadSave(task, auxiliaries, Id_Cell_FrontAngleRefCell, data._frontAngleRefCell, defaultObject._frontAngleRefCell);
+        loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._isFrontAngleRefCell, defaultObject._isFrontAngleRefCell);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._connections, data._cellTypeData, data._signal, data._signalRestriction, data._neuralNetwork);
