@@ -212,8 +212,8 @@ void _PreviewWidget::processActionBar()
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(scale(90.0f));
-    ImGui::SliderInt("##TPSRestriction", &_simulationSpeed, 5, 100, "%d%% speed", ImGuiSliderFlags_None);
-    _simulationSpeed = std::clamp(_simulationSpeed, 5, 100);
+    ImGui::SliderInt("##TPSRestriction", &_simulationSpeed, 1, 100, "%d%% speed", ImGuiSliderFlags_None);
+    _simulationSpeed = std::clamp(_simulationSpeed, 1, 100);
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);

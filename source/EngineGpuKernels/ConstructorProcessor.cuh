@@ -375,7 +375,7 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
-    if (constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
+    if (constructionData.isSeparation && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
         newCell->isFrontAngleRefCell = true;
     }
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
@@ -811,7 +811,7 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
     // TODO implement better logic for angleToFront setting
     if (/*constructionData.isLastNodeOfLastConcatenation || (*/constructionData.isLastNode /*&& constructionData.hasInfiniteConcatenations)*/) {
         newCell->cellState = CellState_Activating;
-        ++newCell->creature->frontAngleId;
+        alienAtomicAdd32(&newCell->creature->frontAngleId, static_cast<uint32_t>(1));
         //if (constructionData.isSeparation) {
         //    newCell->angleToFront = constructionData.creature->genome.frontAngle;
         //} else {

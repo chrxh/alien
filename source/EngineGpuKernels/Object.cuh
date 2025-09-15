@@ -331,6 +331,7 @@ struct Cell
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
+    static auto constexpr FrontAngleId_NoUpdate = 10000.0f;
     bool isFrontAngleRefCell;
 
     // Additional rendering data
@@ -345,6 +346,7 @@ struct Cell
     // Internal algorithm data
     int locked;  // 0 = unlocked, 1 = locked
     TempValue tempValue;
+
     float density;
     Cell* nextCell;                   // Linked list for finding all overlapping cells
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
@@ -379,6 +381,9 @@ struct Cell
 
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
+        if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {
+            return 0;
+        }
         auto result = 0.0f;
         for (int i = connectionIndex1 + 1; i < connectionIndex1 + numConnections; i++) {
             auto index = i % numConnections;
@@ -390,7 +395,7 @@ struct Cell
         return Math::normalizedAngle(result, -180.0f);
     }
 
-    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
+    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2, bool debug = false)
     {
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
@@ -404,6 +409,9 @@ struct Cell
         }
         if (connectionIndex1 == -1 || connectionIndex2 == -1) {
             return 0;
+        }
+        if (debug) {
+            printf("index: %d, %d\n", connectionIndex1, connectionIndex2);
         }
         return getAngelSpan(connectionIndex1, connectionIndex2);
     }

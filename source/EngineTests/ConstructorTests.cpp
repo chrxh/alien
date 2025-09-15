@@ -2858,3 +2858,73 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     EXPECT_TRUE(actualData.hasConnection(cell2._id, 5));
     EXPECT_TRUE(actualData.hasConnection(cell2._id, 6));
 }
+
+TEST_F(ConstructorTests, frontAngleUpdate)
+{
+    auto FrontAngle = 45.0f;
+
+    // Body parts are not contained in genome
+    auto genome =
+        GenomeDescription()
+            .frontAngle(FrontAngle)
+            .genes({
+                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription().referenceAngle(-90.0f), NodeDescription()}), 
+    });
+
+    auto data = Description().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(0)
+                .pos({10.0f + getOffspringDistance(), 12.0f})
+                .energy(getConstructorEnergy())
+                .cellTypeData(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(3)),
+        }),
+        CreatureDescription().id(1).genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).isFrontAngleRefCell(true).cellState(CellState_Constructing),
+            CellDescription().id(2).pos({10.0f, 11.0f}).cellState(CellState_Constructing),
+            CellDescription().id(3).pos({10.0f, 12.0f}).cellState(CellState_Constructing),
+            CellDescription().id(4).pos({9.0f, 10.0f}),
+            CellDescription().id(5).pos({8.0f, 11.0f}),
+            CellDescription().id(6).pos({9.0f, 11.0f}),
+            CellDescription().id(7).pos({12.0f, 11.0f}),
+            CellDescription().id(8).pos({11.0f, 11.0f}),
+        }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 0);
+    data.addConnection(4, 1);
+    data.addConnection(5, 6);
+    data.addConnection(6, 2);
+    data.addConnection(7, 8);
+    data.addConnection(8, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+
+    auto creature = actualData.getCreatureRef(1);
+    ASSERT_EQ(9, creature._cells.size());
+
+    auto actualConstructedCell = actualData.getOtherCellRef({0, 1, 2, 3, 4, 5, 6, 7, 8});
+
+    EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
+    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(4)._angleToFront));
+
+    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(5)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(6)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(7)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(8)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(9)._angleToFront));
+
+    // TODO connected cell from other creature
+}
+
+// TODO First cell in separation case is frontAngleRef

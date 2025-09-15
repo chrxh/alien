@@ -703,17 +703,24 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
         }
         if (cell->frontAngleId != cell->creature->frontAngleId) {
             if (!cell->isFrontAngleRefCell) {
+                auto update = false;
                 for (int i = 0, j = cell->numConnections; i < j; ++i) {
                     auto const& otherCell = cell->connections[i].cell;
                     if (!cell->isSameCreature(otherCell)) {
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-                        auto frontAngle_otherCell_cell = otherCell->angleToFront + otherCell->getAngelSpan(cell, otherCell->connections[0].cell);
+                        auto frontAngle_otherCell_cell =
+                            Math::normalizedAngle(otherCell->angleToFront + otherCell->getAngelSpan(cell, otherCell->connections[0].cell), -180.0f);
                         auto frontAngle_cell_otherCell = Math::normalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
-                        auto frontAngle_cell_connection0 = frontAngle_cell_otherCell + otherCell->getAngelSpan(0, i);
+                        auto frontAngle_cell_connection0 = Math::normalizedAngle(frontAngle_cell_otherCell + cell->getAngelSpan(0, i), -180.0f);
                         cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
+                        update = true;
+                        break;
                     }
+                }
+                if (!update) {
+                    cell->tempValue.as_uint32_float.floatPart = Cell::FrontAngleId_NoUpdate;
                 }
             }
         }
@@ -735,17 +742,11 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
                 cell->frontAngleId = cell->creature->frontAngleId;
                 cell->angleToFront = cell->creature->genome.frontAngle;
             } else {
-                for (int i = 0, j = cell->numConnections; i < j; ++i) {
-                    auto const& otherCell = cell->connections[i].cell;
-                    if (!cell->isSameCreature(otherCell)) {
-                        continue;
-                    }
-                    if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-                        cell->frontAngleId = cell->creature->frontAngleId;
-                        cell->angleToFront = cell->tempValue.as_uint32_float.floatPart;
-                        cell->tempValue.as_uint32_float.floatPart = 0;
-                    }
+                if (cell->tempValue.as_uint32_float.floatPart != Cell::FrontAngleId_NoUpdate) {
+                    cell->frontAngleId = cell->creature->frontAngleId;
+                    cell->angleToFront = cell->tempValue.as_uint32_float.floatPart;
                 }
+                cell->tempValue.as_uint32_float.floatPart = 0;
             }
         }
     }
