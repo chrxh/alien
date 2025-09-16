@@ -395,7 +395,7 @@ struct Cell
         return Math::normalizedAngle(result, -180.0f);
     }
 
-    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2, bool debug = false)
+    __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
     {
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
@@ -409,9 +409,6 @@ struct Cell
         }
         if (connectionIndex1 == -1 || connectionIndex2 == -1) {
             return 0;
-        }
-        if (debug) {
-            printf("index: %d, %d\n", connectionIndex1, connectionIndex2);
         }
         return getAngelSpan(connectionIndex1, connectionIndex2);
     }
