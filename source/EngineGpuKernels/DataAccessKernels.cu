@@ -187,7 +187,7 @@ namespace
         cellTO.cellState = cell->cellState;
         cellTO.cellType = cell->cellType;
         cellTO.color = cell->color;
-        cellTO.angleToFront = cell->angleToFront;
+        cellTO.frontAngle = cell->frontAngle;
         cellTO.age = cell->age;
         cellTO.signalRestriction.active = cell->signalRestriction.active;
         cellTO.signalRestriction.baseAngle = cell->signalRestriction.baseAngle;

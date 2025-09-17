@@ -246,7 +246,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
     cell->sticky = cellTO.sticky;
     cell->age = cellTO.age;
     cell->color = cellTO.color;
-    cell->angleToFront = cellTO.angleToFront;
+    cell->frontAngle = cellTO.frontAngle;
     cell->activationTime = cellTO.activationTime;
     cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTriggered = cellTO.cellTriggered;
@@ -428,7 +428,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->detached = 0;
     cell->scheduledOperationIndex = -1;
     cell->color = 0;
-    cell->angleToFront = Cell::FrontAngle_NotSet;
+    cell->frontAngle = Cell::FrontAngle_NotSet;
     cell->frontAngleId = 0;
     cell->isFrontAngleRefCell = false;
     cell->barrier = false;
@@ -521,7 +521,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
     cell->energy = energy;
     cell->stiffness = gene->stiffness;
     cell->color = node->color;
-    cell->angleToFront = Cell::FrontAngle_NotSet;
+    cell->frontAngle = Cell::FrontAngle_NotSet;
     cell->stiffness = 1.0f;
     cell->barrier = false;
     cell->sticky = false;

@@ -283,7 +283,7 @@ struct CellDescription
     MEMBER(CellDescription, float, energy, 100.0f);
     MEMBER(CellDescription, float, stiffness, 1.0f);
     MEMBER(CellDescription, int, color, 0);
-    MEMBER(CellDescription, std::optional<float>, angleToFront, std::nullopt); // Angle between [cell, cell->connection[0]] and front direction in reference configuration
+    MEMBER(CellDescription, std::optional<float>, frontAngle, std::nullopt); // Angle between [cell, cell->connection[0]] and front direction in reference configuration
     MEMBER(CellDescription, bool, barrier, false);
     MEMBER(CellDescription, bool, sticky, false);
     MEMBER(CellDescription, int, age, 0);

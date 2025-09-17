@@ -238,7 +238,7 @@ struct CellTO
     float stiffness;
     uint8_t color;
     uint8_t numConnections;
-    float angleToFront;
+    float frontAngle;
     static auto constexpr FrontAngle_NotSet = 1e7f;
     bool barrier;
     bool sticky;

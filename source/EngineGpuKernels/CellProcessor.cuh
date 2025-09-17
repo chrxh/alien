@@ -647,12 +647,12 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 cellState = CellState_Activating;
                 //auto prevCell = cell->connections[activatingCellConnection].cell;
                 //if (prevCell != cell->connections[0].cell) {
-                //    cell->angleToFront =
-                //        Math::normalizedAngle(prevCell->angleToFront + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
+                //    cell->frontAngle =
+                //        Math::normalizedAngle(prevCell->frontAngle + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
                 //} else {
-                //    cell->angleToFront = Math::normalizedAngle(prevCell->angleToFront + 180.0f, -180.0f);
+                //    cell->frontAngle = Math::normalizedAngle(prevCell->frontAngle + 180.0f, -180.0f);
                 //}
-                //cell->angleToFront = Math::normalizedAngle(cell->angleToFront, -180.0f);
+                //cell->frontAngle = Math::normalizedAngle(cell->frontAngle, -180.0f);
             }
             if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
                 cellState = CellState_Detaching;
@@ -743,7 +743,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                                 return connection->angleFromPrevious;
                             };
                             auto frontAngle_otherCell_cell = Math::normalizedAngle(
-                                otherCell->angleToFront + getAngelSpanWithModifiedAngles(otherCell, cell, otherCell->connections[0].cell, getInitialAngleFunc), -180.0f);
+                                otherCell->frontAngle + getAngelSpanWithModifiedAngles(otherCell, cell, otherCell->connections[0].cell, getInitialAngleFunc), -180.0f);
                             auto frontAngle_cell_otherCell = Math::normalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
                             auto frontAngle_cell_connection0 =
                                 Math::normalizedAngle(frontAngle_cell_otherCell + getAngelSpanWithModifiedAngles(cell, 0, i, getInitialAngleFunc), -180.0f);
@@ -753,7 +753,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         // Normal case without bending muscles
                         else {
                             auto frontAngle_otherCell_cell =
-                                Math::normalizedAngle(otherCell->angleToFront + otherCell->getAngelSpan(cell, otherCell->connections[0].cell), -180.0f);
+                                Math::normalizedAngle(otherCell->frontAngle + otherCell->getAngelSpan(cell, otherCell->connections[0].cell), -180.0f);
                             auto frontAngle_cell_otherCell = Math::normalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
                             auto frontAngle_cell_connection0 = Math::normalizedAngle(frontAngle_cell_otherCell + cell->getAngelSpan(0, i), -180.0f);
                             cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
@@ -783,11 +783,11 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
         if (cell->frontAngleId != cell->creature->frontAngleId) {
             if (cell->isFrontAngleRefCell) {
                 cell->frontAngleId = cell->creature->frontAngleId;
-                cell->angleToFront = cell->creature->genome.frontAngle;
+                cell->frontAngle = cell->creature->genome.frontAngle;
             } else {
                 if (cell->tempValue.as_uint32_float.floatPart != Cell::FrontAngleId_NoUpdate) {
                     cell->frontAngleId = cell->creature->frontAngleId;
-                    cell->angleToFront = cell->tempValue.as_uint32_float.floatPart;
+                    cell->frontAngle = cell->tempValue.as_uint32_float.floatPart;
                 }
                 cell->tempValue.as_uint32_float.floatPart = 0;
             }

@@ -863,7 +863,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Vel, data._vel, defaultObject._vel);
         loadSave(task, auxiliaries, Id_Cell_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Cell_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._angleToFront, defaultObject._angleToFront);
+        loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
         loadSave(task, auxiliaries, Id_Cell_Barrier, data._barrier, defaultObject._barrier);
         loadSave(task, auxiliaries, Id_Cell_Sticky, data._sticky, defaultObject._sticky);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);

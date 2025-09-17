@@ -171,7 +171,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                 AlienGui::InputText(
                     AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
                 //AlienGui::InputFloat(
-                //    AlienGui::InputFloatParameters().name("TEMP: abs angle to conn0").format("%.1f").textWidth(BaseTabTextWidth), cell._angleToFront);
+                //    AlienGui::InputFloatParameters().name("TEMP: abs angle to conn0").format("%.1f").textWidth(BaseTabTextWidth), cell._frontAngle);
                 ImGui::TreePop();
             }
 
