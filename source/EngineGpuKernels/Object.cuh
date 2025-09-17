@@ -310,7 +310,7 @@ struct Cell
     float energy;
     float stiffness;
     uint8_t color;
-    float angleToFront;
+    float frontAngle;
     static auto constexpr FrontAngle_NotSet = 1e7f;
     bool barrier;
     bool sticky;

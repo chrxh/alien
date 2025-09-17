@@ -89,7 +89,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;
     }
-    if (cell->angleToFront == Cell::FrontAngle_NotSet) {
+    if (cell->frontAngle == Cell::FrontAngle_NotSet) {
         return;
     }
 
@@ -97,7 +97,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (cell->signal.active) {
         bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
         auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f;
-        auto targetAngleRelToConnection0 = Math::normalizedAngle(targetAngle + cell->angleToFront, -180.0f);
+        auto targetAngleRelToConnection0 = Math::normalizedAngle(targetAngle + cell->frontAngle, -180.0f);
 
         auto angleFactor = [&] {
             if (isLeftSide(cell)) {
@@ -228,7 +228,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;
     }
-    if (cell->angleToFront == Cell::FrontAngle_NotSet) {
+    if (cell->frontAngle == Cell::FrontAngle_NotSet) {
         return;
     }
 
@@ -334,7 +334,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;                                                                                                                     
     }
-    if (cell->angleToFront == Cell::FrontAngle_NotSet) {
+    if (cell->frontAngle == Cell::FrontAngle_NotSet) {
         return;
     }
 
@@ -350,7 +350,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         auto bendingInfo = getBendingInfo(data, cell);
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
         auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f;
-        auto targetAngleRelToConnection0 = Math::normalizedAngle(cell->angleToFront + targetAngle, -180.0f);
+        auto targetAngleRelToConnection0 = Math::normalizedAngle(cell->frontAngle + targetAngle, -180.0f);
 
         // Change bending direction
         auto sumAngle = bendingInfo.connection->angleFromPrevious + bendingInfo.connectionNext->angleFromPrevious;  // Sum will not change
@@ -376,7 +376,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
         }
         bendingInfo.connection->angleFromPrevious += angleDelta;
         bendingInfo.connectionNext->angleFromPrevious -= angleDelta;
-        cell->angleToFront -= angleDelta;
+        cell->frontAngle -= angleDelta;
 
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
@@ -464,7 +464,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
 
                 // Forward movement?
                 if (actualDistanceDelta > 0) {
-                    if (cell->angleToFront > 0) {
+                    if (cell->frontAngle > 0) {
                         actualDistanceDelta = abs(actualDistanceDelta);
                     }
                     else {
@@ -474,7 +474,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
 
                 // backward movement?
                 else {
-                    if (cell->angleToFront > 0) {
+                    if (cell->frontAngle > 0) {
                         actualDistanceDelta = -abs(actualDistanceDelta);
                     } else {
                         actualDistanceDelta = abs(actualDistanceDelta);
@@ -561,7 +561,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
 
                 // Forward movement?
                 if (actualDistanceDelta > 0) {
-                    if (cell->angleToFront > 0) {
+                    if (cell->frontAngle > 0) {
                         actualDistanceDelta = abs(actualDistanceDelta);
                     } else {
                         actualDistanceDelta = -abs(actualDistanceDelta);
@@ -570,7 +570,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
 
                 // backward movement?
                 else {
-                    if (cell->angleToFront > 0) {
+                    if (cell->frontAngle > 0) {
                         actualDistanceDelta = -abs(actualDistanceDelta);
                     } else {
                         actualDistanceDelta = abs(actualDistanceDelta);
@@ -592,7 +592,7 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
 {
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
         auto direction = SignalProcessor::calcReferenceDirection(data, cell);
-        auto angle = Math::normalizedAngle(cell->angleToFront + max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
+        auto angle = Math::normalizedAngle(cell->frontAngle + max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
         direction = Math::rotateClockwise(direction, angle);
 
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
@@ -650,8 +650,8 @@ __inline__ __device__ float MuscleProcessor::calcActualAngle(SimulationData& dat
 __inline__ __device__ bool MuscleProcessor::isLeftSide(Cell* cell)
 {
     if (cell->numConnections == 2) {
-        return cell->angleToFront > NEAR_ZERO;
+        return cell->frontAngle > NEAR_ZERO;
     } else {
-        return cell->angleToFront < -NEAR_ZERO;
+        return cell->frontAngle < -NEAR_ZERO;
     }
 }

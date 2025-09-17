@@ -284,7 +284,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._sticky = cellTO.sticky;
     result._age = cellTO.age;
     result._color = cellTO.color;
-    result._angleToFront = cellTO.angleToFront != CellTO::FrontAngle_NotSet ? std::make_optional(cellTO.angleToFront) : std::nullopt;
+    result._frontAngle = cellTO.frontAngle != CellTO::FrontAngle_NotSet ? std::make_optional(cellTO.frontAngle) : std::nullopt;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTriggered = cellTO.cellTriggered;
     result._nodeIndex = cellTO.nodeIndex;
@@ -820,7 +820,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.nodeIndex = cellDesc._nodeIndex;
     cellTO.parentNodeIndex = cellDesc._parentNodeIndex;
     cellTO.geneIndex = cellDesc._geneIndex;
-    cellTO.angleToFront = cellDesc._angleToFront.value_or(CellTO::FrontAngle_NotSet);
+    cellTO.frontAngle = cellDesc._frontAngle.value_or(CellTO::FrontAngle_NotSet);
     cellTO.frontAngleId = cellDesc._frontAngleId;
     cellTO.isFrontAngleRefCell = cellDesc._isFrontAngleRefCell;
 

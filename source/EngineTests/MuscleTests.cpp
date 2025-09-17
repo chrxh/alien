@@ -93,7 +93,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .angleToFront(side == Side::Left ? 90.0f : -90.0f)
+            .frontAngle(side == Side::Left ? 90.0f : -90.0f)
             .cellTypeData(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4)),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
@@ -163,7 +163,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
         CellDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
-            .angleToFront(side == Side::Left ? -90.0f : 90.0f)
+            .frontAngle(side == Side::Left ? -90.0f : 90.0f)
             .cellTypeData(MuscleDescription().mode(AutoBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 4)),
     });
@@ -249,7 +249,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .angleToFront(side == Side::Left ? 90.0f : -90.0f)
+            .frontAngle(side == Side::Left ? 90.0f : -90.0f)
             .cellTypeData(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
@@ -341,7 +341,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         CellDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
-            .angleToFront(side == Side::Left ? -90.0f : 90.0f)
+            .frontAngle(side == Side::Left ? -90.0f : 90.0f)
             .cellTypeData(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
@@ -456,7 +456,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
-            .angleToFront(side == Side::Left ? 90.0f : -90.0f)
+            .frontAngle(side == Side::Left ? 90.0f : -90.0f)
             .cellTypeData(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 180.0f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
         CellDescription().id(3).pos({side == Side::Left ? 12.0f : 10.0f, 10.0f}),
@@ -503,7 +503,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
         CellDescription()
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
-            .angleToFront(side == Side::Left ? -90.0f : 90.0f)
+            .frontAngle(side == Side::Left ? -90.0f : 90.0f)
             .cellTypeData(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
     });
