@@ -16,7 +16,7 @@ public:
     __inline__ __device__ static void createEmptySignal(Cell* cell);
     __inline__ __device__ static float2 calcReferenceDirection(SimulationData& data, Cell* cell);
 
-    __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview = false);
     __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Cell* cell);
     __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval, bool isPreview = false);
 };
@@ -144,7 +144,7 @@ __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationD
     return Math::normalized(data.cellMap.getCorrectedDirection(cell->connections[0].cell->pos - cell->pos));
 }
 
-__inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval, bool isPreview)
+__inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview)
 {
     auto triggerInterval = max(MAX_SIGNAL_RELAXATION_TIME + 1, autoTriggerInterval);
     if (cell->creature != nullptr) {

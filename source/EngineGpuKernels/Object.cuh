@@ -216,6 +216,8 @@ struct Muscle
     // Additional rendering data
     float lastMovementX;
     float lastMovementY;
+
+    bool isBendingMuscle() const { return mode == MuscleMode_AutoBending || mode == MuscleMode_ManualBending || mode == MuscleMode_AngleBending; }
 };
 
 struct Defender
@@ -306,6 +308,7 @@ struct Cell
     float stiffness;
     uint8_t color;
     float angleToFront;
+    static auto constexpr FrontAngle_NotSet = 1e7f;
     bool barrier;
     bool sticky;
     uint32_t age;
@@ -331,7 +334,7 @@ struct Cell
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
-    static auto constexpr FrontAngleId_NoUpdate = 10000.0f;
+    static auto constexpr FrontAngleId_NoUpdate = 1e7f;
     bool isFrontAngleRefCell;
 
     // Additional rendering data

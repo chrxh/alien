@@ -239,6 +239,7 @@ struct CellTO
     uint8_t color;
     uint8_t numConnections;
     float angleToFront;
+    static auto constexpr FrontAngle_NotSet = 1e7f;
     bool barrier;
     bool sticky;
     uint32_t age;

@@ -556,6 +556,17 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
 
+    // Edge case for bending muscle cells with one connection: Reset initial angle
+    if (lastCell->numConnections == 1 && lastCell->cellType == CellType_Muscle && lastCell->cellTypeData.muscle.isBendingMuscle()) {
+        if (lastCell->cellTypeData.muscle.mode == MuscleMode_AutoBending) {
+            lastCell->cellTypeData.muscle.modeData.angleBending.initialAngle = 0;
+        } else if (lastCell->cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+            lastCell->cellTypeData.muscle.modeData.manualBending.initialAngle = 0;
+        } else if (lastCell->cellTypeData.muscle.mode == MuscleMode_AngleBending) {
+            lastCell->cellTypeData.muscle.modeData.angleBending.initialAngle = 0;
+        }
+    }
+
     newCell->releaseLock();
     return newCell;
 }

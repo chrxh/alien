@@ -89,6 +89,9 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;
     }
+    if (cell->angleToFront == Cell::FrontAngle_NotSet) {
+        return;
+    }
 
     // Activation
     if (cell->signal.active) {
@@ -225,6 +228,9 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;
     }
+    if (cell->angleToFront == Cell::FrontAngle_NotSet) {
+        return;
+    }
 
     // Initialization
     if (bending.initialAngle == 0) {
@@ -326,6 +332,9 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     auto& bending = muscle.modeData.angleBending;
 
     if (cell->numConnections != 1 && cell->numConnections != 2) {
+        return;                                                                                                                     
+    }
+    if (cell->angleToFront == Cell::FrontAngle_NotSet) {
         return;
     }
 
