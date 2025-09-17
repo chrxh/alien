@@ -61,6 +61,8 @@ cd build
 
 ## Validation
 
+## Validation
+
 ### Build Validation
 - **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `NetworkTests`, `PersisterTests`
 - **Build time**: 3-4 minutes on 8-core system with `-j8` parallelization
@@ -76,7 +78,28 @@ cd build
 ### Application Validation
 - **CLI works**: `./cli --help` shows usage information
 - **GUI requires**: NVIDIA GPU + X11 display (cannot run in headless CI environments)
+- **GUI error handling**: Provides clear error messages when GPU requirements aren't met
 - **Simulation files**: CLI expects `.sim` and `.settings.json` files (not included in main repo)
+
+### Validation Workflow for Changes
+```bash
+# Always run this validation sequence after making code changes:
+
+# 1. Format code (if modified)
+clang-format --style=file:source/_clang-format -i path/to/modified/files.cpp
+
+# 2. Build (NEVER CANCEL - takes 3-4 minutes)
+cmake --build build --config Release -j8
+
+# 3. Run core tests (required - these must pass)
+cd build && ./NetworkTests && ./PersisterTests
+
+# 4. Test CLI functionality
+./cli --help
+
+# 5. If you have NVIDIA GPU, optionally run full test suite
+./EngineTests  # Will fail without compatible NVIDIA GPU
+```
 
 ### Code Formatting
 ```bash
