@@ -31,6 +31,27 @@ protected:
     }
 };
 
+TEST_F(MuscleTests, noFrontAngle)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellTypeData(GeneratorDescription().autoTriggerInterval(20)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(MuscleDescription().mode(AutoBendingDescription())),
+        CellDescription().id(3).pos({12.0f, 10.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(50);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualMuscleCell = actualData.getCellRef(2);
+
+    ASSERT_EQ(3, actualData._cells.size());
+    EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
+}    
+
+
 enum class Side
 {
     Left,
@@ -813,6 +834,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
+            .frontAngle(0.0f)
             .cellTypeData(MuscleDescription().mode(DirectMovementDescription()))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0)).weight(1, 0, getValue(channel1) / 2)),
         CellDescription().id(3).pos({12.0f, 10.0f}),

@@ -92,7 +92,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (cell->frontAngle == Cell::FrontAngle_NotSet) {
         return;
     }
-
     // Activation
     if (cell->signal.active) {
         bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
