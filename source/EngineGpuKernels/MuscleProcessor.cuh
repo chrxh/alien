@@ -19,7 +19,7 @@ public:
         CellConnection* connectionPrev;
         CellConnection* connectionNext;
     };
-    __inline__ __device__ static BendingInfo getBendingInfo(SimulationData& data, Cell* cell);
+    __inline__ __device__ static BendingInfo getBendingInfo(Cell* cell);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
@@ -123,7 +123,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
 
     // Initialization
     if (bending.initialAngle == 0) {
-        auto bendingInfo = getBendingInfo(data, cell);
+        auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         bending.forward = !isLeftSide(cell);
         bending.lastActualAngle = calcActualAngle(data, bendingInfo);
@@ -135,7 +135,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
 
         auto frontBackVelRatio = isLeftSide(cell) ? 1.0f - bending.frontBackVelRatio : bending.frontBackVelRatio;
 
-        auto bendingInfo = getBendingInfo(data, cell);
+        auto bendingInfo = getBendingInfo(cell);
         auto actualAngle = calcActualAngle(data, bendingInfo);
         auto activation = bending.activation * toFloat(bending.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
 
@@ -233,7 +233,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
 
     // Initialization
     if (bending.initialAngle == 0) {
-        auto bendingInfo = getBendingInfo(data, cell);
+        auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         bending.lastActualAngle = calcActualAngle(data, bendingInfo);
         bending.impulseAlreadyApplied = true;
@@ -243,7 +243,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     // Process manual bending
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
-        auto bendingInfo = getBendingInfo(data, cell);
+        auto bendingInfo = getBendingInfo(cell);
         auto actualAngle = calcActualAngle(data, bendingInfo);
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
 
@@ -339,14 +339,14 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
 
     // Initialization
     if (bending.initialAngle == 0) {
-        auto bendingInfo = getBendingInfo(data, cell);
+        auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
     }
 
     // Process angle bending
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
-        auto bendingInfo = getBendingInfo(data, cell);
+        auto bendingInfo = getBendingInfo(cell);
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
         auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f;
         auto targetAngleRelToConnection0 = Math::normalizedAngle(cell->frontAngle + targetAngle, -180.0f);
@@ -612,7 +612,7 @@ __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Cell* 
     }
 }
 
-__inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(SimulationData& data, Cell* cell)
+__inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Cell* cell)
 {
     BendingInfo result;
     if (cell->numConnections == 2) {
