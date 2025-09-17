@@ -605,7 +605,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront.value()));
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -652,7 +652,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront.value()));
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);    // Preview specific: Move seed far away from construction
     EXPECT_TRUE(compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -697,7 +697,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront.value()));
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -754,13 +754,13 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__an
     auto prevPrevConstructedCell = actualData.getCellRef(3);
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront.value()));
 
     EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(135.0f, prevConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(135.0f, prevConstructedCell._angleToFront.value()));
 
     EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(-45.0f, prevPrevConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(-45.0f, prevPrevConstructedCell._angleToFront.value()));
 }
 
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__angleToFront_lowerSide)
@@ -810,13 +810,13 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__an
     auto prevPrevConstructedCell = actualData.getCellRef(3);
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(45.0f, actualConstructedCell._angleToFront.value()));
 
     EXPECT_EQ(CellState_Ready, prevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(-45.0f, prevConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(-45.0f, prevConstructedCell._angleToFront.value()));
 
     EXPECT_EQ(CellState_Ready, prevPrevConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(135.0f, prevPrevConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(135.0f, prevPrevConstructedCell._angleToFront.value()));
 }
 
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__gene_0)
@@ -855,7 +855,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -905,7 +905,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -945,7 +945,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
     auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(0, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(0, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -989,7 +989,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
     auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(-180.0f, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(-180.0f, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -1033,7 +1033,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, 1.0f), newCell._pos));
-    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -1074,7 +1074,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
     auto newCell = actualData.getOtherCellRef({0});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
 
@@ -1241,7 +1241,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
     EXPECT_FALSE(actualData.hasConnection(2, newCell._id));
     EXPECT_TRUE(actualData.hasConnection(1, 0));
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, newCell._angleToFront.value()));
 }
 
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
@@ -1287,7 +1287,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     auto hostCell = actualData.getCellRef(1);
     auto newCell = actualData.getOtherCellRef({0, 1, 2});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(approxCompare(135.0f + FrontAngle - ConstructionAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(135.0f + FrontAngle - ConstructionAngle, newCell._angleToFront.value()));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
     auto connection = actualData.getConnection(hostCell, newCell);
@@ -1347,7 +1347,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
     auto newCell = actualData.getOtherCellRef({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle, newCell._angleToFront.value()));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, newCell));
@@ -1394,7 +1394,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         auto newCell = actualData.getOtherCellRef({0, 1});
         EXPECT_EQ(CellState_Activating, newCell._cellState);
         EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
-        EXPECT_TRUE(approxCompare(LastAngle + FrontAngle, newCell._angleToFront));
+        EXPECT_TRUE(approxCompare(LastAngle + FrontAngle, newCell._angleToFront.value()));
         EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
         EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
         EXPECT_TRUE(actualData.hasConnection(hostCell, newCell));
@@ -1406,7 +1406,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         auto actualData = _simulationFacade->getSimulationData();
         auto prevCell = actualData.getCellRef(1);
         EXPECT_EQ(CellState_Activating, prevCell._cellState);
-        EXPECT_TRUE(approxCompare(LastAngle + FrontAngle - 180.0f, prevCell._angleToFront));
+        EXPECT_TRUE(approxCompare(LastAngle + FrontAngle - 180.0f, prevCell._angleToFront.value()));
 
     }
 }
@@ -1458,7 +1458,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
     auto newCell = actualData.getOtherCellRef({0, 1, 2, 3});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(-45.0f + FrontAngle + MiddleAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(-45.0f + FrontAngle + MiddleAngle, newCell._angleToFront.value()));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
     EXPECT_TRUE(actualData.hasConnection(hostCell, newCell));
@@ -1512,7 +1512,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
     auto newCell = actualData.getOtherCellRef({0, 1, 2, 3});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(approxCompare(_parameters.constructorAdditionalOffspringDistance, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(approxCompare(45.0f + FrontAngle + MiddleAngle, newCell._angleToFront));
+    EXPECT_TRUE(approxCompare(45.0f + FrontAngle + MiddleAngle, newCell._angleToFront.value()));
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_FALSE(actualData.hasConnection(hostCell, prevCell));
     EXPECT_TRUE(actualData.hasConnection(hostCell, newCell));
@@ -2554,7 +2554,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__an
     auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(-90.0f, actualConstructedCell._angleToFront.value()));
 }
 
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__angleToFront_rightSide)
@@ -2593,7 +2593,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__an
     auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._angleToFront));
+    EXPECT_TRUE(approxCompare(90.0f, actualConstructedCell._angleToFront.value()));
 }
 
 class ConstructorTests_AllShapes
@@ -2913,16 +2913,16 @@ TEST_F(ConstructorTests, frontAngleUpdate)
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1, 2, 3, 4, 5, 6, 7, 8});
 
     EXPECT_EQ(CellState_Ready, actualConstructedCell._cellState);
-    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(4)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(4)._angleToFront.value()));
 
-    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(5)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(6)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(7)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(8)._angleToFront));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(9)._angleToFront));
+    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(5)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(6)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(7)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(8)._angleToFront.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(9)._angleToFront.value()));
 
     // TODO connected cell from other creature
 }

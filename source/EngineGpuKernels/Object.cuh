@@ -217,7 +217,10 @@ struct Muscle
     float lastMovementX;
     float lastMovementY;
 
-    bool isBendingMuscle() const { return mode == MuscleMode_AutoBending || mode == MuscleMode_ManualBending || mode == MuscleMode_AngleBending; }
+    __inline__ __device__ bool isBendingMuscle() const
+    {
+        return mode == MuscleMode_AutoBending || mode == MuscleMode_ManualBending || mode == MuscleMode_AngleBending;
+    }
 };
 
 struct Defender
