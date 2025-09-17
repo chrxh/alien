@@ -121,7 +121,7 @@ struct AutoBendingDescription
     MEMBER(AutoBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 
     // Process data
-    MEMBER(AutoBendingDescription, float, initialAngle, 0.0f);
+    MEMBER(AutoBendingDescription, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(AutoBendingDescription, float, lastActualAngle, 0.0f);
     MEMBER(AutoBendingDescription, bool, forward, true);    // Current direction
     MEMBER(AutoBendingDescription, float, activation, 0);
@@ -138,7 +138,7 @@ struct ManualBendingDescription
     MEMBER(ManualBendingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
 
     // Process data
-    MEMBER(ManualBendingDescription, float, initialAngle, 0.0f);
+    MEMBER(ManualBendingDescription, std::optional<float>, initialAngle, std::nullopt);
     MEMBER(ManualBendingDescription, float, lastActualAngle, 0.0f);
     MEMBER(ManualBendingDescription, float, lastAngleDelta, 0.0f);
     MEMBER(ManualBendingDescription, bool, impulseAlreadyApplied, false);
@@ -153,7 +153,7 @@ struct AngleBendingDescription
     MEMBER(AngleBendingDescription, float, frontBackVelRatio, 0.2f);  // Between 0 and 1
 
     // Process data
-    MEMBER(AngleBendingDescription, float, initialAngle, 0.0f);
+    MEMBER(AngleBendingDescription, std::optional<float>, initialAngle, std::nullopt);
 };
 
 struct AutoCrawlingDescription
@@ -165,7 +165,7 @@ struct AutoCrawlingDescription
     MEMBER(AutoCrawlingDescription, float, frontBackVelRatio, 0.2f);    // Between 0 and 1
 
     // Process data
-    MEMBER(AutoCrawlingDescription, float, initialDistance, 0.0f);
+    MEMBER(AutoCrawlingDescription, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(AutoCrawlingDescription, float, lastActualDistance, 0.0f);
     MEMBER(AutoCrawlingDescription, bool, forward, true);               // Current direction
     MEMBER(AutoCrawlingDescription, float, activation, 0.0f);
@@ -182,7 +182,7 @@ struct ManualCrawlingDescription
     MEMBER(ManualCrawlingDescription, float, frontBackVelRatio, 0.2f);   // Between 0 and 1
 
     // Process data
-    MEMBER(ManualCrawlingDescription, float, initialDistance, 0.0f);
+    MEMBER(ManualCrawlingDescription, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(ManualCrawlingDescription, float, lastActualDistance, 0.0f);
     MEMBER(ManualCrawlingDescription, float, lastDistanceDelta, 0.0f);
     MEMBER(ManualCrawlingDescription, bool, impulseAlreadyApplied, false);

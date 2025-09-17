@@ -24,7 +24,7 @@ namespace
     __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
     {
         uint64_t origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
-        if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
+        if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
 
             auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
             if (creatureTOIndex >= collectionTO.capacities.creatures) {
@@ -223,7 +223,7 @@ namespace
                 cellTO.neuralNetworkDataIndex,
                 collectionTO);
         } else {
-            cellTO.neuralNetworkDataIndex = CellTO::NeuralNetworkDataIndex_NotSet;
+            cellTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
         }
         switch (cell->cellType) {
         case CellType_Base: {
@@ -356,7 +356,7 @@ __global__ void cudaPrepareCreaturesForConversionToTO(int2 rectUpperLeft, int2 r
         auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->creature->creatureIndex = Creature::CreatureIndex_NotSet;
+            cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
@@ -374,7 +374,7 @@ __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeCluste
         if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
             continue;
         }
-        cell->creature->creatureIndex = Creature::CreatureIndex_NotSet;
+        cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
     }
 }
 
@@ -388,7 +388,7 @@ __global__ void cudaPrepareCreaturesForConversionToTO(InspectedEntityIds ids, Si
         if (!cell->creature) {
             continue;
         }
-        cell->creature->creatureIndex = Creature::CreatureIndex_NotSet;
+        cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
     }
 }
 
@@ -401,7 +401,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
-            cell->tempValue.as_uint64 = ConnectionTO::CellIndex_NotSet;
+            cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
         createCellTO(cell, collectionTO, cellArrayStart);
@@ -445,7 +445,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
             }
         }
         if (!found) {
-            cell->tempValue.as_uint64 = ConnectionTO::CellIndex_NotSet;
+            cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
 
@@ -602,7 +602,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
         auto pos = cell->pos;
         data.cellMap.correctPosition(pos);
         if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
-            cell->tempValue.as_uint64 = ConnectionTO::CellIndex_NotSet;
+            cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
 
@@ -786,7 +786,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO collectionTO, ArraySizesForG
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cellTO = collectionTO.cells[index];
             heapBytes += sizeof(Cell) + GpuMemoryAlignmentBytes;
-            if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
+            if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }
         }

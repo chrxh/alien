@@ -87,8 +87,7 @@ struct Constructor
     uint16_t geneIndex;
 
     // Process data
-    uint64_t lastConstructedCellId;
-    static auto constexpr LastConstructedCellId_NotSet = 0xffffffffffffffff;
+    uint64_t lastConstructedCellId;  // May be invalid
     uint16_t currentNodeIndex;
     uint16_t currentConcatenation;
     uint8_t currentBranch;
@@ -135,7 +134,7 @@ struct AutoBending
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
+    float initialAngle; // May be invalid
     float lastActualAngle;
     bool forward;  // Current direction
     float activation;
@@ -150,7 +149,7 @@ struct ManualBending
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
+    float initialAngle; // May be invalid
     float lastActualAngle;
     float lastAngleDelta;
     bool impulseAlreadyApplied;
@@ -163,7 +162,7 @@ struct AngleBending
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
+    float initialAngle; // May be invalid
 };
 
 struct AutoCrawling
@@ -173,7 +172,7 @@ struct AutoCrawling
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialDistance;
+    float initialDistance;  // May be invalid
     float lastActualDistance;
     bool forward;  // Current direction
     float activation;
@@ -188,7 +187,7 @@ struct ManualCrawling
     float frontBackVelRatio;     // Between 0 and 1
 
     // Process data
-    float initialDistance;
+    float initialDistance;  // May be invalid
     float lastActualDistance;
     float lastDistanceDelta;
     bool impulseAlreadyApplied;
@@ -282,8 +281,7 @@ union TempValue
 struct Creature
 {
     uint64_t id;
-    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
-    uint64_t ancestorId;
+    uint64_t ancestorId;  // May be invalid
 
     uint32_t generation;
     uint32_t lineageId;
@@ -295,8 +293,7 @@ struct Creature
     uint32_t frontAngleId;
 
     // Temporary data
-    uint64_t creatureIndex;
-    static auto constexpr CreatureIndex_NotSet = 0xffffffffffffffff;
+    uint64_t creatureIndex;  // May be invalid
 };
 
 struct Cell
@@ -310,8 +307,7 @@ struct Cell
     float energy;
     float stiffness;
     uint8_t color;
-    float frontAngle;
-    static auto constexpr FrontAngle_NotSet = 1e7f;
+    float frontAngle;  // May be invalid
     bool barrier;
     bool sticky;
     uint32_t age;
@@ -337,7 +333,6 @@ struct Cell
     Signal futureSignal;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
-    static auto constexpr FrontAngleId_NoUpdate = 1e7f;
     bool isFrontAngleRefCell;
 
     // Additional rendering data

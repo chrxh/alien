@@ -3,10 +3,11 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "GenomeTO.cuh"
 #include "EngineInterface/EngineConstants.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/ArraySizesForTO.h"
+
+#include "GenomeTO.cuh"
 
 struct ParticleTO
 {
@@ -21,8 +22,7 @@ struct ParticleTO
 
 struct ConnectionTO
 {
-    uint64_t cellIndex;
-    static auto constexpr CellIndex_NotSet = 0x7fffffffffffffff;
+    uint64_t cellIndex; // May be invalid
 
     float distance;
     float angleFromPrevious;
@@ -55,8 +55,7 @@ struct ConstructorTO
     uint16_t geneIndex;
 
     // Process data
-    uint64_t lastConstructedCellId;
-    static auto constexpr LastConstructedCellId_NotSet = 0xffffffffffffffff;
+    uint64_t lastConstructedCellId;  // May be invalid
     uint16_t currentNodeIndex;
     uint16_t currentConcatenation;
     uint8_t currentBranch;
@@ -99,7 +98,7 @@ struct AutoBendingTO
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
+    float initialAngle;  // May be invalid
     float lastActualAngle;
     bool forward;  // Current direction
     float activation;
@@ -114,7 +113,7 @@ struct ManualBendingTO
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
+    float initialAngle; // May be invalid
     float lastActualAngle;
     float lastAngleDelta;
     bool impulseAlreadyApplied;
@@ -127,7 +126,7 @@ struct AngleBendingTO
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle;
+    float initialAngle; // May be invalid
 };
 
 struct AutoCrawlingTO
@@ -137,7 +136,7 @@ struct AutoCrawlingTO
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialDistance;
+    float initialDistance;  // May be invalid
     float lastActualDistance;
     bool forward;  // Current direction
     float activation;
@@ -153,7 +152,7 @@ struct ManualCrawlingTO
     float frontBackVelRatio;  // Between 0 and 1
 
     // Process data
-    float initialDistance;
+    float initialDistance;  // May be invalid
     float lastActualDistance;
     float lastDistanceDelta;
     bool impulseAlreadyApplied;
@@ -238,8 +237,7 @@ struct CellTO
     float stiffness;
     uint8_t color;
     uint8_t numConnections;
-    float frontAngle;
-    static auto constexpr FrontAngle_NotSet = 1e7f;
+    float frontAngle;  // May be invalid
     bool barrier;
     bool sticky;
     uint32_t age;
@@ -258,8 +256,7 @@ struct CellTO
     bool isFrontAngleRefCell;
 
     // Cell type data
-    uint64_t neuralNetworkDataIndex;  // Not used for structure and base cells
-    static auto constexpr NeuralNetworkDataIndex_NotSet = 0xffffffffffffffff;
+    uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)
     CellType cellType;
     CellTypeDataTO cellTypeData;
     SignalRestrictionTO signalRestriction;
@@ -275,7 +272,6 @@ struct CellTO
 struct CreatureTO
 {
     uint64_t id;
-    static auto constexpr AncestorId_NotSet = 0xffffffffffffffff;
     uint64_t ancestorId;
 
     uint32_t generation;

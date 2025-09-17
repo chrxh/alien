@@ -89,7 +89,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;
     }
-    if (cell->frontAngle == Cell::FrontAngle_NotSet) {
+    if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
     // Activation
@@ -122,7 +122,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
 
     // Initialization
-    if (bending.initialAngle == 0) {
+    if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         bending.forward = !isLeftSide(cell);
@@ -227,12 +227,12 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;
     }
-    if (cell->frontAngle == Cell::FrontAngle_NotSet) {
+    if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
 
     // Initialization
-    if (bending.initialAngle == 0) {
+    if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         bending.lastActualAngle = calcActualAngle(data, bendingInfo);
@@ -333,12 +333,12 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (cell->numConnections != 1 && cell->numConnections != 2) {
         return;                                                                                                                     
     }
-    if (cell->frontAngle == Cell::FrontAngle_NotSet) {
+    if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
     }
 
     // Initialization
-    if (bending.initialAngle == 0) {
+    if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
     }
@@ -401,7 +401,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 
     // Initialization
-    if (crawling.initialDistance == 0) {
+    if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
         crawling.initialDistance = cell->connections[0].distance;
         crawling.forward = true;
         crawling.lastActualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
@@ -502,7 +502,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
 
     // Initialization
-    if (crawling.initialDistance == 0) {
+    if (crawling.initialDistance == VALUE_NOT_SET_FLOAT) {
         crawling.initialDistance = cell->connections[0].distance;
         crawling.lastActualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
         crawling.lastDistanceDelta = 0;

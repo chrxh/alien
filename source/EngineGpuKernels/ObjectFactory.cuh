@@ -268,7 +268,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
 
     cell->cellType = cellTO.cellType;
 
-    if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
+    if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         copyDataToHeap(
             sizeof(NeuralNetworkTO), cellTO.neuralNetworkDataIndex, collectionTO.heap, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
     } else {
@@ -428,7 +428,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->detached = 0;
     cell->scheduledOperationIndex = -1;
     cell->color = 0;
-    cell->frontAngle = Cell::FrontAngle_NotSet;
+    cell->frontAngle = VALUE_NOT_SET_FLOAT;
     cell->frontAngleId = 0;
     cell->isFrontAngleRefCell = false;
     cell->barrier = false;
@@ -521,7 +521,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
     cell->energy = energy;
     cell->stiffness = gene->stiffness;
     cell->color = node->color;
-    cell->frontAngle = Cell::FrontAngle_NotSet;
+    cell->frontAngle = VALUE_NOT_SET_FLOAT;
     cell->stiffness = 1.0f;
     cell->barrier = false;
     cell->sticky = false;
@@ -576,7 +576,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
         constructor.geneIndex = nodeConstructor.geneIndex;
-        constructor.lastConstructedCellId = Constructor::LastConstructedCellId_NotSet;
+        constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentNodeIndex = 0;
         constructor.currentConcatenation = 0;
         constructor.currentBranch = 0;
@@ -624,7 +624,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         case MuscleMode_AutoBending: {
             muscle.modeData.autoBending.maxAngleDeviation = nodeMuscle.modeData.autoBending.maxAngleDeviation;
             muscle.modeData.autoBending.frontBackVelRatio = nodeMuscle.modeData.autoBending.frontBackVelRatio;
-            muscle.modeData.autoBending.initialAngle = 0;
+            muscle.modeData.autoBending.initialAngle = VALUE_NOT_SET_FLOAT;
             muscle.modeData.autoBending.lastActualAngle = 0;
             muscle.modeData.autoBending.forward = true;
             muscle.modeData.autoBending.activation = 0;
@@ -634,7 +634,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         case MuscleMode_ManualBending: {
             muscle.modeData.manualBending.maxAngleDeviation = nodeMuscle.modeData.manualBending.maxAngleDeviation;
             muscle.modeData.manualBending.frontBackVelRatio = nodeMuscle.modeData.manualBending.frontBackVelRatio;
-            muscle.modeData.manualBending.initialAngle = 0;
+            muscle.modeData.manualBending.initialAngle = VALUE_NOT_SET_FLOAT;
             muscle.modeData.manualBending.lastActualAngle = 0;
             muscle.modeData.manualBending.lastAngleDelta = 0;
             muscle.modeData.manualBending.impulseAlreadyApplied = false;
@@ -642,12 +642,12 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         case MuscleMode_AngleBending: {
             muscle.modeData.angleBending.maxAngleDeviation = nodeMuscle.modeData.angleBending.maxAngleDeviation;
             muscle.modeData.angleBending.frontBackVelRatio = nodeMuscle.modeData.angleBending.frontBackVelRatio;
-            muscle.modeData.angleBending.initialAngle = 0;
+            muscle.modeData.angleBending.initialAngle = VALUE_NOT_SET_FLOAT;
         } break;
         case MuscleMode_AutoCrawling: {
             muscle.modeData.autoCrawling.maxDistanceDeviation = nodeMuscle.modeData.autoCrawling.maxDistanceDeviation;
             muscle.modeData.autoCrawling.frontBackVelRatio = nodeMuscle.modeData.autoCrawling.frontBackVelRatio;
-            muscle.modeData.autoCrawling.initialDistance = 0;
+            muscle.modeData.autoCrawling.initialDistance = VALUE_NOT_SET_FLOAT;
             muscle.modeData.autoCrawling.lastActualDistance = 0;
             muscle.modeData.autoCrawling.forward = true;
             muscle.modeData.autoCrawling.activation = 0;
@@ -657,7 +657,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         case MuscleMode_ManualCrawling: {
             muscle.modeData.manualCrawling.maxDistanceDeviation = nodeMuscle.modeData.manualCrawling.maxDistanceDeviation;
             muscle.modeData.manualCrawling.frontBackVelRatio = nodeMuscle.modeData.manualCrawling.frontBackVelRatio;
-            muscle.modeData.manualCrawling.initialDistance = 0;
+            muscle.modeData.manualCrawling.initialDistance = VALUE_NOT_SET_FLOAT;
             muscle.modeData.manualCrawling.lastActualDistance = 0;
             muscle.modeData.manualCrawling.lastDistanceDelta = 0;
             muscle.modeData.manualCrawling.impulseAlreadyApplied = false;

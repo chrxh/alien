@@ -54,6 +54,7 @@ public:
 
 private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
+    static auto constexpr FrontAngleId_NoUpdate = 1e7f;
 
     struct AngleModificationInfo
     {
@@ -760,7 +761,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                     }
                 }
                 if (!update) {
-                    cell->tempValue.as_uint32_float.floatPart = Cell::FrontAngleId_NoUpdate;
+                    cell->tempValue.as_uint32_float.floatPart = FrontAngleId_NoUpdate;
                 }
             }
         }
@@ -782,7 +783,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
                 cell->frontAngleId = cell->creature->frontAngleId;
                 cell->frontAngle = cell->creature->genome.frontAngle;
             } else {
-                if (cell->tempValue.as_uint32_float.floatPart != Cell::FrontAngleId_NoUpdate) {
+                if (cell->tempValue.as_uint32_float.floatPart != FrontAngleId_NoUpdate) {
                     cell->frontAngleId = cell->creature->frontAngleId;
                     cell->frontAngle = cell->tempValue.as_uint32_float.floatPart;
                 }

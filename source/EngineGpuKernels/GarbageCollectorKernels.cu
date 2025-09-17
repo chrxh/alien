@@ -126,7 +126,7 @@ __global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->creature) {
-            cell->creature->creatureIndex = Creature::CreatureIndex_NotSet;
+            cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
@@ -140,7 +140,7 @@ __global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
         
         if (cell->creature) {
             auto origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
-            if (origCreatureIndex == Creature::CreatureIndex_NotSet) {
+            if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
                 auto newCreature = newHeap.getTypedSubArray<Creature>(1);
                 *newCreature = *cell->creature;
 

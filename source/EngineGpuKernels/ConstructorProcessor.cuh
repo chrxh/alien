@@ -320,7 +320,7 @@ ConstructorProcessor::tryConstructCell(SimulationData& data, SimulationStatistic
 __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCellOnBranch(Cell* hostCell)
 {
     auto const& constructor = hostCell->cellTypeData.constructor;
-    if (constructor.lastConstructedCellId != Constructor::LastConstructedCellId_NotSet) {
+    if (constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64) {
         for (int i = 0; i < hostCell->numConnections; ++i) {
             auto const& connectedCell = hostCell->connections[i].cell;
             if (connectedCell->id == constructor.lastConstructedCellId) {

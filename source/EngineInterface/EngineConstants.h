@@ -1,5 +1,8 @@
 #pragma once
 
+auto constexpr VALUE_NOT_SET_UINT64 = 0x7fffffffffffffff;
+auto constexpr VALUE_NOT_SET_FLOAT = 1e16f;
+
 auto constexpr MAX_CELL_BONDS = 6;
 auto constexpr MAX_CHANNELS = 8;
 auto constexpr MAX_GENOME_BYTES = 8000;

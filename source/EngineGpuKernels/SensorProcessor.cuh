@@ -52,7 +52,7 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     __shared__ bool isTriggered;
     if (threadIdx.x == 0) {
         isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval);
-        if (cell->frontAngle == Cell::FrontAngle_NotSet) {
+        if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
             isTriggered = false;
         }
         if (isTriggered && !cell->signal.active) {

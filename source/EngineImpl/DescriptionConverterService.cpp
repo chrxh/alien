@@ -268,7 +268,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     for (int i = 0; i < cellTO.numConnections; ++i) {
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
-        if (connectionTO.cellIndex != ConnectionTO::CellIndex_NotSet) {
+        if (connectionTO.cellIndex != VALUE_NOT_SET_UINT64) {
             connection._cellId = collectionTO.cells[connectionTO.cellIndex].id;
         } else {
             connections.clear();
@@ -284,7 +284,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     result._sticky = cellTO.sticky;
     result._age = cellTO.age;
     result._color = cellTO.color;
-    result._frontAngle = cellTO.frontAngle != CellTO::FrontAngle_NotSet ? std::make_optional(cellTO.frontAngle) : std::nullopt;
+    result._frontAngle = cellTO.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(cellTO.frontAngle) : std::nullopt;
     result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTriggered = cellTO.cellTriggered;
     result._nodeIndex = cellTO.nodeIndex;
@@ -319,7 +319,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
         constructor._lastConstructedCellId = 
-            cellTO.cellTypeData.constructor.lastConstructedCellId != ConstructorTO::LastConstructedCellId_NotSet ? 
+            cellTO.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64 ? 
             std::make_optional(cellTO.cellTypeData.constructor.lastConstructedCellId) : std::nullopt;
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
@@ -362,7 +362,9 @@ CellDescription DescriptionConverterService::createCellDescription(
             AutoBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
             bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
-            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle;
+            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle)
+                : std::nullopt;
             bending._lastActualAngle = cellTO.cellTypeData.muscle.modeData.autoBending.lastActualAngle;
             bending._forward = cellTO.cellTypeData.muscle.modeData.autoBending.forward;
             bending._activation = cellTO.cellTypeData.muscle.modeData.autoBending.activation;
@@ -373,7 +375,9 @@ CellDescription DescriptionConverterService::createCellDescription(
             ManualBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
             bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
-            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle;
+            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle)
+                : std::nullopt;
             bending._lastActualAngle = cellTO.cellTypeData.muscle.modeData.manualBending.lastActualAngle;
             bending._lastAngleDelta = cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
             bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
@@ -382,13 +386,17 @@ CellDescription DescriptionConverterService::createCellDescription(
             AngleBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
             bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
-            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle;
+            bending._initialAngle = cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle)
+                : std::nullopt;
             muscle._mode = bending;
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
             AutoCrawlingDescription crawling;
             crawling._maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
             crawling._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
-            crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance;
+            crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance)
+                : std::nullopt;
             crawling._lastActualDistance = cellTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
             crawling._forward = cellTO.cellTypeData.muscle.modeData.autoCrawling.forward;
             crawling._activation = cellTO.cellTypeData.muscle.modeData.autoCrawling.activation;
@@ -399,7 +407,9 @@ CellDescription DescriptionConverterService::createCellDescription(
             ManualCrawlingDescription crawling;
             crawling._maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
             crawling._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
-            crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance;
+            crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance)
+                : std::nullopt;
             crawling._lastActualDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
             crawling._lastDistanceDelta = cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
             crawling._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
@@ -432,7 +442,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         result._cellType = detonator;
     } break;
     }
-    if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
+    if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(collectionTO.heap, cellTO.neuralNetworkDataIndex);
         result._neuralNetwork = convert(*neuralNetworkTO);
     }
@@ -460,7 +470,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
 
     auto const& creatureTO = collectionTO.creatures[creatureIndex];
     result._id = creatureTO.id;
-    result._ancestorId = creatureTO.ancestorId != CreatureTO::AncestorId_NotSet ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
+    result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
     result._lineageId = creatureTO.lineageId;
     result._numCells = creatureTO.numCells;
@@ -641,7 +651,7 @@ void DescriptionConverterService::convertCreatureToTO(
     geneTOs.resize(geneArrayStartIndex + creatureDesc._genome._genes.size());
 
     creatureTO.id = creatureDesc._id;
-    creatureTO.ancestorId = creatureDesc._ancestorId.value_or(CreatureTO::AncestorId_NotSet);
+    creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
     creatureTO.generation = creatureDesc._generation;
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
@@ -820,7 +830,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.nodeIndex = cellDesc._nodeIndex;
     cellTO.parentNodeIndex = cellDesc._parentNodeIndex;
     cellTO.geneIndex = cellDesc._geneIndex;
-    cellTO.frontAngle = cellDesc._frontAngle.value_or(CellTO::FrontAngle_NotSet);
+    cellTO.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
     cellTO.frontAngleId = cellDesc._frontAngleId;
     cellTO.isFrontAngleRefCell = cellDesc._isFrontAngleRefCell;
 
@@ -831,7 +841,7 @@ void DescriptionConverterService::convertCellToTO(
         auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
         *neuralNetworkTO = convert(*cellDesc._neuralNetwork);
     } else {
-        cellTO.neuralNetworkDataIndex = CellTO::NeuralNetworkDataIndex_NotSet;
+        cellTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
     }
     switch (cellType) {
     case CellType_Base: {
@@ -850,7 +860,7 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         constructorTO.constructionAngle = constructorDesc._constructionAngle;
         constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
-        constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(ConstructorTO::LastConstructedCellId_NotSet);
+        constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);
         constructorTO.currentConcatenation = static_cast<uint16_t>(constructorDesc._currentConcatenation);
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
@@ -892,7 +902,7 @@ void DescriptionConverterService::convertCellToTO(
             AutoBendingTO& bendingTO = muscleTO.modeData.autoBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
             bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
-            bendingTO.initialAngle = bendingDesc._initialAngle;
+            bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
             bendingTO.lastActualAngle = bendingDesc._lastActualAngle;
             bendingTO.forward = bendingDesc._forward;
             bendingTO.activation = bendingDesc._activation;
@@ -903,7 +913,7 @@ void DescriptionConverterService::convertCellToTO(
             ManualBendingTO& bendingTO = muscleTO.modeData.manualBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
             bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
-            bendingTO.initialAngle = bendingDesc._initialAngle;
+            bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
             bendingTO.lastActualAngle = bendingDesc._lastActualAngle;
             bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
@@ -912,13 +922,13 @@ void DescriptionConverterService::convertCellToTO(
             AngleBendingTO& bendingTO = muscleTO.modeData.angleBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
             bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
-            bendingTO.initialAngle = bendingDesc._initialAngle;
+            bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
         } else if (muscleTO.mode == MuscleMode_AutoCrawling) {
             auto const& crawlingDesc = std::get<AutoCrawlingDescription>(muscleDesc._mode);
             AutoCrawlingTO& crawlingTO = muscleTO.modeData.autoCrawling;
             crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
             crawlingTO.frontBackVelRatio = crawlingDesc._frontBackVelRatio;
-            crawlingTO.initialDistance = crawlingDesc._initialDistance;
+            crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
             crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
             crawlingTO.forward = crawlingDesc._forward;
             crawlingTO.activation = crawlingDesc._activation;
@@ -929,7 +939,7 @@ void DescriptionConverterService::convertCellToTO(
             ManualCrawlingTO& crawlingTO = muscleTO.modeData.manualCrawling;
             crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
             crawlingTO.frontBackVelRatio = crawlingDesc._frontBackVelRatio;
-            crawlingTO.initialDistance = crawlingDesc._initialDistance;
+            crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
             crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
             crawlingTO.lastDistanceDelta = crawlingDesc._lastDistanceDelta;
             crawlingTO.impulseAlreadyApplied = crawlingDesc._impulseAlreadyApplied;
