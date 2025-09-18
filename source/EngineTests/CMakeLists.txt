@@ -8,6 +8,7 @@ PUBLIC
     DescriptionEditTests.cpp
     DetonatorTests.cpp
     EnergyFlowTests.cpp
+    FrontAngleUpdateTests.cpp
     GarbageCollectorTests.cpp
     GenomeDescriptionEditServiceTests.cpp
     GenomeDescriptionInfoServiceTests.cpp
