@@ -285,7 +285,7 @@ namespace std
             hash_combine(seed, desc._color);
             hash_combine(seed, desc._numAdditionalConnections);
             hash_combine(seed, std::hash<NeuralNetworkGenomeDescription>{}(desc._neuralNetwork));
-            hash_combine(seed, std::hash<CellTypeGenomeDescription>{}(desc._cellTypeData));
+            hash_combine(seed, std::hash<CellTypeGenomeDescription>{}(desc._cellType));
             hash_combine(seed, std::hash<SignalRestrictionGenomeDescription>{}(desc._signalRestriction));
             return seed;
         }

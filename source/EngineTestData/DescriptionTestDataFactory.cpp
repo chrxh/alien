@@ -22,7 +22,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .parentNodeIndex(14)
                       .signalAndRelaxTime({1, 0, 0.6f, 0, 0, 0, 0, 0})
                       .signalRestriction(SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
-                      .cellTypeData(cellTypeDesc);
+                      .cellType(cellTypeDesc);
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
         NeuralNetworkDescription defaultNn; 
@@ -57,7 +57,7 @@ NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(Node
 
     return NodeDescription()
         .neuralNetwork(nn)
-        .cellTypeData(createNonDefaultCellTypeGenomeDescription(nodeParameter))
+        .cellType(createNonDefaultCellTypeGenomeDescription(nodeParameter))
         .color(4)
         .numAdditionalConnections(3)
         .referenceAngle(90.0f)

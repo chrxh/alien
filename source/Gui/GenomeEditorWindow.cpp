@@ -266,7 +266,7 @@ void GenomeEditorWindow::onCreateSeed()
                     .energy(energy)
                     .stiffness(1.0f)
                     .color(EditorModel::get().getDefaultColorCode())
-                    .cellTypeData(ConstructorDescription().geneIndex(0)),
+                    .cellType(ConstructorDescription().geneIndex(0)),
             })
             .genome(genome),
     });

@@ -17,27 +17,27 @@ public:
 protected:
     int getRefGeneIndex(GeneDescription const& gene, int nodeIndex) const
     {
-        return std::get<ConstructorGenomeDescription>(gene._nodes.at(nodeIndex)._cellTypeData)._geneIndex;
+        return std::get<ConstructorGenomeDescription>(gene._nodes.at(nodeIndex)._cellType)._geneIndex;
     };
 
     GenomeDescription createGenome_complexCycles() const
     {
         return GenomeDescription().genes({
             GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(2)),
             }),
             GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(2)),
                 NodeDescription(),
             }),
             GeneDescription().separation(false).nodes({
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(2)),
                 NodeDescription(),
                 NodeDescription(),
             }),
@@ -113,9 +113,9 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyGene_withReferences)
             ASSERT_EQ(5, gene._nodes.size());
         }
         if (i != 2) {
-            EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellTypeData)._geneIndex);
-            EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellTypeData)._geneIndex);
-            EXPECT_EQ(3, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellTypeData)._geneIndex);
+            EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellType)._geneIndex);
+            EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellType)._geneIndex);
+            EXPECT_EQ(3, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellType)._geneIndex);
         }
     }
 }
@@ -130,9 +130,9 @@ TEST_F(GenomeDescriptionEditServiceTests, removeGene_middle)
     EXPECT_EQ(5, genome._genes.at(1)._nodes.size());
     for (int i = 0; i < 2; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellTypeData)._geneIndex);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellTypeData)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellTypeData)._geneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellType)._geneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellType)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellType)._geneIndex);
     }
 }
 
@@ -146,9 +146,9 @@ TEST_F(GenomeDescriptionEditServiceTests, removeGene_end)
     EXPECT_EQ(4, genome._genes.at(1)._nodes.size());
     for (int i = 0; i < 2; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellTypeData)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellTypeData)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellTypeData)._geneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellType)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellType)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellType)._geneIndex);
     }
 }
 
@@ -163,18 +163,18 @@ TEST_F(GenomeDescriptionEditServiceTests, swapGenes)
     EXPECT_EQ(4, genome._genes.at(2)._nodes.size());
     for (int i = 0; i < 3; ++i) {
         auto const& gene = genome._genes.at(i);
-        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellTypeData)._geneIndex);
-        EXPECT_EQ(2, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellTypeData)._geneIndex);
-        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellTypeData)._geneIndex);
+        EXPECT_EQ(0, std::get<ConstructorGenomeDescription>(gene._nodes.at(0)._cellType)._geneIndex);
+        EXPECT_EQ(2, std::get<ConstructorGenomeDescription>(gene._nodes.at(1)._cellType)._geneIndex);
+        EXPECT_EQ(1, std::get<ConstructorGenomeDescription>(gene._nodes.at(2)._cellType)._geneIndex);
     }
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_start)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().addNode(gene, 0, NodeDescription());
 
@@ -188,9 +188,9 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_start)
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_middle)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().addNode(gene, 1, NodeDescription());
 
@@ -204,9 +204,9 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_middle)
 TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_end)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().addNode(gene, 2, NodeDescription());
 
@@ -220,9 +220,9 @@ TEST_F(GenomeDescriptionEditServiceTests, addEmptyNode_end)
 TEST_F(GenomeDescriptionEditServiceTests, removeNode_start)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().removeNode(gene, 0);
 
@@ -234,9 +234,9 @@ TEST_F(GenomeDescriptionEditServiceTests, removeNode_start)
 TEST_F(GenomeDescriptionEditServiceTests, removeNode_middle)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().removeNode(gene, 1);
 
@@ -248,9 +248,9 @@ TEST_F(GenomeDescriptionEditServiceTests, removeNode_middle)
 TEST_F(GenomeDescriptionEditServiceTests, removeNode_end)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().removeNode(gene, 2);
 
@@ -262,9 +262,9 @@ TEST_F(GenomeDescriptionEditServiceTests, removeNode_end)
 TEST_F(GenomeDescriptionEditServiceTests, swapNodes)
 {
     auto gene = GeneDescription().separation(false).nodes({
-        NodeDescription().cellTypeData(DepotGenomeDescription()),
-        NodeDescription().cellTypeData(ConstructorGenomeDescription()),
-        NodeDescription().cellTypeData(SensorGenomeDescription()),
+        NodeDescription().cellType(DepotGenomeDescription()),
+        NodeDescription().cellType(ConstructorGenomeDescription()),
+        NodeDescription().cellType(SensorGenomeDescription()),
     });
     GenomeDescriptionEditService::get().swapNodes(gene, 1);
 
@@ -286,7 +286,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGene
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(5)),  // Invalid reference beyond genome size
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(5)),  // Invalid reference beyond genome size
             NodeDescription(),
         }),
     });
@@ -301,7 +301,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_invalidGene
     ASSERT_EQ(2, subGenome._genes.at(0)._nodes.size());
     ASSERT_EQ(CellTypeGenome_Constructor, subGenome._genes.at(0)._nodes.at(0).getCellType());
     // Invalid reference should remain unchanged (the castrate method has bounds checking)
-    EXPECT_EQ(5, std::get<ConstructorGenomeDescription>(subGenome._genes.at(0)._nodes.at(0)._cellTypeData)._geneIndex);
+    EXPECT_EQ(5, std::get<ConstructorGenomeDescription>(subGenome._genes.at(0)._nodes.at(0)._cellType)._geneIndex);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_onlyBaseAndConstructor)
@@ -311,19 +311,19 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_onlyBaseAnd
             .separation(false)
             .nodes({
             NodeDescription()
-                .cellTypeData(ConstructorGenomeDescription())
+                .cellType(ConstructorGenomeDescription())
                 .neuralNetwork(NeuralNetworkGenomeDescription().weight(2, 3, 0.4f))
                 .signalRestriction(SignalRestrictionGenomeDescription().active(true).openingAngle(3.0f)),
-            NodeDescription().cellTypeData(DepotGenomeDescription()),
-            NodeDescription().cellTypeData(BaseGenomeDescription()),
-            NodeDescription().cellTypeData(SensorGenomeDescription()),
-            NodeDescription().cellTypeData(GeneratorGenomeDescription()),
-            NodeDescription().cellTypeData(AttackerGenomeDescription()),
-            NodeDescription().cellTypeData(InjectorGenomeDescription()),
-            NodeDescription().cellTypeData(MuscleGenomeDescription()),
-            NodeDescription().cellTypeData(DefenderGenomeDescription()),
-            NodeDescription().cellTypeData(ReconnectorGenomeDescription()),
-            NodeDescription().cellTypeData(DetonatorGenomeDescription()),
+            NodeDescription().cellType(DepotGenomeDescription()),
+            NodeDescription().cellType(BaseGenomeDescription()),
+            NodeDescription().cellType(SensorGenomeDescription()),
+            NodeDescription().cellType(GeneratorGenomeDescription()),
+            NodeDescription().cellType(AttackerGenomeDescription()),
+            NodeDescription().cellType(InjectorGenomeDescription()),
+            NodeDescription().cellType(MuscleGenomeDescription()),
+            NodeDescription().cellType(DefenderGenomeDescription()),
+            NodeDescription().cellType(ReconnectorGenomeDescription()),
+            NodeDescription().cellType(DetonatorGenomeDescription()),
         }),
     });
 
@@ -372,11 +372,11 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_subCycle)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
         GeneDescription().separation(false).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0)),
             NodeDescription(),
         }),
         GeneDescription().separation(false).nodes({
@@ -428,11 +428,11 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_noCycles)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(2)),
         }),
         GeneDescription().separation(false).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(2)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(2)),
             NodeDescription(),
         }),
         GeneDescription().separation(false).nodes({
@@ -469,7 +469,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_separation)
             NodeDescription(),
         }),
         GeneDescription().separation(true).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0)),
         }),
     });
     auto subGenomes = GenomeDescriptionEditService::get().createSubGenomesForPreview(genome, {{0}, {1}}, false);
@@ -651,7 +651,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
         if (i % 10 == 0) {
             // Add constructor nodes that reference gene 1
             genome._genes[0]._nodes.emplace_back(
-                NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)));
+                NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)));
         } else {
             genome._genes[0]._nodes.emplace_back(NodeDescription());
         }
@@ -673,7 +673,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_co
     bool foundCastratedConstructor = false;
     for (auto const& node : subGenome._genes.at(0)._nodes) {
         if (node.getCellType() == CellTypeGenome_Constructor) {
-            auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+            auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
             if (constructor._geneIndex >= static_cast<int>(subGenome._genes.size())) {
                 foundCastratedConstructor = true;
                 break;
@@ -728,7 +728,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
     // Create a genome with recursive constructor references that should be trimmed
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numConcatenations(1).nodes({
-            NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1)),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
         GeneDescription()

@@ -197,7 +197,7 @@ struct NodeDescription
     MEMBER(NodeDescription, int, numAdditionalConnections, 0);
 
     MEMBER(NodeDescription, NeuralNetworkGenomeDescription, neuralNetwork, NeuralNetworkGenomeDescription());
-    MEMBER(NodeDescription, CellTypeGenomeDescription, cellTypeData, BaseGenomeDescription());
+    MEMBER(NodeDescription, CellTypeGenomeDescription, cellType, BaseGenomeDescription());
     MEMBER(NodeDescription, SignalRestrictionGenomeDescription, signalRestriction, SignalRestrictionGenomeDescription());
 
     CellTypeGenome getCellType() const;

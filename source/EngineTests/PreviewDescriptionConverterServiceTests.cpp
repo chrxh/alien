@@ -322,7 +322,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
 TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode_multipleConcatenations)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).nodes({NodeDescription().color(2).cellTypeData(ConstructorGenomeDescription().geneIndex(1))}),
+        GeneDescription().separation(false).nodes({NodeDescription().color(2).cellType(ConstructorGenomeDescription().geneIndex(1))}),
         GeneDescription().separation(false).numConcatenations(7).nodes({NodeDescription().color(3)}),
     });
     auto input = Description().creatures({
@@ -334,7 +334,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
             CellDescription().id(6).pos({10.0f, 8.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(7).pos({10.0f, 9.0f}).geneIndex(1).nodeIndex(0),
             CellDescription().id(8).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
-            CellDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
+            CellDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
         }),
     });
     input.addConnection(2, 3);
@@ -407,18 +407,18 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
 TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_withSeparation)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(true).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1))}),
-        GeneDescription().separation(true).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0))}),
+        GeneDescription().separation(true).nodes({NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1))}),
+        GeneDescription().separation(true).nodes({NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0))}),
     });
 
     auto inputCreature1 = Description().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(2)),
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
         }),
     });
     auto inputCreature2 = Description().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(2)),
+            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
         }),
     });
     {
@@ -444,13 +444,13 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_withSep
 TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_withoutSeparation)
 {
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(1))}),
-        GeneDescription().separation(false).nodes({NodeDescription().cellTypeData(ConstructorGenomeDescription().geneIndex(0))}),
+        GeneDescription().separation(false).nodes({NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1))}),
+        GeneDescription().separation(false).nodes({NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(0))}),
     });
     auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
-            CellDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(1)),
-            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellTypeData(ConstructorDescription().geneIndex(2)),
+            CellDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
         }),
     });
     input.addConnection(0, 1);

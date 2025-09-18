@@ -426,7 +426,7 @@ namespace cereal
             defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._neuralNetwork, data._cellTypeData, data._signalRestriction);
+        ar(data._neuralNetwork, data._cellType, data._signalRestriction);
     }
     SPLIT_SERIALIZATION(NodeDescription)
 
@@ -879,7 +879,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._isFrontAngleRefCell, defaultObject._isFrontAngleRefCell);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data._cellTypeData, data._signal, data._signalRestriction, data._neuralNetwork);
+        ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
     }
     SPLIT_SERIALIZATION(CellDescription)
 

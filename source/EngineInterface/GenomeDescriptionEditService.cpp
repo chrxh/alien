@@ -24,7 +24,7 @@ void GenomeDescriptionEditService::addGene(GenomeDescription& genome, int index,
         auto& gene = genome._genes[i];
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 if (constructor._geneIndex > index) {
                     ++constructor._geneIndex;
                 }
@@ -44,7 +44,7 @@ void GenomeDescriptionEditService::removeGene(GenomeDescription& genome, int ind
         auto& gene = genome._genes[i];
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 if (constructor._geneIndex >= index) {
                     --constructor._geneIndex;
                 }
@@ -61,7 +61,7 @@ void GenomeDescriptionEditService::swapGenes(GenomeDescription& genome, int inde
     for (auto& gene : genome._genes) {
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 if (constructor._geneIndex == index) {
                     constructor._geneIndex = index + 1;
                 } else if (constructor._geneIndex == index + 1) {
@@ -107,7 +107,7 @@ namespace
             gene._numConcatenations = 1;
             for (auto& node : gene._nodes) {
                 if (node.getCellType() == CellTypeGenome_Constructor) {
-                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                     constructor._geneIndex = toInt(genome._genes.size());  // Castrate further construction
                 }
             }
@@ -126,7 +126,7 @@ namespace
         // Continue with constructor nodes
         for (auto const& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 if (constructor._geneIndex < genome._genes.size()) {
                     result |= trimNodes(genome, nodeCounter, constructor._geneIndex, nodeLimit);
                 }
@@ -257,7 +257,7 @@ Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescript
         CreatureDescription()
             .genome(subGenome.genome)
             .cells({
-                CellDescription().color(PreviewColor).stiffness(1.0f).cellTypeData(ConstructorDescription().geneIndex(subGenome.startIndex)).pos(pos),
+                CellDescription().color(PreviewColor).stiffness(1.0f).cellType(ConstructorDescription().geneIndex(subGenome.startIndex)).pos(pos),
             }),
     });
 }
@@ -273,7 +273,7 @@ namespace
         auto& gene = genome._genes.at(geneIndex);
         for (auto& node : gene._nodes) {
             if (node.getCellType() == CellTypeGenome_Constructor) {
-                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 if (constructor._geneIndex < genome._genes.size()) {
                     if (inspectedGeneIndices.contains(constructor._geneIndex)) {
                         constructor._geneIndex = genome._genes.size();  // Recursive part => perform castration
@@ -302,10 +302,10 @@ namespace
                 }
                 if (node.getCellType() != CellTypeGenome_Constructor) {
                     if (!detailSimulation) {
-                        node._cellTypeData = BaseGenomeDescription();
+                        node._cellType = BaseGenomeDescription();
                     }
                 } else {
-                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                    auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                     constructor._autoTriggerInterval = 75;
                     constructor._constructionActivationTime = 200;
                 }

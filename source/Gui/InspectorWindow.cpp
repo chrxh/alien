@@ -113,10 +113,10 @@ void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
         processCellTypeTab(cell);
         processCellTypePropertiesTab(cell);
         if (cell.getCellType() == CellType_Constructor) {
-            processCellGenomeTab(std::get<ConstructorDescription>(cell._cellTypeData));
+            processCellGenomeTab(std::get<ConstructorDescription>(cell._cellType));
         }
         if (cell.getCellType() == CellType_Injector) {
-            processCellGenomeTab(std::get<InjectorDescription>(cell._cellTypeData));
+            processCellGenomeTab(std::get<InjectorDescription>(cell._cellType));
         }
 
         validateAndCorrect(cell);
@@ -261,43 +261,43 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                         type)) {
                     switch (type) {
                     case CellType_Structure: {
-                        cell._cellTypeData = StructureCellDescription();
+                        cell._cellType = StructureCellDescription();
                     } break;
                     case CellType_Free: {
-                        cell._cellTypeData = FreeCellDescription();
+                        cell._cellType = FreeCellDescription();
                     } break;
                     case CellType_Base: {
-                        cell._cellTypeData = BaseDescription();
+                        cell._cellType = BaseDescription();
                     } break;
                     case CellType_Depot: {
-                        cell._cellTypeData = DepotDescription();
+                        cell._cellType = DepotDescription();
                     } break;
                     case CellType_Constructor: {
-                        cell._cellTypeData = ConstructorDescription();
+                        cell._cellType = ConstructorDescription();
                     } break;
                     case CellType_Sensor: {
-                        cell._cellTypeData = SensorDescription();
+                        cell._cellType = SensorDescription();
                     } break;
                     case CellType_Generator: {
-                        cell._cellTypeData = GeneratorDescription();
+                        cell._cellType = GeneratorDescription();
                     } break;
                     case CellType_Attacker: {
-                        cell._cellTypeData = AttackerDescription();
+                        cell._cellType = AttackerDescription();
                     } break;
                     case CellType_Injector: {
-                        cell._cellTypeData = InjectorDescription();
+                        cell._cellType = InjectorDescription();
                     } break;
                     case CellType_Muscle: {
-                        cell._cellTypeData = MuscleDescription();
+                        cell._cellType = MuscleDescription();
                     } break;
                     case CellType_Defender: {
-                        cell._cellTypeData = DefenderDescription();
+                        cell._cellType = DefenderDescription();
                     } break;
                     case CellType_Reconnector: {
-                        cell._cellTypeData = ReconnectorDescription();
+                        cell._cellType = ReconnectorDescription();
                     } break;
                     case CellType_Detonator: {
-                        cell._cellTypeData = DetonatorDescription();
+                        cell._cellType = DetonatorDescription();
                     } break;
                     }
                 }
@@ -349,34 +349,34 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
             case CellType_Base: {
             } break;
             case CellType_Depot: {
-                processTransmitterContent(std::get<DepotDescription>(cell._cellTypeData));
+                processTransmitterContent(std::get<DepotDescription>(cell._cellType));
             } break;
             case CellType_Constructor: {
-                processConstructorContent(std::get<ConstructorDescription>(cell._cellTypeData));
+                processConstructorContent(std::get<ConstructorDescription>(cell._cellType));
             } break;
             case CellType_Sensor: {
-                processSensorContent(std::get<SensorDescription>(cell._cellTypeData));
+                processSensorContent(std::get<SensorDescription>(cell._cellType));
             } break;
             case CellType_Generator: {
-                processGeneratorContent(std::get<GeneratorDescription>(cell._cellTypeData));
+                processGeneratorContent(std::get<GeneratorDescription>(cell._cellType));
             } break;
             case CellType_Attacker: {
-                processAttackerContent(std::get<AttackerDescription>(cell._cellTypeData));
+                processAttackerContent(std::get<AttackerDescription>(cell._cellType));
             } break;
             case CellType_Injector: {
-                processInjectorContent(std::get<InjectorDescription>(cell._cellTypeData));
+                processInjectorContent(std::get<InjectorDescription>(cell._cellType));
             } break;
             case CellType_Muscle: {
-                processMuscleContent(std::get<MuscleDescription>(cell._cellTypeData));
+                processMuscleContent(std::get<MuscleDescription>(cell._cellType));
             } break;
             case CellType_Defender: {
-                processDefenderContent(std::get<DefenderDescription>(cell._cellTypeData));
+                processDefenderContent(std::get<DefenderDescription>(cell._cellType));
             } break;
             case CellType_Reconnector: {
-                processReconnectorContent(std::get<ReconnectorDescription>(cell._cellTypeData));
+                processReconnectorContent(std::get<ReconnectorDescription>(cell._cellType));
             } break;
             case CellType_Detonator: {
-                processDetonatorContent(std::get<DetonatorDescription>(cell._cellTypeData));
+                processDetonatorContent(std::get<DetonatorDescription>(cell._cellType));
             } break;
             }
         }
@@ -747,7 +747,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     cell._energy = std::max(0.0f, cell._energy);
     switch (cell.getCellType()) {
     case CellType_Constructor: {
-        auto& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
+        auto& constructor = std::get<ConstructorDescription>(cell._cellType);
         //auto numNodes = GenomeDescriptionConverterService::get().convertNodeAddressToNodeIndex(constructor._genome, toInt(constructor._genome.size()));
         //if (numNodes > 0) {
         //    constructor._currentNodeIndex = ((constructor._currentNodeIndex % numNodes) + numNodes) % numNodes;
@@ -772,7 +772,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         //constructor._generation = std::max(0, constructor._generation);
     } break;
     case CellType_Sensor: {
-        auto& sensor = std::get<SensorDescription>(cell._cellTypeData);
+        auto& sensor = std::get<SensorDescription>(cell._cellType);
         sensor._minDensity = std::max(0.0f, std::min(1.0f, sensor._minDensity));
         if (sensor._minRange) {
             sensor._minRange = std::max(0, std::min(127, *sensor._minRange));
@@ -782,12 +782,12 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
         }
     } break;
     case CellType_Generator: {
-        auto& _generator = std::get<GeneratorDescription>(cell._cellTypeData);
+        auto& _generator = std::get<GeneratorDescription>(cell._cellType);
         _generator._autoTriggerInterval = std::max(0, _generator._autoTriggerInterval);
         _generator._alternationInterval = std::max(0, _generator._alternationInterval);
     } break;
     case CellType_Detonator: {
-        auto& detonator = std::get<DetonatorDescription>(cell._cellTypeData);
+        auto& detonator = std::get<DetonatorDescription>(cell._cellType);
         detonator._countdown = std::min(0xffff, std::max(0, detonator._countdown));
     } break;
     }

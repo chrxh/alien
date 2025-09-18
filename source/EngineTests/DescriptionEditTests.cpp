@@ -348,7 +348,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 {
     // Create test data
     auto data = Description().cells({
-        CellDescription().id(0).cellTypeData(ConstructorDescription().lastConstructedCellId(1)),
+        CellDescription().id(0).cellType(ConstructorDescription().lastConstructedCellId(1)),
         CellDescription().id(1),
     });
 
@@ -375,14 +375,14 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     ASSERT_TRUE(constructor.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(base->_id, std::get<ConstructorDescription>(constructor->_cellTypeData)._lastConstructedCellId);
+    EXPECT_EQ(base->_id, std::get<ConstructorDescription>(constructor->_cellType)._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notContained)
 {
     // Create test data
     auto data = Description().cells({
-        CellDescription().id(0).cellTypeData(ConstructorDescription().lastConstructedCellId(2)),
+        CellDescription().id(0).cellType(ConstructorDescription().lastConstructedCellId(2)),
         CellDescription().id(1),
     });
 
@@ -409,7 +409,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     ASSERT_TRUE(constructor.has_value());
     ASSERT_TRUE(base.has_value());
 
-    EXPECT_EQ(2, std::get<ConstructorDescription>(constructor->_cellTypeData)._lastConstructedCellId);
+    EXPECT_EQ(2, std::get<ConstructorDescription>(constructor->_cellType)._lastConstructedCellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_differentParticleIds)

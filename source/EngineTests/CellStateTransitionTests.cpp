@@ -110,7 +110,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
                  GeneDescription().separation(true).nodes({NodeDescription()}),
              }))
              .cells({
-                 CellDescription().id(1).cellTypeData(ConstructorDescription().geneIndex(0)).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+                 CellDescription().id(1).cellType(ConstructorDescription().geneIndex(0)).pos({10.0f, 10.0f}).cellState(CellState_Ready),
                  CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
              })});
     data.addConnection(1, 2);

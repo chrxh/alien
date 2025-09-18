@@ -63,7 +63,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     } else {
         // Only 1 cell with start gene? => try cells of referenced gene
         if (lastCell.getCellType() == CellType_Constructor) {
-            auto refGeneIndex = std::get<ConstructorDescription>(lastCell._cellTypeData)._geneIndex;
+            auto refGeneIndex = std::get<ConstructorDescription>(lastCell._cellType)._geneIndex;
             phenotype.forEachCell([&](auto const& cell) {
                 if (cell._geneIndex != refGeneIndex || cell._id == lastCell._id) {
                     return;
@@ -103,9 +103,9 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
         }
         if (cell.getCellType() == CellType_Constructor) {
-            auto constructor = std::get<ConstructorDescription>(cell._cellTypeData);
+            auto constructor = std::get<ConstructorDescription>(cell._cellType);
             if (!genome._genes.empty()) {
-                auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+                auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 if (constructor._geneIndex == genome._genes.size()) {
                     previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
                 }

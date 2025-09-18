@@ -35,13 +35,13 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription()),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
+//            .cellType(GeneratorDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -77,14 +77,14 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription())
+//            .cellType(GeneratorDescription())
 //            .signal(signal),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -119,13 +119,13 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_ConnectedCells))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription()),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
+//            .cellType(GeneratorDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -159,10 +159,10 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
-//        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(ConstructorDescription()/*.genome(genome)*/),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
+//        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(ConstructorDescription()/*.genome(genome)*/),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -196,13 +196,13 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
+//            .cellType(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -234,10 +234,10 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
-//        CellDescription().id(2).pos({11.0f, 10.0f}).cellTypeData(DepotDescription()).color(1),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(DepotDescription()),
+//        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(DepotDescription()).color(1),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(DepotDescription()),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -280,16 +280,16 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({9.0f, 10.0f})
-//            .cellTypeData(ConstructorDescription().numExpectedCells(4)/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
+//            .cellType(ConstructorDescription().numExpectedCells(4)/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
 //        CellDescription()
 //            .id(2)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
 //        CellDescription()
 //            .id(3)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))*/),
+//            .cellType(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))*/),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(2, 3);
@@ -333,16 +333,16 @@ public:
 //        CellDescription()
 //            .id(1)
 //            .pos({9.0f, 10.0f})
-//            .cellTypeData(ConstructorDescription().numExpectedCells(4)/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
+//            .cellType(ConstructorDescription().numExpectedCells(4)/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome))*/),
 //        CellDescription()
 //            .id(2)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
+//            .cellType(DepotDescription().mode(EnergyDistributionMode_TransmittersAndConstructors))
 //            .energy(_parameters.normalCellEnergy.value[0] * 2),
 //        CellDescription()
 //            .id(3)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))*/),
+//            .cellType(ConstructorDescription()/*.genome(GenomeDescriptionConverterService::get().convertDescriptionToBytes(subgenome))*/),
 //        CellDescription()
 //            .id(4)
 //            .pos({12.0f, 10.0f})

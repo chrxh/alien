@@ -296,20 +296,20 @@ CellDescription DescriptionConverterService::createCellDescription(
     switch (cellTO.cellType) {
     case CellType_Structure: {
         StructureCellDescription base;
-        result._cellTypeData = base;
+        result._cellType = base;
     } break;
     case CellType_Free: {
         FreeCellDescription base;
-        result._cellTypeData = base;
+        result._cellType = base;
     } break;
     case CellType_Base: {
         BaseDescription base;
-        result._cellTypeData = base;
+        result._cellType = base;
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
         transmitter._mode = cellTO.cellTypeData.depot.mode;
-        result._cellTypeData = transmitter;
+        result._cellType = transmitter;
     } break;
     case CellType_Constructor: {
         ConstructorDescription constructor;
@@ -324,7 +324,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
-        result._cellTypeData = constructor;
+        result._cellType = constructor;
     } break;
     case CellType_Sensor: {
         SensorDescription sensor;
@@ -336,7 +336,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         sensor._restrictToColor =
             cellTO.cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.sensor.restrictToColor) : std::nullopt;
         sensor._restrictToCreatures = cellTO.cellTypeData.sensor.restrictToCreatures;
-        result._cellTypeData = sensor;
+        result._cellType = sensor;
     } break;
     case CellType_Generator: {
         GeneratorDescription generator;
@@ -344,17 +344,17 @@ CellDescription DescriptionConverterService::createCellDescription(
         generator._pulseType = cellTO.cellTypeData.generator.pulseType;
         generator._alternationInterval = cellTO.cellTypeData.generator.alternationInterval;
         generator._numPulses = cellTO.cellTypeData.generator.numPulses;
-        result._cellTypeData = generator;
+        result._cellType = generator;
     } break;
     case CellType_Attacker: {
         AttackerDescription attacker;
-        result._cellTypeData = attacker;
+        result._cellType = attacker;
     } break;
     case CellType_Injector: {
         InjectorDescription injector;
         injector._mode = cellTO.cellTypeData.injector.mode;
         injector._counter = cellTO.cellTypeData.injector.counter;
-        result._cellTypeData = injector;
+        result._cellType = injector;
     } break;
     case CellType_Muscle: {
         MuscleDescription muscle;
@@ -411,25 +411,25 @@ CellDescription DescriptionConverterService::createCellDescription(
 
         muscle._lastMovementX = cellTO.cellTypeData.muscle.lastMovementX;
         muscle._lastMovementY = cellTO.cellTypeData.muscle.lastMovementY;
-        result._cellTypeData = muscle;
+        result._cellType = muscle;
     } break;
     case CellType_Defender: {
         DefenderDescription defender;
         defender._mode = cellTO.cellTypeData.defender.mode;
-        result._cellTypeData = defender;
+        result._cellType = defender;
     } break;
     case CellType_Reconnector: {
         ReconnectorDescription reconnector;
         reconnector._restrictToColor =
             cellTO.cellTypeData.reconnector.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.reconnector.restrictToColor) : std::nullopt;
         reconnector._restrictToCreatures = cellTO.cellTypeData.reconnector.restrictToCreatures;
-        result._cellTypeData = reconnector;
+        result._cellType = reconnector;
     } break;
     case CellType_Detonator: {
         DetonatorDescription detonator;
         detonator._state = cellTO.cellTypeData.detonator.state;
         detonator._countdown = cellTO.cellTypeData.detonator.countdown;
-        result._cellTypeData = detonator;
+        result._cellType = detonator;
     } break;
     }
     if (cellTO.neuralNetworkDataIndex != CellTO::NeuralNetworkDataIndex_NotSet) {
@@ -501,12 +501,12 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
             switch (nodeTO->cellType) {
             case CellTypeGenome_Base: {
                 BaseGenomeDescription baseDesc;
-                nodeDesc._cellTypeData = baseDesc;
+                nodeDesc._cellType = baseDesc;
             } break;
             case CellTypeGenome_Depot: {
                 DepotGenomeDescription depotDesc;
                 depotDesc._mode = nodeTO->cellTypeData.depot.mode;
-                nodeDesc._cellTypeData = depotDesc;
+                nodeDesc._cellType = depotDesc;
             } break;
             case CellTypeGenome_Constructor: {
                 ConstructorGenomeDescription constructorDesc;
@@ -516,7 +516,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                 constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
                 constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
-                nodeDesc._cellTypeData = constructorDesc;
+                nodeDesc._cellType = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
                 SensorGenomeDescription sensorDesc;
@@ -528,23 +528,23 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                 sensorDesc._restrictToColor =
                     nodeTO->cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(nodeTO->cellTypeData.sensor.restrictToColor) : std::nullopt;
                 sensorDesc._restrictToCreatures = nodeTO->cellTypeData.sensor.restrictToCreatures;
-                nodeDesc._cellTypeData = sensorDesc;
+                nodeDesc._cellType = sensorDesc;
             } break;
             case CellTypeGenome_Generator: {
                 GeneratorGenomeDescription generatorDesc;
                 generatorDesc._autoTriggerInterval = nodeTO->cellTypeData.generator.autoTriggerInterval;
                 generatorDesc._pulseType = nodeTO->cellTypeData.generator.pulseType;
                 generatorDesc._alternationInterval = nodeTO->cellTypeData.generator.alternationInterval;
-                nodeDesc._cellTypeData = generatorDesc;
+                nodeDesc._cellType = generatorDesc;
             } break;
             case CellTypeGenome_Attacker: {
                 AttackerGenomeDescription attackerDesc;
-                nodeDesc._cellTypeData = attackerDesc;
+                nodeDesc._cellType = attackerDesc;
             } break;
             case CellTypeGenome_Injector: {
                 InjectorGenomeDescription injectorDesc;
                 injectorDesc._mode = nodeTO->cellTypeData.injector.mode;
-                nodeDesc._cellTypeData = injectorDesc;
+                nodeDesc._cellType = injectorDesc;
             } break;
             case CellTypeGenome_Muscle: {
                 MuscleGenomeDescription muscleDesc;
@@ -584,23 +584,23 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                     muscleDesc._mode = directMovementDesc;
                 } break;
                 }
-                nodeDesc._cellTypeData = muscleDesc;
+                nodeDesc._cellType = muscleDesc;
             } break;
             case CellTypeGenome_Defender: {
                 DefenderGenomeDescription defenderDesc;
                 defenderDesc._mode = nodeTO->cellTypeData.defender.mode;
-                nodeDesc._cellTypeData = defenderDesc;
+                nodeDesc._cellType = defenderDesc;
             } break;
             case CellTypeGenome_Reconnector: {
                 ReconnectorGenomeDescription reconnectorDesc;
                 reconnectorDesc._restrictToColor = nodeTO->cellTypeData.reconnector.restrictToColor;
                 reconnectorDesc._restrictToCreatures = nodeTO->cellTypeData.reconnector.restrictToCreatures;
-                nodeDesc._cellTypeData = reconnectorDesc;
+                nodeDesc._cellType = reconnectorDesc;
             } break;
             case CellTypeGenome_Detonator: {
                 DetonatorGenomeDescription detonatorDesc;
                 detonatorDesc._countdown = nodeTO->cellTypeData.detonator.countdown;
-                nodeDesc._cellTypeData = detonatorDesc;
+                nodeDesc._cellType = detonatorDesc;
             } break;
             }
             geneDesc._nodes.emplace_back(nodeDesc);
@@ -683,12 +683,12 @@ void DescriptionConverterService::convertCreatureToTO(
             case CellTypeGenome_Base: {
             } break;
             case CellTypeGenome_Depot: {
-                auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
                 depotTO.mode = depotDesc._mode;
             } break;
             case CellTypeGenome_Constructor: {
-                auto const& constructorDesc = std::get<ConstructorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& constructorDesc = std::get<ConstructorGenomeDescription>(nodeDesc._cellType);
                 auto& constructorTO = nodeTO.cellTypeData.constructor;
                 constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
                 constructorTO.geneIndex = constructorDesc._geneIndex;
@@ -696,7 +696,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 constructorTO.constructionAngle = constructorDesc._constructionAngle;
             } break;
             case CellTypeGenome_Sensor: {
-                auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint8_t>(sensorDesc._autoTriggerInterval.value_or(0));
                 sensorTO.minDensity = sensorDesc._minDensity;
@@ -706,7 +706,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 sensorTO.restrictToCreatures = sensorDesc._restrictToCreatures;
             } break;
             case CellTypeGenome_Generator: {
-                auto const& generatorDesc = std::get<GeneratorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& generatorDesc = std::get<GeneratorGenomeDescription>(nodeDesc._cellType);
                 auto& generatorTO = nodeTO.cellTypeData.generator;
                 generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
                 generatorTO.pulseType = generatorDesc._pulseType;
@@ -715,12 +715,12 @@ void DescriptionConverterService::convertCreatureToTO(
             case CellTypeGenome_Attacker: {
             } break;
             case CellTypeGenome_Injector: {
-                auto const& injectorDesc = std::get<InjectorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& injectorDesc = std::get<InjectorGenomeDescription>(nodeDesc._cellType);
                 auto& injectorTO = nodeTO.cellTypeData.injector;
                 injectorTO.mode = injectorDesc._mode;
             } break;
             case CellTypeGenome_Muscle: {
-                auto const& muscleDesc = std::get<MuscleGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& muscleDesc = std::get<MuscleGenomeDescription>(nodeDesc._cellType);
                 auto& muscleTO = nodeTO.cellTypeData.muscle;
                 muscleTO.mode = muscleDesc.getMode();
                 switch (muscleDesc.getMode()) {
@@ -759,18 +759,18 @@ void DescriptionConverterService::convertCreatureToTO(
                 }
             } break;
             case CellTypeGenome_Defender: {
-                auto const& defenderDesc = std::get<DefenderGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& defenderDesc = std::get<DefenderGenomeDescription>(nodeDesc._cellType);
                 auto& defenderTO = nodeTO.cellTypeData.defender;
                 defenderTO.mode = defenderDesc._mode;
             } break;
             case CellTypeGenome_Reconnector: {
-                auto const& reconnectorDesc = std::get<ReconnectorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& reconnectorDesc = std::get<ReconnectorGenomeDescription>(nodeDesc._cellType);
                 auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
                 reconnectorTO.restrictToColor = reconnectorDesc._restrictToColor.value_or(255);
                 reconnectorTO.restrictToCreatures = reconnectorDesc._restrictToCreatures;
             } break;
             case CellTypeGenome_Detonator: {
-                auto const& detonatorDesc = std::get<DetonatorGenomeDescription>(nodeDesc._cellTypeData);
+                auto const& detonatorDesc = std::get<DetonatorGenomeDescription>(nodeDesc._cellType);
                 auto& detonatorTO = nodeTO.cellTypeData.detonator;
                 detonatorTO.countdown = detonatorDesc._countdown;
             } break;
@@ -839,12 +839,12 @@ void DescriptionConverterService::convertCellToTO(
         cellTO.cellTypeData.base = baseTO;
     } break;
     case CellType_Depot: {
-        auto const& transmitterDesc = std::get<DepotDescription>(cellDesc._cellTypeData);
+        auto const& transmitterDesc = std::get<DepotDescription>(cellDesc._cellType);
         DepotTO& transmitterTO = cellTO.cellTypeData.depot;
         transmitterTO.mode = transmitterDesc._mode;
     } break;
     case CellType_Constructor: {
-        auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellTypeData);
+        auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellType);
         ConstructorTO& constructorTO = cellTO.cellTypeData.constructor;
         constructorTO.autoTriggerInterval = static_cast<uint8_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
@@ -856,7 +856,7 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.currentBranch = static_cast<uint8_t>(constructorDesc._currentBranch);
     } break;
     case CellType_Sensor: {
-        auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellTypeData);
+        auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellType);
         SensorTO& sensorTO = cellTO.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = static_cast<uint8_t>(sensorDesc._autoTriggerInterval.value_or(0));
         sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
@@ -866,7 +866,7 @@ void DescriptionConverterService::convertCellToTO(
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
     } break;
     case CellType_Generator: {
-        auto const& generatorDesc = std::get<GeneratorDescription>(cellDesc._cellTypeData);
+        auto const& generatorDesc = std::get<GeneratorDescription>(cellDesc._cellType);
         GeneratorTO& generatorTO = cellTO.cellTypeData.generator;
         generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
         generatorTO.pulseType = generatorDesc._pulseType;
@@ -874,17 +874,17 @@ void DescriptionConverterService::convertCellToTO(
         generatorTO.numPulses = generatorDesc._numPulses;
     } break;
     case CellType_Attacker: {
-        //auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellTypeData);
+        //auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellType);
         //AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
     } break;
     case CellType_Injector: {
-        auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellTypeData);
+        auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellType);
         InjectorTO& injectorTO = cellTO.cellTypeData.injector;
         injectorTO.mode = injectorDesc._mode;
         injectorTO.counter = injectorDesc._counter;
     } break;
     case CellType_Muscle: {
-        auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellTypeData);
+        auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellType);
         MuscleTO& muscleTO = cellTO.cellTypeData.muscle;
         muscleTO.mode = muscleDesc.getMode();
         if (muscleTO.mode == MuscleMode_AutoBending) {
@@ -939,18 +939,18 @@ void DescriptionConverterService::convertCellToTO(
         muscleTO.lastMovementY = muscleDesc._lastMovementY;
     } break;
     case CellType_Defender: {
-        auto const& defenderDesc = std::get<DefenderDescription>(cellDesc._cellTypeData);
+        auto const& defenderDesc = std::get<DefenderDescription>(cellDesc._cellType);
         DefenderTO& defenderTO = cellTO.cellTypeData.defender;
         defenderTO.mode = defenderDesc._mode;
     } break;
     case CellType_Reconnector: {
-        auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellTypeData);
+        auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellType);
         ReconnectorTO& reconnectorTO = cellTO.cellTypeData.reconnector;
         reconnectorTO.restrictToColor = toUInt8(reconnectorDesc._restrictToColor.value_or(255));
         reconnectorTO.restrictToCreatures = reconnectorDesc._restrictToCreatures;
     } break;
     case CellType_Detonator: {
-        auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellTypeData);
+        auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellType);
         DetonatorTO& detonatorTO = cellTO.cellTypeData.detonator;
         detonatorTO.state = detonatorDesc._state;
         detonatorTO.countdown = detonatorDesc._countdown;
