@@ -185,7 +185,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles)
             .genome(GenomeDescription().frontAngle(FrontAngle))
             .cells({
                 CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
-                CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellTypeData(MuscleDescription().mode(muscleMode)),
+                CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
                 CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
             }),
     });

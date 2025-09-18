@@ -32,7 +32,7 @@ TEST_F(StatisticsTests, selfReplicatorWithRepetitionsInGenome)
 
     //Description data;
     //data.cells() = {
-    //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
+    //    CellDescription().id(1).cellType(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
 
     //_simulationFacade->setSimulationData(data);
@@ -57,7 +57,7 @@ TEST_F(StatisticsTests, selfReplicatorWithInfiniteRepetitionsInGenome)
 
     //Description data;
     //data.cells() = {
-    //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
+    //    CellDescription().id(1).cellType(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
 
     //_simulationFacade->setSimulationData(data);
@@ -81,7 +81,7 @@ TEST_F(StatisticsTests, nonSelfReplicatorWithRepetitionsInGenome)
 
     //Description data;
     //data.cells() = {
-    //    CellDescription().id(1).cellTypeData(ConstructorDescription()/*.genome(mainGenome)*/),
+    //    CellDescription().id(1).cellType(ConstructorDescription()/*.genome(mainGenome)*/),
     //});
 
     //_simulationFacade->setSimulationData(data);

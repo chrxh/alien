@@ -19,7 +19,7 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -35,7 +35,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -52,7 +52,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97 * 2)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97 * 2)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -69,7 +69,7 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -85,7 +85,7 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -102,7 +102,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -119,7 +119,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).cellTypeData(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -138,7 +138,7 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
 {
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).cellTypeData(GeneratorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({0, 0}).cellType(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription().id(2).pos({1, 0}),
         CellDescription().id(3).pos({0.5, 0.5}),
     };

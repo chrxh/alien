@@ -38,27 +38,27 @@ MuscleMode MuscleGenomeDescription::getMode() const
 
 CellTypeGenome NodeDescription::getCellType() const
 {
-    if (std::holds_alternative<BaseGenomeDescription>(_cellTypeData)) {
+    if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {
         return CellTypeGenome_Base;
-    } else if (std::holds_alternative<DepotGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<DepotGenomeDescription>(_cellType)) {
         return CellTypeGenome_Depot;
-    } else if (std::holds_alternative<ConstructorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<ConstructorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Constructor;
-    } else if (std::holds_alternative<SensorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<SensorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Sensor;
-    } else if (std::holds_alternative<GeneratorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<GeneratorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Generator;
-    } else if (std::holds_alternative<AttackerGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<AttackerGenomeDescription>(_cellType)) {
         return CellTypeGenome_Attacker;
-    } else if (std::holds_alternative<InjectorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<InjectorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Injector;
-    } else if (std::holds_alternative<MuscleGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<MuscleGenomeDescription>(_cellType)) {
         return CellTypeGenome_Muscle;
-    } else if (std::holds_alternative<DefenderGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<DefenderGenomeDescription>(_cellType)) {
         return CellTypeGenome_Defender;
-    } else if (std::holds_alternative<ReconnectorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<ReconnectorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Reconnector;
-    } else if (std::holds_alternative<DetonatorGenomeDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<DetonatorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Detonator;
     }
     CHECK(false);

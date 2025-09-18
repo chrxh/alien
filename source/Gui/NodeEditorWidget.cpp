@@ -158,7 +158,7 @@ void _NodeEditorWidget::processNodeAttributes()
         // Type
         auto nodeType = node.getCellType();
         if (AlienGui::Combo(AlienGui::ComboParameters().name("Type").values(Const::CellTypeGenomeStrings).textWidth(rightColumnWidth), nodeType)) {
-            node._cellTypeData = createCellTypeGenomeDescription(nodeType);
+            node._cellType = createCellTypeGenomeDescription(nodeType);
         }
         if (nodeType == CellTypeGenome_Base) {
         } else if (nodeType == CellTypeGenome_Depot) {
@@ -167,7 +167,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Gene index
-            auto& constructor = std::get<ConstructorGenomeDescription>(node._cellTypeData);
+            auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
             std::vector<std::string> genes;
             for (auto const& [index, gene] : _editData->genome._genes | boost::adaptors::indexed(0)) {
                 auto text = "No. " + std::to_string(index + 1);
@@ -197,7 +197,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Auto activation interval
-            auto& sensor = std::get<SensorGenomeDescription>(node._cellTypeData);
+            auto& sensor = std::get<SensorGenomeDescription>(node._cellType);
             AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
@@ -225,7 +225,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Activation interval
-            auto& generator = std::get<GeneratorGenomeDescription>(node._cellTypeData);
+            auto& generator = std::get<GeneratorGenomeDescription>(node._cellType);
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Activation interval").textWidth(rightColumnWidth), generator._autoTriggerInterval);
 
             // Pulse type
@@ -250,7 +250,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Mode
-            auto& injector = std::get<InjectorGenomeDescription>(node._cellTypeData);
+            auto& injector = std::get<InjectorGenomeDescription>(node._cellType);
             AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::InjectorModeStrings).textWidth(rightColumnWidth), injector._mode);
 
             AlienGui::EndIndent();
@@ -260,7 +260,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Mode
-            auto& muscle = std::get<MuscleGenomeDescription>(node._cellTypeData);
+            auto& muscle = std::get<MuscleGenomeDescription>(node._cellType);
             auto mode = muscle.getMode();
             if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MuscleModeStrings).textWidth(rightColumnWidth), mode)) {
                 muscle._mode = createMuscleModeGenomeDescription(mode);
@@ -356,7 +356,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Defender mode
-            auto& defender = std::get<DefenderGenomeDescription>(node._cellTypeData);
+            auto& defender = std::get<DefenderGenomeDescription>(node._cellType);
             AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::DefenderModeStrings).textWidth(rightColumnWidth), defender._mode);
 
             AlienGui::EndIndent();
@@ -366,7 +366,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Restrict to color
-            auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellTypeData);
+            auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
             AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), reconnector._restrictToColor);
 
             // Restrict to mutants
@@ -381,7 +381,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             // Countdown
-            auto& detonator = std::get<DetonatorGenomeDescription>(node._cellTypeData);
+            auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
 
             AlienGui::EndIndent();

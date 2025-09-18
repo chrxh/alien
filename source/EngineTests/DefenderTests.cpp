@@ -38,20 +38,20 @@
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(AttackerDescription()),
+//            .cellType(AttackerDescription()),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
 //        CellDescription()
 //            .id(3)
 //            .pos({9.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription()),
+//            .cellType(GeneratorDescription()),
 //        CellDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
+//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -77,17 +77,17 @@
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(AttackerDescription()),
+//            .cellType(AttackerDescription()),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(GeneratorDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(GeneratorDescription()),
 //        CellDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
+//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -115,17 +115,17 @@
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
+//            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
 //        CellDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
+//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -138,13 +138,13 @@
 //    auto actualData = _simulationFacade->getSimulationData();
 //
 //    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector._cellTypeData);
+//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector._cellType);
 //
 //    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget._cellTypeData);
+//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget._cellType);
 //
 //    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellTypeData);
+//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellType);
 //
 //    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal->_channels[0]));
 //    EXPECT_EQ(0, actualInjectorFunc._counter);
@@ -160,17 +160,17 @@
 //        CellDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
-//            .cellTypeData(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
+//            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
 //        CellDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
-//            .cellTypeData(GeneratorDescription().autoTriggerInterval(1))
+//            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellTypeData(ConstructorDescription()),
+//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
 //        CellDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
-//            .cellTypeData(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
+//            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
 //    });
 //    data.addConnection(1, 2);
 //    data.addConnection(3, 4);
@@ -183,16 +183,16 @@
 //    auto actualData = _simulationFacade->getSimulationData();
 //
 //    auto actualInjector = getCell(actualData, 1);
-//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector._cellTypeData);
+//    auto actualInjectorFunc = std::get<InjectorDescription>(actualInjector._cellType);
 //
 //    auto origTarget = getCell(data, 3);
-//    auto origTargetFunc = std::get<ConstructorDescription>(origTarget._cellTypeData);
+//    auto origTargetFunc = std::get<ConstructorDescription>(origTarget._cellType);
 //
 //    auto actualTarget = getCell(actualData, 3);
-//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget._cellTypeData);
+//    auto actualTargetFunc = std::get<ConstructorDescription>(actualTarget._cellType);
 //
 //    auto origInjector = getCell(data, 1);
-//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellTypeData);
+//    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellType);
 //
 //    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal->_channels[0]));
 //    EXPECT_EQ(4, actualInjectorFunc._counter);

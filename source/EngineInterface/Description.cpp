@@ -66,31 +66,31 @@ CellDescription CellDescription::id(uint64_t id)
 
 CellType CellDescription::getCellType() const
 {
-    if (std::holds_alternative<StructureCellDescription>(_cellTypeData)) {
+    if (std::holds_alternative<StructureCellDescription>(_cellType)) {
         return CellType_Structure;
-    } else if (std::holds_alternative<FreeCellDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<FreeCellDescription>(_cellType)) {
         return CellType_Free;
-    } else if (std::holds_alternative<BaseDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<BaseDescription>(_cellType)) {
         return CellType_Base;
-    } else if (std::holds_alternative<DepotDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<DepotDescription>(_cellType)) {
         return CellType_Depot;
-    } else if (std::holds_alternative<ConstructorDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<ConstructorDescription>(_cellType)) {
         return CellType_Constructor;
-    } else if (std::holds_alternative<SensorDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<SensorDescription>(_cellType)) {
         return CellType_Sensor;
-    } else if (std::holds_alternative<GeneratorDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<GeneratorDescription>(_cellType)) {
         return CellType_Generator;
-    } else if (std::holds_alternative<AttackerDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<AttackerDescription>(_cellType)) {
         return CellType_Attacker;
-    } else if (std::holds_alternative<InjectorDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<InjectorDescription>(_cellType)) {
         return CellType_Injector;
-    } else if (std::holds_alternative<MuscleDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<MuscleDescription>(_cellType)) {
         return CellType_Muscle;
-    } else if (std::holds_alternative<DefenderDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<DefenderDescription>(_cellType)) {
         return CellType_Defender;
-    } else if (std::holds_alternative<ReconnectorDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<ReconnectorDescription>(_cellType)) {
         return CellType_Reconnector;
-    } else if (std::holds_alternative<DetonatorDescription>(_cellTypeData)) {
+    } else if (std::holds_alternative<DetonatorDescription>(_cellType)) {
         return CellType_Detonator;
     }
     CHECK(false);
@@ -350,7 +350,7 @@ void Description::assignNewIds()
             connection._cellId = findNewCellId(creatureIndex, connection._cellId);
         }
         if (cell.getCellType() == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorDescription>(cell._cellTypeData);
+            auto& constructor = std::get<ConstructorDescription>(cell._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
                 constructor._lastConstructedCellId = findNewCellId(creatureIndex, constructor._lastConstructedCellId.value());
             }

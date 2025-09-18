@@ -23,7 +23,7 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
                                .color(parameters._color)
                                .barrier(parameters._barrier)
                                .sticky(parameters._sticky)
-                               .cellTypeData(parameters._cellType));
+                               .cellType(parameters._cellType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -40,19 +40,19 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
 
             //create cell: upper layer
             result._cells.emplace_back(CellDescription()
-                               .cellTypeData(StructureCellDescription())
+                               .cellType(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                .color(parameters._color)
                                .barrier(parameters._barrier)
                                .sticky(parameters._sticky)
-                               .cellTypeData(parameters._cellType));
+                               .cellType(parameters._cellType));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result._cells.emplace_back(CellDescription()
-                                   .cellTypeData(StructureCellDescription())
+                                   .cellType(StructureCellDescription())
                                    .energy(parameters._energy)
                                    .stiffness(parameters._stiffness)
                                    .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
@@ -74,7 +74,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result._cells.emplace_back(CellDescription()
-                           .cellTypeData(StructureCellDescription())
+                           .cellType(StructureCellDescription())
                            .pos(parameters._center)
                            .energy(parameters._energy)
                            .stiffness(parameters._stiffness)
@@ -98,7 +98,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                 continue;
             }
             result._cells.emplace_back(CellDescription()
-                               .cellTypeData(StructureCellDescription())
+                               .cellType(StructureCellDescription())
                                .energy(parameters._energy)
                                .stiffness(parameters._stiffness)
                                .pos({parameters._center.x + dxMod, parameters._center.y + dy})
@@ -467,7 +467,7 @@ void DescriptionEditService::randomizeCountdowns(Description& data, int minValue
         auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
         for (auto& cell : creature._cells) {
             if (cell.getCellType() == CellType_Detonator) {
-                std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;
+                std::get<DetonatorDescription>(cell._cellType)._countdown = countdown;
             }
         }
     }
@@ -475,7 +475,7 @@ void DescriptionEditService::randomizeCountdowns(Description& data, int minValue
         auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
         for (auto& cell : data._cells) {
             if (cell.getCellType() == CellType_Detonator) {
-                std::get<DetonatorDescription>(cell._cellTypeData)._countdown = countdown;
+                std::get<DetonatorDescription>(cell._cellType)._countdown = countdown;
             }
         }
     }
