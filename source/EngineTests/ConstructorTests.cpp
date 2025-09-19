@@ -980,6 +980,92 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
+class ConstructorTests_BendingMuscles
+    : public ConstructorTests
+    , public testing::WithParamInterface<MuscleMode>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstructorTests_BendingMuscles,
+    ConstructorTests_BendingMuscles,
+    ::testing::Values(MuscleMode_AutoBending, MuscleMode_ManualBending, MuscleMode_AngleBending));
+
+TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2__branch_0_1__resetBendingMuscle)
+{
+    auto muscleModeType = GetParam();
+    auto const InitialFrontAngleId = 4;
+
+    auto muscleMode = [&muscleModeType] -> MuscleModeDescription {
+        if (muscleModeType == MuscleMode_AutoBending)
+            return AutoBendingDescription().initialAngle(90.0f);
+        else if (muscleModeType == MuscleMode_ManualBending)
+            return ManualBendingDescription().initialAngle(90.0f);
+        else
+            return AngleBendingDescription().initialAngle(90.0f);
+    }();
+
+    auto data = Description().creatures({
+        CreatureDescription()
+            .id(0)
+            .frontAngleId(InitialFrontAngleId)
+            .genome(GenomeDescription().genes({
+                GeneDescription().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDescription().cellType(MuscleGenomeDescription())}),
+            }))
+            .cells({
+                CellDescription().id(0).pos({100.0f, 100.0f}),
+                CellDescription()
+                    .id(1)
+                    .energy(getConstructorEnergy())
+                    .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(1).lastConstructedCellId(3))
+                    .pos({100.0f, 101.0f}),
+                CellDescription().id(2).pos({100.0f, 102.0f}),
+                CellDescription()
+                    .id(3)
+                    .pos({100.0f + getOffspringDistance(), 101.0f}).cellType(MuscleDescription().mode(muscleMode)),
+            }),
+    });
+    data.addConnection(0, 1);
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto hostCreature = actualData.getCreatureRef(0);
+    EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
+    ASSERT_EQ(5, hostCreature._cells.size());
+
+    auto hostCell = actualData.getCellRef(1);
+    auto prevCell = actualData.getCellRef(3);
+    auto newCell = actualData.getOtherCellRef({0, 1, 2, 3});
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_TRUE(approxCompare(hostCell._pos + RealVector2D(1.0f, 0.0f), newCell._pos));
+
+    ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
+
+    auto connection = actualData.getConnection(hostCell, newCell);
+    EXPECT_EQ(1.0f, connection._distance);
+
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
+    EXPECT_EQ(1, hostConstructor._currentBranch);
+
+    auto muscle = std::get<MuscleDescription>(prevCell._cellType);
+    if (muscleModeType == MuscleMode_AutoBending) {
+        EXPECT_FALSE(std::get<AutoBendingDescription>(muscle._mode)._initialAngle.has_value());
+    } else if (muscleModeType == MuscleMode_ManualBending) {
+        EXPECT_FALSE(std::get<ManualBendingDescription>(muscle._mode)._initialAngle.has_value());
+    } else {
+        EXPECT_FALSE(std::get<AngleBendingDescription>(muscle._mode)._initialAngle.has_value());
+    }
+}
+
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 {
     auto const InitialFrontAngleId = 4;

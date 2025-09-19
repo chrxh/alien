@@ -819,54 +819,8 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
 __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData)
 {
-    // TODO implement better logic for frontAngle setting
-    if (/*constructionData.isLastNodeOfLastConcatenation || (*/constructionData.isLastNode /*&& constructionData.hasInfiniteConcatenations)*/) {
+    if (constructionData.isLastNode) {
         newCell->cellState = CellState_Activating;
         alienAtomicAdd32(&newCell->creature->frontAngleId, static_cast<uint32_t>(1));
-        //if (constructionData.isSeparation) {
-        //    newCell->frontAngle = constructionData.creature->genome.frontAngle;
-        //} else {
-        //    if (hostCell->numConnections > 1) {
-        //        newCell->frontAngle =
-        //            Math::normalizedAngle(hostCell->frontAngle + (180.0f - hostCell->getAngelSpan(hostCell->connections[0].cell, newCell)), -180.0f);
-        //        if (newCell->numConnections > 1) {
-        //            newCell->frontAngle =
-        //                Math::normalizedAngle(newCell->frontAngle + newCell->getAngelSpan(newCell->connections[0].cell, hostCell), -180.0f);
-        //        }
-        //    } else {
-        //        if (newCell->numConnections > 1) {
-        //            newCell->frontAngle =
-        //                Math::normalizedAngle(hostCell->frontAngle + (180.0f - newCell->getAngelSpan(hostCell, newCell->connections[0].cell)), -180.0f);
-        //        } else {
-        //            newCell->frontAngle = hostCell->frontAngle - 180.0f;
-        //        }
-        //    }
-        //}
     }
 }
-
-//
-//__inline__ __device__ float ConstructorProcessor::calcNumCells(int color, uint8_t* genome, uint16_t genomeSize)
-//{
-//    auto result = 0.0f;
-//
-//    auto lastDepth = 0;
-//    auto numRamifications = 1;
-//    auto numCellsRamificationFactor =
-//        cudaSimulationParameters.numCellsMeasurementToggle.value ? cudaSimulationParameters.numCellsRamificationFactor.value[color] : 0.0f;
-//    auto sizeFactor =
-//        cudaSimulationParameters.numCellsMeasurementToggle.value ? cudaSimulationParameters.numCellsSizeFactor.value[color] : 1.0f;
-//    auto depthLevel = cudaSimulationParameters.numCellsMeasurementToggle.value ? cudaSimulationParameters.numCellsDepthLevel.value[color] : 3;
-//    GenomeDecoder::executeForEachNodeRecursively(genome, toInt(genomeSize), false, false, [&](int depth, int nodeAddress, int repetitions) {
-//        auto ramificationFactor = depth > lastDepth ? numCellsRamificationFactor * toFloat(numRamifications) : 0.0f;
-//        if (depth <= depthLevel) {
-//            result += /* (1.0f + toFloat(depth)) * */ toFloat(repetitions) * (ramificationFactor + sizeFactor);
-//        }
-//        lastDepth = depth;
-//        if (ramificationFactor > 0) {
-//            ++numRamifications;
-//        }
-//    });
-//
-//    return result;
-//}
