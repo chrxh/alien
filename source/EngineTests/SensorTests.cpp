@@ -76,6 +76,24 @@ TEST_F(SensorTests, manuallyTriggered_signal)
     EXPECT_TRUE(actualSensor._signal.has_value());
 }
 
+TEST_F(SensorTests, noFrontAngle)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).minDensity(0.1f)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    data.add(DescriptionEditService::get().get().createRect(
+        DescriptionEditService::CreateRectParameters().center({100.0f, 10.0f}).width(16).height(16).cellDistance(2.5f)));
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_FALSE(actualSensor._signal.has_value());
+}
+
 TEST_F(SensorTests, aboveMinDensity)
 {
     Description data;

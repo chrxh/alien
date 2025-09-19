@@ -728,14 +728,14 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         // In case of auto and manual bending muscles, we need to consider the initial angles when calculating the front angle.
                         // For angle bending muscles, we can use the current reference angles.
                         int numMod = 0;
-                        AngleModificationInfo modInfos[4];
+                        AngleModificationInfo modInfos[(MAX_CELL_BONDS + 1) * 2];
                         auto createModInfo = [&numMod, &modInfos](auto const& cell) {
                             if (cell->cellType == CellType_Muscle
                                 && (cell->cellTypeData.muscle.mode == MuscleMode_AutoBending || cell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
                                 auto const& initialAngle = cell->cellTypeData.muscle.mode == MuscleMode_AutoBending
                                     ? cell->cellTypeData.muscle.modeData.autoBending.initialAngle
                                     : cell->cellTypeData.muscle.modeData.manualBending.initialAngle;
-                                if (initialAngle != 0) {
+                                if (initialAngle != VALUE_NOT_SET_FLOAT) {
                                     auto bendingInfo = MuscleProcessor::getBendingInfo(cell);
                                     modInfos[numMod++] = AngleModificationInfo{bendingInfo.pivotCell, bendingInfo.connection, initialAngle};
                                     modInfos[numMod++] = AngleModificationInfo{
@@ -746,8 +746,9 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                             }
                         };
                         createModInfo(cell);
-                        createModInfo(otherCell);
-
+                        for (int k = 0, l = cell->numConnections; k < l; ++k) {
+                            createModInfo(cell->connections[k].cell);
+                        }
                         auto frontAngle_otherCell_cell = Math::normalizedAngle(
                             otherCell->frontAngle + getAngelSpanWithModifiedAngles(otherCell, cell, otherCell->connections[0].cell, numMod, modInfos),
                             -180.0f);

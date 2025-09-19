@@ -22,7 +22,41 @@ public:
 
 };
 
-TEST_F(FrontAngleUpdateTests, equalFrontAngleIdLeadsToNoUpdate)
+TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
+{
+    auto const FrontAngle = 45.0f;
+    auto const InitialFrontAngleId = 4;
+
+    auto data = Description().creatures({
+        CreatureDescription()
+            .id(1)
+            .frontAngleId(InitialFrontAngleId + 1)
+            .genome(GenomeDescription().frontAngle(FrontAngle))
+            .cells({
+                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
+                CellDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+                CellDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
+            }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto creature = actualData.getCreatureRef(1);
+    ASSERT_EQ(3, creature._cells.size());
+
+    EXPECT_FALSE(actualData.getCellRef(1)._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getCellRef(2)._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getCellRef(3)._frontAngle.has_value());
+}
+
+TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
 {
     auto const InitialFrontAngleId = 4;
 
@@ -108,6 +142,40 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
     EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(9)._frontAngle.value()));
 }
 
+TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
+{
+    auto const FrontAngle = 45.0f;
+    auto const InitialFrontAngleId = 4;
+
+    auto data = Description().creatures({
+        CreatureDescription()
+            .id(1)
+            .frontAngleId(InitialFrontAngleId + 1)
+            .genome(GenomeDescription().frontAngle(FrontAngle))
+            .cells({
+                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).frontAngle(7.0f).isFrontAngleRefCell(true),
+                CellDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).frontAngle(42.0f),
+                CellDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId).frontAngle(23.0f),
+            }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto creature = actualData.getCreatureRef(1);
+    ASSERT_EQ(3, creature._cells.size());
+
+    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+}
+
 TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
 {
     auto const FrontAngle = 45.0f;
@@ -164,7 +232,7 @@ INSTANTIATE_TEST_SUITE_P(
     FrontAngleUpdateTests_BendingMuscles,
     ::testing::Values(MuscleMode_AutoBending, MuscleMode_ManualBending, MuscleMode_AngleBending));
 
-TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles)
+TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_twoConnections)
 {
     auto muscleModeType = GetParam();
     auto const FrontAngle = 45.0f;
@@ -212,4 +280,98 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles)
         EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
         EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(3)._frontAngle.value()));
     }
+}
+
+TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_oneConnections)
+{
+    auto muscleModeType = GetParam();
+    auto const FrontAngle = 45.0f;
+    auto const InitialFrontAngleId = 4;
+
+    auto muscleMode = [&muscleModeType] -> MuscleModeDescription {
+        if (muscleModeType == MuscleMode_AutoBending)
+            return AutoBendingDescription().initialAngle(180.0f);
+        else if (muscleModeType == MuscleMode_ManualBending)
+            return ManualBendingDescription().initialAngle(180.0f);
+        else
+            return AngleBendingDescription().initialAngle(180.0f);
+    }();
+    auto data = Description().creatures({
+        CreatureDescription()
+            .id(1)
+            .frontAngleId(InitialFrontAngleId + 1)
+            .genome(GenomeDescription().frontAngle(FrontAngle))
+            .cells({
+                CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
+                CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
+                CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+            }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto creature = actualData.getCreatureRef(1);
+    ASSERT_EQ(3, creature._cells.size());
+
+    if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
+        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(3)._frontAngle.value()));
+    } else {
+        EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(3)._frontAngle.value()));
+    }
+}
+
+TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_initialAngleInvalid)
+{
+    auto muscleModeType = GetParam();
+    auto const FrontAngle = 45.0f;
+    auto const InitialFrontAngleId = 4;
+
+    auto muscleMode = [&muscleModeType] -> MuscleModeDescription {
+        if (muscleModeType == MuscleMode_AutoBending)
+            return AutoBendingDescription();
+        else if (muscleModeType == MuscleMode_ManualBending)
+            return ManualBendingDescription();
+        else
+            return AngleBendingDescription();
+    }();
+    auto data = Description().creatures({
+        CreatureDescription()
+            .id(1)
+            .frontAngleId(InitialFrontAngleId + 1)
+            .genome(GenomeDescription().frontAngle(FrontAngle))
+            .cells({
+                CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
+                CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+            }),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto creature = actualData.getCreatureRef(1);
+    ASSERT_EQ(3, creature._cells.size());
+
+    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(3)._frontAngle.value()));
 }
