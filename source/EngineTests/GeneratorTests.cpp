@@ -171,14 +171,14 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
         auto generator = actualData.getCellRef(1);
         EXPECT_TRUE(generator._signal.has_value());
         EXPECT_TRUE(approxCompare(1.0f, generator._signal->_channels.at(0)));
-        EXPECT_EQ(2, generator._signalRelaxationTime);
+        EXPECT_EQ(2, generator._signalState);
 
         auto base1 = actualData.getCellRef(2);
         EXPECT_FALSE(base1._signal.has_value());
-        EXPECT_EQ(0, base1._signalRelaxationTime);
+        EXPECT_EQ(0, base1._signalState);
 
         auto base2 = actualData.getCellRef(3);
         EXPECT_FALSE(base2._signal.has_value());
-        EXPECT_EQ(0, base2._signalRelaxationTime);
+        EXPECT_EQ(0, base2._signalState);
     }
 }

@@ -496,7 +496,7 @@ namespace
     auto constexpr Id_Cell_NodeIndex = 12;
     auto constexpr Id_Cell_ParentNodeIndex = 13;
     auto constexpr Id_Cell_GeneIndex = 14;
-    auto constexpr Id_Cell_SignalRelaxationTime = 15;
+    auto constexpr Id_Cell_SignalState = 15;
     auto constexpr Id_Cell_AngleToFront = 16;
     auto constexpr Id_Cell_Sticky = 17;
     auto constexpr Id_Cell_FrontAngleId = 18;
@@ -874,7 +874,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
         loadSave(task, auxiliaries, Id_Cell_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(task, auxiliaries, Id_Cell_SignalRelaxationTime, data._signalRelaxationTime, defaultObject._signalRelaxationTime);
+        loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._isFrontAngleRefCell, defaultObject._isFrontAngleRefCell);
         processLoadSaveMap(task, ar, auxiliaries);

@@ -99,7 +99,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
                                .color(color)
                                .geneIndex(cell._geneIndex)
                                .nodeIndex(cell._nodeIndex)
-                               .signalState(cell._signalRelaxationTime);
+                               .signalState(cell._signalState);
 
         if (node._signalRestriction._active && !cell._connections.empty()) {
             auto otherCellId = cell._connections.front()._cellId;

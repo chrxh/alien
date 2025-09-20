@@ -192,7 +192,7 @@ namespace
         cellTO.signalRestriction.active = cell->signalRestriction.active;
         cellTO.signalRestriction.baseAngle = cell->signalRestriction.baseAngle;
         cellTO.signalRestriction.openingAngle = cell->signalRestriction.openingAngle;
-        cellTO.signalRelaxationTime = cell->signalRelaxationTime;
+        cellTO.signalState = cell->signalState;
         cellTO.signal.active = cell->signal.active;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.signal.channels[i] = cell->signal.channels[i];

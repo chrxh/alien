@@ -56,7 +56,7 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
         }
 
         cell->futureSignal.active = false;
-        if (cell->signalRelaxationTime > 0) {
+        if (cell->signalState > 0) {
             continue;
         }
 
@@ -120,9 +120,9 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
             }
-            cell->signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
+            cell->signalState = MAX_SIGNAL_RELAXATION_TIME;
         } else {
-            cell->signalRelaxationTime = max(0, cell->signalRelaxationTime - 1);
+            cell->signalState = max(0, cell->signalState - 1);
         }
     }
 }
@@ -133,7 +133,7 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }
-    cell->signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
+    cell->signalState = MAX_SIGNAL_RELAXATION_TIME;
 }
 
 __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationData& data, Cell* cell)

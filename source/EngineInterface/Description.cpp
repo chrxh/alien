@@ -127,7 +127,7 @@ CellDescription& CellDescription::signalAndRelaxTime(std::vector<float> const& v
     SignalDescription newSignal;
     newSignal._channels = value;
     _signal = newSignal;
-    _signalRelaxationTime = MAX_SIGNAL_RELAXATION_TIME;
+    _signalState = MAX_SIGNAL_RELAXATION_TIME;
     return *this;
 }
 
