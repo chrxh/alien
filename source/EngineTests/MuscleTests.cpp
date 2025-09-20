@@ -8,6 +8,12 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
+enum class DetailPreview
+{
+    No,
+    Yes
+};
+
 class MuscleTests : public IntegrationTestFramework
 {
 public:
@@ -27,6 +33,33 @@ protected:
             return -1.0f;
         } else {
             return 0.0f;
+        }
+    }
+
+    void setSimulationData(Description const& data, DetailPreview detailPreview)
+    {
+        if (detailPreview == DetailPreview::No) {
+            _simulationFacade->setSimulationData(data);
+        } else {
+            _simulationFacade->setPreviewData(data);
+        }
+    }
+
+    void calcTimesteps(int timesteps, DetailPreview detailPreview)
+    {
+        if (detailPreview == DetailPreview::No) {
+            _simulationFacade->calcTimesteps(timesteps);
+        } else {
+            _simulationFacade->calcTimestepsForPreview(timesteps, true);
+        }
+    }
+
+    Description getSimulationData(DetailPreview detailPreview)
+    {
+        if (detailPreview == DetailPreview::No) {
+            return _simulationFacade->getSimulationData();
+        } else {
+            return _simulationFacade->getPreviewData();
         }
     }
 };
@@ -243,7 +276,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
 class MuscleTests_ManualBending
     : public MuscleTests
-    , public testing::WithParamInterface<std::tuple<Side, Channel0>>
+    , public testing::WithParamInterface<std::tuple<Side, Channel0, DetailPreview>>
 {
 };
 
@@ -251,19 +284,20 @@ INSTANTIATE_TEST_SUITE_P(
     MuscleTests_ManualBending,
     MuscleTests_ManualBending,
     ::testing::Values(
-        std::make_tuple(Side::Left, Channel0::Zero),
-        std::make_tuple(Side::Right, Channel0::Zero),
-        std::make_tuple(Side::Left, Channel0::Positive),
-        std::make_tuple(Side::Right, Channel0::Positive),
-        std::make_tuple(Side::Left, Channel0::Negative),
-        std::make_tuple(Side::Right, Channel0::Negative)));
+        std::make_tuple(Side::Left, Channel0::Zero, DetailPreview::No),
+        std::make_tuple(Side::Right, Channel0::Zero, DetailPreview::No),
+        std::make_tuple(Side::Left, Channel0::Positive, DetailPreview::No),
+        std::make_tuple(Side::Right, Channel0::Positive, DetailPreview::No),
+        std::make_tuple(Side::Left, Channel0::Negative, DetailPreview::No),
+        std::make_tuple(Side::Right, Channel0::Negative, DetailPreview::No),
+        std::make_tuple(Side::Left, Channel0::Positive, DetailPreview::Yes)));
 
 TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
 
-    auto [side, channel0] = GetParam();
+    auto [side, channel0, detailPreview] = GetParam();
 
     auto data = Description().cells({
         CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
@@ -278,7 +312,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    _simulationFacade->setSimulationData(data);
+    setSimulationData(data, detailPreview);
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
@@ -286,9 +320,9 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 200; ++i) {
-        _simulationFacade->calcTimesteps(10);
+        calcTimesteps(10, detailPreview);
 
-        auto actualData = _simulationFacade->getSimulationData();
+        auto actualData = getSimulationData(detailPreview);
         auto actualMuscleCell = actualData.getCellRef(2);
         auto actualCell1 = actualData.getCellRef(1);
         auto actualCell3 = actualData.getCellRef(3);
@@ -353,7 +387,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
 
-    auto [side, channel0] = GetParam();
+    auto [side, channel0, detailPreview] = GetParam();
 
     auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}),

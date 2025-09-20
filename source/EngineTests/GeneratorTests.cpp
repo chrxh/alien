@@ -48,6 +48,22 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
     EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
 
+TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailPreview)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
+    };
+
+    _simulationFacade->setPreviewData(data);
+    _simulationFacade->calcTimestepsForPreview(98, true);
+    auto actualData = _simulationFacade->getPreviewData();
+
+    auto generator = actualData.getCellRef(1);
+    ASSERT_TRUE(generator._signal.has_value());
+    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
+}
+
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
     Description data;

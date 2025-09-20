@@ -43,8 +43,32 @@ TEST_F(SignalTests, forwardSignal)
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell1 = actualData.getCellRef(1);
+    EXPECT_FALSE(cell1._signal.has_value());
+
+    auto cell2 = actualData.getCellRef(2);
+    EXPECT_TRUE(cell2._signal.has_value());
+    EXPECT_EQ(signal, cell2._signal->_channels);
+    EXPECT_EQ(1, cell1._signalRelaxationTime);
+    EXPECT_EQ(2, cell2._signalRelaxationTime);
+}
+
+TEST_F(SignalTests, forwardSignal_detailPreview)
+{
+    std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
+        CellDescription().id(2).pos({1, 0}),
+    };
+    data.addConnection(1, 2);
+
+    _simulationFacade->setPreviewData(data);
+    _simulationFacade->calcTimestepsForPreview(1, true);
+    auto actualData = _simulationFacade->getPreviewData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 
@@ -65,8 +89,8 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 }
@@ -83,8 +107,8 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 }
@@ -103,10 +127,9 @@ TEST_F(SignalTests, mergeSignals)
     data.addConnection(2, 3);
 
     _simulationFacade->setSimulationData(data);
-
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 
@@ -140,8 +163,8 @@ TEST_F(SignalTests, forkSignals)
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_TRUE(cell1._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell1._signal->_channels));
@@ -185,8 +208,8 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
     EXPECT_EQ(0, cell1._signalRelaxationTime);
@@ -216,8 +239,8 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
-
     auto actualData = _simulationFacade->getSimulationData();
+
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
 

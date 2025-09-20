@@ -13,12 +13,14 @@ namespace
     template <typename U>
     U getFirstElement(std::set<U> const& s)
     {
+        //return *(--s.end());
         return *s.begin();
     }
 
     template <typename U>
     U getSecondElement(std::set<U> const& s)
     {
+        //return *(--(-- s.end()));
         return *(++s.begin());
     }
 }

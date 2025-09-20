@@ -656,6 +656,48 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
+TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview_detail)
+{
+    auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(NodeParameter{CellTypeGenome_Base});
+
+    auto data = Description().creatures({
+        CreatureDescription()
+            .id(0)
+            .genome(GenomeDescription().genes({
+                GeneDescription().separation(true).nodes({randomNode}),
+            }))
+            .cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
+    });
+
+    _simulationFacade->setPreviewData(data);
+    _simulationFacade->calcTimestepsForPreview(1, true);
+
+    auto actualData = _simulationFacade->getPreviewData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(2, actualData._creatures.size());
+    EXPECT_TRUE(getEnergy(data) < getEnergy(actualData));  // Preview specific: energy is provided for free
+
+    auto hostCreature = actualData.getCreatureRef(0);
+    ASSERT_EQ(1, hostCreature._cells.size());
+
+    auto newCreature = actualData.getOtherCreatureRef(0);
+    ASSERT_EQ(1, newCreature._cells.size());
+
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
+    EXPECT_EQ(CellState_Activating, newCell._cellState);
+    EXPECT_TRUE(newCell._isFrontAngleRefCell);
+    EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
+    EXPECT_TRUE(compare(newCell, randomNode));
+    EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
+
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(1, hostConstructor._currentConcatenation);  // Preview specific: marking end since preview only produces one offspring
+    EXPECT_EQ(0, hostConstructor._currentBranch);
+}
+
 TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_1)
 {
     auto data = Description().creatures({

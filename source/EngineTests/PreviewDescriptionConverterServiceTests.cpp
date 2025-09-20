@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "Base/Definitions.h"
+#include "Base/Math.h"
 
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
@@ -94,8 +95,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
     EXPECT_EQ(2, cell1._color);
     EXPECT_EQ(3, cell2._color);
 
-    auto expectedCell1_pos = RealVector2D{0, -0.5f};
-    auto expectedCell2_pos = RealVector2D{0, 0.5f};
+    auto expectedCell1_pos = RealVector2D{0, 0.5f};
+    auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}});
@@ -126,8 +127,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
     EXPECT_EQ(2, cell1._color);
     EXPECT_EQ(3, cell2._color);
 
-    auto expectedCell1_pos = RealVector2D{0, -0.5f};
-    auto expectedCell2_pos = RealVector2D{0, 0.5f};
+    auto expectedCell1_pos = RealVector2D{0, 0.5f};
+    auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}});
@@ -156,8 +157,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
     EXPECT_EQ(2, cell1._color);
     EXPECT_EQ(3, cell2._color);
 
-    auto expectedCell1_pos = RealVector2D{0, -0.5f};
-    auto expectedCell2_pos = RealVector2D{0, 0.5f};
+    auto expectedCell1_pos = RealVector2D{0, 0.5f};
+    auto expectedCell2_pos = RealVector2D{0, -0.5f};
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}});
@@ -192,8 +193,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
     auto cell1 = getPreviewCell(result.description, 0, 0);
     auto cell2 = getPreviewCell(result.description, 0, 1);
     ASSERT_TRUE(cell1._signalRestriction.has_value());
-    EXPECT_TRUE(approxCompare(360.0f - OpeningAngle / 2 + BaseAngle, cell1._signalRestriction->_startAngle));
-    EXPECT_TRUE(approxCompare(OpeningAngle / 2 + BaseAngle, cell1._signalRestriction->_endAngle));
+    EXPECT_TRUE(
+        std::abs(Math::normalizedAngle(Math::subtractAngle(180.0f + BaseAngle - OpeningAngle / 2, cell1._signalRestriction->_startAngle), -180.0f))
+        < NEAR_ZERO);
+    EXPECT_TRUE(
+        std::abs(Math::normalizedAngle(Math::subtractAngle(180.0f + BaseAngle + OpeningAngle / 2, cell1._signalRestriction->_endAngle), -180.0f))
+        < NEAR_ZERO);
     checkConnections(result.description, {{cell1._pos, cell2._pos, true, false}});
 }
 
@@ -226,9 +231,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     EXPECT_EQ(4, cell3._color);
 
     auto oneThird = 0.333333f;
-    auto expectedCell1_pos = RealVector2D{oneThird * 2, -oneThird};
-    auto expectedCell2_pos = RealVector2D{-oneThird, -oneThird};
-    auto expectedCell3_pos = RealVector2D{-oneThird, oneThird * 2};
+    auto expectedCell1_pos = RealVector2D{oneThird, oneThird*2};
+    auto expectedCell2_pos = RealVector2D{oneThird, -oneThird};
+    auto expectedCell3_pos = RealVector2D{-oneThird * 2, -oneThird};
     EXPECT_TRUE(approxCompare(expectedCell1_pos, cell1._pos));
     EXPECT_TRUE(approxCompare(expectedCell2_pos, cell2._pos));
     EXPECT_TRUE(approxCompare(expectedCell3_pos, cell3._pos));
@@ -266,14 +271,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
         actualPositions.insert(cell._pos);
     }
     std::set<RealVector2D> expectedPositions = {
-        {3.375f, -0.125f},
-        {2.375f, -0.125f},
-        {1.375f, -0.125f},
-        {0.375f, -0.125f},
-        {-0.625f, -0.125},
-        {-1.625f, -0.125},
-        {-2.625f, -0.125f},
-        {-2.625f, 0.875f}
+        {-0.875000238, -2.62500000},
+        {0.124999769, -2.62500000},
+        {0.124999858, -1.62500000},
+        {0.124999948, -0.625000000},
+        {0.125000030, 0.375000000},
+        {0.125000119, 1.37500000},
+        {0.125000209, 2.37500000},
+        {0.125000298, 3.37500000},
     };
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
@@ -312,7 +317,15 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
         actualPositions.insert(cell._pos);
     }
     std::set<RealVector2D> expectedPositions = {
-        {3.375f, -0.125f}, {2.375f, -0.125f}, {1.375f, -0.125f}, {0.375f, -0.125f}, {-0.625f, -0.125}, {-1.625f, -0.125}, {-2.625f, -0.125f}, {-2.625f, 0.875f}};
+        {-0.875000238, -2.62500000},
+        {0.124999769, -2.62500000},
+        {0.124999858, -1.62500000},
+        {0.124999948, -0.625000000},
+        {0.125000030, 0.375000000},
+        {0.125000119, 1.37500000},
+        {0.125000209, 2.37500000},
+        {0.125000298, 3.37500000},
+    };
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
         EXPECT_TRUE(approxCompare(expectedPosition, actualPosition));
@@ -397,7 +410,15 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
         actualPositions.insert(cell._pos);
     }
     std::set<RealVector2D> expectedPositions = {
-        {3.375f, -0.125f}, {2.375f, -0.125f}, {1.375f, -0.125f}, {0.375f, -0.125f}, {-0.625f, -0.125}, {-1.625f, -0.125}, {-2.625f, -0.125f}, {-2.625f, 0.875f}};
+        {-0.875000238, -2.62500000},
+        {0.124999769, -2.62500000},
+        {0.124999858, -1.62500000},
+        {0.124999948, -0.625000000},
+        {0.125000030, 0.375000000},
+        {0.125000119, 1.37500000},
+        {0.125000209, 2.37500000},
+        {0.125000298, 3.37500000},
+    };
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
         EXPECT_TRUE(approxCompare(expectedPosition, actualPosition));
