@@ -27,6 +27,7 @@ struct CellPreviewDescription
 {
     auto operator<=>(CellPreviewDescription const&) const = default;
     
+    MEMBER(CellPreviewDescription, uint64_t, id, 0);
     MEMBER(CellPreviewDescription, RealVector2D, pos, {});
     MEMBER(CellPreviewDescription, int, color, 0);
     MEMBER(CellPreviewDescription, int, geneIndex, 0);

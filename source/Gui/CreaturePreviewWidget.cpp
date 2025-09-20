@@ -207,10 +207,15 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
             if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize / 2, ImColor(1.0f, 1.0f, 1.0f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.4f, ImColor::HSV(0, 0, 1, 0.7f));
             } else {
-                drawList->AddCircle({cellPos.x, cellPos.y}, std::max(1.0f, cellSize / 2), ImColor::HSV(h, s * 0.8f, v * 1.2f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * 0.4f), ImColor::HSV(h, s * 0.8f, v * 1.2f));
             } 
+        }
+        if (_selectedCellId.has_value() && _selectedCellId.value() == cell._id) {
+            if (_zoom > ZoomLevelForLabels) {
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(0, 0, 1, 1.0f));
+            }
         }
 
         if (clickedOnPreviewWindow) {
@@ -218,6 +223,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 && mousePos.y <= cellPos.y + cellSize / 2) {
                 selectedGene = cell._geneIndex;
                 selectedNode = cell._nodeIndex;
+                _selectedCellId = cell._id;
             }
         }
     }

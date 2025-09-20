@@ -95,6 +95,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
         auto const& node = getNode(cell);
         auto const& color = node._color;
         auto previewCell = CellPreviewDescription()
+                               .id(cell._id)
                                .pos(cell._pos)
                                .color(color)
                                .geneIndex(cell._geneIndex)

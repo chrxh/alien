@@ -45,6 +45,7 @@ private:
     SubGenomeDescription _subGenome;
     uint64_t _creatureId = 0;
     std::optional<float> _visualFrontAngle;
+    std::optional<uint64_t> _selectedCellId;
 
     RealVector2D _worldCenter;
     float _zoom = 20.0f;
