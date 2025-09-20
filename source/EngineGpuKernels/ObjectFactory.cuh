@@ -260,7 +260,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
     cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
     cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
 
-    cell->signalRelaxationTime = cellTO.signalRelaxationTime;
+    cell->signalState = cellTO.signalState;
     cell->signal.active = cellTO.signal.active;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = cellTO.signal.channels[i];
@@ -436,7 +436,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->age = 0;
     cell->activationTime = 0;
     cell->signalRestriction.active = false;
-    cell->signalRelaxationTime = 0;
+    cell->signalState = 0;
     cell->signal.active = false;
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
@@ -497,7 +497,7 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    cell->vel = {0, 0};
 //    cell->activationTime = 0;
 //    cell->signalRestriction.active = false;
-//    cell->signalRelaxationTime = 0;
+//    cell->signalState = 0;
 //    cell->signal.active = false;
 //    cell->density = 1.0f;
 //    cell->detectedByCreatureId = 0;
@@ -548,7 +548,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
     cell->signalRestriction.active = node->signalRestriction.active;
     cell->signalRestriction.baseAngle = node->signalRestriction.baseAngle;
     cell->signalRestriction.openingAngle = node->signalRestriction.openingAngle;
-    cell->signalRelaxationTime = 0;
+    cell->signalState = 0;
     cell->signal.active = false;
     cell->activationTime = 0;
     cell->cellTriggered = CellTriggered_No;

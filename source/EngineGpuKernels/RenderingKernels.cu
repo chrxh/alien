@@ -470,10 +470,10 @@ __global__ void cudaDrawCells(
 
         // draw signal activity
         if (zoom >= cudaSimulationParameters.zoomLevelForNeuronVisualization.value) {
-            if (cell->signalRelaxationTime == signalRelaxationState_Active) {
+            if (cell->signalState == signalRelaxationState_Active) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius, shadedCells);
             }
-            if (cell->signalRelaxationTime == signalRelaxationState_RecentlyActive) {
+            if (cell->signalState == signalRelaxationState_RecentlyActive) {
                 drawCircle(imageData, imageSize, cellImagePos, float3{0.3f, 0.3f, 0.3f}, cellRadius / 2, shadedCells);
             }
         }

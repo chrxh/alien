@@ -51,8 +51,8 @@ TEST_F(SignalTests, forwardSignal)
     auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(cell2._signal.has_value());
     EXPECT_EQ(signal, cell2._signal->_channels);
-    EXPECT_EQ(1, cell1._signalRelaxationTime);
-    EXPECT_EQ(2, cell2._signalRelaxationTime);
+    EXPECT_EQ(1, cell1._signalState);
+    EXPECT_EQ(2, cell2._signalState);
 }
 
 TEST_F(SignalTests, forwardSignal_detailedPreview)
@@ -75,8 +75,8 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(cell2._signal.has_value());
     EXPECT_EQ(signal, cell2._signal->_channels);
-    EXPECT_EQ(1, cell1._signalRelaxationTime);
-    EXPECT_EQ(2, cell2._signalRelaxationTime);
+    EXPECT_EQ(1, cell1._signalState);
+    EXPECT_EQ(2, cell2._signalState);
 }
 
 TEST_F(SignalTests, vanishSignal_singleCell)
@@ -101,7 +101,7 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}).signal(SignalDescription().channels(signal)),
-        CellDescription().id(2).pos({1, 0}).signalRelaxationTime(1),
+        CellDescription().id(2).pos({1, 0}).signalState(1),
     };
     data.addConnection(1, 2);
 
@@ -144,9 +144,9 @@ TEST_F(SignalTests, mergeSignals)
         sumSignal[i] = signal1[i] + signal2[i];
     }
     EXPECT_TRUE(approxCompare(sumSignal, cell2._signal->_channels));
-    EXPECT_EQ(1, cell1._signalRelaxationTime);
-    EXPECT_EQ(2, cell2._signalRelaxationTime);
-    EXPECT_EQ(1, cell3._signalRelaxationTime);
+    EXPECT_EQ(1, cell1._signalState);
+    EXPECT_EQ(2, cell2._signalState);
+    EXPECT_EQ(1, cell3._signalState);
 }
 
 TEST_F(SignalTests, forkSignals)
@@ -168,16 +168,16 @@ TEST_F(SignalTests, forkSignals)
     auto cell1 = actualData.getCellRef(1);
     EXPECT_TRUE(cell1._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell1._signal->_channels));
-    EXPECT_EQ(2, cell1._signalRelaxationTime);
+    EXPECT_EQ(2, cell1._signalState);
 
     auto cell2 = actualData.getCellRef(2);
     EXPECT_FALSE(cell2._signal.has_value());
-    EXPECT_EQ(1, cell2._signalRelaxationTime);
+    EXPECT_EQ(1, cell2._signalState);
 
     auto cell3 = actualData.getCellRef(3);
     EXPECT_TRUE(cell3._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell3._signal->_channels));
-    EXPECT_EQ(2, cell3._signalRelaxationTime);
+    EXPECT_EQ(2, cell3._signalState);
 }
 
 enum class AngleRange
@@ -212,16 +212,16 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
 
     auto cell1 = actualData.getCellRef(1);
     EXPECT_FALSE(cell1._signal.has_value());
-    EXPECT_EQ(0, cell1._signalRelaxationTime);
+    EXPECT_EQ(0, cell1._signalState);
 
     auto cell2 = actualData.getCellRef(2);
     EXPECT_FALSE(cell2._signal.has_value());
-    EXPECT_EQ(1, cell2._signalRelaxationTime);
+    EXPECT_EQ(1, cell2._signalState);
 
     auto cell3 = actualData.getCellRef(3);
     EXPECT_TRUE(cell3._signal.has_value());
     EXPECT_TRUE(approxCompare(signal, cell3._signal->_channels));
-    EXPECT_EQ(2, cell3._signalRelaxationTime);
+    EXPECT_EQ(2, cell3._signalState);
 }
 
 TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)

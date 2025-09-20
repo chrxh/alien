@@ -325,7 +325,7 @@ struct Cell
     CellTypeData cellTypeData;
     Signal signal;
     SignalRestriction signalRestriction;
-    SignalState signalRelaxationTime;
+    SignalState signalState;
     uint32_t activationTime;
     CellTriggered cellTriggered;
 
