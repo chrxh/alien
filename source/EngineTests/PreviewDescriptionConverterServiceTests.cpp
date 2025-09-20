@@ -498,7 +498,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
     auto input = Description().creatures({
         CreatureDescription().genome(genome).cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).signalAndState(signal),
-            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalRelaxationTime(SignalState_RecentlyActive),
+            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalState(SignalState_RecentlyActive),
         }),
     });
     input.addConnection(1, 2);
