@@ -12,6 +12,8 @@ public:
     }
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
+    float getPreferredFrontAngle() override { return 0.0f; }
 };
 
 class _TriangleGenerator : public _ShapeGenerator
@@ -44,6 +46,8 @@ public:
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
+    float getPreferredFrontAngle() override { return -30.0f; }
+
 private:
     int _nodePos = 0;
     int _edgePos = 0;
@@ -75,6 +79,8 @@ public:
     }
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_90; }
+
+    float getPreferredFrontAngle() override { return 0.0f; }
 
 private:
     int _nodePos = 0;
@@ -113,6 +119,8 @@ public:
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
+    float getPreferredFrontAngle() override { return 0.0f; }
+
 private:
     int _nodePos = 0;
     int _edgePos = 0;
@@ -149,6 +157,8 @@ public:
     }
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
+    float getPreferredFrontAngle() override { return 0.0f; }
 
 private:
     int _nodePos = 0;
@@ -192,6 +202,8 @@ public:
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
+    float getPreferredFrontAngle() override { return 210.0f; }
+
 private:
     int _pos = 0;
 };
@@ -234,6 +246,8 @@ public:
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
+    float getPreferredFrontAngle() override { return 120.0f; }
+
 private:
     int _nodePos = 0;
     int _edgePos = 0;
@@ -274,6 +288,8 @@ public:
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
+    float getPreferredFrontAngle() override { return 120.0f; }
+
 private:
     int _nodePos = 0;
     int _edgePos = 0;
@@ -306,6 +322,8 @@ public:
     }
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
+
+    float getPreferredFrontAngle() override { return 120.0f; }
 
 private:
     int _nodePos = 0;

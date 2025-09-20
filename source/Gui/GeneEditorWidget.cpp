@@ -78,7 +78,12 @@ void _GeneEditorWidget::processHeaderData()
         AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
 
         // Shape
-        AlienGui::Combo(AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape);
+        if (AlienGui::Combo(
+                AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape)) {
+            if (auto shapeGenerator = ShapeGeneratorFactory::create(gene._shape)) {
+                _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
+            }
+        }
 
         // Angle alignment
         AlienGui::BeginIndent();

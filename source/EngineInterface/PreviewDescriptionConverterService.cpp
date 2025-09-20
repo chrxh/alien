@@ -11,15 +11,15 @@
 namespace
 {
     template <typename U>
-    U getLastElement(std::set<U> const& s)
+    U getFirstElement(std::set<U> const& s)
     {
-        return *(--s.end());
+        return *s.begin();
     }
 
     template <typename U>
-    U getSecondLastElement(std::set<U> const& s)
+    U getSecondElement(std::set<U> const& s)
     {
-        return *(--(--s.end()));
+        return *(++s.begin());
     }
 }
 
@@ -47,7 +47,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     // Center
     editService.setCenter(phenotype, {0, 0});
 
-    // Get last and second last constructed cell on start gene
+    // Get first and second constructed cell on start gene
     std::set<uint64_t> cellIdsOnStartGene;
     phenotype.forEachCell([&](auto const& cell) {
         if (cell._geneIndex != startGeneIndex) {
@@ -56,34 +56,34 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
         cellIdsOnStartGene.insert(cell._id);
     });
     CHECK(!cellIdsOnStartGene.empty());
-    auto lastCell = phenotype.getCellRef(getLastElement(cellIdsOnStartGene));
-    std::optional<CellDescription> secondLastCell;
+    auto firstCell = phenotype.getCellRef(getFirstElement(cellIdsOnStartGene));
+    std::optional<CellDescription> secondCell;
     if (cellIdsOnStartGene.size() > 1) {
-        secondLastCell = phenotype.getCellRef(getSecondLastElement(cellIdsOnStartGene));
+        secondCell = phenotype.getCellRef(getSecondElement(cellIdsOnStartGene));
     } else {
         // Only 1 cell with start gene? => try cells of referenced gene
-        if (lastCell.getCellType() == CellType_Constructor) {
-            auto refGeneIndex = std::get<ConstructorDescription>(lastCell._cellType)._geneIndex;
+        if (firstCell.getCellType() == CellType_Constructor) {
+            auto refGeneIndex = std::get<ConstructorDescription>(firstCell._cellType)._geneIndex;
             phenotype.forEachCell([&](auto const& cell) {
-                if (cell._geneIndex != refGeneIndex || cell._id == lastCell._id) {
+                if (cell._geneIndex != refGeneIndex || cell._id == firstCell._id) {
                     return;
                 }
-                if (!secondLastCell.has_value() || cell._id > secondLastCell->_id) {
-                    secondLastCell = cell;
+                if (!secondCell.has_value() || cell._id > secondCell->_id) {
+                    secondCell = cell;
                 }
             });
         }
     }
 
     // Rotate preview
-    if (secondLastCell.has_value()) {
-        auto angle = Math::angleOfVector(secondLastCell->_pos - lastCell._pos);
-        if (!result.visualFrontAngle.has_value()) {
+    if (secondCell.has_value()) {
+        auto angle = Math::angleOfVector(secondCell->_pos - firstCell._pos);
+        //if (!result.visualFrontAngle.has_value()) {
             result.visualFrontAngle = angle;
-        } else {
-            result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 10.0f;
-            result.visualFrontAngle.value() = Math::normalizedAngle(result.visualFrontAngle.value(), 0.0);
-        }
+        //} else {
+        //    result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 3.0f;
+        //    result.visualFrontAngle.value() = Math::normalizedAngle(result.visualFrontAngle.value(), 0.0);
+        //}
         editService.rotate(phenotype, -result.visualFrontAngle.value());
     }
 

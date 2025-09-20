@@ -17,6 +17,7 @@ class PreviewDescriptionConverterService
     MAKE_SINGLETON(PreviewDescriptionConverterService);
 
 public:
+    // Note: lastVisualFrontAngle currently deactivated
     ConversionResult convertToPreviewDescription(
         GenomeDescription const& genome,
         int startGeneIndex,
