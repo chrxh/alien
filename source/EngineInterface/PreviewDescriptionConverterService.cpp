@@ -94,7 +94,12 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     phenotype.forEachCell([&](CellDescription const& cell) {
         auto const& node = getNode(cell);
         auto const& color = node._color;
-        auto previewCell = CellPreviewDescription().pos(cell._pos).color(color).geneIndex(cell._geneIndex).nodeIndex(cell._nodeIndex);
+        auto previewCell = CellPreviewDescription()
+                               .pos(cell._pos)
+                               .color(color)
+                               .geneIndex(cell._geneIndex)
+                               .nodeIndex(cell._nodeIndex)
+                               .signalState(cell._signalRelaxationTime);
 
         if (node._signalRestriction._active && !cell._connections.empty()) {
             auto otherCellId = cell._connections.front()._cellId;
@@ -103,6 +108,9 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             auto signalAngleRestrictionStart = Math::normalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
             auto signalAngleRestrictionEnd = Math::normalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
+        }
+        if (cell._signal.has_value()) {
+            previewCell._signal = SignalPreviewDescription().channels(cell._signal->_channels);
         }
         if (cell.getCellType() == CellType_Constructor) {
             auto constructor = std::get<ConstructorDescription>(cell._cellType);

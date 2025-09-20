@@ -3,7 +3,7 @@
 #include "Base/Singleton.h"
 
 #include "EngineInterface/Description.h"
-#include "EngineInterface/PreviewDescriptions.h"
+#include "EngineInterface/PreviewDescription.h"
 
 struct ConversionResult
 {

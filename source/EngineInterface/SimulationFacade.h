@@ -9,7 +9,7 @@
 #include "SimulationFacade.h"
 #include "MutationType.h"
 #include "DataPointCollection.h"
-#include "PreviewDescriptions.h"
+#include "PreviewDescription.h"
 #include "StatisticsHistory.h"
 #include "SimulationParametersUpdateConfig.h"
 

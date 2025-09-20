@@ -5,12 +5,22 @@
 #include "Base/Definitions.h"
 #include "Base/Macros.h"
 
+#include "CellTypeConstants.h"
+
 struct SignalRestrictionPreviewDescription
 {
     auto operator<=>(SignalRestrictionPreviewDescription const&) const = default;
 
     MEMBER(SignalRestrictionPreviewDescription, float, startAngle, 0);
     MEMBER(SignalRestrictionPreviewDescription, float, endAngle, 0);
+};
+
+struct SignalPreviewDescription
+{
+    SignalPreviewDescription();
+    auto operator<=>(SignalPreviewDescription const&) const = default;
+
+    MEMBER(SignalPreviewDescription, std::vector<float>, channels, {});
 };
 
 struct CellPreviewDescription
@@ -21,7 +31,9 @@ struct CellPreviewDescription
     MEMBER(CellPreviewDescription, int, color, 0);
     MEMBER(CellPreviewDescription, int, geneIndex, 0);
     MEMBER(CellPreviewDescription, int, nodeIndex, 0);
+    MEMBER(CellPreviewDescription, std::optional<SignalPreviewDescription>, signal, std::nullopt);
     MEMBER(CellPreviewDescription, std::optional<SignalRestrictionPreviewDescription>, signalRestriction, std::nullopt);
+    MEMBER(CellPreviewDescription, SignalState, signalState, 0);
     MEMBER(CellPreviewDescription, std::optional<int>, constructorGeneIndex, std::nullopt);
 };
 

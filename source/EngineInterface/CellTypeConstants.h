@@ -78,6 +78,14 @@ enum ActivationFunction_
     ActivationFunction_Count
 };
 
+using SignalState = uint8_t;
+enum SignalState_
+{
+    signalRelaxationState_Inactive,
+    signalRelaxationState_RecentlyActive,
+    signalRelaxationState_Active
+};
+
 namespace Const
 {
     std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};

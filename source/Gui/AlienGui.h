@@ -7,7 +7,7 @@
 
 #include "Base/Definitions.h"
 #include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/PreviewDescriptions.h"
+#include "EngineInterface/PreviewDescription.h"
 #include "EngineInterface/CellTypeConstants.h"
 #include "EngineInterface/SimulationParametersTypes.h"
 

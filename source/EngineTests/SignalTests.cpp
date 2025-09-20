@@ -55,7 +55,7 @@ TEST_F(SignalTests, forwardSignal)
     EXPECT_EQ(2, cell2._signalRelaxationTime);
 }
 
-TEST_F(SignalTests, forwardSignal_detailPreview)
+TEST_F(SignalTests, forwardSignal_detailedPreview)
 {
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     Description data;

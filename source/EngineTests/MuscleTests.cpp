@@ -8,7 +8,7 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "IntegrationTestFramework.h"
 
-enum class DetailPreview
+enum class DetailedPreview
 {
     No,
     Yes
@@ -36,27 +36,27 @@ protected:
         }
     }
 
-    void setSimulationData(Description const& data, DetailPreview detailPreview)
+    void setSimulationData(Description const& data, DetailedPreview detailedPreview)
     {
-        if (detailPreview == DetailPreview::No) {
+        if (detailedPreview == DetailedPreview::No) {
             _simulationFacade->setSimulationData(data);
         } else {
             _simulationFacade->setPreviewData(data);
         }
     }
 
-    void calcTimesteps(int timesteps, DetailPreview detailPreview)
+    void calcTimesteps(int timesteps, DetailedPreview detailedPreview)
     {
-        if (detailPreview == DetailPreview::No) {
+        if (detailedPreview == DetailedPreview::No) {
             _simulationFacade->calcTimesteps(timesteps);
         } else {
             _simulationFacade->calcTimestepsForPreview(timesteps, true);
         }
     }
 
-    Description getSimulationData(DetailPreview detailPreview)
+    Description getSimulationData(DetailedPreview detailedPreview)
     {
-        if (detailPreview == DetailPreview::No) {
+        if (detailedPreview == DetailedPreview::No) {
             return _simulationFacade->getSimulationData();
         } else {
             return _simulationFacade->getPreviewData();
@@ -276,7 +276,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 
 class MuscleTests_ManualBending
     : public MuscleTests
-    , public testing::WithParamInterface<std::tuple<Side, Channel0, DetailPreview>>
+    , public testing::WithParamInterface<std::tuple<Side, Channel0, DetailedPreview>>
 {
 };
 
@@ -284,20 +284,20 @@ INSTANTIATE_TEST_SUITE_P(
     MuscleTests_ManualBending,
     MuscleTests_ManualBending,
     ::testing::Values(
-        std::make_tuple(Side::Left, Channel0::Zero, DetailPreview::No),
-        std::make_tuple(Side::Right, Channel0::Zero, DetailPreview::No),
-        std::make_tuple(Side::Left, Channel0::Positive, DetailPreview::No),
-        std::make_tuple(Side::Right, Channel0::Positive, DetailPreview::No),
-        std::make_tuple(Side::Left, Channel0::Negative, DetailPreview::No),
-        std::make_tuple(Side::Right, Channel0::Negative, DetailPreview::No),
-        std::make_tuple(Side::Left, Channel0::Positive, DetailPreview::Yes)));
+        std::make_tuple(Side::Left, Channel0::Zero, DetailedPreview::No),
+        std::make_tuple(Side::Right, Channel0::Zero, DetailedPreview::No),
+        std::make_tuple(Side::Left, Channel0::Positive, DetailedPreview::No),
+        std::make_tuple(Side::Right, Channel0::Positive, DetailedPreview::No),
+        std::make_tuple(Side::Left, Channel0::Negative, DetailedPreview::No),
+        std::make_tuple(Side::Right, Channel0::Negative, DetailedPreview::No),
+        std::make_tuple(Side::Left, Channel0::Positive, DetailedPreview::Yes)));
 
 TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
 {
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
 
-    auto [side, channel0, detailPreview] = GetParam();
+    auto [side, channel0, detailedPreview] = GetParam();
 
     auto data = Description().cells({
         CellDescription().id(1).pos({side == Side::Left ? 10.0f : 12.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(20)),
@@ -312,7 +312,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     data.addConnection(1, 2);
     data.addConnection(2, 3);
 
-    setSimulationData(data, detailPreview);
+    setSimulationData(data, detailedPreview);
 
     auto minAngle = 180.0f;
     auto maxAngle = 180.0f;
@@ -320,9 +320,9 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
     auto numNegativeAngleChanges = 0;
     std::optional<float> lastAngle;
     for (int i = 0; i < 200; ++i) {
-        calcTimesteps(10, detailPreview);
+        calcTimesteps(10, detailedPreview);
 
-        auto actualData = getSimulationData(detailPreview);
+        auto actualData = getSimulationData(detailedPreview);
         auto actualMuscleCell = actualData.getCellRef(2);
         auto actualCell1 = actualData.getCellRef(1);
         auto actualCell3 = actualData.getCellRef(3);
@@ -387,7 +387,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
     auto constexpr MaxAngleDeviation = 30.0f;
     auto constexpr AnglePrecision = NEAR_ZERO;
 
-    auto [side, channel0, detailPreview] = GetParam();
+    auto [side, channel0, detailedPreview] = GetParam();
 
     auto data = Description().cells({
         CellDescription().id(1).pos({10.0f, 10.0f}),

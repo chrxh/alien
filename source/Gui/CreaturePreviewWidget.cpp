@@ -222,12 +222,18 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
-    // Draw signal restrictions
+    // Draw signals and signal restrictions
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& cell : desc._cells) {
             auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
             auto constexpr cellRadiusFactor = 0.3f;
             float radius = cellSize * cellRadiusFactor;
+
+            if (cell._signal.has_value()) {
+                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
+            }
+
             if (!cell._signalRestriction.has_value()) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
             } else {

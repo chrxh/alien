@@ -323,9 +323,9 @@ struct Cell
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
-    SignalRestriction signalRestriction;
-    uint8_t signalRelaxationTime;
     Signal signal;
+    SignalRestriction signalRestriction;
+    SignalState signalRelaxationTime;
     uint32_t activationTime;
     CellTriggered cellTriggered;
 

@@ -48,7 +48,7 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
     EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
 }
 
-TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailPreview)
+TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
 {
     Description data;
     data._cells = {
