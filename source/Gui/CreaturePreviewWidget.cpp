@@ -229,9 +229,13 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto constexpr cellRadiusFactor = 0.3f;
             float radius = cellSize * cellRadiusFactor;
 
-            if (cell._signal.has_value()) {
+            if (cell._signalState == signalRelaxationState_Active) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
                 drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
+            }
+            if (cell._signalState == signalRelaxationState_RecentlyActive) {
+                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 1.0f, 0.5f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 0.2f, 0.5f));
             }
 
             if (!cell._signalRestriction.has_value()) {
