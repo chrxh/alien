@@ -56,7 +56,7 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
         }
 
         cell->futureSignal.active = false;
-        if (cell->signalState > 0) {
+        if (cell->signalState != SignalState_Inactive) {
             continue;
         }
 
@@ -120,7 +120,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
             }
-            cell->signalState = MAX_SIGNAL_RELAXATION_TIME;
+            cell->signalState = SignalState_Active;
         } else {
             cell->signalState = max(0, cell->signalState - 1);
         }
@@ -133,7 +133,7 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }
-    cell->signalState = MAX_SIGNAL_RELAXATION_TIME;
+    cell->signalState = SignalState_Active;
 }
 
 __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationData& data, Cell* cell)
@@ -146,7 +146,7 @@ __inline__ __device__ float2 SignalProcessor::calcReferenceDirection(SimulationD
 
 __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview)
 {
-    auto triggerInterval = max(MAX_SIGNAL_RELAXATION_TIME + 1, autoTriggerInterval);
+    auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
     if (cell->creature != nullptr) {
         if (isPreview) {
             return data.timestep % triggerInterval == 0;

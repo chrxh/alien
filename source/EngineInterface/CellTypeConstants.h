@@ -81,9 +81,10 @@ enum ActivationFunction_
 using SignalState = uint8_t;
 enum SignalState_
 {
-    signalRelaxationState_Inactive,
-    signalRelaxationState_RecentlyActive,
-    signalRelaxationState_Active
+    SignalState_Inactive,
+    SignalState_RecentlyActive,
+    SignalState_Active,
+    SignalState_Count,
 };
 
 namespace Const

@@ -81,7 +81,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     Description data;
     data._cells = { 
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
-        CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 1, 0, 0, 0, 0.5f}),
+        CellDescription().id(2).pos({0, 1}).signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f}),
     };
     data.addConnection(1, 2);
 
@@ -109,7 +109,7 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     Description data;
     data._cells = { 
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
-        CellDescription().id(2).pos({0, 1}).signalAndRelaxTime({0, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(2).pos({0, 1}).signalAndState({0, 0, 0, 0, 0, 0, 0, 0}),
     };
     data.addConnection(1, 2);
 

@@ -487,3 +487,32 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
     auto cell2 = getPreviewCell(result.description, 1, 0);
     EXPECT_EQ(0, cell2._constructorGeneIndex);
 }
+
+TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
+    });
+
+    std::vector<float> signal{0.2f, 0.2f, 0.2f, 0.8f, 0.2f, -1.2f, 0.2f, -0.2f};
+    auto input = Description().creatures({
+        CreatureDescription().genome(genome).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).signalAndState(signal),
+            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalRelaxationTime(SignalState_RecentlyActive),
+        }),
+    });
+    input.addConnection(1, 2);
+
+    auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
+
+    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(1, result.description._connections.size());
+
+    auto cell1 = getPreviewCell(result.description, 0, 0);
+    auto cell2 = getPreviewCell(result.description, 0, 1);
+
+    EXPECT_EQ(SignalState_Active, cell1._signalState);
+    EXPECT_TRUE(cell1._signal.has_value());
+    EXPECT_EQ(signal, cell1._signal->_channels);
+    EXPECT_EQ(SignalState_RecentlyActive, cell2._signalState);
+}

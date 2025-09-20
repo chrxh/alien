@@ -120,14 +120,14 @@ float CellDescription::getAngleSpan(uint64_t connectedCellId1, uint64_t connecte
     CHECK(false);
 }
 
-CellDescription& CellDescription::signalAndRelaxTime(std::vector<float> const& value)
+CellDescription& CellDescription::signalAndState(std::vector<float> const& value)
 {
     CHECK(value.size() == MAX_CHANNELS);
 
     SignalDescription newSignal;
     newSignal._channels = value;
     _signal = newSignal;
-    _signalState = MAX_SIGNAL_RELAXATION_TIME;
+    _signalState = SignalState_Active;
     return *this;
 }
 

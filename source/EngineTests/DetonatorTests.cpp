@@ -53,7 +53,7 @@ TEST_F(DetonatorTests, activateDetonator)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({10.0f, 10.0f}).cellType(DetonatorDescription().countdown(10)),
-        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(GeneratorDescription()).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(2).pos({11.0f, 10.0f}).cellType(GeneratorDescription()).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     };
     data.addConnection(1, 2);
 

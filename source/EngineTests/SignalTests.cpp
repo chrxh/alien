@@ -36,7 +36,7 @@ TEST_F(SignalTests, forwardSignal)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
+        CellDescription().id(1).pos({0, 0}).signalAndState(signal),
         CellDescription().id(2).pos({1, 0}),
     };
     data.addConnection(1, 2);
@@ -60,7 +60,7 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
+        CellDescription().id(1).pos({0, 0}).signalAndState(signal),
         CellDescription().id(2).pos({1, 0}),
     };
     data.addConnection(1, 2);
@@ -84,7 +84,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal),
+        CellDescription().id(1).pos({0, 0}).signalAndState(signal),
     };
     
     _simulationFacade->setSimulationData(data);
@@ -119,9 +119,9 @@ TEST_F(SignalTests, mergeSignals)
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).signalAndRelaxTime(signal1),
+        CellDescription().id(1).pos({0, 0}).signalAndState(signal1),
         CellDescription().id(2).pos({1, 0}),
-        CellDescription().id(3).pos({2, 0}).signalAndRelaxTime(signal2),
+        CellDescription().id(3).pos({2, 0}).signalAndState(signal2),
     };
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -155,7 +155,7 @@ TEST_F(SignalTests, forkSignals)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal),
+        CellDescription().id(2).pos({1, 0}).signalAndState(signal),
         CellDescription().id(3).pos({2, 0}),
     };
     data.addConnection(1, 2);
@@ -200,7 +200,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
+        CellDescription().id(2).pos({1, 0}).signalAndState(signal).signalRestriction(side == AngleRange::Start ? -44.0f : 44.0f, 90.0f),
         CellDescription().id(3).pos({2, 0}),
     };
     data.addConnection(1, 2);
@@ -231,7 +231,7 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signalAndRelaxTime(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
+        CellDescription().id(2).pos({1, 0}).signalAndState(signal).signalRestriction(side == AngleRange::Start ? -45.0f : 45.0f, 90.0f),
         CellDescription().id(3).pos({2, 0}),
     };
     data.addConnection(1, 2);

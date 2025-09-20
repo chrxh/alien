@@ -309,7 +309,7 @@ struct CellDescription
     MEMBER(CellDescription, bool, isFrontAngleRefCell, false);
 
     CellType getCellType() const;
-    CellDescription& signalAndRelaxTime(std::vector<float> const& value);
+    CellDescription& signalAndState(std::vector<float> const& value);
     CellDescription& signalRestriction(float baseAngle, float openingAngle);
 
     bool isConnectedTo(uint64_t id) const;

@@ -66,7 +66,7 @@ TEST_F(SensorTests, manuallyTriggered_signal)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(0)),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     };
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
