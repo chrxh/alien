@@ -18,7 +18,7 @@ public:
 
     __inline__ __device__ static bool isAutoTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview = false);
     __inline__ __device__ static bool isManuallyTriggered(SimulationData& data, Cell* cell);
-    __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval, bool isPreview = false);
+    __inline__ __device__ static bool isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview = false);
 };
 
 /************************************************************************/
@@ -170,7 +170,7 @@ __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& 
     return true;
 }
 
-__inline__ __device__ bool SignalProcessor::isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint8_t autoTriggerInterval, bool isPreview)
+__inline__ __device__ bool SignalProcessor::isAutoOrManuallyTriggered(SimulationData& data, Cell* cell, uint32_t autoTriggerInterval, bool isPreview)
 {
     if (autoTriggerInterval == 0) {
         return isManuallyTriggered(data, cell);
