@@ -98,3 +98,41 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
     auto actualAngle = Math::angle(cell1._pos, cell2._pos, cell3._pos);
     EXPECT_TRUE(abs(Math::normalizedAngle(refAngle - actualAngle, -180.0f)) < 1.0f);
 }
+
+TEST_F(PhysicsTests, noGhostRotations)
+{
+    auto constexpr Angle1 = 0.0f;
+    auto constexpr Angle2 = 120.0f;
+    auto constexpr RefAngle = 90.0f;
+
+    auto pos1 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle1);
+    auto pos2 = RealVector2D{100.0f, 100.0f};
+    auto pos3 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle2);
+    auto pos3ref = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(Angle1 + RefAngle);
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos(pos1),
+        CellDescription().id(2).pos(pos2),
+        CellDescription().id(3).pos(pos3),
+    };
+    data.addConnection(2, 1);
+    data.addConnection(2, 3, pos3ref);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1000);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto savedPos1 = actualData.getCellRef(1)._pos;
+    auto savedPos2 = actualData.getCellRef(2)._pos;
+    auto savedPos3 = actualData.getCellRef(3)._pos;
+
+    _simulationFacade->calcTimesteps(1000);
+    actualData = _simulationFacade->getSimulationData();
+    auto currentPos1 = actualData.getCellRef(1)._pos;
+    auto currentPos2 = actualData.getCellRef(2)._pos;
+    auto currentPos3 = actualData.getCellRef(3)._pos;
+
+    EXPECT_TRUE(Math::length(savedPos1 - currentPos1) < 0.01f);
+    EXPECT_TRUE(Math::length(savedPos2 - currentPos2) < 0.01f);
+    EXPECT_TRUE(Math::length(savedPos3 - currentPos3) < 0.01f);
+}
