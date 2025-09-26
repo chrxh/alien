@@ -23,7 +23,7 @@ public:
 struct Angles
 {
     float angle1 = 0;
-    float angle2 = 0;
+    float angleOffset2 = 0;
     float refAngle = 0;
 };
 
@@ -38,21 +38,41 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         Angles{0, 1.0f, 90.0f},
         Angles{0, 30.0f, 90.0f},
-        Angles{0, 60.0f, 90.0f},
         Angles{0, 90.0f, 90.0f},
         Angles{0, 120.0f, 90.0f},
-        Angles{0, 150.0f, 90.0f},
         Angles{0, 180.0f, 90.0f},
-        Angles{0, 210.0f, 90.0f},
         Angles{0, 240.0f, 90.0f},
         Angles{0, 270.0f, 90.0f},
-        Angles{0, 300.0f, 90.0f},
-        Angles{0, 330.0f, 90.0f},
-        Angles{0, 359.0f, 90.0f}));
+        Angles{0, 359.0f, 90.0f},
+
+        Angles{-30.0f, 1.0f, 90.0f},
+        Angles{-30.0f, 30.0f, 90.0f},
+        Angles{-30.0f, 90.0f, 90.0f},
+        Angles{-30.0f, 120.0f, 90.0f},
+        Angles{-30.0f, 180.0f, 90.0f},
+        Angles{-30.0f, 240.0f, 90.0f},
+        Angles{-30.0f, 270.0f, 90.0f},
+        Angles{-30.0f, 359.0f, 90.0f},
+        
+        Angles{-30.0f, 1.0f, 180.0f},
+        Angles{-30.0f, 30.0f, 180.0f},
+        Angles{-30.0f, 120.0f, 180.0f},
+        Angles{-30.0f, 180.0f, 180.0f},
+        Angles{-30.0f, 270.0f, 180.0f}, 
+        Angles{-30.0f, 359.0f, 180.0f},
+
+        Angles{-30.0f, 1.0f, 270.0f},  
+        Angles{-30.0f, 30.0f, 270.0f}, 
+        Angles{-30.0f, 120.0f, 270.0f},
+        Angles{-30.0f, 180.0f, 270.0f},
+        Angles{-30.0f, 270.0f, 270.0f},
+        Angles{-30.0f, 359.0f, 270.0f} 
+    ));
 
 TEST_P(PhysicsTests_TwoAngles, angularForces)
 {
-    auto [angle1, angle2, refAngle] = GetParam();
+    auto [angle1, angleOffset2, refAngle] = GetParam();
+    auto angle2 = angle1 + angleOffset2;
 
     auto pos1 = RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(angle1) * 1.5f;
     auto pos2 = RealVector2D{100.0f, 100.0f};
@@ -68,16 +88,13 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
     data.addConnection(2, 3, pos3ref);
 
     _simulationFacade->setSimulationData(data);
-    for (int i = 0; i < 1; ++i) {
-        _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(1000);
 
-        auto actualData = _simulationFacade->getSimulationData();
+    auto actualData = _simulationFacade->getSimulationData();
 
-        auto cell1 = actualData.getCellRef(1);
-        auto cell2 = actualData.getCellRef(2);
-        auto cell3 = actualData.getCellRef(3);
-        auto actualAngle = Math::angle(cell1._pos, cell2._pos, cell3._pos);
-        printf("angle: %f\n", actualAngle);
-        EXPECT_TRUE(abs(refAngle - actualAngle) < 1.0f);
-    }
+    auto cell1 = actualData.getCellRef(1);
+    auto cell2 = actualData.getCellRef(2);
+    auto cell3 = actualData.getCellRef(3);
+    auto actualAngle = Math::angle(cell1._pos, cell2._pos, cell3._pos);
+    EXPECT_TRUE(abs(Math::normalizedAngle(refAngle - actualAngle, -180.0f)) < 1.0f);
 }

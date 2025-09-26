@@ -461,7 +461,6 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     r1 *= -1.0f;
                     r2 *= -1.0f;
                 }
-
                 auto g = 1e-4f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f));
                 auto strength1 = g / Math::length(r1);
                 auto strength2 = g / Math::length(r2);
