@@ -14,6 +14,7 @@ class Math
 public:
     static float length(RealVector2D const& v);
     static float angleOfVector(RealVector2D const& v);
+    static float angle(RealVector2D const& a, RealVector2D const& b, RealVector2D const& c);  // Returns the angle ABC in degrees
     static RealVector2D rotateQuarterCounterClockwise(RealVector2D v);
     static RealVector2D unitVectorOfAngle(float angleInDeg);
     static RealMatrix2D calcRotationMatrix(float angleInDeg);  //rotation is clockwise

@@ -241,17 +241,6 @@ DescriptionConverterService::DescriptionConverterService()
     _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
-namespace
-{
-    template <typename T>
-    void setInplaceDifference(std::unordered_set<T>& a, std::unordered_set<T> const& b)
-    {
-        for (auto const& element : b) {
-            a.erase(element);
-        }
-    }
-}
-
 CellDescription DescriptionConverterService::createCellDescription(
     TO const& collectionTO,
     int cellIndex) const

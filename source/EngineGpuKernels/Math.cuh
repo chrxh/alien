@@ -33,6 +33,7 @@ public:
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
     __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
     __inline__ __device__ static float length(float2 const& v);
+    __inline__ __device__ static float length(float3 const& v);
     __inline__ __device__ static float lengthMax(float2 const& v);
     __inline__ __device__ static float length(int2 const& v);
     __inline__ __device__ static float lengthSquared(float2 const& v);
@@ -43,6 +44,8 @@ public:
     __inline__ __device__ static float alignAngleOnBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
     __inline__ __device__ static bool crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
     __inline__ __device__ static float modulo(float value, float size);
+    __inline__ __device__ static float3 cross(float2 const& a, float2 const& b);
+    __inline__ __device__ static float2 crossReduced(float3 const& a, float2 const& b);
 };
 
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
@@ -291,6 +294,10 @@ __device__ __inline__ float Math::length(float2 const & v)
     return sqrt(v.x * v.x + v.y * v.y);
 }
 
+__device__ __inline__ float Math::length(float3 const& v) {
+    return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
 __device__ __inline__ float Math::lengthMax(float2 const& v)
 {
     return max(abs(v.x), abs(v.y));
@@ -413,4 +420,14 @@ __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 con
 __inline__ __device__ float Math::modulo(float value, float size)
 {
     return fmodf(fmodf(value, size) + size, size);
+}
+
+__inline__ __device__ float3 Math::cross(float2 const& a, float2 const& b)
+{
+    return { 0.0f, 0.0f, a.x*b.y - a.y * b.x};
+}
+
+__device__ __inline__ float2 Math::crossReduced(float3 const& a, float2 const& b)
+{
+    return {-a.z * b.y, a.z * b.x};
 }

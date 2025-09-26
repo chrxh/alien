@@ -23,6 +23,15 @@ float Math::angleOfVector(RealVector2D const& v)
     return angle;
 }
 
+float Math::angle(RealVector2D const& a, RealVector2D const& b, RealVector2D const& c)
+{
+    auto ba = a - b;
+    auto bc = c - b;
+    auto angle1 = angleOfVector(ba);
+    auto angle2 = angleOfVector(bc);
+    return normalizedAngle(angle2 - angle1, -180.0f);
+}
+
 RealVector2D Math::rotateQuarterCounterClockwise(RealVector2D v)
 {
     auto temp = v.x;

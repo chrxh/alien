@@ -28,7 +28,7 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
     // Not all kernels need to be executed in each time step for performance reasons
-    bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
+    bool calcAngularForces = (data.timestep % 3 == 0);
     bool considerInnerFriction = (data.timestep % 3 == 0);
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
@@ -44,9 +44,9 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
         KERNEL_CALL(cudaApplyForceFieldSettings, data);
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, 16, data);
-    KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, calcAngularForces);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, 16, data);
-    KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, considerForcesFromAngleDifferences);
+    KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, calcAngularForces);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, 16, data);
 
     // Signal processing

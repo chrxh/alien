@@ -5,11 +5,13 @@ PUBLIC
     ConstructorTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
+    DepotTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
     EnergyFlowTests.cpp
     FrontAngleUpdateTests.cpp
     GarbageCollectorTests.cpp
+    GeneratorTests.cpp
     GenomeDescriptionEditServiceTests.cpp
     GenomeDescriptionInfoServiceTests.cpp
     InjectorTests.cpp
@@ -17,15 +19,14 @@ PUBLIC
     IntegrationTestFramework.h
     MuscleTests.cpp
     NeuronTests.cpp
-    GeneratorTests.cpp
     ParametersEditServiceTests.cpp
+    PhysicsTests.cpp
     PreviewDescriptionConverterServiceTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
     SignalTests.cpp
     StatisticsTests.cpp
-    Testsuite.cpp
-    DepotTests.cpp)
+    Testsuite.cpp)
 
 target_link_libraries(EngineTests Base)
 target_link_libraries(EngineTests EngineGpuKernels)

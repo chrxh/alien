@@ -29,7 +29,7 @@ public:
     __inline__ __device__ static void checkForces(SimulationData& data);
     __inline__ __device__ static void applyForces(SimulationData& data);  //prerequisite: data from calcCollisions_reconnectCells_correctOverlap
 
-    __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool considerAngles);
+    __inline__ __device__ static void calcConnectionForces(SimulationData& data, bool calcAngularForces);
     __inline__ __device__ static void checkConnections(SimulationData& data);
     __inline__ __device__ static void verletPositionUpdate(SimulationData& data);
     __inline__ __device__ static void verletVelocityUpdate(SimulationData& data);
@@ -197,17 +197,18 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
             if (!otherCell->barrier && distance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
 
-                //calc density
+                // Calc density
                 atomicAdd_block(&density, calcKernel(distance / smoothingLength) / (smoothingLength * smoothingLength));
 
                 if (cell != otherCell) {
 
-                    //overlap correction
+                    // Overlap correction
                     if (!cell->barrier && distance < cudaSimulationParameters.minCellDistance.value) {
                         atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.minCellDistance.value / 5);
                         atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.minCellDistance.value / 5);
                     }
 
+                    auto velDelta = cell->vel - otherCell->vel;
                     bool isConnected = false;
                     for (int i = 0; i < cell->numConnections; ++i) {
                         auto const& connectedCell = cell->connections[i].cell;
@@ -217,13 +218,12 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                     }
                     if (!isConnected) {
 
-                        //calc forces: for simplicity pressure = density
-                        auto velDelta = cell->vel - otherCell->vel;
-                        auto const& cellPressure = cell->density;            //optimization: using the density from last time step
-                        auto const& otherCellPressure = otherCell->density;  //optimization: using the density from last time step
-                        auto factor = (cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density));
+                        // Calc forces: for simplicity pressure = density
+                        auto const& cellPressure = cell->density;            // Optimization: using the density from last time step
+                        auto const& otherCellPressure = otherCell->density;  // Optimization: using the density from last time step
+                        auto factor = cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density);
 
-                        if (abs(distance) > NEAR_ZERO) {
+                        if (distance > NEAR_ZERO) {
                             float kernel_d = calcKernel_d(distance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
                             auto F_pressureDelta = posDelta / (-distance) * factor * kernel_d;
@@ -234,14 +234,13 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                             atomicAdd_block(&F_viscosity.x, F_viscosityDelta.x);
                             atomicAdd_block(&F_viscosity.y, F_viscosityDelta.y);
                         }
+                    }
 
-                        //fusion
-                        if (Math::length(velDelta) >= cellFusionVelocity && cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
-                            && (cell->sticky || otherCell->sticky)
-                            && cell->energy <= cellMaxBindingEnergy
-                            && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier && !otherCell->barrier) {
-                            CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
-                        }
+                    // Fusion
+                    if (Math::length(velDelta) >= cellFusionVelocity && cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
+                        && (cell->sticky || otherCell->sticky) && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy
+                        && !cell->barrier && !otherCell->barrier) {
+                        CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                     }
                 }
             }
@@ -250,7 +249,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __syncthreads();
 
         if (threadIdx.x == 0) {
-            //calculate barrier forces
+            // Calculate barrier forces
             numBarrierCells = min(MaxBarrierCellsForCollision, numBarrierCells);
             if (numBarrierCells > 0) {
                 Cell* closestBarrierCell = nullptr;
@@ -415,7 +414,7 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data, bool considerAngles)
+__inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& data, bool calcAngularForces)
 {
     auto& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -443,54 +442,39 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto deviation = actualDistance - bondDistance;
             force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 6;
 
-            if (considerAngles && (numConnections > 2 || (numConnections == 2 && i == 0))) {
-
+            if (calcAngularForces) {
                 auto lastIndex = (i + numConnections - 1) % numConnections;
                 auto lastConnectedCell = cell->connections[lastIndex].cell;
 
-                //check if there is a triangular connection
-                bool triangularConnection = false;
-                for (int j = 0; j < connectedCell->numConnections; ++j) {
-                    if (connectedCell->connections[j].cell == lastConnectedCell) {
-                        triangularConnection = true;
-                        break;
-                    }
+                auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
+
+                auto r1 = prevDisplacement;
+                auto r2 = displacement;
+                Math::rotateQuarterClockwise(r1);
+                Math::rotateQuarterCounterClockwise(r2);
+
+                auto angle = Math::angleOfVector(displacement);
+                auto prevAngle = Math::angleOfVector(prevDisplacement);
+                auto theta = Math::normalizedAngle(angle - prevAngle, 0.0f);
+
+                if (theta < referenceAngleFromPrevious) {
+                    r1 *= -1.0f;
+                    r2 *= -1.0f;
                 }
 
-                //angle forces in case of no triangular connections
-                if (!triangularConnection) {
-                    auto angle = Math::angleOfVector(displacement);
-                    auto prevAngle = Math::angleOfVector(prevDisplacement);
-                    auto actualAngleFromPrevious = Math::subtractAngle(angle, prevAngle);
-                    if (actualAngleFromPrevious < 0) {
-                        continue;
-                    }
-                    auto referenceAngleFromPrevious = cell->connections[i].angleFromPrevious;
+                auto g = 1e-4f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f));
+                auto strength1 = g / Math::length(r1);
+                auto strength2 = g / Math::length(r2);
+                auto force2 = r1 * strength1 * cellStiffnessSquared;
+                auto force1 = r2 * strength2 * cellStiffnessSquared;
 
-                    auto strength = abs(referenceAngleFromPrevious - actualAngleFromPrevious) / 2000 * cellStiffnessSquared;
-
-                    auto force1 = Math::normalized(displacement) / max(Math::length(displacement), cudaSimulationParameters.minCellDistance.value) * strength;
-                    Math::rotateQuarterClockwise(force1);
-
-                    auto force2 =
-                        Math::normalized(prevDisplacement) / max(Math::length(prevDisplacement), cudaSimulationParameters.minCellDistance.value) * strength;
-                    Math::rotateQuarterCounterClockwise(force2);
-
-                    if (referenceAngleFromPrevious < actualAngleFromPrevious) {
-                        force1 = force1 * (-1);
-                        force2 = force2 * (-1);
-                    }
-                    if (!connectedCell->barrier) {
-                        atomicAdd(&connectedCell->shared1.x, force1.x);
-                        atomicAdd(&connectedCell->shared1.y, force1.y);
-                    }
-                    auto otherConnectedCell = cell->connections[lastIndex].cell;
-                    if (!otherConnectedCell->barrier) {
-                        atomicAdd(&otherConnectedCell->shared1.x, force2.x);
-                        atomicAdd(&otherConnectedCell->shared1.y, force2.y);
-                    }
-                    force -= force1 + force2;
+                if (!connectedCell->barrier && !lastConnectedCell->barrier) {
+                    atomicAdd(&connectedCell->shared1.x, force1.x);
+                    atomicAdd(&connectedCell->shared1.y, force1.y);
+                    atomicAdd(&lastConnectedCell->shared1.x, force2.x);
+                    atomicAdd(&lastConnectedCell->shared1.y, force2.y);
                 }
+                force -= force1 + force2;
             }
 
             prevDisplacement = displacement;
@@ -811,13 +795,18 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
             if (connectingCell->barrier) {
                 continue;
             }
-            SystemDoubleLock lock;
-            lock.init(&cell->locked, &connectingCell->locked);
-            if (lock.tryLock()) {
-                auto averageVel = (cell->vel + connectingCell->vel) / 2;
-                cell->vel = cell->vel * (1.0f - innerFriction) + averageVel * innerFriction;
-                connectingCell->vel = connectingCell->vel * (1.0f - innerFriction) + averageVel * innerFriction;
-                lock.releaseLock();
+            auto posDelta = cell->pos - connectingCell->pos;
+            auto distance = Math::length(posDelta);
+            if (distance > NEAR_ZERO) {
+                auto direction = posDelta / distance;
+                auto velDelta = cell->vel - connectingCell->vel;
+                auto velDelta_part = Math::dot(velDelta, direction);
+
+                auto delta = direction * innerFriction * velDelta_part;
+                atomicAdd(&cell->vel.x, -delta.x * 0.5f);
+                atomicAdd(&cell->vel.y, -delta.y * 0.5f);
+                atomicAdd(&connectingCell->vel.x, delta.x * 0.5f);
+                atomicAdd(&connectingCell->vel.y, delta.y * 0.5f);
             }
         }
     }
