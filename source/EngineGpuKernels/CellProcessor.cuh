@@ -461,11 +461,11 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     r1 *= -1.0f;
                     r2 *= -1.0f;
                 }
-                auto g = 1e-4f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f));
-                auto strength1 = g / Math::length(r1);
-                auto strength2 = g / Math::length(r2);
-                auto force2 = r1 * strength1 * cellStiffnessSquared;
-                auto force1 = r2 * strength2 * cellStiffnessSquared;
+                auto g = 1e-3f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
+                auto strength1 = g / max(Math::lengthSquared(r1), cudaSimulationParameters.minCellDistance.value);
+                auto strength2 = g / max(Math::lengthSquared(r2), cudaSimulationParameters.minCellDistance.value);
+                auto force2 = r1 * strength1;
+                auto force1 = r2 * strength2;
 
                 if (!connectedCell->barrier && !lastConnectedCell->barrier) {
                     atomicAdd(&connectedCell->shared1.x, force1.x);
