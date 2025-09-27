@@ -2769,7 +2769,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             CellDescription()
                 .id(1)
                 .energy(getConstructorEnergy() * n)
-                .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
+                .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(250))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
         }),
@@ -2784,7 +2784,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     std::vector<uint64_t> createdCellIds;
     {
         for (int i = 0; i < n; ++i) {
-            _simulationFacade->calcTimesteps(100);
+            _simulationFacade->calcTimesteps(250);
             auto actualData = _simulationFacade->getSimulationData();
 
             ASSERT_EQ(0, actualData._cells.size());

@@ -461,7 +461,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
                     r1 *= -1.0f;
                     r2 *= -1.0f;
                 }
-                auto g = 1e-3f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
+                auto g = 5e-4f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
                 auto strength1 = g / max(Math::lengthSquared(r1), cudaSimulationParameters.minCellDistance.value);
                 auto strength2 = g / max(Math::lengthSquared(r2), cudaSimulationParameters.minCellDistance.value);
                 auto force2 = r1 * strength1;
