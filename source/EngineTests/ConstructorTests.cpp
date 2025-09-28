@@ -568,19 +568,17 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0)
 {
     auto nodeParameter = GetParam();
+    auto constexpr FrontAngleId = 5;
+
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
 
     auto data = Description().creatures({
         CreatureDescription()
             .id(0)
-            .genome(GenomeDescription()
-                        .genes({
-                            GeneDescription().separation(true).nodes({randomNode}),
-                        }))
-            .cells({CellDescription()
-                        .energy(getConstructorEnergy())
-                        .cellType(ConstructorDescription())
-                        .pos({100.0f, 100.0f})}),
+            .genome(GenomeDescription().genes({
+                GeneDescription().separation(true).nodes({randomNode}),
+            }))
+            .cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).frontAngleId(FrontAngleId).pos({100.0f, 100.0f})}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -602,6 +600,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._isFrontAngleRefCell);
+    EXPECT_EQ(FrontAngleId, newCell._frontAngleId);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));

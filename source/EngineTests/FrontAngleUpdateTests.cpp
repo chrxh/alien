@@ -254,11 +254,13 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
             .cells({
                 CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
                 CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
-                CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+                CellDescription().id(3).pos({9.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
+                CellDescription().id(4).pos({9.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
             }),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
+    data.addConnection(3, 4);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(5);
@@ -269,12 +271,13 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, creature._cells.size());
+    ASSERT_EQ(4, creature._cells.size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
         EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
         EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
         EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(4)._frontAngle.value()));
     } else {
         EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
         EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));

@@ -12,14 +12,7 @@ class MuscleProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
-    struct BendingInfo
-    {
-        Cell* pivotCell;
-        CellConnection* connection;
-        CellConnection* connectionPrev;
-        CellConnection* connectionNext;
-    };
-    __inline__ __device__ static BendingInfo getBendingInfo(Cell* cell);
+    __inline__ __device__ static float getAngleFromPreviousWithoutMuscleDistortions(Cell* cell, int connectionIndex);  // Considers modifications by connected muscle cells
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
@@ -34,6 +27,15 @@ private:
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Cell* cell);
+
+    struct BendingInfo
+    {
+        Cell* pivotCell;
+        CellConnection* connection;
+        CellConnection* connectionPrev;
+        CellConnection* connectionNext;
+    };
+    __inline__ __device__ static BendingInfo getBendingInfo(Cell* cell);
 
     __inline__ __device__ static bool isLeftSide(Cell* cell);
 
@@ -53,6 +55,31 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).cell);
     }
+}
+
+__device__ __inline__ float MuscleProcessor::getAngleFromPreviousWithoutMuscleDistortions(Cell* cell, int connectionIndex)
+{
+    CUDA_CHECK(connectionIndex < cell->numConnections);
+    for (int i = 0, j = cell->numConnections; i < j; ++i) {
+        auto connectedCell = cell->connections[i].cell;
+        if (connectedCell->cellType == CellType_Muscle
+            && (connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedCell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
+
+            auto const& initialAngle = connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending
+                ? connectedCell->cellTypeData.muscle.modeData.autoBending.initialAngle
+                : connectedCell->cellTypeData.muscle.modeData.manualBending.initialAngle;
+            if (initialAngle != VALUE_NOT_SET_FLOAT) {
+                auto bendingInfo = MuscleProcessor::getBendingInfo(connectedCell);
+                if (bendingInfo.connection == &cell->connections[connectionIndex]) {
+                    return initialAngle;
+                }
+                if (bendingInfo.connectionNext == &cell->connections[connectionIndex]) {
+                    return bendingInfo.connectionNext->angleFromPrevious - (initialAngle - bendingInfo.connection->angleFromPrevious);
+                }
+            }
+        }
+    }
+    return cell->connections[connectionIndex].angleFromPrevious;
 }
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)

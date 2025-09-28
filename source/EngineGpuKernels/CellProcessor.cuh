@@ -54,19 +54,10 @@ public:
 
 private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
-    static auto constexpr FrontAngleId_NoUpdate = 1e7f;
+    static auto constexpr FrontAngleId_NoUpdate = VALUE_NOT_SET_FLOAT;
 
-    struct AngleModificationInfo
-    {
-        Cell* cell;
-        CellConnection* connection;
-        float initialAngle;
-    };
-    __inline__ __device__ static float
-    getAngelSpanWithModifiedAngles(Cell* cell, int connectionIndex1, int connectionIndex2, int numModInfos, AngleModificationInfo* angleModInfos);
-
-    __inline__ __device__ static float
-    getAngelSpanWithModifiedAngles(Cell* cell, Cell* connectedCell1, Cell* connectedCell2, int numModInfos, AngleModificationInfo* angleModInfos);
+    __inline__ __device__ static float getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIndex1, int connectionIndex2);
+    __inline__ __device__ static float getAngelSpanWithoutMuscleDistortions(Cell* cell, Cell* connectedCell1, Cell* connectedCell2);
 };
 
 /************************************************************************/
@@ -707,33 +698,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-                        //if (cell->id == 0x170a) {
-                        //    printf("AAA\n");
-                        //}
-                        // In case of auto and manual bending muscles, we need to consider the initial angles when calculating the front angle.
-                        // For angle bending muscles, we can use the current reference angles.
-                        int numMod = 0;
-                        AngleModificationInfo modInfos[(MAX_CELL_BONDS + 1) * 2];
-                        auto createModInfo = [&numMod, &modInfos](auto const& cell) {
-                            if (cell->cellType == CellType_Muscle
-                                && (cell->cellTypeData.muscle.mode == MuscleMode_AutoBending || cell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
-                                auto const& initialAngle = cell->cellTypeData.muscle.mode == MuscleMode_AutoBending
-                                    ? cell->cellTypeData.muscle.modeData.autoBending.initialAngle
-                                    : cell->cellTypeData.muscle.modeData.manualBending.initialAngle;
-                                if (initialAngle != VALUE_NOT_SET_FLOAT) {
-                                    auto bendingInfo = MuscleProcessor::getBendingInfo(cell);
-                                    modInfos[numMod++] = AngleModificationInfo{bendingInfo.pivotCell, bendingInfo.connection, initialAngle};
-                                    if (bendingInfo.pivotCell->numConnections == 2) {
-                                        modInfos[numMod++] = AngleModificationInfo{bendingInfo.pivotCell, bendingInfo.connectionNext, 360.0f - initialAngle};
-                                    }
-                                }
-                            }
-                        };
-                        for (int k = 0, l = cell->numConnections; k < l; ++k) {
-                            createModInfo(cell->connections[k].cell);
-                        }
-                        createModInfo(cell);
-                        //if (cell->id == 0x1761) {
+                        //if (cell->id == 3) {
                         //    for (int i = 0; i < numMod; ++i) {
                         //        printf(
                         //            "MOD: cell: %llu, otherCell: %llu, angle: %f\n",
@@ -744,11 +709,11 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         //    numMod = 2;
                         //}
                         auto frontAngle_otherCell_cell = Math::normalizedAngle(
-                            otherCell->frontAngle + getAngelSpanWithModifiedAngles(otherCell, cell, otherCell->connections[0].cell, numMod, modInfos),
+                            otherCell->frontAngle + getAngelSpanWithoutMuscleDistortions(otherCell, cell, otherCell->connections[0].cell),
                             -180.0f);
                         auto frontAngle_cell_otherCell = Math::normalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
                         auto frontAngle_cell_connection0 =
-                            Math::normalizedAngle(frontAngle_cell_otherCell + getAngelSpanWithModifiedAngles(cell, 0, i, numMod, modInfos), -180.0f);
+                            Math::normalizedAngle(frontAngle_cell_otherCell + getAngelSpanWithoutMuscleDistortions(cell, 0, i), -180.0f);
                         cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
 
                         update = true;
@@ -1016,7 +981,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 }
 
 __device__ __inline__ float
-CellProcessor::getAngelSpanWithModifiedAngles(Cell* cell, int connectionIndex1, int connectionIndex2, int numModInfos, AngleModificationInfo* angleModInfos)
+CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIndex1, int connectionIndex2)
 {
     if ((connectionIndex1 - connectionIndex2 + cell->numConnections) % cell->numConnections == 0) {
         return 0;
@@ -1024,17 +989,7 @@ CellProcessor::getAngelSpanWithModifiedAngles(Cell* cell, int connectionIndex1, 
     auto result = 0.0f;
     for (int i = connectionIndex1 + 1; i < connectionIndex1 + cell->numConnections; i++) {
         auto index = i % cell->numConnections;
-        auto modApplied = false;
-        for (int j = 0; j < numModInfos; j++) {
-            if (angleModInfos[j].cell == cell && angleModInfos[j].connection == &cell->connections[index]) {
-                result += angleModInfos[j].initialAngle;
-                modApplied = true;
-                break;
-            }
-        }
-        if (!modApplied) {
-            result += cell->connections[index].angleFromPrevious;
-        }
+        result += MuscleProcessor::getAngleFromPreviousWithoutMuscleDistortions(cell, index);
         if (index == connectionIndex2) {
             break;
         }
@@ -1043,7 +998,7 @@ CellProcessor::getAngelSpanWithModifiedAngles(Cell* cell, int connectionIndex1, 
 }
 
 __device__ __inline__ float
-CellProcessor::getAngelSpanWithModifiedAngles(Cell* cell, Cell* connectedCell1, Cell* connectedCell2, int numModInfos, AngleModificationInfo* angleModInfos)
+CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, Cell* connectedCell1, Cell* connectedCell2)
 {
     auto connectionIndex1 = -1;
     auto connectionIndex2 = -1;
@@ -1058,5 +1013,5 @@ CellProcessor::getAngelSpanWithModifiedAngles(Cell* cell, Cell* connectedCell1, 
     if (connectionIndex1 == -1 || connectionIndex2 == -1) {
         return 0;
     }
-    return getAngelSpanWithModifiedAngles(cell, connectionIndex1, connectionIndex2, numModInfos, angleModInfos);
+    return getAngelSpanWithoutMuscleDistortions(cell, connectionIndex1, connectionIndex2);
 }
