@@ -122,7 +122,6 @@ struct AutoBendingDescription
 
     // Process data
     MEMBER(AutoBendingDescription, std::optional<float>, initialAngle, std::nullopt);
-    MEMBER(AutoBendingDescription, float, lastActualAngle, 0.0f);
     MEMBER(AutoBendingDescription, bool, forward, true);    // Current direction
     MEMBER(AutoBendingDescription, float, activation, 0);
     MEMBER(AutoBendingDescription, int, activationCountdown, 0);
@@ -139,7 +138,6 @@ struct ManualBendingDescription
 
     // Process data
     MEMBER(ManualBendingDescription, std::optional<float>, initialAngle, std::nullopt);
-    MEMBER(ManualBendingDescription, float, lastActualAngle, 0.0f);
     MEMBER(ManualBendingDescription, float, lastAngleDelta, 0.0f);
     MEMBER(ManualBendingDescription, bool, impulseAlreadyApplied, false);
 };

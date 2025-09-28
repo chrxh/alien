@@ -173,12 +173,10 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         MuscleModeDescription muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending: {
-            AutoBendingDescription defaultBending;
             muscleModeDesc = AutoBendingDescription()
                                  .maxAngleDeviation(0.6f)
                                  .frontBackVelRatio(0.4f)
                                  .initialAngle(135.0f)
-                                 .lastActualAngle(180.0f)
                                  .forward(false)
                                  .activation(0.7f)
                                  .activationCountdown(8)
@@ -189,7 +187,6 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
                                  .maxAngleDeviation(0.5f)
                                  .frontBackVelRatio(0.3f)
                                  .initialAngle(225.0f)
-                                 .lastActualAngle(270.0f)
                                  .lastAngleDelta(0.8f)
                                  .impulseAlreadyApplied(true);
             break;

@@ -104,6 +104,12 @@ __inline__ __device__ __host__ void operator*=(float2& p, float const& q)
     p.y *= q;
 }
 
+__inline__ __device__ __host__ void operator/=(float2& p, float const& q)
+{
+    p.x /= q;
+    p.y /= q;
+}
+
 __inline__ __device__ __host__ void operator+=(float2& p, float2 const& q)
 {
     p.x += q.x;

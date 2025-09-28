@@ -73,7 +73,7 @@ struct SimulationParameters
     BaseParameter<float> maxCollisionDistance = {1.3f};  // for MotionType_Collision
     BaseParameter<float> repulsionStrength = {0.08f};    // for MotionType_Collision
     BaseLayerParameter<float> friction = {.baseValue = 0.001f};
-    BaseParameter<float> innerFriction = {0.3f};
+    BaseParameter<float> innerFriction = {0.6f};
     BaseLayerParameter<float> rigidity = {.baseValue = 0.0f};
 
     // Physics: Thresholds

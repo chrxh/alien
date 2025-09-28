@@ -170,8 +170,20 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                     cell._barrier);
                 AlienGui::InputText(
                     AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
-                //AlienGui::InputFloat(
-                //    AlienGui::InputFloatParameters().name("TEMP: abs angle to conn0").format("%.1f").textWidth(BaseTabTextWidth), cell._frontAngle);
+                if (auto frontAngle = cell._frontAngle) {
+                    AlienGui::InputFloat(
+                        AlienGui::InputFloatParameters().name("TEMP: front angle").format("%.1f").textWidth(BaseTabTextWidth), frontAngle.value());
+                    cell._frontAngle = frontAngle;
+                }
+                if (cell.getCellType() == CellType_Muscle) {
+                    auto& muscle = std::get<MuscleDescription>(cell._cellType);
+                    auto& bending = std::get<AutoBendingDescription>(muscle._mode);
+                    if (auto initialAngle = bending._initialAngle) {
+                        AlienGui::InputFloat(
+                            AlienGui::InputFloatParameters().name("TEMP: initial angle").format("%.1f").textWidth(BaseTabTextWidth), initialAngle.value());
+                        bending._initialAngle = initialAngle;
+                    }
+                }
                 ImGui::TreePop();
             }
 

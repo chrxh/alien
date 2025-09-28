@@ -707,7 +707,9 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-
+                        //if (cell->id == 0x170a) {
+                        //    printf("AAA\n");
+                        //}
                         // In case of auto and manual bending muscles, we need to consider the initial angles when calculating the front angle.
                         // For angle bending muscles, we can use the current reference angles.
                         int numMod = 0;
@@ -721,17 +723,26 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                                 if (initialAngle != VALUE_NOT_SET_FLOAT) {
                                     auto bendingInfo = MuscleProcessor::getBendingInfo(cell);
                                     modInfos[numMod++] = AngleModificationInfo{bendingInfo.pivotCell, bendingInfo.connection, initialAngle};
-                                    modInfos[numMod++] = AngleModificationInfo{
-                                        bendingInfo.pivotCell,
-                                        bendingInfo.connectionNext,
-                                        bendingInfo.connectionNext->angleFromPrevious - (initialAngle - bendingInfo.connection->angleFromPrevious)};
+                                    if (bendingInfo.pivotCell->numConnections == 2) {
+                                        modInfos[numMod++] = AngleModificationInfo{bendingInfo.pivotCell, bendingInfo.connectionNext, 360.0f - initialAngle};
+                                    }
                                 }
                             }
                         };
-                        createModInfo(cell);
                         for (int k = 0, l = cell->numConnections; k < l; ++k) {
                             createModInfo(cell->connections[k].cell);
                         }
+                        createModInfo(cell);
+                        //if (cell->id == 0x1761) {
+                        //    for (int i = 0; i < numMod; ++i) {
+                        //        printf(
+                        //            "MOD: cell: %llu, otherCell: %llu, angle: %f\n",
+                        //            modInfos[i].cell->id,
+                        //            modInfos[i].connection->cell->id,
+                        //            modInfos[i].initialAngle);
+                        //    }
+                        //    numMod = 2;
+                        //}
                         auto frontAngle_otherCell_cell = Math::normalizedAngle(
                             otherCell->frontAngle + getAngelSpanWithModifiedAngles(otherCell, cell, otherCell->connections[0].cell, numMod, modInfos),
                             -180.0f);
@@ -1018,6 +1029,7 @@ CellProcessor::getAngelSpanWithModifiedAngles(Cell* cell, int connectionIndex1, 
             if (angleModInfos[j].cell == cell && angleModInfos[j].connection == &cell->connections[index]) {
                 result += angleModInfos[j].initialAngle;
                 modApplied = true;
+                break;
             }
         }
         if (!modApplied) {

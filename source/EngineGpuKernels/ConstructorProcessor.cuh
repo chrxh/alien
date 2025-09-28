@@ -375,7 +375,7 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
         }
     }
-    if (constructionData.isSeparation && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
+    if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
         newCell->isFrontAngleRefCell = true;
     }
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
@@ -556,10 +556,11 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
 
-    // Edge case for bending muscle cells with one connection: Reset initial angle
-    if (lastCell->numConnections == 1 && lastCell->cellType == CellType_Muscle && lastCell->cellTypeData.muscle.isBendingMuscle()) {
+    // Edge case for bending muscle cells: Reset front angle and initial angle
+    if (lastCell->cellType == CellType_Muscle && lastCell->cellTypeData.muscle.isBendingMuscle()) {
+        lastCell->frontAngle = VALUE_NOT_SET_FLOAT;
         if (lastCell->cellTypeData.muscle.mode == MuscleMode_AutoBending) {
-            lastCell->cellTypeData.muscle.modeData.angleBending.initialAngle = VALUE_NOT_SET_FLOAT;
+            lastCell->cellTypeData.muscle.modeData.autoBending.initialAngle = VALUE_NOT_SET_FLOAT;
         } else if (lastCell->cellTypeData.muscle.mode == MuscleMode_ManualBending) {
             lastCell->cellTypeData.muscle.modeData.manualBending.initialAngle = VALUE_NOT_SET_FLOAT;
         } else if (lastCell->cellTypeData.muscle.mode == MuscleMode_AngleBending) {
@@ -723,6 +724,7 @@ ConstructorProcessor::constructCellIntern(
     factory.init(&data);
     Cell* result = factory.createCellFromNode(
         cellIndex, constructionData.creature, constructor.geneIndex, constructor.currentNodeIndex, hostCell->nodeIndex, posOfNewCell, hostCell->vel, constructionData.energy);
+    result->frontAngleId = hostCell->frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
 

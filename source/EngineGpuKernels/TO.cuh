@@ -99,7 +99,6 @@ struct AutoBendingTO
 
     // Process data
     float initialAngle;  // May be invalid
-    float lastActualAngle;
     bool forward;  // Current direction
     float activation;
     uint8_t activationCountdown;
@@ -114,7 +113,6 @@ struct ManualBendingTO
 
     // Process data
     float initialAngle; // May be invalid
-    float lastActualAngle;
     float lastAngleDelta;
     bool impulseAlreadyApplied;
 };

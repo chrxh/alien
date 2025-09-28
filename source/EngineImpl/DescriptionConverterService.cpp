@@ -354,7 +354,6 @@ CellDescription DescriptionConverterService::createCellDescription(
             bending._initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle)
                 : std::nullopt;
-            bending._lastActualAngle = cellTO.cellTypeData.muscle.modeData.autoBending.lastActualAngle;
             bending._forward = cellTO.cellTypeData.muscle.modeData.autoBending.forward;
             bending._activation = cellTO.cellTypeData.muscle.modeData.autoBending.activation;
             bending._activationCountdown = cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown;
@@ -367,7 +366,6 @@ CellDescription DescriptionConverterService::createCellDescription(
             bending._initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle)
                 : std::nullopt;
-            bending._lastActualAngle = cellTO.cellTypeData.muscle.modeData.manualBending.lastActualAngle;
             bending._lastAngleDelta = cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
             bending._impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             muscle._mode = bending;
@@ -892,7 +890,6 @@ void DescriptionConverterService::convertCellToTO(
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
             bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
             bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
-            bendingTO.lastActualAngle = bendingDesc._lastActualAngle;
             bendingTO.forward = bendingDesc._forward;
             bendingTO.activation = bendingDesc._activation;
             bendingTO.activationCountdown = bendingDesc._activationCountdown;
@@ -903,7 +900,6 @@ void DescriptionConverterService::convertCellToTO(
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
             bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
             bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
-            bendingTO.lastActualAngle = bendingDesc._lastActualAngle;
             bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
         } else if (muscleTO.mode == MuscleMode_AngleBending) {

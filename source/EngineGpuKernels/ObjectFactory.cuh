@@ -318,7 +318,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
             cell->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
             cell->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
             cell->cellTypeData.muscle.modeData.autoBending.initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle;
-            cell->cellTypeData.muscle.modeData.autoBending.lastActualAngle = cellTO.cellTypeData.muscle.modeData.autoBending.lastActualAngle;
             cell->cellTypeData.muscle.modeData.autoBending.forward = cellTO.cellTypeData.muscle.modeData.autoBending.forward;
             cell->cellTypeData.muscle.modeData.autoBending.activation = cellTO.cellTypeData.muscle.modeData.autoBending.activation;
             cell->cellTypeData.muscle.modeData.autoBending.activationCountdown = cellTO.cellTypeData.muscle.modeData.autoBending.activationCountdown;
@@ -327,7 +326,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
             cell->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
             cell->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
             cell->cellTypeData.muscle.modeData.manualBending.initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle;
-            cell->cellTypeData.muscle.modeData.manualBending.lastActualAngle = cellTO.cellTypeData.muscle.modeData.manualBending.lastActualAngle;
             cell->cellTypeData.muscle.modeData.manualBending.lastAngleDelta = cellTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
             cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
@@ -625,7 +623,6 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
             muscle.modeData.autoBending.maxAngleDeviation = nodeMuscle.modeData.autoBending.maxAngleDeviation;
             muscle.modeData.autoBending.frontBackVelRatio = nodeMuscle.modeData.autoBending.frontBackVelRatio;
             muscle.modeData.autoBending.initialAngle = VALUE_NOT_SET_FLOAT;
-            muscle.modeData.autoBending.lastActualAngle = 0;
             muscle.modeData.autoBending.forward = true;
             muscle.modeData.autoBending.activation = 0;
             muscle.modeData.autoBending.activationCountdown = 0;
@@ -635,7 +632,6 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
             muscle.modeData.manualBending.maxAngleDeviation = nodeMuscle.modeData.manualBending.maxAngleDeviation;
             muscle.modeData.manualBending.frontBackVelRatio = nodeMuscle.modeData.manualBending.frontBackVelRatio;
             muscle.modeData.manualBending.initialAngle = VALUE_NOT_SET_FLOAT;
-            muscle.modeData.manualBending.lastActualAngle = 0;
             muscle.modeData.manualBending.lastAngleDelta = 0;
             muscle.modeData.manualBending.impulseAlreadyApplied = false;
         } break;

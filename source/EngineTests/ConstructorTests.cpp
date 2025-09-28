@@ -873,7 +873,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_FALSE(newCell._isFrontAngleRefCell);
+    EXPECT_TRUE(newCell._isFrontAngleRefCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));

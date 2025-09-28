@@ -33,7 +33,8 @@ private:
 
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 
-    __inline__ __device__ static float calcActualAngle(SimulationData& data, BendingInfo const& bendingInfo);
+    __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Cell* cell);
+
     __inline__ __device__ static bool isLeftSide(Cell* cell);
 
     static auto constexpr AccelerationLimit = 0.3f;
@@ -124,9 +125,27 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     // Initialization
     if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(cell);
+
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
+        auto pivotCell = bendingInfo.pivotCell;
+        for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
+            auto connectedCell = pivotCell->connections[k].cell;
+            if (connectedCell->cellType == CellType_Muscle
+                && (connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedCell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
+                auto const& initialAngle = connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending
+                    ? connectedCell->cellTypeData.muscle.modeData.autoBending.initialAngle
+                    : connectedCell->cellTypeData.muscle.modeData.manualBending.initialAngle;
+                if (initialAngle != VALUE_NOT_SET_FLOAT) {
+                    auto connectedBendingInfo = MuscleProcessor::getBendingInfo(connectedCell);
+                    if (connectedBendingInfo.connection == bendingInfo.connection) {
+                        bending.initialAngle = initialAngle;
+                        break;
+                    }
+                }
+            }
+        }
+
         bending.forward = !isLeftSide(cell);
-        bending.lastActualAngle = calcActualAngle(data, bendingInfo);
         bending.impulseAlreadyApplied = true;
     }
 
@@ -136,7 +155,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         auto frontBackVelRatio = isLeftSide(cell) ? 1.0f - bending.frontBackVelRatio : bending.frontBackVelRatio;
 
         auto bendingInfo = getBendingInfo(cell);
-        auto actualAngle = calcActualAngle(data, bendingInfo);
         auto activation = bending.activation * toFloat(bending.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
 
         // Change bending direction
@@ -145,11 +163,11 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         auto maxAngle = min(max(bending.initialAngle + maxAngleDeviation, MinAngle), sumAngle - MinAngle);
         auto minAngle = min(max(bending.initialAngle - maxAngleDeviation, MinAngle), sumAngle - MinAngle);
 
-        if (bendingInfo.connection->angleFromPrevious /*actualAngle */ > maxAngle - NEAR_ZERO) {
+        if (bendingInfo.connection->angleFromPrevious > maxAngle - NEAR_ZERO) {
             bending.forward = activation >= 0;
             bending.impulseAlreadyApplied = false;
         }
-        if (bendingInfo.connection->angleFromPrevious /*actualAngle*/ < minAngle + NEAR_ZERO) {
+        if (bendingInfo.connection->angleFromPrevious < minAngle + NEAR_ZERO) {
             bending.forward = activation < 0;
             bending.impulseAlreadyApplied = false;
         }
@@ -167,26 +185,27 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         bendingInfo.connection->angleFromPrevious += angleDelta;
         bendingInfo.connectionNext->angleFromPrevious -= angleDelta;
 
+
         // Apply impulse
-        auto actualAngleDelta = actualAngle - bending.lastActualAngle;
         if (!bending.impulseAlreadyApplied) {
-            if ((angleDelta < 0 && actualAngle < bending.initialAngle && bendingInfo.connection->angleFromPrevious < bending.initialAngle)
-                || (angleDelta > 0 && actualAngle > bending.initialAngle && bendingInfo.connection->angleFromPrevious > bending.initialAngle)) {
+            if ((angleDelta < 0 && bendingInfo.connection->angleFromPrevious < bending.initialAngle)
+                || (angleDelta > 0 && bendingInfo.connection->angleFromPrevious > bending.initialAngle)) {
                 bending.impulseAlreadyApplied = true;
 
-                auto direction = Math::normalized(data.cellMap.getCorrectedDirection(bendingInfo.connection->cell->pos - bendingInfo.pivotCell->pos));
-                if (actualAngleDelta < 0) {
+                auto direction = calcAverageDirection(data, cell);
+
+                if (angleDelta < 0) {
                     Math::rotateQuarterClockwise(direction);
                 } else {
                     Math::rotateQuarterCounterClockwise(direction);
                 }
-                actualAngleDelta = min(5.0f, abs(actualAngleDelta));
+                angleDelta = min(5.0f, abs(angleDelta));
                 if (bending.forward) {
-                    actualAngleDelta *= powf(frontBackVelRatio, 4.0f);
+                    angleDelta *= powf(frontBackVelRatio, 4.0f);
                 } else {
-                    actualAngleDelta *= powf(1.0f - frontBackVelRatio, 4.0f);
+                    angleDelta *= powf(1.0f - frontBackVelRatio, 4.0f);
                 }
-                auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
+                auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
 
                 if (cell->numConnections == 2) {
                     int chainLength = 0;
@@ -195,15 +214,17 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
                         connectedCell = connectedCell->connections[1].cell;
                         ++chainLength;
                     }
-                    connectedCell = cell;
                     float2 accPerCell{
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
+                    chainLength = 0;
+                    connectedCell = cell;
                     while (connectedCell->numConnections == 2 && chainLength < 20) {
                         connectedCell = connectedCell->connections[1].cell;
 
                         atomicAdd(&connectedCell->vel.x, accPerCell.x);
                         atomicAdd(&connectedCell->vel.y, accPerCell.y);
+                        ++chainLength;
                     }
                 } else {
                     atomicAdd(&bendingInfo.pivotCell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
@@ -212,7 +233,6 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
             }
         }
 
-        bending.lastActualAngle = actualAngle;
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
         --bending.activationCountdown;
@@ -235,7 +255,24 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (bending.initialAngle == VALUE_NOT_SET_FLOAT) {
         auto bendingInfo = getBendingInfo(cell);
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
-        bending.lastActualAngle = calcActualAngle(data, bendingInfo);
+        auto pivotCell = bendingInfo.pivotCell;
+        for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
+            auto connectedCell = pivotCell->connections[k].cell;
+            if (connectedCell->cellType == CellType_Muscle
+                && (connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedCell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
+                auto const& initialAngle = connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending
+                    ? connectedCell->cellTypeData.muscle.modeData.autoBending.initialAngle
+                    : connectedCell->cellTypeData.muscle.modeData.manualBending.initialAngle;
+                if (initialAngle != VALUE_NOT_SET_FLOAT) {
+                    auto connectedBendingInfo = MuscleProcessor::getBendingInfo(connectedCell);
+                    if (connectedBendingInfo.connection == bendingInfo.connection) {
+                        bending.initialAngle = initialAngle;
+                        break;
+                    }
+                }
+            }
+        }
+
         bending.impulseAlreadyApplied = true;
         bending.lastAngleDelta = 0;
     }
@@ -244,7 +281,6 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto bendingInfo = getBendingInfo(cell);
-        auto actualAngle = calcActualAngle(data, bendingInfo);
         auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
 
         // Change bending direction
@@ -275,25 +311,25 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         bending.lastAngleDelta = angleDelta;
 
         // Apply impulse
-        auto actualAngleDelta = actualAngle - bending.lastActualAngle;
         if (!bending.impulseAlreadyApplied) {
-            if ((angleDelta < 0 && actualAngle < bending.initialAngle && bendingInfo.connection->angleFromPrevious < bending.initialAngle)
-                || (angleDelta > 0 && actualAngle > bending.initialAngle && bendingInfo.connection->angleFromPrevious > bending.initialAngle)) {
+            if ((angleDelta < 0 && bendingInfo.connection->angleFromPrevious < bending.initialAngle)
+                || (angleDelta > 0 && bendingInfo.connection->angleFromPrevious > bending.initialAngle)) {
                 bending.impulseAlreadyApplied = true;
 
-                auto direction = Math::normalized(data.cellMap.getCorrectedDirection(bendingInfo.connection->cell->pos - bendingInfo.pivotCell->pos));
-                if (actualAngleDelta < 0) {
+                auto direction = calcAverageDirection(data, cell);
+
+                if (angleDelta < 0) {
                     Math::rotateQuarterClockwise(direction);
                 } else {
                     Math::rotateQuarterCounterClockwise(direction);
                 }
-                actualAngleDelta = min(5.0f, abs(actualAngleDelta));
+                angleDelta = min(5.0f, abs(angleDelta));
                 if (activation > 0) {
-                    actualAngleDelta *= powf(bending.frontBackVelRatio, 4.0f);
+                    angleDelta *= powf(bending.frontBackVelRatio, 4.0f);
                 } else {
-                    actualAngleDelta *= powf(1.0f - bending.frontBackVelRatio, 4.0f);
+                    angleDelta *= powf(1.0f - bending.frontBackVelRatio, 4.0f);
                 }
-                auto acceleration = direction * actualAngleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
+                auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
 
                 if (cell->numConnections == 2) {
                     int chainLength = 0;
@@ -306,11 +342,13 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
                     float2 accPerCell{
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
+                    chainLength = 0;
                     while (connectedCell->numConnections == 2 && chainLength < 20) {
                         connectedCell = connectedCell->connections[1].cell;
 
                         atomicAdd(&connectedCell->vel.x, accPerCell.x);
                         atomicAdd(&connectedCell->vel.y, accPerCell.y);
+                        ++chainLength;
                     }
                 } else {
                     atomicAdd(&bendingInfo.pivotCell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
@@ -319,7 +357,6 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
             }
         }
 
-        bending.lastActualAngle = actualAngle;
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
     }
@@ -612,15 +649,35 @@ __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Cell* 
     }
 }
 
+__inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationData& data, Cell* cell)
+{
+    int chainLength = 0;
+    Cell* anchorCell = cell;
+    float2 result{0, 0};
+    do {
+        auto nextCell = anchorCell->numConnections == 2 ? anchorCell->connections[1].cell : anchorCell->connections[0].cell;
+        result += Math::normalized(data.cellMap.getCorrectedDirection(anchorCell->pos - nextCell->pos));
+        anchorCell = nextCell;
+        ++chainLength;
+    } while (anchorCell->numConnections == 2 && chainLength < 20);
+    result /= toFloat(chainLength);
+    return result;
+}
+
 __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Cell* cell)
 {
     BendingInfo result;
     if (cell->numConnections == 2) {
-        result.pivotCell = cell;
-        result.connection = &cell->connections[0];
-        result.connectionPrev = &cell->connections[1];
-        result.connectionNext = &cell->connections[1];
-        return result;
+        auto privotCell = cell->connections[1].cell;
+        result.pivotCell = privotCell;
+        for (int i = 0; i < privotCell->numConnections; ++i) {
+            if (privotCell->connections[i].cell == cell) {
+                result.connection = &privotCell->connections[i];
+                result.connectionPrev = &privotCell->connections[(i + privotCell->numConnections - 1) % privotCell->numConnections];
+                result.connectionNext = &privotCell->connections[(i + 1) % privotCell->numConnections];
+                break;
+            }
+        }
     }
 
     // numConnections == 1
@@ -637,13 +694,6 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
         }
     }
     return result;
-}
-
-__inline__ __device__ float MuscleProcessor::calcActualAngle(SimulationData& data, BendingInfo const& bendingInfo)
-{
-    auto direction0 = data.cellMap.getCorrectedDirection(bendingInfo.connection->cell->pos - bendingInfo.pivotCell->pos);
-    auto direction1 = data.cellMap.getCorrectedDirection(bendingInfo.connectionPrev->cell->pos - bendingInfo.pivotCell->pos);
-    return Math::subtractAngle(Math::angleOfVector(direction0), Math::angleOfVector(direction1));
 }
 
 __inline__ __device__ bool MuscleProcessor::isLeftSide(Cell* cell)

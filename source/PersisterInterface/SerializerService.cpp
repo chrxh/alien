@@ -536,13 +536,11 @@ namespace
     auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
     auto constexpr Id_MuscleMode_AutoBending_Activation = 9;
     auto constexpr Id_MuscleMode_AutoBending_ActivationCountdown = 10;
-    auto constexpr Id_MuscleMode_AutoBending_LastActualAngle = 11;
     auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
 
     auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleMode_ManualBending_FrontBackVelRatio = 1;
     auto constexpr Id_MuscleMode_ManualBending_InitialAngle = 2;
-    auto constexpr Id_MuscleMode_ManualBending_LastActualAngle = 3;
     auto constexpr Id_MuscleMode_ManualBending_ImpulseAlreadyApplied = 4;
     auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
 
@@ -730,7 +728,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_LastActualAngle, data._lastActualAngle, defaultObject._lastActualAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Activation, data._activation, defaultObject._activation);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ActivationCountdown, data._activationCountdown, defaultObject._activationCountdown);
@@ -747,7 +744,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
-        loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_LastActualAngle, data._lastActualAngle, defaultObject._lastActualAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_LastAngleDelta, data._lastAngleDelta, defaultObject._lastAngleDelta);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
         processLoadSaveMap(task, ar, auxiliaries);
