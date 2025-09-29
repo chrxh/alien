@@ -237,7 +237,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
                 if (cell->numConnections == 2) {
                     int chainLength = 0;
                     Cell* connectedCell = cell;
-                    while (connectedCell->numConnections == 2 && chainLength < 20) {
+                    while (connectedCell->numConnections == 2 && chainLength < 4) {
                         connectedCell = connectedCell->connections[1].cell;
                         ++chainLength;
                     }
@@ -246,7 +246,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
                     chainLength = 0;
                     connectedCell = cell;
-                    while (connectedCell->numConnections == 2 && chainLength < 20) {
+                    while (connectedCell->numConnections == 2 && chainLength < 4) {
                         connectedCell = connectedCell->connections[1].cell;
 
                         atomicAdd(&connectedCell->vel.x, accPerCell.x);
@@ -361,7 +361,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
                 if (cell->numConnections == 2) {
                     int chainLength = 0;
                     Cell* connectedCell = cell;
-                    while (connectedCell->numConnections == 2 && chainLength < 20) {
+                    while (connectedCell->numConnections == 2 && chainLength < 4) {
                         connectedCell = connectedCell->connections[1].cell;
                         ++chainLength;
                     }
@@ -370,7 +370,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
                         min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
                     chainLength = 0;
-                    while (connectedCell->numConnections == 2 && chainLength < 20) {
+                    while (connectedCell->numConnections == 2 && chainLength < 4) {
                         connectedCell = connectedCell->connections[1].cell;
 
                         atomicAdd(&connectedCell->vel.x, accPerCell.x);
@@ -686,7 +686,7 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
         result += Math::normalized(data.cellMap.getCorrectedDirection(anchorCell->pos - nextCell->pos));
         anchorCell = nextCell;
         ++chainLength;
-    } while (anchorCell->numConnections == 2 && chainLength < 20);
+    } while (anchorCell->numConnections == 2 && chainLength < 4);
     result /= toFloat(chainLength);
     return result;
 }

@@ -281,7 +281,8 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     } else {
         EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
         EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(4)._frontAngle.value()));
     }
 }
 
