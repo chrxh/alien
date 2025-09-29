@@ -165,7 +165,7 @@ protected:
                 if (autoBending._maxAngleDeviation != nodeAutoBending._maxAngleDeviation) {
                     return false;
                 }
-                if (autoBending._frontBackVelRatio != nodeAutoBending._frontBackVelRatio) {
+                if (autoBending._forwardBackwardRatio != nodeAutoBending._forwardBackwardRatio) {
                     return false;
                 }
             } break;
@@ -175,7 +175,7 @@ protected:
                 if (manualBending._maxAngleDeviation != nodeManualBending._maxAngleDeviation) {
                     return false;
                 }
-                if (manualBending._frontBackVelRatio != nodeManualBending._frontBackVelRatio) {
+                if (manualBending._forwardBackwardRatio != nodeManualBending._forwardBackwardRatio) {
                     return false;
                 }
             } break;
@@ -195,7 +195,7 @@ protected:
                 if (autoCrawling._maxDistanceDeviation != nodeAutoCrawling._maxDistanceDeviation) {
                     return false;
                 }
-                if (autoCrawling._frontBackVelRatio != nodeAutoCrawling._frontBackVelRatio) {
+                if (autoCrawling._forwardBackwardRatio != nodeAutoCrawling._forwardBackwardRatio) {
                     return false;
                 }
             } break;
@@ -205,7 +205,7 @@ protected:
                 if (manualCrawling._maxDistanceDeviation != nodeManualCrawling._maxDistanceDeviation) {
                     return false;
                 }
-                if (manualCrawling._frontBackVelRatio != nodeManualCrawling._frontBackVelRatio) {
+                if (manualCrawling._forwardBackwardRatio != nodeManualCrawling._forwardBackwardRatio) {
                     return false;
                 }
             } break;

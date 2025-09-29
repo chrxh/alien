@@ -350,7 +350,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
             AutoBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-            bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
+            bending._forwardBackwardRatio = cellTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
             bending._initialAngle = cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.autoBending.initialAngle)
                 : std::nullopt;
@@ -362,7 +362,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
             ManualBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-            bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+            bending._forwardBackwardRatio = cellTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
             bending._initialAngle = cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.manualBending.initialAngle)
                 : std::nullopt;
@@ -380,7 +380,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
             AutoCrawlingDescription crawling;
             crawling._maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-            crawling._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
+            crawling._forwardBackwardRatio = cellTO.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
             crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance)
                 : std::nullopt;
@@ -393,7 +393,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
             ManualCrawlingDescription crawling;
             crawling._maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-            crawling._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
+            crawling._forwardBackwardRatio = cellTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
             crawling._initialDistance = cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance)
                 : std::nullopt;
@@ -549,13 +549,13 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                 case MuscleMode_AutoBending: {
                     AutoBendingGenomeDescription bendingDesc;
                     bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-                    bendingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.autoBending.frontBackVelRatio;
+                    bendingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                     muscleDesc._mode = bendingDesc;
                 } break;
                 case MuscleMode_ManualBending: {
                     ManualBendingGenomeDescription bendingDesc;
                     bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-                    bendingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.manualBending.frontBackVelRatio;
+                    bendingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
                     muscleDesc._mode = bendingDesc;
                 } break;
                 case MuscleMode_AngleBending: {
@@ -567,13 +567,13 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                 case MuscleMode_AutoCrawling: {
                     AutoCrawlingGenomeDescription crawlingDesc;
                     crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-                    crawlingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.autoCrawling.frontBackVelRatio;
+                    crawlingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
                     muscleDesc._mode = crawlingDesc;
                 } break;
                 case MuscleMode_ManualCrawling: {
                     ManualCrawlingGenomeDescription crawlingDesc;
                     crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-                    crawlingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.manualCrawling.frontBackVelRatio;
+                    crawlingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
                     muscleDesc._mode = crawlingDesc;
                 } break;
                 case MuscleMode_DirectMovement: {
@@ -725,13 +725,13 @@ void DescriptionConverterService::convertCreatureToTO(
                     auto const& autoBendingDesc = std::get<AutoBendingGenomeDescription>(muscleDesc._mode);
                     auto& autoBendingTO = muscleTO.modeData.autoBending;
                     autoBendingTO.maxAngleDeviation = autoBendingDesc._maxAngleDeviation;
-                    autoBendingTO.frontBackVelRatio = autoBendingDesc._frontBackVelRatio;
+                    autoBendingTO.forwardBackwardRatio = autoBendingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_ManualBending: {
                     auto const& manualBendingDesc = std::get<ManualBendingGenomeDescription>(muscleDesc._mode);
                     auto& manualBendingTO = muscleTO.modeData.manualBending;
                     manualBendingTO.maxAngleDeviation = manualBendingDesc._maxAngleDeviation;
-                    manualBendingTO.frontBackVelRatio = manualBendingDesc._frontBackVelRatio;
+                    manualBendingTO.forwardBackwardRatio = manualBendingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_AngleBending: {
                     auto const& angleBendingDesc = std::get<AngleBendingGenomeDescription>(muscleDesc._mode);
@@ -743,13 +743,13 @@ void DescriptionConverterService::convertCreatureToTO(
                     auto const& autoCrawlingDesc = std::get<AutoCrawlingGenomeDescription>(muscleDesc._mode);
                     auto& autoCrawlingTO = muscleTO.modeData.autoCrawling;
                     autoCrawlingTO.maxDistanceDeviation = autoCrawlingDesc._maxDistanceDeviation;
-                    autoCrawlingTO.frontBackVelRatio = autoCrawlingDesc._frontBackVelRatio;
+                    autoCrawlingTO.forwardBackwardRatio = autoCrawlingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_ManualCrawling: {
                     auto const& manualCrawlingDesc = std::get<ManualCrawlingGenomeDescription>(muscleDesc._mode);
                     auto& manualCrawlingTO = muscleTO.modeData.manualCrawling;
                     manualCrawlingTO.maxDistanceDeviation = manualCrawlingDesc._maxDistanceDeviation;
-                    manualCrawlingTO.frontBackVelRatio = manualCrawlingDesc._frontBackVelRatio;
+                    manualCrawlingTO.forwardBackwardRatio = manualCrawlingDesc._forwardBackwardRatio;
                 } break;
                 case MuscleMode_DirectMovement: {
                 } break;
@@ -888,7 +888,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& bendingDesc = std::get<AutoBendingDescription>(muscleDesc._mode);
             AutoBendingTO& bendingTO = muscleTO.modeData.autoBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
-            bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
+            bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
             bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
             bendingTO.forward = bendingDesc._forward;
             bendingTO.activation = bendingDesc._activation;
@@ -898,7 +898,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& bendingDesc = std::get<ManualBendingDescription>(muscleDesc._mode);
             ManualBendingTO& bendingTO = muscleTO.modeData.manualBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
-            bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
+            bendingTO.forwardBackwardRatio = bendingDesc._forwardBackwardRatio;
             bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
             bendingTO.lastAngleDelta = bendingDesc._lastAngleDelta;
             bendingTO.impulseAlreadyApplied = bendingDesc._impulseAlreadyApplied;
@@ -912,7 +912,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& crawlingDesc = std::get<AutoCrawlingDescription>(muscleDesc._mode);
             AutoCrawlingTO& crawlingTO = muscleTO.modeData.autoCrawling;
             crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
-            crawlingTO.frontBackVelRatio = crawlingDesc._frontBackVelRatio;
+            crawlingTO.forwardBackwardRatio = crawlingDesc._forwardBackwardRatio;
             crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
             crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
             crawlingTO.forward = crawlingDesc._forward;
@@ -923,7 +923,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& crawlingDesc = std::get<ManualCrawlingDescription>(muscleDesc._mode);
             ManualCrawlingTO& crawlingTO = muscleTO.modeData.manualCrawling;
             crawlingTO.maxDistanceDeviation = crawlingDesc._maxDistanceDeviation;
-            crawlingTO.frontBackVelRatio = crawlingDesc._frontBackVelRatio;
+            crawlingTO.forwardBackwardRatio = crawlingDesc._forwardBackwardRatio;
             crawlingTO.initialDistance = crawlingDesc._initialDistance.value_or(VALUE_NOT_SET_FLOAT);
             crawlingTO.lastActualDistance = crawlingDesc._lastActualDistance;
             crawlingTO.lastDistanceDelta = crawlingDesc._lastDistanceDelta;
