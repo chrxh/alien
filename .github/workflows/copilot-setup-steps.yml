@@ -11,6 +11,12 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+
 jobs:
   # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
   copilot-setup-steps:
