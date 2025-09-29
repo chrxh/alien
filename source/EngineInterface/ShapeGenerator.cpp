@@ -202,7 +202,7 @@ public:
 
     ConstructorAngleAlignment getConstructorAngleAlignment() override { return ConstructorAngleAlignment_60; }
 
-    float getPreferredFrontAngle() override { return 210.0f; }
+    float getPreferredFrontAngle() override { return 240.0f; }
 
 private:
     int _pos = 0;
