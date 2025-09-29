@@ -169,10 +169,17 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         for (auto const& cell : desc._cells) {
             maxDistance = std::max(maxDistance, Math::length(cell._pos));
         }
+        auto radius = (maxDistance + 1.0f);
+        radius = std::max(radius, 3.0f) * 1.25f;
+        if (_lastFrontAngleRadius.has_value() && _lastFrontAngleRadius.value() / (radius + 1.0f) < 1.25f
+            && _lastFrontAngleRadius.value() / (radius + 1.0f) > 0.75f) {
+            radius = _lastFrontAngleRadius.value();
+        }
+        _lastFrontAngleRadius = radius;
+
+        radius *= cellSize;
+
         auto center = mapWorldToViewPosition({0, 0}, windowSize, windowPos);
-        
-        auto radius = (maxDistance + 1.0f) * cellSize;
-        radius = std::max(radius, cellSize * 3.0f);
         drawList->AddCircle({center.x, center.y}, radius, ImColor::HSV(0, 0, 0.2f), 64);
 
         auto textSize = scale(12.0f);
@@ -185,6 +192,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
         drawList->AddText(nullptr, textSize, {textPos.x - textSize + 0.5f, textPos.y - textSize / 2 + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
         AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
+
     }
 
     // Draw selected gene

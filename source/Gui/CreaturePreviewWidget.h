@@ -50,6 +50,7 @@ private:
     RealVector2D _worldCenter;
     float _zoom = 20.0f;
     bool _initialScrollPositionSet = false;
+    std::optional<float> _lastFrontAngleRadius;
 
     std::optional<RealVector2D> _worldPosForPanning;
 };
