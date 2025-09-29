@@ -34,8 +34,8 @@ protected:
     GenomeDescription createGenomeForThinCreatureWithLegs(MuscleMode const& muscleMode, Direction direction) const
     {
         auto muscleDesc = muscleMode == MuscleMode_AutoBending
-            ? MuscleGenomeDescription().mode(AutoBendingGenomeDescription().frontBackVelRatio(direction == Direction::Forward ? 0.8f : 0.2f))
-            : MuscleGenomeDescription().mode(ManualBendingGenomeDescription().frontBackVelRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+            ? MuscleGenomeDescription().mode(AutoBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f))
+            : MuscleGenomeDescription().mode(ManualBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
         auto generator = muscleMode == MuscleMode_AutoBending
             ? GeneratorGenomeDescription()
             : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);

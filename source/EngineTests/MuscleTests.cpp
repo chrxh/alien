@@ -412,7 +412,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
+            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
     data.addConnection(1, 2);
