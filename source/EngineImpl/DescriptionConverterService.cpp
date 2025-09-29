@@ -372,7 +372,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
             AngleBendingDescription bending;
             bending._maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-            bending._frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+            bending._attractionRepulsionRatio = cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
             bending._initialAngle = cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle != VALUE_NOT_SET_FLOAT
                 ? std::make_optional(cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle)
                 : std::nullopt;
@@ -561,7 +561,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                 case MuscleMode_AngleBending: {
                     AngleBendingGenomeDescription bendingDesc;
                     bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                    bendingDesc._frontBackVelRatio = nodeTO->cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                    bendingDesc._attractionRepulsionRatio = nodeTO->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                     muscleDesc._mode = bendingDesc;
                 } break;
                 case MuscleMode_AutoCrawling: {
@@ -737,7 +737,7 @@ void DescriptionConverterService::convertCreatureToTO(
                     auto const& angleBendingDesc = std::get<AngleBendingGenomeDescription>(muscleDesc._mode);
                     auto& angleBendingTO = muscleTO.modeData.angleBending;
                     angleBendingTO.maxAngleDeviation = angleBendingDesc._maxAngleDeviation;
-                    angleBendingTO.frontBackVelRatio = angleBendingDesc._frontBackVelRatio;
+                    angleBendingTO.attractionRepulsionRatio = angleBendingDesc._attractionRepulsionRatio;
                 } break;
                 case MuscleMode_AutoCrawling: {
                     auto const& autoCrawlingDesc = std::get<AutoCrawlingGenomeDescription>(muscleDesc._mode);
@@ -906,7 +906,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& bendingDesc = std::get<AngleBendingDescription>(muscleDesc._mode);
             AngleBendingTO& bendingTO = muscleTO.modeData.angleBending;
             bendingTO.maxAngleDeviation = bendingDesc._maxAngleDeviation;
-            bendingTO.frontBackVelRatio = bendingDesc._frontBackVelRatio;
+            bendingTO.attractionRepulsionRatio = bendingDesc._attractionRepulsionRatio;
             bendingTO.initialAngle = bendingDesc._initialAngle.value_or(VALUE_NOT_SET_FLOAT);
         } else if (muscleTO.mode == MuscleMode_AutoCrawling) {
             auto const& crawlingDesc = std::get<AutoCrawlingDescription>(muscleDesc._mode);

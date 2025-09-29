@@ -9,21 +9,17 @@
 class DepotTests : public IntegrationTestFramework
 {
 public:
-    static SimulationParameters getParameters()
-    {
-        SimulationParameters result;
-        result.transmitterEnergyDistributionSameCreature.value = true;
-        result.innerFriction.value = 0;
-        result.friction.baseValue = 0;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result.radiationType1_strength.baseValue[i] = 0;
-        }
-        return result;
-    }
-
     DepotTests()
-        : IntegrationTestFramework(getParameters())
-    {}
+        : IntegrationTestFramework()
+    {
+        _parameters.transmitterEnergyDistributionSameCreature.value = true;
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
 
     ~DepotTests() = default;
 };

@@ -29,7 +29,7 @@ public:
     __inline__ __device__ static float2 unitVectorOfAngle(float angle);
     __inline__ __device__ static void normalize(float2& vec);
     __inline__ __device__ static float2 normalized(float2 vec);
-    __inline__ __device__ static float normalizedAngle(float angle, float base);
+    __inline__ __device__ static float getNormalizedAngle(float angle, float base);
     __inline__ __device__ static float dot(float2 const& p, float2 const& q);
     __inline__ __device__ static float2 crossProdProjected(float3 const& p, float3 const& q);
     __inline__ __device__ static float length(float2 const& v);
@@ -273,7 +273,7 @@ __device__ __inline__ float2 Math::normalized(float2 vec)
     return vec;
 }
 
-__device__ __inline__ float Math::normalizedAngle(float angle, float base)
+__device__ __inline__ float Math::getNormalizedAngle(float angle, float base)
 {
     angle = Math::modulo(angle, 360.0f);
     if (angle < base) {
@@ -287,7 +287,7 @@ __device__ __inline__ float Math::normalizedAngle(float angle, float base)
 
 __device__ __inline__ float Math::dot(float2 const &p, float2 const &q)
 {
-    return p.x*q.x + p.y*q.y;
+    return p.x * q.x + p.y * q.y;
 }
 
 __inline__ __device__ float2 Math::crossProdProjected(float3 const& p, float3 const& q)

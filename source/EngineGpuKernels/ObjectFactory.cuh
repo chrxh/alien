@@ -170,7 +170,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
                     break;
                 case MuscleMode_AngleBending:
                     node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = nodeTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                    node.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio = nodeTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                    node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio = nodeTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                     break;
                 case MuscleMode_AutoCrawling:
                     node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = nodeTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
@@ -330,7 +330,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
             cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
             cell->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-            cell->cellTypeData.muscle.modeData.angleBending.frontBackVelRatio = cellTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+            cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio = cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
             cell->cellTypeData.muscle.modeData.angleBending.initialAngle = cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle;
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
             cell->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
@@ -637,7 +637,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         } break;
         case MuscleMode_AngleBending: {
             muscle.modeData.angleBending.maxAngleDeviation = nodeMuscle.modeData.angleBending.maxAngleDeviation;
-            muscle.modeData.angleBending.frontBackVelRatio = nodeMuscle.modeData.angleBending.frontBackVelRatio;
+            muscle.modeData.angleBending.attractionRepulsionRatio = nodeMuscle.modeData.angleBending.attractionRepulsionRatio;
             muscle.modeData.angleBending.initialAngle = VALUE_NOT_SET_FLOAT;
         } break;
         case MuscleMode_AutoCrawling: {

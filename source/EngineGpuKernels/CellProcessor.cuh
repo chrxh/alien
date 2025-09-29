@@ -446,13 +446,13 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
 
                 auto angle = Math::angleOfVector(displacement);
                 auto prevAngle = Math::angleOfVector(prevDisplacement);
-                auto theta = Math::normalizedAngle(angle - prevAngle, 0.0f);
+                auto theta = Math::getNormalizedAngle(angle - prevAngle, 0.0f);
 
                 if (theta < referenceAngleFromPrevious) {
                     r1 *= -1.0f;
                     r2 *= -1.0f;
                 }
-                auto g = 5e-4f * abs(Math::normalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
+                auto g = 5e-4f * abs(Math::getNormalizedAngle(theta - referenceAngleFromPrevious, -180.0f)) * cellStiffnessSquared;
                 auto strength1 = g / max(Math::lengthSquared(r1), cudaSimulationParameters.minCellDistance.value);
                 auto strength2 = g / max(Math::lengthSquared(r2), cudaSimulationParameters.minCellDistance.value);
                 auto force2 = r1 * strength1;
@@ -708,12 +708,12 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         //    }
                         //    numMod = 2;
                         //}
-                        auto frontAngle_otherCell_cell = Math::normalizedAngle(
+                        auto frontAngle_otherCell_cell = Math::getNormalizedAngle(
                             otherCell->frontAngle + getAngelSpanWithoutMuscleDistortions(otherCell, cell, otherCell->connections[0].cell),
                             -180.0f);
-                        auto frontAngle_cell_otherCell = Math::normalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
+                        auto frontAngle_cell_otherCell = Math::getNormalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
                         auto frontAngle_cell_connection0 =
-                            Math::normalizedAngle(frontAngle_cell_otherCell + getAngelSpanWithoutMuscleDistortions(cell, 0, i), -180.0f);
+                            Math::getNormalizedAngle(frontAngle_cell_otherCell + getAngelSpanWithoutMuscleDistortions(cell, 0, i), -180.0f);
                         cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
 
                         update = true;
@@ -994,7 +994,7 @@ CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIn
             break;
         }
     }
-    return Math::normalizedAngle(result, -180.0f);
+    return Math::getNormalizedAngle(result, -180.0f);
 }
 
 __device__ __inline__ float

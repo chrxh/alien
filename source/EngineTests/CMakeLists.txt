@@ -3,6 +3,7 @@ PUBLIC
     CellConnectionTests.cpp
     CellStateTransitionTests.cpp
     ConstructorTests.cpp
+    CreatureTests.cpp
     DataTransferTests.cpp
     DefenderTests.cpp
     DepotTests.cpp

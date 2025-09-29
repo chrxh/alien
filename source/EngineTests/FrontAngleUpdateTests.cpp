@@ -130,16 +130,16 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(9, creature._cells.size());
 
-    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(4)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getCellRef(4)._frontAngle.value()));
 
-    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(5)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(6)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(7)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(8)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(9)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getCellRef(5)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getCellRef(6)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getCellRef(7)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getCellRef(8)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getCellRef(9)._frontAngle.value()));
 }
 
 TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
@@ -171,9 +171,9 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, creature._cells.size());
 
-    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
 }
 
 TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
@@ -211,8 +211,8 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
         auto creature = actualData.getCreatureRef(1);
         ASSERT_EQ(2, creature._cells.size());
 
-        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
     }
     {
         auto creature = actualData.getCreatureRef(2);
@@ -274,15 +274,15 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     ASSERT_EQ(4, creature._cells.size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
-        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(4)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(4)._frontAngle.value()));
     } else {
-        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(4)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getCellRef(4)._frontAngle.value()));
     }
 }
 
@@ -326,13 +326,13 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     ASSERT_EQ(3, creature._cells.size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
-        EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(3)._frontAngle.value()));
     } else {
-        EXPECT_TRUE(approxCompare(FrontAngle + 90.0f, actualData.getCellRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getCellRef(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getCellRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(3)._frontAngle.value()));
     }
 }
 
@@ -375,7 +375,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, creature._cells.size());
 
-    EXPECT_TRUE(approxCompare(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompare(FrontAngle - 90.0f, actualData.getCellRef(3)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getCellRef(3)._frontAngle.value()));
 }

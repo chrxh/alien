@@ -29,7 +29,7 @@ float Math::angle(RealVector2D const& a, RealVector2D const& b, RealVector2D con
     auto bc = c - b;
     auto angle1 = angleOfVector(ba);
     auto angle2 = angleOfVector(bc);
-    return normalizedAngle(angle2 - angle1, -180.0f);
+    return getNormalizedAngle(angle2 - angle1, -180.0f);
 }
 
 RealVector2D Math::rotateQuarterCounterClockwise(RealVector2D v)
@@ -63,11 +63,18 @@ RealVector2D Math::rotateClockwise(RealVector2D const& v, float angle)
 void Math::normalize(RealVector2D& v)
 {
     float l = length(v);
-    if (l > 0.0001f) {
+    if (l > 1e-5f) {
         v = {v.x / l, v.y / l};
     } else {
         v = {1.0f, 0.0f};
     }
+}
+
+RealVector2D Math::getNormalized(RealVector2D const& v)
+{
+    auto copy = v;
+    normalize(copy);
+    return copy;
 }
 
 float Math::subtractAngle(float angleMinuend, float angleSubtrahend)
@@ -114,7 +121,7 @@ bool Math::isAngleStrictInBetween(float angle1, float angle2, float angleBetween
     return isAngleInBetween(angle1, angle2, angleBetweenCandidate);
 }
 
-float Math::normalizedAngle(float angle, float base)
+float Math::getNormalizedAngle(float angle, float base)
 {
     angle = Math::modulo(angle, 360.0f);
     if (angle < base) {
@@ -126,7 +133,12 @@ float Math::normalizedAngle(float angle, float base)
     return angle;
 }
 
-bool Math::crossing(
+float Math::dot(RealVector2D const& p, RealVector2D const& q)
+{
+    return p.x * q.x + p.y * q.y;
+}
+
+bool Math::isCrossing(
     RealVector2D const& segmentStart,
     RealVector2D const& segmentEnd,
     RealVector2D const& otherSegmentStart,

@@ -24,7 +24,7 @@ namespace std
 class IntegrationTestFramework : public ::testing::Test
 {
 public:
-    IntegrationTestFramework(std::optional<SimulationParameters> const& parameters = std::nullopt, IntVector2D const& universeSize = IntVector2D{1000, 1000});
+    IntegrationTestFramework(IntVector2D const& universeSize = IntVector2D{1000, 1000});
     virtual ~IntegrationTestFramework();
 
 protected:
@@ -34,6 +34,7 @@ protected:
     bool approxCompare(float expected, float actual, float precision = 0.001f) const;
     bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const;
     bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const;
+    bool approxCompareAngles(float expected, float actual, float precision = 0.001f) const;
 
     bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;

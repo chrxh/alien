@@ -125,8 +125,8 @@ namespace
                         case MuscleMode_AngleBending:
                             nodeTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation =
                                 node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio =
-                                node.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                            nodeTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
+                                node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                             break;
                         case MuscleMode_AutoCrawling:
                             nodeTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation =
@@ -280,7 +280,7 @@ namespace
                     cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                 cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                cellTO.cellTypeData.muscle.modeData.angleBending.frontBackVelRatio = cell->cellTypeData.muscle.modeData.angleBending.frontBackVelRatio;
+                cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio = cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                 cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle = cell->cellTypeData.muscle.modeData.angleBending.initialAngle;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
                 cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = cell->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;

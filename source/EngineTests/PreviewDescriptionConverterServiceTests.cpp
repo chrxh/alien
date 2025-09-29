@@ -17,7 +17,7 @@ class PreviewDescriptionConverterServiceTests : public IntegrationTestFramework
 {
 public:
     PreviewDescriptionConverterServiceTests()
-        : IntegrationTestFramework(std::nullopt, {100, 100})
+        : IntegrationTestFramework({100, 100})
     {}
     virtual ~PreviewDescriptionConverterServiceTests() = default;
 
@@ -194,10 +194,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
     auto cell2 = getPreviewCell(result.description, 0, 1);
     ASSERT_TRUE(cell1._signalRestriction.has_value());
     EXPECT_TRUE(
-        std::abs(Math::normalizedAngle(Math::subtractAngle(180.0f + BaseAngle - OpeningAngle / 2, cell1._signalRestriction->_startAngle), -180.0f))
+        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle - OpeningAngle / 2, cell1._signalRestriction->_startAngle), -180.0f))
         < NEAR_ZERO);
     EXPECT_TRUE(
-        std::abs(Math::normalizedAngle(Math::subtractAngle(180.0f + BaseAngle + OpeningAngle / 2, cell1._signalRestriction->_endAngle), -180.0f))
+        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle + OpeningAngle / 2, cell1._signalRestriction->_endAngle), -180.0f))
         < NEAR_ZERO);
     checkConnections(result.description, {{cell1._pos, cell2._pos, true, false}});
 }

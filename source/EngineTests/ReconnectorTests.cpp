@@ -8,19 +8,16 @@
 class ReconnectorTests : public IntegrationTestFramework
 {
 public:
-    static SimulationParameters getParameters()
-    {
-        SimulationParameters result;
-        result.innerFriction.value = 0;
-        result.friction.baseValue = 0;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result.radiationType1_strength.baseValue[i] = 0;
-        }
-        return result;
-    }
     ReconnectorTests()
-        : IntegrationTestFramework(getParameters())
-    {}
+        : IntegrationTestFramework()
+    {
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
 
     ~ReconnectorTests() = default;
 };

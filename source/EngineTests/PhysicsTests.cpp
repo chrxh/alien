@@ -96,7 +96,7 @@ TEST_P(PhysicsTests_TwoAngles, angularForces)
     auto cell2 = actualData.getCellRef(2);
     auto cell3 = actualData.getCellRef(3);
     auto actualAngle = Math::angle(cell1._pos, cell2._pos, cell3._pos);
-    EXPECT_TRUE(abs(Math::normalizedAngle(refAngle - actualAngle, -180.0f)) < 1.0f);
+    EXPECT_TRUE(abs(Math::getNormalizedAngle(refAngle - actualAngle, -180.0f)) < 1.0f);
 }
 
 TEST_F(PhysicsTests, noGhostRotations)

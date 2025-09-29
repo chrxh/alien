@@ -69,7 +69,7 @@ struct ManualBendingGenomeTO
 struct AngleBendingGenomeTO
 {
     float maxAngleDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float attractionRepulsionRatio;  // Between 0 and 1
 };
 
 struct AutoCrawlingGenomeTO

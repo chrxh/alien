@@ -266,8 +266,8 @@ namespace
     drawSection(uint64_t* imageData, int2 const& imageSize, float2 pos, float3 color, float innerRadius, float outerRadius, float angle1, float angle2)
     {
         if (outerRadius > 2.0 - NEAR_ZERO) {
-            angle1 = Math::normalizedAngle(angle1, 0.0f);
-            angle2 = Math::normalizedAngle(angle2, 0.0f);
+            angle1 = Math::getNormalizedAngle(angle1, 0.0f);
+            angle2 = Math::getNormalizedAngle(angle2, 0.0f);
             auto outerRadiusSquared = outerRadius * outerRadius;
             auto innerRadiusSquared = innerRadius * innerRadius;
             for (float x = -outerRadius; x <= outerRadius; x += 1.0f) {
@@ -556,8 +556,8 @@ __global__ void cudaDrawCells(
         if (zoom >= ZoomLevelForSignalFlow) {
             auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
             auto signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
-            signalAngleRestrictionStart = Math::normalizedAngle(signalAngleRestrictionStart, 0.0f);
-            signalAngleRestrictionEnd = Math::normalizedAngle(signalAngleRestrictionEnd, 0.0f);
+            signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+            signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
             auto summedAngle = 0.0f;
             for (int i = 0; i < cell->numConnections; ++i) {

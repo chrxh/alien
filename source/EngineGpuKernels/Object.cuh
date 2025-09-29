@@ -157,7 +157,7 @@ struct AngleBending
 {
     // Fixed data
     float maxAngleDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float attractionRepulsionRatio;  // Between 0 and 1
 
     // Process data
     float initialAngle; // May be invalid
@@ -391,7 +391,7 @@ struct Cell
                 break;
             }
         }
-        return Math::normalizedAngle(result, -180.0f);
+        return Math::getNormalizedAngle(result, -180.0f);
     }
 
     __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)

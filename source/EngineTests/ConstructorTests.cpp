@@ -185,7 +185,7 @@ protected:
                 if (angleBending._maxAngleDeviation != nodeAngleBending._maxAngleDeviation) {
                     return false;
                 }
-                if (angleBending._frontBackVelRatio != nodeAngleBending._frontBackVelRatio) {
+                if (angleBending._attractionRepulsionRatio != nodeAngleBending._attractionRepulsionRatio) {
                     return false;
                 }
             } break;
@@ -2652,7 +2652,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
 
     auto angleSpan_cell2_cell0 = hostCell.getAngleSpan(2, 0);
     auto angleSpan_lastCell_and_cell0 = hostCell.getAngleSpan(newCell._id, 0);
-    EXPECT_TRUE(approxCompare(Math::normalizedAngle(angleSpan_lastCell_and_cell0 + ConstructionAngle, 0.0f), angleSpan_cell2_cell0 / 2));
+    EXPECT_TRUE(approxCompare(Math::getNormalizedAngle(angleSpan_lastCell_and_cell0 + ConstructionAngle, 0.0f), angleSpan_cell2_cell0 / 2));
 }
 
 TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__frontAngle_leftSide)
@@ -2821,7 +2821,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             auto prevCellId = createdCellIds.at(i - 1);
             auto nextCellId = createdCellIds.at(i + 1);
             auto angle = cell.getAngleSpan(prevCellId, nextCellId);
-            angle = Math::normalizedAngle(angle - 180.0f, -180.0f);
+            angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
             EXPECT_EQ(shapeResult.angle, angle);
             int numPrevConnections = 0;
             for (auto const& connection : cell._connections) {
@@ -2847,7 +2847,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
         auto prevCellId = createdCellIds.at(n - 2);
         auto nextCellId = 1;    // = id of hostCell
         auto angle = cell.getAngleSpan(prevCellId, nextCellId);
-        angle = Math::normalizedAngle(angle - 180.0f, -180.0f);
+        angle = Math::getNormalizedAngle(angle - 180.0f, -180.0f);
         EXPECT_EQ(LastAngle, angle);
     }
 }

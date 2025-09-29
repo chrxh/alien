@@ -121,7 +121,7 @@ struct AngleBendingTO
 {
     // Fixed data
     float maxAngleDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float attractionRepulsionRatio;  // Between 0 and 1
 
     // Process data
     float initialAngle; // May be invalid

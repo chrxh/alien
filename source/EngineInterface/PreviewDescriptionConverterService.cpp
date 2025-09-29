@@ -106,8 +106,8 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             auto otherCellId = cell._connections.front()._cellId;
             auto const& otherCell = phenotype.getCellRef(otherCellId, cache);
             auto baseAngle = Math::angleOfVector(otherCell._pos - cell._pos) + 180.0f + node._signalRestriction._baseAngle;
-            auto signalAngleRestrictionStart = Math::normalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
-            auto signalAngleRestrictionEnd = Math::normalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
+            auto signalAngleRestrictionStart = Math::getNormalizedAngle(baseAngle - node._signalRestriction._openingAngle / 2, 0);
+            auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
         }
         if (cell._signal.has_value()) {
@@ -131,8 +131,8 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
         auto const& node = getNode(cell);
         auto signalAngleRestrictionStart = 180.0f + node._signalRestriction._baseAngle - node._signalRestriction._openingAngle / 2;
         auto signalAngleRestrictionEnd = 180.0f + node._signalRestriction._baseAngle + node._signalRestriction._openingAngle / 2;
-        signalAngleRestrictionStart = Math::normalizedAngle(signalAngleRestrictionStart, 0.0f);
-        signalAngleRestrictionEnd = Math::normalizedAngle(signalAngleRestrictionEnd, 0.0f);
+        signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+        signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
         auto summedAngle = 0.0f;
         for (int i = 0; i < cell._connections.size(); ++i) {

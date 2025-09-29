@@ -9,16 +9,12 @@
 
 #include "EngineImpl/SimulationFacadeImpl.h"
 
-IntegrationTestFramework::IntegrationTestFramework(std::optional<SimulationParameters> const& parameters_, IntVector2D const& universeSize)
+IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
 {
     _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
     SimulationParameters parameters;
-    if (parameters_) {
-        parameters = *parameters_;
-    } else {
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            parameters.radiationType1_strength.baseValue[i] = 0;
-        }
+    for (int i = 0; i < MAX_COLORS; ++i) {
+        parameters.radiationType1_strength.baseValue[i] = 0;
     }
     _simulationFacade->newSimulation(0, universeSize, parameters);
     _parameters = _simulationFacade->getSimulationParameters();
@@ -76,6 +72,11 @@ bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected,
         }
     }
     return true;
+}
+
+bool IntegrationTestFramework::approxCompareAngles(float expected, float actual, float precision) const
+{
+    return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
 }
 
 bool IntegrationTestFramework::compare(Description left, Description right) const

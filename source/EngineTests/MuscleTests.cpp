@@ -581,7 +581,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).frontBackVelRatio(0.2f)))
+            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.2f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
     });
     data.addConnection(1, 2);
@@ -931,7 +931,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
         }
     } else if (channel1 == Channel1::Positive) {
         if (channel0 == Channel0::Positive) {
-            EXPECT_TRUE(approxCompare(0.0f, Math::normalizedAngle(angleVel, -180.0f), AnglePrecision));
+            EXPECT_TRUE(approxCompare(0.0f, Math::getNormalizedAngle(angleVel, -180.0f), AnglePrecision));
         } else if (channel0 == Channel0::Negative) {
             EXPECT_TRUE(approxCompare(180.0f, angleVel, AnglePrecision));
         } else {
@@ -941,7 +941,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
         if (channel0 == Channel0::Positive) {
             EXPECT_TRUE(approxCompare(180.0f, angleVel, AnglePrecision));
         } else if (channel0 == Channel0::Negative) {
-            EXPECT_TRUE(approxCompare(0.0f, Math::normalizedAngle(angleVel, -180.0f), AnglePrecision));
+            EXPECT_TRUE(approxCompare(0.0f, Math::getNormalizedAngle(angleVel, -180.0f), AnglePrecision));
         } else {
             EXPECT_TRUE(approxCompare(0.0f, Math::length(actualCell2._vel), 0.01f));
         }

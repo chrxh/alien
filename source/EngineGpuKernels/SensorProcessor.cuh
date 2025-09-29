@@ -294,7 +294,7 @@ SensorProcessor::calcStartDistanceForScanning(uint8_t const& restrictToColor, Se
 
 __inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
 {
-    angle = Math::normalizedAngle(angle, -180.0f);
+    angle = Math::getNormalizedAngle(angle, -180.0f);
     int result = static_cast<int>(angle * 128.0f / 180.0f);
     return static_cast<uint8_t>(result);
 }

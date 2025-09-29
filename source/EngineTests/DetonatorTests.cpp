@@ -10,20 +10,17 @@
 class DetonatorTests : public IntegrationTestFramework
 {
 public:
-    static SimulationParameters getParameters()
-    {
-        SimulationParameters result;
-        result.innerFriction.value = 0;
-        result.friction.baseValue = 0;
-        for (int i = 0; i < MAX_COLORS; ++i) {
-            result.radiationType1_strength.baseValue[i] = 0;
-            result.detonatorChainExplosionProbability.value[i] = 1.0f;
-        }
-        return result;
-    }
     DetonatorTests()
-        : IntegrationTestFramework(getParameters())
-    {}
+        : IntegrationTestFramework()
+    {
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+            _parameters.detonatorChainExplosionProbability.value[i] = 1.0f;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
 
     ~DetonatorTests() = default;
 };

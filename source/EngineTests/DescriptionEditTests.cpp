@@ -15,7 +15,7 @@ class DescriptionEditTests
 {
 public:
     DescriptionEditTests()
-        : IntegrationTestFramework(std::nullopt, {100, 100})
+        : IntegrationTestFramework({100, 100})
     {}
     virtual ~DescriptionEditTests() = default;
 
