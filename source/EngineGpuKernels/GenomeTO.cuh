@@ -57,13 +57,13 @@ struct InjectorGenomeTO
 struct AutoBendingGenomeTO
 {
     float maxAngleDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualBendingGenomeTO
 {
     float maxAngleDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct AngleBendingGenomeTO
@@ -75,13 +75,13 @@ struct AngleBendingGenomeTO
 struct AutoCrawlingGenomeTO
 {
     float maxDistanceDeviation;  // Between 0 and 1
-    float frontBackVelRatio;     // Between 0 and 1
+    float forwardBackwardRatio;     // Between 0 and 1
 };
 
 struct ManualCrawlingGenomeTO
 {
     float maxDistanceDeviation;  // Between 0 and 1
-    float frontBackVelRatio;     // Between 0 and 1
+    float forwardBackwardRatio;     // Between 0 and 1
 };
 
 struct DirectMovementGenomeTO

@@ -118,7 +118,7 @@ struct AutoBendingDescription
 
     // Fixed data
     MEMBER(AutoBendingDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
-    MEMBER(AutoBendingDescription, float, frontBackVelRatio, 0.8f);  // Between 0 and 1
+    MEMBER(AutoBendingDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 
     // Process data
     MEMBER(AutoBendingDescription, std::optional<float>, initialAngle, std::nullopt);
@@ -134,7 +134,7 @@ struct ManualBendingDescription
 
     // Fixed data
     MEMBER(ManualBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
-    MEMBER(ManualBendingDescription, float, frontBackVelRatio, 0.8f);   // Between 0 and 1
+    MEMBER(ManualBendingDescription, float, forwardBackwardRatio, 0.8f);   // Between 0 and 1
 
     // Process data
     MEMBER(ManualBendingDescription, std::optional<float>, initialAngle, std::nullopt);
@@ -160,7 +160,7 @@ struct AutoCrawlingDescription
 
     // Fixed data
     MEMBER(AutoCrawlingDescription, float, maxDistanceDeviation, 0.8f); // Between 0 and 1
-    MEMBER(AutoCrawlingDescription, float, frontBackVelRatio, 0.8f);    // Between 0 and 1
+    MEMBER(AutoCrawlingDescription, float, forwardBackwardRatio, 0.8f);    // Between 0 and 1
 
     // Process data
     MEMBER(AutoCrawlingDescription, std::optional<float>, initialDistance, std::nullopt);
@@ -177,7 +177,7 @@ struct ManualCrawlingDescription
 
     // Fixed data
     MEMBER(ManualCrawlingDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingDescription, float, frontBackVelRatio, 0.8f);   // Between 0 and 1
+    MEMBER(ManualCrawlingDescription, float, forwardBackwardRatio, 0.8f);   // Between 0 and 1
 
     // Process data
     MEMBER(ManualCrawlingDescription, std::optional<float>, initialDistance, std::nullopt);

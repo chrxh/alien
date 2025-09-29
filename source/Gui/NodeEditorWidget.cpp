@@ -278,7 +278,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Front back ratio
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
-                    autoBending._frontBackVelRatio);
+                    autoBending._forwardBackwardRatio);
 
                 AlienGui::EndIndent();
 
@@ -294,7 +294,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Front back ratio
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
-                    manualBending._frontBackVelRatio);
+                    manualBending._forwardBackwardRatio);
 
                 AlienGui::EndIndent();
 
@@ -326,7 +326,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Front back ratio
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
-                    autoCrawling._frontBackVelRatio);
+                    autoCrawling._forwardBackwardRatio);
 
                 AlienGui::EndIndent();
 
@@ -342,7 +342,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 // Front back ratio
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Forward backward ratio").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
-                    manualCrawling._frontBackVelRatio);
+                    manualCrawling._forwardBackwardRatio);
 
                 AlienGui::EndIndent();
 

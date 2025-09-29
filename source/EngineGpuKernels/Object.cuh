@@ -131,7 +131,7 @@ struct AutoBending
 {
     // Fixed data
     float maxAngleDeviation; // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
     float initialAngle; // May be invalid
@@ -145,7 +145,7 @@ struct ManualBending
 {
     // Fixed data
     float maxAngleDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
     float initialAngle; // May be invalid
@@ -167,7 +167,7 @@ struct AutoCrawling
 {
     // Fixed data
     float maxDistanceDeviation;  // Between 0 and 1
-    float frontBackVelRatio;  // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
     float initialDistance;  // May be invalid
@@ -182,7 +182,7 @@ struct ManualCrawling
 {
     // Fixed data
     float maxDistanceDeviation;  // Between 0 and 1
-    float frontBackVelRatio;     // Between 0 and 1
+    float forwardBackwardRatio;     // Between 0 and 1
 
     // Process data
     float initialDistance;  // May be invalid

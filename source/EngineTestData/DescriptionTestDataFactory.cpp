@@ -175,7 +175,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         case MuscleMode_AutoBending: {
             muscleModeDesc = AutoBendingDescription()
                                  .maxAngleDeviation(0.6f)
-                                 .frontBackVelRatio(0.4f)
+                                 .forwardBackwardRatio(0.4f)
                                  .initialAngle(135.0f)
                                  .forward(false)
                                  .activation(0.7f)
@@ -185,7 +185,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         case MuscleMode_ManualBending:
             muscleModeDesc = ManualBendingDescription()
                                  .maxAngleDeviation(0.5f)
-                                 .frontBackVelRatio(0.3f)
+                                 .forwardBackwardRatio(0.3f)
                                  .initialAngle(225.0f)
                                  .lastAngleDelta(0.8f)
                                  .impulseAlreadyApplied(true);
@@ -200,7 +200,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             AutoCrawlingDescription defaultCrawling;
             muscleModeDesc = AutoCrawlingDescription()
                                  .maxDistanceDeviation(0.9f)
-                                 .frontBackVelRatio(0.35f)
+                                 .forwardBackwardRatio(0.35f)
                                  .initialDistance(0.6f)
                                  .lastActualDistance(0.8f)
                                  .forward(false)
@@ -211,7 +211,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         case MuscleMode_ManualCrawling:
             muscleModeDesc = ManualCrawlingDescription()
                                  .maxDistanceDeviation(0.75f)
-                                 .frontBackVelRatio(0.45f)
+                                 .forwardBackwardRatio(0.45f)
                                  .initialDistance(0.4f)
                                  .lastActualDistance(0.9f)
                                  .lastDistanceDelta(0.65f)
@@ -276,19 +276,19 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         MuscleModeGenomeDescription muscleModeDesc;
         switch (muscleMode) {
         case MuscleMode_AutoBending:
-            muscleModeDesc = AutoBendingGenomeDescription().maxAngleDeviation(0.55f).frontBackVelRatio(0.25f);
+            muscleModeDesc = AutoBendingGenomeDescription().maxAngleDeviation(0.55f).forwardBackwardRatio(0.25f);
             break;
         case MuscleMode_ManualBending:
-            muscleModeDesc = ManualBendingGenomeDescription().maxAngleDeviation(0.45f).frontBackVelRatio(0.35f);
+            muscleModeDesc = ManualBendingGenomeDescription().maxAngleDeviation(0.45f).forwardBackwardRatio(0.35f);
             break;
         case MuscleMode_AngleBending:
             muscleModeDesc = AngleBendingGenomeDescription().maxAngleDeviation(0.65f).attractionRepulsionRatio(0.55f);
             break;
         case MuscleMode_AutoCrawling:
-            muscleModeDesc = AutoCrawlingGenomeDescription().maxDistanceDeviation(0.85f).frontBackVelRatio(0.15f);
+            muscleModeDesc = AutoCrawlingGenomeDescription().maxDistanceDeviation(0.85f).forwardBackwardRatio(0.15f);
             break;
         case MuscleMode_ManualCrawling:
-            muscleModeDesc = ManualCrawlingGenomeDescription().maxDistanceDeviation(0.95f).frontBackVelRatio(0.25f);
+            muscleModeDesc = ManualCrawlingGenomeDescription().maxDistanceDeviation(0.95f).forwardBackwardRatio(0.25f);
             break;
         case MuscleMode_DirectMovement:
             muscleModeDesc = DirectMovementGenomeDescription();

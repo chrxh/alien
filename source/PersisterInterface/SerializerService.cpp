@@ -171,19 +171,19 @@ namespace
     auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
 
     auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AutoBending_FrontBackVelRatio = 4;
+    auto constexpr Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio = 4;
 
     auto constexpr Id_MuscleModeGenome_ManualBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_ManualBending_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio = 1;
 
     auto constexpr Id_MuscleModeGenome_AngleBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio = 1;
 
     auto constexpr Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio = 1;
 
     auto constexpr Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation = 0;
-    auto constexpr Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio = 1;
 
     auto constexpr Id_GeneratorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_GeneratorGenome_PulseType = 1;
@@ -299,7 +299,7 @@ namespace cereal
         AutoBendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoBendingGenomeDescription)
@@ -310,7 +310,7 @@ namespace cereal
         ManualBendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ManualBendingGenomeDescription)
@@ -332,7 +332,7 @@ namespace cereal
         AutoCrawlingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AutoCrawlingGenomeDescription)
@@ -343,7 +343,7 @@ namespace cereal
         ManualCrawlingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_MaxDistanceDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleModeGenome_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ManualCrawlingGenomeDescription)
@@ -531,7 +531,7 @@ namespace
     auto constexpr Id_Muscle_LastMovementY = 5;
 
     auto constexpr Id_MuscleMode_AutoBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AutoBending_FrontBackVelRatio = 6;
+    auto constexpr Id_MuscleMode_AutoBending_ForwardBackwardRatio = 6;
     auto constexpr Id_MuscleMode_AutoBending_InitialAngle = 7;
     auto constexpr Id_MuscleMode_AutoBending_Forward = 8;
     auto constexpr Id_MuscleMode_AutoBending_Activation = 9;
@@ -539,7 +539,7 @@ namespace
     auto constexpr Id_MuscleMode_AutoBending_ImpulseAlreadyApplied = 12;
 
     auto constexpr Id_MuscleMode_ManualBending_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_ManualBending_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_ManualBending_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_ManualBending_InitialAngle = 2;
     auto constexpr Id_MuscleMode_ManualBending_ImpulseAlreadyApplied = 4;
     auto constexpr Id_MuscleMode_ManualBending_LastAngleDelta = 5;
@@ -549,7 +549,7 @@ namespace
     auto constexpr Id_MuscleMode_AngleBending_InitialAngle = 2;
 
     auto constexpr Id_MuscleMode_AutoCrawling_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_AutoCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_AutoCrawling_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_AutoCrawling_InitialDistance = 2;
     auto constexpr Id_MuscleMode_AutoCrawling_Forward = 3;
     auto constexpr Id_MuscleMode_AutoCrawling_Activation = 4;
@@ -558,7 +558,7 @@ namespace
     auto constexpr Id_MuscleMode_AutoCrawling_ImpulseAlreadyApplied = 7;
 
     auto constexpr Id_MuscleMode_ManualCrawling_MaxAngleDeviation = 0;
-    auto constexpr Id_MuscleMode_ManualCrawling_FrontBackVelRatio = 1;
+    auto constexpr Id_MuscleMode_ManualCrawling_ForwardBackwardRatio = 1;
     auto constexpr Id_MuscleMode_ManualCrawling_InitialDistance = 2;
     auto constexpr Id_MuscleMode_ManualCrawling_LastActualDistance = 3;
     auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
@@ -726,7 +726,7 @@ namespace cereal
         AutoBendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Forward, data._forward, defaultObject._forward);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoBending_Activation, data._activation, defaultObject._activation);
@@ -742,7 +742,7 @@ namespace cereal
         ManualBendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_LastAngleDelta, data._lastAngleDelta, defaultObject._lastAngleDelta);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualBending_ImpulseAlreadyApplied, data._impulseAlreadyApplied, defaultObject._impulseAlreadyApplied);
@@ -768,7 +768,7 @@ namespace cereal
         AutoCrawlingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_AutoCrawling_Forward, data._forward, defaultObject._forward);
@@ -785,7 +785,7 @@ namespace cereal
         ManualCrawlingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_MaxAngleDeviation, data._maxDistanceDeviation, defaultObject._maxDistanceDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_FrontBackVelRatio, data._frontBackVelRatio, defaultObject._frontBackVelRatio);
+        loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_ForwardBackwardRatio, data._forwardBackwardRatio, defaultObject._forwardBackwardRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_InitialDistance, data._initialDistance, defaultObject._initialDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_LastActualDistance, data._lastActualDistance, defaultObject._lastActualDistance);
         loadSave(task, auxiliaries, Id_MuscleMode_ManualCrawling_LastDistanceDelta, data._lastDistanceDelta, defaultObject._lastDistanceDelta);

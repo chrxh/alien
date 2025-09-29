@@ -134,7 +134,7 @@ namespace std
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxAngleDeviation);
-            hash_combine(seed, desc._frontBackVelRatio);
+            hash_combine(seed, desc._forwardBackwardRatio);
             return seed;
         }
     };
@@ -146,7 +146,7 @@ namespace std
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxAngleDeviation);
-            hash_combine(seed, desc._frontBackVelRatio);
+            hash_combine(seed, desc._forwardBackwardRatio);
             return seed;
         }
     };
@@ -170,7 +170,7 @@ namespace std
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxDistanceDeviation);
-            hash_combine(seed, desc._frontBackVelRatio);
+            hash_combine(seed, desc._forwardBackwardRatio);
             return seed;
         }
     };
@@ -182,7 +182,7 @@ namespace std
         {
             std::size_t seed = 0;
             hash_combine(seed, desc._maxDistanceDeviation);
-            hash_combine(seed, desc._frontBackVelRatio);
+            hash_combine(seed, desc._forwardBackwardRatio);
             return seed;
         }
     };
