@@ -31,7 +31,7 @@ public:
     ~CreatureTests() = default;
 
 protected:
-    GenomeDescription createGenomeForThinCreatureWithLegs(MuscleMode const& muscleMode, Direction direction) const
+    GenomeDescription createGenomeForCreatureWithLegs(MuscleMode const& muscleMode, Direction direction) const
     {
         auto muscleDesc = muscleMode == MuscleMode_AutoBending
             ? MuscleGenomeDescription().mode(AutoBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f))
@@ -51,6 +51,24 @@ protected:
             GeneDescription().numConcatenations(4).numBranches(2).nodes({NodeDescription().cellType(muscleDesc)}),
         });
     }
+
+    GenomeDescription createGenomeForCrawlingCreature(MuscleMode const& muscleMode, Direction direction) const
+    {
+        auto muscleDesc = muscleMode == MuscleMode_AutoBending
+            ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().frontBackVelRatio(direction == Direction::Forward ? 0.8f : 0.2f))
+            : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().frontBackVelRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+        auto generator = muscleMode == MuscleMode_AutoBending
+            ? GeneratorGenomeDescription()
+            : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
+        return GenomeDescription().genes({
+            GeneDescription().separation(false).nodes({
+                NodeDescription().cellType(generator),
+                NodeDescription().cellType(muscleDesc),
+                NodeDescription().cellType(muscleDesc),
+                NodeDescription().cellType(muscleDesc),
+            }),
+        });
+    }
 };
 
 class CreatureTests_BendingMuscles
@@ -63,11 +81,11 @@ INSTANTIATE_TEST_SUITE_P(
     CreatureTests_BendingMuscles,
     ::testing::Values(MuscleMode_AutoBending, MuscleMode_ManualBending));
 
-TEST_P(CreatureTests_BendingMuscles, constructThinCreatureWithLegs)
+TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
 {
     auto muscleMode = GetParam();
 
-    auto genome = createGenomeForThinCreatureWithLegs(muscleMode, Direction::Forward);
+    auto genome = createGenomeForCreatureWithLegs(muscleMode, Direction::Forward);
     auto data = Description().creatures({
         CreatureDescription().genome(genome).cells({CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().geneIndex(0))}),
     });
@@ -154,12 +172,12 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_pair(MuscleMode_AutoBending, Direction::Backward),
         std::make_pair(MuscleMode_ManualBending, Direction::Backward)));
 
-TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveThinCreatureWithLegs)
+TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
 {
     auto [muscleMode, direction] = GetParam();
     RealVector2D refPoint{500.0f, 500.0f};
 
-    auto genome = createGenomeForThinCreatureWithLegs(muscleMode, direction);
+    auto genome = createGenomeForCreatureWithLegs(muscleMode, direction);
     auto data = Description().creatures({
         CreatureDescription().genome(genome).cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().geneIndex(0))}),
     });
@@ -202,6 +220,112 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveThinCreatureWithLegs)
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
         auto movedRefPoint =  refPoint + moveAxis * 50.0f;
+        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, moveAxis));
+    }
+}
+
+class CreatureTests_CrawlingMuscles
+    : public CreatureTests
+    , public testing::WithParamInterface<MuscleMode>
+{};
+
+INSTANTIATE_TEST_SUITE_P(CreatureTests_CrawlingMuscles, CreatureTests_CrawlingMuscles, ::testing::Values(MuscleMode_AutoCrawling, MuscleMode_ManualCrawling));
+
+TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
+{
+    auto muscleMode = GetParam();
+
+    auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward);
+    auto data = Description().creatures({
+        CreatureDescription().genome(genome).cells({CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().geneIndex(0))}),
+    });
+
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 4 * _parameters.normalCellEnergy.value[0] + 10.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(500);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    DescriptionEditService::get().removeCell(actualData, 0);
+    ASSERT_EQ(1, actualData._creatures.size());
+
+    auto creature = actualData._creatures.front();
+    ASSERT_EQ(4, creature._cells.size());
+
+    auto& cells = creature._cells;
+    std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
+
+    // Check front angles
+    EXPECT_TRUE(approxCompareAngles(0.0f, cells.at(0)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(1)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(2)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(3)._frontAngle.value()));
+}
+
+class CreatureTests_Crawlinguscles_TwoDirections
+    : public CreatureTests
+    , public testing::WithParamInterface<std::pair<MuscleMode, Direction>>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    CreatureTests_Crawlinguscles_TwoDirections,
+    CreatureTests_Crawlinguscles_TwoDirections,
+    ::testing::Values(
+        std::make_pair(MuscleMode_AutoCrawling, Direction::Forward),
+        std::make_pair(MuscleMode_ManualCrawling, Direction::Forward),
+        std::make_pair(MuscleMode_AutoCrawling, Direction::Backward),
+        std::make_pair(MuscleMode_ManualCrawling, Direction::Backward)));
+
+TEST_P(CreatureTests_Crawlinguscles_TwoDirections, moveCrawlingCreature)
+{
+    auto [muscleMode, direction] = GetParam();
+    RealVector2D refPoint{500.0f, 500.0f};
+
+    auto genome = createGenomeForCrawlingCreature(muscleMode, direction);
+    auto data = Description().creatures({
+        CreatureDescription().genome(genome).cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().geneIndex(0))}),
+    });
+
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 4 * _parameters.normalCellEnergy.value[0] + 10.0f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(500);
+
+    RealVector2D moveAxis;
+    {
+        auto actualData = _simulationFacade->getSimulationData();
+        DescriptionEditService::get().removeCell(actualData, 0);
+        ASSERT_EQ(1, actualData._creatures.size());
+
+        auto creature = actualData._creatures.front();
+        ASSERT_EQ(4, creature._cells.size());
+
+        auto& cells = creature._cells;
+        std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
+
+        moveAxis = Math::getNormalized(cells.at(3)._pos - cells.at(0)._pos);
+        if (direction == Direction::Backward) {
+            moveAxis = -moveAxis;
+        }
+    }
+
+    _simulationFacade->calcTimesteps(4000);
+    {
+        auto actualData = _simulationFacade->getSimulationData();
+        DescriptionEditService::get().removeCell(actualData, 0);
+        ASSERT_EQ(1, actualData._creatures.size());
+
+        auto creature = actualData._creatures.front();
+        ASSERT_EQ(4, creature._cells.size());
+
+        auto& cells = creature._cells;
+        std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
+
+        auto movedRefPoint = refPoint + moveAxis * 50.0f;
         EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, moveAxis));
     }
 }

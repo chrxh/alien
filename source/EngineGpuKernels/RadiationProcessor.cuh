@@ -225,7 +225,7 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, Cel
         + float2{
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-    float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f - particleVel;
+    float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
     data.cellMap.correctPosition(particlePos);
 
     RadiationProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
@@ -274,7 +274,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                         vel = Math::unitVectorOfAngle(cudaSimulationParameters.sourceRadiationAngle.sourceValues[sourceIndex].value)
                             * data.primaryNumberGen.random(0.5f, 1.0f);
                     } else {
-                        vel = Math::normalized(delta) * data.primaryNumberGen.random(0.5f, 1.0f);
+                        vel = Math::getNormalized(delta) * data.primaryNumberGen.random(0.5f, 1.0f);
                     }
                 }
                 if (cudaSimulationParameters.sourceShapeType.sourceValues[sourceIndex] == SourceShapeType_Rectangular) {
@@ -293,13 +293,13 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
                         float2 corner3{-rect.x / 2, rect.y / 2};
                         float2 corner4{rect.x / 2, rect.y / 2};
                         if (Math::lengthMax(corner1 - delta) <= roundSize) {
-                            vel = Math::normalized(delta - (corner1 + float2{roundSize, roundSize}));
+                            vel = Math::getNormalized(delta - (corner1 + float2{roundSize, roundSize}));
                         } else if (Math::lengthMax(corner2 - delta) <= roundSize) {
-                            vel = Math::normalized(delta - (corner2 + float2{-roundSize, roundSize}));
+                            vel = Math::getNormalized(delta - (corner2 + float2{-roundSize, roundSize}));
                         } else if (Math::lengthMax(corner3 - delta) <= roundSize) {
-                            vel = Math::normalized(delta - (corner3 + float2{roundSize, -roundSize}));
+                            vel = Math::getNormalized(delta - (corner3 + float2{roundSize, -roundSize}));
                         } else if (Math::lengthMax(corner4 - delta) <= roundSize) {
-                            vel = Math::normalized(delta - (corner4 + float2{-roundSize, -roundSize}));
+                            vel = Math::getNormalized(delta - (corner4 + float2{-roundSize, -roundSize}));
                         } else {
                             vel.x = 0;
                             vel.y = 0;

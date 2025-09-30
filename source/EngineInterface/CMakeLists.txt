@@ -18,6 +18,7 @@ add_library(EngineInterface
     GenomeDescription.h
     GenomeDescriptionEditService.cpp
     GenomeDescriptionEditService.h
+    GenomeDescriptionHash.h
     GenomeDescriptionInfoService.cpp
     GenomeDescriptionInfoService.h
     GenomeDescriptionValidationService.cpp

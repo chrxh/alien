@@ -396,7 +396,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     auto desiredDistance = constructionData.gene->connectionDistance;
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
-    posDelta = Math::normalized(posDelta) * (constructionSiteDistance - desiredDistance);
+    posDelta = Math::getNormalized(posDelta) * (constructionSiteDistance - desiredDistance);
 
     if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance.value
         || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance.value) {
@@ -612,7 +612,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 break;
             }
         }
-        auto n = Math::normalized(hostCell->pos - lastConstructionCell->pos);
+        auto n = Math::getNormalized(hostCell->pos - lastConstructionCell->pos);
         Math::rotateQuarterClockwise(n);
 
         // assemble surrounding cell candidates

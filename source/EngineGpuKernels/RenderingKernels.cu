@@ -543,7 +543,7 @@ __global__ void cudaDrawCells(
                 auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                 otherCellPos += topologyCorrection;
 
-                auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius.value * 6 / 5 * 11 / 10;
+                auto distFromCellCenter = Math::getNormalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius.value * 6 / 5 * 11 / 10;
                 auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                 auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
                 if (isLineVisible(startImagePos, endImagePos, universeImageSize)) {
@@ -570,10 +570,10 @@ __global__ void cudaDrawCells(
                     auto otherCellPos = otherCell->pos;
                     auto topologyCorrection = map.getCorrectionIncrement(cellPos, otherCellPos);
                     otherCellPos += topologyCorrection;
-                    auto distFromCellCenter = Math::normalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius.value * 6 / 5 * 11 / 10;
+                    auto distFromCellCenter = Math::getNormalized(otherCellPos - cellPos) * cudaSimulationParameters.cellRadius.value * 6 / 5 * 11 / 10;
                     auto const startImagePos = mapWorldPosToImagePos(rectUpperLeft, cellPos + distFromCellCenter, universeImageSize, zoom);
                     auto const endImagePos = mapWorldPosToImagePos(rectUpperLeft, otherCellPos - distFromCellCenter, universeImageSize, zoom);
-                    auto direction = Math::normalized(endImagePos - startImagePos);
+                    auto direction = Math::getNormalized(endImagePos - startImagePos);
                     {
                         float2 arrowPartStart = {-direction.x + direction.y, -direction.x - direction.y};
                         arrowPartStart = arrowPartStart * zoom / 14 + endImagePos;

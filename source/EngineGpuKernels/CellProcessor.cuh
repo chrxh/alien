@@ -340,7 +340,7 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                         atomicAdd(&otherCell->shared1.x, -force.x);
                         atomicAdd(&otherCell->shared1.y, -force.y);
                     } else {
-                        auto force = Math::normalized(posDelta)
+                        auto force = Math::getNormalized(posDelta)
                             * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
                             * cudaSimulationParameters.repulsionStrength.value * barrierFactor;
                         atomicAdd(&cell->shared1.x, force.x);
@@ -399,7 +399,7 @@ __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 
         cell->vel += cell->shared1;
         if (Math::length(cell->vel) > cudaSimulationParameters.maxVelocity.value) {
-            cell->vel = Math::normalized(cell->vel) * cudaSimulationParameters.maxVelocity.value;
+            cell->vel = Math::getNormalized(cell->vel) * cudaSimulationParameters.maxVelocity.value;
         }
         cell->shared1 = {0, 0};
     }
@@ -431,7 +431,7 @@ __inline__ __device__ void CellProcessor::calcConnectionForces(SimulationData& d
             auto actualDistance = Math::length(displacement);
             auto bondDistance = cell->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::normalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 6;
+            force = force + Math::getNormalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 6;
 
             if (calcAngularForces) {
                 auto lastIndex = (i + numConnections - 1) % numConnections;
@@ -835,7 +835,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 
                     float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
                         + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
-                    float2 particlePos = cell->pos + Math::normalized(particleVel) * 1.5f
+                    float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f
                         - particleVel;  // minus particleVel because particle will still be moved in current time step
                     data.cellMap.correctPosition(particlePos);
                     if (energyLoss > cellEnergy - 1) {
