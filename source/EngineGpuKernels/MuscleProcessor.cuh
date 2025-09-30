@@ -27,6 +27,7 @@ private:
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 
     __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Cell* cell);
+    __inline__ __device__ static void applyAcceleration(Cell* cell, float2 const& acceleration);
 
     struct BendingInfo
     {
@@ -43,6 +44,7 @@ private:
     static auto constexpr AutoTriggerInterval = 9;
     static auto constexpr MinAngle = 30.0f;
     static auto constexpr MinDistance = 0.1f;
+    static auto constexpr ChainLength = 5;
 };
 
 /************************************************************************/
@@ -236,30 +238,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
                     angleDelta *= powf(1.0f - forwardBackwardRatio, 4.0f);
                 }
                 auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
-
-                if (cell->numConnections == 2) {
-                    int chainLength = 0;
-                    Cell* connectedCell = cell;
-                    while (connectedCell->numConnections == 2 && chainLength < 4) {
-                        connectedCell = connectedCell->connections[1].cell;
-                        ++chainLength;
-                    }
-                    float2 accPerCell{
-                        min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
-                        min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
-                    chainLength = 0;
-                    connectedCell = cell;
-                    while (connectedCell->numConnections == 2 && chainLength < 4) {
-                        connectedCell = connectedCell->connections[1].cell;
-
-                        atomicAdd(&connectedCell->vel.x, accPerCell.x);
-                        atomicAdd(&connectedCell->vel.y, accPerCell.y);
-                        ++chainLength;
-                    }
-                } else {
-                    atomicAdd(&bendingInfo.pivotCell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
-                    atomicAdd(&bendingInfo.pivotCell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
-                }
+                applyAcceleration(cell, acceleration);
             }
         }
 
@@ -364,30 +343,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
                     angleDelta *= powf(bending.forwardBackwardRatio, 4.0f);
                 }
                 auto acceleration = direction * angleDelta * cudaSimulationParameters.muscleBendingAcceleration.value[cell->color] / 9.0f;
-
-                if (cell->numConnections == 2) {
-                    int chainLength = 0;
-                    Cell* connectedCell = cell;
-                    while (connectedCell->numConnections == 2 && chainLength < 4) {
-                        connectedCell = connectedCell->connections[1].cell;
-                        ++chainLength;
-                    }
-                    connectedCell = cell;
-                    float2 accPerCell{
-                        min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
-                        min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
-                    chainLength = 0;
-                    while (connectedCell->numConnections == 2 && chainLength < 4) {
-                        connectedCell = connectedCell->connections[1].cell;
-
-                        atomicAdd(&connectedCell->vel.x, accPerCell.x);
-                        atomicAdd(&connectedCell->vel.y, accPerCell.y);
-                        ++chainLength;
-                    }
-                } else {
-                    atomicAdd(&bendingInfo.pivotCell->vel.x, min(AccelerationLimit, max(-AccelerationLimit, acceleration.x)));
-                    atomicAdd(&bendingInfo.pivotCell->vel.y, min(AccelerationLimit, max(-AccelerationLimit, acceleration.y)));
-                }
+                applyAcceleration(cell, acceleration);
             }
         }
 
@@ -697,6 +653,34 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
     } while (anchorCell->numConnections == 2 && chainLength < 4);
     result /= toFloat(chainLength);
     return result;
+}
+
+__inline__ __device__ void MuscleProcessor::applyAcceleration(Cell* cell, float2 const& acceleration)
+{
+    int chainLength = 1;
+    Cell* connectedCell = cell;
+    do  {
+        auto index = connectedCell->numConnections == 2 ? 1 : 0;
+        connectedCell = connectedCell->connections[index].cell;
+        ++chainLength;
+    } while (connectedCell->numConnections == 2 && chainLength < ChainLength);
+
+    float2 accPerCell{
+        min(AccelerationLimit, max(-AccelerationLimit, acceleration.x / chainLength)),
+        min(AccelerationLimit, max(-AccelerationLimit, acceleration.y / chainLength))};
+
+    chainLength = 1;
+    connectedCell = cell;
+    do {
+        atomicAdd(&connectedCell->vel.x, accPerCell.x);
+        atomicAdd(&connectedCell->vel.y, accPerCell.y);
+
+        auto index = connectedCell->numConnections == 2 ? 1 : 0;
+        connectedCell = connectedCell->connections[index].cell;
+        ++chainLength;
+    } while (connectedCell->numConnections == 2 && chainLength < ChainLength);
+    atomicAdd(&connectedCell->vel.x, accPerCell.x);
+    atomicAdd(&connectedCell->vel.y, accPerCell.y);
 }
 
 __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Cell* cell)
