@@ -520,10 +520,9 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
         }
 
         // Apply impulse
-        //auto actualDistanceDelta = actualDistance - crawling.lastActualDistance;
         if (!crawling.impulseAlreadyApplied) {
-            if ((distanceDelta < 0 /*&& actualDistance < crawling.initialDistance*/ && cell->connections[0].distance < crawling.initialDistance)
-                || (distanceDelta > 0 /*&& actualDistance > crawling.initialDistance*/ && cell->connections[0].distance > crawling.initialDistance)) {
+            if ((distanceDelta < 0 && cell->connections[0].distance < crawling.initialDistance)
+                || (distanceDelta > 0 && cell->connections[0].distance > crawling.initialDistance)) {
                 crawling.impulseAlreadyApplied = true;
 
                 distanceDelta = min(1.0f, abs(distanceDelta));

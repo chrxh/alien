@@ -55,8 +55,8 @@ protected:
     GenomeDescription createGenomeForCrawlingCreature(MuscleMode const& muscleMode, Direction direction) const
     {
         auto muscleDesc = muscleMode == MuscleMode_AutoBending
-            ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().frontBackVelRatio(direction == Direction::Forward ? 0.8f : 0.2f))
-            : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().frontBackVelRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+            ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f))
+            : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
         auto generator = muscleMode == MuscleMode_AutoBending
             ? GeneratorGenomeDescription()
             : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
