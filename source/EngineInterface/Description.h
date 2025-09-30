@@ -92,7 +92,7 @@ struct GeneratorDescription
     // Fixed data
     MEMBER(GeneratorDescription, int, autoTriggerInterval, 100);   // Must be >= 3
     MEMBER(GeneratorDescription, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
-    MEMBER(GeneratorDescription, int, alternationInterval, 1);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(GeneratorDescription, int, alternationInterval, 20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 
     // Process data
     MEMBER(GeneratorDescription, int, numPulses, 0);

@@ -367,15 +367,13 @@ struct Cell
             || (otherCell->creature == nullptr && this->creature == nullptr);
     }
 
-    __device__ __inline__ float getRefDistance(Cell* connectedCell)
+    __device__ __inline__ float& getRefDistance(Cell* connectedCell)
     {
-        for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell) {
-                return connections[i].distance;
-            }
-        }
+        auto index = getConnectionIndex(connectedCell);
+        return connections[index].distance;
+
         CUDA_CHECK(false);
-        return 0;
+        return tempValue.as_uint32_float.floatPart; // Return some dummy in order to prevent compile error
     }
 
     __device__ __inline__ int getConnectionIndex(Cell* connectedCell)

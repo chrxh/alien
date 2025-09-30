@@ -62,10 +62,10 @@ protected:
 
     GenomeDescription createGenomeForCrawlingCreature(MuscleMode const& muscleMode, Direction direction) const
     {
-        auto muscleDesc = muscleMode == MuscleMode_AutoBending
+        auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
             ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f))
             : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
-        auto generator = muscleMode == MuscleMode_AutoBending
+        auto generator = muscleMode == MuscleMode_AutoCrawling
             ? GeneratorGenomeDescription()
             : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
         return GenomeDescription().genes({
@@ -200,7 +200,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
 
-    RealVector2D moveAxis;
+    RealVector2D movementDirection;
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescriptionEditService::get().removeCell(actualData, 0);
@@ -212,9 +212,9 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        moveAxis = Math::getNormalized(cells.at(5)._pos - cells.at(0)._pos);
+        movementDirection = Math::getNormalized(cells.at(5)._pos - cells.at(0)._pos);
         if (direction == Direction::Backward) {
-            moveAxis = -moveAxis;
+            movementDirection = -movementDirection;
         }
     }
 
@@ -230,8 +230,8 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        auto movedRefPoint =  refPoint + moveAxis * 50.0f;
-        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, moveAxis));
+        auto movedRefPoint =  refPoint + movementDirection * 40.0f;
+        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
     }
 }
 
@@ -289,6 +289,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_pair(MuscleMode_AutoCrawling, Direction::Backward),
         std::make_pair(MuscleMode_ManualCrawling, Direction::Backward)));
 
+// TODO front angle parameter
 TEST_P(CreatureTests_Crawlinguscles_TwoDirections, moveCrawlingCreature)
 {
     auto [muscleMode, direction] = GetParam();
@@ -306,7 +307,7 @@ TEST_P(CreatureTests_Crawlinguscles_TwoDirections, moveCrawlingCreature)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(500);
 
-    RealVector2D moveAxis;
+    RealVector2D movementDirection;
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescriptionEditService::get().removeCell(actualData, 0);
@@ -318,9 +319,9 @@ TEST_P(CreatureTests_Crawlinguscles_TwoDirections, moveCrawlingCreature)
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        moveAxis = Math::getNormalized(cells.at(3)._pos - cells.at(0)._pos);
+        movementDirection = Math::getNormalized(cells.at(3)._pos - cells.at(0)._pos);
         if (direction == Direction::Backward) {
-            moveAxis = -moveAxis;
+            movementDirection = -movementDirection;
         }
     }
 
@@ -336,7 +337,7 @@ TEST_P(CreatureTests_Crawlinguscles_TwoDirections, moveCrawlingCreature)
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        auto movedRefPoint = refPoint + moveAxis * 50.0f;
-        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, moveAxis));
+        auto movedRefPoint = refPoint + movementDirection * 30.0f;
+        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
     }
 }
