@@ -989,7 +989,7 @@ CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIn
     auto result = 0.0f;
     for (int i = connectionIndex1 + 1; i < connectionIndex1 + cell->numConnections; i++) {
         auto index = i % cell->numConnections;
-        result += MuscleProcessor::getAngleFromPreviousWithoutMuscleDistortions(cell, index);
+        result += MuscleProcessor::getInitialAngleFromPrevious(cell, index);
         if (index == connectionIndex2) {
             break;
         }

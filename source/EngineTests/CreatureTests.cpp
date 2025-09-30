@@ -33,11 +33,19 @@ public:
 protected:
     GenomeDescription createGenomeForCreatureWithLegs(MuscleMode const& muscleMode, Direction direction) const
     {
-        auto muscleDesc = muscleMode == MuscleMode_AutoBending
-            ? MuscleGenomeDescription().mode(AutoBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f))
-            : MuscleGenomeDescription().mode(ManualBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+        auto muscleDesc = [&muscleMode, &direction] {
+            if (muscleMode == MuscleMode_AutoBending) {
+                return MuscleGenomeDescription().mode(AutoBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+            } else if (muscleMode == MuscleMode_ManualBending) {
+                return MuscleGenomeDescription().mode(ManualBendingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+            } else if (muscleMode == MuscleMode_AngleBending) {
+                return MuscleGenomeDescription().mode(AngleBendingGenomeDescription().attractionRepulsionRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+            } else {
+                CHECK(false);
+            }
+        }();
         auto generator = muscleMode == MuscleMode_AutoBending
-            ? GeneratorGenomeDescription()
+            ? GeneratorGenomeDescription().autoTriggerInterval(15)
             : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
         return GenomeDescription().genes({
             GeneDescription().separation(false).nodes({
@@ -79,7 +87,7 @@ class CreatureTests_BendingMuscles
 INSTANTIATE_TEST_SUITE_P(
     CreatureTests_BendingMuscles,
     CreatureTests_BendingMuscles,
-    ::testing::Values(MuscleMode_AutoBending, MuscleMode_ManualBending));
+    ::testing::Values(MuscleMode_AutoBending, MuscleMode_ManualBending, MuscleMode_AngleBending));
 
 TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
 {
@@ -121,28 +129,31 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
     }
 
     // Check front angles
-    EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0)._frontAngle.value()));
-    for (int i = 1; i < 6; ++i) {
-        EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i)._frontAngle.value()));
-    } 
+    if (muscleMode != MuscleMode_AngleBending) {
+        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0)._frontAngle.value()));
+        for (int i = 1; i < 6; ++i) {
+            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i)._frontAngle.value()));
+        }
 
-    EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(0)._frontAngle.value()));
-    for (int i = 1; i < 4; ++i) {
-        EXPECT_TRUE(approxCompareAngles(90.0f, leg1.at(i)._frontAngle.value()));
-    }
+        EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(0)._frontAngle.value()));
+        for (int i = 1; i < 4; ++i) {
+            EXPECT_TRUE(approxCompareAngles(90.0f, leg1.at(i)._frontAngle.value()));
+        }
 
-    EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(0)._frontAngle.value()));
-    for (int i = 1; i < 4; ++i) {
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg2.at(i)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(0)._frontAngle.value()));
+        for (int i = 1; i < 4; ++i) {
+            EXPECT_TRUE(approxCompareAngles(-90.0f, leg2.at(i)._frontAngle.value()));
+        }
     }
 
     // Check angles without muscle distortions
-    auto getInitialAngle = [](CellDescription const& cell) {
-        auto muscle = std::get_if<MuscleDescription>(&cell._cellType);
-        if (muscle->getMode() == MuscleMode_AutoBending) {
+    auto getInitialAngle = [&muscleMode](CellDescription const& cell) {
+        if (muscleMode == MuscleMode_AutoBending) {
             return std::get<AutoBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
-        } else if (muscle->getMode() == MuscleMode_ManualBending) {
+        } else if (muscleMode == MuscleMode_ManualBending) {
             return std::get<ManualBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+        } else if (muscleMode == MuscleMode_AngleBending) {
+            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }

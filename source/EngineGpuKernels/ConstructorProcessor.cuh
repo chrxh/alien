@@ -9,6 +9,7 @@
 #include "CudaShapeGenerator.cuh"
 #include "ConstructorHelper.cuh"
 #include "Genome.cuh"
+#include "MuscleProcessor.cuh"
 
 class ConstructorProcessor
 {
@@ -556,16 +557,11 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
 
-    // Edge case for bending muscle cells: Reset front angle and initial angle
+    // Edge case for bending muscle cells: Reset front angle and restore initial angle
     if (lastCell->cellType == CellType_Muscle && lastCell->cellTypeData.muscle.isBendingMuscle()) {
         lastCell->frontAngle = VALUE_NOT_SET_FLOAT;
-        if (lastCell->cellTypeData.muscle.mode == MuscleMode_AutoBending) {
-            lastCell->cellTypeData.muscle.modeData.autoBending.initialAngle = VALUE_NOT_SET_FLOAT;
-        } else if (lastCell->cellTypeData.muscle.mode == MuscleMode_ManualBending) {
-            lastCell->cellTypeData.muscle.modeData.manualBending.initialAngle = VALUE_NOT_SET_FLOAT;
-        } else if (lastCell->cellTypeData.muscle.mode == MuscleMode_AngleBending) {
-            lastCell->cellTypeData.muscle.modeData.angleBending.initialAngle = VALUE_NOT_SET_FLOAT;
-        }
+        auto connectionIndex = hostCell->getConnectionIndex(newCell);
+        MuscleProcessor::restoreInitialAngleFromPrevious(lastCell, hostCell, connectionIndex);
     }
 
     newCell->releaseLock();

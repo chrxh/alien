@@ -12,8 +12,9 @@ class MuscleProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
-    __inline__ __device__ static float getAngleFromPreviousWithoutMuscleDistortions(Cell* cell, int connectionIndex);  // Considers modifications by connected muscle cells
-
+    __inline__ __device__ static float getInitialAngleFromPrevious(Cell* cell, int connectionIndex);  // Return the angleFromPrevious without muscle distortions
+    __inline__ __device__ static void restoreInitialAngleFromPrevious(Cell* muscleCell, Cell* affectedCell, int connectionIndex);
+    
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
@@ -23,6 +24,7 @@ private:
     __inline__ __device__ static void autoCrawling(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void manualCrawling(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void restoreInitialAngleFromPreviousIntern(float& initialAngle, Cell* muscleCell, Cell* affectedCell, int connectionIndex);
 
     __inline__ __device__ static void radiate(SimulationData& data, Cell* cell);
 
@@ -59,7 +61,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
     }
 }
 
-__device__ __inline__ float MuscleProcessor::getAngleFromPreviousWithoutMuscleDistortions(Cell* cell, int connectionIndex)
+__device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Cell* cell, int connectionIndex)
 {
     CUDA_CHECK(connectionIndex < cell->numConnections);
     for (int i = 0, j = cell->numConnections; i < j; ++i) {
@@ -82,6 +84,18 @@ __device__ __inline__ float MuscleProcessor::getAngleFromPreviousWithoutMuscleDi
         }
     }
     return cell->connections[connectionIndex].angleFromPrevious;
+}
+
+__device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Cell* muscleCell, Cell* affectedCell, int connectionIndex)
+{
+    auto& muscle = muscleCell->cellTypeData.muscle;
+    if (muscle.mode == MuscleMode_AutoBending) {
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.autoBending.initialAngle, muscleCell, affectedCell, connectionIndex);
+    } else if (muscle.mode == MuscleMode_ManualBending) {
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.manualBending.initialAngle, muscleCell, affectedCell, connectionIndex);
+    } else if (muscle.mode == MuscleMode_AngleBending) {
+        restoreInitialAngleFromPreviousIntern(muscle.modeData.angleBending.initialAngle, muscleCell, affectedCell, connectionIndex);
+    }
 }
 
 __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -629,6 +643,22 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
         cell->cellTypeData.muscle.lastMovementY = direction.y;
         statistics.incNumMuscleActivities(cell->color);
         radiate(data, cell);
+    }
+}
+
+__inline__ __device__ void MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Cell* muscleCell, Cell* affectedCell, int connectionIndex)
+{
+    if (initialAngle != VALUE_NOT_SET_FLOAT) {
+        auto& angle = affectedCell->connections[connectionIndex].angleFromPrevious;
+        auto& nextAngle = affectedCell->connections[(connectionIndex + 1) % affectedCell->numConnections].angleFromPrevious;
+        auto diff = initialAngle - angle;
+
+        // Check for enough angle space
+        if (!(diff > 0 && nextAngle <= diff)) {
+            angle = initialAngle;
+            nextAngle -= diff;
+        }
+        initialAngle = VALUE_NOT_SET_FLOAT;
     }
 }
 

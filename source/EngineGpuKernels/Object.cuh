@@ -378,6 +378,17 @@ struct Cell
         return 0;
     }
 
+    __device__ __inline__ int getConnectionIndex(Cell* connectedCell)
+    {
+        for (int i = 0; i < numConnections; i++) {
+            if (connections[i].cell == connectedCell) {
+                return i;
+            }
+        }
+        CUDA_CHECK(false);
+        return 0;
+    }
+
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {
