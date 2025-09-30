@@ -578,11 +578,15 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
             if (ids.values[i] == cell->id) {
                 found = true;
             }
+            for (int j = 0; j < cell->numConnections; ++j) {
+                if (ids.values[i] == cell->connections[j].cell->id) {
+                    found = true;
+                }
+            }
         }
         if (!found) {
             continue;
         }
-
         createCreatureTO(cell, collectionTO);
     }
 }

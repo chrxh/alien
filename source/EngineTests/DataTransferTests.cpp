@@ -265,8 +265,8 @@ TEST_F(DataTransferTests, changeGenome_successful)
 
 TEST_F(DataTransferTests, changeGenome_failed)
 {
-    auto const CreatureId = 1;
-    auto const WrongCreatureId = 2;
+    auto constexpr CreatureId = 1;
+    auto constexpr WrongCreatureId = 2;
     auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
 
     _simulationFacade->setSimulationData(data);
@@ -278,27 +278,29 @@ TEST_F(DataTransferTests, changeGenome_failed)
 
 TEST_F(DataTransferTests, getInspectedSimulationData)
 {
+    auto constexpr CreatureId1 = 1;
+    auto constexpr CreatureId2 = 2;
+    auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
     auto data = Description().creatures(
         {CreatureDescription()
-             .genome(GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})}))
+             .id(CreatureId1)
+             .genome(genome)
              .cells({CellDescription().id(1), CellDescription().id(2)}),
-         CreatureDescription().genome(GenomeDescription()).cells({CellDescription().id(3)})});
-    uint64_t cellId1 = 1;
-    uint64_t cellId2 = 2;
+         CreatureDescription().id(CreatureId2).genome(GenomeDescription()).cells({CellDescription().id(3)})});
 
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
     _simulationFacade->setSimulationData(data);
 
-    auto inspectedData = _simulationFacade->getInspectedSimulationData({cellId1, cellId2});
-    ASSERT_EQ(1, inspectedData._creatures.size());
+    auto inspectedData = _simulationFacade->getInspectedSimulationData({1, 2});
+    ASSERT_EQ(2, inspectedData._creatures.size());
 
-    auto creature = inspectedData._creatures.front();
+    auto creature = inspectedData.getCreatureRef(CreatureId1);
+
     EXPECT_EQ(2, creature._cells.size());
 
-    auto cell1 = inspectedData.getCellRef(cellId1);
-    auto cell2 = inspectedData.getCellRef(cellId2);
+    auto cell1 = inspectedData.getCellRef(1);
+    auto cell2 = inspectedData.getCellRef(2);
 
-    ASSERT_EQ(1, creature._genome._genes.size());
-
-    auto gene = creature._genome._genes.front();
-    EXPECT_EQ(2, gene._nodes.size());
+    EXPECT_EQ(genome, creature._genome);
 }

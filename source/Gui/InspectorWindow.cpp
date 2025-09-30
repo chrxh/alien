@@ -177,11 +177,21 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                 }
                 if (cell.getCellType() == CellType_Muscle) {
                     auto& muscle = std::get<MuscleDescription>(cell._cellType);
-                    auto& bending = std::get<AutoBendingDescription>(muscle._mode);
-                    if (auto initialAngle = bending._initialAngle) {
-                        AlienGui::InputFloat(
-                            AlienGui::InputFloatParameters().name("TEMP: initial angle").format("%.1f").textWidth(BaseTabTextWidth), initialAngle.value());
-                        bending._initialAngle = initialAngle;
+                    if (muscle.getMode() == MuscleMode_AutoBending) {
+                        auto& bending = std::get<AutoBendingDescription>(muscle._mode);
+                        if (auto initialAngle = bending._initialAngle) {
+                            AlienGui::InputFloat(
+                                AlienGui::InputFloatParameters().name("TEMP: initial angle").format("%.1f").textWidth(BaseTabTextWidth), initialAngle.value());
+                            bending._initialAngle = initialAngle;
+                        }
+                    }
+                    if (muscle.getMode() == MuscleMode_ManualBending) {
+                        auto& bending = std::get<ManualBendingDescription>(muscle._mode);
+                        if (auto initialAngle = bending._initialAngle) {
+                            AlienGui::InputFloat(
+                                AlienGui::InputFloatParameters().name("TEMP: initial angle").format("%.1f").textWidth(BaseTabTextWidth), initialAngle.value());
+                            bending._initialAngle = initialAngle;
+                        }
                     }
                 }
                 ImGui::TreePop();
