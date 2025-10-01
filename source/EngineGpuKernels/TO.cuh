@@ -50,6 +50,7 @@ struct ConstructorTO
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     uint16_t constructionActivationTime;
     float constructionAngle;
+    bool provideEnergyAtConstruction;
 
     // Genome data
     uint16_t geneIndex;

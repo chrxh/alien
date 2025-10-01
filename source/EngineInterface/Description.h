@@ -62,6 +62,7 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(ConstructorDescription, int, constructionActivationTime, 100);
     MEMBER(ConstructorDescription, float, constructionAngle, 0.0f);
+    MEMBER(ConstructorDescription, bool, provideEnergyAtConstruction, true);
 
     // Genome data
     MEMBER(ConstructorDescription, int, geneIndex, 0);
