@@ -256,9 +256,16 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     if (result.node->cellType == CellTypeGenome_Constructor) {
         auto const& constructorNode = result.node->cellTypeData.constructor;
         if (constructor.provideEnergy && constructorNode.geneIndex < result.creature->genome.numGenes) {
-            auto const& referencedGene = result.creature->genome.genes[constructorNode.geneIndex];
-            auto numCells = referencedGene.numNodes * referencedGene.numBranches * referencedGene.numConcatenations;
-            result.energy *= (1.0f + toFloat(numCells));
+            auto& referencedGene = result.creature->genome.genes[constructorNode.geneIndex];
+            if (!referencedGene.separation) {
+                int numCells;
+                if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
+                    numCells = referencedGene.numNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+                } else {
+                    numCells = referencedGene.numNodes;
+                }
+                result.energy *= (1.0f + toFloat(numCells));
+            }
         }
     }
     result.numAdditionalConnections = result.node->numAdditionalConnections;

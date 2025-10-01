@@ -38,22 +38,6 @@ struct Particle
     }
 };
 
-struct GenomeHeader
-{
-    ConstructorShape shape;
-    int numBranches;
-    bool separateConstruction;
-    ConstructorAngleAlignment angleAlignment;
-    float stiffness;
-    float connectionDistance;
-    int numRepetitions;
-    float concatenationAngle1;
-    float concatenationAngle2;
-    float frontAngle;
-
-    __inline__ __device__ bool hasInfiniteRepetitions() const { return numRepetitions == 0x7fffffff; }
-};
-
 struct CellConnection
 {
     Cell* cell;

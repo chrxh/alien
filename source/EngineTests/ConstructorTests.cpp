@@ -3080,3 +3080,50 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_insufficientEnergy)
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, creature._cells.size());
 }
+
+TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_infiniteConcatenations)
+{
+    auto provideEnergy = GetParam();
+
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
+            NodeDescription(),
+        }),
+        GeneDescription().separation(false).numBranches(2).numConcatenations(std::numeric_limits<int>::max()).nodes({NodeDescription(), NodeDescription()}),
+    });
+
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto constructorEnergy = provideEnergy ? normalCellEnergy * (2 + 2) + 1.0f : normalCellEnergy * 2 + 1.0f;
+    auto data = Description().creatures({
+        CreatureDescription().id(0).genome(genome).cells({
+            CellDescription()
+                .id(0)
+                .pos({10.0f, 10.0f})
+                .energy(constructorEnergy)
+                .cellType(
+                    ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
+            CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
+        }),
+    });
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(3, creature._cells.size());
+
+    auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
+
+    if (provideEnergy) {
+        EXPECT_TRUE(approxCompare(normalCellEnergy * 3, actualConstructedCell._energy));
+    } else {
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+    }
+}

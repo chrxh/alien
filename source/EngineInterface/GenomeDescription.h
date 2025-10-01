@@ -213,7 +213,7 @@ struct GeneDescription
     MEMBER(GeneDescription, ConstructorShape, shape, ConstructorShape_Custom);
     MEMBER(GeneDescription, bool, separation, false);
     MEMBER(GeneDescription, int, numBranches, 1);   // For separation = false
-    MEMBER(GeneDescription, int, numConcatenations, 1);
+    MEMBER(GeneDescription, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);
     MEMBER(GeneDescription, float, connectionDistance, 1.0f);
