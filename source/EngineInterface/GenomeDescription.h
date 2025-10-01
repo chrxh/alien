@@ -46,6 +46,7 @@ struct ConstructorGenomeDescription
     MEMBER(ConstructorGenomeDescription, int, geneIndex, 0);
     MEMBER(ConstructorGenomeDescription, int, constructionActivationTime, 100);
     MEMBER(ConstructorGenomeDescription, float, constructionAngle, 0.0f);
+    MEMBER(ConstructorGenomeDescription, bool, provideEnergyAtConstruction, true);
 };
 
 struct SensorGenomeDescription
