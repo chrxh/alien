@@ -148,14 +148,14 @@ void SimulationView::draw()
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _shader->setInt("phase", 10);
+        _shader->setInt("phase", 0);
         glBindVertexArray(_vao);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _shader->setInt("phase", 11);
+        _shader->setInt("phase", 1);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
         glActiveTexture(GL_TEXTURE1);
@@ -165,7 +165,7 @@ void SimulationView::draw()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _shader->setInt("phase", 12);
+        _shader->setInt("phase", 2);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

@@ -145,7 +145,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             .autoTriggerInterval(50)
             .constructionActivationTime(75)
             .constructionAngle(42.0f)
-            .provideEnergyAtConstruction(false)
+            .provideEnergy(false)
             .geneIndex(2)
             .lastConstructedCellId(123)
             .currentNodeIndex(1)
@@ -249,11 +249,10 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Depot:
         return DepotGenomeDescription();
     case CellTypeGenome_Constructor: {
-        ConstructorGenomeDescription defaultConstructor;
         return ConstructorGenomeDescription()
             .autoTriggerInterval(45)
             .constructionActivationTime(85)
-            .provideEnergyAtConstruction(false);
+            .provideEnergy(false);
     }
     case CellTypeGenome_Sensor:
         return SensorGenomeDescription()
@@ -264,7 +263,6 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             .minDensity(0.25f)
             .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellTypeGenome_Generator: {
-        GeneratorGenomeDescription defaultGenerator;
         return GeneratorGenomeDescription()
             .autoTriggerInterval(55)
             .pulseType(GeneratorPulseType_Alternation)
@@ -307,7 +305,6 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             .restrictToColor(4)
             .restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellTypeGenome_Detonator: {
-        DetonatorGenomeDescription defaultDetonator;
         return DetonatorGenomeDescription().countdown(45);
     }
     default:

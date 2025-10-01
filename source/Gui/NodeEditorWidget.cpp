@@ -190,6 +190,10 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Construction angle").textWidth(rightColumnWidth).format("%.1f"), constructor._constructionAngle);
 
+            // Provide energy at construction
+            AlienGui::Checkbox(
+                AlienGui::CheckboxParameters().name("Provide energy").textWidth(rightColumnWidth), constructor._provideEnergy);
+
             AlienGui::EndIndent();
 
         } else if (nodeType == CellTypeGenome_Sensor) {

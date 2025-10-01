@@ -306,7 +306,7 @@ CellDescription DescriptionConverterService::createCellDescription(
             cellTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructor._constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
-        constructor._provideEnergyAtConstruction = cellTO.cellTypeData.constructor.provideEnergyAtConstruction;
+        constructor._provideEnergy = cellTO.cellTypeData.constructor.provideEnergy;
         constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
         constructor._lastConstructedCellId = 
             cellTO.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64 ? 
@@ -514,7 +514,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
                 constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
                 constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
-                constructorDesc._provideEnergyAtConstruction = nodeTO->cellTypeData.constructor.provideEnergyAtConstruction;
+                constructorDesc._provideEnergy = nodeTO->cellTypeData.constructor.provideEnergy;
                 nodeDesc._cellType = constructorDesc;
             } break;
             case CellTypeGenome_Sensor: {
@@ -693,7 +693,7 @@ void DescriptionConverterService::convertCreatureToTO(
                 constructorTO.geneIndex = constructorDesc._geneIndex;
                 constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
                 constructorTO.constructionAngle = constructorDesc._constructionAngle;
-                constructorTO.provideEnergyAtConstruction = constructorDesc._provideEnergyAtConstruction;
+                constructorTO.provideEnergy = constructorDesc._provideEnergy;
             } break;
             case CellTypeGenome_Sensor: {
                 auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellType);
@@ -849,7 +849,7 @@ void DescriptionConverterService::convertCellToTO(
         constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         constructorTO.constructionAngle = constructorDesc._constructionAngle;
-        constructorTO.provideEnergyAtConstruction = constructorDesc._provideEnergyAtConstruction;
+        constructorTO.provideEnergy = constructorDesc._provideEnergy;
         constructorTO.geneIndex = static_cast<uint16_t>(constructorDesc._geneIndex);
         constructorTO.lastConstructedCellId = constructorDesc._lastConstructedCellId.value_or(VALUE_NOT_SET_UINT64);
         constructorTO.currentNodeIndex = static_cast<uint16_t>(constructorDesc._currentNodeIndex);

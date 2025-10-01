@@ -95,14 +95,11 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
 {
     auto muscleMode = GetParam();
 
+    auto neededEnergy = (1 + 4 + 4 + 6) * _parameters.normalCellEnergy.value[0] + 1.0f;
     auto genome = createGenomeForCreatureWithLegs(muscleMode, Direction::Forward);
     auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells({CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().geneIndex(0))}),
+        CreatureDescription().genome(genome).cells({CellDescription().id(0).energy(neededEnergy).pos({200.0f, 200.0f}).cellType(ConstructorDescription().geneIndex(0))}),
     });
-
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = (4 + 4 + 6) * _parameters.normalCellEnergy.value[0] + 10.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);

@@ -138,6 +138,7 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
                 node.cellTypeData.constructor.geneIndex = nodeTO.cellTypeData.constructor.geneIndex;
                 node.cellTypeData.constructor.constructionActivationTime = nodeTO.cellTypeData.constructor.constructionActivationTime;
                 node.cellTypeData.constructor.constructionAngle = nodeTO.cellTypeData.constructor.constructionAngle;
+                node.cellTypeData.constructor.provideEnergy = nodeTO.cellTypeData.constructor.provideEnergy;
                 break;
             case CellTypeGenome_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
@@ -284,6 +285,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& collectionT
         cell->cellTypeData.constructor.autoTriggerInterval = cellTO.cellTypeData.constructor.autoTriggerInterval;
         cell->cellTypeData.constructor.constructionActivationTime = cellTO.cellTypeData.constructor.constructionActivationTime;
         cell->cellTypeData.constructor.constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
+        cell->cellTypeData.constructor.provideEnergy = cellTO.cellTypeData.constructor.provideEnergy;
         cell->cellTypeData.constructor.geneIndex = cellTO.cellTypeData.constructor.geneIndex;
         cell->cellTypeData.constructor.lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId;
         cell->cellTypeData.constructor.currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
@@ -573,6 +575,7 @@ ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int g
         constructor.autoTriggerInterval = nodeConstructor.autoTriggerInterval;
         constructor.constructionActivationTime = nodeConstructor.constructionActivationTime;
         constructor.constructionAngle = nodeConstructor.constructionAngle;
+        constructor.provideEnergy = nodeConstructor.provideEnergy;
         constructor.geneIndex = nodeConstructor.geneIndex;
         constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
         constructor.currentNodeIndex = 0;

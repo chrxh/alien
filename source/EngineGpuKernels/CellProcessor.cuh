@@ -56,8 +56,8 @@ private:
     static auto constexpr MaxBarrierCellsForCollision = 10;
     static auto constexpr FrontAngleId_NoUpdate = VALUE_NOT_SET_FLOAT;
 
-    __inline__ __device__ static float getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIndex1, int connectionIndex2);
-    __inline__ __device__ static float getAngelSpanWithoutMuscleDistortions(Cell* cell, Cell* connectedCell1, Cell* connectedCell2);
+    __inline__ __device__ static float getInitialAngelSpan(Cell* cell, int connectionIndex1, int connectionIndex2);
+    __inline__ __device__ static float getInitialAngelSpan(Cell* cell, Cell* connectedCell1, Cell* connectedCell2);
 };
 
 /************************************************************************/
@@ -698,22 +698,12 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-                        //if (cell->id == 3) {
-                        //    for (int i = 0; i < numMod; ++i) {
-                        //        printf(
-                        //            "MOD: cell: %llu, otherCell: %llu, angle: %f\n",
-                        //            modInfos[i].cell->id,
-                        //            modInfos[i].connection->cell->id,
-                        //            modInfos[i].initialAngle);
-                        //    }
-                        //    numMod = 2;
-                        //}
                         auto frontAngle_otherCell_cell = Math::getNormalizedAngle(
-                            otherCell->frontAngle + getAngelSpanWithoutMuscleDistortions(otherCell, cell, otherCell->connections[0].cell),
+                            otherCell->frontAngle + getInitialAngelSpan(otherCell, cell, otherCell->connections[0].cell),
                             -180.0f);
                         auto frontAngle_cell_otherCell = Math::getNormalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
                         auto frontAngle_cell_connection0 =
-                            Math::getNormalizedAngle(frontAngle_cell_otherCell + getAngelSpanWithoutMuscleDistortions(cell, 0, i), -180.0f);
+                            Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(cell, 0, i), -180.0f);
                         cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
 
                         update = true;
@@ -952,6 +942,9 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         if (cell->numConnections == 0) {
             continue;
         }
+        if (cell->cellState == CellState_Constructing || cell->cellState == CellState_Activating) {
+            continue;
+        }
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
@@ -988,7 +981,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 }
 
 __device__ __inline__ float
-CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIndex1, int connectionIndex2)
+CellProcessor::getInitialAngelSpan(Cell* cell, int connectionIndex1, int connectionIndex2)
 {
     if ((connectionIndex1 - connectionIndex2 + cell->numConnections) % cell->numConnections == 0) {
         return 0;
@@ -1005,7 +998,7 @@ CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, int connectionIn
 }
 
 __device__ __inline__ float
-CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, Cell* connectedCell1, Cell* connectedCell2)
+CellProcessor::getInitialAngelSpan(Cell* cell, Cell* connectedCell1, Cell* connectedCell2)
 {
     auto connectionIndex1 = -1;
     auto connectionIndex2 = -1;
@@ -1020,5 +1013,5 @@ CellProcessor::getAngelSpanWithoutMuscleDistortions(Cell* cell, Cell* connectedC
     if (connectionIndex1 == -1 || connectionIndex2 == -1) {
         return 0;
     }
-    return getAngelSpanWithoutMuscleDistortions(cell, connectionIndex1, connectionIndex2);
+    return getInitialAngelSpan(cell, connectionIndex1, connectionIndex2);
 }

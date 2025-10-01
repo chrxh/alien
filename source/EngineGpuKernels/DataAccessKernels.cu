@@ -235,6 +235,7 @@ namespace
             cellTO.cellTypeData.constructor.autoTriggerInterval = cell->cellTypeData.constructor.autoTriggerInterval;
             cellTO.cellTypeData.constructor.constructionActivationTime = cell->cellTypeData.constructor.constructionActivationTime;
             cellTO.cellTypeData.constructor.constructionAngle = cell->cellTypeData.constructor.constructionAngle;
+            cellTO.cellTypeData.constructor.provideEnergy = cell->cellTypeData.constructor.provideEnergy;
             cellTO.cellTypeData.constructor.geneIndex = cell->cellTypeData.constructor.geneIndex;
             cellTO.cellTypeData.constructor.lastConstructedCellId = cell->cellTypeData.constructor.lastConstructedCellId;
             cellTO.cellTypeData.constructor.currentNodeIndex = cell->cellTypeData.constructor.currentNodeIndex;

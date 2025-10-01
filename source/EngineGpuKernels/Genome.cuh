@@ -36,6 +36,7 @@ struct ConstructorGenome
     uint16_t geneIndex;
     uint16_t constructionActivationTime;
     float constructionAngle;
+    bool provideEnergy;
 };
 
 struct GeneratorGenome

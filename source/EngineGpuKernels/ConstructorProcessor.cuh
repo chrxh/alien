@@ -253,6 +253,14 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
     result.angle = result.node->referenceAngle;
     result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+    if (result.node->cellType == CellTypeGenome_Constructor) {
+        auto const& constructorNode = result.node->cellTypeData.constructor;
+        if (constructor.provideEnergy && constructorNode.geneIndex < result.creature->genome.numGenes) {
+            auto const& referencedGene = result.creature->genome.genes[constructorNode.geneIndex];
+            auto numCells = referencedGene.numNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+            result.energy *= (1.0f + toFloat(numCells));
+        }
+    }
     result.numAdditionalConnections = result.node->numAdditionalConnections;
 
     CudaShapeGenerator shapeGenerator;
