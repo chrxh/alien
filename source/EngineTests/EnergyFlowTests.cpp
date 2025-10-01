@@ -186,3 +186,70 @@ TEST_F(EnergyFlowTests, energyFlowsBranches)
         }
     }
 }
+
+TEST_F(EnergyFlowTests, energyFlowsNotToConstructorUnderConstruction)
+{
+    auto genome = GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription()})});
+
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = Description().creatures({
+        CreatureDescription().genome(genome).cells({CellDescription()
+                                                        .id(1)
+                                                        .pos({100.0f, 100.0f})
+                                                        .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                                        .energy(normalCellEnergy * 10)}),
+        CreatureDescription().genome(genome).cells({CellDescription()
+                                                        .id(2)
+                                                        .cellState(CellState_Constructing)
+                                                        .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
+                                                        .cellType(ConstructorDescription().currentNodeIndex(1))
+                                                        .energy(normalCellEnergy)}),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(100);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualEnergy = getEnergy(actualData);
+    EXPECT_TRUE(approxCompare(getEnergy(data), actualEnergy));
+
+    EXPECT_EQ(2, actualData.getNumCells());
+    auto cell1 = actualData.getCellRef(1);
+    auto cell2 = actualData.getCellRef(2);
+    EXPECT_TRUE(abs(cell1._energy - normalCellEnergy * 10) < 1.0f);
+    EXPECT_TRUE(abs(cell2._energy - normalCellEnergy) < 1.0f);
+}
+
+TEST_F(EnergyFlowTests, energyFlowsEquallyToActiveConstructors)
+{
+    auto genome = GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription()})});
+
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto data = Description().creatures({
+        CreatureDescription().genome(genome).cells({CellDescription()
+                                                        .id(1)
+                                                        .pos({100.0f, 100.0f})
+                                                        .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                                        .energy(normalCellEnergy * 10)}),
+        CreatureDescription().genome(genome).cells({CellDescription()
+                                                        .id(2)
+                                                        .pos({101.0f, 100.0f})
+                                                        .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                                        .energy(normalCellEnergy)}),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(100);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualEnergy = getEnergy(actualData);
+    EXPECT_TRUE(approxCompare(getEnergy(data), actualEnergy));
+
+    EXPECT_EQ(2, actualData.getNumCells());
+    auto cell1 = actualData.getCellRef(1);
+    auto cell2 = actualData.getCellRef(2);
+    EXPECT_TRUE(abs(cell1._energy - actualEnergy / 2) < 1.0f);
+    EXPECT_TRUE(abs(cell2._energy - actualEnergy / 2) < 1.0f);
+}

@@ -370,6 +370,8 @@ struct Description
     void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const;
     void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc);  
 
+    size_t getNumCells() const;
+
     void clear();
     bool isEmpty() const;
 

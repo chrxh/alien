@@ -225,6 +225,15 @@ void Description::forEachCell(std::function<void(std::optional<uint64_t> const&,
     }
 }
 
+size_t Description::getNumCells() const
+{
+    size_t result = _cells.size();
+    for (auto const& creature : _creatures) {
+        result += creature._cells.size();
+    }
+    return result;
+}
+
 void Description::clear()
 {
     _cells.clear();

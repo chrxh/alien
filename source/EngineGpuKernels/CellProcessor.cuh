@@ -956,19 +956,26 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-        auto canConnectedCellHaveEnergy = connectedCell->cellType == CellType_Constructor && connectedCell->creature
-            && !ConstructorHelper::isFinished(connectedCell->cellTypeData.constructor, connectedCell->creature->genome)
-            && cell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color];
-        auto canCellProvideEnergy =
-            (cell->cellType != CellType_Constructor
-                                     || (cell->creature && ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome)))
-            && cell->energy > connectedCell->energy;
-        float flow = 0;
-        if (canConnectedCellHaveEnergy) {
-            flow = cell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
-        } else if (canCellProvideEnergy) {
-            flow = (cell->energy - connectedCell->energy) / 2;
+        auto needsEnergy = [](Cell* cell) {
+            return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
+                && cell->cellType == CellType_Constructor && cell->creature
+                && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome);
+        };
+        auto cellNeedsEnergy = needsEnergy(cell);
+        auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
+
+        auto flow = 0.0f;
+        if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
+            if (cell->energy > connectedCell->energy) {
+                flow = (cell->energy - connectedCell->energy) / 2;
+            }
         }
+        if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
+            if (cell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color]) {
+                flow = cell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
+            }
+        }
+
         if (flow > 0) {
             auto orig = atomicAdd(&cell->energy, -flow);
             if (orig < cellMinEnergy) {
