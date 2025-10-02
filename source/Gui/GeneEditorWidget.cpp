@@ -81,7 +81,9 @@ void _GeneEditorWidget::processHeaderData()
         if (AlienGui::Combo(
                 AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape)) {
             if (auto shapeGenerator = ShapeGeneratorFactory::create(gene._shape)) {
-                _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
+                if (_editData->selectedGeneIndex.value() == 0) {
+                    _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
+                }
             }
         }
 

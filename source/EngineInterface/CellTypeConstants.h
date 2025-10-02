@@ -212,6 +212,14 @@ enum ConstructorShape_
     ConstructorShape_Count
 };
 
+using ProvideEnergy = uint8_t;
+enum ProvideEnergy_
+{
+    ProvideEnergy_CellOnly,
+    ProvideEnergy_CellAndGene,
+    ProvideEnergy_FreeGeneration
+};
+
 namespace Const
 {
     std::vector<std::string> const ConstructorShapeStrings =

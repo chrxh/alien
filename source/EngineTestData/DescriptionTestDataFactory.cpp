@@ -145,7 +145,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             .autoTriggerInterval(50)
             .constructionActivationTime(75)
             .constructionAngle(42.0f)
-            .provideEnergy(false)
+            .provideEnergy(ProvideEnergy_FreeGeneration)
             .geneIndex(2)
             .lastConstructedCellId(123)
             .currentNodeIndex(1)
@@ -252,7 +252,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         return ConstructorGenomeDescription()
             .autoTriggerInterval(45)
             .constructionActivationTime(85)
-            .provideEnergy(false);
+            .provideEnergy(ProvideEnergy_FreeGeneration);
     }
     case CellTypeGenome_Sensor:
         return SensorGenomeDescription()

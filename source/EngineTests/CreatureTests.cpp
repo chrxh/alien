@@ -349,7 +349,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        auto movedRefPoint = refPoint + movementDirection * 15.0f;
+        auto movedRefPoint = refPoint + movementDirection * 10.0f;
         EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
     }
 }

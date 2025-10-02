@@ -182,6 +182,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 if (!constructionData.isSeparation) {
                     ++constructor.currentBranch;
                 } else {
+                    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
+                        constructor.provideEnergy = ProvideEnergy_CellOnly;
+                    }
                     constructor.offspring = nullptr;
 
                     // HACK for preview mode: Do not construct more than one offspring + move seed away
@@ -255,7 +258,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
     if (result.node->cellType == CellTypeGenome_Constructor) {
         auto const& constructorNode = result.node->cellTypeData.constructor;
-        if (constructor.provideEnergy && constructorNode.geneIndex < result.creature->genome.numGenes) {
+        if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome.numGenes) {
             auto& referencedGene = result.creature->genome.genes[constructorNode.geneIndex];
             if (!referencedGene.separation) {
                 int numCells;
@@ -738,6 +741,9 @@ ConstructorProcessor::constructCellIntern(
     result->frontAngleId = hostCell->frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
+    if (constructor.provideEnergy == ProvideEnergy_FreeGeneration && result->cellType == CellType_Constructor) {
+        result->cellTypeData.constructor.provideEnergy = ProvideEnergy_FreeGeneration;
+    }
 
     statistics.incNumCreatedCells(hostCell->color);
 
@@ -767,6 +773,9 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 {
     // HACK for preview mode: Construction does not consume energy
     if (constructionData.isPreview) {
+        return true;
+    }
+    if (hostCell->cellTypeData.constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
         return true;
     }
 

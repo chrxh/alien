@@ -257,20 +257,18 @@ void GenomeEditorWindow::onCreateSeed()
 
     auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
-    auto energy = parameter.normalCellEnergy.value[EditorModel::get().getDefaultColorCode()] * toFloat(numNodes * 2 + 1);
-    auto data = Description().creatures({
+    auto seed = Description().creatures({
         CreatureDescription()
             .cells({
                 CellDescription()
                     .pos(pos)
-                    .energy(energy)
                     .stiffness(1.0f)
                     .color(EditorModel::get().getDefaultColorCode())
-                    .cellType(ConstructorDescription().geneIndex(0)),
+                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)),
             })
             .genome(genome),
     });
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    _simulationFacade->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();
 
     printOverlayMessage("Seed created");
