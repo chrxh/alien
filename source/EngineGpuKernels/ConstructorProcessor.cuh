@@ -375,6 +375,15 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
         return nullptr;
     }
 
+    // For bending muscle cells: Reset front angle and restore initial angle
+    for (int i = 0; i < hostCell->numConnections; ++i) {
+        auto const& connectedCell = hostCell->connections[i].cell;
+        if (connectedCell->cellType == CellType_Muscle && connectedCell->cellTypeData.muscle.isBendingMuscle()) {
+            connectedCell->frontAngle = VALUE_NOT_SET_FLOAT;
+            MuscleProcessor::restoreInitialAngleFromPrevious(connectedCell, hostCell, i);
+        }
+    }
+
     uint64_t cellPointerIndex;
     Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
 
@@ -738,8 +747,17 @@ ConstructorProcessor::constructCellIntern(
     result->frontAngleId = hostCell->frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
+
+    // Inherit free energy provision from parent in case that offspring constructs a non-separating gene
     if (constructor.provideEnergy == ProvideEnergy_FreeGeneration && result->cellType == CellType_Constructor) {
-        result->cellTypeData.constructor.provideEnergy = ProvideEnergy_FreeGeneration;
+        auto const& offspringConstructor = result->cellTypeData.constructor;
+        auto const& offspringGenome = constructionData.creature->genome;
+        if (offspringConstructor.geneIndex < offspringGenome.numGenes) {
+            auto const& offspringGene = offspringGenome.genes[offspringConstructor.geneIndex];
+            if (!offspringGene.separation) {
+                result->cellTypeData.constructor.provideEnergy = ProvideEnergy_FreeGeneration;
+            }
+        }
     }
 
     statistics.incNumCreatedCells(hostCell->color);

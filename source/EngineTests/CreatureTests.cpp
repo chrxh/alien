@@ -48,7 +48,7 @@ protected:
             ? GeneratorGenomeDescription().autoTriggerInterval(15)
             : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
         return GenomeDescription().genes({
-            GeneDescription().separation(false).nodes({
+            GeneDescription().separation(true).nodes({
                 NodeDescription().cellType(generator),
                 NodeDescription(),
                 NodeDescription(),
@@ -73,9 +73,16 @@ protected:
             .genes({
                 GeneDescription().separation(false).nodes({
                     NodeDescription().cellType(generator),
+                    NodeDescription(),
+                    NodeDescription(),
+                    NodeDescription(),
                     NodeDescription().cellType(muscleDesc),
                     NodeDescription().cellType(muscleDesc),
                     NodeDescription().cellType(muscleDesc),
+                    NodeDescription(),
+                    NodeDescription(),
+                    NodeDescription(),
+                    NodeDescription(),
                 }),
             });
     }
@@ -95,16 +102,22 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
 {
     auto muscleMode = GetParam();
 
-    auto neededEnergy = (1 + 4 + 4 + 6) * _parameters.normalCellEnergy.value[0] + 1.0f;
     auto genome = createGenomeForCreatureWithLegs(muscleMode, Direction::Forward);
     auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells({CellDescription().id(0).energy(neededEnergy).pos({200.0f, 200.0f}).cellType(ConstructorDescription().geneIndex(0))}),
+        CreatureDescription().genome(genome).cells(
+            {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
     });
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
+
+    // Check that the seed provides no energy anymore after the creature is constructed
+    auto constructor = std::get<ConstructorDescription>(actualData.getCellRef(0)._cellType);
+    if (genome._genes[constructor._geneIndex]._separation) {
+        EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
+    }
     DescriptionEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
 
@@ -250,31 +263,28 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
     auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells({CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().geneIndex(0))}),
+        CreatureDescription().genome(genome).cells(
+            {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
     });
 
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = 4 * _parameters.normalCellEnergy.value[0] + 10.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(500);
+    _simulationFacade->calcTimesteps(1300);
 
     auto actualData = _simulationFacade->getSimulationData();
     DescriptionEditService::get().removeCell(actualData, 0);
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(4, creature._cells.size());
+    ASSERT_EQ(11, creature._cells.size());
 
     auto& cells = creature._cells;
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
     // Check front angles
     EXPECT_TRUE(approxCompareAngles(0.0f, cells.at(0)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(3)._frontAngle.value()));
+    for (int i = 1; i < 11; ++i) {
+        EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(i)._frontAngle.value()));
+    }
 }
 
 class CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles
@@ -303,15 +313,12 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().geneIndex(0))}),
+        CreatureDescription().genome(genome).cells(
+            {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
     });
 
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = 4 * _parameters.normalCellEnergy.value[0] + 10.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(1300);
 
     RealVector2D movementDirection;
     {
@@ -323,7 +330,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(4, creature._cells.size());
+        ASSERT_EQ(11, creature._cells.size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -344,7 +351,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(4, creature._cells.size());
+        ASSERT_EQ(11, creature._cells.size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
