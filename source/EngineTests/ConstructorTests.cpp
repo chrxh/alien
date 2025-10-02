@@ -2990,16 +2990,33 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     EXPECT_TRUE(actualData.hasConnection(cell2._id, 6));
 }
 
-class ConstructorTests_ProvideEnergy
+enum class ProvideEnergy
+{
+    No,
+    Yes
+};
+enum class Separation
+{
+    No,
+    Yes
+};
+class ConstructorTests_ProvideEnergy_Separation
     : public ConstructorTests
-    , public testing::WithParamInterface<bool>
+    , public testing::WithParamInterface<std::pair<ProvideEnergy, Separation>>
 {};
 
-INSTANTIATE_TEST_SUITE_P(ConstructorTests_ProvideEnergy, ConstructorTests_ProvideEnergy, ::testing::Values(false, true));
+INSTANTIATE_TEST_SUITE_P(
+    ConstructorTests_ProvideEnergy,
+    ConstructorTests_ProvideEnergy_Separation,
+    ::testing::Values(
+        std::make_pair(ProvideEnergy::No, Separation::No),
+        std::make_pair(ProvideEnergy::Yes, Separation::No),
+        std::make_pair(ProvideEnergy::No, Separation::Yes),
+        std::make_pair(ProvideEnergy::Yes, Separation::Yes)));
 
-TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_sufficientEnergy)
+TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy)
 {
-    auto provideEnergy = GetParam();
+    auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -3007,7 +3024,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_sufficientEnergy)
             NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
-        GeneDescription().separation(false).numBranches(2).numConcatenations(3).nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDescription(), NodeDescription()}),
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -3017,8 +3034,12 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_sufficientEnergy)
                 .id(0)
                 .pos({10.0f, 10.0f})
                 .energy(normalCellEnergy * (2 * 3 * 2 + 2) + 1.0f)
-                .cellType(
-                    ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
+                .cellType(ConstructorDescription()
+                              .provideEnergy(provideEnergy == ProvideEnergy::Yes)
+                              .geneIndex(0)
+                              .currentNodeIndex(1)
+                              .autoTriggerInterval(1)
+                              .lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
         }),
     });
@@ -3036,16 +3057,16 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_sufficientEnergy)
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
-    if (provideEnergy) {
+    if (provideEnergy == ProvideEnergy::Yes && separation == Separation::No) {
         EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell._energy));
     } else {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
     }
 }
 
-TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_insufficientEnergy)
+TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEnergy)
 {
-    auto provideEnergy = GetParam();
+    auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -3053,18 +3074,24 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_insufficientEnergy)
             NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
-        GeneDescription().separation(false).numBranches(2).numConcatenations(3).nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDescription(), NodeDescription()}),
     });
 
-    auto constructorEnergy = provideEnergy ? _parameters.normalCellEnergy.value[0] * (2 * 3 * 2 + 2) - 1.0f : _parameters.normalCellEnergy.value[0] - 1.0f;
+    auto constructorEnergy = provideEnergy == ProvideEnergy::Yes && separation == Separation::No
+        ? _parameters.normalCellEnergy.value[0] * (2 * 3 * 2 + 2) - 1.0f
+        : _parameters.normalCellEnergy.value[0] - 1.0f;
     auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
                 .energy(constructorEnergy)
-                .cellType(
-                    ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
+                .cellType(ConstructorDescription()
+                              .provideEnergy(provideEnergy == ProvideEnergy::Yes)
+                              .geneIndex(0)
+                              .currentNodeIndex(1)
+                              .autoTriggerInterval(1)
+                              .lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
         }),
     });
@@ -3081,9 +3108,9 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_insufficientEnergy)
     ASSERT_EQ(2, creature._cells.size());
 }
 
-TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_infiniteConcatenations)
+TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcatenations)
 {
-    auto provideEnergy = GetParam();
+    auto [provideEnergy, separation] = GetParam();
 
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
@@ -3091,19 +3118,27 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_infiniteConcatenations)
             NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1)),
             NodeDescription(),
         }),
-        GeneDescription().separation(false).numBranches(2).numConcatenations(std::numeric_limits<int>::max()).nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription()
+            .separation(separation == Separation::Yes)
+            .numBranches(2)
+            .numConcatenations(std::numeric_limits<int>::max())
+            .nodes({NodeDescription(), NodeDescription()}),
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    auto constructorEnergy = provideEnergy ? normalCellEnergy * (2 + 2) + 1.0f : normalCellEnergy * 2 + 1.0f;
+    auto constructorEnergy = provideEnergy == ProvideEnergy::Yes ? normalCellEnergy * (2 + 2) + 1.0f : normalCellEnergy * 2 + 1.0f;
     auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
                 .energy(constructorEnergy)
-                .cellType(
-                    ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
+                .cellType(ConstructorDescription()
+                              .provideEnergy(provideEnergy == ProvideEnergy::Yes)
+                              .geneIndex(0)
+                              .currentNodeIndex(1)
+                              .autoTriggerInterval(1)
+                              .lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
         }),
     });
@@ -3121,7 +3156,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_infiniteConcatenations)
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
-    if (provideEnergy) {
+    if (provideEnergy == ProvideEnergy::Yes && separation == Separation::No) {
         EXPECT_TRUE(approxCompare(normalCellEnergy * 3, actualConstructedCell._energy));
     } else {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
