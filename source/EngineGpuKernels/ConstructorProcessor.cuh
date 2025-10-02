@@ -20,8 +20,6 @@ public:
 private:
     struct ConstructionData
     {
-        bool isPreview;
-
         // Creature and genome data
         Creature* creature;
         Gene* gene;
@@ -47,7 +45,7 @@ private:
 //
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Cell* cell);
-    __inline__ __device__ static ConstructionData createConstructionData(Cell* cell, bool isPreview);
+    __inline__ __device__ static ConstructionData createConstructionData(Cell* cell);
 
     __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
@@ -169,7 +167,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
             constructor.currentConcatenation = 0;
         }
 
-        auto constructionData = createConstructionData(cell, isPreview);
+        auto constructionData = createConstructionData(cell);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
@@ -189,7 +187,6 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
                     // HACK for preview mode: Do not construct more than one offspring + move seed away
                     if (isPreview) {
-                        constructor.currentConcatenation = constructionData.gene->numConcatenations;  
                         cell->pos.y += toFloat(PREVIEW_HEIGHT / 3);
                     }
                 }
@@ -234,7 +231,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     return factory.cloneCreature(cell->creature);
 }
 
-__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell, bool isPreview)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell)
 {
     auto& constructor = cell->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
@@ -243,7 +240,6 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     auto isFirstConcatenation = ConstructorHelper::isFirstConcatenation(constructor);
 
     ConstructionData result;
-    result.isPreview = isPreview;
     result.creature = constructor.offspring;
     result.gene = ConstructorHelper::getCurrentGene(constructor, genome);
     result.node = ConstructorHelper::getCurrentNode(constructor, genome);
@@ -437,6 +433,14 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     if (!checkAndReduceHostEnergy(data, hostCell, constructionData)) {
         return nullptr;
     }
+
+    // For bending muscle cells: Reset front angle and restore initial angle
+    if (lastCell->cellType == CellType_Muscle && lastCell->cellTypeData.muscle.isBendingMuscle()) {
+        lastCell->frontAngle = VALUE_NOT_SET_FLOAT;
+        auto connectionIndex = hostCell->getConnectionIndex(lastCell);
+        MuscleProcessor::restoreInitialAngleFromPrevious(lastCell, hostCell, connectionIndex);
+    }
+
     uint64_t cellPointerIndex;
     Cell* newCell = constructCellIntern(data, statistics, cellPointerIndex, hostCell, newCellPos, constructionData);
 
@@ -574,13 +578,6 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     }
 
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
-
-    // Edge case for bending muscle cells: Reset front angle and restore initial angle
-    if (lastCell->cellType == CellType_Muscle && lastCell->cellTypeData.muscle.isBendingMuscle()) {
-        lastCell->frontAngle = VALUE_NOT_SET_FLOAT;
-        auto connectionIndex = hostCell->getConnectionIndex(newCell);
-        MuscleProcessor::restoreInitialAngleFromPrevious(lastCell, hostCell, connectionIndex);
-    }
 
     newCell->releaseLock();
     return newCell;
@@ -771,10 +768,6 @@ __inline__ __device__ bool ConstructorProcessor::checkForValidConstruction(Cell*
 
 __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData)
 {
-    // HACK for preview mode: Construction does not consume energy
-    if (constructionData.isPreview) {
-        return true;
-    }
     if (hostCell->cellTypeData.constructor.provideEnergy == ProvideEnergy_FreeGeneration) {
         return true;
     }

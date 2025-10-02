@@ -257,7 +257,7 @@ Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescript
         CreatureDescription()
             .genome(subGenome.genome)
             .cells({
-                CellDescription().color(PreviewColor).stiffness(1.0f).cellType(ConstructorDescription().geneIndex(subGenome.startIndex)).pos(pos),
+                CellDescription().color(PreviewColor).stiffness(1.0f).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex)).pos(pos),
             }),
     });
 }

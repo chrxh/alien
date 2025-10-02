@@ -2990,11 +2990,6 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     EXPECT_TRUE(actualData.hasConnection(cell2._id, 6));
 }
 
-enum class ProvideEnergy
-{
-    No,
-    Yes
-};
 enum class Separation
 {
     No,
@@ -3009,10 +3004,12 @@ INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_ProvideEnergy,
     ConstructorTests_ProvideEnergy_Separation,
     ::testing::Values(
-        std::make_pair(ProvideEnergy::No, Separation::No),
-        std::make_pair(ProvideEnergy::Yes, Separation::No),
-        std::make_pair(ProvideEnergy::No, Separation::Yes),
-        std::make_pair(ProvideEnergy::Yes, Separation::Yes)));
+        std::make_pair(ProvideEnergy_CellOnly, Separation::No),
+        std::make_pair(ProvideEnergy_CellAndGene, Separation::No),
+        std::make_pair(ProvideEnergy_FreeGeneration, Separation::No),
+        std::make_pair(ProvideEnergy_CellOnly, Separation::Yes),
+        std::make_pair(ProvideEnergy_CellAndGene, Separation::Yes),
+        std::make_pair(ProvideEnergy_FreeGeneration, Separation::Yes)));
 
 TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy)
 {
@@ -3028,14 +3025,24 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto constructorEnergy = [&] {
+        if (provideEnergy == ProvideEnergy_FreeGeneration) {
+            return normalCellEnergy;
+        }
+        if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
+            return normalCellEnergy * (2 * 3 * 2 + 2) + 1.0f;
+        } else {
+            return normalCellEnergy * 2 + 1.0f;
+        }
+    }();
     auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
-                .energy(normalCellEnergy * (2 * 3 * 2 + 2) + 1.0f)
+                .energy(constructorEnergy)
                 .cellType(ConstructorDescription()
-                              .provideEnergy(provideEnergy == ProvideEnergy::Yes)
+                              .provideEnergy(provideEnergy)
                               .geneIndex(0)
                               .currentNodeIndex(1)
                               .autoTriggerInterval(1)
@@ -3057,10 +3064,14 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
-    if (provideEnergy == ProvideEnergy::Yes && separation == Separation::No) {
-        EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell._energy));
+    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._energy));
     } else {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+        if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell._energy));
+        } else {
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+        }
     }
 }
 
@@ -3068,6 +3079,9 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
 {
     auto [provideEnergy, separation] = GetParam();
 
+    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        GTEST_SKIP() << "Skipping test because FreeGeneration always has enough energy.";
+    }
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).nodes({
             NodeDescription(),
@@ -3077,9 +3091,9 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
         GeneDescription().separation(separation == Separation::Yes).numBranches(2).numConcatenations(3).nodes({NodeDescription(), NodeDescription()}),
     });
 
-    auto constructorEnergy = provideEnergy == ProvideEnergy::Yes && separation == Separation::No
-        ? _parameters.normalCellEnergy.value[0] * (2 * 3 * 2 + 2) - 1.0f
-        : _parameters.normalCellEnergy.value[0] - 1.0f;
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto constructorEnergy =
+        provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No ? normalCellEnergy * (2 * 3 * 2 + 2) - 1.0f : normalCellEnergy * 2 - 1.0f;
     auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
@@ -3087,7 +3101,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
                 .pos({10.0f, 10.0f})
                 .energy(constructorEnergy)
                 .cellType(ConstructorDescription()
-                              .provideEnergy(provideEnergy == ProvideEnergy::Yes)
+                              .provideEnergy(provideEnergy)
                               .geneIndex(0)
                               .currentNodeIndex(1)
                               .autoTriggerInterval(1)
@@ -3126,7 +3140,18 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     });
 
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    auto constructorEnergy = provideEnergy == ProvideEnergy::Yes ? normalCellEnergy * (2 + 2) + 1.0f : normalCellEnergy * 2 + 1.0f;
+    auto constructorEnergy = [&] {
+        if (provideEnergy == ProvideEnergy_FreeGeneration) {
+            return normalCellEnergy;
+        }
+        if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
+            return normalCellEnergy * (2 + 2) + 1.0f;
+        } else {
+            return normalCellEnergy * 2 + 1.0f;
+        }
+    }();
+
+
     auto data = Description().creatures({
         CreatureDescription().id(0).genome(genome).cells({
             CellDescription()
@@ -3134,7 +3159,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
                 .pos({10.0f, 10.0f})
                 .energy(constructorEnergy)
                 .cellType(ConstructorDescription()
-                              .provideEnergy(provideEnergy == ProvideEnergy::Yes)
+                              .provideEnergy(provideEnergy)
                               .geneIndex(0)
                               .currentNodeIndex(1)
                               .autoTriggerInterval(1)
@@ -3156,9 +3181,13 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
-    if (provideEnergy == ProvideEnergy::Yes && separation == Separation::No) {
-        EXPECT_TRUE(approxCompare(normalCellEnergy * 3, actualConstructedCell._energy));
+    if (provideEnergy == ProvideEnergy_FreeGeneration) {
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._energy));
     } else {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+        if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), actualConstructedCell._energy));
+        } else {
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+        }
     }
 }
