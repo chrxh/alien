@@ -57,10 +57,16 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    // Shader data
+    // Shader data for post-processing
     unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo1, _fbo2;
     Shader _shader;
+
+    // Shader data for object rendering
+    unsigned int _objectVao, _objectVbo;
+    Shader _objectShader;
+    unsigned int _objectTexture;
+    unsigned int _objectFbo;
 
     bool _areTexturesInitialized = false;
     unsigned int _textureSimulationId = 0;
@@ -73,4 +79,5 @@ private:
 
     // Settings
     bool _renderSimulation = true;
+    bool _useShaderRendering = true;
 };

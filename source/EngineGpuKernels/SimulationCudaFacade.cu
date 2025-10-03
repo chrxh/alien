@@ -137,6 +137,64 @@ void* _SimulationCudaFacade::registerImageResource(GLuint image)
     return reinterpret_cast<void*>(_cudaResource);
 }
 
+void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
+{
+    //unregister old resource
+    if (_cudaBufferResource) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaBufferResource));
+    }
+
+    //register new resource
+    CHECK_FOR_CUDA_ERROR(
+        cudaGraphicsGLRegisterBuffer(&_cudaBufferResource, buffer, cudaGraphicsMapFlagsWriteDiscard));
+
+    return reinterpret_cast<void*>(_cudaBufferResource);
+}
+
+void _SimulationCudaFacade::extractObjectDataToBuffer(
+    float2 const& rectUpperLeft,
+    float2 const& rectLowerRight,
+    void* cudaBufferResource,
+    double zoom)
+{
+    checkAndProcessSimulationParameterChanges();
+
+    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaBufferResource);
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
+
+    RenderingObjectData* mappedBuffer;
+    size_t bufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
+
+    // Extract object data to temporary buffer
+    _renderingKernels->extractObjectData(
+        _settings, rectUpperLeft, rectLowerRight, static_cast<float>(zoom), getSimulationDataPtrCopy(), *_cudaRenderingData);
+    syncAndCheck();
+
+    // Copy to mapped OpenGL buffer
+    int numObjects;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&numObjects, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
+    
+    if (numObjects > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            mappedBuffer,
+            _cudaRenderingData->objectData,
+            min(numObjects, _cudaRenderingData->maxObjects) * sizeof(RenderingObjectData),
+            cudaMemcpyDeviceToDevice));
+    }
+
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
+}
+
+int _SimulationCudaFacade::getNumExtractedObjects()
+{
+    int numObjects;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&numObjects, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
+    return numObjects;
+}
+
+
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
 {
     for (uint64_t i = 0; i < timesteps; ++i) {

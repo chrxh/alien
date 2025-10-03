@@ -45,6 +45,17 @@ void EngineWorker::setImageResource(void* image)
     }
 }
 
+void EngineWorker::setBufferResource(void* buffer)
+{
+    GLuint bufferId = reinterpret_cast<uintptr_t>(buffer);
+    _bufferResource = bufferId;
+
+    if (_simulationCudaFacade) {
+        EngineWorkerGuard access(this);
+        _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
+    }
+}
+
 std::string EngineWorker::getGpuName() const
 {
     return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuModelName;
@@ -64,6 +75,30 @@ void EngineWorker::tryDrawVectorGraphics(
             {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
         syncSimulationWithRenderingIfDesired();
     }
+}
+
+void EngineWorker::tryDrawVectorGraphicsWithShaders(
+    RealVector2D const& rectUpperLeft,
+    RealVector2D const& rectLowerRight,
+    double zoom)
+{
+    EngineWorkerGuard access(this, FrameTimeout);
+
+    if (!access.isTimeout()) {
+        registerBufferResource();
+        _simulationCudaFacade->extractObjectDataToBuffer(
+            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaBufferResource, zoom);
+        syncSimulationWithRenderingIfDesired();
+    }
+}
+
+int EngineWorker::getNumExtractedObjects()
+{
+    if (_simulationCudaFacade) {
+        EngineWorkerGuard access(this);
+        return _simulationCudaFacade->getNumExtractedObjects();
+    }
+    return 0;
 }
 
 std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(
@@ -615,6 +650,13 @@ void EngineWorker::registerImageResource()
 {
     if (_imageResource && !_cudaResource) {
         _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
+    }
+}
+
+void EngineWorker::registerBufferResource()
+{
+    if (_bufferResource && !_cudaBufferResource) {
+        _cudaBufferResource = _simulationCudaFacade->registerBufferResource(*_bufferResource);
     }
 }
 

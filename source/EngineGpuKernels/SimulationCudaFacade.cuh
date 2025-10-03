@@ -42,6 +42,7 @@ public:
     ~_SimulationCudaFacade();
 
     void* registerImageResource(GLuint image);
+    void* registerBufferResource(GLuint buffer);
 
     void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);
     void applyCataclysm(int power);
@@ -49,6 +50,8 @@ public:
     Ids getMaxIds() const;
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
+    void extractObjectDataToBuffer(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaBufferResource, double zoom);
+    int getNumExtractedObjects();
     TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
@@ -129,6 +132,7 @@ private:
 
     GpuInfo _gpuInfo;
     cudaGraphicsResource* _cudaResource = nullptr;
+    cudaGraphicsResource* _cudaBufferResource = nullptr;
 
     mutable std::mutex _mutexForSimulationParameters;
     std::optional<SimulationParameters> _newSimulationParameters;

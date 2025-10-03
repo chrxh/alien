@@ -46,9 +46,12 @@ public:
     void clear();
 
     void setImageResource(void* image);
+    void setBufferResource(void* buffer);
     std::string getGpuName() const;
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
+    void tryDrawVectorGraphicsWithShaders(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom);
+    int getNumExtractedObjects();
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 
@@ -140,6 +143,7 @@ private:
     void slowdownTPS();
 
     void registerImageResource();
+    void registerBufferResource();
 
     CudaSimulationFacade _simulationCudaFacade;
 
@@ -179,7 +183,9 @@ private:
 
     //internals
     std::optional<GLuint> _imageResource;
+    std::optional<GLuint> _bufferResource;
     void* _cudaResource = nullptr;
+    void* _cudaBufferResource = nullptr;
     TOProvider _collectionTOProvider;
 };
 

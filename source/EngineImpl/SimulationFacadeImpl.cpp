@@ -36,6 +36,11 @@ void _SimulationFacadeImpl::setImageResource(void* image)
     _worker.setImageResource(image);
 }
 
+void _SimulationFacadeImpl::setBufferResource(void* buffer)
+{
+    _worker.setBufferResource(buffer);
+}
+
 std::string _SimulationFacadeImpl::getGpuName() const
 {
     return _worker.getGpuName();
@@ -48,6 +53,19 @@ void _SimulationFacadeImpl::tryDrawVectorGraphics(
     double zoom)
 {
     _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
+}
+
+void _SimulationFacadeImpl::tryDrawVectorGraphicsWithShaders(
+    RealVector2D const& rectUpperLeft,
+    RealVector2D const& rectLowerRight,
+    double zoom)
+{
+    _worker.tryDrawVectorGraphicsWithShaders(rectUpperLeft, rectLowerRight, zoom);
+}
+
+int _SimulationFacadeImpl::getNumExtractedObjects()
+{
+    return _worker.getNumExtractedObjects();
 }
 
 std::optional<OverlayDescription> _SimulationFacadeImpl::tryDrawVectorGraphicsAndReturnOverlay(

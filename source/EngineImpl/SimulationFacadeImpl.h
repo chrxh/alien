@@ -22,6 +22,7 @@ public:
     void clear() override;
 
     void setImageResource(void* image) override;
+    void setBufferResource(void* buffer) override;
     std::string getGpuName() const override;
 
     /**
@@ -33,6 +34,11 @@ public:
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
         double zoom) override;
+    void tryDrawVectorGraphicsWithShaders(
+        RealVector2D const& rectUpperLeft,
+        RealVector2D const& rectLowerRight,
+        double zoom) override;
+    int getNumExtractedObjects() override;
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
