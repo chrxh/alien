@@ -44,7 +44,6 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void updateImageFromSimulation();
     void updateImageFromSimulationWithShaders();
 
     void markReferenceDomain();
@@ -70,7 +69,6 @@ private:
     unsigned int _objectFbo;
 
     bool _areTexturesInitialized = false;
-    unsigned int _textureSimulationId = 0;
     unsigned int _textureFramebufferId1 = 0;
     unsigned int _textureFramebufferId2 = 0;
 
@@ -80,5 +78,4 @@ private:
 
     // Settings
     bool _renderSimulation = true;
-    bool _useShaderRendering = true;
 };

@@ -127,24 +127,13 @@ void SimulationView::resize(IntVector2D const& size)
         glDeleteFramebuffers(1, &_fbo1);
         glDeleteFramebuffers(1, &_fbo2);
         glDeleteFramebuffers(1, &_objectFbo);
-        glDeleteTextures(1, &_textureSimulationId);
         glDeleteTextures(1, &_textureFramebufferId1);
         glDeleteTextures(1, &_textureFramebufferId2);
         glDeleteTextures(1, &_objectTexture);
         _areTexturesInitialized = true;
     }
     
-    // Create texture for CUDA rendering (old pipeline)
-    glGenTextures(1, &_textureSimulationId);
-    glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-    _simulationFacade->setImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
-
-    // Create texture for object rendering (new shader pipeline)
+    // Create texture for object rendering
     glGenTextures(1, &_objectTexture);
     glBindTexture(GL_TEXTURE_2D, _objectTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -191,11 +180,7 @@ void SimulationView::resize(IntVector2D const& size)
 void SimulationView::draw()
 {
     if (_renderSimulation) {
-        if (_useShaderRendering) {
-            updateImageFromSimulationWithShaders();
-        } else {
-            updateImageFromSimulation();
-        }
+        updateImageFromSimulationWithShaders();
 
         _shader->use();
 
@@ -204,17 +189,17 @@ void SimulationView::draw()
 
         // Post-processing pipeline (horizontal blur)
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _shader->setInt("phase", _useShaderRendering ? 0 : 10);
+        _shader->setInt("phase", 0);
         glBindVertexArray(_vao);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _useShaderRendering ? _objectTexture : _textureSimulationId);
+        glBindTexture(GL_TEXTURE_2D, _objectTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Post-processing pipeline (vertical blur + mix)
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _shader->setInt("phase", _useShaderRendering ? 1 : 11);
+        _shader->setInt("phase", 1);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _useShaderRendering ? _objectTexture : _textureSimulationId);
+        glBindTexture(GL_TEXTURE_2D, _objectTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
         glActiveTexture(GL_TEXTURE2);
@@ -223,7 +208,7 @@ void SimulationView::draw()
 
         // Final render to screen
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _shader->setInt("phase", _useShaderRendering ? 2 : 12);
+        _shader->setInt("phase", 2);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -338,62 +323,6 @@ void SimulationView::setMotionBlur(float value)
 {
     _motionBlur = value;
     updateMotionBlur();
-}
-
-void SimulationView::updateImageFromSimulation()
-{
-    auto worldRect = Viewport::get().getVisibleWorldRect();
-    auto viewSize = Viewport::get().getViewSize();
-    auto zoomFactor = Viewport::get().getZoomFactor();
-
-    if (zoomFactor >= ZoomFactorForOverlay) {
-        auto overlay = _simulationFacade->tryDrawVectorGraphicsAndReturnOverlay(
-            worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
-        if (overlay) {
-            std::sort(overlay->elements.begin(), overlay->elements.end(), [](OverlayElementDescription const& left, OverlayElementDescription const& right) {
-                return left.id < right.id;
-            });
-            _overlay = overlay;
-        }
-    } else {
-        _simulationFacade->tryDrawVectorGraphics(
-            worldRect.topLeft, worldRect.bottomRight, {viewSize.x, viewSize.y}, zoomFactor);
-        _overlay = std::nullopt;
-    }
-
-    //draw overlay
-    if (_overlay) {
-        ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-        auto parameters = _simulationFacade->getSimulationParameters();
-        for (auto const& overlayElement : _overlay->elements) {
-            if (_cellDetailOverlayActive && overlayElement.cell) {
-                {
-                    auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
-                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
-                    auto text = Const::CellTypeStrings.at(overlayElement.cellType);
-                    drawList->AddText(
-                        StyleRepository::get().getMediumFont(),
-                        fontSizeUnit,
-                        {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
-                        Const::CellTypeOverlayShadowColor,
-                        text.c_str());
-                    drawList->AddText(
-                        StyleRepository::get().getMediumFont(),
-                        fontSizeUnit,
-                        {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
-                        Const::CellTypeOverlayColor,
-                        text.c_str());
-                }
-            }
-
-            if (overlayElement.selected == 1) {
-                auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
-                if (Viewport::get().isVisible(viewPos)) {
-                    drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
-                }
-            }
-        }
-    }
 }
 
 void SimulationView::updateMotionBlur()
