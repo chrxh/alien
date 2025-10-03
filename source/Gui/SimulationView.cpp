@@ -29,10 +29,15 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
+    // Setup post-processing shader
     _shader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
+
+    // Setup object rendering shader
+    _objectShader = std::make_shared<_Shader>(Const::ObjectVertexShader, Const::ObjectFragmentShader);
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
+    // Setup post-processing quad
     float vertices[] = {
         // positions        // texture coordinates
         1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
@@ -68,8 +73,35 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    // Setup object rendering VAO and VBO
+    glGenVertexArrays(1, &_objectVao);
+    glGenBuffers(1, &_objectVbo);
+    
+    glBindVertexArray(_objectVao);
+    glBindBuffer(GL_ARRAY_BUFFER, _objectVbo);
+    
+    // Allocate buffer for maximum expected objects (will be resized if needed)
+    glBufferData(GL_ARRAY_BUFFER, 100000 * sizeof(RenderingObjectData), nullptr, GL_DYNAMIC_DRAW);
+    
+    // Setup vertex attributes for RenderingObjectData
+    // Position (vec2)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color (vec3)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Radius (float)
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Register OpenGL buffer with CUDA
+    _simulationFacade->setBufferResource(reinterpret_cast<void*>(uintptr_t(_objectVbo)));
+
     resize(Viewport::get().getViewSize());
 
+    // Setup shaders
     _shader->use();
     _shader->setInt("texture1", 0);
     _shader->setInt("texture2", 1);
@@ -94,11 +126,15 @@ void SimulationView::resize(IntVector2D const& size)
     if (_areTexturesInitialized) {
         glDeleteFramebuffers(1, &_fbo1);
         glDeleteFramebuffers(1, &_fbo2);
+        glDeleteFramebuffers(1, &_objectFbo);
         glDeleteTextures(1, &_textureSimulationId);
         glDeleteTextures(1, &_textureFramebufferId1);
         glDeleteTextures(1, &_textureFramebufferId2);
+        glDeleteTextures(1, &_objectTexture);
         _areTexturesInitialized = true;
     }
+    
+    // Create texture for CUDA rendering (old pipeline)
     glGenTextures(1, &_textureSimulationId);
     glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -107,6 +143,21 @@ void SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
     _simulationFacade->setImageResource(reinterpret_cast<void*>(uintptr_t(_textureSimulationId)));
+
+    // Create texture for object rendering (new shader pipeline)
+    glGenTextures(1, &_objectTexture);
+    glBindTexture(GL_TEXTURE_2D, _objectTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, NULL);
+
+    // Create FBO for object rendering
+    glGenFramebuffers(1, &_objectFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glGenTextures(1, &_textureFramebufferId1);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
@@ -140,32 +191,39 @@ void SimulationView::resize(IntVector2D const& size)
 void SimulationView::draw()
 {
     if (_renderSimulation) {
-        updateImageFromSimulation();
+        if (_useShaderRendering) {
+            updateImageFromSimulationWithShaders();
+        } else {
+            updateImageFromSimulation();
+        }
 
         _shader->use();
 
         GLint currentFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
+        // Post-processing pipeline (horizontal blur)
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _shader->setInt("phase", 10);
+        _shader->setInt("phase", _useShaderRendering ? 0 : 10);
         glBindVertexArray(_vao);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+        glBindTexture(GL_TEXTURE_2D, _useShaderRendering ? _objectTexture : _textureSimulationId);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        // Post-processing pipeline (vertical blur + mix)
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _shader->setInt("phase", 11);
+        _shader->setInt("phase", _useShaderRendering ? 1 : 11);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _textureSimulationId);
+        glBindTexture(GL_TEXTURE_2D, _useShaderRendering ? _objectTexture : _textureSimulationId);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        // Final render to screen
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _shader->setInt("phase", 12);
+        _shader->setInt("phase", _useShaderRendering ? 2 : 12);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -343,6 +401,52 @@ void SimulationView::updateMotionBlur()
     //motionBlurFactor = 0: max motion blur
     //motionBlurFactor = 1: no motion blur
     _shader->setFloat("motionBlurFactor", 1.0f / (1.0f + _motionBlur));
+}
+
+void SimulationView::updateImageFromSimulationWithShaders()
+{
+    auto worldRect = Viewport::get().getVisibleWorldRect();
+    auto viewSize = Viewport::get().getViewSize();
+    auto zoomFactor = Viewport::get().getZoomFactor();
+
+    // Extract object data from CUDA and transfer to OpenGL buffer
+    _simulationFacade->tryDrawVectorGraphicsWithShaders(
+        worldRect.topLeft, worldRect.bottomRight, zoomFactor);
+    
+    // Get number of objects to render
+    int numObjects = _simulationFacade->getNumExtractedObjects();
+    
+    // Render objects to texture using shaders
+    glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
+    glViewport(0, 0, viewSize.x, viewSize.y);
+    
+    // Clear with black background
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    // Enable blending for anti-aliasing
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Enable point sprites
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    
+    // Use object shader
+    _objectShader->use();
+    _objectShader->setFloat("zoom", static_cast<float>(zoomFactor));
+    _objectShader->setVec2("worldSize", static_cast<float>(_simulationFacade->getWorldSize().x), static_cast<float>(_simulationFacade->getWorldSize().y));
+    _objectShader->setVec2("rectUpperLeft", static_cast<float>(worldRect.topLeft.x), static_cast<float>(worldRect.topLeft.y));
+    _objectShader->setVec2("viewportSize", static_cast<float>(viewSize.x), static_cast<float>(viewSize.y));
+    
+    // Draw points
+    glBindVertexArray(_objectVao);
+    glDrawArrays(GL_POINTS, 0, numObjects);
+    
+    // Disable blending and point sprites
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glDisable(GL_BLEND);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void SimulationView::markReferenceDomain()

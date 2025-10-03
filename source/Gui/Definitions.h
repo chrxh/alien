@@ -2,6 +2,14 @@
 
 #include "Base/Definitions.h"
 
+// Structure matching the CUDA RenderingObjectData for OpenGL rendering
+struct RenderingObjectData
+{
+    float pos[2];      // x, y position
+    float color[3];    // r, g, b color
+    float radius;      // radius for rendering
+};
+
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;
 

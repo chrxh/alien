@@ -45,6 +45,7 @@ public:
 
 private:
     void updateImageFromSimulation();
+    void updateImageFromSimulationWithShaders();
 
     void markReferenceDomain();
 
