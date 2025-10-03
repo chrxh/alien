@@ -43,3 +43,31 @@ void _RenderingKernelsService::drawImage(
         KERNEL_CALL(cudaDrawRepetition, data.worldSize, imageSize, rectUpperLeft, rectLowerRight, targetImage, zoom);
     }
 }
+
+void _RenderingKernelsService::extractObjectData(
+    SettingsForSimulation const& settings,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    float zoom,
+    SimulationData data,
+    RenderingData renderingData)
+{
+    auto const& gpuSettings = settings.cudaSettings;
+    
+    // Resize buffer if necessary
+    int maxObjects = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
+    renderingData.resizeObjectBufferIfNecessary(maxObjects);
+
+    // Extract object data
+    KERNEL_CALL(
+        cudaExtractObjectData,
+        data.worldSize,
+        rectUpperLeft,
+        rectLowerRight,
+        data.objects.cells,
+        data.objects.particles,
+        renderingData.objectData,
+        renderingData.numObjects,
+        maxObjects,
+        zoom);
+}

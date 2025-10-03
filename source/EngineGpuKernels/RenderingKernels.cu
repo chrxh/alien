@@ -767,3 +767,92 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
         }
     }
 }
+
+__global__ void cudaExtractObjectData(
+    int2 worldSize,
+    float2 rectUpperLeft,
+    float2 rectLowerRight,
+    Array<Cell*> cells,
+    Array<Particle*> particles,
+    RenderingObjectData* objectData,
+    int* numObjects,
+    int maxObjects,
+    float zoom)
+{
+    auto totalSize = cells.getNumEntries() + particles.getNumEntries();
+    auto const& threadPartition = calcAllThreadsPartition(totalSize);
+
+    // Reset counter in first thread
+    if (threadPartition.startIndex == 0) {
+        *numObjects = 0;
+    }
+    __syncthreads();
+
+    BaseMap map;
+    map.init(worldSize);
+
+    // Process cells and particles
+    for (int index = threadPartition.startIndex; index <= threadPartition.endIndex; ++index) {
+        if (index < cells.getNumEntries()) {
+            auto const& cell = cells.at(index);
+            if (!cell) {
+                continue;
+            }
+
+            // Check if cell is in visible region
+            auto pos = cell->pos;
+            map.correctPosition(pos);
+            
+            if (pos.x < rectUpperLeft.x || pos.x > rectLowerRight.x || 
+                pos.y < rectUpperLeft.y || pos.y > rectLowerRight.y) {
+                continue;
+            }
+
+            // Calculate color
+            auto color = calcColor(cell, cell->selected, cudaSimulationParameters.primaryCellColoring.value, true);
+            
+            // Calculate radius based on zoom
+            auto radius = 0.5f * zoom;
+
+            // Add to output buffer
+            int objIndex = atomicAdd(numObjects, 1);
+            if (objIndex < maxObjects) {
+                objectData[objIndex].pos = pos;
+                objectData[objIndex].color = color;
+                objectData[objIndex].radius = radius;
+            }
+        } else {
+            // Process particles
+            int particleIndex = index - cells.getNumEntries();
+            if (particleIndex < particles.getNumEntries()) {
+                auto const& particle = particles.at(particleIndex);
+                if (!particle) {
+                    continue;
+                }
+
+                // Check if particle is in visible region
+                auto pos = particle->pos;
+                map.correctPosition(pos);
+                
+                if (pos.x < rectUpperLeft.x || pos.x > rectLowerRight.x || 
+                    pos.y < rectUpperLeft.y || pos.y > rectLowerRight.y) {
+                    continue;
+                }
+
+                // Calculate color for particle
+                auto color = calcColor(particle, particle->selected);
+                
+                // Calculate radius based on zoom
+                auto radius = 0.3f * zoom;
+
+                // Add to output buffer
+                int objIndex = atomicAdd(numObjects, 1);
+                if (objIndex < maxObjects) {
+                    objectData[objIndex].pos = pos;
+                    objectData[objIndex].color = color;
+                    objectData[objIndex].radius = radius;
+                }
+            }
+        }
+    }
+}

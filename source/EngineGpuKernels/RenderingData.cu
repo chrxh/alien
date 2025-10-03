@@ -1,6 +1,11 @@
 ﻿#include "RenderingData.cuh"
 
-void RenderingData::init() {}
+#include "CudaMemoryManager.cuh"
+
+void RenderingData::init()
+{
+    CudaMemoryManager::getInstance().acquireMemory<int>(1, numObjects);
+}
 
 void RenderingData::resizeImageIfNecessary(int2 const& newSize)
 {
@@ -11,7 +16,18 @@ void RenderingData::resizeImageIfNecessary(int2 const& newSize)
     }
 }
 
+void RenderingData::resizeObjectBufferIfNecessary(int maxNumObjects)
+{
+    if (maxNumObjects > maxObjects) {
+        CudaMemoryManager::getInstance().freeMemory(objectData);
+        CudaMemoryManager::getInstance().acquireMemory<RenderingObjectData>(maxNumObjects, objectData);
+        maxObjects = maxNumObjects;
+    }
+}
+
 void RenderingData::free()
 {
     CudaMemoryManager::getInstance().freeMemory(imageData);
+    CudaMemoryManager::getInstance().freeMemory(objectData);
+    CudaMemoryManager::getInstance().freeMemory(numObjects);
 }

@@ -21,4 +21,12 @@ public:
         float zoom,
         SimulationData data,
         RenderingData renderingData);
+
+    void extractObjectData(
+        SettingsForSimulation const& settings,
+        float2 rectUpperLeft,
+        float2 rectLowerRight,
+        float zoom,
+        SimulationData data,
+        RenderingData renderingData);
 };
