@@ -21,8 +21,16 @@ void main()
     float alpha;
     if (zoom > 4.0) {
         alpha = cos(dist / 180.0 * 3.14159 * 90.0);
-    } else {
-        alpha = 1.0 - smoothstep(zoom / 4.0 * 0.35, 0.35 * min(1.0, zoom), dist);
+    } else if (zoom > 1.0) {
+        float startValue = zoom / 4.0 * 0.5;
+        float endValue = 0.5 * zoom * zoom / 4.0;
+        alpha = 1.0 - smoothstep(min(startValue, endValue), max(startValue, endValue), dist);
+    }
+    else {
+        if (dist > 0.3) {
+            discard;
+        }
+        alpha = zoom * zoom * 0.2;
     }
     FragColor = vec4(vColor, alpha);
 }

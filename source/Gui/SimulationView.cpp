@@ -233,7 +233,7 @@ void SimulationView::draw()
             // Use background object shader
             _backgroundObjectShader->use();
             _backgroundObjectShader->setFloat("zoom", zoomFactor);
-            _backgroundObjectShader->setFloat("radius", std::max(6.0f, zoomFactor));
+            _backgroundObjectShader->setFloat("radius", std::max(6.0f, zoomFactor));    // std::max to avoid moiré patterns at low zoom factors
             _backgroundObjectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
             _backgroundObjectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
             _backgroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -251,7 +251,7 @@ void SimulationView::draw()
 
             _foregroundObjectShader->use();
             _foregroundObjectShader->setFloat("zoom", zoomFactor);
-            _foregroundObjectShader->setFloat("radius", std::max(6.0f, zoomFactor * 0.5f));
+            _foregroundObjectShader->setFloat("radius", std::max(6.0f, zoomFactor * 0.5f)); // std::max to avoid moiré patterns at low zoom factors
             _foregroundObjectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
             _foregroundObjectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
             _foregroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -365,7 +365,7 @@ void SimulationView::draw()
             // Use background object shader
             _backgroundObjectShader->use();
             _backgroundObjectShader->setFloat("zoom", zoomFactor);
-            _backgroundObjectShader->setFloat("radius", std::max(6.0f, zoomFactor));
+            _backgroundObjectShader->setFloat("radius", std::max(4.5f, zoomFactor));  // std::max to avoid moiré patterns at low zoom factors
             _backgroundObjectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
             _backgroundObjectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
             _backgroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
