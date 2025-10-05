@@ -18,7 +18,6 @@ namespace Const
 
     std::filesystem::path const SimulationFragmentShader = ResourcePath / "shader.fs";
     std::filesystem::path const SimulationVertexShader = ResourcePath / "shader.vs";
-    std::filesystem::path const ObjectFragmentShader = ResourcePath / "object.fs";
     std::filesystem::path const ObjectVertexShader = ResourcePath / "object.vs";
     std::filesystem::path const BackgroundObjectFragmentShader = ResourcePath / "background_object.fs";
     std::filesystem::path const ForegroundObjectFragmentShader = ResourcePath / "foreground_object.fs";

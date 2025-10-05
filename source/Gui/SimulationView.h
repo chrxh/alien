@@ -44,7 +44,6 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void setupObjectShader();
     void setupBackgroundObjectShader();
     void setupForegroundObjectShader();
     void setupBlurHorizontalShader();
@@ -66,15 +65,17 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    // Shader data for object rendering
-    Shader _objectShader;
-    Shader _backgroundObjectShader;
-    Shader _foregroundObjectShader;
     uint64_t _numObjects = 0;
-    unsigned int _objectTexture;
-    unsigned int _objectFbo;
-    unsigned int _objectTextureSmall;
-    unsigned int _objectFboSmall;
+
+    // Shader data for background object rendering
+    Shader _backgroundObjectShader;
+    unsigned int _backgroundObjectTexture;
+    unsigned int _backgroundObjectFbo;
+
+    // Shader data for foreground object rendering
+    Shader _foregroundObjectShader;
+    unsigned int _foregroundObjectTexture;
+    unsigned int _foregroundObjectFbo;
 
     // Shader data for blur preprocessing
     Shader _blurHorizontalShader;

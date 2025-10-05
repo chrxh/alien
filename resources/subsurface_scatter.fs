@@ -27,7 +27,7 @@ void main()
     // Scale with zoom: at high zoom (close up), reduce effect; at low zoom (far away), increase effect
     // Zoom typically ranges from ~0.5 (far) to ~50+ (close)
     float zoomScale = max(0.5, min(10.0, sqrt(zoom) / 5.0));
-    float scatterRadius = mix(12.0, 1.0, brightness) * zoomScale;
+    float scatterRadius = mix(12.0, 1.0, brightness) * zoomScale / 3;
     int radius = int(ceil(scatterRadius));
     
     int scanRadius = max(1, radius / 3);
