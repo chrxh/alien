@@ -270,36 +270,39 @@ void SimulationView::draw()
         float blurRadius = zoomFactor / 4;
 
         // Apply horizontal Gaussian blur preprocessing
-        glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
         _blurHorizontalShader->use();
         _blurHorizontalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
         _blurHorizontalShader->setFloat("blurRadius", blurRadius);
         glBindVertexArray(_blurHorizontalShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _objectTexture);
+        glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         //*****************************************************
         //* 4. Step: Apply vertical Gaussian blur to background
         //*****************************************************
-        glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
         _blurVerticalShader->use();
         _blurVerticalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
         _blurVerticalShader->setFloat("blurRadius", blurRadius);
         glBindVertexArray(_blurVerticalShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
+        glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         //***********************************************
         //* 5. Step: Apply metaballs effect to background
         //***********************************************
-        glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
         _metaballsShader->use();
         _metaballsShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
         glBindVertexArray(_metaballsShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
+        glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         //*********************************************
@@ -312,6 +315,8 @@ void SimulationView::draw()
         glBindVertexArray(_fresnelShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         //***********************************************************
@@ -324,6 +329,8 @@ void SimulationView::draw()
         glBindVertexArray(_subsurfaceScatterShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
+        glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         //****************************************************************
@@ -336,6 +343,8 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
+        glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
