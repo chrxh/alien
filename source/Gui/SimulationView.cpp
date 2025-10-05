@@ -343,6 +343,9 @@ void SimulationView::draw()
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         } else {
+            //*******************************************************************
+            //* 1. Step: Render objects for background to texture (objectTexture)
+            //*******************************************************************
             glBindFramebuffer(GL_FRAMEBUFFER, _backgroundObjectFbo);
             glViewport(0, 0, viewSize.x, viewSize.y);
 
@@ -375,7 +378,7 @@ void SimulationView::draw()
             glDisable(GL_BLEND);
 
             //*******************************************************
-            //* 3. Step: Apply horizontal Gaussian blur to background
+            //* 2. Step: Apply horizontal Gaussian blur to background
             //*******************************************************
             float blurRadius = 1.0f;
             //zoomFactor / 4;
@@ -392,7 +395,7 @@ void SimulationView::draw()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             //*****************************************************
-            //* 4. Step: Apply vertical Gaussian blur to background
+            //* 3. Step: Apply vertical Gaussian blur to background
             //*****************************************************
             _blurVerticalShader->use();
             _blurVerticalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
