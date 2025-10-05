@@ -14,10 +14,12 @@ struct RenderingData
 
     // New shader-based rendering data
     uint64_t capacity = 0;
-    VertexData* objectData = nullptr;
-    uint64_t* numObjects = nullptr;
+    uint64_t* numVertices = nullptr;
+    VertexData* vertices = nullptr;
+    void* vertices_openGlBuffer = nullptr;
 
     void init();
+    void registerBuffers(RenderBuffers const& buffers);
     void resizeImageIfNecessary(int2 const& newSize);
     void resizeObjectBufferIfNecessary(uint64_t numRequiredObjects);
     void free();

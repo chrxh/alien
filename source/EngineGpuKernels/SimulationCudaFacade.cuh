@@ -23,7 +23,6 @@
 #include "EngineInterface/StatisticsHistory.h"
 #include "EngineInterface/Definitions.h"
 
-#include "CudaRenderBuffers.cuh"
 #include "Definitions.cuh"
 #include "TO.cuh"
 
@@ -120,7 +119,6 @@ private:
     void initCuda();
 
     void registerRenderBuffers(RenderBuffers const& buffers);
-    void unregisterRenderBuffers();
 
     void syncAndCheck();
     void copyDataTOtoGpu(TO const& cudaDataTO, TO const& dataTO);
@@ -148,8 +146,6 @@ private:
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaTOProvider _cudaTOProvider;
     TOProvider _collectionTOProvider;
-
-    std::optional<CudaRenderBuffers> _cudaRenderBuffers;
 
     mutable std::mutex _mutexForStatistics;
     std::optional<std::chrono::steady_clock::time_point> _lastStatisticsUpdateTime;

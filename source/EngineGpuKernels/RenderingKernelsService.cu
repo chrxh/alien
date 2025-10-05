@@ -53,6 +53,6 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     renderingData.resizeObjectBufferIfNecessary(maxObjects);
 
     // Extract object data
-    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numObjects, 0, sizeof(uint64_t)));
-    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, renderingData.objectData, renderingData.numObjects);
+    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numVertices, 0, sizeof(uint64_t)));
+    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, renderingData.vertices, renderingData.numVertices);
 }
