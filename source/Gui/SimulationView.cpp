@@ -250,7 +250,7 @@ void SimulationView::draw()
 
             _foregroundObjectShader->use();
             _foregroundObjectShader->setFloat("zoom", zoomFactor);
-            _foregroundObjectShader->setFloat("radius", zoomFactor * 0.5f);
+            _foregroundObjectShader->setFloat("radius", std::max(4.0f, zoomFactor * 0.5f));
             _foregroundObjectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
             _foregroundObjectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
             _foregroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
