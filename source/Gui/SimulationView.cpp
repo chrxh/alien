@@ -35,7 +35,6 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     setupBlurHorizontalShader();
     setupBlurVerticalShader();
     setupMetaballsShader();
-    setupSubsurfaceShader();
     setupSubsurfaceScatterShader();
     setupFresnelShader();
     setupMergeShader();
@@ -53,9 +52,6 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     
     _metaballsShader->use();
     _metaballsShader->setInt("inputTexture", 0);
-    
-    _subsurfaceShader->use();
-    _subsurfaceShader->setInt("inputTexture", 0);
     
     _subsurfaceScatterShader->use();
     _subsurfaceScatterShader->setInt("inputTexture", 0);
@@ -660,42 +656,6 @@ void SimulationView::setupMetaballsShader()
     auto vao = _metaballsShader->getVao();
     auto vbo = _metaballsShader->getVbo();
     auto ebo = _metaballsShader->getEbo();
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Texture coordinate attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-}
-
-void SimulationView::setupSubsurfaceShader()
-{
-    _subsurfaceShader = std::make_shared<_Shader>(Const::SubsurfaceVertexShader, Const::SubsurfaceFragmentShader);
-
-    // Setup full-screen quad
-    float vertices[] = {
-        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
-        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
-        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
-    };
-    unsigned int indices[] = {
-        0, 1, 3,  // first triangle
-        1, 2, 3   // second triangle
-    };
-
-    auto vao = _subsurfaceShader->getVao();
-    auto vbo = _subsurfaceShader->getVbo();
-    auto ebo = _subsurfaceShader->getEbo();
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

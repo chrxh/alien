@@ -50,7 +50,6 @@ private:
     void setupBlurHorizontalShader();
     void setupBlurVerticalShader();
     void setupMetaballsShader();
-    void setupSubsurfaceShader();
     void setupSubsurfaceScatterShader();
     void setupFresnelShader();
     void setupMergeShader();
@@ -90,9 +89,6 @@ private:
     Shader _metaballsShader;
     unsigned int _metaballsTexture;
     unsigned int _metaballsFbo;
-
-    // Shader data for subsurface scattering post-processing (old combined shader)
-    Shader _subsurfaceShader;
 
     // Shader data for subsurface scattering post-processing (new separated shaders)
     Shader _subsurfaceScatterShader;
