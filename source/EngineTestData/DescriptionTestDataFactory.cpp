@@ -248,12 +248,12 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         return BaseGenomeDescription();
     case CellTypeGenome_Depot:
         return DepotGenomeDescription();
-    case CellTypeGenome_Constructor: {
+    case CellTypeGenome_Constructor:
         return ConstructorGenomeDescription()
             .autoTriggerInterval(45)
             .constructionActivationTime(85)
-            .provideEnergy(ProvideEnergy_FreeGeneration);
-    }
+            .provideEnergy(ProvideEnergy_FreeGeneration)
+            .constructionAngle(30.0f);
     case CellTypeGenome_Sensor:
         return SensorGenomeDescription()
             .autoTriggerInterval(70)
@@ -262,12 +262,11 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             .maxRange(30)
             .minDensity(0.25f)
             .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
-    case CellTypeGenome_Generator: {
+    case CellTypeGenome_Generator:
         return GeneratorGenomeDescription()
             .autoTriggerInterval(55)
             .pulseType(GeneratorPulseType_Alternation)
             .alternationInterval(4);
-    }
     case CellTypeGenome_Attacker:
         return AttackerGenomeDescription();
     case CellTypeGenome_Injector:

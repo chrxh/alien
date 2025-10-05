@@ -90,6 +90,8 @@ namespace
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
                         nodeTO.cellTypeData.constructor.geneIndex = node.cellTypeData.constructor.geneIndex;
                         nodeTO.cellTypeData.constructor.constructionActivationTime = node.cellTypeData.constructor.constructionActivationTime;
+                        nodeTO.cellTypeData.constructor.constructionAngle = node.cellTypeData.constructor.constructionAngle;
+                        nodeTO.cellTypeData.constructor.provideEnergy = node.cellTypeData.constructor.provideEnergy;
                         break;
                     case CellTypeGenome_Sensor:
                         nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;

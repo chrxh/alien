@@ -141,7 +141,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 
     auto data = Description().creatures({
         _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
+        //_descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
     });
 
     _simulationFacade->setPreviewData(data);

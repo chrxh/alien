@@ -633,7 +633,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
-    EXPECT_TRUE(getEnergy(data) < getEnergy(actualData));   // Preview specific: energy is provided for free
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
@@ -651,7 +651,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(1, hostConstructor._currentConcatenation);    // Preview specific: marking end since preview only produces one offspring
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
@@ -675,7 +675,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
-    EXPECT_TRUE(getEnergy(data) < getEnergy(actualData));  // Preview specific: energy is provided for free
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
@@ -693,7 +693,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
-    EXPECT_EQ(1, hostConstructor._currentConcatenation);  // Preview specific: marking end since preview only produces one offspring
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
 }
 
