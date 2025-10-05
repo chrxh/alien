@@ -49,5 +49,5 @@ void main()
     // Add Fresnel highlight to the color
     vec3 fresnelColor = color.rgb + vec3(fresnelIntensity);
     
-    FragColor = vec4(fresnelColor, 1.0f);
+    FragColor = clamp(vec4(fresnelColor, 1.0f), -1.0, 1.0);
 }

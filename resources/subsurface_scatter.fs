@@ -69,5 +69,5 @@ void main()
     vec3 glowColor = finalColor * 1.5; // Much stronger brightness boost for glow
     finalColor = mix(finalColor, glowColor, glowIntensity);
 
-    FragColor = vec4(scattered, 1.0f);//vec4(finalColor, 1.0f);
+    FragColor = clamp(vec4(scattered, 1.0f), -1.0, 1.0);//vec4(finalColor, 1.0f);
 }

@@ -302,6 +302,7 @@ void SimulationView::draw()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
         glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
+        //glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
