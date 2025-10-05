@@ -18,8 +18,8 @@ namespace Const
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const ObjectVertexShader = ShaderPath / "Object.vs";
-    std::filesystem::path const BackgroundObjectFragmentShader = ShaderPath / "BackgroundObject.fs";
-    std::filesystem::path const ForegroundObjectFragmentShader = ShaderPath / "ForegroundObject.fs";
+    std::filesystem::path const ObjectBackgroundFragmentShader = ShaderPath / "ObjectBackground.fs";
+    std::filesystem::path const ObjectForegroundFragmentShader = ShaderPath / "ObjectForeground.fs";
     std::filesystem::path const BlurHorizontalFragmentShader = ShaderPath / "BlurHorizontal.fs";
     std::filesystem::path const BlurHorizontalVertexShader = ShaderPath / "BlurHorizontal.vs";
     std::filesystem::path const BlurVerticalFragmentShader = ShaderPath / "BlurVertical.fs";

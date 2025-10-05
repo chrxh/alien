@@ -68,14 +68,14 @@ private:
     NumRenderObjects _numObjects;
 
     // Shader data for background object rendering
-    Shader _backgroundObjectShader;
-    unsigned int _backgroundObjectTexture;
-    unsigned int _backgroundObjectFbo;
+    Shader _objectBackgroundShader;
+    unsigned int _objectBackgroundTexture;
+    unsigned int _objectBackgroundFbo;
 
     // Shader data for foreground object rendering
-    Shader _foregroundObjectShader;
-    unsigned int _foregroundObjectTexture;
-    unsigned int _foregroundObjectFbo;
+    Shader _objectForegroundShader;
+    unsigned int _objectForegroundTexture;
+    unsigned int _objectForegroundFbo;
 
     // Shader data for blur preprocessing
     Shader _blurHorizontalShader;
