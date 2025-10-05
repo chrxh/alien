@@ -291,16 +291,6 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply subsurface scattering effect (step 1: scattering only)
-        glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
-        _subsurfaceScatterShader->use();
-        _subsurfaceScatterShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-        _subsurfaceScatterShader->setFloat("zoom", zoomFactor);
-        glBindVertexArray(_subsurfaceScatterShader->getVao());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
         // Apply Fresnel effect (step 2: Fresnel after subsurface scattering)
         glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
         _fresnelShader->use();
@@ -308,7 +298,17 @@ void SimulationView::draw()
         _fresnelShader->setFloat("zoom", zoomFactor);
         glBindVertexArray(_fresnelShader->getVao());
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
+        glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Apply subsurface scattering effect (step 1: scattering only)
+        glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
+        _subsurfaceScatterShader->use();
+        _subsurfaceScatterShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        _subsurfaceScatterShader->setFloat("zoom", zoomFactor);
+        glBindVertexArray(_subsurfaceScatterShader->getVao());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // Apply merge effect (step 3: merge with objectTextureSmall)

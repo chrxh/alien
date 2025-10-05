@@ -59,7 +59,7 @@ void main()
     // Add pronounced translucent glow effect
     // Simulate light passing through thin areas - increased from 0.3 to 0.7
     float glowIntensity = (1.0 - brightness) * 0.7;
-    vec3 glowColor = finalColor * 2.5; // Much stronger brightness boost for glow
+    vec3 glowColor = finalColor * 1.5; // Much stronger brightness boost for glow
     finalColor = mix(finalColor, glowColor, glowIntensity);
 
     FragColor = vec4(finalColor, 1.0f);
