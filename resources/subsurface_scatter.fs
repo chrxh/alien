@@ -26,16 +26,21 @@ void main()
     // Scatter radius based on inverse thickness (brighter = thicker = less scatter)
     // Scale with zoom: at high zoom (close up), reduce effect; at low zoom (far away), increase effect
     // Zoom typically ranges from ~0.5 (far) to ~50+ (close)
-    float zoomScale = max(0.5, min(2.0, 5.0 / zoom));
+    float zoomScale = max(0.5, min(10.0, sqrt(zoom) / 5.0));
     float scatterRadius = mix(12.0, 1.0, brightness) * zoomScale;
     int radius = int(ceil(scatterRadius));
     
+    int scanRadius = max(1, radius / 3);
+    int scanDist = 3;
+    if(radius < 3) {
+        scanDist = 1;
+    }
     // Subsurface scattering kernel - samples in a circular pattern
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
+    for (int y = -scanRadius; y <= scanRadius; y++) {
+        for (int x = -scanRadius; x <= scanRadius; x++) {
             float dist = length(vec2(x, y));
             if (dist <= scatterRadius) {
-                vec2 offset = vec2(x, y) * texelSize;
+                vec2 offset = vec2(x, y) * texelSize * scanDist;
                 vec4 sample = texture(inputTexture, texCoord + offset);
                 
                 // Weight based on distance and thickness
@@ -64,5 +69,5 @@ void main()
     vec3 glowColor = finalColor * 1.5; // Much stronger brightness boost for glow
     finalColor = mix(finalColor, glowColor, glowIntensity);
 
-    FragColor = vec4(finalColor, 1.0f);
+    FragColor = vec4(scattered, 1.0f);//vec4(finalColor, 1.0f);
 }

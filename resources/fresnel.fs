@@ -19,17 +19,14 @@ void main()
     // Sample the gradient to detect edges
     vec2 texelSize = 1.0 / viewportSize;
     
-    // Scale edge detection with zoom: at high zoom, use larger kernel; at low zoom, use smaller kernel
-    float zoomScale = max(0.5, min(2.0, 5.0 / zoom));
-    
     // Calculate gradient using Sobel-like operator
     float gradX = 0.0;
     float gradY = 0.0;
     
-    // Sample surrounding pixels with zoom-scaled offset
+    // Sample surrounding pixels
     for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
-            vec2 offset = vec2(x, y) * texelSize * zoomScale;
+            vec2 offset = vec2(x, y) * texelSize;
             float sample = dot(texture(inputTexture, texCoord + offset).rgb, vec3(0.333, 0.333, 0.333));
             
             // Sobel kernel for X direction
@@ -47,8 +44,7 @@ void main()
     
     // Apply Fresnel effect: enhance edges with a subtle highlight
     // Fresnel intensity is based on edge strength and inverse thickness
-    // Scale with zoom to maintain consistent effect
-    float fresnelIntensity = edgeStrength * (1.0 - brightness * 0.5) * 1.0 * zoomScale;
+    float fresnelIntensity = edgeStrength * (1.0 - brightness * 0.5) * 1.0 * zoom / 40.0;
     
     // Add Fresnel highlight to the color
     vec3 fresnelColor = color.rgb + vec3(fresnelIntensity);

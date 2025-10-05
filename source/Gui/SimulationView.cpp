@@ -308,7 +308,6 @@ void SimulationView::draw()
         //*********************************************
         //* 6. Step: Apply Fresnel effect to background
         //*********************************************
-        glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
         _fresnelShader->use();
         _fresnelShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
         _fresnelShader->setFloat("zoom", zoomFactor);
@@ -322,7 +321,6 @@ void SimulationView::draw()
         //***********************************************************
         //* 7. Step: Apply subsurface scattering effect to background
         //***********************************************************
-        glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
         _subsurfaceScatterShader->use();
         _subsurfaceScatterShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
         _subsurfaceScatterShader->setFloat("zoom", zoomFactor);
@@ -336,11 +334,10 @@ void SimulationView::draw()
         //****************************************************************
         //* 7. Step: Merge background with foreground and render to screen
         //****************************************************************
-        glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
         _mergeShader->use();
         glBindVertexArray(_mergeShader->getVao());
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
+        glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
         glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
