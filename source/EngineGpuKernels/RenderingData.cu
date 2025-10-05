@@ -6,9 +6,6 @@
 
 #include <cuda_gl_interop.h>
 
-#include "RenderingData.cuh"
-#include "CudaMemoryManager.cuh"
-
 
 void RenderingData::init()
 {
