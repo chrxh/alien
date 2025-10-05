@@ -6,6 +6,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
+#include "EngineInterface/RenderData.h"
 
 #include "Definitions.h"
 
@@ -65,7 +66,7 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    uint64_t _numObjects = 0;
+    NumRenderObjects _numObjects;
 
     // Shader data for background object rendering
     Shader _backgroundObjectShader;

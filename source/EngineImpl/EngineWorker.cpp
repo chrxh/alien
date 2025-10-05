@@ -7,6 +7,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Ids.h"
 #include "EngineInterface/NumberGenerator.h"
+#include "EngineInterface/RenderData.h"
 
 #include "EngineGpuKernels/TOProvider.cuh"
 #include "EngineGpuKernels/TO.cuh"
@@ -25,7 +26,6 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
     _settings = settings;
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
-    _cudaBufferResource = nullptr;
 }
 
 void EngineWorker::clear()
@@ -39,59 +39,16 @@ std::string EngineWorker::getGpuName() const
     return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
-void EngineWorker::tryDrawVectorGraphics(
-    RealVector2D const& rectUpperLeft,
-    RealVector2D const& rectLowerRight,
-    IntVector2D const& imageSize,
-    double zoom)
-{
-    //EngineWorkerGuard access(this, FrameTimeout);
-
-    //if (!access.isTimeout()) {
-    //    _simulationCudaFacade->drawVectorGraphics(
-    //        {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
-    //    syncSimulationWithRenderingIfDesired();
-    //}
-}
-
-std::optional<uint64_t> EngineWorker::tryUpdateObjectBuffersForShaders(void* buffer)
+std::optional<NumRenderObjects> EngineWorker::tryCopyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        GLuint bufferId = reinterpret_cast<uintptr_t>(buffer);
-        if (!_cudaBufferResource) {
-            _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
-        }
-
-        auto result = _simulationCudaFacade->extractObjectDataToBuffer(_cudaBufferResource);
+        auto result = _simulationCudaFacade->copyBuffersFromCudaToOpenGL(buffers);
         syncSimulationWithRenderingIfDesired();
 
         return result;
     }
-    return std::nullopt;
-}
-
-std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(
-    RealVector2D const& rectUpperLeft,
-    RealVector2D const& rectLowerRight,
-    IntVector2D const& imageSize,
-    double zoom)
-{
-    //EngineWorkerGuard access(this, FrameTimeout);
-
-    //if (!access.isTimeout()) {
-    //    _simulationCudaFacade->drawVectorGraphics(
-    //        {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
-
-    //    auto dataTO =
-    //        _simulationCudaFacade->getOverlayData({toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)}, int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)});
-
-    //    auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
-
-    //    syncSimulationWithRenderingIfDesired();
-    //    return result;
-    //}
     return std::nullopt;
 }
 

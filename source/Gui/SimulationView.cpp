@@ -8,7 +8,7 @@
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
-#include "EngineInterface/inc/ObjectRenderData.h"
+#include "EngineInterface/RenderData.h"
 
 #include "AlienGui.h"
 #include "SimulationScrollbars.h"
@@ -201,9 +201,10 @@ void SimulationView::draw()
         auto zoomFactor = Viewport::get().getZoomFactor();
 
         // Extract object data from CUDA and transfer to OpenGL buffer
-        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(reinterpret_cast<void*>(uintptr_t(_backgroundObjectShader->getVbo())));
-        if (numObjects.has_value()) {
-            _numObjects = *numObjects;
+        RenderBuffers renderBuffers{.vboForPoints = _backgroundObjectShader->getVbo()};
+        auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
+        if (numRenderObjects.has_value()) {
+            _numObjects = *numRenderObjects;
         }
         
         GLint screenFbo;
@@ -240,7 +241,7 @@ void SimulationView::draw()
 
             // Draw points
             glBindVertexArray(_backgroundObjectShader->getVao());
-            glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
+            glDrawArrays(GL_POINTS, 0, toInt(_numObjects.vertices));
 
             //*******************************************************************
             //* 2. Step: Render objects for foreground to texture (objectTexture)
@@ -257,7 +258,7 @@ void SimulationView::draw()
             _foregroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 
             glBindVertexArray(_foregroundObjectShader->getVao());
-            glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
+            glDrawArrays(GL_POINTS, 0, toInt(_numObjects.vertices));
 
             // Disable blending and point sprites
             glDisable(GL_PROGRAM_POINT_SIZE);
@@ -372,7 +373,7 @@ void SimulationView::draw()
 
             // Draw points
             glBindVertexArray(_backgroundObjectShader->getVao());
-            glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
+            glDrawArrays(GL_POINTS, 0, toInt(_numObjects.vertices));
 
             // Disable blending and point sprites
             glDisable(GL_PROGRAM_POINT_SIZE);
@@ -535,15 +536,15 @@ void SimulationView::setupBackgroundObjectShader()
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Color (3 floats)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 }
 
@@ -560,11 +561,11 @@ void SimulationView::setupForegroundObjectShader()
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Color (3 floats)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 }
 

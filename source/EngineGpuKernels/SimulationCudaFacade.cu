@@ -102,6 +102,9 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
 _SimulationCudaFacade::~_SimulationCudaFacade()
 {
+    if (_cudaRenderBuffers.has_value()) {
+        unregisterRenderBuffers();
+    }
     _cudaSimulationData->free();
     _cudaPreviewData->free();
     _cudaRenderingData->free();
@@ -123,28 +126,18 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
+NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
 {
-    //unregister old resource
-    if (_cudaBufferResource) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaBufferResource));
+    if (!_cudaRenderBuffers.has_value()) {
+        registerRenderBuffers(buffers);
     }
 
-    //register new resource
-    CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterBuffer(&_cudaBufferResource, buffer, cudaGraphicsMapFlagsWriteDiscard));
-
-    return reinterpret_cast<void*>(_cudaBufferResource);
-}
-
-uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResource)
-{
     checkAndProcessSimulationParameterChanges();
 
-    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaBufferResource);
+    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(_cudaRenderBuffers->bufferForPoints);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
 
-    ObjectRenderData* mappedBuffer;
+    VertexData* mappedBuffer;
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
         reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
@@ -154,20 +147,19 @@ uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResour
     syncAndCheck();
 
     // Copy to mapped OpenGL buffer
-    int numObjects;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&numObjects, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
+    NumRenderObjects result;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.vertices, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
     
-    if (numObjects > 0) {
+    if (result.vertices > 0) {
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(
             mappedBuffer,
-            _cudaRenderingData->objectData,
-            numObjects * sizeof(ObjectRenderData),
+            _cudaRenderingData->objectData, result.vertices * sizeof(VertexData),
             cudaMemcpyDeviceToDevice));
     }
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
 
-    return numObjects;
+    return result;
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
@@ -714,6 +706,29 @@ void _SimulationCudaFacade::initCuda()
     cudaGetLastError(); //reset error code
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
+}
+
+namespace
+{
+    void* registerBufferResource(GLuint buffer)
+    {
+        cudaGraphicsResource* result = nullptr;
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsGLRegisterBuffer(&result, buffer, cudaGraphicsMapFlagsWriteDiscard));
+
+        return reinterpret_cast<void*>(result);
+    }
+}
+
+void _SimulationCudaFacade::registerRenderBuffers(RenderBuffers const& buffers)
+{
+    CudaRenderBuffers cudaRenderBuffers;
+    cudaRenderBuffers.bufferForPoints = registerBufferResource(buffers.vboForPoints);
+    _cudaRenderBuffers = cudaRenderBuffers;
+}
+
+void _SimulationCudaFacade::unregisterRenderBuffers()
+{
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(reinterpret_cast<cudaGraphicsResource*>(_cudaRenderBuffers->bufferForPoints)));
 }
 
 auto _SimulationCudaFacade::checkAndReturnGpuInfo() -> GpuInfo

@@ -23,17 +23,7 @@ public:
 
     std::string getGpuName() const override;
 
-    /**
-     * Draws section of simulation to registered texture.
-     * If the GPU is busy for specific time, the texture will not be updated.
-     */
-    void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) override;
-    std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer) override;
-    std::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
-        RealVector2D const& rectUpperLeft,
-        RealVector2D const& rectLowerRight,
-        IntVector2D const& imageSize,
-        double zoom) override;
+    std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(RenderBuffers const& buffers) override;
 
     bool isSyncSimulationWithRendering() const override;
     void setSyncSimulationWithRendering(bool value) override;

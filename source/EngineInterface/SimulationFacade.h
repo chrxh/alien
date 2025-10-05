@@ -26,15 +26,11 @@ public:
     virtual std::string getGpuName() const = 0;
 
     /**
-     * Draws a section of simulation to a registered texture.
-     * If the GPU is busy for a specified duration, the texture will not be updated.
+     * Transfers the simulation data from CUDA to the provided buffer.
+     * Resizes buffers if necessary and fills it with data for rendering.
+     * If the GPU is busy for a specified duration, the buffers will not be updated and std::nullopt will be returned.
      */
-    virtual void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
-
-    virtual std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer) = 0;
-
-    virtual std::optional<OverlayDescription>
-    tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
+    virtual std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(RenderBuffers const& buffers) = 0;
 
     virtual bool isSyncSimulationWithRendering() const = 0;
     virtual void setSyncSimulationWithRendering(bool value) = 0;

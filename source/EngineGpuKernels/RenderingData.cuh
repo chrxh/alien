@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "EngineInterface/inc/ObjectRenderData.h"
+#include "EngineInterface/RenderData.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -14,7 +14,7 @@ struct RenderingData
 
     // New shader-based rendering data
     uint64_t capacity = 0;
-    ObjectRenderData* objectData = nullptr;
+    VertexData* objectData = nullptr;
     uint64_t* numObjects = nullptr;
 
     void init();

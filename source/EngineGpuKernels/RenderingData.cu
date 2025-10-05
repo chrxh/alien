@@ -20,7 +20,7 @@ void RenderingData::resizeObjectBufferIfNecessary(uint64_t numRequiredObjects)
 {
     if (numRequiredObjects > capacity) {
         CudaMemoryManager::getInstance().freeMemory(objectData);
-        CudaMemoryManager::getInstance().acquireMemory<ObjectRenderData>(numRequiredObjects * 2, objectData);
+        CudaMemoryManager::getInstance().acquireMemory<VertexData>(numRequiredObjects * 2, objectData);
         capacity = numRequiredObjects * 2;
     }
 }
