@@ -206,10 +206,12 @@ void SimulationView::draw()
             _numObjects = *numObjects;
         }
         
-        GLint currentFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        GLint screenFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &screenFbo);
 
-        // Render objects to texture using shaders
+        //*******************************************************************
+        //* 1. Step: Render objects for background to texture (objectTexture)
+        //*******************************************************************
         glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
         //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
         glViewport(0, 0, viewSize.x, viewSize.y);
@@ -239,7 +241,9 @@ void SimulationView::draw()
         glBindVertexArray(_objectShader->getVao());
         glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
 
-        // Render objects to small texture with half radius
+        //*******************************************************************
+        //* 2. Step: Render objects for foreground to texture (objectTexture)
+        //*******************************************************************
         glBindFramebuffer(GL_FRAMEBUFFER, _objectFboSmall);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -259,7 +263,10 @@ void SimulationView::draw()
         glDisable(GL_PROGRAM_POINT_SIZE);
         glDisable(GL_BLEND);
 
-        // Calculate blur radius based on zoom
+
+        //*******************************************************
+        //* 3. Step: Apply horizontal Gaussian blur to background
+        //*******************************************************
         float blurRadius = zoomFactor / 4;
 
         // Apply horizontal Gaussian blur preprocessing
@@ -272,7 +279,9 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _objectTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply vertical Gaussian blur preprocessing
+        //*****************************************************
+        //* 4. Step: Apply vertical Gaussian blur to background
+        //*****************************************************
         glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
         _blurVerticalShader->use();
         _blurVerticalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -282,7 +291,9 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply metaballs post-processing effect
+        //***********************************************
+        //* 5. Step: Apply metaballs effect to background
+        //***********************************************
         glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
         _metaballsShader->use();
         _metaballsShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -291,7 +302,9 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply Fresnel effect (step 2: Fresnel after subsurface scattering)
+        //*********************************************
+        //* 6. Step: Apply Fresnel effect to background
+        //*********************************************
         glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
         _fresnelShader->use();
         _fresnelShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -301,7 +314,9 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply subsurface scattering effect (step 1: scattering only)
+        //***********************************************************
+        //* 7. Step: Apply subsurface scattering effect to background
+        //***********************************************************
         glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
         _subsurfaceScatterShader->use();
         _subsurfaceScatterShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -311,8 +326,10 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply merge effect (step 3: merge with objectTextureSmall)
-        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+        //****************************************************************
+        //* 7. Step: Merge background with foreground and render to screen
+        //****************************************************************
+        glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
         _mergeShader->use();
         glBindVertexArray(_mergeShader->getVao());
         glActiveTexture(GL_TEXTURE0);
