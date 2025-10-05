@@ -17,53 +17,42 @@ void RenderingData::init()
 
 namespace
 {
-    void* registerBufferResource(GLuint buffer)
+    cudaGraphicsResource* registerBufferResource(GLuint buffer)
     {
         cudaGraphicsResource* result = nullptr;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsGLRegisterBuffer(&result, buffer, cudaGraphicsMapFlagsWriteDiscard));
 
-        return reinterpret_cast<void*>(result);
+        return result;
     }
 
-    void unregisterBufferResource(void* buffer)
+    void unregisterBufferResource(cudaGraphicsResource* buffer)
     {
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(reinterpret_cast<cudaGraphicsResource*>(buffer)));
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(buffer));
     }
 }
 
 void RenderingData::registerBuffers(RenderBuffers const& buffers)
 {
-    if (vertices_openGlBuffer != nullptr) {
-        unregisterBufferResource(vertices_openGlBuffer);
+    if (vertexBuffer != nullptr) {
+        unregisterBufferResource(vertexBuffer);
     }
-    vertices_openGlBuffer = registerBufferResource(buffers.vboForPoints);
-}
-
-void RenderingData::resizeImageIfNecessary(int2 const& newSize)
-{
-    if (newSize.x * newSize.y > numPixels) {
-        CudaMemoryManager::getInstance().freeMemory(imageData);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(newSize.x * newSize.y, imageData);
-        numPixels = newSize.x * newSize.y;
-    }
+    vertexBuffer = registerBufferResource(buffers.vboForPoints);
 }
 
 void RenderingData::resizeObjectBufferIfNecessary(uint64_t numRequiredObjects)
 {
-    if (numRequiredObjects > capacity) {
-        CudaMemoryManager::getInstance().freeMemory(vertices);
-        CudaMemoryManager::getInstance().acquireMemory<VertexData>(numRequiredObjects * 2, vertices);
-        capacity = numRequiredObjects * 2;
-    }
+    //if (numRequiredObjects > capacity) {
+    //    CudaMemoryManager::getInstance().freeMemory(vertices);
+    //    CudaMemoryManager::getInstance().acquireMemory<VertexData>(numRequiredObjects * 2, vertices);
+    //    capacity = numRequiredObjects * 2;
+    //}
 }
 
 void RenderingData::free()
 {
-    if (vertices_openGlBuffer != nullptr) {
-        unregisterBufferResource(vertices_openGlBuffer);
+    if (vertexBuffer != nullptr) {
+        unregisterBufferResource(vertexBuffer);
     }
 
-    CudaMemoryManager::getInstance().freeMemory(imageData);
-    CudaMemoryManager::getInstance().freeMemory(vertices);
     CudaMemoryManager::getInstance().freeMemory(numVertices);
 }

@@ -129,14 +129,6 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffer
 
     _cudaRenderingData->registerBuffers(buffers);
 
-    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(_cudaRenderingData->vertices_openGlBuffer);
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
-
-    VertexData* mappedBuffer;
-    size_t bufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
-        reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
-
     // Extract object data to temporary buffer
     _renderingKernels->extractObjectData(_settings, getSimulationDataPtrCopy(), *_cudaRenderingData);
     syncAndCheck();
@@ -145,15 +137,6 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffer
     NumRenderObjects result;
     CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.vertices, _cudaRenderingData->numVertices, sizeof(int), cudaMemcpyDeviceToHost));
     
-    if (result.vertices > 0) {
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-            mappedBuffer,
-            _cudaRenderingData->vertices, result.vertices * sizeof(VertexData),
-            cudaMemcpyDeviceToDevice));
-    }
-
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
-
     return result;
 }
 
@@ -198,40 +181,6 @@ void _SimulationCudaFacade::applyCataclysm(int power)
         syncAndCheck();
         resizeArraysIfNecessary();
     }
-}
-
-void _SimulationCudaFacade::drawVectorGraphics(
-    float2 const& rectUpperLeft,
-    float2 const& rectLowerRight,
-    void* cudaResource,
-    int2 const& imageSize,
-    double zoom)
-{
-    checkAndProcessSimulationParameterChanges();
-
-    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
-
-    cudaArray* mappedArray;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
-
-    _cudaRenderingData->resizeImageIfNecessary(imageSize);
-
-    _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataPtrCopy(), *_cudaRenderingData);
-    syncAndCheck();
-
-    const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
-        mappedArray,
-        0,
-        0,
-        _cudaRenderingData->imageData,
-        widthBytes,
-        widthBytes,
-        imageSize.y,
-        cudaMemcpyDeviceToDevice));
-
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
 }
 
 TO _SimulationCudaFacade::getSimulationData(

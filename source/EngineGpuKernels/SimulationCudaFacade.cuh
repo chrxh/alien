@@ -46,8 +46,6 @@ public:
 
     Ids getMaxIds() const;
 
-    void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
-    // Return number of extracted objects
     NumRenderObjects copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers);
     TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TO getSelectedSimulationData(bool includeClusters);
