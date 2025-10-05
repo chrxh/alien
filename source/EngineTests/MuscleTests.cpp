@@ -412,7 +412,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.2f)))
+            .cellType(MuscleDescription().mode(ManualBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).forwardBackwardRatio(0.8f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
     data.addConnection(1, 2);
@@ -581,7 +581,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
             .id(4)
             .pos({side == Side::Left ? 9.0f : 11.0f, 11.0f})
             .frontAngle(side == Side::Left ? -90.0f : 90.0f)
-            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.2f)))
+            .cellType(MuscleDescription().mode(AngleBendingDescription().maxAngleDeviation(MaxAngleDeviation * 2 / 90.0f).attractionRepulsionRatio(0.8f)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, 1.0f).weight(1, 0, targetAngle / 180.0f)),
     });
     data.addConnection(1, 2);
@@ -636,13 +636,14 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
     auto channel0 = GetParam();
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
+            .frontAngle(180.0f)
             .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
-        CellDescription().id(3).pos({12.0f, 10.0f}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).frontAngle(180.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -701,10 +702,11 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
     auto channel0 = GetParam();
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
+            .frontAngle(180.0f)
             .cellType(MuscleDescription().mode(AutoCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
@@ -770,13 +772,14 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
     auto channel0 = GetParam();
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
+            .frontAngle(180.0f)
             .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
-        CellDescription().id(3).pos({12.0f, 10.0f}),
+        CellDescription().id(3).pos({12.0f, 10.0f}).frontAngle(180.0f),
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -805,11 +808,11 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
         EXPECT_TRUE(approxCompare(1.0f, minDistance));
         EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     } else if (channel0 == Channel0::Positive) {
-        EXPECT_TRUE(approxCompare(1.0f - MaxDistanceDeviation, minDistance));
-        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
-    } else if (channel0 == Channel0::Negative) {
         EXPECT_TRUE(approxCompare(1.0f, minDistance));
         EXPECT_TRUE(approxCompare(1.0f + MaxDistanceDeviation, maxDistance));
+    } else if (channel0 == Channel0::Negative) {
+        EXPECT_TRUE(approxCompare(1.0f - MaxDistanceDeviation, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     }
 }
 
@@ -820,10 +823,11 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
     auto channel0 = GetParam();
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).frontAngle(0.0f).cellType(GeneratorDescription().autoTriggerInterval(10)),
         CellDescription()
             .id(2)
             .pos({11.0f, 10.0f})
+            .frontAngle(180.0f)
             .cellType(MuscleDescription().mode(ManualCrawlingDescription().maxDistanceDeviation(MaxDistanceDeviation)))
             .neuralNetwork(NeuralNetworkDescription().weight(0, 0, getValue(channel0))),
     });
@@ -853,11 +857,11 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
         EXPECT_TRUE(approxCompare(1.0f, minDistance));
         EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     } else if (channel0 == Channel0::Positive) {
-        EXPECT_TRUE(approxCompare(1.0f - MaxDistanceDeviation, minDistance));
-        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
-    } else if (channel0 == Channel0::Negative) {
         EXPECT_TRUE(approxCompare(1.0f, minDistance));
         EXPECT_TRUE(approxCompare(1.0f + MaxDistanceDeviation, maxDistance));
+    } else if (channel0 == Channel0::Negative) {
+        EXPECT_TRUE(approxCompare(1.0f - MaxDistanceDeviation, minDistance));
+        EXPECT_TRUE(approxCompare(1.0f, maxDistance));
     }
 }
 
