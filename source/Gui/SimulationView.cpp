@@ -44,6 +44,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _postProcessingShader->setInt("texture3", 2);
     _postProcessingShader->setBool("glowEffect", true);
     _postProcessingShader->setBool("motionEffect", true);
+
     updateMotionBlur();
     setBrightness(1.0f);
     setContrast(1.0f);
@@ -63,13 +64,13 @@ void SimulationView::resize(IntVector2D const& size)
         glDeleteFramebuffers(1, &_fbo1);
         glDeleteFramebuffers(1, &_fbo2);
         glDeleteFramebuffers(1, &_objectFbo);
+        glDeleteTextures(1, &_objectTexture);
         glDeleteTextures(1, &_textureFramebufferId1);
         glDeleteTextures(1, &_textureFramebufferId2);
-        glDeleteTextures(1, &_objectTexture);
         _areTexturesInitialized = true;
     }
-    
-    // Create texture for object rendering
+
+    // Init textures
     glGenTextures(1, &_objectTexture);
     glBindTexture(GL_TEXTURE_2D, _objectTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -77,12 +78,6 @@ void SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, NULL);
-
-    // Create FBO for object rendering
-    glGenFramebuffers(1, &_objectFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTexture, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glGenTextures(1, &_textureFramebufferId1);
     glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
@@ -100,6 +95,12 @@ void SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
 
+    // Init framebuffers
+    glGenFramebuffers(1, &_objectFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     glGenFramebuffers(1, &_fbo1);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);  
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId1, 0);
@@ -116,6 +117,7 @@ void SimulationView::resize(IntVector2D const& size)
 void SimulationView::draw()
 {
     if (_renderSimulation) {
+        auto worldSize = _simulationFacade->getWorldSize();
         auto worldRect = Viewport::get().getVisibleWorldRect();
         auto viewSize = Viewport::get().getViewSize();
         auto zoomFactor = Viewport::get().getZoomFactor();
@@ -147,10 +149,10 @@ void SimulationView::draw()
 
         // Use object shader
         _objectShader->use();
-        _objectShader->setFloat("zoom", static_cast<float>(zoomFactor));
-        _objectShader->setVec2("worldSize", static_cast<float>(_simulationFacade->getWorldSize().x), static_cast<float>(_simulationFacade->getWorldSize().y));
-        _objectShader->setVec2("rectUpperLeft", static_cast<float>(worldRect.topLeft.x), static_cast<float>(worldRect.topLeft.y));
-        _objectShader->setVec2("viewportSize", static_cast<float>(viewSize.x), static_cast<float>(viewSize.y));
+        _objectShader->setFloat("zoom", zoomFactor);
+        _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+        _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+        _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 
         // Draw points
         glBindVertexArray(_objectShader->getVao());
