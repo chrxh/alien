@@ -45,6 +45,7 @@ public:
 
 private:
     void setupObjectShader();
+    void setupBlurShader();
     void setupMetaballsShader();
 
     void markReferenceDomain();
@@ -63,6 +64,11 @@ private:
     uint64_t _numObjects = 0;
     unsigned int _objectTexture;
     unsigned int _objectFbo;
+
+    // Shader data for blur preprocessing
+    Shader _blurShader;
+    unsigned int _blurTexture;
+    unsigned int _blurFbo;
 
     // Shader data for metaballs post-processing
     Shader _metaballsShader;
