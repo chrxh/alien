@@ -53,5 +53,4 @@ __global__ void cudaExtractObjectData(
     Array<Particle*> particles,
     RenderingObjectData* objectData,
     int* numObjects,
-    int maxObjects,
     float zoom);

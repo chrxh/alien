@@ -18,10 +18,10 @@ void RenderingData::resizeImageIfNecessary(int2 const& newSize)
 
 void RenderingData::resizeObjectBufferIfNecessary(int maxNumObjects)
 {
-    if (maxNumObjects > maxObjects) {
+    if (maxNumObjects > capacity) {
         CudaMemoryManager::getInstance().freeMemory(objectData);
         CudaMemoryManager::getInstance().acquireMemory<RenderingObjectData>(maxNumObjects, objectData);
-        maxObjects = maxNumObjects;
+        capacity = maxNumObjects;
     }
 }
 

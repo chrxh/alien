@@ -180,7 +180,7 @@ void _SimulationCudaFacade::extractObjectDataToBuffer(
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(
             mappedBuffer,
             _cudaRenderingData->objectData,
-            min(numObjects, _cudaRenderingData->maxObjects) * sizeof(RenderingObjectData),
+            numObjects * sizeof(RenderingObjectData),
             cudaMemcpyDeviceToDevice));
     }
 

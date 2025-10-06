@@ -50,7 +50,7 @@ void _RenderingKernelsService::extractObjectData(
     float2 rectLowerRight,
     float zoom,
     SimulationData data,
-    RenderingData renderingData)
+    RenderingData& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
     
@@ -59,6 +59,7 @@ void _RenderingKernelsService::extractObjectData(
     renderingData.resizeObjectBufferIfNecessary(maxObjects);
 
     // Extract object data
+    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numObjects, 0, sizeof(int)));
     KERNEL_CALL(
         cudaExtractObjectData,
         data.worldSize,
@@ -68,6 +69,5 @@ void _RenderingKernelsService::extractObjectData(
         data.objects.particles,
         renderingData.objectData,
         renderingData.numObjects,
-        maxObjects,
         zoom);
 }

@@ -39,10 +39,10 @@ void EngineWorker::setImageResource(void* image)
     GLuint imageId = reinterpret_cast<uintptr_t>(image);
     _imageResource = imageId;
 
-    if (_simulationCudaFacade) {
-        EngineWorkerGuard access(this);
-        _cudaResource = _simulationCudaFacade->registerImageResource(imageId);
-    }
+    //if (_simulationCudaFacade) {
+    //    EngineWorkerGuard access(this);
+    //    _cudaResource = _simulationCudaFacade->registerImageResource(imageId);
+    //}
 }
 
 void EngineWorker::setBufferResource(void* buffer)
@@ -50,10 +50,10 @@ void EngineWorker::setBufferResource(void* buffer)
     GLuint bufferId = reinterpret_cast<uintptr_t>(buffer);
     _bufferResource = bufferId;
 
-    if (_simulationCudaFacade) {
-        EngineWorkerGuard access(this);
-        _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
-    }
+    //if (_simulationCudaFacade) {
+    //    EngineWorkerGuard access(this);
+    //    _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
+    //}
 }
 
 std::string EngineWorker::getGpuName() const

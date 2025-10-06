@@ -18,7 +18,7 @@ struct RenderingData
     uint64_t* imageData = nullptr;  //pixel in bbbbggggrrrr format (3 x 16 bit + 16 bit unused)
 
     // New shader-based rendering data
-    int maxObjects = 0;
+    int capacity = 0;
     RenderingObjectData* objectData = nullptr;
     int* numObjects = nullptr;
 

@@ -28,5 +28,5 @@ public:
         float2 rectLowerRight,
         float zoom,
         SimulationData data,
-        RenderingData renderingData);
+        RenderingData& renderingData);
 };

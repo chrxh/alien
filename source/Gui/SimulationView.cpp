@@ -73,14 +73,14 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    //----------------------------
+
     // Setup object rendering VAO and VBO
     glGenVertexArrays(1, &_objectVao);
     glGenBuffers(1, &_objectVbo);
     
     glBindVertexArray(_objectVao);
     glBindBuffer(GL_ARRAY_BUFFER, _objectVbo);
-    
-    // Allocate buffer for maximum expected objects (will be resized if needed)
     glBufferData(GL_ARRAY_BUFFER, 100000 * sizeof(RenderingObjectData), nullptr, GL_DYNAMIC_DRAW);
     
     // Setup vertex attributes for RenderingObjectData
@@ -182,40 +182,40 @@ void SimulationView::draw()
     if (_renderSimulation) {
         updateImageFromSimulationWithShaders();
 
-        _shader->use();
+        //_shader->use();
 
-        GLint currentFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        //GLint currentFbo;
+        //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
-        // Post-processing pipeline (horizontal blur)
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _shader->setInt("phase", 0);
-        glBindVertexArray(_vao);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //// Post-processing pipeline (horizontal blur)
+        //glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
+        //_shader->setInt("phase", 0);
+        //glBindVertexArray(_vao);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, _objectTexture);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Post-processing pipeline (vertical blur + mix)
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _shader->setInt("phase", 1);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //// Post-processing pipeline (vertical blur + mix)
+        //glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+        //_shader->setInt("phase", 1);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, _objectTexture);
+        //glActiveTexture(GL_TEXTURE1);
+        //glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
+        //glActiveTexture(GL_TEXTURE2);
+        //glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Final render to screen
-        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _shader->setInt("phase", 2);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //// Final render to screen
+        //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+        //_shader->setInt("phase", 2);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
-            markReferenceDomain();
-        }
+        //if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
+        //    markReferenceDomain();
+        //}
 
     } else {
         glClearColor(0, 0, 0.0f, 1.0f);
@@ -344,9 +344,12 @@ void SimulationView::updateImageFromSimulationWithShaders()
     
     // Get number of objects to render
     int numObjects = _simulationFacade->getNumExtractedObjects();
-    
+
+    //GLint currentFbo;
+    //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+
     // Render objects to texture using shaders
-    glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
+    //glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
     glViewport(0, 0, viewSize.x, viewSize.y);
     
     // Clear with black background
@@ -375,7 +378,7 @@ void SimulationView::updateImageFromSimulationWithShaders()
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
     
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
 }
 
 void SimulationView::markReferenceDomain()

@@ -13,7 +13,7 @@ uniform vec2 viewportSize;
 
 void main()
 {
-    vColor = aColor;
+    vColor = aColor; //vec3(1.0, 1.0, 1.0);
     vRadius = aRadius;
     
     // Transform world position to normalized device coordinates
@@ -21,7 +21,6 @@ void main()
     vec2 screenPos = relativePos * zoom;
     vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
     ndc.y = -ndc.y; // Flip Y coordinate
-    
     gl_Position = vec4(ndc, 0.0, 1.0);
-    gl_PointSize = aRadius * 2.0;
+    gl_PointSize = zoom * 0.5;
 }
