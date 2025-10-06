@@ -1,10 +1,8 @@
 #version 330 core
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec3 aColor;
-layout (location = 2) in float aRadius;
 
 out vec3 vColor;
-out float vRadius;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -13,8 +11,7 @@ uniform vec2 viewportSize;
 
 void main()
 {
-    vColor = aColor; //vec3(1.0, 1.0, 1.0);
-    vRadius = aRadius;
+    vColor = aColor;
     
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos - rectUpperLeft;

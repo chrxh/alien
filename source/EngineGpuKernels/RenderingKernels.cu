@@ -802,7 +802,7 @@ __global__ void cudaExtractObjectData(
         auto color = calcColor(cell, cell->selected, cudaSimulationParameters.primaryCellColoring.value, true);
 
         //// Calculate radius based on zoom
-        auto radius = 0.5f * zoom;
+        //auto radius = 0.5f * zoom;
 
         // Add to output buffer
         int objIndex = atomicAdd(numObjects, 1);
@@ -810,6 +810,6 @@ __global__ void cudaExtractObjectData(
         objectData[objIndex].color.x = 0.5f;
         objectData[objIndex].color.y = 1.0f;
         objectData[objIndex].color.z = 1.0f;
-        objectData[objIndex].radius = radius;
+        //objectData[objIndex].radius = radius;
     }
 }

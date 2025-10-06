@@ -2,7 +2,6 @@
 out vec4 FragColor;
 
 in vec3 vColor;
-in float vRadius;
 
 void main()
 {
@@ -11,12 +10,12 @@ void main()
     float dist = length(coord);
     
     // Discard pixels outside the circle
-     if (dist > 1.5) {
+     if (dist > 0.5) {
          discard;
      }
     
     // Apply smooth anti-aliasing at edges
     float alpha = 1.0 - smoothstep(0.4, 0.5, dist);
     
-    FragColor = vec4(vColor, 1.0); //vec4(1.0, 1.0, 1.0, 1.0);
+    FragColor = vec4(vColor, alpha);
 }

@@ -93,8 +93,8 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     glEnableVertexAttribArray(1);
     
     // Radius (float)
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    //glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)(5 * sizeof(float)));
+    //glEnableVertexAttribArray(2);
 
     // Register OpenGL buffer with CUDA
     _simulationFacade->setBufferResource(reinterpret_cast<void*>(uintptr_t(_objectVbo)));
@@ -362,7 +362,8 @@ void SimulationView::updateImageFromSimulationWithShaders()
     
     // Enable point sprites
     glEnable(GL_PROGRAM_POINT_SIZE);
-    
+    glEnable(GL_POINT_SPRITE); 
+
     // Use object shader
     _objectShader->use();
     _objectShader->setFloat("zoom", static_cast<float>(zoomFactor));
@@ -375,8 +376,8 @@ void SimulationView::updateImageFromSimulationWithShaders()
     glDrawArrays(GL_POINTS, 0, numObjects);
     
     // Disable blending and point sprites
-    glDisable(GL_PROGRAM_POINT_SIZE);
-    glDisable(GL_BLEND);
+//    glDisable(GL_PROGRAM_POINT_SIZE);
+    //glDisable(GL_BLEND);
     
     //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
 }
