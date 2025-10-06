@@ -49,7 +49,7 @@ public:
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
     // Return number of objects if successful, std::nullopt if not
-    std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom);
+    std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer);
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 

@@ -44,13 +44,7 @@ void _RenderingKernelsService::drawImage(
     }
 }
 
-void _RenderingKernelsService::extractObjectData(
-    SettingsForSimulation const& settings,
-    float2 rectUpperLeft,
-    float2 rectLowerRight,
-    float zoom,
-    SimulationData data,
-    RenderingData& renderingData)
+void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, RenderingData& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
     
@@ -60,14 +54,5 @@ void _RenderingKernelsService::extractObjectData(
 
     // Extract object data
     CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numObjects, 0, sizeof(int)));
-    KERNEL_CALL(
-        cudaExtractObjectData,
-        data.worldSize,
-        rectUpperLeft,
-        rectLowerRight,
-        data.objects.cells,
-        data.objects.particles,
-        renderingData.objectData,
-        renderingData.numObjects,
-        zoom);
+    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, renderingData.objectData, renderingData.numObjects);
 }

@@ -54,7 +54,7 @@ void EngineWorker::tryDrawVectorGraphics(
     //}
 }
 
-std::optional<uint64_t> EngineWorker::tryUpdateObjectBuffersForShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom)
+std::optional<uint64_t> EngineWorker::tryUpdateObjectBuffersForShaders(void* buffer)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
@@ -64,8 +64,7 @@ std::optional<uint64_t> EngineWorker::tryUpdateObjectBuffersForShaders(void* buf
             _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
         }
 
-        auto result = _simulationCudaFacade->extractObjectDataToBuffer(
-            _cudaBufferResource, {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, zoom);
+        auto result = _simulationCudaFacade->extractObjectDataToBuffer(_cudaBufferResource);
         syncSimulationWithRenderingIfDesired();
 
         return result;

@@ -768,15 +768,7 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(
-    int2 worldSize,
-    float2 rectUpperLeft,
-    float2 rectLowerRight,
-    Array<Cell*> cells,
-    Array<Particle*> particles,
-    RenderingObjectData* objectData,
-    int* numObjects,
-    float zoom)
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, RenderingObjectData* objectData, int* numObjects)
 {
     auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -793,10 +785,6 @@ __global__ void cudaExtractObjectData(
         // Check if cell is in visible region
         auto pos = cell->pos;
         map.correctPosition(pos);
-
-        if (pos.x < rectUpperLeft.x || pos.x > rectLowerRight.x || pos.y < rectUpperLeft.y || pos.y > rectLowerRight.y) {
-            continue;
-        }
 
         // Calculate color
         auto color = calcColor(cell, cell->selected, cudaSimulationParameters.primaryCellColoring.value, true);

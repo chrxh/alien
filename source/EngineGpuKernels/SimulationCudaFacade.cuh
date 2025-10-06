@@ -50,7 +50,7 @@ public:
 
     void drawVectorGraphics(float2 const& rectUpperLeft, float2 const& rectLowerRight, void* cudaResource, int2 const& imageSize, double zoom);
     // Return number of extracted objects
-    uint64_t extractObjectDataToBuffer(void* cudaBufferResource, float2 const& rectUpperLeft, float2 const& rectLowerRight, double zoom);
+    uint64_t extractObjectDataToBuffer(void* cudaBufferResource);
     TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);

@@ -137,10 +137,7 @@ void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
     return reinterpret_cast<void*>(_cudaBufferResource);
 }
 
-uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResource,
-    float2 const& rectUpperLeft,
-    float2 const& rectLowerRight,
-    double zoom)
+uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResource)
 {
     checkAndProcessSimulationParameterChanges();
 
@@ -153,8 +150,7 @@ uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResour
         reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
 
     // Extract object data to temporary buffer
-    _renderingKernels->extractObjectData(
-        _settings, rectUpperLeft, rectLowerRight, static_cast<float>(zoom), getSimulationDataPtrCopy(), *_cudaRenderingData);
+    _renderingKernels->extractObjectData(_settings, getSimulationDataPtrCopy(), *_cudaRenderingData);
     syncAndCheck();
 
     // Copy to mapped OpenGL buffer

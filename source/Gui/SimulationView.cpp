@@ -120,8 +120,7 @@ void SimulationView::draw()
         auto zoomFactor = Viewport::get().getZoomFactor();
 
         // Extract object data from CUDA and transfer to OpenGL buffer
-        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(
-            reinterpret_cast<void*>(uintptr_t(_objectShader->getVbo())), worldRect.topLeft, worldRect.bottomRight, zoomFactor);
+        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(reinterpret_cast<void*>(uintptr_t(_objectShader->getVbo())));
         if (numObjects.has_value()) {
             _numObjects = *numObjects;
         }
