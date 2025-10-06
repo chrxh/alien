@@ -786,18 +786,12 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         auto pos = cell->pos;
         map.correctPosition(pos);
 
-        // Calculate color
-        auto color = calcColor(cell, cell->selected, cudaSimulationParameters.primaryCellColoring.value, true);
-
-        //// Calculate radius based on zoom
-        //auto radius = 0.5f * zoom;
-
         // Add to output buffer
         uint64_t objIndex = alienAtomicAdd64(numObjects, uint64_t(1));
         objectData[objIndex].pos[0] = pos.x;
         objectData[objIndex].pos[1] = pos.y;
-        objectData[objIndex].color[0] = color.x;
-        objectData[objIndex].color[1] = color.y;
-        objectData[objIndex].color[2] = color.z;
+        objectData[objIndex].color[0] = 1.0;
+        objectData[objIndex].color[1] = 0.0;
+        objectData[objIndex].color[2] = 0.0;
     }
 }
