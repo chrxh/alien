@@ -58,14 +58,14 @@ void SimulationView::resize(IntVector2D const& size)
         _areTexturesInitialized = true;
     }
 
-    // Init textures
+    // Init textures - use RGBA16F for proper floating point color handling
     glGenTextures(1, &_objectTexture);
     glBindTexture(GL_TEXTURE_2D, _objectTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     // Init framebuffers
     glGenFramebuffers(1, &_objectFbo);

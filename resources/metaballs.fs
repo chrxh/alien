@@ -11,13 +11,20 @@ void main()
     // Sample the input texture
     vec4 color = texture(inputTexture, texCoord);
     
-    // Metaballs effect: threshold the alpha channel to create blob-like appearance
-    float threshold = 0.5;
-    float alphaValue = color.a;
+    // For metaballs effect, use the luminance/brightness as the density
+    // This works even when alpha is 1 by treating bright colors as "dense" areas
+    float luminance = dot(color.rgb, vec3(0.299, 0.587, 0.114));
     
-    // Apply threshold with smoothstep for smooth edges
-    float metaball = smoothstep(threshold - 0.1, threshold + 0.1, alphaValue);
+    // Also incorporate alpha for smoother edges from anti-aliasing
+    float density = luminance * color.a;
     
-    // Output with metaball effect applied
-    FragColor = vec4(color.rgb, metaball);
+    // Apply metaballs threshold with smoothstep for smooth blob-like edges
+    float threshold = 0.3;
+    float smoothRange = 0.2;
+    float metaball = smoothstep(threshold - smoothRange, threshold + smoothRange, density);
+    
+    // Output with metaball effect - modulate color intensity
+    vec3 outputColor = color.rgb * metaball;
+    
+    FragColor = vec4(outputColor, 1.0);
 }
