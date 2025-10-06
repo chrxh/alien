@@ -45,7 +45,8 @@ public:
 
 private:
     void setupObjectShader();
-    void setupBlurShader();
+    void setupBlurHorizontalShader();
+    void setupBlurVerticalShader();
     void setupMetaballsShader();
 
     void markReferenceDomain();
@@ -66,9 +67,12 @@ private:
     unsigned int _objectFbo;
 
     // Shader data for blur preprocessing
-    Shader _blurShader;
-    unsigned int _blurTexture;
-    unsigned int _blurFbo;
+    Shader _blurHorizontalShader;
+    Shader _blurVerticalShader;
+    unsigned int _blurHorizontalTexture;
+    unsigned int _blurHorizontalFbo;
+    unsigned int _blurVerticalTexture;
+    unsigned int _blurVerticalFbo;
 
     // Shader data for metaballs post-processing
     Shader _metaballsShader;

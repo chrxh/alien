@@ -20,8 +20,10 @@ namespace Const
     std::filesystem::path const SimulationVertexShader = ResourcePath / "shader.vs";
     std::filesystem::path const ObjectFragmentShader = ResourcePath / "object.fs";
     std::filesystem::path const ObjectVertexShader = ResourcePath / "object.vs";
-    std::filesystem::path const BlurFragmentShader = ResourcePath / "blur.fs";
-    std::filesystem::path const BlurVertexShader = ResourcePath / "blur.vs";
+    std::filesystem::path const BlurHorizontalFragmentShader = ResourcePath / "blur_horizontal.fs";
+    std::filesystem::path const BlurHorizontalVertexShader = ResourcePath / "blur_horizontal.vs";
+    std::filesystem::path const BlurVerticalFragmentShader = ResourcePath / "blur_vertical.fs";
+    std::filesystem::path const BlurVerticalVertexShader = ResourcePath / "blur_vertical.vs";
     std::filesystem::path const MetaballsFragmentShader = ResourcePath / "metaballs.fs";
     std::filesystem::path const MetaballsVertexShader = ResourcePath / "metaballs.vs";
 
