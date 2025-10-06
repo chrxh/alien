@@ -793,12 +793,11 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         //auto radius = 0.5f * zoom;
 
         // Add to output buffer
-        int objIndex = atomicAdd(numObjects, 1);
+        uint64_t objIndex = alienAtomicAdd64(numObjects, uint64_t(1));
         objectData[objIndex].pos[0] = pos.x;
         objectData[objIndex].pos[1] = pos.y;
-        objectData[objIndex].color[0] = 0.5f;
-        objectData[objIndex].color[1] = 1.0f;
-        objectData[objIndex].color[2] = 1.0f;
-        //objectData[objIndex].radius = radius;
+        objectData[objIndex].color[0] = color.x;
+        objectData[objIndex].color[1] = color.y;
+        objectData[objIndex].color[2] = color.z;
     }
 }

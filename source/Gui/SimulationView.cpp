@@ -128,11 +128,11 @@ void SimulationView::draw()
             _numObjects = *numObjects;
         }
         
-        //GLint currentFbo;
-        //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        GLint currentFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
         // Render objects to texture using shaders
-        //glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
         glViewport(0, 0, viewSize.x, viewSize.y);
 
         // Clear with black background
@@ -159,41 +159,37 @@ void SimulationView::draw()
         glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
 
         // Disable blending and point sprites
-        //    glDisable(GL_PROGRAM_POINT_SIZE);
-        //glDisable(GL_BLEND);
+        glDisable(GL_PROGRAM_POINT_SIZE);
+        glDisable(GL_BLEND);
 
-        //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+        // Post-processing pipeline
+        _postProcessingShader->use();
 
-        //_shader->use();
+        // Post-processing pipeline (horizontal blur)
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
+        _postProcessingShader->setInt("phase", 0);
+        glBindVertexArray(_postProcessingShader->getVao());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _objectTexture);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        //GLint currentFbo;
-        //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        // Post-processing pipeline (vertical blur + mix)
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
+        _postProcessingShader->setInt("phase", 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _objectTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        //// Post-processing pipeline (horizontal blur)
-        //glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        //_shader->setInt("phase", 0);
-        //glBindVertexArray(_vao);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        //// Post-processing pipeline (vertical blur + mix)
-        //glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        //_shader->setInt("phase", 1);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        //glActiveTexture(GL_TEXTURE1);
-        //glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
-        //glActiveTexture(GL_TEXTURE2);
-        //glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        //// Final render to screen
-        //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        //_shader->setInt("phase", 2);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // Final render to screen
+        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+        _postProcessingShader->setInt("phase", 2);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
