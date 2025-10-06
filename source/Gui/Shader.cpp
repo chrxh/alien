@@ -45,19 +45,23 @@ _Shader::_Shader(std::filesystem::path const& vertexPath, std::filesystem::path 
     }
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
+
     // 2. compile shaders
     unsigned int vertex, fragment;
-    // vertex shader
+
+    // Vertex shader
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
     checkCompileErrors(vertex, "VERTEX");
-    // fragment Shader
+
+    // Fragment Shader
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
     checkCompileErrors(fragment, "FRAGMENT");
-    // if geometry shader is given, compile geometry shader
+
+    // If geometry shader is given, compile geometry shader
     unsigned int geometry;
     if (!geometryPath.empty()) {
         const char* gShaderCode = geometryCode.c_str();
@@ -66,41 +70,49 @@ _Shader::_Shader(std::filesystem::path const& vertexPath, std::filesystem::path 
         glCompileShader(geometry);
         checkCompileErrors(geometry, "GEOMETRY");
     }
-    // shader Program
-    ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
-    if (!geometryPath.empty())
-        glAttachShader(ID, geometry);
-    glLinkProgram(ID);
-    checkCompileErrors(ID, "PROGRAM");
-    // delete the shaders as they're linked into our program now and no longer necessery
+    // Shader Program
+    _id = glCreateProgram();
+    glAttachShader(_id, vertex);
+    glAttachShader(_id, fragment);
+    if (!geometryPath.empty()) {
+        glAttachShader(_id, geometry);
+    }
+    glLinkProgram(_id);
+    checkCompileErrors(_id, "PROGRAM");
+
+    // Delete the shaders as they're linked into our program now and no longer necessery
     glDeleteShader(vertex);
     glDeleteShader(fragment);
-    if (!geometryPath.empty())
+    if (!geometryPath.empty()) {
         glDeleteShader(geometry);
+    }
+
+    // Generate buffers and arrays
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
+    glGenBuffers(1, &_ebo);
 }
 
 void _Shader::use()
 {
-    glUseProgram(ID);
+    glUseProgram(_id);
 }
 void _Shader::setBool(const std::string& name, bool value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value);
 }
 void _Shader::setInt(const std::string& name, int value) const
 {
-    glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+    glUniform1i(glGetUniformLocation(_id, name.c_str()), value);
 }
 void _Shader::setFloat(const std::string& name, float value) const
 {
-    glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    glUniform1f(glGetUniformLocation(_id, name.c_str()), value);
 }
 
 void _Shader::setVec2(const std::string& name, float x, float y) const
 {
-    glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+    glUniform2f(glGetUniformLocation(_id, name.c_str()), x, y);
 }
 
 void _Shader::checkCompileErrors(GLuint shader, std::string type)

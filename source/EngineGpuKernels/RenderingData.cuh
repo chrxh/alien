@@ -9,7 +9,7 @@ struct RenderingObjectData
 {
     float2 pos;
     float3 color;
-    float radius;
+    float padding;
 };
 
 struct RenderingData

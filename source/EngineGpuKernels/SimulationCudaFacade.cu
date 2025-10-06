@@ -123,20 +123,6 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void* _SimulationCudaFacade::registerImageResource(GLuint image)
-{
-    //unregister old resource
-    if (_cudaResource) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
-    }
-
-    //register new resource
-    CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
-
-    return reinterpret_cast<void*>(_cudaResource);
-}
-
 void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
 {
     //unregister old resource

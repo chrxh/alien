@@ -31,16 +31,6 @@ void _SimulationFacadeImpl::clear()
     _selectionNeedsUpdate = true;
 }
 
-void _SimulationFacadeImpl::setImageResource(void* image)
-{
-    _worker.setImageResource(image);
-}
-
-void _SimulationFacadeImpl::setBufferResource(void* buffer)
-{
-    _worker.setBufferResource(buffer);
-}
-
 std::string _SimulationFacadeImpl::getGpuName() const
 {
     return _worker.getGpuName();
@@ -56,11 +46,12 @@ void _SimulationFacadeImpl::tryDrawVectorGraphics(
 }
 
 void _SimulationFacadeImpl::tryDrawVectorGraphicsWithShaders(
+    void* buffer,
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     double zoom)
 {
-    _worker.tryDrawVectorGraphicsWithShaders(rectUpperLeft, rectLowerRight, zoom);
+    _worker.tryDrawVectorGraphicsWithShaders(buffer, rectUpperLeft, rectLowerRight, zoom);
 }
 
 int _SimulationFacadeImpl::getNumExtractedObjects()

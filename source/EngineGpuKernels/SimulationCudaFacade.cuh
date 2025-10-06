@@ -41,7 +41,6 @@ public:
     _SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings);
     ~_SimulationCudaFacade();
 
-    void* registerImageResource(GLuint image);
     void* registerBufferResource(GLuint buffer);
 
     void calcTimestep(uint64_t timesteps, bool forceUpdateStatistics);

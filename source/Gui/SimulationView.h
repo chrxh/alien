@@ -44,7 +44,8 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void updateImageFromSimulationWithShaders();
+    void setupObjectShader();
+    void setupProcessingShader();
 
     void markReferenceDomain();
 
@@ -58,12 +59,10 @@ private:
     std::optional<OverlayDescription> _overlay;
 
     // Shader data for post-processing
-    unsigned int _vao, _vbo, _ebo;
     unsigned int _fbo1, _fbo2;
-    Shader _shader;
+    Shader _postProcessingShader;
 
     // Shader data for object rendering
-    unsigned int _objectVao, _objectVbo;
     Shader _objectShader;
     unsigned int _objectTexture;
     unsigned int _objectFbo;

@@ -25,35 +25,13 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
     _settings = settings;
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
-    _cudaResource = nullptr;
+    _cudaBufferResource = nullptr;
 }
 
 void EngineWorker::clear()
 {
     EngineWorkerGuard access(this);
     return _simulationCudaFacade->clear();
-}
-
-void EngineWorker::setImageResource(void* image)
-{
-    GLuint imageId = reinterpret_cast<uintptr_t>(image);
-    _imageResource = imageId;
-
-    //if (_simulationCudaFacade) {
-    //    EngineWorkerGuard access(this);
-    //    _cudaResource = _simulationCudaFacade->registerImageResource(imageId);
-    //}
-}
-
-void EngineWorker::setBufferResource(void* buffer)
-{
-    GLuint bufferId = reinterpret_cast<uintptr_t>(buffer);
-    _bufferResource = bufferId;
-
-    //if (_simulationCudaFacade) {
-    //    EngineWorkerGuard access(this);
-    //    _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
-    //}
 }
 
 std::string EngineWorker::getGpuName() const
@@ -67,25 +45,25 @@ void EngineWorker::tryDrawVectorGraphics(
     IntVector2D const& imageSize,
     double zoom)
 {
-    EngineWorkerGuard access(this, FrameTimeout);
+    //EngineWorkerGuard access(this, FrameTimeout);
 
-    if (!access.isTimeout()) {
-        registerImageResource();
-        _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
-        syncSimulationWithRenderingIfDesired();
-    }
+    //if (!access.isTimeout()) {
+    //    _simulationCudaFacade->drawVectorGraphics(
+    //        {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
+    //    syncSimulationWithRenderingIfDesired();
+    //}
 }
 
-void EngineWorker::tryDrawVectorGraphicsWithShaders(
-    RealVector2D const& rectUpperLeft,
-    RealVector2D const& rectLowerRight,
-    double zoom)
+void EngineWorker::tryDrawVectorGraphicsWithShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        registerBufferResource();
+        GLuint bufferId = reinterpret_cast<uintptr_t>(buffer);
+        if (!_cudaBufferResource) {
+            _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
+        }
+
         _simulationCudaFacade->extractObjectDataToBuffer(
             {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaBufferResource, zoom);
         syncSimulationWithRenderingIfDesired();
@@ -107,21 +85,20 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
     IntVector2D const& imageSize,
     double zoom)
 {
-    EngineWorkerGuard access(this, FrameTimeout);
+    //EngineWorkerGuard access(this, FrameTimeout);
 
-    if (!access.isTimeout()) {
-        registerImageResource();
-        _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
+    //if (!access.isTimeout()) {
+    //    _simulationCudaFacade->drawVectorGraphics(
+    //        {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
 
-        auto dataTO =
-            _simulationCudaFacade->getOverlayData({toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)}, int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)});
+    //    auto dataTO =
+    //        _simulationCudaFacade->getOverlayData({toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)}, int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)});
 
-        auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
+    //    auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
 
-        syncSimulationWithRenderingIfDesired();
-        return result;
-    }
+    //    syncSimulationWithRenderingIfDesired();
+    //    return result;
+    //}
     return std::nullopt;
 }
 
@@ -644,20 +621,6 @@ void EngineWorker::slowdownTPS()
         }
     }
     _slowDownTimepoint = std::chrono::steady_clock::now();
-}
-
-void EngineWorker::registerImageResource()
-{
-    if (_imageResource && !_cudaResource) {
-        _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
-    }
-}
-
-void EngineWorker::registerBufferResource()
-{
-    if (_bufferResource && !_cudaBufferResource) {
-        _cudaBufferResource = _simulationCudaFacade->registerBufferResource(*_bufferResource);
-    }
 }
 
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)

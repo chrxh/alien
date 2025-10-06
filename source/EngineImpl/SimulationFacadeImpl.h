@@ -21,26 +21,16 @@ public:
 
     void clear() override;
 
-    void setImageResource(void* image) override;
-    void setBufferResource(void* buffer) override;
     std::string getGpuName() const override;
 
     /**
      * Draws section of simulation to registered texture.
      * If the GPU is busy for specific time, the texture will not be updated.
      */
-    void tryDrawVectorGraphics(
-        RealVector2D const& rectUpperLeft,
-        RealVector2D const& rectLowerRight,
-        IntVector2D const& imageSize,
-        double zoom) override;
-    void tryDrawVectorGraphicsWithShaders(
-        RealVector2D const& rectUpperLeft,
-        RealVector2D const& rectLowerRight,
-        double zoom) override;
+    void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) override;
+    void tryDrawVectorGraphicsWithShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom) override;
     int getNumExtractedObjects() override;
-    std::optional<OverlayDescription>
-    tryDrawVectorGraphicsAndReturnOverlay(
+    std::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,
         IntVector2D const& imageSize,
