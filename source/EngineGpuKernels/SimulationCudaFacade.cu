@@ -137,10 +137,9 @@ void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
     return reinterpret_cast<void*>(_cudaBufferResource);
 }
 
-void _SimulationCudaFacade::extractObjectDataToBuffer(
+uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResource,
     float2 const& rectUpperLeft,
     float2 const& rectLowerRight,
-    void* cudaBufferResource,
     double zoom)
 {
     checkAndProcessSimulationParameterChanges();
@@ -171,15 +170,9 @@ void _SimulationCudaFacade::extractObjectDataToBuffer(
     }
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
-}
 
-int _SimulationCudaFacade::getNumExtractedObjects()
-{
-    int numObjects;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&numObjects, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
     return numObjects;
 }
-
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
 {

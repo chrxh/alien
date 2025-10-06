@@ -54,7 +54,7 @@ void EngineWorker::tryDrawVectorGraphics(
     //}
 }
 
-void EngineWorker::tryDrawVectorGraphicsWithShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom)
+std::optional<uint64_t> EngineWorker::tryUpdateObjectBuffersForShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
@@ -64,19 +64,13 @@ void EngineWorker::tryDrawVectorGraphicsWithShaders(void* buffer, RealVector2D c
             _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
         }
 
-        _simulationCudaFacade->extractObjectDataToBuffer(
-            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaBufferResource, zoom);
+        auto result = _simulationCudaFacade->extractObjectDataToBuffer(
+            _cudaBufferResource, {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, zoom);
         syncSimulationWithRenderingIfDesired();
-    }
-}
 
-int EngineWorker::getNumExtractedObjects()
-{
-    if (_simulationCudaFacade) {
-        EngineWorkerGuard access(this);
-        return _simulationCudaFacade->getNumExtractedObjects();
+        return result;
     }
-    return 0;
+    return std::nullopt;
 }
 
 std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(

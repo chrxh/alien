@@ -28,8 +28,8 @@ public:
      * If the GPU is busy for specific time, the texture will not be updated.
      */
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) override;
-    void tryDrawVectorGraphicsWithShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom) override;
-    int getNumExtractedObjects() override;
+    std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer, RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, double zoom)
+        override;
     std::optional<OverlayDescription> tryDrawVectorGraphicsAndReturnOverlay(
         RealVector2D const& rectUpperLeft,
         RealVector2D const& rectLowerRight,

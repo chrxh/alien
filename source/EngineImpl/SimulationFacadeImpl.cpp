@@ -45,18 +45,14 @@ void _SimulationFacadeImpl::tryDrawVectorGraphics(
     _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
 }
 
-void _SimulationFacadeImpl::tryDrawVectorGraphicsWithShaders(
+std::optional<uint64_t>
+_SimulationFacadeImpl::tryUpdateObjectBuffersForShaders(
     void* buffer,
     RealVector2D const& rectUpperLeft,
     RealVector2D const& rectLowerRight,
     double zoom)
 {
-    _worker.tryDrawVectorGraphicsWithShaders(buffer, rectUpperLeft, rectLowerRight, zoom);
-}
-
-int _SimulationFacadeImpl::getNumExtractedObjects()
-{
-    return _worker.getNumExtractedObjects();
+    return _worker.tryUpdateObjectBuffersForShaders(buffer, rectUpperLeft, rectLowerRight, zoom);
 }
 
 std::optional<OverlayDescription> _SimulationFacadeImpl::tryDrawVectorGraphicsAndReturnOverlay(

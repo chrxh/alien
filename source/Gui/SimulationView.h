@@ -59,11 +59,12 @@ private:
     std::optional<OverlayDescription> _overlay;
 
     // Shader data for post-processing
-    unsigned int _fbo1, _fbo2;
     Shader _postProcessingShader;
+    unsigned int _fbo1, _fbo2;
 
     // Shader data for object rendering
     Shader _objectShader;
+    uint64_t _numObjects = 0;
     unsigned int _objectTexture;
     unsigned int _objectFbo;
 

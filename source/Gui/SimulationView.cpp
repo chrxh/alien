@@ -120,12 +120,12 @@ void SimulationView::draw()
         auto zoomFactor = Viewport::get().getZoomFactor();
 
         // Extract object data from CUDA and transfer to OpenGL buffer
-        _simulationFacade->tryDrawVectorGraphicsWithShaders(
+        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(
             reinterpret_cast<void*>(uintptr_t(_objectShader->getVbo())), worldRect.topLeft, worldRect.bottomRight, zoomFactor);
-
-        // Get number of objects to render
-        int numObjects = _simulationFacade->getNumExtractedObjects();
-
+        if (numObjects.has_value()) {
+            _numObjects = *numObjects;
+        }
+        
         //GLint currentFbo;
         //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
 
@@ -154,7 +154,7 @@ void SimulationView::draw()
 
         // Draw points
         glBindVertexArray(_objectShader->getVao());
-        glDrawArrays(GL_POINTS, 0, numObjects);
+        glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
 
         // Disable blending and point sprites
         //    glDisable(GL_PROGRAM_POINT_SIZE);
