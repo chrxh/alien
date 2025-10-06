@@ -144,7 +144,7 @@ uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResour
     auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaBufferResource);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
 
-    RenderingObjectData* mappedBuffer;
+    ObjectRenderData* mappedBuffer;
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
         reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
@@ -161,7 +161,7 @@ uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResour
         CHECK_FOR_CUDA_ERROR(cudaMemcpy(
             mappedBuffer,
             _cudaRenderingData->objectData,
-            numObjects * sizeof(RenderingObjectData),
+            numObjects * sizeof(ObjectRenderData),
             cudaMemcpyDeviceToDevice));
     }
 

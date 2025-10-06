@@ -768,7 +768,7 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, RenderingObjectData* objectData, int* numObjects)
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, ObjectRenderData* objectData, uint64_t* numObjects)
 {
     auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -794,10 +794,11 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
 
         // Add to output buffer
         int objIndex = atomicAdd(numObjects, 1);
-        objectData[objIndex].pos = pos;
-        objectData[objIndex].color.x = 0.5f;
-        objectData[objIndex].color.y = 1.0f;
-        objectData[objIndex].color.z = 1.0f;
+        objectData[objIndex].pos[0] = pos.x;
+        objectData[objIndex].pos[1] = pos.y;
+        objectData[objIndex].color[0] = 0.5f;
+        objectData[objIndex].color[1] = 1.0f;
+        objectData[objIndex].color[2] = 1.0f;
         //objectData[objIndex].radius = radius;
     }
 }

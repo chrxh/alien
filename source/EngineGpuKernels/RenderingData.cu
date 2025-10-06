@@ -4,7 +4,7 @@
 
 void RenderingData::init()
 {
-    CudaMemoryManager::getInstance().acquireMemory<int>(1, numObjects);
+    CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, numObjects);
 }
 
 void RenderingData::resizeImageIfNecessary(int2 const& newSize)
@@ -16,12 +16,12 @@ void RenderingData::resizeImageIfNecessary(int2 const& newSize)
     }
 }
 
-void RenderingData::resizeObjectBufferIfNecessary(int maxNumObjects)
+void RenderingData::resizeObjectBufferIfNecessary(uint64_t numRequiredObjects)
 {
-    if (maxNumObjects > capacity) {
+    if (numRequiredObjects > capacity) {
         CudaMemoryManager::getInstance().freeMemory(objectData);
-        CudaMemoryManager::getInstance().acquireMemory<RenderingObjectData>(maxNumObjects, objectData);
-        capacity = maxNumObjects;
+        CudaMemoryManager::getInstance().acquireMemory<ObjectRenderData>(numRequiredObjects * 2, objectData);
+        capacity = numRequiredObjects * 2;
     }
 }
 

@@ -2,15 +2,10 @@
 
 #include <atomic>
 
+#include "EngineInterface/inc/ObjectRenderData.h"
+
 #include "Base.cuh"
 #include "Definitions.cuh"
-
-struct RenderingObjectData
-{
-    float2 pos;
-    float3 color;
-    float padding;
-};
 
 struct RenderingData
 {
@@ -18,12 +13,12 @@ struct RenderingData
     uint64_t* imageData = nullptr;  //pixel in bbbbggggrrrr format (3 x 16 bit + 16 bit unused)
 
     // New shader-based rendering data
-    int capacity = 0;
-    RenderingObjectData* objectData = nullptr;
-    int* numObjects = nullptr;
+    uint64_t capacity = 0;
+    ObjectRenderData* objectData = nullptr;
+    uint64_t* numObjects = nullptr;
 
     void init();
     void resizeImageIfNecessary(int2 const& newSize);
-    void resizeObjectBufferIfNecessary(int maxNumObjects);
+    void resizeObjectBufferIfNecessary(uint64_t numRequiredObjects);
     void free();
 };

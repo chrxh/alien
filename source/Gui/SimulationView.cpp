@@ -8,6 +8,7 @@
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
+#include "EngineInterface/inc/ObjectRenderData.h"
 
 #include "AlienGui.h"
 #include "SimulationScrollbars.h"
@@ -320,15 +321,15 @@ void SimulationView::setupObjectShader()
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 100000 * sizeof(RenderingObjectData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 100000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Color (3 floats)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(RenderingObjectData), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 }
 
