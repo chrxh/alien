@@ -45,7 +45,7 @@ public:
 
 private:
     void setupObjectShader();
-    void setupProcessingShader();
+    void setupMetaballsShader();
 
     void markReferenceDomain();
 
@@ -58,19 +58,16 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    // Shader data for post-processing
-    Shader _postProcessingShader;
-    unsigned int _fbo1, _fbo2;
-
     // Shader data for object rendering
     Shader _objectShader;
     uint64_t _numObjects = 0;
     unsigned int _objectTexture;
     unsigned int _objectFbo;
 
+    // Shader data for metaballs post-processing
+    Shader _metaballsShader;
+
     bool _areTexturesInitialized = false;
-    unsigned int _textureFramebufferId1 = 0;
-    unsigned int _textureFramebufferId2 = 0;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

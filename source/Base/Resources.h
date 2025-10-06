@@ -20,6 +20,8 @@ namespace Const
     std::filesystem::path const SimulationVertexShader = ResourcePath / "shader.vs";
     std::filesystem::path const ObjectFragmentShader = ResourcePath / "object.fs";
     std::filesystem::path const ObjectVertexShader = ResourcePath / "object.vs";
+    std::filesystem::path const MetaballsFragmentShader = ResourcePath / "metaballs.fs";
+    std::filesystem::path const MetaballsVertexShader = ResourcePath / "metaballs.vs";
 
     std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";

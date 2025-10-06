@@ -31,23 +31,15 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
     setupObjectShader();
-    setupProcessingShader();
+    setupMetaballsShader();
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
     resize(Viewport::get().getViewSize());
 
-    // Setup shaders
-    _postProcessingShader->use();
-    _postProcessingShader->setInt("texture1", 0);
-    _postProcessingShader->setInt("texture2", 1);
-    _postProcessingShader->setInt("texture3", 2);
-    _postProcessingShader->setBool("glowEffect", true);
-    _postProcessingShader->setBool("motionEffect", true);
-
-    updateMotionBlur();
-    setBrightness(1.0f);
-    setContrast(1.0f);
+    // Setup metaballs shader
+    _metaballsShader->use();
+    _metaballsShader->setInt("inputTexture", 0);
 }
 
 void SimulationView::shutdown()
@@ -61,12 +53,8 @@ void SimulationView::shutdown()
 void SimulationView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
-        glDeleteFramebuffers(1, &_fbo1);
-        glDeleteFramebuffers(1, &_fbo2);
         glDeleteFramebuffers(1, &_objectFbo);
         glDeleteTextures(1, &_objectTexture);
-        glDeleteTextures(1, &_textureFramebufferId1);
-        glDeleteTextures(1, &_textureFramebufferId2);
         _areTexturesInitialized = true;
     }
 
@@ -75,41 +63,15 @@ void SimulationView::resize(IntVector2D const& size)
     glBindTexture(GL_TEXTURE_2D, _objectTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_SHORT, NULL);
-
-    glGenTextures(1, &_textureFramebufferId1);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
-
-    glGenTextures(1, &_textureFramebufferId2);
-    glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
 
     // Init framebuffers
     glGenFramebuffers(1, &_objectFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    glGenFramebuffers(1, &_fbo1);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);  
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId1, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);  
-
-    glGenFramebuffers(1, &_fbo2);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _textureFramebufferId2, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);  
 
     Viewport::get().setViewSize(size);
 }
@@ -162,33 +124,13 @@ void SimulationView::draw()
         glDisable(GL_PROGRAM_POINT_SIZE);
         glDisable(GL_BLEND);
 
-        // Post-processing pipeline
-        _postProcessingShader->use();
-
-        // Post-processing pipeline (horizontal blur)
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo1);
-        _postProcessingShader->setInt("phase", 0);
-        glBindVertexArray(_postProcessingShader->getVao());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        // Post-processing pipeline (vertical blur + mix)
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo2);
-        _postProcessingShader->setInt("phase", 1);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId1);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        // Final render to screen
+        // Apply metaballs post-processing effect
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _postProcessingShader->setInt("phase", 2);
+        _metaballsShader->use();
+        _metaballsShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        glBindVertexArray(_metaballsShader->getVao());
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _textureFramebufferId2);
+        glBindTexture(GL_TEXTURE_2D, _objectTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
@@ -278,7 +220,7 @@ float SimulationView::getBrightness() const
 void SimulationView::setBrightness(float value)
 {
     _brightness = value;
-    _postProcessingShader->setFloat("brightness", value);
+    // Metaballs shader doesn't use brightness parameter
 }
 
 float SimulationView::getContrast() const
@@ -289,7 +231,7 @@ float SimulationView::getContrast() const
 void SimulationView::setContrast(float value)
 {
     _contrast = value;
-    _postProcessingShader->setFloat("contrast", value);
+    // Metaballs shader doesn't use contrast parameter
 }
 
 float SimulationView::getMotionBlur() const
@@ -300,14 +242,12 @@ float SimulationView::getMotionBlur() const
 void SimulationView::setMotionBlur(float value)
 {
     _motionBlur = value;
-    updateMotionBlur();
+    // Metaballs shader doesn't use motion blur parameter
 }
 
 void SimulationView::updateMotionBlur()
 {
-    //motionBlurFactor = 0: max motion blur
-    //motionBlurFactor = 1: no motion blur
-    _postProcessingShader->setFloat("motionBlurFactor", 1.0f / (1.0f + _motionBlur));
+    // Metaballs shader doesn't use motion blur parameter
 }
 
 void SimulationView::setupObjectShader()
@@ -331,12 +271,11 @@ void SimulationView::setupObjectShader()
     glEnableVertexAttribArray(1);
 }
 
-void SimulationView::setupProcessingShader()
+void SimulationView::setupMetaballsShader()
 {
-    _postProcessingShader = std::make_shared<_Shader>(Const::SimulationVertexShader, Const::SimulationFragmentShader);
+    _metaballsShader = std::make_shared<_Shader>(Const::MetaballsVertexShader, Const::MetaballsFragmentShader);
 
-    // Setup post-processing quad
-    // Format: Positions (3 floats) annd texture coordinates (2 floats)
+    // Setup full-screen quad
     float vertices[] = {
         1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
         1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
@@ -344,17 +283,13 @@ void SimulationView::setupProcessingShader()
         -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
     };
     unsigned int indices[] = {
-        0,
-        1,
-        3,  // first triangle
-        1,
-        2,
-        3  // second triangle
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
     };
 
-    auto vao = _postProcessingShader->getVao();
-    auto vbo = _postProcessingShader->getVbo();
-    auto ebo = _postProcessingShader->getEbo();
+    auto vao = _metaballsShader->getVao();
+    auto vbo = _metaballsShader->getVbo();
+    auto ebo = _metaballsShader->getEbo();
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
