@@ -23,7 +23,8 @@ void main()
     float totalWeight = 0.0;
     
     // Scatter radius based on inverse thickness (brighter = thicker = less scatter)
-    float scatterRadius = mix(3.0, 0.5, brightness);
+    // Much larger radius for more pronounced effect
+    float scatterRadius = mix(12.0, 1.0, brightness);
     int radius = int(ceil(scatterRadius));
     
     // Subsurface scattering kernel - samples in a circular pattern
@@ -36,7 +37,8 @@ void main()
                 
                 // Weight based on distance and thickness
                 // Thinner areas allow more light to penetrate from neighbors
-                float weight = exp(-dist / scatterRadius) * (1.0 - brightness * 0.7);
+                // Reduced brightness dampening for stronger effect
+                float weight = exp(-dist / scatterRadius) * (1.0 - brightness * 0.3);
                 scattered += sample.rgb * weight;
                 totalWeight += weight;
             }
@@ -49,14 +51,14 @@ void main()
     }
     
     // Blend original color with scattered light
-    // More scattering in thinner (darker) areas
-    float scatterMix = (1.0 - brightness) * 0.5;
+    // Much more scattering in thinner (darker) areas - increased from 0.5 to 0.85
+    float scatterMix = (1.0 - brightness) * 0.85;
     vec3 finalColor = mix(color.rgb, scattered, scatterMix);
     
-    // Add subtle translucent glow effect
-    // Simulate light passing through thin areas
-    float glowIntensity = (1.0 - brightness) * 0.3;
-    vec3 glowColor = finalColor * 1.5; // Boosted brightness for glow
+    // Add pronounced translucent glow effect
+    // Simulate light passing through thin areas - increased from 0.3 to 0.7
+    float glowIntensity = (1.0 - brightness) * 0.7;
+    vec3 glowColor = finalColor * 2.5; // Much stronger brightness boost for glow
     finalColor = mix(finalColor, glowColor, glowIntensity);
     
     FragColor = vec4(finalColor, 1.0);
