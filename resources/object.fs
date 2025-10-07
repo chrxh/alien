@@ -15,7 +15,9 @@ void main()
      }
     
     // Apply smooth anti-aliasing at edges
-    float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+    //float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+    float alpha = cos(dist / 180.0 * 3.14159 * 90.0);
+//    float alpha = (1.0 - smoothstep(0.3, 0.5, dist)) * smoothstep(0.1, 0.3, dist);
     
     FragColor = vec4(vColor, alpha);
 }

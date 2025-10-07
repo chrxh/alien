@@ -152,6 +152,7 @@ void SimulationView::draw()
 
         // Render objects to texture using shaders
         glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
+        //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
         glViewport(0, 0, viewSize.x, viewSize.y);
 
         // Clear with black background
@@ -160,7 +161,7 @@ void SimulationView::draw()
 
         // Enable blending for anti-aliasing
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
         // Enable point sprites
         glEnable(GL_PROGRAM_POINT_SIZE);

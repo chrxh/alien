@@ -5,67 +5,61 @@ in vec2 texCoord;
 
 uniform sampler2D inputTexture;
 uniform vec2 viewportSize;
-uniform float zoom;
 
 void main()
 {
     // Sample the input texture (output from metaballs effect)
     vec4 color = texture(inputTexture, texCoord);
     
-    // Interpret brightness as height map
-    float height = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    // Calculate brightness as thickness for subsurface scattering
+    float brightness = dot(color.rgb, vec3(0.333, 0.333, 0.333));
     
-    // Calculate normal from height map using Sobel operator
+    // Subsurface scattering simulation
+    // Thicker areas (brighter) scatter less light, thinner areas scatter more
     vec2 texelSize = 1.0 / viewportSize;
     
-    // Sample neighboring heights
-    float h_left = dot(texture(inputTexture, texCoord + vec2(-texelSize.x, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
-    float h_right = dot(texture(inputTexture, texCoord + vec2(texelSize.x, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
-    float h_top = dot(texture(inputTexture, texCoord + vec2(0.0, -texelSize.y)).rgb, vec3(0.299, 0.587, 0.114));
-    float h_bottom = dot(texture(inputTexture, texCoord + vec2(0.0, texelSize.y)).rgb, vec3(0.299, 0.587, 0.114));
+    // Sample neighboring pixels for light scattering
+    vec3 scattered = vec3(0.0);
+    float totalWeight = 0.0;
     
-    // Calculate gradients (heightmap derivatives)
-    float dx = (h_right - h_left) * 0.5;
-    float dy = (h_bottom - h_top) * 0.5;
+    // Scatter radius based on inverse thickness (brighter = thicker = less scatter)
+    // Much larger radius for more pronounced effect
+    float scatterRadius = mix(12.0, 1.0, brightness);
+    int radius = int(ceil(scatterRadius));
     
-    // Compensate for zoom level - at high zoom, multiply by zoom to maintain bump illusion
-    // At low zoom, the effect is already visible, so we use a logarithmic scale
-    float zoomCompensation = mix(1.0, zoom, clamp(zoom / 10.0, 0.0, 1.0));
+    // Subsurface scattering kernel - samples in a circular pattern
+    for (int y = -radius; y <= radius; y++) {
+        for (int x = -radius; x <= radius; x++) {
+            float dist = length(vec2(x, y));
+            if (dist <= scatterRadius) {
+                vec2 offset = vec2(x, y) * texelSize;
+                vec4 sample = texture(inputTexture, texCoord + offset);
+                
+                // Weight based on distance and thickness
+                // Thinner areas allow more light to penetrate from neighbors
+                // Reduced brightness dampening for stronger effect
+                float weight = exp(-dist / scatterRadius) * (1.0 - brightness * 0.3);
+                scattered += sample.rgb * weight;
+                totalWeight += weight;
+            }
+        }
+    }
     
-    // Strength factor to amplify the normal calculation
-    float normalStrength = 5.0 * zoomCompensation;
-    dx *= normalStrength;
-    dy *= normalStrength;
+    // Normalize scattered light
+    if (totalWeight > 0.0) {
+        scattered /= totalWeight;
+    }
     
-    // Construct normal vector
-    vec3 normal = normalize(vec3(-dx, -dy, 1.0));
+    // Blend original color with scattered light
+    // Much more scattering in thinner (darker) areas - increased from 0.5 to 0.85
+    float scatterMix = (1.0 - brightness) * 0.85;
+    vec3 finalColor = mix(color.rgb, scattered, scatterMix);
     
-    // Fixed light direction (from top-left, slightly forward)
-    vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0));
+    // Add pronounced translucent glow effect
+    // Simulate light passing through thin areas - increased from 0.3 to 0.7
+    float glowIntensity = (1.0 - brightness) * 0.7;
+    vec3 glowColor = finalColor * 2.5; // Much stronger brightness boost for glow
+    finalColor = mix(finalColor, glowColor, glowIntensity);
     
-    // Calculate diffuse lighting (Lambertian)
-    float diffuse = max(dot(normal, lightDir), 0.0);
-    
-    // Add ambient light to prevent completely dark areas
-    float ambient = 0.3;
-    float lighting = ambient + diffuse * 0.7;
-    
-    // Apply lighting to the color
-    vec3 litColor = color.rgb * lighting;
-    
-    // Add specular highlight for more pronounced effect
-    vec3 viewDir = vec3(0.0, 0.0, 1.0); // Camera looking straight down
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float specular = pow(max(dot(normal, halfDir), 0.0), 32.0);
-    
-    // Add specular highlight
-    vec3 specularColor = vec3(1.0) * specular * 0.5;
-    litColor += specularColor;
-    
-    // Enhance contrast based on height
-    // Higher areas get more light, lower areas get less
-    float heightBoost = height * 0.3;
-    litColor += litColor * heightBoost;
-    
-    FragColor = vec4(litColor, 1.0);
+    FragColor = vec4(finalColor, 1.0);
 }
