@@ -791,7 +791,7 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         objectData[objIndex].pos[0] = pos.x;
         objectData[objIndex].pos[1] = pos.y;
         objectData[objIndex].color[0] = 1.0;
-        objectData[objIndex].color[1] = 0.0;
-        objectData[objIndex].color[2] = 0.0;
+        objectData[objIndex].color[1] = 1.0;
+        objectData[objIndex].color[2] = 1.0;
     }
 }

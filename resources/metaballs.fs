@@ -19,8 +19,8 @@ void main()
     float density = luminance * color.a;
     
     // Apply metaballs threshold with smoothstep for smooth blob-like edges
-    float threshold = 0.3;
-    float smoothRange = 0.2;
+    float threshold = 0.6;
+    float smoothRange = 0.1;
     float metaball = smoothstep(threshold - smoothRange, threshold + smoothRange, density);
     
     // Output with metaball effect - modulate color intensity

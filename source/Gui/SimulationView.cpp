@@ -163,7 +163,7 @@ void SimulationView::draw()
         glDisable(GL_BLEND);
 
         // Calculate blur radius based on zoom
-        float blurRadius = zoomFactor * 2.0f;
+        float blurRadius = zoomFactor / 4;
 
         // Apply horizontal Gaussian blur preprocessing
         glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
