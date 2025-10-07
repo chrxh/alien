@@ -186,6 +186,8 @@ void SimulationView::draw()
         // Use object shader
         _objectShader->use();
         _objectShader->setFloat("zoom", zoomFactor);
+        _objectShader->setBool("smoothCircles", false);
+        _objectShader->setFloat("radius", zoomFactor);
         _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
         _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
         _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -200,7 +202,9 @@ void SimulationView::draw()
         glClear(GL_COLOR_BUFFER_BIT);
 
         _objectShader->use();
-        _objectShader->setFloat("zoom", zoomFactor * 0.5f); // Half the radius
+        _objectShader->setFloat("zoom", zoomFactor);
+        _objectShader->setBool("smoothCircles", true);
+        _objectShader->setFloat("radius", zoomFactor * 0.5f);
         _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
         _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
         _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
@@ -382,7 +386,7 @@ void SimulationView::setupObjectShader()
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 100000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)
