@@ -26,6 +26,8 @@ namespace Const
     std::filesystem::path const BlurVerticalVertexShader = ResourcePath / "blur_vertical.vs";
     std::filesystem::path const MetaballsFragmentShader = ResourcePath / "metaballs.fs";
     std::filesystem::path const MetaballsVertexShader = ResourcePath / "metaballs.vs";
+    std::filesystem::path const SubsurfaceFragmentShader = ResourcePath / "subsurface.fs";
+    std::filesystem::path const SubsurfaceVertexShader = ResourcePath / "subsurface.vs";
 
     std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";

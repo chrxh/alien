@@ -48,6 +48,7 @@ private:
     void setupBlurHorizontalShader();
     void setupBlurVerticalShader();
     void setupMetaballsShader();
+    void setupSubsurfaceShader();
 
     void markReferenceDomain();
 
@@ -76,6 +77,11 @@ private:
 
     // Shader data for metaballs post-processing
     Shader _metaballsShader;
+    unsigned int _metaballsTexture;
+    unsigned int _metaballsFbo;
+
+    // Shader data for subsurface scattering post-processing
+    Shader _subsurfaceShader;
 
     bool _areTexturesInitialized = false;
 
