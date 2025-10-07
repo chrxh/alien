@@ -5,6 +5,7 @@ in vec2 texCoord;
 
 uniform sampler2D inputTexture;
 uniform vec2 viewportSize;
+uniform float zoom;
 
 void main()
 {
@@ -27,8 +28,12 @@ void main()
     float dx = (h_right - h_left) * 0.5;
     float dy = (h_bottom - h_top) * 0.5;
     
+    // Compensate for zoom level - at high zoom, multiply by zoom to maintain bump illusion
+    // At low zoom, the effect is already visible, so we use a logarithmic scale
+    float zoomCompensation = mix(1.0, zoom, clamp(zoom / 10.0, 0.0, 1.0));
+    
     // Strength factor to amplify the normal calculation
-    float normalStrength = 5.0;
+    float normalStrength = 5.0 * zoomCompensation;
     dx *= normalStrength;
     dy *= normalStrength;
     

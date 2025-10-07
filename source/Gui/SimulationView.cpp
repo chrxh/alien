@@ -217,6 +217,7 @@ void SimulationView::draw()
         glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
         _subsurfaceShader->use();
         _subsurfaceShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        _subsurfaceShader->setFloat("zoom", zoomFactor);
         glBindVertexArray(_subsurfaceShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
