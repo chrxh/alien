@@ -52,6 +52,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     
     _subsurfaceShader->use();
     _subsurfaceShader->setInt("inputTexture", 0);
+    _subsurfaceShader->setInt("objectTextureSmall", 1);
 }
 
 void SimulationView::shutdown()
@@ -66,10 +67,12 @@ void SimulationView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
         glDeleteFramebuffers(1, &_objectFbo);
+        glDeleteFramebuffers(1, &_objectFboSmall);
         glDeleteFramebuffers(1, &_blurHorizontalFbo);
         glDeleteFramebuffers(1, &_blurVerticalFbo);
         glDeleteFramebuffers(1, &_metaballsFbo);
         glDeleteTextures(1, &_objectTexture);
+        glDeleteTextures(1, &_objectTextureSmall);
         glDeleteTextures(1, &_blurHorizontalTexture);
         glDeleteTextures(1, &_blurVerticalTexture);
         glDeleteTextures(1, &_metaballsTexture);
@@ -79,6 +82,14 @@ void SimulationView::resize(IntVector2D const& size)
     // Init textures - use RGBA16F for proper floating point color handling
     glGenTextures(1, &_objectTexture);
     glBindTexture(GL_TEXTURE_2D, _objectTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    glGenTextures(1, &_objectTextureSmall);
+    glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -113,6 +124,11 @@ void SimulationView::resize(IntVector2D const& size)
     glGenFramebuffers(1, &_objectFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glGenFramebuffers(1, &_objectFboSmall);
+    glBindFramebuffer(GL_FRAMEBUFFER, _objectFboSmall);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTextureSmall, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glGenFramebuffers(1, &_blurHorizontalFbo);
@@ -178,6 +194,20 @@ void SimulationView::draw()
         glBindVertexArray(_objectShader->getVao());
         glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
 
+        // Render objects to small texture with half radius
+        glBindFramebuffer(GL_FRAMEBUFFER, _objectFboSmall);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        _objectShader->use();
+        _objectShader->setFloat("zoom", zoomFactor * 0.5f); // Half the radius
+        _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+        _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+        _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+
+        glBindVertexArray(_objectShader->getVao());
+        glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
+
         // Disable blending and point sprites
         glDisable(GL_PROGRAM_POINT_SIZE);
         glDisable(GL_BLEND);
@@ -222,6 +252,8 @@ void SimulationView::draw()
         glBindVertexArray(_subsurfaceShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {

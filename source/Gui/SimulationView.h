@@ -66,6 +66,8 @@ private:
     uint64_t _numObjects = 0;
     unsigned int _objectTexture;
     unsigned int _objectFbo;
+    unsigned int _objectTextureSmall;
+    unsigned int _objectFboSmall;
 
     // Shader data for blur preprocessing
     Shader _blurHorizontalShader;
