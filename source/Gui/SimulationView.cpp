@@ -31,6 +31,8 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
     setupObjectShader();
+    setupBackgroundObjectShader();
+    setupForegroundObjectShader();
     setupBlurHorizontalShader();
     setupBlurVerticalShader();
     setupMetaballsShader();
@@ -201,7 +203,7 @@ void SimulationView::draw()
         auto zoomFactor = Viewport::get().getZoomFactor();
 
         // Extract object data from CUDA and transfer to OpenGL buffer
-        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(reinterpret_cast<void*>(uintptr_t(_objectShader->getVbo())));
+        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(reinterpret_cast<void*>(uintptr_t(_backgroundObjectShader->getVbo())));
         if (numObjects.has_value()) {
             _numObjects = *numObjects;
         }
@@ -228,17 +230,16 @@ void SimulationView::draw()
         glEnable(GL_PROGRAM_POINT_SIZE);
         glEnable(GL_POINT_SPRITE);
 
-        // Use object shader
-        _objectShader->use();
-        _objectShader->setFloat("zoom", zoomFactor);
-        _objectShader->setBool("smoothCircles", false);
-        _objectShader->setFloat("radius", zoomFactor);
-        _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
-        _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
-        _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        // Use background object shader
+        _backgroundObjectShader->use();
+        _backgroundObjectShader->setFloat("zoom", zoomFactor);
+        _backgroundObjectShader->setFloat("radius", zoomFactor);
+        _backgroundObjectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+        _backgroundObjectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+        _backgroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 
         // Draw points
-        glBindVertexArray(_objectShader->getVao());
+        glBindVertexArray(_backgroundObjectShader->getVao());
         glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
 
         //*******************************************************************
@@ -248,15 +249,14 @@ void SimulationView::draw()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        _objectShader->use();
-        _objectShader->setFloat("zoom", zoomFactor);
-        _objectShader->setBool("smoothCircles", true);
-        _objectShader->setFloat("radius", zoomFactor * 0.5f);
-        _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
-        _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
-        _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        _foregroundObjectShader->use();
+        _foregroundObjectShader->setFloat("zoom", zoomFactor);
+        _foregroundObjectShader->setFloat("radius", zoomFactor * 0.5f);
+        _foregroundObjectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+        _foregroundObjectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+        _foregroundObjectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 
-        glBindVertexArray(_objectShader->getVao());
+        glBindVertexArray(_foregroundObjectShader->getVao());
         glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
 
         // Disable blending and point sprites
@@ -474,6 +474,48 @@ void SimulationView::setupObjectShader()
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
+
+    // Setup vertex attributes for RenderingObjectData
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color (3 floats)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupBackgroundObjectShader()
+{
+    _backgroundObjectShader = std::make_shared<_Shader>(Const::ObjectVertexShader, Const::BackgroundObjectFragmentShader);
+
+    auto vao = _backgroundObjectShader->getVao();
+    auto vbo = _backgroundObjectShader->getVbo();
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
+
+    // Setup vertex attributes for RenderingObjectData
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color (3 floats)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupForegroundObjectShader()
+{
+    _foregroundObjectShader = std::make_shared<_Shader>(Const::ObjectVertexShader, Const::ForegroundObjectFragmentShader);
+
+    auto vao = _foregroundObjectShader->getVao();
+    auto vbo = _foregroundObjectShader->getVbo();
+
+    glBindVertexArray(vao);
+    // Use the same VBO as background shader (data is shared)
+    glBindBuffer(GL_ARRAY_BUFFER, _backgroundObjectShader->getVbo());
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)

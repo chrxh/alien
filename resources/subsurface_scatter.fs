@@ -24,8 +24,10 @@ void main()
     float totalWeight = 0.0;
     
     // Scatter radius based on inverse thickness (brighter = thicker = less scatter)
-    // Much larger radius for more pronounced effect
-    float scatterRadius = mix(12.0, 1.0, brightness);
+    // Scale with zoom: at high zoom (close up), reduce effect; at low zoom (far away), increase effect
+    // Zoom typically ranges from ~0.5 (far) to ~50+ (close)
+    float zoomScale = max(0.5, min(2.0, 5.0 / zoom));
+    float scatterRadius = mix(12.0, 1.0, brightness) * zoomScale;
     int radius = int(ceil(scatterRadius));
     
     // Subsurface scattering kernel - samples in a circular pattern

@@ -45,6 +45,8 @@ public:
 
 private:
     void setupObjectShader();
+    void setupBackgroundObjectShader();
+    void setupForegroundObjectShader();
     void setupBlurHorizontalShader();
     void setupBlurVerticalShader();
     void setupMetaballsShader();
@@ -66,6 +68,8 @@ private:
 
     // Shader data for object rendering
     Shader _objectShader;
+    Shader _backgroundObjectShader;
+    Shader _foregroundObjectShader;
     uint64_t _numObjects = 0;
     unsigned int _objectTexture;
     unsigned int _objectFbo;
