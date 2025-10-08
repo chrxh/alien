@@ -35,6 +35,9 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     setupBlurVerticalShader();
     setupMetaballsShader();
     setupSubsurfaceShader();
+    setupSubsurfaceScatterShader();
+    setupFresnelShader();
+    setupMergeShader();
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
@@ -53,6 +56,16 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _subsurfaceShader->use();
     _subsurfaceShader->setInt("inputTexture", 0);
     _subsurfaceShader->setInt("objectTextureSmall", 1);
+    
+    _subsurfaceScatterShader->use();
+    _subsurfaceScatterShader->setInt("inputTexture", 0);
+    
+    _fresnelShader->use();
+    _fresnelShader->setInt("inputTexture", 0);
+    
+    _mergeShader->use();
+    _mergeShader->setInt("inputTexture", 0);
+    _mergeShader->setInt("objectTextureSmall", 1);
 }
 
 void SimulationView::shutdown()
@@ -71,11 +84,15 @@ void SimulationView::resize(IntVector2D const& size)
         glDeleteFramebuffers(1, &_blurHorizontalFbo);
         glDeleteFramebuffers(1, &_blurVerticalFbo);
         glDeleteFramebuffers(1, &_metaballsFbo);
+        glDeleteFramebuffers(1, &_subsurfaceScatterFbo);
+        glDeleteFramebuffers(1, &_fresnelFbo);
         glDeleteTextures(1, &_objectTexture);
         glDeleteTextures(1, &_objectTextureSmall);
         glDeleteTextures(1, &_blurHorizontalTexture);
         glDeleteTextures(1, &_blurVerticalTexture);
         glDeleteTextures(1, &_metaballsTexture);
+        glDeleteTextures(1, &_subsurfaceScatterTexture);
+        glDeleteTextures(1, &_fresnelTexture);
         _areTexturesInitialized = true;
     }
 
@@ -120,6 +137,22 @@ void SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
+    glGenTextures(1, &_subsurfaceScatterTexture);
+    glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    glGenTextures(1, &_fresnelTexture);
+    glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
     // Init framebuffers
     glGenFramebuffers(1, &_objectFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
@@ -144,6 +177,16 @@ void SimulationView::resize(IntVector2D const& size)
     glGenFramebuffers(1, &_metaballsFbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _metaballsTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glGenFramebuffers(1, &_subsurfaceScatterFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _subsurfaceScatterTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glGenFramebuffers(1, &_fresnelFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _fresnelTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     Viewport::get().setViewSize(size);
@@ -248,14 +291,32 @@ void SimulationView::draw()
         glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply subsurface scattering effect (final step)
-        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _subsurfaceShader->use();
-        _subsurfaceShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-        _subsurfaceShader->setFloat("zoom", zoomFactor);
-        glBindVertexArray(_subsurfaceShader->getVao());
+        // Apply subsurface scattering effect (step 1: scattering only)
+        glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
+        _subsurfaceScatterShader->use();
+        _subsurfaceScatterShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        _subsurfaceScatterShader->setFloat("zoom", zoomFactor);
+        glBindVertexArray(_subsurfaceScatterShader->getVao());
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Apply Fresnel effect (step 2: Fresnel after subsurface scattering)
+        glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
+        _fresnelShader->use();
+        _fresnelShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+        _fresnelShader->setFloat("zoom", zoomFactor);
+        glBindVertexArray(_fresnelShader->getVao());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Apply merge effect (step 3: merge with objectTextureSmall)
+        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
+        _mergeShader->use();
+        glBindVertexArray(_mergeShader->getVao());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -525,6 +586,114 @@ void SimulationView::setupSubsurfaceShader()
     auto vao = _subsurfaceShader->getVao();
     auto vbo = _subsurfaceShader->getVbo();
     auto ebo = _subsurfaceShader->getEbo();
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupSubsurfaceScatterShader()
+{
+    _subsurfaceScatterShader = std::make_shared<_Shader>(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader);
+
+    // Setup full-screen quad
+    float vertices[] = {
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
+
+    auto vao = _subsurfaceScatterShader->getVao();
+    auto vbo = _subsurfaceScatterShader->getVbo();
+    auto ebo = _subsurfaceScatterShader->getEbo();
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupFresnelShader()
+{
+    _fresnelShader = std::make_shared<_Shader>(Const::FresnelVertexShader, Const::FresnelFragmentShader);
+
+    // Setup full-screen quad
+    float vertices[] = {
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
+
+    auto vao = _fresnelShader->getVao();
+    auto vbo = _fresnelShader->getVbo();
+    auto ebo = _fresnelShader->getEbo();
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupMergeShader()
+{
+    _mergeShader = std::make_shared<_Shader>(Const::MergeVertexShader, Const::MergeFragmentShader);
+
+    // Setup full-screen quad
+    float vertices[] = {
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
+
+    auto vao = _mergeShader->getVao();
+    auto vbo = _mergeShader->getVbo();
+    auto ebo = _mergeShader->getEbo();
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

@@ -28,6 +28,12 @@ namespace Const
     std::filesystem::path const MetaballsVertexShader = ResourcePath / "metaballs.vs";
     std::filesystem::path const SubsurfaceFragmentShader = ResourcePath / "subsurface.fs";
     std::filesystem::path const SubsurfaceVertexShader = ResourcePath / "subsurface.vs";
+    std::filesystem::path const SubsurfaceScatterFragmentShader = ResourcePath / "subsurface_scatter.fs";
+    std::filesystem::path const SubsurfaceScatterVertexShader = ResourcePath / "subsurface_scatter.vs";
+    std::filesystem::path const FresnelFragmentShader = ResourcePath / "fresnel.fs";
+    std::filesystem::path const FresnelVertexShader = ResourcePath / "fresnel.vs";
+    std::filesystem::path const MergeFragmentShader = ResourcePath / "merge.fs";
+    std::filesystem::path const MergeVertexShader = ResourcePath / "merge.vs";
 
     std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";
