@@ -123,18 +123,51 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void* _SimulationCudaFacade::registerImageResource(GLuint image)
+void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
 {
     //unregister old resource
-    if (_cudaResource) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaResource));
+    if (_cudaBufferResource) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaBufferResource));
     }
 
     //register new resource
     CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterImage(&_cudaResource, image, GL_TEXTURE_2D, cudaGraphicsMapFlagsReadOnly));
+        cudaGraphicsGLRegisterBuffer(&_cudaBufferResource, buffer, cudaGraphicsMapFlagsWriteDiscard));
 
-    return reinterpret_cast<void*>(_cudaResource);
+    return reinterpret_cast<void*>(_cudaBufferResource);
+}
+
+uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResource)
+{
+    checkAndProcessSimulationParameterChanges();
+
+    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaBufferResource);
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
+
+    ObjectRenderData* mappedBuffer;
+    size_t bufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
+
+    // Extract object data to temporary buffer
+    _renderingKernels->extractObjectData(_settings, getSimulationDataPtrCopy(), *_cudaRenderingData);
+    syncAndCheck();
+
+    // Copy to mapped OpenGL buffer
+    int numObjects;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&numObjects, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
+    
+    if (numObjects > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
+            mappedBuffer,
+            _cudaRenderingData->objectData,
+            numObjects * sizeof(ObjectRenderData),
+            cudaMemcpyDeviceToDevice));
+    }
+
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
+
+    return numObjects;
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)

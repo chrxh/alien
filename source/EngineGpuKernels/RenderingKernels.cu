@@ -767,3 +767,62 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
         }
     }
 }
+
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, ObjectRenderData* objectData, uint64_t* numObjects)
+{
+    auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    BaseMap map;
+    map.init(worldSize);
+
+    // Process cells and particles
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = cells.at(index);
+        if (!cell) {
+            continue;
+        }
+
+        // Check if cell is in visible region
+        auto pos = cell->pos;
+        map.correctPosition(pos);
+
+        // Add to output buffer
+        uint64_t objIndex = alienAtomicAdd64(numObjects, uint64_t(1));
+        uint32_t cellColor;
+        switch (calcMod(cell->color, MAX_COLORS)) {
+        case 0: {
+            cellColor = Const::IndividualCellColor1;
+            break;
+        }
+        case 1: {
+            cellColor = Const::IndividualCellColor2;
+            break;
+        }
+        case 2: {
+            cellColor = Const::IndividualCellColor3;
+            break;
+        }
+        case 3: {
+            cellColor = Const::IndividualCellColor4;
+            break;
+        }
+        case 4: {
+            cellColor = Const::IndividualCellColor5;
+            break;
+        }
+        case 5: {
+            cellColor = Const::IndividualCellColor6;
+            break;
+        }
+        case 6: {
+            cellColor = Const::IndividualCellColor7;
+            break;
+        }
+        }
+        objectData[objIndex].pos[0] = pos.x;
+        objectData[objIndex].pos[1] = pos.y;
+        objectData[objIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
+        objectData[objIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
+        objectData[objIndex].color[2] = toFloat(cellColor & 0xff) / 255.0f;
+    }
+}

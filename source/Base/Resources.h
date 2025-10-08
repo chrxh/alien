@@ -18,6 +18,16 @@ namespace Const
 
     std::filesystem::path const SimulationFragmentShader = ResourcePath / "shader.fs";
     std::filesystem::path const SimulationVertexShader = ResourcePath / "shader.vs";
+    std::filesystem::path const ObjectFragmentShader = ResourcePath / "object.fs";
+    std::filesystem::path const ObjectVertexShader = ResourcePath / "object.vs";
+    std::filesystem::path const BlurHorizontalFragmentShader = ResourcePath / "blur_horizontal.fs";
+    std::filesystem::path const BlurHorizontalVertexShader = ResourcePath / "blur_horizontal.vs";
+    std::filesystem::path const BlurVerticalFragmentShader = ResourcePath / "blur_vertical.fs";
+    std::filesystem::path const BlurVerticalVertexShader = ResourcePath / "blur_vertical.vs";
+    std::filesystem::path const MetaballsFragmentShader = ResourcePath / "metaballs.fs";
+    std::filesystem::path const MetaballsVertexShader = ResourcePath / "metaballs.vs";
+    std::filesystem::path const SubsurfaceFragmentShader = ResourcePath / "subsurface.fs";
+    std::filesystem::path const SubsurfaceVertexShader = ResourcePath / "subsurface.vs";
 
     std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";

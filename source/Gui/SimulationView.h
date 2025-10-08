@@ -44,7 +44,11 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void updateImageFromSimulation();
+    void setupObjectShader();
+    void setupBlurHorizontalShader();
+    void setupBlurVerticalShader();
+    void setupMetaballsShader();
+    void setupSubsurfaceShader();
 
     void markReferenceDomain();
 
@@ -57,15 +61,31 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    // Shader data
-    unsigned int _vao, _vbo, _ebo;
-    unsigned int _fbo1, _fbo2;
-    Shader _shader;
+    // Shader data for object rendering
+    Shader _objectShader;
+    uint64_t _numObjects = 0;
+    unsigned int _objectTexture;
+    unsigned int _objectFbo;
+    unsigned int _objectTextureSmall;
+    unsigned int _objectFboSmall;
+
+    // Shader data for blur preprocessing
+    Shader _blurHorizontalShader;
+    Shader _blurVerticalShader;
+    unsigned int _blurHorizontalTexture;
+    unsigned int _blurHorizontalFbo;
+    unsigned int _blurVerticalTexture;
+    unsigned int _blurVerticalFbo;
+
+    // Shader data for metaballs post-processing
+    Shader _metaballsShader;
+    unsigned int _metaballsTexture;
+    unsigned int _metaballsFbo;
+
+    // Shader data for subsurface scattering post-processing
+    Shader _subsurfaceShader;
 
     bool _areTexturesInitialized = false;
-    unsigned int _textureSimulationId = 0;
-    unsigned int _textureFramebufferId1 = 0;
-    unsigned int _textureFramebufferId2 = 0;
 
     float _brightness = DefaultBrightness;
     float _contrast = DefaultContrast;

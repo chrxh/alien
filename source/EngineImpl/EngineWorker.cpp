@@ -25,24 +25,13 @@ void EngineWorker::newSimulation(uint64_t timestep, SettingsForSimulation const&
     _settings = settings;
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _simulationCudaFacade = std::make_shared<_SimulationCudaFacade>(timestep, settings);
-    _cudaResource = nullptr;
+    _cudaBufferResource = nullptr;
 }
 
 void EngineWorker::clear()
 {
     EngineWorkerGuard access(this);
     return _simulationCudaFacade->clear();
-}
-
-void EngineWorker::setImageResource(void* image)
-{
-    GLuint imageId = reinterpret_cast<uintptr_t>(image);
-    _imageResource = imageId;
-
-    if (_simulationCudaFacade) {
-        EngineWorkerGuard access(this);
-        _cudaResource = _simulationCudaFacade->registerImageResource(imageId);
-    }
 }
 
 std::string EngineWorker::getGpuName() const
@@ -56,14 +45,31 @@ void EngineWorker::tryDrawVectorGraphics(
     IntVector2D const& imageSize,
     double zoom)
 {
+    //EngineWorkerGuard access(this, FrameTimeout);
+
+    //if (!access.isTimeout()) {
+    //    _simulationCudaFacade->drawVectorGraphics(
+    //        {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
+    //    syncSimulationWithRenderingIfDesired();
+    //}
+}
+
+std::optional<uint64_t> EngineWorker::tryUpdateObjectBuffersForShaders(void* buffer)
+{
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        registerImageResource();
-        _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
+        GLuint bufferId = reinterpret_cast<uintptr_t>(buffer);
+        if (!_cudaBufferResource) {
+            _cudaBufferResource = _simulationCudaFacade->registerBufferResource(bufferId);
+        }
+
+        auto result = _simulationCudaFacade->extractObjectDataToBuffer(_cudaBufferResource);
         syncSimulationWithRenderingIfDesired();
+
+        return result;
     }
+    return std::nullopt;
 }
 
 std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOverlay(
@@ -72,21 +78,20 @@ std::optional<OverlayDescription> EngineWorker::tryDrawVectorGraphicsAndReturnOv
     IntVector2D const& imageSize,
     double zoom)
 {
-    EngineWorkerGuard access(this, FrameTimeout);
+    //EngineWorkerGuard access(this, FrameTimeout);
 
-    if (!access.isTimeout()) {
-        registerImageResource();
-        _simulationCudaFacade->drawVectorGraphics(
-            {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
+    //if (!access.isTimeout()) {
+    //    _simulationCudaFacade->drawVectorGraphics(
+    //        {rectUpperLeft.x, rectUpperLeft.y}, {rectLowerRight.x, rectLowerRight.y}, _cudaResource, {imageSize.x, imageSize.y}, zoom);
 
-        auto dataTO =
-            _simulationCudaFacade->getOverlayData({toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)}, int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)});
+    //    auto dataTO =
+    //        _simulationCudaFacade->getOverlayData({toInt(rectUpperLeft.x), toInt(rectUpperLeft.y)}, int2{toInt(rectLowerRight.x), toInt(rectLowerRight.y)});
 
-        auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
+    //    auto result = DescriptionConverterService::get().convertTOtoOverlayDescription(dataTO);
 
-        syncSimulationWithRenderingIfDesired();
-        return result;
-    }
+    //    syncSimulationWithRenderingIfDesired();
+    //    return result;
+    //}
     return std::nullopt;
 }
 
@@ -609,13 +614,6 @@ void EngineWorker::slowdownTPS()
         }
     }
     _slowDownTimepoint = std::chrono::steady_clock::now();
-}
-
-void EngineWorker::registerImageResource()
-{
-    if (_imageResource && !_cudaResource) {
-        _cudaResource = _simulationCudaFacade->registerImageResource(*_imageResource);
-    }
 }
 
 EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::chrono::milliseconds> const& maxDuration)

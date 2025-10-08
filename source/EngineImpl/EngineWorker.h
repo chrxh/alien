@@ -45,10 +45,11 @@ public:
     void newSimulation(uint64_t timestep, SettingsForSimulation const& _settings);
     void clear();
 
-    void setImageResource(void* image);
     std::string getGpuName() const;
 
     void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
+    // Return number of objects if successful, std::nullopt if not
+    std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer);
     std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
 
@@ -139,14 +140,12 @@ private:
     void measureTPS();
     void slowdownTPS();
 
-    void registerImageResource();
-
     CudaSimulationFacade _simulationCudaFacade;
 
-    //settings
+    // Settings
     SettingsForSimulation _settings;
 
-    //sync
+    // Sync
     std::atomic<bool> _syncSimulationWithRendering{false};
     std::atomic<int> _syncSimulationWithRenderingRatio{2};
     std::atomic<int> _accessState{0};  //0 = worker thread has access, 1 = require access from other thread, 2 = access granted to other thread
@@ -155,7 +154,7 @@ private:
     std::atomic<bool> _isShutdown{false};
     ExceptionData _exceptionData;
 
-    //async jobs
+    // Async jobs
     std::recursive_mutex _mutexForEngineWorkerGuard;
     mutable std::mutex _mutexForAsyncJobs;
     std::optional<CudaSettings> _updateGpuSettingsJob;
@@ -169,7 +168,7 @@ private:
     };
     std::vector<ApplyForceJob> _applyForceJobs;
 
-    //time step measurements
+    // Time step measurements
     std::atomic<int> _tpsRestriction{0};  //0 = no restriction
     std::atomic<float> _tps;
     int _timestepsSinceMeasurement = 0;
@@ -177,9 +176,8 @@ private:
     std::optional<std::chrono::steady_clock::time_point> _slowDownTimepoint;
     std::optional<std::chrono::microseconds> _slowDownOvershot;
 
-    //internals
-    std::optional<GLuint> _imageResource;
-    void* _cudaResource = nullptr;
+    // Internals
+    void* _cudaBufferResource = nullptr;
     TOProvider _collectionTOProvider;
 };
 

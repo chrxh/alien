@@ -23,7 +23,6 @@ public:
 
     virtual void clear() = 0;
 
-    virtual void setImageResource(void* image) = 0;
     virtual std::string getGpuName() const = 0;
 
     /**
@@ -31,6 +30,9 @@ public:
      * If the GPU is busy for a specified duration, the texture will not be updated.
      */
     virtual void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
+
+    virtual std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer) = 0;
+
     virtual std::optional<OverlayDescription>
     tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom) = 0;
 

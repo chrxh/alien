@@ -21,4 +21,6 @@ public:
         float zoom,
         SimulationData data,
         RenderingData renderingData);
+
+    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, RenderingData& renderingData);
 };
