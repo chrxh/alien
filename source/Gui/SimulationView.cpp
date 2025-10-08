@@ -62,6 +62,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _mergeShader->use();
     _mergeShader->setInt("backgroundObjectTexture", 0);
     _mergeShader->setInt("foregroundObjectTexture", 1);
+    _mergeShader->setInt("screenBackgroundTexture", 2);
 }
 
 void SimulationView::shutdown()
@@ -89,6 +90,7 @@ void SimulationView::resize(IntVector2D const& size)
         glDeleteTextures(1, &_metaballsTexture);
         glDeleteTextures(1, &_subsurfaceScatterTexture);
         glDeleteTextures(1, &_fresnelTexture);
+        glDeleteTextures(1, &_screenBackgroundTexture);
         _areTexturesInitialized = true;
     }
 
@@ -148,6 +150,24 @@ void SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    // Create screen background texture (dark blue)
+    glGenTextures(1, &_screenBackgroundTexture);
+    glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // Fill with dark blue color (RGB: 0.0, 0.05, 0.15)
+    std::vector<float> darkBlueData(size.x * size.y * 4);
+    for (int i = 0; i < size.x * size.y; ++i) {
+        darkBlueData[i * 4 + 0] = 0.0f;   // R
+        darkBlueData[i * 4 + 1] = 0.05f;  // G
+        darkBlueData[i * 4 + 2] = 0.15f;  // B
+        darkBlueData[i * 4 + 3] = 1.0f;   // A
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, darkBlueData.data());
 
     // Init framebuffers
     glGenFramebuffers(1, &_objectBackgroundFbo);
@@ -337,6 +357,8 @@ void SimulationView::draw()
             glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, _objectForegroundTexture);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
             glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -362,7 +384,7 @@ void SimulationView::draw()
             // Use background object shader
             _objectBackgroundShader->use();
             _objectBackgroundShader->setFloat("zoom", zoomFactor);
-            _objectBackgroundShader->setFloat("radius", std::max(4.5f, zoomFactor));  // std::max to avoid moiré patterns at low zoom factors
+            _objectBackgroundShader->setFloat("radius", std::max(4.5f, zoomFactor));  // std::max to avoid moirï¿½ patterns at low zoom factors
             _objectBackgroundShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
             _objectBackgroundShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
             _objectBackgroundShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));

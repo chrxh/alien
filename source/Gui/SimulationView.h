@@ -102,6 +102,11 @@ private:
     
     // Shader data for merge post-processing
     Shader _mergeShader;
+    unsigned int _mergeTexture;
+    unsigned int _mergeFbo;
+    
+    // Screen background texture (dark blue background)
+    unsigned int _screenBackgroundTexture;
 
     bool _areTexturesInitialized = false;
 
