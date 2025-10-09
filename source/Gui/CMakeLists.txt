@@ -115,6 +115,10 @@ PUBLIC
     PatternEditorWindow.h
     PreviewWidget.cpp
     PreviewWidget.h
+    RenderPipeline.cpp
+    RenderPipeline.h
+    RenderStep.cpp
+    RenderStep.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp
