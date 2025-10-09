@@ -60,8 +60,8 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _fresnelShader->setInt("inputTexture", 0);
     
     _mergeShader->use();
-    _mergeShader->setInt("backgroundObjectTexture", 0);
-    _mergeShader->setInt("foregroundObjectTexture", 1);
+    _mergeShader->setInt("objectBackgroundTexture", 0);
+    _mergeShader->setInt("objectForegroundTexture", 1);
     _mergeShader->setInt("screenBackgroundTexture", 2);
 }
 
@@ -164,7 +164,7 @@ void SimulationView::resize(IntVector2D const& size)
     for (int i = 0; i < size.x * size.y; ++i) {
         darkBlueData[i * 4 + 0] = 0.0f;   // R
         darkBlueData[i * 4 + 1] = 0.0f;  // G
-        darkBlueData[i * 4 + 2] = 0.2f;  // B
+        darkBlueData[i * 4 + 2] = 0.15f;  // B
         darkBlueData[i * 4 + 3] = 1.0f;   // A
     }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, darkBlueData.data());
@@ -347,7 +347,7 @@ void SimulationView::draw()
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
             //********************************************
-            //* 7. Step: Merge layers and render to screen
+            //* 8. Step: Merge layers and render to screen
             //********************************************
             _mergeShader->use();
             glBindVertexArray(_mergeShader->getVao());
@@ -382,7 +382,7 @@ void SimulationView::draw()
             // Use background object shader
             _objectBackgroundShader->use();
             _objectBackgroundShader->setFloat("zoom", zoomFactor);
-            _objectBackgroundShader->setFloat("radius", std::max(4.5f, zoomFactor));  // std::max to avoid moir� patterns at low zoom factors
+            _objectBackgroundShader->setFloat("radius", std::max(4.5f, zoomFactor));  // std::max to avoid moire patterns at low zoom factors
             _objectBackgroundShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
             _objectBackgroundShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
             _objectBackgroundShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
