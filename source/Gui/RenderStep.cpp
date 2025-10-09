@@ -53,19 +53,33 @@ unsigned int _RenderStep::getTexture() const
 
 _PointRenderStep::_PointRenderStep(
     std::filesystem::path const& vertexShader,
-    std::filesystem::path const& fragmentShader,
-    RenderStep const& dependentStep)
+    std::filesystem::path const& fragmentShader)
     : _RenderStep(vertexShader, fragmentShader, {})
-    , _dependentStep(dependentStep)
 {
     auto vao = _shader->getVao();
-    auto vbo = dependentStep ? dependentStep->getShader()->getVbo() : _shader->getVbo();
+    auto vbo = _shader->getVbo();
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    if (!dependentStep) {
-        glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
-    }
+    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
+
+    // Setup vertex attributes for RenderingObjectData
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color (3 floats)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+_PointRenderStep::_PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, unsigned sharedVbo)
+    : _RenderStep(vertexShader, fragmentShader, {})
+{
+    auto vao = _shader->getVao();
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, sharedVbo);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)

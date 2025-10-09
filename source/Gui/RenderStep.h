@@ -39,14 +39,14 @@ protected:
 class _PointRenderStep : public _RenderStep 
 {
 public:
-    _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& dependentStep = nullptr);
+    _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
+    _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, unsigned int sharedVbo);
 
     void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 
     void setBool(std::string const& name, bool value);
 
 private:
-    RenderStep _dependentStep;
     std::map<std::string, bool> _boolValues;
 };
 

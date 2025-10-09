@@ -57,7 +57,7 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
         Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
     _renderPipeline->addStep(renderStep6);
 
-    auto renderStep7 = std::make_shared<_PointRenderStep>(Const::ObjectVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
+    auto renderStep7 = std::make_shared<_PointRenderStep>(Const::ObjectVertexShader, Const::ObjectForegroundFragmentShader, renderStep1->getShader()->getVbo());
     _renderPipeline->addStep(renderStep7);
 
     auto renderStep8 =

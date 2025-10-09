@@ -47,9 +47,5 @@ void RenderingData::resizeObjectBufferIfNecessary(uint64_t numRequiredObjects)
 
 void RenderingData::free()
 {
-    if (vertexBuffer != nullptr) {
-        unregisterBufferResource(vertexBuffer);
-    }
-
     CudaMemoryManager::getInstance().freeMemory(numVertices);
 }
