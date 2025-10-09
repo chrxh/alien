@@ -8,7 +8,7 @@
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
-#include "EngineInterface/inc/ObjectRenderData.h"
+#include "EngineInterface/RenderData.h"
 
 #include "AlienGui.h"
 #include "SimulationScrollbars.h"
@@ -30,11 +30,14 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
-    setupObjectShader();
+    setupBackgroundObjectShader();
+    setupForegroundObjectShader();
     setupBlurHorizontalShader();
     setupBlurVerticalShader();
     setupMetaballsShader();
-    setupSubsurfaceShader();
+    setupSubsurfaceScatterShader();
+    setupFresnelShader();
+    setupMergeShader();
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
@@ -50,9 +53,16 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _metaballsShader->use();
     _metaballsShader->setInt("inputTexture", 0);
     
-    _subsurfaceShader->use();
-    _subsurfaceShader->setInt("inputTexture", 0);
-    _subsurfaceShader->setInt("objectTextureSmall", 1);
+    _subsurfaceScatterShader->use();
+    _subsurfaceScatterShader->setInt("inputTexture", 0);
+    
+    _fresnelShader->use();
+    _fresnelShader->setInt("inputTexture", 0);
+    
+    _mergeShader->use();
+    _mergeShader->setInt("objectBackgroundTexture", 0);
+    _mergeShader->setInt("objectForegroundTexture", 1);
+    _mergeShader->setInt("screenBackgroundTexture", 2);
 }
 
 void SimulationView::shutdown()
@@ -66,30 +76,35 @@ void SimulationView::shutdown()
 void SimulationView::resize(IntVector2D const& size)
 {
     if (_areTexturesInitialized) {
-        glDeleteFramebuffers(1, &_objectFbo);
-        glDeleteFramebuffers(1, &_objectFboSmall);
+        glDeleteFramebuffers(1, &_objectBackgroundFbo);
+        glDeleteFramebuffers(1, &_objectForegroundFbo);
         glDeleteFramebuffers(1, &_blurHorizontalFbo);
         glDeleteFramebuffers(1, &_blurVerticalFbo);
         glDeleteFramebuffers(1, &_metaballsFbo);
-        glDeleteTextures(1, &_objectTexture);
-        glDeleteTextures(1, &_objectTextureSmall);
+        glDeleteFramebuffers(1, &_subsurfaceScatterFbo);
+        glDeleteFramebuffers(1, &_fresnelFbo);
+        glDeleteTextures(1, &_objectBackgroundTexture);
+        glDeleteTextures(1, &_objectForegroundTexture);
         glDeleteTextures(1, &_blurHorizontalTexture);
         glDeleteTextures(1, &_blurVerticalTexture);
         glDeleteTextures(1, &_metaballsTexture);
+        glDeleteTextures(1, &_subsurfaceScatterTexture);
+        glDeleteTextures(1, &_fresnelTexture);
+        glDeleteTextures(1, &_screenBackgroundTexture);
         _areTexturesInitialized = true;
     }
 
     // Init textures - use RGBA16F for proper floating point color handling
-    glGenTextures(1, &_objectTexture);
-    glBindTexture(GL_TEXTURE_2D, _objectTexture);
+    glGenTextures(1, &_objectBackgroundTexture);
+    glBindTexture(GL_TEXTURE_2D, _objectBackgroundTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
-    glGenTextures(1, &_objectTextureSmall);
-    glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
+    glGenTextures(1, &_objectForegroundTexture);
+    glBindTexture(GL_TEXTURE_2D, _objectForegroundTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -120,15 +135,49 @@ void SimulationView::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
+    glGenTextures(1, &_subsurfaceScatterTexture);
+    glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    glGenTextures(1, &_fresnelTexture);
+    glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    // Create screen background texture (dark blue)
+    glGenTextures(1, &_screenBackgroundTexture);
+    glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    // Fill with dark blue color (RGB: 0.0, 0.05, 0.15)
+    std::vector<float> darkBlueData(size.x * size.y * 4);
+    for (int i = 0; i < size.x * size.y; ++i) {
+        darkBlueData[i * 4 + 0] = 0.0f;   // R
+        darkBlueData[i * 4 + 1] = 0.0f;  // G
+        darkBlueData[i * 4 + 2] = 0.15f;  // B
+        darkBlueData[i * 4 + 3] = 1.0f;   // A
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, darkBlueData.data());
+
     // Init framebuffers
-    glGenFramebuffers(1, &_objectFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTexture, 0);
+    glGenFramebuffers(1, &_objectBackgroundFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _objectBackgroundFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectBackgroundTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glGenFramebuffers(1, &_objectFboSmall);
-    glBindFramebuffer(GL_FRAMEBUFFER, _objectFboSmall);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectTextureSmall, 0);
+    glGenFramebuffers(1, &_objectForegroundFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _objectForegroundFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectForegroundTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glGenFramebuffers(1, &_blurHorizontalFbo);
@@ -146,6 +195,16 @@ void SimulationView::resize(IntVector2D const& size)
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _metaballsTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    glGenFramebuffers(1, &_subsurfaceScatterFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _subsurfaceScatterTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glGenFramebuffers(1, &_fresnelFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _fresnelTexture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     Viewport::get().setViewSize(size);
 }
 
@@ -158,107 +217,228 @@ void SimulationView::draw()
         auto zoomFactor = Viewport::get().getZoomFactor();
 
         // Extract object data from CUDA and transfer to OpenGL buffer
-        auto numObjects = _simulationFacade->tryUpdateObjectBuffersForShaders(reinterpret_cast<void*>(uintptr_t(_objectShader->getVbo())));
-        if (numObjects.has_value()) {
-            _numObjects = *numObjects;
+        RenderBuffers renderBuffers{.vboForPoints = _objectBackgroundShader->getVbo()};
+        auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
+        if (numRenderObjects.has_value()) {
+            _numObjects = *numRenderObjects;
         }
         
-        GLint currentFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+        GLint screenFbo;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &screenFbo);
 
-        // Render objects to texture using shaders
-        glBindFramebuffer(GL_FRAMEBUFFER, _objectFbo);
-        //glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        glViewport(0, 0, viewSize.x, viewSize.y);
+        if (zoomFactor > 2.0f) {
 
-        // Clear with black background
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+            //*******************************************************************
+            //* 1. Step: Render objects for background to texture (objectTexture)
+            //*******************************************************************
+            glBindFramebuffer(GL_FRAMEBUFFER, _objectBackgroundFbo);
+            glViewport(0, 0, viewSize.x, viewSize.y);
 
-        // Enable blending for anti-aliasing
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            // Clear with black background
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        // Enable point sprites
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glEnable(GL_POINT_SPRITE);
+            // Enable blending for anti-aliasing
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-        // Use object shader
-        _objectShader->use();
-        _objectShader->setFloat("zoom", zoomFactor);
-        _objectShader->setBool("smoothCircles", false);
-        _objectShader->setFloat("radius", zoomFactor);
-        _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
-        _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
-        _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            // Enable point sprites
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_POINT_SPRITE);
 
-        // Draw points
-        glBindVertexArray(_objectShader->getVao());
-        glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
+            // Use background object shader
+            _objectBackgroundShader->use();
+            _objectBackgroundShader->setFloat("zoom", zoomFactor);
+            _objectBackgroundShader->setFloat("radius", std::max(6.0f, zoomFactor));    // std::max to avoid moire patterns at low zoom factors
+            _objectBackgroundShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+            _objectBackgroundShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+            _objectBackgroundShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 
-        // Render objects to small texture with half radius
-        glBindFramebuffer(GL_FRAMEBUFFER, _objectFboSmall);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+            // Draw points
+            glBindVertexArray(_objectBackgroundShader->getVao());
+            glDrawArrays(GL_POINTS, 0, toInt(_numObjects.vertices));
 
-        _objectShader->use();
-        _objectShader->setFloat("zoom", zoomFactor);
-        _objectShader->setBool("smoothCircles", true);
-        _objectShader->setFloat("radius", zoomFactor * 0.5f);
-        _objectShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
-        _objectShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
-        _objectShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            //*******************************************************************
+            //* 2. Step: Render objects for foreground to texture (objectTexture)
+            //*******************************************************************
+            glBindFramebuffer(GL_FRAMEBUFFER, _objectForegroundFbo);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(_objectShader->getVao());
-        glDrawArrays(GL_POINTS, 0, toInt(_numObjects));
+            _objectForegroundShader->use();
+            _objectForegroundShader->setFloat("zoom", zoomFactor);
+            _objectForegroundShader->setFloat("radius", std::max(6.0f, zoomFactor * 0.5f)); // std::max to avoid moire patterns at low zoom factors
+            _objectForegroundShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+            _objectForegroundShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+            _objectForegroundShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 
-        // Disable blending and point sprites
-        glDisable(GL_PROGRAM_POINT_SIZE);
-        glDisable(GL_BLEND);
+            glBindVertexArray(_objectForegroundShader->getVao());
+            glDrawArrays(GL_POINTS, 0, toInt(_numObjects.vertices));
 
-        // Calculate blur radius based on zoom
-        float blurRadius = zoomFactor / 4;
+            // Disable blending and point sprites
+            glDisable(GL_PROGRAM_POINT_SIZE);
+            glDisable(GL_BLEND);
 
-        // Apply horizontal Gaussian blur preprocessing
-        glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
-        _blurHorizontalShader->use();
-        _blurHorizontalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-        _blurHorizontalShader->setFloat("blurRadius", blurRadius);
-        glBindVertexArray(_blurHorizontalShader->getVao());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _objectTexture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        // Apply vertical Gaussian blur preprocessing
-        glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
-        _blurVerticalShader->use();
-        _blurVerticalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-        _blurVerticalShader->setFloat("blurRadius", blurRadius);
-        glBindVertexArray(_blurVerticalShader->getVao());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            //*******************************************************
+            //* 3. Step: Apply horizontal Gaussian blur to background
+            //*******************************************************
+            float blurRadius = zoomFactor / 4;
 
-        // Apply metaballs post-processing effect
-        glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
-        _metaballsShader->use();
-        _metaballsShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-        glBindVertexArray(_metaballsShader->getVao());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            _blurHorizontalShader->use();
+            _blurHorizontalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            _blurHorizontalShader->setFloat("blurRadius", blurRadius);
+            glBindVertexArray(_blurHorizontalShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _objectBackgroundTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
 
-        // Apply subsurface scattering effect (final step)
-        glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
-        _subsurfaceShader->use();
-        _subsurfaceShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-        _subsurfaceShader->setFloat("zoom", zoomFactor);
-        glBindVertexArray(_subsurfaceShader->getVao());
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, _objectTextureSmall);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //*****************************************************
+            //* 4. Step: Apply vertical Gaussian blur to background
+            //*****************************************************
+            _blurVerticalShader->use();
+            _blurVerticalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            _blurVerticalShader->setFloat("blurRadius", blurRadius);
+            glBindVertexArray(_blurVerticalShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //***********************************************
+            //* 5. Step: Apply metaballs effect to background
+            //***********************************************
+            _metaballsShader->use();
+            _metaballsShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            glBindVertexArray(_metaballsShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
+            //glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //*********************************************
+            //* 6. Step: Apply Fresnel effect to background
+            //*********************************************
+            _fresnelShader->use();
+            _fresnelShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            _fresnelShader->setFloat("zoom", zoomFactor);
+            glBindVertexArray(_fresnelShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            //***********************************************************
+            //* 7. Step: Apply subsurface scattering effect to background
+            //***********************************************************
+            _subsurfaceScatterShader->use();
+            _subsurfaceScatterShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            _subsurfaceScatterShader->setFloat("zoom", zoomFactor);
+            glBindVertexArray(_subsurfaceScatterShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //********************************************
+            //* 8. Step: Merge layers and render to screen
+            //********************************************
+            _mergeShader->use();
+            glBindVertexArray(_mergeShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, _objectForegroundTexture);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        } else {
+            //*******************************************************************
+            //* 1. Step: Render objects for background to texture (objectTexture)
+            //*******************************************************************
+            glBindFramebuffer(GL_FRAMEBUFFER, _objectBackgroundFbo);
+            glViewport(0, 0, viewSize.x, viewSize.y);
+
+            // Clear with black background
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            // Enable blending for anti-aliasing
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+            // Enable point sprites
+            glEnable(GL_PROGRAM_POINT_SIZE);
+            glEnable(GL_POINT_SPRITE);
+
+            // Use background object shader
+            _objectBackgroundShader->use();
+            _objectBackgroundShader->setFloat("zoom", zoomFactor);
+            _objectBackgroundShader->setFloat("radius", std::max(4.5f, zoomFactor));  // std::max to avoid moire patterns at low zoom factors
+            _objectBackgroundShader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+            _objectBackgroundShader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+            _objectBackgroundShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+
+            // Draw points
+            glBindVertexArray(_objectBackgroundShader->getVao());
+            glDrawArrays(GL_POINTS, 0, toInt(_numObjects.vertices));
+
+            // Disable blending and point sprites
+            glDisable(GL_PROGRAM_POINT_SIZE);
+            glDisable(GL_BLEND);
+
+            //*******************************************************
+            //* 2. Step: Apply horizontal Gaussian blur to background
+            //*******************************************************
+            float blurRadius = 1.0f;
+            //zoomFactor / 4;
+
+            _blurHorizontalShader->use();
+            _blurHorizontalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            _blurHorizontalShader->setFloat("blurRadius", blurRadius);
+            glBindVertexArray(_blurHorizontalShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _objectBackgroundTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //*****************************************************
+            //* 3. Step: Apply vertical Gaussian blur to background
+            //*****************************************************
+            _blurVerticalShader->use();
+            _blurVerticalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+            _blurVerticalShader->setFloat("blurRadius", blurRadius);
+            glBindVertexArray(_blurVerticalShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //********************************************
+            //* 4. Step: Merge layers and render to screen
+            //********************************************
+            _mergeShader->use();
+            glBindVertexArray(_mergeShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _blurHorizontalFbo);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, _blurHorizontalFbo);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
 
         if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
@@ -377,24 +557,45 @@ void SimulationView::updateMotionBlur()
     // Metaballs shader doesn't use motion blur parameter
 }
 
-void SimulationView::setupObjectShader()
+void SimulationView::setupBackgroundObjectShader()
 {
-    _objectShader = std::make_shared<_Shader>(Const::ObjectVertexShader, Const::ObjectFragmentShader);
+    _objectBackgroundShader = std::make_shared<_Shader>(Const::ObjectVertexShader, Const::ObjectBackgroundFragmentShader);
 
-    auto vao = _objectShader->getVao();
-    auto vbo = _objectShader->getVbo();
+    auto vao = _objectBackgroundShader->getVao();
+    auto vbo = _objectBackgroundShader->getVbo();
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(ObjectRenderData), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Color (3 floats)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ObjectRenderData), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupForegroundObjectShader()
+{
+    _objectForegroundShader = std::make_shared<_Shader>(Const::ObjectVertexShader, Const::ObjectForegroundFragmentShader);
+
+    auto vao = _objectForegroundShader->getVao();
+    auto vbo = _objectForegroundShader->getVbo();
+
+    glBindVertexArray(vao);
+    // Use the same VBO as background shader (data is shared)
+    glBindBuffer(GL_ARRAY_BUFFER, _objectBackgroundShader->getVbo());
+
+    // Setup vertex attributes for RenderingObjectData
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color (3 floats)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
 }
 
@@ -506,9 +707,9 @@ void SimulationView::setupMetaballsShader()
     glEnableVertexAttribArray(1);
 }
 
-void SimulationView::setupSubsurfaceShader()
+void SimulationView::setupSubsurfaceScatterShader()
 {
-    _subsurfaceShader = std::make_shared<_Shader>(Const::SubsurfaceVertexShader, Const::SubsurfaceFragmentShader);
+    _subsurfaceScatterShader = std::make_shared<_Shader>(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader);
 
     // Setup full-screen quad
     float vertices[] = {
@@ -522,9 +723,81 @@ void SimulationView::setupSubsurfaceShader()
         1, 2, 3   // second triangle
     };
 
-    auto vao = _subsurfaceShader->getVao();
-    auto vbo = _subsurfaceShader->getVbo();
-    auto ebo = _subsurfaceShader->getEbo();
+    auto vao = _subsurfaceScatterShader->getVao();
+    auto vbo = _subsurfaceScatterShader->getVbo();
+    auto ebo = _subsurfaceScatterShader->getEbo();
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupFresnelShader()
+{
+    _fresnelShader = std::make_shared<_Shader>(Const::FresnelVertexShader, Const::FresnelFragmentShader);
+
+    // Setup full-screen quad
+    float vertices[] = {
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
+
+    auto vao = _fresnelShader->getVao();
+    auto vbo = _fresnelShader->getVbo();
+    auto ebo = _fresnelShader->getEbo();
+    glBindVertexArray(vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+void SimulationView::setupMergeShader()
+{
+    _mergeShader = std::make_shared<_Shader>(Const::MergeVertexShader, Const::MergeFragmentShader);
+
+    // Setup full-screen quad
+    float vertices[] = {
+        1.0f,  1.0f,  0.0f, 1.0f, 1.0f,  // top right
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom left
+        -1.0f, 1.0f,  0.0f, 0.0f, 1.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
+
+    auto vao = _mergeShader->getVao();
+    auto vbo = _mergeShader->getVbo();
+    auto ebo = _mergeShader->getEbo();
     glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

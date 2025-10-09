@@ -46,5 +46,8 @@ struct PreviewDescription;
 
 struct ConversionResult;
 
-
 struct Ids;
+
+struct RenderBuffers;
+struct NumRenderObjects;
+struct VertexData;

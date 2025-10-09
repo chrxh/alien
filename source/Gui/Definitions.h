@@ -152,3 +152,8 @@ struct TextureData
     int height;
 };
 
+class _RenderPipeline;
+using RenderPipeline = std::shared_ptr<_RenderPipeline>;
+
+class _RenderStep;
+using RenderStep = std::shared_ptr<_RenderStep>;

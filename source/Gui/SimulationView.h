@@ -6,6 +6,7 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
+#include "EngineInterface/RenderData.h"
 
 #include "Definitions.h"
 
@@ -44,11 +45,14 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void setupObjectShader();
+    void setupBackgroundObjectShader();
+    void setupForegroundObjectShader();
     void setupBlurHorizontalShader();
     void setupBlurVerticalShader();
     void setupMetaballsShader();
-    void setupSubsurfaceShader();
+    void setupSubsurfaceScatterShader();
+    void setupFresnelShader();
+    void setupMergeShader();
 
     void markReferenceDomain();
 
@@ -61,13 +65,17 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
-    // Shader data for object rendering
-    Shader _objectShader;
-    uint64_t _numObjects = 0;
-    unsigned int _objectTexture;
-    unsigned int _objectFbo;
-    unsigned int _objectTextureSmall;
-    unsigned int _objectFboSmall;
+    NumRenderObjects _numObjects;
+
+    // Shader data for background object rendering
+    Shader _objectBackgroundShader;
+    unsigned int _objectBackgroundTexture;
+    unsigned int _objectBackgroundFbo;
+
+    // Shader data for foreground object rendering
+    Shader _objectForegroundShader;
+    unsigned int _objectForegroundTexture;
+    unsigned int _objectForegroundFbo;
 
     // Shader data for blur preprocessing
     Shader _blurHorizontalShader;
@@ -82,8 +90,23 @@ private:
     unsigned int _metaballsTexture;
     unsigned int _metaballsFbo;
 
-    // Shader data for subsurface scattering post-processing
-    Shader _subsurfaceShader;
+    // Shader data for subsurface scattering post-processing (new separated shaders)
+    Shader _subsurfaceScatterShader;
+    unsigned int _subsurfaceScatterTexture;
+    unsigned int _subsurfaceScatterFbo;
+    
+    // Shader data for Fresnel effect post-processing
+    Shader _fresnelShader;
+    unsigned int _fresnelTexture;
+    unsigned int _fresnelFbo;
+    
+    // Shader data for merge post-processing
+    Shader _mergeShader;
+    unsigned int _mergeTexture;
+    unsigned int _mergeFbo;
+    
+    // Screen background texture (dark blue background)
+    unsigned int _screenBackgroundTexture;
 
     bool _areTexturesInitialized = false;
 

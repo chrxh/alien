@@ -2,23 +2,19 @@
 
 #include <atomic>
 
-#include "EngineInterface/inc/ObjectRenderData.h"
+#include "EngineInterface/RenderData.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
 
 struct RenderingData
 {
-    int numPixels = 0;
-    uint64_t* imageData = nullptr;  //pixel in bbbbggggrrrr format (3 x 16 bit + 16 bit unused)
-
-    // New shader-based rendering data
     uint64_t capacity = 0;
-    ObjectRenderData* objectData = nullptr;
-    uint64_t* numObjects = nullptr;
+    uint64_t* numVertices = nullptr;
+    cudaGraphicsResource* vertexBuffer = nullptr;
 
     void init();
-    void resizeImageIfNecessary(int2 const& newSize);
+    void registerBuffers(RenderBuffers const& buffers);
     void resizeObjectBufferIfNecessary(uint64_t numRequiredObjects);
     void free();
 };

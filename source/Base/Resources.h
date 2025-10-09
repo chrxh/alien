@@ -9,6 +9,7 @@ namespace Const
     std::string const AlienURL = "alien-project.org";
 
     std::filesystem::path const ResourcePath = "resources";
+    std::filesystem::path const ShaderPath = ResourcePath / "shaders";
 
     std::filesystem::path const LogFilename = "log.txt";
     std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
@@ -16,18 +17,23 @@ namespace Const
     std::filesystem::path const SettingsFilename = ResourcePath / "settings.json";
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
-    std::filesystem::path const SimulationFragmentShader = ResourcePath / "shader.fs";
-    std::filesystem::path const SimulationVertexShader = ResourcePath / "shader.vs";
-    std::filesystem::path const ObjectFragmentShader = ResourcePath / "object.fs";
-    std::filesystem::path const ObjectVertexShader = ResourcePath / "object.vs";
-    std::filesystem::path const BlurHorizontalFragmentShader = ResourcePath / "blur_horizontal.fs";
-    std::filesystem::path const BlurHorizontalVertexShader = ResourcePath / "blur_horizontal.vs";
-    std::filesystem::path const BlurVerticalFragmentShader = ResourcePath / "blur_vertical.fs";
-    std::filesystem::path const BlurVerticalVertexShader = ResourcePath / "blur_vertical.vs";
-    std::filesystem::path const MetaballsFragmentShader = ResourcePath / "metaballs.fs";
-    std::filesystem::path const MetaballsVertexShader = ResourcePath / "metaballs.vs";
-    std::filesystem::path const SubsurfaceFragmentShader = ResourcePath / "subsurface.fs";
-    std::filesystem::path const SubsurfaceVertexShader = ResourcePath / "subsurface.vs";
+    std::filesystem::path const ObjectVertexShader = ShaderPath / "Object.vs";
+    std::filesystem::path const ObjectBackgroundFragmentShader = ShaderPath / "ObjectBackground.fs";
+    std::filesystem::path const ObjectForegroundFragmentShader = ShaderPath / "ObjectForeground.fs";
+    std::filesystem::path const BlurHorizontalFragmentShader = ShaderPath / "BlurHorizontal.fs";
+    std::filesystem::path const BlurHorizontalVertexShader = ShaderPath / "BlurHorizontal.vs";
+    std::filesystem::path const BlurVerticalFragmentShader = ShaderPath / "BlurVertical.fs";
+    std::filesystem::path const BlurVerticalVertexShader = ShaderPath / "BlurVertical.vs";
+    std::filesystem::path const MetaballsFragmentShader = ShaderPath / "Metaballs.fs";
+    std::filesystem::path const MetaballsVertexShader = ShaderPath / "Metaballs.vs";
+    std::filesystem::path const SubsurfaceFragmentShader = ShaderPath / "Subsurface.fs";
+    std::filesystem::path const SubsurfaceVertexShader = ShaderPath / "Subsurface.vs";
+    std::filesystem::path const SubsurfaceScatterFragmentShader = ShaderPath / "SubsurfaceScatter.fs";
+    std::filesystem::path const SubsurfaceScatterVertexShader = ShaderPath / "SubsurfaceScatter.vs";
+    std::filesystem::path const FresnelFragmentShader = ShaderPath / "Fresnel.fs";
+    std::filesystem::path const FresnelVertexShader = ShaderPath / "Fresnel.vs";
+    std::filesystem::path const MergeFragmentShader = ShaderPath / "Merge.fs";
+    std::filesystem::path const MergeVertexShader = ShaderPath / "Merge.vs";
 
     std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";

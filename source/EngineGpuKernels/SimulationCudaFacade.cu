@@ -123,51 +123,21 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void* _SimulationCudaFacade::registerBufferResource(GLuint buffer)
-{
-    //unregister old resource
-    if (_cudaBufferResource) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphicsUnregisterResource(_cudaBufferResource));
-    }
-
-    //register new resource
-    CHECK_FOR_CUDA_ERROR(
-        cudaGraphicsGLRegisterBuffer(&_cudaBufferResource, buffer, cudaGraphicsMapFlagsWriteDiscard));
-
-    return reinterpret_cast<void*>(_cudaBufferResource);
-}
-
-uint64_t _SimulationCudaFacade::extractObjectDataToBuffer(void* cudaBufferResource)
+NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
 {
     checkAndProcessSimulationParameterChanges();
 
-    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaBufferResource);
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
-
-    ObjectRenderData* mappedBuffer;
-    size_t bufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
-        reinterpret_cast<void**>(&mappedBuffer), &bufferSize, cudaResourceImpl));
+    _cudaRenderingData->registerBuffers(buffers);
 
     // Extract object data to temporary buffer
     _renderingKernels->extractObjectData(_settings, getSimulationDataPtrCopy(), *_cudaRenderingData);
     syncAndCheck();
 
     // Copy to mapped OpenGL buffer
-    int numObjects;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&numObjects, _cudaRenderingData->numObjects, sizeof(int), cudaMemcpyDeviceToHost));
+    NumRenderObjects result;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.vertices, _cudaRenderingData->numVertices, sizeof(int), cudaMemcpyDeviceToHost));
     
-    if (numObjects > 0) {
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(
-            mappedBuffer,
-            _cudaRenderingData->objectData,
-            numObjects * sizeof(ObjectRenderData),
-            cudaMemcpyDeviceToDevice));
-    }
-
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
-
-    return numObjects;
+    return result;
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
@@ -211,40 +181,6 @@ void _SimulationCudaFacade::applyCataclysm(int power)
         syncAndCheck();
         resizeArraysIfNecessary();
     }
-}
-
-void _SimulationCudaFacade::drawVectorGraphics(
-    float2 const& rectUpperLeft,
-    float2 const& rectLowerRight,
-    void* cudaResource,
-    int2 const& imageSize,
-    double zoom)
-{
-    checkAndProcessSimulationParameterChanges();
-
-    auto cudaResourceImpl = reinterpret_cast<cudaGraphicsResource*>(cudaResource);
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &cudaResourceImpl));
-
-    cudaArray* mappedArray;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsSubResourceGetMappedArray(&mappedArray, cudaResourceImpl, 0, 0));
-
-    _cudaRenderingData->resizeImageIfNecessary(imageSize);
-
-    _renderingKernels->drawImage(_settings, rectUpperLeft, rectLowerRight, imageSize, static_cast<float>(zoom), getSimulationDataPtrCopy(), *_cudaRenderingData);
-    syncAndCheck();
-
-    const size_t widthBytes = sizeof(uint64_t) * imageSize.x;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy2DToArray(
-        mappedArray,
-        0,
-        0,
-        _cudaRenderingData->imageData,
-        widthBytes,
-        widthBytes,
-        imageSize.y,
-        cudaMemcpyDeviceToDevice));
-
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &cudaResourceImpl));
 }
 
 TO _SimulationCudaFacade::getSimulationData(

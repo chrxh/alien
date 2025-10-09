@@ -768,7 +768,7 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, ObjectRenderData* objectData, uint64_t* numObjects)
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData, uint64_t* numObjects)
 {
     auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 

@@ -1,6 +1,7 @@
 #include "SimulationFacadeImpl.h"
 
 #include "EngineInterface/Description.h"
+#include "EngineInterface/RenderData.h"
 
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
@@ -36,27 +37,9 @@ std::string _SimulationFacadeImpl::getGpuName() const
     return _worker.getGpuName();
 }
 
-void _SimulationFacadeImpl::tryDrawVectorGraphics(
-    RealVector2D const& rectUpperLeft,
-    RealVector2D const& rectLowerRight,
-    IntVector2D const& imageSize,
-    double zoom)
+std::optional<NumRenderObjects> _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
 {
-    _worker.tryDrawVectorGraphics(rectUpperLeft, rectLowerRight, imageSize, zoom);
-}
-
-std::optional<uint64_t> _SimulationFacadeImpl::tryUpdateObjectBuffersForShaders(void* buffer)
-{
-    return _worker.tryUpdateObjectBuffersForShaders(buffer);
-}
-
-std::optional<OverlayDescription> _SimulationFacadeImpl::tryDrawVectorGraphicsAndReturnOverlay(
-    RealVector2D const& rectUpperLeft,
-    RealVector2D const& rectLowerRight,
-    IntVector2D const& imageSize,
-    double zoom)
-{
-    return _worker.tryDrawVectorGraphicsAndReturnOverlay(rectUpperLeft, rectLowerRight, imageSize, zoom);
+    return _worker.tryCopyBuffersFromCudaToOpenGL(buffers);
 }
 
 bool _SimulationFacadeImpl::isSyncSimulationWithRendering() const

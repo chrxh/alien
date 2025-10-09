@@ -47,11 +47,7 @@ public:
 
     std::string getGpuName() const;
 
-    void tryDrawVectorGraphics(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
-    // Return number of objects if successful, std::nullopt if not
-    std::optional<uint64_t> tryUpdateObjectBuffersForShaders(void* buffer);
-    std::optional<OverlayDescription>
-    tryDrawVectorGraphicsAndReturnOverlay(RealVector2D const& rectUpperLeft, RealVector2D const& rectLowerRight, IntVector2D const& imageSize, double zoom);
+    std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(RenderBuffers const& buffers);
 
     bool isSyncSimulationWithRendering() const;
     void setSyncSimulationWithRendering(bool value);
@@ -177,7 +173,6 @@ private:
     std::optional<std::chrono::microseconds> _slowDownOvershot;
 
     // Internals
-    void* _cudaBufferResource = nullptr;
     TOProvider _collectionTOProvider;
 };
 

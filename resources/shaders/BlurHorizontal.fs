@@ -14,7 +14,7 @@ void main()
     float totalWeight = 0.0;
     
     // Dynamic blur based on radius
-    int radius = int(ceil(blurRadius));
+    int radius = max(1, int(ceil(blurRadius)));
     
     // Apply horizontal Gaussian blur
     for (int x = -radius; x <= radius; x++) {

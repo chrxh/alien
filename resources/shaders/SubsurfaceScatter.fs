@@ -4,7 +4,6 @@ out vec4 FragColor;
 in vec2 texCoord;
 
 uniform sampler2D inputTexture;
-uniform sampler2D objectTextureSmall;
 uniform vec2 viewportSize;
 uniform float zoom;
 
@@ -12,9 +11,6 @@ void main()
 {
     // Sample the input texture (output from metaballs effect)
     vec4 color = texture(inputTexture, texCoord);
-    
-    // Sample the original small object texture
-    vec4 originalColor = texture(objectTextureSmall, texCoord);
     
     // Calculate brightness as thickness for subsurface scattering
     float brightness = dot(color.rgb, vec3(0.333, 0.333, 0.333));
@@ -28,16 +24,23 @@ void main()
     float totalWeight = 0.0;
     
     // Scatter radius based on inverse thickness (brighter = thicker = less scatter)
-    // Much larger radius for more pronounced effect
-    float scatterRadius = mix(12.0, 1.0, brightness);
+    // Scale with zoom: at high zoom (close up), reduce effect; at low zoom (far away), increase effect
+    // Zoom typically ranges from ~0.5 (far) to ~50+ (close)
+    float zoomScale = max(0.5, min(10.0, sqrt(zoom) / 5.0));
+    float scatterRadius = mix(12.0, 1.0, brightness) * zoomScale / 3;
     int radius = int(ceil(scatterRadius));
     
+    int scanRadius = max(1, radius / 3);
+    int scanDist = 3;
+    if(radius < 3) {
+        scanDist = 1;
+    }
     // Subsurface scattering kernel - samples in a circular pattern
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
+    for (int y = -scanRadius; y <= scanRadius; y++) {
+        for (int x = -scanRadius; x <= scanRadius; x++) {
             float dist = length(vec2(x, y));
             if (dist <= scatterRadius) {
-                vec2 offset = vec2(x, y) * texelSize;
+                vec2 offset = vec2(x, y) * texelSize * scanDist;
                 vec4 sample = texture(inputTexture, texCoord + offset);
                 
                 // Weight based on distance and thickness
@@ -63,12 +66,8 @@ void main()
     // Add pronounced translucent glow effect
     // Simulate light passing through thin areas - increased from 0.3 to 0.7
     float glowIntensity = (1.0 - brightness) * 0.7;
-    vec3 glowColor = finalColor * 2.5; // Much stronger brightness boost for glow
+    vec3 glowColor = finalColor * 1.5; // Much stronger brightness boost for glow
     finalColor = mix(finalColor, glowColor, glowIntensity);
 
-    // Additively blend with original small object texture
-    finalColor = finalColor * 0.5 + originalColor.rgb * 0.5;
-//    float finalAlpha = color.a * 0.4 + originalColor.a * 0.6;
-
-    FragColor = vec4(finalColor, 1.0f);
+    FragColor = clamp(vec4(scattered, 1.0f), -1.0, 1.0);//vec4(finalColor, 1.0f);
 }
