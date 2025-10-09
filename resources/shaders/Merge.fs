@@ -17,7 +17,7 @@ void main()
     vec3 mergedColor = backgroundColor.rgb * 0.5 + foregroundColor.rgb * 0.5;
     
     // Calculate brightness of merged result
-    float brightness = dot(mergedColor, vec3(0.299, 0.587, 0.114));
+    float brightness = clamp(dot(mergedColor, vec3(1.0)), -1.0, 1.0);
     
     // Use brightness as alpha to blend with screen background
     vec3 finalColor = mix(screenBackground.rgb, mergedColor, brightness);

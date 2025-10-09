@@ -163,8 +163,8 @@ void SimulationView::resize(IntVector2D const& size)
     std::vector<float> darkBlueData(size.x * size.y * 4);
     for (int i = 0; i < size.x * size.y; ++i) {
         darkBlueData[i * 4 + 0] = 0.0f;   // R
-        darkBlueData[i * 4 + 1] = 0.05f;  // G
-        darkBlueData[i * 4 + 2] = 0.15f;  // B
+        darkBlueData[i * 4 + 1] = 0.0f;  // G
+        darkBlueData[i * 4 + 2] = 0.2f;  // B
         darkBlueData[i * 4 + 3] = 1.0f;   // A
     }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, darkBlueData.data());
@@ -232,7 +232,6 @@ void SimulationView::draw()
             //* 1. Step: Render objects for background to texture (objectTexture)
             //*******************************************************************
             glBindFramebuffer(GL_FRAMEBUFFER, _objectBackgroundFbo);
-            //glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
             glViewport(0, 0, viewSize.x, viewSize.y);
 
             // Clear with black background
@@ -286,7 +285,6 @@ void SimulationView::draw()
             //*******************************************************
             float blurRadius = zoomFactor / 4;
 
-            // Apply horizontal Gaussian blur preprocessing
             _blurHorizontalShader->use();
             _blurHorizontalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
             _blurHorizontalShader->setFloat("blurRadius", blurRadius);
@@ -348,9 +346,9 @@ void SimulationView::draw()
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-            //****************************************************************
-            //* 7. Step: Merge background with foreground and render to screen
-            //****************************************************************
+            //********************************************
+            //* 7. Step: Merge layers and render to screen
+            //********************************************
             _mergeShader->use();
             glBindVertexArray(_mergeShader->getVao());
             glActiveTexture(GL_TEXTURE0);
@@ -403,7 +401,6 @@ void SimulationView::draw()
             float blurRadius = 1.0f;
             //zoomFactor / 4;
 
-            // Apply horizontal Gaussian blur preprocessing
             _blurHorizontalShader->use();
             _blurHorizontalShader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
             _blurHorizontalShader->setFloat("blurRadius", blurRadius);
@@ -423,6 +420,21 @@ void SimulationView::draw()
             glBindVertexArray(_blurVerticalShader->getVao());
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
+            glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            //********************************************
+            //* 4. Step: Merge layers and render to screen
+            //********************************************
+            _mergeShader->use();
+            glBindVertexArray(_mergeShader->getVao());
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _blurHorizontalFbo);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, _blurHorizontalFbo);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
             glBindFramebuffer(GL_FRAMEBUFFER, screenFbo);
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
