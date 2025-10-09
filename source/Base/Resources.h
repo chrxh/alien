@@ -18,22 +18,27 @@ namespace Const
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const ObjectVertexShader = ShaderPath / "Object.vs";
+
     std::filesystem::path const ObjectBackgroundFragmentShader = ShaderPath / "ObjectBackground.fs";
     std::filesystem::path const ObjectForegroundFragmentShader = ShaderPath / "ObjectForeground.fs";
-    std::filesystem::path const BlurHorizontalFragmentShader = ShaderPath / "BlurHorizontal.fs";
+
     std::filesystem::path const BlurHorizontalVertexShader = ShaderPath / "BlurHorizontal.vs";
-    std::filesystem::path const BlurVerticalFragmentShader = ShaderPath / "BlurVertical.fs";
+    std::filesystem::path const BlurHorizontalFragmentShader = ShaderPath / "BlurHorizontal.fs";
+
     std::filesystem::path const BlurVerticalVertexShader = ShaderPath / "BlurVertical.vs";
-    std::filesystem::path const MetaballsFragmentShader = ShaderPath / "Metaballs.fs";
+    std::filesystem::path const BlurVerticalFragmentShader = ShaderPath / "BlurVertical.fs";
+
     std::filesystem::path const MetaballsVertexShader = ShaderPath / "Metaballs.vs";
-    std::filesystem::path const SubsurfaceFragmentShader = ShaderPath / "Subsurface.fs";
-    std::filesystem::path const SubsurfaceVertexShader = ShaderPath / "Subsurface.vs";
-    std::filesystem::path const SubsurfaceScatterFragmentShader = ShaderPath / "SubsurfaceScatter.fs";
-    std::filesystem::path const SubsurfaceScatterVertexShader = ShaderPath / "SubsurfaceScatter.vs";
-    std::filesystem::path const FresnelFragmentShader = ShaderPath / "Fresnel.fs";
+    std::filesystem::path const MetaballsFragmentShader = ShaderPath / "Metaballs.fs";
+
     std::filesystem::path const FresnelVertexShader = ShaderPath / "Fresnel.vs";
-    std::filesystem::path const MergeFragmentShader = ShaderPath / "Merge.fs";
+    std::filesystem::path const FresnelFragmentShader = ShaderPath / "Fresnel.fs";
+
+    std::filesystem::path const SubsurfaceScatterVertexShader = ShaderPath / "SubsurfaceScatter.vs";
+    std::filesystem::path const SubsurfaceScatterFragmentShader = ShaderPath / "SubsurfaceScatter.fs";
+
     std::filesystem::path const MergeVertexShader = ShaderPath / "Merge.vs";
+    std::filesystem::path const MergeFragmentShader = ShaderPath / "Merge.fs";
 
     std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";

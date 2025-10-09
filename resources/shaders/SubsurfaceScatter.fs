@@ -3,14 +3,14 @@ out vec4 FragColor;
 
 in vec2 texCoord;
 
-uniform sampler2D inputTexture;
+uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
 uniform float zoom;
 
 void main()
 {
     // Sample the input texture (output from metaballs effect)
-    vec4 color = texture(inputTexture, texCoord);
+    vec4 color = texture(inputTexture1, texCoord);
     
     // Calculate brightness as thickness for subsurface scattering
     float brightness = dot(color.rgb, vec3(0.333, 0.333, 0.333));
@@ -41,7 +41,7 @@ void main()
             float dist = length(vec2(x, y));
             if (dist <= scatterRadius) {
                 vec2 offset = vec2(x, y) * texelSize * scanDist;
-                vec4 sample = texture(inputTexture, texCoord + offset);
+                vec4 sample = texture(inputTexture1, texCoord + offset);
                 
                 // Weight based on distance and thickness
                 // Thinner areas allow more light to penetrate from neighbors

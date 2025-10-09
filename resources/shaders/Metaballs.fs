@@ -3,13 +3,14 @@ out vec4 FragColor;
 
 in vec2 texCoord;
 
-uniform sampler2D inputTexture;
+uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
+uniform float zoom;
 
 void main()
 {
     // Sample the input texture
-    vec4 color = texture(inputTexture, texCoord);
+    vec4 color = texture(inputTexture1, texCoord);
     
     // For metaballs effect, use the luminance/brightness as the density
     // This works even when alpha is 1 by treating bright colors as "dense" areas

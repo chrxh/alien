@@ -3,14 +3,14 @@ out vec4 FragColor;
 
 in vec2 texCoord;
 
-uniform sampler2D inputTexture;
+uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
 uniform float zoom;
 
 void main()
 {
     // Sample the input texture (output from subsurface scattering)
-    vec4 color = texture(inputTexture, texCoord);
+    vec4 color = texture(inputTexture1, texCoord);
     
     // Calculate brightness as thickness for Fresnel effect
     float brightness = dot(color.rgb, vec3(0.333, 0.333, 0.333));
@@ -27,7 +27,7 @@ void main()
     for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
             vec2 offset = vec2(x, y) * texelSize;
-            float sample = dot(texture(inputTexture, texCoord + offset).rgb, vec3(0.333, 0.333, 0.333));
+            float sample = dot(texture(inputTexture1, texCoord + offset).rgb, vec3(0.333, 0.333, 0.333));
             
             // Sobel kernel for X direction
             float kx = float(x);

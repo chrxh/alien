@@ -51,15 +51,21 @@ unsigned int _RenderStep::getTexture() const
     return _outputTexture;
 }
 
-_PointRenderStep::_PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader)
+_PointRenderStep::_PointRenderStep(
+    std::filesystem::path const& vertexShader,
+    std::filesystem::path const& fragmentShader,
+    RenderStep const& dependentStep)
     : _RenderStep(vertexShader, fragmentShader, {})
+    , _dependentStep(dependentStep)
 {
     auto vao = _shader->getVao();
-    auto vbo = _shader->getVbo();
+    auto vbo = dependentStep ? dependentStep->getShader()->getVbo() : _shader->getVbo();
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
+    if (!dependentStep) {
+        glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
+    }
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)
@@ -76,7 +82,7 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     auto worldSize = simulationFacade->getWorldSize();
     auto worldRect = Viewport::get().getVisibleWorldRect();
     auto viewSize = Viewport::get().getViewSize();
-    auto zoomFactor = Viewport::get().getZoomFactor();
+    auto zoom = Viewport::get().getZoomFactor();
 
     if (std::holds_alternative<TextureTarget>(target)) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
@@ -98,13 +104,16 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    // Use background object shader
     _shader->use();
-    _shader->setFloat("zoom", zoomFactor);
-    _shader->setFloat("radius", std::max(6.0f, zoomFactor));  // std::max to avoid moire patterns at low zoom factors
+    _shader->setFloat("zoom", zoom);
+    _shader->setFloat("radius", std::max(6.0f, zoom));  // std::max to avoid moire patterns at low zoom factors
     _shader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
     _shader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
     _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+
+    for (auto const& [key, value] : _boolValues) {
+        _shader->setBool(key, value);
+    }
 
     // Draw points
     glBindVertexArray(_shader->getVao());
@@ -113,6 +122,11 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
+}
+
+void _PointRenderStep::setBool(std::string const& name, bool value)
+{
+    _boolValues.insert_or_assign(name, value);
 }
 
 _PostProcessingRenderStep::_PostProcessingRenderStep(
@@ -159,17 +173,25 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(
 
 void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
+    auto viewSize = Viewport::get().getViewSize();
+    auto zoom = Viewport::get().getZoomFactor();
+
     _shader->use();
+    _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+    _shader->setFloat("zoom", zoom);
+
     glBindVertexArray(_shader->getVao());
 
     // Input
     auto numDependentSteps = _dependentSteps.size();
     CHECK(numDependentSteps <= 2);
     if (numDependentSteps >= 1) {
+        _shader->setInt("inputTexture1", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(0)->getTexture());
     }
     if (numDependentSteps >= 2) {
+        _shader->setInt("inputTexture2", 1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(1)->getTexture());
     }

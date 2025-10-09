@@ -41,39 +41,32 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
         Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
     _renderPipeline->addStep(renderStep2);
 
-    setupBackgroundObjectShader();
-    setupForegroundObjectShader();
-    setupBlurHorizontalShader();
-    setupBlurVerticalShader();
-    setupMetaballsShader();
-    setupSubsurfaceScatterShader();
-    setupFresnelShader();
-    setupMergeShader();
+    auto renderStep3 =
+        std::make_shared<_PostProcessingRenderStep>(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader, std::vector<RenderStep>{renderStep2});
+    _renderPipeline->addStep(renderStep3);
+
+    auto renderStep4 =
+        std::make_shared<_PostProcessingRenderStep>(Const::MetaballsVertexShader, Const::MetaballsFragmentShader, std::vector<RenderStep>{renderStep3});
+    _renderPipeline->addStep(renderStep4);
+
+    auto renderStep5 =
+        std::make_shared<_PostProcessingRenderStep>(Const::FresnelVertexShader, Const::FresnelFragmentShader, std::vector<RenderStep>{renderStep4});
+    _renderPipeline->addStep(renderStep5);
+
+    auto renderStep6 = std::make_shared<_PostProcessingRenderStep>(
+        Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
+    _renderPipeline->addStep(renderStep6);
+
+    auto renderStep7 = std::make_shared<_PointRenderStep>(Const::ObjectVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
+    _renderPipeline->addStep(renderStep7);
+
+    auto renderStep8 =
+        std::make_shared<_PostProcessingRenderStep>(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
+    _renderPipeline->addStep(renderStep8);
 
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
     resize(Viewport::get().getViewSize());
-
-    // Setup shaders
-    _blurHorizontalShader->use();
-    _blurHorizontalShader->setInt("inputTexture", 0);
-    
-    _blurVerticalShader->use();
-    _blurVerticalShader->setInt("inputTexture", 0);
-    
-    _metaballsShader->use();
-    _metaballsShader->setInt("inputTexture", 0);
-    
-    _subsurfaceScatterShader->use();
-    _subsurfaceScatterShader->setInt("inputTexture", 0);
-    
-    _fresnelShader->use();
-    _fresnelShader->setInt("inputTexture", 0);
-    
-    _mergeShader->use();
-    _mergeShader->setInt("objectBackgroundTexture", 0);
-    _mergeShader->setInt("objectForegroundTexture", 1);
-    _mergeShader->setInt("screenBackgroundTexture", 2);
 }
 
 void SimulationView::shutdown()

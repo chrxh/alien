@@ -3,15 +3,16 @@ out vec4 FragColor;
 
 in vec2 texCoord;
 
-uniform sampler2D inputTexture;
+uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
-uniform float blurRadius;
+uniform float zoom;
 
 void main()
 {
     vec2 texelSize = 1.0 / viewportSize;
     vec4 result = vec4(0.0);
     float totalWeight = 0.0;
+    float blurRadius = zoom / 4.0;
     
     // Dynamic blur based on radius
     int radius = max(1, int(ceil(blurRadius)));
@@ -22,7 +23,7 @@ void main()
         // Gaussian weight calculation
         float weight = exp(-0.5 * (distance * distance) / (blurRadius * blurRadius));
         vec2 offset = vec2(distance * texelSize.x, 0.0);
-        result += texture(inputTexture, texCoord + offset) * weight;
+        result += texture(inputTexture1, texCoord + offset) * weight;
         totalWeight += weight;
     }
     
