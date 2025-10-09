@@ -65,6 +65,8 @@ private:
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
 
+    RenderPipeline _renderPipeline;
+
     NumRenderObjects _numObjects;
 
     // Shader data for background object rendering

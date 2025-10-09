@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 struct RenderBuffers
 {
     unsigned int vboForPoints = 0;
@@ -7,7 +9,7 @@ struct RenderBuffers
 
 struct NumRenderObjects
 {
-    uint64_t vertices = 0;
+    uint64_t vertices;
 };
 
 struct VertexData

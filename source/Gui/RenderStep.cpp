@@ -1,7 +1,7 @@
 #include "RenderStep.h"
 
-#include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/RenderData.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "Shader.h"
 #include "Viewport.h"
@@ -12,13 +12,47 @@ _RenderStep::_RenderStep(std::filesystem::path const& vertexShader, std::filesys
     _shader = std::make_shared<_Shader>(vertexShader, fragmentShader);
 }
 
-_PointRenderStep::_PointRenderStep(
-    std::filesystem::path const& vertexShader,
-    std::filesystem::path const& fragmentShader,
-    std::vector<RenderStep> const& dependentSteps,
-    SimulationFacade const& simulationFacade)
-    : _RenderStep(vertexShader, fragmentShader, dependentSteps)
-    , _simulationFacade(simulationFacade)
+void _RenderStep::resize(IntVector2D const& size)
+{
+    if (!_outputTextureInitialized) {
+        glDeleteFramebuffers(1, &_fbo);
+        glDeleteTextures(1, &_outputTexture);
+    }
+    // Init output texture
+    glGenTextures(1, &_outputTexture);
+    glBindTexture(GL_TEXTURE_2D, _outputTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    // Init framebuffer
+    glGenFramebuffers(1, &_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _fbo, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    _outputTextureInitialized = true;
+}
+
+std::vector<RenderStep> const& _RenderStep::getDependentSteps() const
+{
+    return _dependentSteps;
+}
+
+Shader _RenderStep::getShader() const
+{
+    return _shader;
+}
+
+unsigned int _RenderStep::getTexture() const
+{
+    return _outputTexture;
+}
+
+_PointRenderStep::_PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader)
+    : _RenderStep(vertexShader, fragmentShader, {})
 {
     auto vao = _shader->getVao();
     auto vbo = _shader->getVbo();
@@ -37,18 +71,19 @@ _PointRenderStep::_PointRenderStep(
     glEnableVertexAttribArray(1);
 }
 
-void _PointRenderStep::resize()
+void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
-}
-
-void _PointRenderStep::execute(NumRenderObjects const& numObjects)
-{
-    auto worldSize = _simulationFacade->getWorldSize();
+    auto worldSize = simulationFacade->getWorldSize();
     auto worldRect = Viewport::get().getVisibleWorldRect();
     auto viewSize = Viewport::get().getViewSize();
     auto zoomFactor = Viewport::get().getZoomFactor();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    if (std::holds_alternative<TextureTarget>(target)) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    } else {
+        auto fbo = std::get<ScreenTarget>(target).fbo;
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    }
     glViewport(0, 0, viewSize.x, viewSize.y);
 
     // Clear with black background
@@ -74,10 +109,17 @@ void _PointRenderStep::execute(NumRenderObjects const& numObjects)
     // Draw points
     glBindVertexArray(_shader->getVao());
     glDrawArrays(GL_POINTS, 0, toInt(numObjects.vertices));
+
+    // Disable blending and point sprites
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glDisable(GL_BLEND);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader)
-    : _RenderStep(vertexShader, fragmentShader, {})
+_PostProcessingRenderStep::_PostProcessingRenderStep(
+    std::filesystem::path const& vertexShader,
+    std::filesystem::path const& fragmentShader,
+    std::vector<RenderStep> const& dependentSteps)
+    : _RenderStep(vertexShader, fragmentShader, dependentSteps)
 {
     // Setup full-screen quad
     float vertices[] = {
@@ -115,6 +157,29 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const
     glEnableVertexAttribArray(1);
 }
 
-void _PostProcessingRenderStep::resize() {}
+void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
+{
+    _shader->use();
+    glBindVertexArray(_shader->getVao());
 
-void _PostProcessingRenderStep::execute(NumRenderObjects const& numObjects) {}
+    // Input
+    auto numDependentSteps = _dependentSteps.size();
+    CHECK(numDependentSteps <= 2);
+    if (numDependentSteps >= 1) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(0)->getTexture());
+    }
+    if (numDependentSteps >= 2) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(1)->getTexture());
+    }
+
+    // Output
+    if (std::holds_alternative<TextureTarget>(target)) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    } else {
+        auto fbo = std::get<ScreenTarget>(target).fbo;
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    }
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}

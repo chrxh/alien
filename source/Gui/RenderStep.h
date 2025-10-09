@@ -4,46 +4,53 @@
 
 #include "Definitions.h"
 #include <filesystem>
+#include <variant>
+
+struct TextureTarget
+{};
+struct ScreenTarget
+{
+    int fbo = 0;
+};
+using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
 
 class _RenderStep
 {
 public:
     _RenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, std::vector<RenderStep> const& dependentSteps);
+    virtual ~_RenderStep() = default;
 
-    virtual void resize() = 0;
-    virtual void execute(NumRenderObjects const& numObjects) = 0;
+    virtual void resize(IntVector2D const& size);
+    virtual void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) = 0;
+
+    std::vector<RenderStep> const& getDependentSteps() const;
+    Shader getShader() const;
+    unsigned int getTexture() const;
 
 protected:
     std::vector<RenderStep> _dependentSteps;
 
     Shader _shader;
+    bool _outputTextureInitialized = false;
     unsigned int _outputTexture = 0;
     unsigned int _fbo = 0;
 };
 
-class _PointRenderStep : public _RenderStep
+class _PointRenderStep : public _RenderStep 
 {
 public:
-    _PointRenderStep(
-        std::filesystem::path const& vertexShader,
-        std::filesystem::path const& fragmentShader,
-        std::vector<RenderStep> const& dependentSteps,
-        SimulationFacade const& simulationFacade);
+    _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
 
-    void resize() override;
-    void execute(NumRenderObjects const& numObjects) override;
-
-private:
-    SimulationFacade _simulationFacade;
+    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 };
 
 class _PostProcessingRenderStep : public _RenderStep
 {
 public:
-    _PostProcessingRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
+    _PostProcessingRenderStep(
+        std::filesystem::path const& vertexShader,
+        std::filesystem::path const& fragmentShader,
+        std::vector<RenderStep> const& dependentSteps);
 
-    void resize() override;
-    void execute(NumRenderObjects const& numObjects) override;
-
-private:
+    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 };
