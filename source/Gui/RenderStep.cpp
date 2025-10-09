@@ -30,7 +30,7 @@ void _RenderStep::resize(IntVector2D const& size)
     // Init framebuffer
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _fbo, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _outputTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     _outputTextureInitialized = true;
