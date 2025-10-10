@@ -40,12 +40,12 @@ void RenderingData::registerBuffers(RenderBuffers const& buffers)
 }
 
 
-void RenderingData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects)
+void RenderingData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers)
 {
-    if (numRenderObjects.vertices > capacity) {
-        capacity = numRenderObjects.vertices * 2;
-        glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<uintptr_t>(vertexBuffer));
-        glBufferData(GL_ARRAY_BUFFER, capacity * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
+    if (numRenderObjects.vertices >= capacity) {
+        capacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ARRAY_BUFFER, buffers.vboForPoints);
+        glBufferData(GL_ARRAY_BUFFER, toInt(capacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
 }
 

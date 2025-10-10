@@ -15,6 +15,6 @@ struct RenderingData
 
     void init();
     void registerBuffers(RenderBuffers const& buffers);
-    void resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects);
+    void resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers);
     void free();
 };
