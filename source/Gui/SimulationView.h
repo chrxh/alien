@@ -45,15 +45,6 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
-    void setupBackgroundObjectShader();
-    void setupForegroundObjectShader();
-    void setupBlurHorizontalShader();
-    void setupBlurVerticalShader();
-    void setupMetaballsShader();
-    void setupSubsurfaceScatterShader();
-    void setupFresnelShader();
-    void setupMergeShader();
-
     void markReferenceDomain();
 
     SimulationFacade _simulationFacade;

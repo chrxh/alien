@@ -6,10 +6,29 @@
 #include "Shader.h"
 #include "Viewport.h"
 
-_RenderStep::_RenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, std::vector<RenderStep> const& dependentSteps)
+_RenderStep::_RenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
     : _dependentSteps(dependentSteps)
+    , _shader(shader)
 {
-    _shader = std::make_shared<_Shader>(vertexShader, fragmentShader);
+}
+
+void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
+{
+    auto worldSize = simulationFacade->getWorldSize();
+    auto worldRect = Viewport::get().getVisibleWorldRect();
+    auto viewSize = Viewport::get().getViewSize();
+    auto zoom = Viewport::get().getZoomFactor();
+
+    _shader->use();
+    _shader->setFloat("zoom", zoom);
+    _shader->setFloat("radius", std::max(6.0f, zoom));  // std::max to avoid moire patterns at low zoom factors
+    _shader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
+    _shader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
+    _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+
+    for (auto const& [key, value] : _boolValues) {
+        _shader->setBool(key, value);
+    }
 }
 
 void _RenderStep::resize(IntVector2D const& size)
@@ -51,10 +70,13 @@ unsigned int _RenderStep::getTexture() const
     return _outputTexture;
 }
 
-_PointRenderStep::_PointRenderStep(
-    std::filesystem::path const& vertexShader,
-    std::filesystem::path const& fragmentShader)
-    : _RenderStep(vertexShader, fragmentShader, {})
+void _RenderStep::setBool(std::string const& name, bool value)
+{
+    _boolValues.insert_or_assign(name, value);
+}
+
+_AbstractPointRenderStep::_AbstractPointRenderStep(Shader const& shader)
+    : _RenderStep(shader, {})
 {
     auto vao = _shader->getVao();
     auto vbo = _shader->getVbo();
@@ -73,30 +95,20 @@ _PointRenderStep::_PointRenderStep(
     glEnableVertexAttribArray(1);
 }
 
-_PointRenderStep::_PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, unsigned sharedVbo)
-    : _RenderStep(vertexShader, fragmentShader, {})
+_PointRenderStep::_PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader)
+    : _AbstractPointRenderStep(std::make_shared<_Shader>(vertexShader, fragmentShader))
+{}
+
+_SharedVboPointRenderStep::_SharedVboPointRenderStep(
+    std::filesystem::path const& vertexShader,
+    std::filesystem::path const& fragmentShader,
+    RenderStep const& sharedStep)
+    : _AbstractPointRenderStep(std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo()))
+{}
+
+void _AbstractPointRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
-    auto vao = _shader->getVao();
-
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, sharedVbo);
-
-    // Setup vertex attributes for RenderingObjectData
-    // Position (2 floats)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Color (3 floats)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-}
-
-void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
-{
-    auto worldSize = simulationFacade->getWorldSize();
-    auto worldRect = Viewport::get().getVisibleWorldRect();
     auto viewSize = Viewport::get().getViewSize();
-    auto zoom = Viewport::get().getZoomFactor();
 
     if (std::holds_alternative<TextureTarget>(target)) {
         glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
@@ -118,16 +130,7 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    _shader->use();
-    _shader->setFloat("zoom", zoom);
-    _shader->setFloat("radius", std::max(6.0f, zoom));  // std::max to avoid moire patterns at low zoom factors
-    _shader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
-    _shader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
-    _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-
-    for (auto const& [key, value] : _boolValues) {
-        _shader->setBool(key, value);
-    }
+    activateShader(simulationFacade);
 
     // Draw points
     glBindVertexArray(_shader->getVao());
@@ -138,16 +141,11 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     glDisable(GL_BLEND);
 }
 
-void _PointRenderStep::setBool(std::string const& name, bool value)
-{
-    _boolValues.insert_or_assign(name, value);
-}
-
 _PostProcessingRenderStep::_PostProcessingRenderStep(
     std::filesystem::path const& vertexShader,
     std::filesystem::path const& fragmentShader,
     std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(vertexShader, fragmentShader, dependentSteps)
+    : _RenderStep(std::make_shared<_Shader>(vertexShader, fragmentShader), dependentSteps)
 {
     // Setup full-screen quad
     float vertices[] = {
@@ -187,12 +185,7 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(
 
 void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
-    auto viewSize = Viewport::get().getViewSize();
-    auto zoom = Viewport::get().getZoomFactor();
-
-    _shader->use();
-    _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
-    _shader->setFloat("zoom", zoom);
+    activateShader(simulationFacade);
 
     glBindVertexArray(_shader->getVao());
 
@@ -219,3 +212,4 @@ void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObj
     }
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
+

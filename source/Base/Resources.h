@@ -17,9 +17,10 @@ namespace Const
     std::filesystem::path const SettingsFilename = ResourcePath / "settings.json";
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
-    std::filesystem::path const ObjectVertexShader = ShaderPath / "Object.vs";
-
+    std::filesystem::path const ObjectBackgroundVertexShader = ShaderPath / "ObjectBackground.vs";
     std::filesystem::path const ObjectBackgroundFragmentShader = ShaderPath / "ObjectBackground.fs";
+
+    std::filesystem::path const ObjectForegroundVertexShader = ShaderPath / "ObjectForeground.vs";
     std::filesystem::path const ObjectForegroundFragmentShader = ShaderPath / "ObjectForeground.fs";
 
     std::filesystem::path const BlurHorizontalVertexShader = ShaderPath / "BlurHorizontal.vs";

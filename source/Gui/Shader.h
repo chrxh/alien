@@ -13,7 +13,8 @@ public:
     _Shader(
         std::filesystem::path const& vertexPath,
         std::filesystem::path const& fragmentPath,
-        std::filesystem::path const& geometryPath = std::filesystem::path());
+        std::filesystem::path const& geometryPath = std::filesystem::path(),
+        std::optional<unsigned int> sharedVbo = std::nullopt);
     
     void use();
     void setBool(const std::string& name, bool value) const;

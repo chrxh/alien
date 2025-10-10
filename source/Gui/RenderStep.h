@@ -17,7 +17,6 @@ using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
 class _RenderStep
 {
 public:
-    _RenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, std::vector<RenderStep> const& dependentSteps);
     virtual ~_RenderStep() = default;
 
     virtual void resize(IntVector2D const& size);
@@ -26,29 +25,45 @@ public:
     std::vector<RenderStep> const& getDependentSteps() const;
     Shader getShader() const;
     unsigned int getTexture() const;
+    void setBool(std::string const& name, bool value);
 
 protected:
+    _RenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps);
+
+    void activateShader(SimulationFacade const& simulationFacade);
+
     std::vector<RenderStep> _dependentSteps;
 
     Shader _shader;
     bool _outputTextureInitialized = false;
     unsigned int _outputTexture = 0;
     unsigned int _fbo = 0;
+
+    std::map<std::string, bool> _boolValues;
 };
 
-class _PointRenderStep : public _RenderStep 
+class _AbstractPointRenderStep : public _RenderStep 
+{
+public:
+    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
+
+protected:
+    _AbstractPointRenderStep(Shader const& shader);
+
+};
+
+class _PointRenderStep : public _AbstractPointRenderStep
 {
 public:
     _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
-    _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, unsigned int sharedVbo);
-
-    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
-
-    void setBool(std::string const& name, bool value);
-
-private:
-    std::map<std::string, bool> _boolValues;
 };
+
+class _SharedVboPointRenderStep : public _AbstractPointRenderStep
+{
+public:
+    _SharedVboPointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
+};
+
 
 class _PostProcessingRenderStep : public _RenderStep
 {
