@@ -9,12 +9,14 @@ namespace Const
     std::string const AlienURL = "alien-project.org";
 
     std::filesystem::path const ResourcePath = "resources";
+    std::filesystem::path const AutosavePath = ResourcePath / "autosave";
+    std::filesystem::path const ImagesPath = ResourcePath / "images";
     std::filesystem::path const ShaderPath = ResourcePath / "shaders";
 
     std::filesystem::path const LogFilename = "log.txt";
     std::filesystem::path const AutosaveFileWithoutPath = "autosave.sim";
-    std::filesystem::path const AutosaveFile = ResourcePath / AutosaveFileWithoutPath;
-    std::filesystem::path const SettingsFilename = ResourcePath / "settings.json";
+    std::filesystem::path const AutosaveFile = AutosavePath / AutosaveFileWithoutPath;
+    std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const ObjectBackgroundVertexShader = ShaderPath / "ObjectBackground.vs";
@@ -41,8 +43,8 @@ namespace Const
     std::filesystem::path const MergeVertexShader = ShaderPath / "Merge.vs";
     std::filesystem::path const MergeFragmentShader = ShaderPath / "Merge.fs";
 
-    std::filesystem::path const EditorOnFilename = ResourcePath / "editor on.png";
-    std::filesystem::path const EditorOffFilename = ResourcePath / "editor off.png";
+    std::filesystem::path const EditorOnFilename = ImagesPath / "editor on.png";
+    std::filesystem::path const EditorOffFilename = ImagesPath / "editor off.png";
 
-    std::filesystem::path const LogoFilename = ResourcePath / "logo.png";
+    std::filesystem::path const LogoFilename = ImagesPath / "logo.png";
 }

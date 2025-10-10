@@ -46,7 +46,7 @@ void AutosaveWindow::initIntern(SimulationFacade simulationFacade, PersisterFaca
     _origNumberOfFiles = GlobalSettings::get().getValue("windows.autosave.number of files", _origNumberOfFiles);
     _numberOfFiles = _origNumberOfFiles;
 
-    _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::ResourcePath).string());
+    _origDirectory = GlobalSettings::get().getValue("windows.autosave.directory", (std::filesystem::current_path() / Const::AutosavePath).string());
     _directory = _origDirectory;
 
     _origCatchPeaks = GlobalSettings::get().getValue("windows.autosave.catch peaks", _origCatchPeaks);
