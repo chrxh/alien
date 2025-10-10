@@ -775,7 +775,7 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
     BaseMap map;
     map.init(worldSize);
 
-    // Process cells and particles
+    // First pass: Process cells and particles
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
         if (!cell) {
@@ -829,7 +829,10 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         cell->tempValue.as_uint64 = objIndex;
     }
 
-    // Extract line indices from cell connections in a second pass
+    // Synchronize to ensure all cells have their indices stored
+    __syncthreads();
+
+    // Second pass: Extract line indices from cell connections
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
         if (!cell) {
@@ -841,12 +844,13 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         // Add line indices for each connection
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell && connectedCell->tempValue.as_uint64 < *numObjects) {
+            if (connectedCell) {
+                uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
                 // Only add each connection once (from lower index to higher index to avoid duplicates)
-                if (cellIndex < connectedCell->tempValue.as_uint64) {
+                if (cellIndex < connectedIndex) {
                     uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
                     lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
-                    lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedCell->tempValue.as_uint64);
+                    lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
                 }
             }
         }

@@ -159,7 +159,7 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
 }
 
 _LineRenderStep::_LineRenderStep(Shader const& shader, RenderStep const& sharedStep)
-    : _RenderStep(shader, {})
+    : _RenderStep(shader, {sharedStep})
     , _sharedStep(sharedStep)
 {
     auto vao = _shader->getVao();
