@@ -102,6 +102,7 @@ add_library(EngineGpuKernels
 target_link_libraries(EngineGpuKernels Base)
 target_link_libraries(EngineGpuKernels EngineInterface)
 target_link_libraries(EngineGpuKernels OpenGL::GL)
+target_link_libraries(EngineGpuKernels glad::glad)
 
 # See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
 set_property(TARGET EngineGpuKernels PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
