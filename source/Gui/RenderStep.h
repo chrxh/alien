@@ -46,19 +46,14 @@ protected:
     std::map<std::string, bool> _boolValues;
 };
 
-class _AbstractPointRenderStep : public _RenderStep
-{
-protected:
-    _AbstractPointRenderStep(Shader const& shader);
-
-    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
-};
-
-class _PointRenderStep : public _AbstractPointRenderStep
+class _PointRenderStep : public _RenderStep
 {
 public:
     static PointRenderStep create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
     static PointRenderStep createWithSharedVbo(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
+
+protected:
+    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 
 private:
     _PointRenderStep(Shader const& shader);

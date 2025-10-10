@@ -75,7 +75,7 @@ void _RenderStep::setBool(std::string const& name, bool value)
     _boolValues.insert_or_assign(name, value);
 }
 
-_AbstractPointRenderStep::_AbstractPointRenderStep(Shader const& shader)
+_PointRenderStep::_PointRenderStep(Shader const& shader)
     : _RenderStep(shader, {})
 {
     auto vao = _shader->getVao();
@@ -110,10 +110,6 @@ PointRenderStep _PointRenderStep::createWithSharedVbo(
     return PointRenderStep(new _PointRenderStep(shader));
 }
 
-_PointRenderStep::_PointRenderStep(Shader const& shader)
-    : _AbstractPointRenderStep(shader)
-{}
-
 PostProcessingRenderStep _PostProcessingRenderStep::create(
     std::filesystem::path const& vertexShader,
     std::filesystem::path const& fragmentShader,
@@ -123,7 +119,7 @@ PostProcessingRenderStep _PostProcessingRenderStep::create(
     return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, dependentSteps));
 }
 
-void _AbstractPointRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
+void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
     auto viewSize = Viewport::get().getViewSize();
 
