@@ -768,14 +768,14 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData, uint64_t* numObjects, unsigned int* lineIndices, uint64_t* numLineIndices)
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData, uint64_t* numObjects)
 {
     auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 
     BaseMap map;
     map.init(worldSize);
 
-    // First pass: Process cells and particles
+    // Process cells and particles
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
         if (!cell) {
@@ -828,11 +828,13 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         // Store cell index temporarily for line extraction
         cell->tempValue.as_uint64 = objIndex;
     }
+}
 
-    // Synchronize to ensure all cells have their indices stored
-    __syncthreads();
+__global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineIndices, uint64_t* numLineIndices)
+{
+    auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    // Second pass: Extract line indices from cell connections
+    // Extract line indices from cell connections
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
         if (!cell) {

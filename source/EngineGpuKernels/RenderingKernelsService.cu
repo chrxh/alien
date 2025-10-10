@@ -72,7 +72,14 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     size_t lineIndexBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
-    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer, renderingData.numVertices, mappedLineIndexBuffer, renderingData.numLineIndices);
+    // First kernel: Extract vertex data and store cell indices
+    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer, renderingData.numVertices);
+    
+    // Ensure first kernel completes before second kernel starts
+    CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize());
+    
+    // Second kernel: Extract line indices from cell connections
+    KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, renderingData.numLineIndices);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
