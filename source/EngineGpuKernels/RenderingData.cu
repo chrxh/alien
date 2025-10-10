@@ -4,8 +4,14 @@
 #include <windows.h>
 #endif
 
+#include <GL/gl.h>
 #include <cuda_gl_interop.h>
-#include <glad/glad.h>
+
+// OpenGL extension functions - declare as extern
+extern "C" {
+    void glBindBuffer(GLenum target, GLuint buffer);
+    void glBufferData(GLenum target, GLsizeiptr size, const void* data, GLenum usage);
+}
 
 
 void RenderingData::init()
