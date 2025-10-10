@@ -45,6 +45,8 @@ public:
     static auto constexpr DefaultMotionBlur = 0.25f;
 
 private:
+    void setupRenderPipeline();
+
     void markReferenceDomain();
 
     SimulationFacade _simulationFacade;

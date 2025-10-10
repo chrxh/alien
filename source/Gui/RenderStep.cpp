@@ -95,16 +95,33 @@ _AbstractPointRenderStep::_AbstractPointRenderStep(Shader const& shader)
     glEnableVertexAttribArray(1);
 }
 
-_PointRenderStep::_PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader)
-    : _AbstractPointRenderStep(std::make_shared<_Shader>(vertexShader, fragmentShader))
-{}
+PointRenderStep _PointRenderStep::create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader)
+{
+    auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader);
+    return PointRenderStep(new _PointRenderStep(shader));
+}
 
-_SharedVboPointRenderStep::_SharedVboPointRenderStep(
+PointRenderStep _PointRenderStep::createWithSharedVbo(
     std::filesystem::path const& vertexShader,
     std::filesystem::path const& fragmentShader,
     RenderStep const& sharedStep)
-    : _AbstractPointRenderStep(std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo()))
+{
+    auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo());
+    return PointRenderStep(new _PointRenderStep(shader));
+}
+
+_PointRenderStep::_PointRenderStep(Shader const& shader)
+    : _AbstractPointRenderStep(shader)
 {}
+
+PostProcessingRenderStep _PostProcessingRenderStep::create(
+    std::filesystem::path const& vertexShader,
+    std::filesystem::path const& fragmentShader,
+    std::vector<RenderStep> const& dependentSteps)
+{
+    auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader);
+    return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, dependentSteps));
+}
 
 void _AbstractPointRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
@@ -141,11 +158,38 @@ void _AbstractPointRenderStep::execute(RenderTarget const& target, NumRenderObje
     glDisable(GL_BLEND);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(
-    std::filesystem::path const& vertexShader,
-    std::filesystem::path const& fragmentShader,
-    std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(std::make_shared<_Shader>(vertexShader, fragmentShader), dependentSteps)
+void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
+{
+    activateShader(simulationFacade);
+
+    glBindVertexArray(_shader->getVao());
+
+    // Input
+    auto numDependentSteps = _dependentSteps.size();
+    CHECK(numDependentSteps <= 2);
+    if (numDependentSteps >= 1) {
+        _shader->setInt("inputTexture1", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(0)->getTexture());
+    }
+    if (numDependentSteps >= 2) {
+        _shader->setInt("inputTexture2", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(1)->getTexture());
+    }
+
+    // Output
+    if (std::holds_alternative<TextureTarget>(target)) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    } else {
+        auto fbo = std::get<ScreenTarget>(target).fbo;
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    }
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+_PostProcessingRenderStep::_PostProcessingRenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+    : _RenderStep(shader, dependentSteps)
 {
     // Setup full-screen quad
     float vertices[] = {
@@ -182,34 +226,3 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 }
-
-void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
-{
-    activateShader(simulationFacade);
-
-    glBindVertexArray(_shader->getVao());
-
-    // Input
-    auto numDependentSteps = _dependentSteps.size();
-    CHECK(numDependentSteps <= 2);
-    if (numDependentSteps >= 1) {
-        _shader->setInt("inputTexture1", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(0)->getTexture());
-    }
-    if (numDependentSteps >= 2) {
-        _shader->setInt("inputTexture2", 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, _dependentSteps.at(1)->getTexture());
-    }
-
-    // Output
-    if (std::holds_alternative<TextureTarget>(target)) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    } else {
-        auto fbo = std::get<ScreenTarget>(target).fbo;
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    }
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-

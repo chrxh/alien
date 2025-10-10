@@ -1,10 +1,11 @@
 #pragma once
 
+#include <filesystem>
+#include <variant>
+
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
-#include <filesystem>
-#include <variant>
 
 struct TextureTarget
 {};
@@ -45,7 +46,7 @@ protected:
     std::map<std::string, bool> _boolValues;
 };
 
-class _AbstractPointRenderStep : public _RenderStep 
+class _AbstractPointRenderStep : public _RenderStep
 {
 protected:
     _AbstractPointRenderStep(Shader const& shader);
@@ -56,24 +57,22 @@ protected:
 class _PointRenderStep : public _AbstractPointRenderStep
 {
 public:
-    _PointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
-};
+    static PointRenderStep create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
+    static PointRenderStep createWithSharedVbo(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
 
-class _SharedVboPointRenderStep : public _AbstractPointRenderStep
-{
-public:
-    _SharedVboPointRenderStep(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
+private:
+    _PointRenderStep(Shader const& shader);
 };
-
 
 class _PostProcessingRenderStep : public _RenderStep
 {
 public:
-    _PostProcessingRenderStep(
-        std::filesystem::path const& vertexShader,
-        std::filesystem::path const& fragmentShader,
-        std::vector<RenderStep> const& dependentSteps);
+    static PostProcessingRenderStep
+    create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, std::vector<RenderStep> const& dependentSteps);
 
 protected:
     void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
+
+private:
+    _PostProcessingRenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps);
 };
