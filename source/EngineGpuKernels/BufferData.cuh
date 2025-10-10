@@ -7,7 +7,7 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-struct RenderingData
+struct BufferData
 {
     uint64_t capacity = 0;
     uint64_t* numVertices = nullptr;

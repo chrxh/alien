@@ -1,6 +1,6 @@
 ﻿#include "RenderingKernelsService.cuh"
 
-#include "RenderingData.cuh"
+#include "BufferData.cuh"
 #include "RenderingKernels.cuh"
 
 void _RenderingKernelsService::drawImage(
@@ -10,7 +10,7 @@ void _RenderingKernelsService::drawImage(
     int2 imageSize,
     float zoom,
     SimulationData data,
-    RenderingData renderingData)
+    BufferData renderingData)
 {
     //auto const& gpuSettings = settings.cudaSettings;
 
@@ -50,7 +50,7 @@ NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SimulationData da
     return result;
 }
 
-void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, RenderingData& renderingData)
+void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, BufferData& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
     

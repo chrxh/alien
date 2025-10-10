@@ -139,7 +139,7 @@ private:
     mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
     std::shared_ptr<SimulationData> _cudaPreviewData;
-    std::shared_ptr<RenderingData> _cudaRenderingData;
+    std::shared_ptr<BufferData> _cudaRenderingData;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaTOProvider _cudaTOProvider;
     TOProvider _collectionTOProvider;

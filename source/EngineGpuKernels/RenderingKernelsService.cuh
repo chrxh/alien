@@ -21,8 +21,8 @@ public:
         int2 imageSize,
         float zoom,
         SimulationData data,
-        RenderingData renderingData);
+        BufferData renderingData);
 
     NumRenderObjects getNumRenderObjects(SimulationData data);
-    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, RenderingData& renderingData);
+    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, BufferData& renderingData);
 };

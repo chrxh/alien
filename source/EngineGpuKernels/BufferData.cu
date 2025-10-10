@@ -1,4 +1,4 @@
-﻿#include "RenderingData.cuh"
+﻿#include "BufferData.cuh"
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -10,7 +10,7 @@
 #include "CudaMemoryManager.cuh"
 
 
-void RenderingData::init()
+void BufferData::init()
 {
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, numVertices);
 }
@@ -31,7 +31,7 @@ namespace
     }
 }
 
-void RenderingData::registerBuffers(RenderBuffers const& buffers)
+void BufferData::registerBuffers(RenderBuffers const& buffers)
 {
     if (vertexBuffer != nullptr) {
         unregisterBufferResource(vertexBuffer);
@@ -40,7 +40,7 @@ void RenderingData::registerBuffers(RenderBuffers const& buffers)
 }
 
 
-void RenderingData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers)
+void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers)
 {
     if (numRenderObjects.vertices >= capacity) {
         capacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
@@ -49,7 +49,7 @@ void RenderingData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRen
     }
 }
 
-void RenderingData::free()
+void BufferData::free()
 {
     CudaMemoryManager::getInstance().freeMemory(numVertices);
 }

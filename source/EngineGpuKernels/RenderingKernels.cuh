@@ -9,7 +9,7 @@
 #include "ObjectFactory.cuh"
 #include "Map.cuh"
 #include "SimulationData.cuh"
-#include "RenderingData.cuh"
+#include "BufferData.cuh"
 
 #include <cuda_runtime_api.h>
 #include <cuda_runtime.h>

@@ -40,7 +40,7 @@
 #include "EditKernelsService.cuh"
 #include "StatisticsKernelsService.cuh"
 #include "SelectionResult.cuh"
-#include "RenderingData.cuh"
+#include "BufferData.cuh"
 #include "SimulationParametersUpdateService.cuh"
 #include "TestKernelsService.cuh"
 #include "StatisticsService.cuh"
@@ -70,7 +70,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaPreviewData = std::make_shared<SimulationData>();
-    _cudaRenderingData = std::make_shared<RenderingData>();
+    _cudaRenderingData = std::make_shared<BufferData>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();

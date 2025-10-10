@@ -81,9 +81,8 @@ _PointRenderStep::_PointRenderStep(Shader const& shader)
     auto vao = _shader->getVao();
     auto vbo = _shader->getVbo();
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    
     glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)

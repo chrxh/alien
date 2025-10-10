@@ -15,7 +15,7 @@ struct Objects;
 struct Creature;
 
 struct SimulationData;
-struct RenderingData;
+struct BufferData;
 class SelectionResult;
 struct CellTO;
 struct ClusterAccessTO;
