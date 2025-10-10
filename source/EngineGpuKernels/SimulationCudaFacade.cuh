@@ -10,7 +10,6 @@
 #endif
 
 #include <vector_types.h>
-#include <GL/gl.h>
 
 #include "EngineInterface/MutationType.h"
 #include "EngineInterface/ArraySizesForGpu.h"
