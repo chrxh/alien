@@ -4,11 +4,11 @@ add_library(EngineGpuKernels
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
+    BufferData.cu
+    BufferData.cuh
     CellConnectionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
-    TOProvider.cu
-    TOProvider.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
     Constants.cuh
@@ -40,6 +40,7 @@ add_library(EngineGpuKernels
     GarbageCollectorKernels.cuh
     GarbageCollectorKernelsService.cu
     GarbageCollectorKernelsService.cuh
+    GeneratorProcessor.cuh
     Genome.cuh
     GenomeTO.cuh
     HashMap.cuh
@@ -53,12 +54,10 @@ add_library(EngineGpuKernels
     MaxAgeBalancer.cu
     MaxAgeBalancer.cuh
     MuscleProcessor.cuh
-    GeneratorProcessor.cuh
     NeuronProcessor.cuh
     Object.cuh
     Objects.cu
     Objects.cuh
-    TO.cuh
     ObjectFactory.cuh
     Operations.cuh
     ParameterCalculator.cuh
@@ -66,8 +65,6 @@ add_library(EngineGpuKernels
     PreprocessedSimulationData.cuh
     RadiationProcessor.cuh
     ReconnectorProcessor.cuh
-    RenderingData.cu
-    RenderingData.cuh
     RenderingKernels.cu
     RenderingKernels.cuh
     RenderingKernelsService.cu
@@ -96,6 +93,9 @@ add_library(EngineGpuKernels
     TestKernels.cuh
     TestKernelsService.cu
     TestKernelsService.cuh
+    TO.cuh
+    TOProvider.cu
+    TOProvider.cuh
     Util.cuh
     )
 
