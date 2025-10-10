@@ -66,8 +66,8 @@ add_library(EngineGpuKernels
     PreprocessedSimulationData.cuh
     RadiationProcessor.cuh
     ReconnectorProcessor.cuh
-    RenderingData.cu
-    RenderingData.cuh
+    BufferData.cu
+    BufferData.cuh
     RenderingKernels.cu
     RenderingKernels.cuh
     RenderingKernelsService.cu
