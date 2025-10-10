@@ -768,7 +768,7 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData, uint64_t* numObjects)
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData, uint64_t* numObjects, unsigned int* lineIndices, uint64_t* numLineIndices)
 {
     auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -824,5 +824,31 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         objectData[objIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
         objectData[objIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
         objectData[objIndex].color[2] = toFloat(cellColor & 0xff) / 255.0f;
+
+        // Store cell index temporarily for line extraction
+        cell->tempValue.as_uint64 = objIndex;
+    }
+
+    // Extract line indices from cell connections in a second pass
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = cells.at(index);
+        if (!cell) {
+            continue;
+        }
+
+        uint64_t cellIndex = cell->tempValue.as_uint64;
+
+        // Add line indices for each connection
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectedCell = cell->connections[i].cell;
+            if (connectedCell && connectedCell->tempValue.as_uint64 < *numObjects) {
+                // Only add each connection once (from lower index to higher index to avoid duplicates)
+                if (cellIndex < connectedCell->tempValue.as_uint64) {
+                    uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
+                    lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
+                    lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedCell->tempValue.as_uint64);
+                }
+            }
+        }
     }
 }

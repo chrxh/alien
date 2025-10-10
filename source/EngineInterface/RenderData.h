@@ -5,11 +5,13 @@
 struct RenderBuffers
 {
     unsigned int vboForPoints = 0;
+    unsigned int eboForLines = 0;
 };
 
 struct NumRenderObjects
 {
     uint64_t vertices;
+    uint64_t lineIndices;
 };
 
 struct VertexData

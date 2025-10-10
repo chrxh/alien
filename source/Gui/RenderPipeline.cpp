@@ -33,8 +33,17 @@ void _RenderPipeline::execute()
 
     auto vbo = currentRenderStep->getShader()->getVbo();
 
+    // Find line renderer to get EBO
+    unsigned int ebo = 0;
+    for (auto const& step : _steps) {
+        if (auto lineStep = std::dynamic_pointer_cast<_LineRenderStep>(step)) {
+            ebo = lineStep->getShader()->getEbo();
+            break;
+        }
+    }
+
     // Copy vertex buffer from Cuda to OpenGL
-    RenderBuffers renderBuffers{.vboForPoints = vbo};
+    RenderBuffers renderBuffers{.vboForPoints = vbo, .eboForLines = ebo};
     auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;

@@ -25,6 +25,7 @@ public:
     std::vector<RenderStep> const& getDependentSteps() const;
     Shader getShader() const;
     unsigned int getTexture() const;
+    unsigned int getFbo() const;
 
     void setBool(std::string const& name, bool value);
 
@@ -57,6 +58,20 @@ protected:
 
 private:
     _PointRenderStep(Shader const& shader);
+};
+
+class _LineRenderStep : public _RenderStep
+{
+public:
+    static LineRenderStep create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
+
+protected:
+    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
+
+private:
+    _LineRenderStep(Shader const& shader, RenderStep const& sharedStep);
+    
+    RenderStep _sharedStep;
 };
 
 class _PostProcessingRenderStep : public _RenderStep

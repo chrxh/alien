@@ -47,6 +47,10 @@ NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SimulationData da
 {
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
+    
+    // Estimate maximum number of line indices (each cell can have up to MAX_CELL_BONDS connections)
+    // We count each connection once, so it's approximately numCells * avgConnections
+    result.lineIndices = data.objects.cells.getNumEntries_host() * 4;  // Conservative estimate
     return result;
 }
 
@@ -56,13 +60,20 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     
     // Extract object data
     CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numVertices, 0, sizeof(uint64_t)));
+    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numLineIndices, 0, sizeof(uint64_t)));
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
     VertexData* mappedBuffer;
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedBuffer), &bufferSize, renderingData.vertexBuffer));
 
-    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer, renderingData.numVertices);
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
+    unsigned int* mappedLineIndexBuffer;
+    size_t lineIndexBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
+    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer, renderingData.numVertices, mappedLineIndexBuffer, renderingData.numLineIndices);
+
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 }

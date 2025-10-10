@@ -70,6 +70,11 @@ unsigned int _RenderStep::getTexture() const
     return _outputTexture;
 }
 
+unsigned int _RenderStep::getFbo() const
+{
+    return _fbo;
+}
+
 void _RenderStep::setBool(std::string const& name, bool value)
 {
     _boolValues.insert_or_assign(name, value);
@@ -150,6 +155,58 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
+    glDisable(GL_BLEND);
+}
+
+_LineRenderStep::_LineRenderStep(Shader const& shader, RenderStep const& sharedStep)
+    : _RenderStep(shader, {})
+    , _sharedStep(sharedStep)
+{
+    auto vao = _shader->getVao();
+    auto vbo = _shader->getVbo();
+    auto ebo = _shader->getEbo();
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    // Setup vertex attributes for VertexData (same as PointRenderStep)
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color (3 floats) - not used for lines but needed for compatibility
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // Bind EBO (will be filled by CUDA later)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+}
+
+LineRenderStep _LineRenderStep::create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep)
+{
+    auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo());
+    return LineRenderStep(new _LineRenderStep(shader, sharedStep));
+}
+
+void _LineRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
+{
+    auto viewSize = Viewport::get().getViewSize();
+
+    // Render to the same framebuffer as the shared step (point renderer)
+    glBindFramebuffer(GL_FRAMEBUFFER, _sharedStep->getFbo());
+    glViewport(0, 0, viewSize.x, viewSize.y);
+
+    // Enable blending for anti-aliasing
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    activateShader(simulationFacade);
+
+    // Draw lines
+    glBindVertexArray(_shader->getVao());
+    glDrawElements(GL_LINES, toInt(numObjects.lineIndices), GL_UNSIGNED_INT, 0);
+
+    // Disable blending
     glDisable(GL_BLEND);
 }
 
