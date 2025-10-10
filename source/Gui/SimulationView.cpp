@@ -82,81 +82,11 @@ void SimulationView::resize(IntVector2D const& size)
     _renderPipeline->resize(size);
     
     //if (_areTexturesInitialized) {
-    //    glDeleteFramebuffers(1, &_objectBackgroundFbo);
-    //    glDeleteFramebuffers(1, &_objectForegroundFbo);
-    //    glDeleteFramebuffers(1, &_blurHorizontalFbo);
-    //    glDeleteFramebuffers(1, &_blurVerticalFbo);
-    //    glDeleteFramebuffers(1, &_metaballsFbo);
-    //    glDeleteFramebuffers(1, &_subsurfaceScatterFbo);
-    //    glDeleteFramebuffers(1, &_fresnelFbo);
-    //    glDeleteTextures(1, &_objectBackgroundTexture);
-    //    glDeleteTextures(1, &_objectForegroundTexture);
-    //    glDeleteTextures(1, &_blurHorizontalTexture);
-    //    glDeleteTextures(1, &_blurVerticalTexture);
-    //    glDeleteTextures(1, &_metaballsTexture);
-    //    glDeleteTextures(1, &_subsurfaceScatterTexture);
-    //    glDeleteTextures(1, &_fresnelTexture);
     //    glDeleteTextures(1, &_screenBackgroundTexture);
     //    _areTexturesInitialized = true;
     //}
 
     //// Init textures - use RGBA16F for proper floating point color handling
-    //glGenTextures(1, &_objectBackgroundTexture);
-    //glBindTexture(GL_TEXTURE_2D, _objectBackgroundTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //glGenTextures(1, &_objectForegroundTexture);
-    //glBindTexture(GL_TEXTURE_2D, _objectForegroundTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //glGenTextures(1, &_blurHorizontalTexture);
-    //glBindTexture(GL_TEXTURE_2D, _blurHorizontalTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //glGenTextures(1, &_blurVerticalTexture);
-    //glBindTexture(GL_TEXTURE_2D, _blurVerticalTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //glGenTextures(1, &_metaballsTexture);
-    //glBindTexture(GL_TEXTURE_2D, _metaballsTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //glGenTextures(1, &_subsurfaceScatterTexture);
-    //glBindTexture(GL_TEXTURE_2D, _subsurfaceScatterTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    //glGenTextures(1, &_fresnelTexture);
-    //glBindTexture(GL_TEXTURE_2D, _fresnelTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
     //// Create screen background texture (dark blue)
     //glGenTextures(1, &_screenBackgroundTexture);
     //glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
@@ -174,42 +104,6 @@ void SimulationView::resize(IntVector2D const& size)
     //    darkBlueData[i * 4 + 3] = 1.0f;   // A
     //}
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, darkBlueData.data());
-
-    //// Init framebuffers
-    //glGenFramebuffers(1, &_objectBackgroundFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _objectBackgroundFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectBackgroundTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glGenFramebuffers(1, &_objectForegroundFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _objectForegroundFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _objectForegroundTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glGenFramebuffers(1, &_blurHorizontalFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _blurHorizontalFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _blurHorizontalTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glGenFramebuffers(1, &_blurVerticalFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _blurVerticalFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _blurVerticalTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glGenFramebuffers(1, &_metaballsFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _metaballsFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _metaballsTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glGenFramebuffers(1, &_subsurfaceScatterFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _subsurfaceScatterFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _subsurfaceScatterTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    //glGenFramebuffers(1, &_fresnelFbo);
-    //glBindFramebuffer(GL_FRAMEBUFFER, _fresnelFbo);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _fresnelTexture, 0);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     Viewport::get().setViewSize(size);
 }

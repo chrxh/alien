@@ -16,19 +16,22 @@ using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
 
 class _RenderStep
 {
+    friend _RenderPipeline;
+
 public:
     virtual ~_RenderStep() = default;
-
-    virtual void resize(IntVector2D const& size);
-    virtual void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) = 0;
 
     std::vector<RenderStep> const& getDependentSteps() const;
     Shader getShader() const;
     unsigned int getTexture() const;
+
     void setBool(std::string const& name, bool value);
 
 protected:
     _RenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps);
+
+    virtual void resize(IntVector2D const& size);
+    virtual void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) = 0;
 
     void activateShader(SimulationFacade const& simulationFacade);
 
@@ -44,12 +47,10 @@ protected:
 
 class _AbstractPointRenderStep : public _RenderStep 
 {
-public:
-    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
-
 protected:
     _AbstractPointRenderStep(Shader const& shader);
 
+    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 };
 
 class _PointRenderStep : public _AbstractPointRenderStep
@@ -73,5 +74,6 @@ public:
         std::filesystem::path const& fragmentShader,
         std::vector<RenderStep> const& dependentSteps);
 
+protected:
     void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 };
