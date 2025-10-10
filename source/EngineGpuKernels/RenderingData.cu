@@ -5,6 +5,7 @@
 #endif
 
 #include <cuda_gl_interop.h>
+#include <glad/glad.h>
 
 
 void RenderingData::init()
@@ -36,13 +37,14 @@ void RenderingData::registerBuffers(RenderBuffers const& buffers)
     vertexBuffer = registerBufferResource(buffers.vboForPoints);
 }
 
-void RenderingData::resizeObjectBufferIfNecessary(uint64_t numRequiredObjects)
+
+void RenderingData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects)
 {
-    //if (numRequiredObjects > capacity) {
-    //    CudaMemoryManager::getInstance().freeMemory(vertices);
-    //    CudaMemoryManager::getInstance().acquireMemory<VertexData>(numRequiredObjects * 2, vertices);
-    //    capacity = numRequiredObjects * 2;
-    //}
+    if (numRenderObjects.vertices > capacity) {
+        capacity = numRenderObjects.vertices * 2;
+        glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<uintptr_t>(vertexBuffer));
+        glBufferData(GL_ARRAY_BUFFER, capacity * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
+    }
 }
 
 void RenderingData::free()

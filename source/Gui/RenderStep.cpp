@@ -81,9 +81,10 @@ _PointRenderStep::_PointRenderStep(Shader const& shader)
     auto vao = _shader->getVao();
     auto vbo = _shader->getVbo();
 
-    glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, 1000000 * sizeof(VertexData), nullptr, GL_DYNAMIC_DRAW);
+
+    glBindVertexArray(vao);
 
     // Setup vertex attributes for RenderingObjectData
     // Position (2 floats)

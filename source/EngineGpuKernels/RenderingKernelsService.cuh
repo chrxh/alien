@@ -3,6 +3,7 @@
 #include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/SettingsForSimulation.h"
+#include "EngineInterface/RenderData.h"
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"
@@ -22,5 +23,6 @@ public:
         SimulationData data,
         RenderingData renderingData);
 
+    NumRenderObjects getNumRenderObjects(SimulationData data);
     void extractObjectData(SettingsForSimulation const& settings, SimulationData data, RenderingData& renderingData);
 };

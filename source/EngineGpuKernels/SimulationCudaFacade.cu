@@ -126,11 +126,15 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
 NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
 {
     checkAndProcessSimulationParameterChanges();
+    auto simulationData = getSimulationDataPtrCopy();
+
+    auto numRenderObjects = _renderingKernels->getNumRenderObjects(simulationData);
+    _cudaRenderingData->resizeObjectBufferIfNecessary(numRenderObjects);
 
     _cudaRenderingData->registerBuffers(buffers);
 
     // Extract object data to temporary buffer
-    _renderingKernels->extractObjectData(_settings, getSimulationDataPtrCopy(), *_cudaRenderingData);
+    _renderingKernels->extractObjectData(_settings, simulationData, *_cudaRenderingData);
     syncAndCheck();
 
     // Copy to mapped OpenGL buffer

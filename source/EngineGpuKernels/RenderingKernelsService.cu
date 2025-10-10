@@ -43,6 +43,13 @@ void _RenderingKernelsService::drawImage(
     //}
 }
 
+NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SimulationData data)
+{
+    NumRenderObjects result;
+    result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
+    return result;
+}
+
 void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, RenderingData& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
