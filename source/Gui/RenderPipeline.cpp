@@ -22,28 +22,29 @@ void _RenderPipeline::resize(IntVector2D const& size)
 void _RenderPipeline::execute()
 {
     // Start with point renderer
-    RenderStep currentRenderStep;
+    RenderStep pointRenderStep;
     for (auto const& step : _steps) {
         if (std::dynamic_pointer_cast<_PointRenderStep>(step)) {
-            currentRenderStep = step;
+            pointRenderStep = step;
             break;
         }
     }
-    CHECK(currentRenderStep);
-
-    auto vbo = currentRenderStep->getShader()->getVbo();
+    CHECK(pointRenderStep);
+    auto vbo = pointRenderStep->getShader()->getVbo();
 
     // Find line renderer to get EBO
-    unsigned int ebo = 0;
-    for (auto const& step : _steps) {
-        if (auto lineStep = std::dynamic_pointer_cast<_LineRenderStep>(step)) {
-            ebo = lineStep->getShader()->getEbo();
-            break;
-        }
-    }
+    //RenderStep lineRenderStep;
+    //for (auto const& step : _steps) {
+    //    if (auto lineStep = std::dynamic_pointer_cast<_LineRenderStep>(step)) {
+    //        lineRenderStep = step;
+    //        break;
+    //    }
+    //}
+    //CHECK(lineRenderStep);
+    //auto ebo = lineRenderStep->getShader()->getEbo();
 
     // Copy vertex buffer from Cuda to OpenGL
-    RenderBuffers renderBuffers{.vboForPoints = vbo, .eboForLines = ebo};
+    RenderBuffers renderBuffers{.vboForPoints = vbo, .eboForLines = 0/*ebo*/};
     auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;
@@ -54,13 +55,13 @@ void _RenderPipeline::execute()
 
     std::set<RenderStep> finishedSteps;
     do {
-        finishedSteps.insert(currentRenderStep);
+        finishedSteps.insert(pointRenderStep);
         auto nextRenderStep = findNextStep(finishedSteps);
         auto isFinalStep = nextRenderStep == nullptr;
         RenderTarget target = isFinalStep ? RenderTarget(ScreenTarget{.fbo = screenFbo}) : RenderTarget(TextureTarget{});
-        currentRenderStep->execute(target, _numObjects, _simulationFacade);
-        currentRenderStep = nextRenderStep;
-    } while (currentRenderStep);
+        pointRenderStep->execute(target, _numObjects, _simulationFacade);
+        pointRenderStep = nextRenderStep;
+    } while (pointRenderStep);
 }
 
 namespace

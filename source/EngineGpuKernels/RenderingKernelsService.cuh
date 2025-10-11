@@ -14,6 +14,9 @@
 class _RenderingKernelsService
 {
 public:
+    _RenderingKernelsService();
+    ~_RenderingKernelsService();
+
     void drawImage(
         SettingsForSimulation const& settings,
         float2 rectUpperLeft,
@@ -23,6 +26,9 @@ public:
         SimulationData data,
         BufferData renderingData);
 
-    NumRenderObjects getNumRenderObjects(SimulationData data);
+    NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data);
     void extractObjectData(SettingsForSimulation const& settings, SimulationData data, BufferData& renderingData);
+
+private:
+    uint64_t* _numLineIndices;
 };

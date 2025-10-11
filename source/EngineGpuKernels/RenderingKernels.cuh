@@ -46,4 +46,5 @@ __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpper
 __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUpperLeft, float2 rectLowerRight, uint64_t* imageData, float zoom);
 
 __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData);
+__global__ void cudaExtractNumLineIndices(Array<Cell*> cells, uint64_t* numLineIndices);
 __global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineIndices, uint64_t* numLineIndices);

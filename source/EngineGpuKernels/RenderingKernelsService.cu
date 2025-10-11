@@ -3,6 +3,18 @@
 #include "BufferData.cuh"
 #include "RenderingKernels.cuh"
 
+_RenderingKernelsService::_RenderingKernelsService()
+{
+    auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.acquireMemory(1, _numLineIndices);
+}
+
+_RenderingKernelsService::~_RenderingKernelsService()
+{
+    auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.freeMemory(_numLineIndices);
+}
+
 void _RenderingKernelsService::drawImage(
     SettingsForSimulation const& settings,
     float2 rectUpperLeft,
@@ -43,14 +55,17 @@ void _RenderingKernelsService::drawImage(
     //}
 }
 
-NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SimulationData data)
+NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data)
 {
+    //auto const& gpuSettings = settings.cudaSettings;
+
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
     
-    // Estimate maximum number of line indices (each cell can have up to MAX_CELL_BONDS connections)
-    // We count each connection once, so it's approximately numCells * avgConnections
-    result.lineIndices = data.objects.cells.getNumEntries_host() * 4;  // Conservative estimate
+    //KERNEL_CALL(cudaExtractNumLineIndices, data.objects.cells, _numLineIndices);
+    //cudaDeviceSynchronize();
+    //result.lineIndices = copyToHost(_numLineIndices);
+
     return result;
 }
 
@@ -58,28 +73,22 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
 {
     auto const& gpuSettings = settings.cudaSettings;
     
-    // Extract object data
-    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numLineIndices, 0, sizeof(uint64_t)));
-
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
     VertexData* mappedBuffer;
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedBuffer), &bufferSize, renderingData.vertexBuffer));
 
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
-    unsigned int* mappedLineIndexBuffer;
-    size_t lineIndexBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
+    //unsigned int* mappedLineIndexBuffer;
+    //size_t lineIndexBufferSize;
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
     // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
     KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer);
     
-    // Ensure first kernel completes before second kernel starts
-    CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize());
-    
     // Second kernel: Extract line indices from cell connections
-    KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, renderingData.numLineIndices);
+    //KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, renderingData.numLineIndices);
 
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
 }

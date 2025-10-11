@@ -436,8 +436,8 @@ void SimulationView::setupRenderPipeline()
     auto renderStep1 = _PointRenderStep::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
     _renderPipeline->addStep(renderStep1);
 
-    auto renderStepLine = _LineRenderStep::create(Const::LineVertexShader, Const::LineFragmentShader, renderStep1);
-    _renderPipeline->addStep(renderStepLine);
+    //auto renderStepLine = _LineRenderStep::create(Const::LineVertexShader, Const::LineFragmentShader, renderStep1);
+    //_renderPipeline->addStep(renderStepLine);
 
     auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
     _renderPipeline->addStep(renderStep2);

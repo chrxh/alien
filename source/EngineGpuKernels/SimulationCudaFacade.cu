@@ -129,7 +129,7 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffer
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
 
-    auto numRenderObjects = _renderingKernels->getNumRenderObjects(simulationData);
+    auto numRenderObjects = _renderingKernels->getNumRenderObjects(_settings, simulationData);
     _cudaRenderingData->resizeObjectBufferIfNecessary(numRenderObjects, buffers);
     _cudaRenderingData->registerBuffers(buffers);
 
@@ -137,12 +137,7 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffer
     _renderingKernels->extractObjectData(_settings, simulationData, *_cudaRenderingData);
     syncAndCheck();
 
-    // Return the render objects count (vertices are known: numCells + numParticles)
-    NumRenderObjects result;
-    result.vertices = numRenderObjects.vertices;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.lineIndices, _cudaRenderingData->numLineIndices, sizeof(uint64_t), cudaMemcpyDeviceToHost));
-    
-    return result;
+    return numRenderObjects;
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)

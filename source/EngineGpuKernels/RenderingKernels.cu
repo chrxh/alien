@@ -839,45 +839,33 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         auto pos = particle->pos;
         map.correctPosition(pos);
 
-        uint32_t particleColor;
-        switch (calcMod(particle->color, MAX_COLORS)) {
-        case 0: {
-            particleColor = Const::IndividualCellColor1;
-            break;
-        }
-        case 1: {
-            particleColor = Const::IndividualCellColor2;
-            break;
-        }
-        case 2: {
-            particleColor = Const::IndividualCellColor3;
-            break;
-        }
-        case 3: {
-            particleColor = Const::IndividualCellColor4;
-            break;
-        }
-        case 4: {
-            particleColor = Const::IndividualCellColor5;
-            break;
-        }
-        case 5: {
-            particleColor = Const::IndividualCellColor6;
-            break;
-        }
-        case 6: {
-            particleColor = Const::IndividualCellColor7;
-            break;
-        }
-        }
-
         // Write particle data after all cells
         auto bufferIndex = numCells + index;
         objectData[bufferIndex].pos[0] = pos.x;
         objectData[bufferIndex].pos[1] = pos.y;
-        objectData[bufferIndex].color[0] = toFloat((particleColor >> 16) & 0xff) / 255.0f;
-        objectData[bufferIndex].color[1] = toFloat((particleColor >> 8) & 0xff) / 255.0f;
-        objectData[bufferIndex].color[2] = toFloat(particleColor & 0xff) / 255.0f;
+        objectData[bufferIndex].color[0] = 0.5f;
+        objectData[bufferIndex].color[1] = 0.5f;
+        objectData[bufferIndex].color[2] = 0.0f;
+    }
+}
+
+__global__ void cudaExtractNumLineIndices(Array<Cell*> cells, uint64_t* numLineIndices)
+{
+    auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = cells.at(index);
+        if (!cell) {
+            continue;
+        }
+
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectedCell = cell->connections[i].cell;
+            // Only add each connection once (from lower index to higher index to avoid duplicates)
+            if (cell->id < connectedCell->id) {
+                alienAtomicAdd64(numLineIndices, uint64_t(2));
+            }
+        }
     }
 }
 
@@ -898,14 +886,12 @@ __global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineInd
         // Add line indices for each connection
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell) {
-                uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
-                // Only add each connection once (from lower index to higher index to avoid duplicates)
-                if (cellIndex < connectedIndex) {
-                    uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
-                    lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
-                    lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
-                }
+            uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
+            // Only add each connection once (from lower index to higher index to avoid duplicates)
+            if (cellIndex < connectedIndex) {
+                uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
+                lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
+                lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
             }
         }
     }
