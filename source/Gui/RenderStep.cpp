@@ -6,9 +6,11 @@
 #include "Shader.h"
 #include "Viewport.h"
 
-_RenderStep::_RenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+_RenderStep::_RenderStep(Shader const& shader, TargetData const& targetData, std::vector<RenderStep> const& dependentSteps)
     : _dependentSteps(dependentSteps)
     , _shader(shader)
+    , _targetData(targetData)
+    , _sharedTarget(targetData != nullptr)
 {
 }
 
@@ -33,13 +35,18 @@ void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
 
 void _RenderStep::resize(IntVector2D const& size)
 {
-    if (!_outputTextureInitialized) {
-        glDeleteFramebuffers(1, &_fbo);
-        glDeleteTextures(1, &_outputTexture);
+    if (_sharedTarget) {
+        return;
+    }
+    if (_targetData != nullptr) {
+        glDeleteFramebuffers(1, &_targetData->fbo);
+        glDeleteTextures(1, &_targetData->outputTexture);
+    } else {
+        _targetData = std::make_shared<_TargetData>();
     }
     // Init output texture
-    glGenTextures(1, &_outputTexture);
-    glBindTexture(GL_TEXTURE_2D, _outputTexture);
+    glGenTextures(1, &_targetData->outputTexture);
+    glBindTexture(GL_TEXTURE_2D, _targetData->outputTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -47,12 +54,10 @@ void _RenderStep::resize(IntVector2D const& size)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     // Init framebuffer
-    glGenFramebuffers(1, &_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _outputTexture, 0);
+    glGenFramebuffers(1, &_targetData->fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _targetData->fbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _targetData->outputTexture, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    _outputTextureInitialized = true;
 }
 
 std::vector<RenderStep> const& _RenderStep::getDependentSteps() const
@@ -65,14 +70,19 @@ Shader _RenderStep::getShader() const
     return _shader;
 }
 
+TargetData _RenderStep::getTargetData() const
+{
+    return _targetData;
+}
+
 unsigned int _RenderStep::getTexture() const
 {
-    return _outputTexture;
+    return _targetData->outputTexture;
 }
 
 unsigned int _RenderStep::getFbo() const
 {
-    return _fbo;
+    return _targetData->fbo;
 }
 
 void _RenderStep::setBool(std::string const& name, bool value)
@@ -81,7 +91,7 @@ void _RenderStep::setBool(std::string const& name, bool value)
 }
 
 _PointRenderStep::_PointRenderStep(Shader const& shader)
-    : _RenderStep(shader, {})
+    : _RenderStep(shader, nullptr, {})
 {
     auto vao = _shader->getVao();
     auto vbo = _shader->getVbo();
@@ -128,7 +138,7 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     auto viewSize = Viewport::get().getViewSize();
 
     if (std::holds_alternative<TextureTarget>(target)) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _targetData->fbo);
     } else {
         auto fbo = std::get<ScreenTarget>(target).fbo;
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -158,9 +168,14 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     glDisable(GL_BLEND);
 }
 
-_LineRenderStep::_LineRenderStep(Shader const& shader, RenderStep const& sharedStep)
-    : _RenderStep(shader, {sharedStep})
-    , _sharedStep(sharedStep)
+LineRenderStep _LineRenderStep::create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep)
+{
+    auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo());
+    return LineRenderStep(new _LineRenderStep(shader, sharedStep->getTargetData()));
+}
+
+_LineRenderStep::_LineRenderStep(Shader const& shader, TargetData const& targetData)
+    : _RenderStep(shader, targetData, {})
 {
     auto vao = _shader->getVao();
     auto vbo = _shader->getVbo();
@@ -182,32 +197,26 @@ _LineRenderStep::_LineRenderStep(Shader const& shader, RenderStep const& sharedS
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 }
 
-LineRenderStep _LineRenderStep::create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep)
-{
-    auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo());
-    return LineRenderStep(new _LineRenderStep(shader, sharedStep));
-}
-
 void _LineRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
 {
-    auto viewSize = Viewport::get().getViewSize();
+    //auto viewSize = Viewport::get().getViewSize();
 
-    // Render to the same framebuffer as the shared step (point renderer)
-    glBindFramebuffer(GL_FRAMEBUFFER, _sharedStep->getFbo());
-    glViewport(0, 0, viewSize.x, viewSize.y);
+    //// Render to the same framebuffer as the shared step (point renderer)
+    //glBindFramebuffer(GL_FRAMEBUFFER, _sharedStep->getFbo());
+    //glViewport(0, 0, viewSize.x, viewSize.y);
 
-    // Enable blending for anti-aliasing
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    //// Enable blending for anti-aliasing
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    activateShader(simulationFacade);
+    //activateShader(simulationFacade);
 
-    // Draw lines
-    glBindVertexArray(_shader->getVao());
-    glDrawElements(GL_LINES, toInt(numObjects.lineIndices), GL_UNSIGNED_INT, 0);
+    //// Draw lines
+    //glBindVertexArray(_shader->getVao());
+    //glDrawElements(GL_LINES, toInt(numObjects.lineIndices), GL_UNSIGNED_INT, 0);
 
-    // Disable blending
-    glDisable(GL_BLEND);
+    //// Disable blending
+    //glDisable(GL_BLEND);
 }
 
 void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade)
@@ -232,7 +241,7 @@ void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObj
 
     // Output
     if (std::holds_alternative<TextureTarget>(target)) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _targetData->fbo);
     } else {
         auto fbo = std::get<ScreenTarget>(target).fbo;
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -241,7 +250,7 @@ void _PostProcessingRenderStep::execute(RenderTarget const& target, NumRenderObj
 }
 
 _PostProcessingRenderStep::_PostProcessingRenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(shader, dependentSteps)
+    : _RenderStep(shader, nullptr, dependentSteps)
 {
     // Setup full-screen quad
     float vertices[] = {

@@ -15,6 +15,13 @@ struct ScreenTarget
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
 
+struct _TargetData
+{
+    unsigned int outputTexture = 0;
+    unsigned int fbo = 0;
+};
+using TargetData = std::shared_ptr<_TargetData>;
+
 class _RenderStep
 {
     friend _RenderPipeline;
@@ -24,13 +31,14 @@ public:
 
     std::vector<RenderStep> const& getDependentSteps() const;
     Shader getShader() const;
+    TargetData getTargetData() const;
     unsigned int getTexture() const;
     unsigned int getFbo() const;
 
     void setBool(std::string const& name, bool value);
 
 protected:
-    _RenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps);
+    _RenderStep(Shader const& shader, TargetData const& targetData, std::vector<RenderStep> const& dependentSteps);
 
     virtual void resize(IntVector2D const& size);
     virtual void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) = 0;
@@ -40,9 +48,8 @@ protected:
     std::vector<RenderStep> _dependentSteps;
 
     Shader _shader;
-    bool _outputTextureInitialized = false;
-    unsigned int _outputTexture = 0;
-    unsigned int _fbo = 0;
+    bool _sharedTarget = false;
+    TargetData _targetData;
 
     std::map<std::string, bool> _boolValues;
 };
@@ -69,9 +76,7 @@ protected:
     void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
 
 private:
-    _LineRenderStep(Shader const& shader, RenderStep const& sharedStep);
-    
-    RenderStep _sharedStep;
+    _LineRenderStep(Shader const& shader, TargetData const& targetData);
 };
 
 class _PostProcessingRenderStep : public _RenderStep
