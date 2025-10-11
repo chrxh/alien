@@ -137,9 +137,10 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffer
     _renderingKernels->extractObjectData(_settings, simulationData, *_cudaRenderingData);
     syncAndCheck();
 
-    // Copy to mapped OpenGL buffer
+    // Return the render objects count (vertices are known: numCells + numParticles)
     NumRenderObjects result;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.vertices, _cudaRenderingData->numVertices, sizeof(int), cudaMemcpyDeviceToHost));
+    result.vertices = numRenderObjects.vertices;
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.lineIndices, _cudaRenderingData->numLineIndices, sizeof(uint64_t), cudaMemcpyDeviceToHost));
     
     return result;
 }

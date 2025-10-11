@@ -768,26 +768,22 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData, uint64_t* numObjects)
+__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData)
 {
-    auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
-
     BaseMap map;
     map.init(worldSize);
 
-    // Process cells and particles
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    // Process cells - each cell goes to its index position
+    auto const& cellPartition = calcAllThreadsPartition(cells.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = cells.at(index);
         if (!cell) {
             continue;
         }
 
-        // Check if cell is in visible region
         auto pos = cell->pos;
         map.correctPosition(pos);
 
-        // Add to output buffer
-        uint64_t objIndex = alienAtomicAdd64(numObjects, uint64_t(1));
         uint32_t cellColor;
         switch (calcMod(cell->color, MAX_COLORS)) {
         case 0: {
@@ -819,14 +815,69 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
             break;
         }
         }
-        objectData[objIndex].pos[0] = pos.x;
-        objectData[objIndex].pos[1] = pos.y;
-        objectData[objIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
-        objectData[objIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
-        objectData[objIndex].color[2] = toFloat(cellColor & 0xff) / 255.0f;
+        
+        // Write cell data at cell index position
+        objectData[index].pos[0] = pos.x;
+        objectData[index].pos[1] = pos.y;
+        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
+        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
+        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f;
 
-        // Store cell index temporarily for line extraction
-        cell->tempValue.as_uint64 = objIndex;
+        // Store cell index for line extraction (just use the index directly)
+        cell->tempValue.as_uint64 = index;
+    }
+
+    // Process particles - each particle goes after all cells
+    auto const& particlePartition = calcAllThreadsPartition(particles.getNumEntries());
+    auto numCells = cells.getNumEntries();
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
+        auto const& particle = particles.at(index);
+        if (!particle) {
+            continue;
+        }
+
+        auto pos = particle->pos;
+        map.correctPosition(pos);
+
+        uint32_t particleColor;
+        switch (calcMod(particle->color, MAX_COLORS)) {
+        case 0: {
+            particleColor = Const::IndividualCellColor1;
+            break;
+        }
+        case 1: {
+            particleColor = Const::IndividualCellColor2;
+            break;
+        }
+        case 2: {
+            particleColor = Const::IndividualCellColor3;
+            break;
+        }
+        case 3: {
+            particleColor = Const::IndividualCellColor4;
+            break;
+        }
+        case 4: {
+            particleColor = Const::IndividualCellColor5;
+            break;
+        }
+        case 5: {
+            particleColor = Const::IndividualCellColor6;
+            break;
+        }
+        case 6: {
+            particleColor = Const::IndividualCellColor7;
+            break;
+        }
+        }
+
+        // Write particle data after all cells
+        auto bufferIndex = numCells + index;
+        objectData[bufferIndex].pos[0] = pos.x;
+        objectData[bufferIndex].pos[1] = pos.y;
+        objectData[bufferIndex].color[0] = toFloat((particleColor >> 16) & 0xff) / 255.0f;
+        objectData[bufferIndex].color[1] = toFloat((particleColor >> 8) & 0xff) / 255.0f;
+        objectData[bufferIndex].color[2] = toFloat(particleColor & 0xff) / 255.0f;
     }
 }
 
@@ -841,6 +892,7 @@ __global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineInd
             continue;
         }
 
+        // Cell index is just the array index (stored in tempValue for consistency)
         uint64_t cellIndex = cell->tempValue.as_uint64;
 
         // Add line indices for each connection

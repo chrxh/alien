@@ -59,7 +59,6 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     auto const& gpuSettings = settings.cudaSettings;
     
     // Extract object data
-    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numVertices, 0, sizeof(uint64_t)));
     CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numLineIndices, 0, sizeof(uint64_t)));
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
@@ -72,8 +71,8 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     size_t lineIndexBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
-    // First kernel: Extract vertex data and store cell indices
-    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer, renderingData.numVertices);
+    // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
+    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer);
     
     // Ensure first kernel completes before second kernel starts
     CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize());

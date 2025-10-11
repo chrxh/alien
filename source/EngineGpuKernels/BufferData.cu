@@ -12,7 +12,6 @@
 
 void BufferData::init()
 {
-    CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, numVertices);
     CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, numLineIndices);
 }
 
@@ -62,6 +61,5 @@ void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRender
 
 void BufferData::free()
 {
-    CudaMemoryManager::getInstance().freeMemory(numVertices);
     CudaMemoryManager::getInstance().freeMemory(numLineIndices);
 }
