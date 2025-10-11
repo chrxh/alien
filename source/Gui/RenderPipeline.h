@@ -10,16 +10,16 @@ class _RenderPipeline
 public:
     _RenderPipeline(SimulationFacade const& simulationFacade);
 
-    void addStep(RenderStep2 const& step);
+    void addStep(RenderStep const& step);
 
     void resize(IntVector2D const& size);
     void execute();
 
 private:
-    RenderStep2 findNextStep(std::set<RenderStep2> const& finishedSteps) const;
+    RenderStep findNextStep(std::set<RenderStep> const& finishedSteps) const;
 
     SimulationFacade _simulationFacade;
-    std::vector<RenderStep2> _steps;
+    std::vector<RenderStep> _steps;
 
     NumRenderObjects _numObjects;
 };

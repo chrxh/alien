@@ -12,7 +12,6 @@
 
 void BufferData::init()
 {
-    CudaMemoryManager::getInstance().acquireMemory<uint64_t>(1, numLineIndices);
 }
 
 namespace
@@ -38,29 +37,28 @@ void BufferData::registerBuffers(RenderBuffers const& buffers)
     }
     vertexBuffer = registerBufferResource(buffers.vboForPoints);
 
-    //if (lineIndexBuffer != nullptr) {
-    //    unregisterBufferResource(lineIndexBuffer);
-    //}
-    //lineIndexBuffer = registerBufferResource(buffers.eboForLines);
+    if (lineIndexBuffer != nullptr) {
+        unregisterBufferResource(lineIndexBuffer);
+    }
+    lineIndexBuffer = registerBufferResource(buffers.eboForLines);
 }
 
 
 void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers)
 {
-    if (numRenderObjects.vertices >= capacity) {
-        capacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.vertices >= vertexBufferCapacity) {
+        vertexBufferCapacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, buffers.vboForPoints);
-        glBufferData(GL_ARRAY_BUFFER, toInt(capacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
-    //if (numRenderObjects.lineIndices >= lineIndexCapacity) {
-    //    lineIndexCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
-    //    glBindVertexArray(buffers.vaoForLines);
-    //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.eboForLines);
-    //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(lineIndexCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
-    //}
+    if (numRenderObjects.lineIndices >= LineIndexBufferCapacity) {
+        LineIndexBufferCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
+        glBindVertexArray(buffers.vaoForLines);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.eboForLines);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(LineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+    }
 }
 
 void BufferData::free()
 {
-    CudaMemoryManager::getInstance().freeMemory(numLineIndices);
 }

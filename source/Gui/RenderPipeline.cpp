@@ -8,7 +8,7 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     : _simulationFacade(simulationFacade)
 {}
 
-void _RenderPipeline::addStep(RenderStep2 const& step)
+void _RenderPipeline::addStep(RenderStep const& step)
 {
     _steps.emplace_back(step);
 }
@@ -48,15 +48,15 @@ void _RenderPipeline::resize(IntVector2D const& size)
 void _RenderPipeline::execute()
 {
     // Start with point renderer
-    RenderStep2 startRenderStep;
+    RenderStep startRenderStep;
     for (auto const& step : _steps) {
-        if (std::dynamic_pointer_cast<_PointRenderStep2>(step)) {
+        if (std::dynamic_pointer_cast<_PointRenderStep>(step)) {
             startRenderStep = step;
             break;
         }
     }
     CHECK(startRenderStep);
-    auto vbo = std::get<GeometrySource>(startRenderStep->getSource()).vbo;
+    auto const& geometrySource = std::get<GeometrySource>(startRenderStep->getSource());
 
     //// Find line renderer to get EBO
     //RenderStep lineRenderStep;
@@ -71,7 +71,7 @@ void _RenderPipeline::execute()
     //auto ebo = lineRenderStep->getShader()->getEbo();
 
     // Copy vertex buffer from Cuda to OpenGL
-    RenderBuffers renderBuffers{.vboForPoints = vbo/*, .vaoForLines = vao, .eboForLines = ebo*/};
+    RenderBuffers renderBuffers{.vboForPoints = geometrySource.vbo, .vaoForLines = geometrySource.vao, .eboForLines = geometrySource.ebo};
     auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;
@@ -81,12 +81,15 @@ void _RenderPipeline::execute()
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
     auto currentRenderStep = startRenderStep;
-    std::set<RenderStep2> finishedSteps;
+    std::set<RenderStep> finishedSteps;
     do {
         finishedSteps.insert(currentRenderStep);
         auto nextRenderStep = findNextStep(finishedSteps);
-        if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep2>(currentRenderStep)) {
+        if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep>(currentRenderStep)) {
             pointRenderStep->execute(_numObjects.vertices, generalRenderInfo, _simulationFacade);
+        }
+        if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(currentRenderStep)) {
+            lineRenderStep->execute(_numObjects.lineIndices, generalRenderInfo, _simulationFacade);
         }
         currentRenderStep = nextRenderStep;
     } while (currentRenderStep);
@@ -95,7 +98,7 @@ void _RenderPipeline::execute()
 namespace
 {
     // Proofs if steps1 is contained in steps2
-    bool isContained(std::vector<RenderStep2> const& steps1, std::set<RenderStep2> const& steps2)
+    bool isContained(std::vector<RenderStep> const& steps1, std::set<RenderStep> const& steps2)
     {
         for (auto const& step : steps1) {
             if (!steps2.contains(step)) {
@@ -106,9 +109,9 @@ namespace
     }
 }
 
-RenderStep2 _RenderPipeline::findNextStep(std::set<RenderStep2> const& finishedSteps) const
+RenderStep _RenderPipeline::findNextStep(std::set<RenderStep> const& finishedSteps) const
 {
-    std::vector<RenderStep2> result;
+    std::vector<RenderStep> result;
     for (auto const& candidate : _steps) {
         if (finishedSteps.contains(candidate)) {
             continue;

@@ -62,6 +62,7 @@ NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimula
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
     
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractNumLineIndices, data.objects.cells, _numLineIndices);
     cudaDeviceSynchronize();
     result.lineIndices = copyToHost(_numLineIndices);
@@ -78,17 +79,18 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedBuffer), &bufferSize, renderingData.vertexBuffer));
 
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
-    //unsigned int* mappedLineIndexBuffer;
-    //size_t lineIndexBufferSize;
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
+    unsigned int* mappedLineIndexBuffer;
+    size_t lineIndexBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
     // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
     KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer);
     
     // Second kernel: Extract line indices from cell connections
-    //KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, renderingData.numLineIndices);
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, _numLineIndices);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
 }

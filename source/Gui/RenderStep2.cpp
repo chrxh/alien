@@ -1,10 +1,10 @@
 #include "RenderStep2.h"
 
 #include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/RenderData.h>
 
 #include "Shader.h"
 #include "Viewport.h"
-#include <EngineInterface/RenderData.h>
 
 GeometrySource GeometrySource::create()
 {
@@ -15,29 +15,29 @@ GeometrySource GeometrySource::create()
     return result;
 }
 
-std::vector<RenderStep2> const& _RenderStep2::getDependentSteps() const
+std::vector<RenderStep> const& _RenderStep::getDependentSteps() const
 {
     return _dependentSteps;
 }
 
-RenderSource const& _RenderStep2::getSource() const
+RenderSource const& _RenderStep::getSource() const
 {
     return _source;
 }
 
-RenderTarget const& _RenderStep2::getTarget() const
+RenderTarget const& _RenderStep::getTarget() const
 {
     return _target;
 }
 
-_RenderStep2::_RenderStep2(Shader const& shader, RenderSource const& source, RenderTarget const& target, std::vector<RenderStep2> const& dependentSteps)
+_RenderStep::_RenderStep(Shader const& shader, RenderSource const& source, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
     : _shader(shader)
     , _source(source)
     , _target(target)
     , _dependentSteps(dependentSteps)
 {}
 
-void _RenderStep2::activateShader(SimulationFacade const& simulationFacade)
+void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
 {
     auto worldSize = simulationFacade->getWorldSize();
     auto worldRect = Viewport::get().getVisibleWorldRect();
@@ -52,12 +52,12 @@ void _RenderStep2::activateShader(SimulationFacade const& simulationFacade)
     _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
 }
 
-PointRenderStep2 _PointRenderStep2::create(Shader const& shader, GeometrySource const& source, RenderTarget const& target)
+PointRenderStep _PointRenderStep::create(Shader const& shader, GeometrySource const& source, RenderTarget const& target)
 {
-    return PointRenderStep2(new _PointRenderStep2(shader, source, target));
+    return PointRenderStep(new _PointRenderStep(shader, source, target));
 }
 
-void _PointRenderStep2::execute(uint64_t const& numVertices, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+void _PointRenderStep::execute(uint64_t const& numVertices, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
     auto viewSize = Viewport::get().getViewSize();
 
@@ -93,21 +93,76 @@ void _PointRenderStep2::execute(uint64_t const& numVertices, GeneralRenderInfo c
     glDisable(GL_BLEND);
 }
 
-_PointRenderStep2::_PointRenderStep2(Shader const& shader, GeometrySource const& source, RenderTarget const& target)
-    : _RenderStep2(shader, source, target, {})
+_PointRenderStep::_PointRenderStep(Shader const& shader, GeometrySource const& source, RenderTarget const& target)
+    : _RenderStep(shader, source, target, {})
 {
-        auto vao = source.vao;
-        auto vbo = source.vbo;
+    auto vao = source.vao;
+    auto vbo = source.vbo;
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    // Setup vertex attributes
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Color (3 floats)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+}
+
+LineRenderStep _LineRenderStep::create(Shader const& shader, GeometrySource const& source, RenderTarget const& target, RenderStep const& dependentStep)
+{
+    return LineRenderStep(new _LineRenderStep(shader, source, target, dependentStep));
+}
+
+void _LineRenderStep::execute(uint64_t const& numLines, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+{
+    auto viewSize = Viewport::get().getViewSize();
+
+    if (std::holds_alternative<TextureTarget>(_target)) {
+        auto textureTarget = std::get<TextureTarget>(_target);
+        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
+    }
+    glViewport(0, 0, viewSize.x, viewSize.y);
     
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    // Enable blending for anti-aliasing
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     
-        // Setup vertex attributes for RenderingObjectData
-        // Position (2 floats)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
-        glEnableVertexAttribArray(0);
+    activateShader(simulationFacade);
     
-        // Color (3 floats)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+    // Draw lines
+    auto geometrySource = std::get<GeometrySource>(_source);
+    glBindVertexArray(geometrySource.vao);
+    glDrawElements(GL_LINES, toInt(numLines), GL_UNSIGNED_INT, 0);
+    
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_LineRenderStep::_LineRenderStep(Shader const& shader, GeometrySource const& source, RenderTarget const& target, RenderStep const& dependentStep)
+    : _RenderStep(shader, source, target, {dependentStep})
+{
+    auto const& vao = source.vao;
+    auto const& vbo = source.vbo;
+    auto const& ebo = source.ebo;
+    
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    // Setup vertex attributes for VertexData (same as PointRenderStep)
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color (3 floats) - not used for lines but needed for compatibility
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Bind EBO (will be filled by CUDA later)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 }

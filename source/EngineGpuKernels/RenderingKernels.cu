@@ -879,9 +879,10 @@ __global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineInd
         // Add line indices for each connection
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
+
             // Only add each connection once (from lower index to higher index to avoid duplicates)
-            if (cellIndex < connectedIndex) {
+            if (cell->id < connectedCell->id) {
+                uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
                 uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
                 lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
                 lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
