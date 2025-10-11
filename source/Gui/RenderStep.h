@@ -58,7 +58,8 @@ class _PointRenderStep : public _RenderStep
 {
 public:
     static PointRenderStep create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
-    static PointRenderStep createWithSharedVbo(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
+    static PointRenderStep
+    createWithSharedVbo(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
 
 protected:
     void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
@@ -70,7 +71,8 @@ private:
 class _LineRenderStep : public _RenderStep
 {
 public:
-    static LineRenderStep create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
+    static LineRenderStep
+    createWithSharedVboAndTarget(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
 
 protected:
     void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;

@@ -399,7 +399,6 @@ float SimulationView::getBrightness() const
 void SimulationView::setBrightness(float value)
 {
     _brightness = value;
-    // Metaballs shader doesn't use brightness parameter
 }
 
 float SimulationView::getContrast() const
@@ -410,7 +409,6 @@ float SimulationView::getContrast() const
 void SimulationView::setContrast(float value)
 {
     _contrast = value;
-    // Metaballs shader doesn't use contrast parameter
 }
 
 float SimulationView::getMotionBlur() const
@@ -421,12 +419,10 @@ float SimulationView::getMotionBlur() const
 void SimulationView::setMotionBlur(float value)
 {
     _motionBlur = value;
-    // Metaballs shader doesn't use motion blur parameter
 }
 
 void SimulationView::updateMotionBlur()
 {
-    // Metaballs shader doesn't use motion blur parameter
 }
 
 void SimulationView::setupRenderPipeline()
@@ -436,7 +432,7 @@ void SimulationView::setupRenderPipeline()
     auto renderStep1 = _PointRenderStep::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
     _renderPipeline->addStep(renderStep1);
 
-    auto renderStepLine = _LineRenderStep::create(Const::LineVertexShader, Const::LineFragmentShader, renderStep1);
+    auto renderStepLine = _LineRenderStep::createWithSharedVboAndTarget(Const::LineVertexShader, Const::LineFragmentShader, renderStep1);
     _renderPipeline->addStep(renderStepLine);
 
     auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});

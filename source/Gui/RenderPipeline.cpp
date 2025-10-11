@@ -41,10 +41,11 @@ void _RenderPipeline::execute()
         }
     }
     CHECK(lineRenderStep);
+    auto vao = lineRenderStep->getShader()->getVao();
     auto ebo = lineRenderStep->getShader()->getEbo();
 
     // Copy vertex buffer from Cuda to OpenGL
-    RenderBuffers renderBuffers{.vboForPoints = vbo, .eboForLines = ebo};
+    RenderBuffers renderBuffers{.vboForPoints = vbo, .vaoForLines = vao, .eboForLines = ebo};
     auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;

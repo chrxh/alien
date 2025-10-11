@@ -168,7 +168,7 @@ void _PointRenderStep::execute(RenderTarget const& target, NumRenderObjects cons
     glDisable(GL_BLEND);
 }
 
-LineRenderStep _LineRenderStep::create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep)
+LineRenderStep _LineRenderStep::createWithSharedVboAndTarget(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep)
 {
     auto shader = std::make_shared<_Shader>(vertexShader, fragmentShader, std::filesystem::path(), sharedStep->getShader()->getVbo());
     return LineRenderStep(new _LineRenderStep(shader, sharedStep->getTargetData()));
