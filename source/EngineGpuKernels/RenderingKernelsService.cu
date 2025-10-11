@@ -57,14 +57,14 @@ void _RenderingKernelsService::drawImage(
 
 NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data)
 {
-    //auto const& gpuSettings = settings.cudaSettings;
+    auto const& gpuSettings = settings.cudaSettings;
 
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
     
-    //KERNEL_CALL(cudaExtractNumLineIndices, data.objects.cells, _numLineIndices);
-    //cudaDeviceSynchronize();
-    //result.lineIndices = copyToHost(_numLineIndices);
+    KERNEL_CALL(cudaExtractNumLineIndices, data.objects.cells, _numLineIndices);
+    cudaDeviceSynchronize();
+    result.lineIndices = copyToHost(_numLineIndices);
 
     return result;
 }
@@ -89,6 +89,6 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     // Second kernel: Extract line indices from cell connections
     //KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, renderingData.numLineIndices);
 
-    //CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
+    //CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
 }

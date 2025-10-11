@@ -843,8 +843,8 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
         auto bufferIndex = numCells + index;
         objectData[bufferIndex].pos[0] = pos.x;
         objectData[bufferIndex].pos[1] = pos.y;
-        objectData[bufferIndex].color[0] = 0.5f;
-        objectData[bufferIndex].color[1] = 0.5f;
+        objectData[bufferIndex].color[0] = 0.2f;
+        objectData[bufferIndex].color[1] = 0.2f;
         objectData[bufferIndex].color[2] = 0.0f;
     }
 }
@@ -855,9 +855,6 @@ __global__ void cudaExtractNumLineIndices(Array<Cell*> cells, uint64_t* numLineI
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
-        if (!cell) {
-            continue;
-        }
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
@@ -873,14 +870,10 @@ __global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineInd
 {
     auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    // Extract line indices from cell connections
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = cells.at(index);
-        if (!cell) {
-            continue;
-        }
 
-        // Cell index is just the array index (stored in tempValue for consistency)
+        // Cell index is just the array index (stored in tempValue)
         uint64_t cellIndex = cell->tempValue.as_uint64;
 
         // Add line indices for each connection

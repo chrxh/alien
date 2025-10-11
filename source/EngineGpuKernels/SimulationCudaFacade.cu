@@ -133,7 +133,6 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffer
     _cudaRenderingData->resizeObjectBufferIfNecessary(numRenderObjects, buffers);
     _cudaRenderingData->registerBuffers(buffers);
 
-    // Extract object data to temporary buffer
     _renderingKernels->extractObjectData(_settings, simulationData, *_cudaRenderingData);
     syncAndCheck();
 

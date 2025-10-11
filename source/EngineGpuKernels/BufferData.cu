@@ -54,6 +54,7 @@ void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRender
     }
     //if (numRenderObjects.lineIndices >= lineIndexCapacity) {
     //    lineIndexCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
+    //    glBindVertexArray(buffers.vaoForLines);
     //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.eboForLines);
     //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(lineIndexCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
     //}

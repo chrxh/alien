@@ -13,6 +13,7 @@
 #include "AlienGui.h"
 #include "RenderPipeline.h"
 #include "RenderStep.h"
+#include "RenderStep2.h"
 #include "SimulationScrollbars.h"
 #include "Shader.h"
 #include "Viewport.h"
@@ -429,32 +430,34 @@ void SimulationView::setupRenderPipeline()
 {
     _renderPipeline = std::make_shared<_RenderPipeline>(_simulationFacade);
 
-    auto renderStep1 = _PointRenderStep::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
+    auto geometrySource = GeometrySource::create();
+    auto shader1 = std::make_shared<_Shader>(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
+    auto renderStep1 = _PointRenderStep2::create(shader1, geometrySource, ScreenTarget());
     _renderPipeline->addStep(renderStep1);
 
-    auto renderStepLine = _LineRenderStep::createWithSharedVboAndTarget(Const::LineVertexShader, Const::LineFragmentShader, renderStep1);
-    _renderPipeline->addStep(renderStepLine);
+    //auto renderStepLine = _LineRenderStep::createWithSharedVboAndTarget(Const::LineVertexShader, Const::LineFragmentShader, renderStep1);
+    //_renderPipeline->addStep(renderStepLine);
 
-    auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
-    _renderPipeline->addStep(renderStep2);
+    //auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
+    //_renderPipeline->addStep(renderStep2);
 
-    auto renderStep3 = _PostProcessingRenderStep::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader, std::vector<RenderStep>{renderStep2});
-    _renderPipeline->addStep(renderStep3);
+    //auto renderStep3 = _PostProcessingRenderStep::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader, std::vector<RenderStep>{renderStep2});
+    //_renderPipeline->addStep(renderStep3);
 
-    auto renderStep4 = _PostProcessingRenderStep::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader, std::vector<RenderStep>{renderStep3});
-    _renderPipeline->addStep(renderStep4);
+    //auto renderStep4 = _PostProcessingRenderStep::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader, std::vector<RenderStep>{renderStep3});
+    //_renderPipeline->addStep(renderStep4);
 
-    auto renderStep5 = _PostProcessingRenderStep::create(Const::FresnelVertexShader, Const::FresnelFragmentShader, std::vector<RenderStep>{renderStep4});
-    _renderPipeline->addStep(renderStep5);
+    //auto renderStep5 = _PostProcessingRenderStep::create(Const::FresnelVertexShader, Const::FresnelFragmentShader, std::vector<RenderStep>{renderStep4});
+    //_renderPipeline->addStep(renderStep5);
 
-    auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
-    _renderPipeline->addStep(renderStep6);
+    //auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
+    //_renderPipeline->addStep(renderStep6);
 
-    auto renderStep7 = _PointRenderStep::createWithSharedVbo(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
-    _renderPipeline->addStep(renderStep7);
+    //auto renderStep7 = _PointRenderStep::createWithSharedVbo(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
+    //_renderPipeline->addStep(renderStep7);
 
-    auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
-    _renderPipeline->addStep(renderStep8);
+    //auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
+    //_renderPipeline->addStep(renderStep8);
 }
 
 void SimulationView::markReferenceDomain()

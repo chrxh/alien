@@ -157,12 +157,20 @@ using RenderPipeline = std::shared_ptr<_RenderPipeline>;
 
 class _RenderStep;
 using RenderStep = std::shared_ptr<_RenderStep>;
+class _RenderStep2;
+using RenderStep2 = std::shared_ptr<_RenderStep2>;
 
 class _PointRenderStep;
 using PointRenderStep = std::shared_ptr<_PointRenderStep>;
+class _PointRenderStep2;
+using PointRenderStep2 = std::shared_ptr<_PointRenderStep2>;
 
 class _LineRenderStep;
 using LineRenderStep = std::shared_ptr<_LineRenderStep>;
+class _LineRenderStep2;
+using LineRenderStep2 = std::shared_ptr<_LineRenderStep2>;
 
 class _PostProcessingRenderStep;
 using PostProcessingRenderStep = std::shared_ptr<_PostProcessingRenderStep>;
+class _PostProcessingRenderStep2;
+using PostProcessingRenderStep2 = std::shared_ptr<_PostProcessingRenderStep2>;

@@ -8,8 +8,7 @@
 _Shader::_Shader(
     std::filesystem::path const& vertexPath,
     std::filesystem::path const& fragmentPath,
-    std::filesystem::path const& geometryPath,
-    std::optional<unsigned int> sharedVbo)
+    std::filesystem::path const& geometryPath/*, std::optional<unsigned int> sharedVbo*/)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -92,13 +91,13 @@ _Shader::_Shader(
     }
 
     // Generate buffers and arrays
-    glGenVertexArrays(1, &_vao);
-    if (!sharedVbo.has_value()) {
-        glGenBuffers(1, &_vbo);
-    } else {
-        _vbo = sharedVbo.value();
-    }
-    glGenBuffers(1, &_ebo);
+    //glGenVertexArrays(1, &_vao);
+    //if (!sharedVbo.has_value()) {
+    //    glGenBuffers(1, &_vbo);
+    //} else {
+    //    _vbo = sharedVbo.value();
+    //}
+    //glGenBuffers(1, &_ebo);
 }
 
 void _Shader::use()
