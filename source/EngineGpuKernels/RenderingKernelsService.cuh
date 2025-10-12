@@ -3,7 +3,7 @@
 #include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
 #include "EngineInterface/SettingsForSimulation.h"
-#include "EngineInterface/RenderData.h"
+#include "EngineInterface/RenderBuffers.h"
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"

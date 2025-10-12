@@ -7,7 +7,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Ids.h"
 #include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/RenderData.h"
+#include "EngineInterface/RenderBuffers.h"
 
 #include "EngineGpuKernels/TOProvider.cuh"
 #include "EngineGpuKernels/TO.cuh"

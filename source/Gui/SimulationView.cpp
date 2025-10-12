@@ -8,7 +8,6 @@
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
-#include "EngineInterface/RenderData.h"
 
 #include "AlienGui.h"
 #include "RenderPipeline.h"

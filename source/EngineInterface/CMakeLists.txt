@@ -39,6 +39,7 @@ add_library(EngineInterface
     PreviewDescription.h
     PreviewDescriptionConverterService.cpp
     PreviewDescriptionConverterService.h
+    RenderBuffers.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h

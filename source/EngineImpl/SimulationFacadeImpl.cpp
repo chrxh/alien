@@ -1,7 +1,7 @@
 #include "SimulationFacadeImpl.h"
 
 #include "EngineInterface/Description.h"
-#include "EngineInterface/RenderData.h"
+#include "EngineInterface/RenderBuffers.h"
 
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {

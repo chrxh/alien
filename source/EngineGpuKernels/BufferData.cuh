@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "EngineInterface/RenderData.h"
+#include "EngineInterface/RenderBuffers.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
