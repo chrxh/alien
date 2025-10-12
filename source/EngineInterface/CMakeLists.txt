@@ -66,6 +66,7 @@ add_library(EngineInterface
 target_link_libraries(EngineInterface Base)
 
 target_link_libraries(EngineInterface Boost::boost)
+target_link_libraries(EngineInterface glad::glad)
 
 if (MSVC)
     target_compile_options(EngineInterface PRIVATE "/MP")
