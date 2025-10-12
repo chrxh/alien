@@ -7,19 +7,27 @@ uniform sampler2D inputTexture1;
 uniform sampler2D inputTexture2;
 uniform vec2 viewportSize;
 uniform float zoom;
+uniform int mode;
 
 void main()
 {
     vec4 color1 = texture(inputTexture1, texCoord);
     vec4 color2 = texture(inputTexture2, texCoord);
-    //vec4 screenBackground = texture(screenBackgroundTexture, texCoord);
     
-    // Merge the first two textures
-    vec3 mergedColor = color1.rgb * 0.5 + color2.rgb * 0.5;
-    
-    FragColor = vec4(mergedColor, 1.0f);
+    if (mode == 0) {
+        vec3 mergedColor = color1.rgb * 0.5 + color2.rgb * 0.5;
+        FragColor = vec4(mergedColor, 1.0f);
+    } else if (mode == 1) {
+        float brightness = clamp(dot(color2.rgb, vec3(1.0)), 0.0, 1.0);
+        vec3 finalColor = mix(color1.rgb, color2.rgb, brightness);
+        FragColor = vec4(finalColor, 1.0f);
+    } else {
+        FragColor = vec4(0.0);
+    }
+
+
     // Calculate brightness of merged result
-    //float brightness = clamp(dot(mergedColor, vec3(1.0)), -1.0, 1.0);
+    //float brightness = clamp(dot(mergedColor, vec3(1.0)), 0.0, 1.0);
     
     // Use brightness as alpha to blend with screen background
     //vec3 finalColor = mix(screenBackground.rgb, mergedColor, brightness);

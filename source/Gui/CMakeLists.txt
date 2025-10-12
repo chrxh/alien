@@ -119,8 +119,6 @@ PUBLIC
     RenderPipeline.h
     RenderStep.cpp
     RenderStep.h
-    RenderStep2.cpp
-    RenderStep2.h
     ResetPasswordDialog.cpp
     ResetPasswordDialog.h
     ResizeWorldDialog.cpp

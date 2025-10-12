@@ -10,11 +10,11 @@
 class _Shader
 {
 public:
-    _Shader(
+    static Shader create(
         std::filesystem::path const& vertexPath,
         std::filesystem::path const& fragmentPath,
         std::filesystem::path const& geometryPath = std::filesystem::path());
-    
+
     void use();
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
@@ -22,6 +22,11 @@ public:
     void setVec2(const std::string& name, float x, float y) const;
 
 private:
+    _Shader(
+        std::filesystem::path const& vertexPath,
+        std::filesystem::path const& fragmentPath,
+        std::filesystem::path const& geometryPath);
+
     void checkCompileErrors(GLuint shader, std::string type);
 
     unsigned int _id = 0;

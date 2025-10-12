@@ -1,95 +1,101 @@
-//#pragma once
-//
-//#include <filesystem>
-//#include <variant>
-//
-//#include "EngineInterface/Definitions.h"
-//
-//#include "Definitions.h"
-//
-//struct TextureTarget
-//{};
-//struct ScreenTarget
-//{
-//    int fbo = 0;
-//};
-//using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
-//
-//struct _TargetData
-//{
-//    unsigned int outputTexture = 0;
-//    unsigned int fbo = 0;
-//};
-//using TargetData = std::shared_ptr<_TargetData>;
-//
-//class _RenderStep
-//{
-//    friend _RenderPipeline;
-//
-//public:
-//    virtual ~_RenderStep() = default;
-//
-//    std::vector<RenderStep> const& getDependentSteps() const;
-//    Shader getShader() const;
-//    TargetData getTargetData() const;
-//    unsigned int getTexture() const;
-//    unsigned int getFbo() const;
-//
-//    void setBool(std::string const& name, bool value);
-//
-//protected:
-//    _RenderStep(Shader const& shader, TargetData const& targetData, std::vector<RenderStep> const& dependentSteps);
-//
-//    virtual void resize(IntVector2D const& size);
-//    virtual void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) = 0;
-//
-//    void activateShader(SimulationFacade const& simulationFacade);
-//
-//    std::vector<RenderStep> _dependentSteps;
-//
-//    Shader _shader;
-//    bool _sharedTarget = false;
-//    TargetData _targetData;
-//
-//    std::map<std::string, bool> _boolValues;
-//};
-//
-//class _PointRenderStep : public _RenderStep
-//{
-//public:
-//    static PointRenderStep create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader);
-//    static PointRenderStep
-//    createWithSharedVbo(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
-//
-//protected:
-//    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
-//
-//private:
-//    _PointRenderStep(Shader const& shader);
-//};
-//
-//class _LineRenderStep : public _RenderStep
-//{
-//public:
-//    static LineRenderStep
-//    createWithSharedVboAndTarget(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, RenderStep const& sharedStep);
-//
-//protected:
-//    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
-//
-//private:
-//    _LineRenderStep(Shader const& shader, TargetData const& targetData, RenderStep const& dependentStep);
-//};
-//
-//class _PostProcessingRenderStep : public _RenderStep
-//{
-//public:
-//    static PostProcessingRenderStep
-//    create(std::filesystem::path const& vertexShader, std::filesystem::path const& fragmentShader, std::vector<RenderStep> const& dependentSteps);
-//
-//protected:
-//    void execute(RenderTarget const& target, NumRenderObjects const& numObjects, SimulationFacade const& simulationFacade) override;
-//
-//private:
-//    _PostProcessingRenderStep(Shader const& shader, std::vector<RenderStep> const& dependentSteps);
-//};
+#pragma once
+
+#include <variant>
+
+#include "EngineInterface/Definitions.h"
+
+#include "Definitions.h"
+
+struct _TextureTarget
+{
+    static TextureTarget create();
+
+    bool initialized = false;
+    unsigned int fbo = 0;
+    unsigned int texture = 0;
+
+private: 
+    _TextureTarget() = default;
+};
+struct ScreenTarget
+{
+    // FBO is automatically determined
+};
+using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
+
+struct GeneralRenderInfo
+{
+    int screenFbo = 0;
+};
+
+class _RenderStep
+{
+public:
+    virtual ~_RenderStep() = default;
+
+    std::vector<RenderStep> const& getDependentSteps() const;
+    RenderTarget const& getTarget() const;
+
+    template<typename T>
+    void setUniform(std::string const& name, T value)
+    {
+        _uniformValues.insert_or_assign(name, value);
+    }
+
+protected:
+    _RenderStep(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps);
+
+    void activateShader(SimulationFacade const& simulationFacade);
+
+    Shader _shader;
+    RenderTarget _target;
+    std::vector<RenderStep> _dependentSteps;
+
+    std::map<std::string, std::variant<int>> _uniformValues;
+};
+
+class _PointRenderStep : public _RenderStep
+{
+    friend _RenderPipeline;
+
+public:
+    static PointRenderStep create(Shader const& shader, RenderTarget const& target);
+
+protected:
+    void execute(uint64_t const& numVertices, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+
+private:
+    _PointRenderStep(Shader const& shader, RenderTarget const& target);
+};
+
+class _LineRenderStep : public _RenderStep
+{
+    friend _RenderPipeline;
+
+public:
+    static LineRenderStep create(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep);
+
+protected:
+    void execute(uint64_t const& numLines, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+
+private:
+    _LineRenderStep(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep);
+};
+
+class _PostProcessingRenderStep : public _RenderStep
+{
+    friend _RenderPipeline;
+
+public:
+    static PostProcessingRenderStep create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps);
+
+protected:
+    void execute(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+
+private:
+    _PostProcessingRenderStep(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps);
+
+    unsigned int _vao = 0;
+    unsigned int _vbo = 0;
+    unsigned int _ebo = 0;
+};

@@ -3,7 +3,7 @@
 #include "EngineInterface/GeometryBuffers.h"
 
 #include "RenderStep.h"
-#include "RenderStep2.h"
+#include "RenderStep.h"
 #include "Shader.h"
 
 _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
@@ -99,8 +99,13 @@ void _RenderPipeline::execute()
         if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(currentRenderStep)) {
             lineRenderStep->execute(_numObjects.lineIndices, _geometryBuffers, generalRenderInfo, _simulationFacade);
         }
+        if (auto postProcessingRenderStep = std::dynamic_pointer_cast<_PostProcessingRenderStep>(currentRenderStep)) {
+            postProcessingRenderStep->execute(generalRenderInfo, _simulationFacade);
+        }
         currentRenderStep = nextRenderStep;
     } while (currentRenderStep);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
 }
 
 namespace

@@ -166,3 +166,6 @@ using LineRenderStep = std::shared_ptr<_LineRenderStep>;
 
 class _PostProcessingRenderStep;
 using PostProcessingRenderStep = std::shared_ptr<_PostProcessingRenderStep>;
+
+class _TextureTarget;
+using TextureTarget = std::shared_ptr<_TextureTarget>;

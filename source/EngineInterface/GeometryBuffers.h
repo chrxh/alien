@@ -22,19 +22,19 @@ class _GeometryBuffers
 public:
     static GeometryBuffers create();
 
-    unsigned int getVao() const { return vao; }
-    unsigned int getVbo() const { return vbo; }
-    unsigned int getEbo() const { return ebo; }
+    unsigned int getVao() const { return _vao; }
+    unsigned int getVbo() const { return _vbo; }
+    unsigned int getEbo() const { return _ebo; }
 
     void resizeIfNecessary(NumRenderObjects const& numRenderObjects);
 
 private:
-    unsigned int vao = 0;
-    unsigned int vbo = 0;
-    unsigned int ebo = 0;
+    unsigned int _vao = 0;
+    unsigned int _vbo = 0;
+    unsigned int _ebo = 0;
 
-    uint64_t vertexBufferCapacity = 0;
-    uint64_t lineIndexBufferCapacity = 0;
+    uint64_t _vertexBufferCapacity = 0;
+    uint64_t _lineIndexBufferCapacity = 0;
 
     _GeometryBuffers() = default;
 };

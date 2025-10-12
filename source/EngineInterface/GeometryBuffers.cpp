@@ -7,23 +7,23 @@
 GeometryBuffers _GeometryBuffers::create()
 {
     auto result = new _GeometryBuffers();
-    glGenVertexArrays(1, &result->vao);
-    glGenBuffers(1, &result->vbo);
-    glGenBuffers(1, &result->ebo);
+    glGenVertexArrays(1, &result->_vao);
+    glGenBuffers(1, &result->_vbo);
+    glGenBuffers(1, &result->_ebo);
     return GeometryBuffers(result);
 }
 
 void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObjects)
 {
-    if (numRenderObjects.vertices >= vertexBufferCapacity) {
-        vertexBufferCapacity = std::max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.vertices >= _vertexBufferCapacity) {
+        _vertexBufferCapacity = std::max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVbo());
-        glBufferData(GL_ARRAY_BUFFER, toInt(vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
-    if (numRenderObjects.lineIndices >= lineIndexBufferCapacity) {
-        lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
+        _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
         glBindVertexArray(getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getEbo());
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
     }
 }
