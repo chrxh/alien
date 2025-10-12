@@ -35,6 +35,10 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     
     // Bind EBO (will be filled by CUDA later)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+    _renderBuffers.vaoForLines = vao;
+    _renderBuffers.vboForPoints = vbo;
+    _renderBuffers.eboForLines = ebo;
 }
 
 void _RenderPipeline::addStep(RenderStep const& step)
@@ -87,8 +91,7 @@ void _RenderPipeline::execute()
     CHECK(startRenderStep);
 
     // Copy vertex buffer from Cuda to OpenGL
-    RenderBuffers renderBuffers{.vboForPoints = _geometrySource->getVbo(), .vaoForLines = _geometrySource->getVao(), .eboForLines = _geometrySource->getEbo()};
-    auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
+    auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_renderBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;
     }

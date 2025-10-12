@@ -42,4 +42,5 @@ private:
     NumRenderObjects _numObjects;
 
     GeometrySource _geometrySource;
+    RenderBuffers _renderBuffers;
 };

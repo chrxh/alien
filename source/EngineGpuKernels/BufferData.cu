@@ -44,18 +44,18 @@ void BufferData::registerBuffers(RenderBuffers const& buffers)
 }
 
 
-void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers)
+void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers& buffers)
 {
-    if (numRenderObjects.vertices >= vertexBufferCapacity) {
-        vertexBufferCapacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.vertices >= buffers.vertexBufferCapacity) {
+        buffers.vertexBufferCapacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, buffers.vboForPoints);
-        glBufferData(GL_ARRAY_BUFFER, toInt(vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(buffers.vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
-    if (numRenderObjects.lineIndices >= LineIndexBufferCapacity) {
-        LineIndexBufferCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.lineIndices >= buffers.lineIndexBufferCapacity) {
+        buffers.lineIndexBufferCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
         glBindVertexArray(buffers.vaoForLines);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.eboForLines);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(LineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(buffers.lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
     }
 }
 

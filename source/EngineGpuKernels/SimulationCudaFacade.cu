@@ -124,7 +124,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
+NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffers& buffers)
 {
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();

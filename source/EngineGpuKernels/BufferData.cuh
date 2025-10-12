@@ -9,13 +9,11 @@
 
 struct BufferData
 {
-    uint64_t vertexBufferCapacity = 0;
-    uint64_t LineIndexBufferCapacity = 0;
     cudaGraphicsResource* vertexBuffer = nullptr;
     cudaGraphicsResource* lineIndexBuffer = nullptr;
 
     void init();
     void registerBuffers(RenderBuffers const& buffers);
-    void resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers const& buffers);
+    void resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers& buffers);
     void free();
 };
