@@ -40,7 +40,7 @@
 #include "EditKernelsService.cuh"
 #include "StatisticsKernelsService.cuh"
 #include "SelectionResult.cuh"
-#include "BufferData.cuh"
+#include "CudaGeometryBuffers.cuh"
 #include "SimulationParametersUpdateService.cuh"
 #include "TestKernelsService.cuh"
 #include "StatisticsService.cuh"
@@ -70,7 +70,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaPreviewData = std::make_shared<SimulationData>();
-    _cudaRenderingData = std::make_shared<BufferData>();
+    _cudaRenderingData = std::make_shared<CudaGeometryBuffers>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();
@@ -80,7 +80,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
-    _cudaRenderingData->init();
     _cudaSimulationStatistics->init();
     _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
@@ -105,7 +104,6 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
 {
     _cudaSimulationData->free();
     _cudaPreviewData->free();
-    _cudaRenderingData->free();
     _cudaSimulationStatistics->free();
     _cudaSelectionResult->free();
 
@@ -130,7 +128,7 @@ NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuff
     auto simulationData = getSimulationDataPtrCopy();
 
     auto numRenderObjects = _renderingKernels->getNumRenderObjects(_settings, simulationData);
-    _cudaRenderingData->resizeObjectBufferIfNecessary(numRenderObjects, geometryBuffers);
+    geometryBuffers->resizeIfNecessary(numRenderObjects);
     _cudaRenderingData->registerBuffers(geometryBuffers);
 
     _renderingKernels->extractObjectData(_settings, simulationData, *_cudaRenderingData);

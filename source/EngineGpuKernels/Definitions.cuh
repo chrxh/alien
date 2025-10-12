@@ -15,7 +15,7 @@ struct Objects;
 struct Creature;
 
 struct SimulationData;
-struct BufferData;
+struct CudaGeometryBuffers;
 class SelectionResult;
 struct CellTO;
 struct ClusterAccessTO;

@@ -21,10 +21,10 @@ public:
         int2 imageSize,
         float zoom,
         SimulationData data,
-        BufferData renderingData);
+        CudaGeometryBuffers renderingData);
 
     NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data);
-    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, BufferData& renderingData);
+    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData);
 
 private:
     uint64_t* _numLineIndices;

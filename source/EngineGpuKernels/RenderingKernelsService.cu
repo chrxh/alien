@@ -2,7 +2,7 @@
 
 #include "EngineInterface/SettingsForSimulation.h"
 
-#include "BufferData.cuh"
+#include "CudaGeometryBuffers.cuh"
 #include "RenderingKernels.cuh"
 
 _RenderingKernelsService::_RenderingKernelsService()
@@ -24,7 +24,7 @@ void _RenderingKernelsService::drawImage(
     int2 imageSize,
     float zoom,
     SimulationData data,
-    BufferData renderingData)
+    CudaGeometryBuffers renderingData)
 {
     //auto const& gpuSettings = settings.cudaSettings;
 
@@ -72,7 +72,7 @@ NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimula
     return result;
 }
 
-void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, BufferData& renderingData)
+void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
     

@@ -26,13 +26,15 @@ public:
     unsigned int getVbo() const { return vbo; }
     unsigned int getEbo() const { return ebo; }
 
-    uint64_t vertexBufferCapacity = 0;
-    uint64_t lineIndexBufferCapacity = 0;
+    void resizeIfNecessary(NumRenderObjects const& numRenderObjects);
 
 private:
     unsigned int vao = 0;
     unsigned int vbo = 0;
     unsigned int ebo = 0;
+
+    uint64_t vertexBufferCapacity = 0;
+    uint64_t lineIndexBufferCapacity = 0;
 
     _GeometryBuffers() = default;
 };
