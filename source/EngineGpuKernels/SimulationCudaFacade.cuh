@@ -137,7 +137,7 @@ private:
     mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
     std::shared_ptr<SimulationData> _cudaPreviewData;
-    std::shared_ptr<CudaGeometryBuffers> _cudaRenderingData;
+    std::shared_ptr<CudaGeometryBuffers> _cudaGeometryBuffers;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaTOProvider _cudaTOProvider;
     TOProvider _collectionTOProvider;
@@ -153,7 +153,7 @@ private:
     SimulationKernelsService _simulationKernels;
     DataAccessKernelsService _dataAccessKernels;
     GarbageCollectorKernelsService _garbageCollectorKernels;
-    RenderingKernelsService _renderingKernels;
+    GeometryKernelsService _geometryKernels;
     EditKernelsService _editKernels;
     StatisticsKernelsService _statisticsKernels;
     TestKernelsService _testKernels;

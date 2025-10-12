@@ -1,4 +1,4 @@
-﻿#include "RenderingKernels.cuh"
+﻿#include "GeometryKernels.cuh"
 
 #include "SignalProcessor.cuh"
 #include "ParameterCalculator.cuh"

@@ -8,11 +8,11 @@
 #include "GarbageCollectorKernelsService.cuh"
 #include "Macros.cuh"
 
-class _RenderingKernelsService
+class _GeometryKernelsService
 {
 public:
-    _RenderingKernelsService();
-    ~_RenderingKernelsService();
+    _GeometryKernelsService();
+    ~_GeometryKernelsService();
 
     void drawImage(
         SettingsForSimulation const& settings,

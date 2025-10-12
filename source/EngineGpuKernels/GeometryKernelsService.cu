@@ -1,23 +1,23 @@
-﻿#include "RenderingKernelsService.cuh"
+﻿#include "GeometryKernelsService.cuh"
 
 #include "EngineInterface/SettingsForSimulation.h"
 
 #include "CudaGeometryBuffers.cuh"
-#include "RenderingKernels.cuh"
+#include "GeometryKernels.cuh"
 
-_RenderingKernelsService::_RenderingKernelsService()
+_GeometryKernelsService::_GeometryKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _numLineIndices);
 }
 
-_RenderingKernelsService::~_RenderingKernelsService()
+_GeometryKernelsService::~_GeometryKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_numLineIndices);
 }
 
-void _RenderingKernelsService::drawImage(
+void _GeometryKernelsService::drawImage(
     SettingsForSimulation const& settings,
     float2 rectUpperLeft,
     float2 rectLowerRight,
@@ -57,7 +57,7 @@ void _RenderingKernelsService::drawImage(
     //}
 }
 
-NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data)
+NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data)
 {
     auto const& gpuSettings = settings.cudaSettings;
 
@@ -72,7 +72,7 @@ NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimula
     return result;
 }
 
-void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData)
+void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
     

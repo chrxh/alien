@@ -43,6 +43,10 @@ add_library(EngineGpuKernels
     GeneratorProcessor.cuh
     Genome.cuh
     GenomeTO.cuh
+    GeometryKernels.cu
+    GeometryKernels.cuh
+    GeometryKernelsService.cu
+    GeometryKernelsService.cuh
     HashMap.cuh
     HashSet.cuh
     InjectorProcessor.cuh
@@ -65,10 +69,6 @@ add_library(EngineGpuKernels
     PreprocessedSimulationData.cuh
     RadiationProcessor.cuh
     ReconnectorProcessor.cuh
-    RenderingKernels.cu
-    RenderingKernels.cuh
-    RenderingKernelsService.cu
-    RenderingKernelsService.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
     SignalProcessor.cuh
