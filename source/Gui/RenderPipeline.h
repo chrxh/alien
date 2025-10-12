@@ -11,6 +11,7 @@ public:
     _RenderPipeline(SimulationFacade const& simulationFacade);
 
     void addStep(RenderStep const& step);
+    void finalize();
 
     void resize(IntVector2D const& size);
     void execute();

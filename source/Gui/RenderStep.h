@@ -30,11 +30,15 @@ struct GeneralRenderInfo
 
 class _RenderStep
 {
+    friend _RenderPipeline;
+    friend _PointRenderStep;
+    friend _PostProcessingRenderStep;
+    friend _LineRenderStep;
+
 public:
     virtual ~_RenderStep() = default;
 
     std::vector<RenderStep> const& getDependentSteps() const;
-    RenderTarget const& getTarget() const;
 
     template<typename T>
     void setUniform(std::string const& name, T value)
@@ -43,12 +47,15 @@ public:
     }
 
 protected:
-    _RenderStep(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps);
+    _RenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
 
+    std::optional<RenderTarget> const& getTarget() const;
+    void setTarget(RenderTarget const& target);
     void activateShader(SimulationFacade const& simulationFacade);
+    void setFramebuffer(GeneralRenderInfo const& renderInfo);
 
     Shader _shader;
-    RenderTarget _target;
+    std::optional<RenderTarget> _target;
     std::vector<RenderStep> _dependentSteps;
 
     std::map<std::string, std::variant<int>> _uniformValues;
@@ -59,13 +66,14 @@ class _PointRenderStep : public _RenderStep
     friend _RenderPipeline;
 
 public:
-    static PointRenderStep create(Shader const& shader, RenderTarget const& target);
+    static PointRenderStep create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps = {});
+    static PointRenderStep create(Shader const& shader, std::vector<RenderStep> const& dependentSteps = {});
 
 protected:
     void execute(uint64_t const& numVertices, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
 private:
-    _PointRenderStep(Shader const& shader, RenderTarget const& target);
+    _PointRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
 };
 
 class _LineRenderStep : public _RenderStep
@@ -73,13 +81,14 @@ class _LineRenderStep : public _RenderStep
     friend _RenderPipeline;
 
 public:
-    static LineRenderStep create(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep);
+    static LineRenderStep create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps = {});
+    static LineRenderStep create(Shader const& shader, std::vector<RenderStep> const& dependentSteps = {});
 
 protected:
     void execute(uint64_t const& numLines, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
 private:
-    _LineRenderStep(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep);
+    _LineRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
 };
 
 class _PostProcessingRenderStep : public _RenderStep
@@ -88,12 +97,13 @@ class _PostProcessingRenderStep : public _RenderStep
 
 public:
     static PostProcessingRenderStep create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps);
+    static PostProcessingRenderStep create(Shader const& shader, std::vector<RenderStep> const& dependentSteps);
 
 protected:
     void execute(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
 private:
-    _PostProcessingRenderStep(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps);
+    _PostProcessingRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
 
     unsigned int _vao = 0;
     unsigned int _vbo = 0;

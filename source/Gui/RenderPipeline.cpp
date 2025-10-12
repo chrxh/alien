@@ -35,13 +35,42 @@ void _RenderPipeline::addStep(RenderStep const& step)
     _steps.emplace_back(step);
 }
 
+void _RenderPipeline::finalize()
+{
+    // Start with point renderer
+    RenderStep startRenderStep;
+    for (auto const& step : _steps) {
+        if (std::dynamic_pointer_cast<_PointRenderStep>(step)) {
+            startRenderStep = step;
+            break;
+        }
+    }
+    CHECK(startRenderStep);
+
+    auto currentRenderStep = startRenderStep;
+    std::set<RenderStep> finishedSteps;
+    do {
+        finishedSteps.insert(currentRenderStep);
+        auto nextRenderStep = findNextStep(finishedSteps);
+        if (!currentRenderStep->getTarget().has_value()) {
+            auto finalStep = nextRenderStep == nullptr;
+            if (finalStep) {
+                currentRenderStep->setTarget(ScreenTarget());
+            } else {
+                currentRenderStep->setTarget(_TextureTarget::create());
+            }
+        }
+        currentRenderStep = nextRenderStep;
+    } while (currentRenderStep);
+}
+
 void _RenderPipeline::resize(IntVector2D const& size)
 {
     std::set<TextureTarget> textureTargets;
 
     for (auto const& step : _steps) {
-        if (std::holds_alternative<TextureTarget>(step->getTarget())) {
-            textureTargets.insert(std::get<TextureTarget>(step->getTarget()));
+        if (std::holds_alternative<TextureTarget>(step->getTarget().value())) {
+            textureTargets.insert(std::get<TextureTarget>(step->getTarget().value()));
         }
     }
 

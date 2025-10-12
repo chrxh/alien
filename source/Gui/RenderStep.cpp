@@ -18,16 +18,22 @@ std::vector<RenderStep> const& _RenderStep::getDependentSteps() const
     return _dependentSteps;
 }
 
-RenderTarget const& _RenderStep::getTarget() const
-{
-    return _target;
-}
 
-_RenderStep::_RenderStep(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+_RenderStep::_RenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
     : _shader(shader)
     , _target(target)
     , _dependentSteps(dependentSteps)
 {}
+
+std::optional<RenderTarget> const& _RenderStep::getTarget() const
+{
+    return _target;
+}
+
+void _RenderStep::setTarget(RenderTarget const& target)
+{
+    _target = target;
+}
 
 void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
 {
@@ -50,9 +56,24 @@ void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
     }
 }
 
-PointRenderStep _PointRenderStep::create(Shader const& shader,RenderTarget const& target)
+void _RenderStep::setFramebuffer(GeneralRenderInfo const& renderInfo)
 {
-    return PointRenderStep(new _PointRenderStep(shader, target));
+    if (std::holds_alternative<TextureTarget>(_target.value())) {
+        auto textureTarget = std::get<TextureTarget>(_target.value());
+        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
+    }
+}
+
+PointRenderStep _PointRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+{
+    return PointRenderStep(new _PointRenderStep(shader, target, dependentSteps));
+}
+
+PointRenderStep _PointRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+{
+    return PointRenderStep(new _PointRenderStep(shader, std::nullopt, dependentSteps));
 }
 
 void _PointRenderStep::execute(
@@ -63,12 +84,7 @@ void _PointRenderStep::execute(
 {
     auto viewSize = Viewport::get().getViewSize();
 
-    if (std::holds_alternative<TextureTarget>(_target)) {
-        auto textureTarget = std::get<TextureTarget>(_target);
-        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
-    }
+    setFramebuffer(renderInfo);
     glViewport(0, 0, viewSize.x, viewSize.y);
 
     // Clear with black background
@@ -94,13 +110,18 @@ void _PointRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_PointRenderStep::_PointRenderStep(Shader const& shader, RenderTarget const& target)
-    : _RenderStep(shader, target, {})
+_PointRenderStep::_PointRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
+    : _RenderStep(shader, target, dependentSteps)
 {}
 
-LineRenderStep _LineRenderStep::create(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep)
+LineRenderStep _LineRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
 {
-    return LineRenderStep(new _LineRenderStep(shader, target, dependentStep));
+    return LineRenderStep(new _LineRenderStep(shader, target, dependentSteps));
+}
+
+LineRenderStep _LineRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+{
+    return LineRenderStep(new _LineRenderStep(shader, std::nullopt, dependentSteps));
 }
 
 void _LineRenderStep::execute(
@@ -112,14 +133,13 @@ void _LineRenderStep::execute(
     auto viewSize = Viewport::get().getViewSize();
     auto zoom = Viewport::get().getZoomFactor();
 
-    if (std::holds_alternative<TextureTarget>(_target)) {
-        auto textureTarget = std::get<TextureTarget>(_target);
-        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
-    }
+    setFramebuffer(renderInfo);
     glViewport(0, 0, viewSize.x, viewSize.y);
     
+    // Clear with black background
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -135,14 +155,19 @@ void _LineRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_LineRenderStep::_LineRenderStep(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep)
-    : _RenderStep(shader, target, {dependentStep})
+_LineRenderStep::_LineRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
+    : _RenderStep(shader, target, dependentSteps)
 {
 }
 
 PostProcessingRenderStep _PostProcessingRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
 {
     return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, target, dependentSteps));
+}
+
+PostProcessingRenderStep _PostProcessingRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+{
+    return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, std::nullopt, dependentSteps));
 }
 
 void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
@@ -155,14 +180,14 @@ void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, Sim
         auto numDependentSteps = _dependentSteps.size();
         CHECK(numDependentSteps <= 2);
         if (numDependentSteps >= 1) {
-            auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(0)->getTarget());
+            auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(0)->getTarget().value());
 
             _shader->setInt("inputTexture1", 0);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
         }
         if (numDependentSteps >= 2) {
-            auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(1)->getTarget());
+            auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(1)->getTarget().value());
 
             _shader->setInt("inputTexture2", 1);
             glActiveTexture(GL_TEXTURE1);
@@ -170,8 +195,8 @@ void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, Sim
         }
     
         // Output
-        if (std::holds_alternative<TextureTarget>(_target)) {
-            auto textureTarget = std::get<TextureTarget>(_target);
+        if (std::holds_alternative<TextureTarget>(_target.value())) {
+            auto textureTarget = std::get<TextureTarget>(_target.value());
             glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
         } else {
             glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
@@ -179,7 +204,10 @@ void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, Sim
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+_PostProcessingRenderStep::_PostProcessingRenderStep(
+    Shader const& shader,
+    std::optional<RenderTarget> const& target,
+    std::vector<RenderStep> const& dependentSteps)
     : _RenderStep(shader, target, dependentSteps)
 {
     glGenVertexArrays(1, &_vao);

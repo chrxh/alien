@@ -199,31 +199,38 @@ void SimulationView::setupRenderPipeline()
 {
     _renderPipeline = std::make_shared<_RenderPipeline>(_simulationFacade);
 
-    auto shader1 = _Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
-    auto textureTarget1 = _TextureTarget::create();
-    auto renderStep1 = _PointRenderStep::create(shader1, textureTarget1);
+    auto shader1 = _Shader::create(Const::LineVertexShader, Const::LineFragmentShader);
+    auto renderStep1 = _LineRenderStep::create(shader1);
     _renderPipeline->addStep(renderStep1);
 
-    auto shader2 = _Shader::create(Const::LineVertexShader, Const::LineFragmentShader);
-    auto renderStep2 = _LineRenderStep::create(shader2, textureTarget1, renderStep1);
+    auto shader2 = _Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
+    auto renderStep2 = _PointRenderStep::create(shader2,{renderStep1});
     _renderPipeline->addStep(renderStep2);
 
     auto shader3 = _Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader);
-    auto renderStep3 = _PostProcessingRenderStep::create(shader3, ScreenTarget(), {renderStep2});
+    auto renderStep3 = _PostProcessingRenderStep::create(shader3,{renderStep1, renderStep2});
     renderStep3->setUniform("mode", 1);
     _renderPipeline->addStep(renderStep3);
 
-    //auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
-    //_renderPipeline->addStep(renderStep2);
+    auto shader4 = _Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader);
+    auto renderStep4 = _PostProcessingRenderStep::create(shader4, std::vector<RenderStep>{renderStep3});
+    _renderPipeline->addStep(renderStep4);
 
-    //auto renderStep3 = _PostProcessingRenderStep::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader, std::vector<RenderStep>{renderStep2});
-    //_renderPipeline->addStep(renderStep3);
+    auto shader5 = _Shader::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader);
+    auto renderStep5 = _PostProcessingRenderStep::create(shader5, std::vector<RenderStep>{renderStep4});
+    _renderPipeline->addStep(renderStep5);
 
-    //auto renderStep4 = _PostProcessingRenderStep::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader, std::vector<RenderStep>{renderStep3});
-    //_renderPipeline->addStep(renderStep4);
+    auto shader6 = _Shader::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader);
+    auto renderStep6 = _PostProcessingRenderStep::create(shader6, std::vector<RenderStep>{renderStep5});
+    _renderPipeline->addStep(renderStep6);
 
-    //auto renderStep5 = _PostProcessingRenderStep::create(Const::FresnelVertexShader, Const::FresnelFragmentShader, std::vector<RenderStep>{renderStep4});
-    //_renderPipeline->addStep(renderStep5);
+    //auto shader7 = _Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader);
+    //auto renderStep7 = _PostProcessingRenderStep::create(shader7, std::vector<RenderStep>{renderStep6});
+    //_renderPipeline->addStep(renderStep7);
+
+    //auto shader8 = _Shader::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader);
+    //auto renderStep8 = _PostProcessingRenderStep::create(shader8, ScreenTarget(), std::vector<RenderStep>{renderStep7});
+    //_renderPipeline->addStep(renderStep8);
 
     //auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
     //_renderPipeline->addStep(renderStep6);
@@ -233,6 +240,8 @@ void SimulationView::setupRenderPipeline()
 
     //auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
     //_renderPipeline->addStep(renderStep8);
+
+    _renderPipeline->finalize();
 }
 
 void SimulationView::markReferenceDomain()

@@ -20,7 +20,7 @@ void main()
     float density = luminance * color.a;
     
     // Apply metaballs threshold with smoothstep for smooth blob-like edges
-    float threshold = 1.3;
+    float threshold = 0.7;
     float smoothRange = 0.45;
     float metaball = smoothstep(threshold - smoothRange, threshold + smoothRange, density);
     

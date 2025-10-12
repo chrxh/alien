@@ -13,7 +13,7 @@ void main()
 {
     vec4 color1 = texture(inputTexture1, texCoord);
     vec4 color2 = texture(inputTexture2, texCoord);
-    
+
     if (mode == 0) {
         vec3 mergedColor = color1.rgb * 0.5 + color2.rgb * 0.5;
         FragColor = vec4(mergedColor, 1.0f);
