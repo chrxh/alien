@@ -6,7 +6,6 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/RenderBuffers.h"
 
 #include "Definitions.h"
 
@@ -59,8 +58,6 @@ private:
     std::optional<OverlayDescription> _overlay;
 
     RenderPipeline _renderPipeline;
-
-    NumRenderObjects _numObjects;
 
     // Screen background texture (dark blue background)
     unsigned int _screenBackgroundTexture;

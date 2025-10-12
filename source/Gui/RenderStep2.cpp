@@ -1,9 +1,8 @@
 #include "RenderStep2.h"
 
 #include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/RenderBuffers.h"
+#include "EngineInterface/GeometryBuffers.h"
 
-#include "GeometrySource.h"
 #include "RenderPipeline.h"
 
 #include "Shader.h"
@@ -47,7 +46,7 @@ PointRenderStep _PointRenderStep::create(Shader const& shader,RenderTarget const
 
 void _PointRenderStep::execute(
     uint64_t const& numVertices,
-    GeometrySource const& geometrySource,
+    GeometryBuffers const& geometryBuffers,
     GeneralRenderInfo const& renderInfo,
     SimulationFacade const& simulationFacade)
 {
@@ -76,7 +75,7 @@ void _PointRenderStep::execute(
     activateShader(simulationFacade);
 
     // Draw points
-    glBindVertexArray(geometrySource->getVao());
+    glBindVertexArray(geometryBuffers->getVao());
     glDrawArrays(GL_POINTS, 0, toInt(numVertices));
 
     // Disable blending and point sprites
@@ -95,7 +94,7 @@ LineRenderStep _LineRenderStep::create(Shader const& shader, RenderTarget const&
 
 void _LineRenderStep::execute(
     uint64_t const& numLines,
-    GeometrySource const& geometrySource,
+    GeometryBuffers const& geometryBuffers,
     GeneralRenderInfo const& renderInfo,
     SimulationFacade const& simulationFacade)
 {
@@ -117,7 +116,7 @@ void _LineRenderStep::execute(
     activateShader(simulationFacade);
     
     // Draw lines
-    glBindVertexArray(geometrySource->getVao());
+    glBindVertexArray(geometryBuffers->getVao());
     glLineWidth(zoom * 0.1f);
     glDrawElements(GL_LINES, toInt(numLines), GL_UNSIGNED_INT, 0);
     

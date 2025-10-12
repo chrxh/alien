@@ -50,7 +50,7 @@ public:
     static PointRenderStep create(Shader const& shader, RenderTarget const& target);
 
 protected:
-    void execute(uint64_t const& numVertices, GeometrySource const& geometrySource, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void execute(uint64_t const& numVertices, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
 private:
     _PointRenderStep(Shader const& shader, RenderTarget const& target);
@@ -64,7 +64,7 @@ public:
     static LineRenderStep create(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep);
 
 protected:
-    void execute(uint64_t const& numLines, GeometrySource const& geometrySource, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void execute(uint64_t const& numLines, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
 private:
     _LineRenderStep(Shader const& shader, RenderTarget const& target, RenderStep const& dependentStep);

@@ -30,32 +30,32 @@ namespace
     }
 }
 
-void BufferData::registerBuffers(RenderBuffers const& buffers)
+void BufferData::registerBuffers(GeometryBuffers const& buffers)
 {
     if (vertexBuffer != nullptr) {
         unregisterBufferResource(vertexBuffer);
     }
-    vertexBuffer = registerBufferResource(buffers.vboForPoints);
+    vertexBuffer = registerBufferResource(buffers->getVbo());
 
     if (lineIndexBuffer != nullptr) {
         unregisterBufferResource(lineIndexBuffer);
     }
-    lineIndexBuffer = registerBufferResource(buffers.eboForLines);
+    lineIndexBuffer = registerBufferResource(buffers->getEbo());
 }
 
 
-void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers& buffers)
+void BufferData::resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, GeometryBuffers const& buffers)
 {
-    if (numRenderObjects.vertices >= buffers.vertexBufferCapacity) {
-        buffers.vertexBufferCapacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
-        glBindBuffer(GL_ARRAY_BUFFER, buffers.vboForPoints);
-        glBufferData(GL_ARRAY_BUFFER, toInt(buffers.vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
+    if (numRenderObjects.vertices >= buffers->vertexBufferCapacity) {
+        buffers->vertexBufferCapacity = max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ARRAY_BUFFER, buffers->getVbo());
+        glBufferData(GL_ARRAY_BUFFER, toInt(buffers->vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
-    if (numRenderObjects.lineIndices >= buffers.lineIndexBufferCapacity) {
-        buffers.lineIndexBufferCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
-        glBindVertexArray(buffers.vaoForLines);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers.eboForLines);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(buffers.lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+    if (numRenderObjects.lineIndices >= buffers->lineIndexBufferCapacity) {
+        buffers->lineIndexBufferCapacity = max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
+        glBindVertexArray(buffers->getVao());
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers->getEbo());
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(buffers->lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
     }
 }
 

@@ -46,7 +46,7 @@ public:
 
     std::string getGpuName() const;
 
-    std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(RenderBuffers& buffers);
+    std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers);
 
     bool isSyncSimulationWithRendering() const;
     void setSyncSimulationWithRendering(bool value);

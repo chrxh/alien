@@ -45,7 +45,7 @@ public:
 
     Ids getMaxIds() const;
 
-    NumRenderObjects copyBuffersFromCudaToOpenGL(RenderBuffers& buffers);
+    NumRenderObjects copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers);
     TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
@@ -114,8 +114,6 @@ public:
 
 private:
     void initCuda();
-
-    void registerRenderBuffers(RenderBuffers const& buffers);
 
     void syncAndCheck();
     void copyDataTOtoGpu(TO const& cudaDataTO, TO const& dataTO);

@@ -1,7 +1,7 @@
 #include "SimulationFacadeImpl.h"
 
 #include "EngineInterface/Description.h"
-#include "EngineInterface/RenderBuffers.h"
+#include "EngineInterface/GeometryBuffers.h"
 
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
@@ -37,9 +37,9 @@ std::string _SimulationFacadeImpl::getGpuName() const
     return _worker.getGpuName();
 }
 
-std::optional<NumRenderObjects> _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(RenderBuffers& buffers)
+std::optional<NumRenderObjects> _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
 {
-    return _worker.tryCopyBuffersFromCudaToOpenGL(buffers);
+    return _worker.tryCopyBuffersFromCudaToOpenGL(geometryBuffers);
 }
 
 bool _SimulationFacadeImpl::isSyncSimulationWithRendering() const

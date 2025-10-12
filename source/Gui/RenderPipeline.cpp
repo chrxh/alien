@@ -1,17 +1,18 @@
 #include "RenderPipeline.h"
 
+#include "EngineInterface/GeometryBuffers.h"
+
 #include "RenderStep.h"
 #include "RenderStep2.h"
 #include "Shader.h"
-#include "GeometrySource.h"
 
 _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     : _simulationFacade(simulationFacade)
-    , _geometrySource(_GeometrySource::create())
+    , _geometryBuffers(_GeometryBuffers::create())
 {
-    auto vao = _geometrySource->getVao();
-    auto vbo = _geometrySource->getVbo();
-    auto ebo = _geometrySource->getEbo();
+    auto vao = _geometryBuffers->getVao();
+    auto vbo = _geometryBuffers->getVbo();
+    auto ebo = _geometryBuffers->getEbo();
     
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -27,10 +28,6 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     
     // Bind EBO (will be filled by CUDA later)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-
-    _renderBuffers.vaoForLines = vao;
-    _renderBuffers.vboForPoints = vbo;
-    _renderBuffers.eboForLines = ebo;
 }
 
 void _RenderPipeline::addStep(RenderStep const& step)
@@ -83,7 +80,7 @@ void _RenderPipeline::execute()
     CHECK(startRenderStep);
 
     // Copy vertex buffer from Cuda to OpenGL
-    auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_renderBuffers);
+    auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;
     }
@@ -97,10 +94,10 @@ void _RenderPipeline::execute()
         finishedSteps.insert(currentRenderStep);
         auto nextRenderStep = findNextStep(finishedSteps);
         if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep>(currentRenderStep)) {
-            pointRenderStep->execute(_numObjects.vertices, _geometrySource, generalRenderInfo, _simulationFacade);
+            pointRenderStep->execute(_numObjects.vertices, _geometryBuffers, generalRenderInfo, _simulationFacade);
         }
         if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(currentRenderStep)) {
-            lineRenderStep->execute(_numObjects.lineIndices, _geometrySource, generalRenderInfo, _simulationFacade);
+            lineRenderStep->execute(_numObjects.lineIndices, _geometryBuffers, generalRenderInfo, _simulationFacade);
         }
         currentRenderStep = nextRenderStep;
     } while (currentRenderStep);

@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "EngineInterface/RenderBuffers.h"
+#include "EngineInterface/GeometryBuffers.h"
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -13,7 +13,7 @@ struct BufferData
     cudaGraphicsResource* lineIndexBuffer = nullptr;
 
     void init();
-    void registerBuffers(RenderBuffers const& buffers);
-    void resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, RenderBuffers& buffers);
+    void registerBuffers(GeometryBuffers const& buffers);
+    void resizeObjectBufferIfNecessary(NumRenderObjects const& numRenderObjects, GeometryBuffers const& buffers);
     void free();
 };

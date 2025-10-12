@@ -1,5 +1,7 @@
 ﻿#include "RenderingKernelsService.cuh"
 
+#include "EngineInterface/SettingsForSimulation.h"
+
 #include "BufferData.cuh"
 #include "RenderingKernels.cuh"
 

@@ -23,6 +23,8 @@ add_library(EngineInterface
     GenomeDescriptionInfoService.h
     GenomeDescriptionValidationService.cpp
     GenomeDescriptionValidationService.h
+    GeometryBuffers.cpp
+    GeometryBuffers.h
     Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp
@@ -39,7 +41,6 @@ add_library(EngineInterface
     PreviewDescription.h
     PreviewDescriptionConverterService.cpp
     PreviewDescriptionConverterService.h
-    RenderBuffers.h
     SelectionShallowData.h
     SettingsForSimulation.h
     ShallowUpdateSelectionData.h

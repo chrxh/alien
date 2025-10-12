@@ -5,9 +5,9 @@
 #include "Base/ExitScopeGuard.h"
 
 #include "EngineInterface/DescriptionEditService.h"
+#include "EngineInterface/GeometryBuffers.h"
 #include "EngineInterface/Ids.h"
 #include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/RenderBuffers.h"
 
 #include "EngineGpuKernels/TOProvider.cuh"
 #include "EngineGpuKernels/TO.cuh"
@@ -39,12 +39,12 @@ std::string EngineWorker::getGpuName() const
     return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
-std::optional<NumRenderObjects> EngineWorker::tryCopyBuffersFromCudaToOpenGL(RenderBuffers& buffers)
+std::optional<NumRenderObjects> EngineWorker::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        auto result = _simulationCudaFacade->copyBuffersFromCudaToOpenGL(buffers);
+        auto result = _simulationCudaFacade->copyBuffersFromCudaToOpenGL(geometryBuffers);
         syncSimulationWithRenderingIfDesired();
 
         return result;

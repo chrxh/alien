@@ -1,9 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/CudaSettings.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/SettingsForSimulation.h"
-#include "EngineInterface/RenderBuffers.h"
+#include "EngineInterface/GeometryBuffers.h"
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"
