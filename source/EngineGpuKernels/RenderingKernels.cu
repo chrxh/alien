@@ -768,15 +768,14 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<Particle*> particles, VertexData* objectData)
+__global__ void cudaExtractObjectData(SimulationData data, VertexData* objectData)
 {
-    BaseMap map;
-    map.init(worldSize);
+    BaseMap const& map = data.cellMap;
 
     // Process cells - each cell goes to its index position
-    auto const& cellPartition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto const& cell = cells.at(index);
+        auto const& cell = data.objects.cells.at(index);
         if (!cell) {
             continue;
         }
@@ -828,10 +827,10 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
     }
 
     // Process particles - each particle goes after all cells
-    auto const& particlePartition = calcAllThreadsPartition(particles.getNumEntries());
-    auto numCells = cells.getNumEntries();
+    auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    auto numCells = data.objects.cells.getNumEntries();
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto const& particle = particles.at(index);
+        auto const& particle = data.objects.particles.at(index);
         if (!particle) {
             continue;
         }
@@ -849,29 +848,31 @@ __global__ void cudaExtractObjectData(int2 worldSize, Array<Cell*> cells, Array<
     }
 }
 
-__global__ void cudaExtractNumLineIndices(Array<Cell*> cells, uint64_t* numLineIndices)
+__global__ void cudaExtractNumLineIndices(SimulationData data, uint64_t* numLineIndices)
 {
-    auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& cell = cells.at(index);
+        auto const& cell = data.objects.cells.at(index);
 
         for (int i = 0; i < cell->numConnections; ++i) {
             auto connectedCell = cell->connections[i].cell;
             // Only add each connection once (from lower index to higher index to avoid duplicates)
             if (cell->id < connectedCell->id) {
-                alienAtomicAdd64(numLineIndices, uint64_t(2));
+                if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
+                    alienAtomicAdd64(numLineIndices, uint64_t(2));
+                }
             }
         }
     }
 }
 
-__global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineIndices, uint64_t* numLineIndices)
+__global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices)
 {
-    auto const& partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& cell = cells.at(index);
+        auto const& cell = data.objects.cells.at(index);
 
         // Cell index is just the array index (stored in tempValue)
         uint64_t cellIndex = cell->tempValue.as_uint64;
@@ -882,10 +883,12 @@ __global__ void cudaExtractLineIndices(Array<Cell*> cells, unsigned int* lineInd
 
             // Only add each connection once (from lower index to higher index to avoid duplicates)
             if (cell->id < connectedCell->id) {
-                uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
-                uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
-                lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
-                lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
+                if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
+                    uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
+                    uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
+                    lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
+                    lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
+                }
             }
         }
     }

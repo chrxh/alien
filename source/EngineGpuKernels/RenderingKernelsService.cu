@@ -63,7 +63,7 @@ NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SettingsForSimula
     result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
     
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractNumLineIndices, data.objects.cells, _numLineIndices);
+    KERNEL_CALL(cudaExtractNumLineIndices, data, _numLineIndices);
     cudaDeviceSynchronize();
     result.lineIndices = copyToHost(_numLineIndices);
 
@@ -85,11 +85,11 @@ void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& se
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
     // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
-    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer);
+    KERNEL_CALL(cudaExtractObjectData, data, mappedBuffer);
     
     // Second kernel: Extract line indices from cell connections
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractLineIndices, data.objects.cells, mappedLineIndexBuffer, _numLineIndices);
+    KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
