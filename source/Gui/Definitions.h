@@ -152,6 +152,9 @@ struct TextureData
     int height;
 };
 
+class _GeometrySource;
+using GeometrySource = std::shared_ptr<_GeometrySource>;
+
 class _RenderPipeline;
 using RenderPipeline = std::shared_ptr<_RenderPipeline>;
 

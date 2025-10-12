@@ -4,9 +4,38 @@
 #include "RenderStep2.h"
 #include "Shader.h"
 
+GeometrySource _GeometrySource::create()
+{
+    auto result = new _GeometrySource();
+    glGenVertexArrays(1, &result->vao);
+    glGenBuffers(1, &result->vbo);
+    glGenBuffers(1, &result->ebo);
+    return GeometrySource(result);
+}
+
 _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     : _simulationFacade(simulationFacade)
-{}
+    , _geometrySource(_GeometrySource::create())
+{
+    auto vao = _geometrySource->getVao();
+    auto vbo = _geometrySource->getVbo();
+    auto ebo = _geometrySource->getEbo();
+    
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    
+    // Setup vertex attributes for VertexData (same as PointRenderStep)
+    // Position (2 floats)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+    glEnableVertexAttribArray(0);
+    
+    // Color (3 floats) - not used for lines but needed for compatibility
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    // Bind EBO (will be filled by CUDA later)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+}
 
 void _RenderPipeline::addStep(RenderStep const& step)
 {
@@ -56,22 +85,9 @@ void _RenderPipeline::execute()
         }
     }
     CHECK(startRenderStep);
-    auto const& geometrySource = std::get<GeometrySource>(startRenderStep->getSource());
-
-    //// Find line renderer to get EBO
-    //RenderStep lineRenderStep;
-    //for (auto const& step : _steps) {
-    //    if (auto lineStep = std::dynamic_pointer_cast<_LineRenderStep>(step)) {
-    //        lineRenderStep = step;
-    //        break;
-    //    }
-    //}
-    //CHECK(lineRenderStep);
-    //auto vao = lineRenderStep->getShader()->getVao();
-    //auto ebo = lineRenderStep->getShader()->getEbo();
 
     // Copy vertex buffer from Cuda to OpenGL
-    RenderBuffers renderBuffers{.vboForPoints = geometrySource.vbo, .vaoForLines = geometrySource.vao, .eboForLines = geometrySource.ebo};
+    RenderBuffers renderBuffers{.vboForPoints = _geometrySource->getVbo(), .vaoForLines = _geometrySource->getVao(), .eboForLines = _geometrySource->getEbo()};
     auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(renderBuffers);
     if (numRenderObjects.has_value()) {
         _numObjects = *numRenderObjects;
@@ -86,10 +102,10 @@ void _RenderPipeline::execute()
         finishedSteps.insert(currentRenderStep);
         auto nextRenderStep = findNextStep(finishedSteps);
         if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep>(currentRenderStep)) {
-            pointRenderStep->execute(_numObjects.vertices, generalRenderInfo, _simulationFacade);
+            pointRenderStep->execute(_numObjects.vertices, _geometrySource, generalRenderInfo, _simulationFacade);
         }
         if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(currentRenderStep)) {
-            lineRenderStep->execute(_numObjects.lineIndices, generalRenderInfo, _simulationFacade);
+            lineRenderStep->execute(_numObjects.lineIndices, _geometrySource, generalRenderInfo, _simulationFacade);
         }
         currentRenderStep = nextRenderStep;
     } while (currentRenderStep);
