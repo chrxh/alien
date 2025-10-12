@@ -32,15 +32,15 @@
 #include "Map.cuh"
 #include "StatisticsKernels.cuh"
 #include "EditKernels.cuh"
-#include "RenderingKernels.cuh"
+#include "GeometryKernels.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernelsService.cuh"
 #include "DataAccessKernelsService.cuh"
-#include "RenderingKernelsService.cuh"
+#include "GeometryKernelsService.cuh"
 #include "EditKernelsService.cuh"
 #include "StatisticsKernelsService.cuh"
 #include "SelectionResult.cuh"
-#include "BufferData.cuh"
+#include "CudaGeometryBuffers.cuh"
 #include "SimulationParametersUpdateService.cuh"
 #include "TestKernelsService.cuh"
 #include "StatisticsService.cuh"
@@ -70,7 +70,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _cudaSimulationData = std::make_shared<SimulationData>();
     _cudaPreviewData = std::make_shared<SimulationData>();
-    _cudaRenderingData = std::make_shared<BufferData>();
+    _cudaGeometryBuffers = std::make_shared<CudaGeometryBuffers>();
     _cudaSelectionResult = std::make_shared<SelectionResult>();
     _collectionTOProvider = std::make_shared<_TOProvider>();
     _cudaTOProvider = std::make_shared<_CudaTOProvider>();
@@ -80,7 +80,6 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
 
     _cudaSimulationData->init({_settings.worldSizeX, _settings.worldSizeY}, timestep);
     _cudaPreviewData->init({_settingsForPreview.worldSizeX, _settingsForPreview.worldSizeY}, 0);
-    _cudaRenderingData->init();
     _cudaSimulationStatistics->init();
     _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
@@ -88,7 +87,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _simulationKernels = std::make_shared<_SimulationKernelsService>();
     _dataAccessKernels = std::make_shared<_DataAccessKernelsService>();
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
-    _renderingKernels = std::make_shared<_RenderingKernelsService>();
+    _geometryKernels = std::make_shared<_GeometryKernelsService>();
     _editKernels = std::make_shared<_EditKernelsService>();
     _statisticsKernels = std::make_shared<_StatisticsKernelsService>();
     _testKernels = std::make_shared<_TestKernelsService>();
@@ -105,14 +104,13 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
 {
     _cudaSimulationData->free();
     _cudaPreviewData->free();
-    _cudaRenderingData->free();
     _cudaSimulationStatistics->free();
     _cudaSelectionResult->free();
 
     _simulationKernels.reset();
     _dataAccessKernels.reset();
     _garbageCollectorKernels.reset();
-    _renderingKernels.reset();
+    _geometryKernels.reset();
     _editKernels.reset();
     _statisticsKernels.reset();
     _testKernels.reset();
@@ -124,24 +122,19 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers)
+NumRenderObjects _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
 {
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
 
-    auto numRenderObjects = _renderingKernels->getNumRenderObjects(simulationData);
-    _cudaRenderingData->resizeObjectBufferIfNecessary(numRenderObjects, buffers);
-    _cudaRenderingData->registerBuffers(buffers);
+    auto numRenderObjects = _geometryKernels->getNumRenderObjects(_settings, simulationData);
+    geometryBuffers->resizeIfNecessary(numRenderObjects);
+    _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
-    // Extract object data to temporary buffer
-    _renderingKernels->extractObjectData(_settings, simulationData, *_cudaRenderingData);
+    _geometryKernels->extractObjectData(_settings, simulationData, *_cudaGeometryBuffers);
     syncAndCheck();
 
-    // Copy to mapped OpenGL buffer
-    NumRenderObjects result;
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result.vertices, _cudaRenderingData->numVertices, sizeof(int), cudaMemcpyDeviceToHost));
-    
-    return result;
+    return numRenderObjects;
 }
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)

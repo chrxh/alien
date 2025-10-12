@@ -45,7 +45,7 @@ public:
 
     Ids getMaxIds() const;
 
-    NumRenderObjects copyBuffersFromCudaToOpenGL(RenderBuffers const& buffers);
+    NumRenderObjects copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers);
     TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
@@ -115,8 +115,6 @@ public:
 private:
     void initCuda();
 
-    void registerRenderBuffers(RenderBuffers const& buffers);
-
     void syncAndCheck();
     void copyDataTOtoGpu(TO const& cudaDataTO, TO const& dataTO);
     void copyDataTOtoHost(TO const& dataTO, TO const& cudaDataTO);
@@ -139,7 +137,7 @@ private:
     mutable std::mutex _mutexForSimulationData;
     std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
     std::shared_ptr<SimulationData> _cudaPreviewData;
-    std::shared_ptr<BufferData> _cudaRenderingData;
+    std::shared_ptr<CudaGeometryBuffers> _cudaGeometryBuffers;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaTOProvider _cudaTOProvider;
     TOProvider _collectionTOProvider;
@@ -155,7 +153,7 @@ private:
     SimulationKernelsService _simulationKernels;
     DataAccessKernelsService _dataAccessKernels;
     GarbageCollectorKernelsService _garbageCollectorKernels;
-    RenderingKernelsService _renderingKernels;
+    GeometryKernelsService _geometryKernels;
     EditKernelsService _editKernels;
     StatisticsKernelsService _statisticsKernels;
     TestKernelsService _testKernels;

@@ -8,8 +8,7 @@
 _Shader::_Shader(
     std::filesystem::path const& vertexPath,
     std::filesystem::path const& fragmentPath,
-    std::filesystem::path const& geometryPath,
-    std::optional<unsigned int> sharedVbo)
+    std::filesystem::path const& geometryPath /*, std::optional<unsigned int> sharedVbo*/)
 {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
@@ -44,7 +43,7 @@ _Shader::_Shader(
             gShaderFile.close();
             geometryCode = gShaderStream.str();
         }
-    } catch (std::ifstream::failure& ) {
+    } catch (std::ifstream::failure&) {
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
     const char* vShaderCode = vertexCode.c_str();
@@ -90,15 +89,6 @@ _Shader::_Shader(
     if (!geometryPath.empty()) {
         glDeleteShader(geometry);
     }
-
-    // Generate buffers and arrays
-    glGenVertexArrays(1, &_vao);
-    if (!sharedVbo.has_value()) {
-        glGenBuffers(1, &_vbo);
-    } else {
-        _vbo = sharedVbo.value();
-    }
-    glGenBuffers(1, &_ebo);
 }
 
 void _Shader::use()

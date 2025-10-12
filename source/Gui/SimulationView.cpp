@@ -8,11 +8,11 @@
 #include "Base/Resources.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
-#include "EngineInterface/RenderData.h"
 
 #include "AlienGui.h"
 #include "RenderPipeline.h"
 #include "RenderStep.h"
+#include "RenderStep2.h"
 #include "SimulationScrollbars.h"
 #include "Shader.h"
 #include "Viewport.h"
@@ -399,7 +399,6 @@ float SimulationView::getBrightness() const
 void SimulationView::setBrightness(float value)
 {
     _brightness = value;
-    // Metaballs shader doesn't use brightness parameter
 }
 
 float SimulationView::getContrast() const
@@ -410,7 +409,6 @@ float SimulationView::getContrast() const
 void SimulationView::setContrast(float value)
 {
     _contrast = value;
-    // Metaballs shader doesn't use contrast parameter
 }
 
 float SimulationView::getMotionBlur() const
@@ -421,41 +419,44 @@ float SimulationView::getMotionBlur() const
 void SimulationView::setMotionBlur(float value)
 {
     _motionBlur = value;
-    // Metaballs shader doesn't use motion blur parameter
 }
 
 void SimulationView::updateMotionBlur()
 {
-    // Metaballs shader doesn't use motion blur parameter
 }
 
 void SimulationView::setupRenderPipeline()
 {
     _renderPipeline = std::make_shared<_RenderPipeline>(_simulationFacade);
 
-    auto renderStep1 = _PointRenderStep::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
+    auto shader1 = std::make_shared<_Shader>(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader);
+    auto renderStep1 = _PointRenderStep::create(shader1, ScreenTarget());
     _renderPipeline->addStep(renderStep1);
 
-    auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
+    auto shader2 = std::make_shared<_Shader>(Const::LineVertexShader, Const::LineFragmentShader);
+    auto renderStep2 = _LineRenderStep::create(shader2, ScreenTarget(), renderStep1);
     _renderPipeline->addStep(renderStep2);
 
-    auto renderStep3 = _PostProcessingRenderStep::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader, std::vector<RenderStep>{renderStep2});
-    _renderPipeline->addStep(renderStep3);
+    //auto renderStep2 = _PostProcessingRenderStep::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader, std::vector<RenderStep>{renderStep1});
+    //_renderPipeline->addStep(renderStep2);
 
-    auto renderStep4 = _PostProcessingRenderStep::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader, std::vector<RenderStep>{renderStep3});
-    _renderPipeline->addStep(renderStep4);
+    //auto renderStep3 = _PostProcessingRenderStep::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader, std::vector<RenderStep>{renderStep2});
+    //_renderPipeline->addStep(renderStep3);
 
-    auto renderStep5 = _PostProcessingRenderStep::create(Const::FresnelVertexShader, Const::FresnelFragmentShader, std::vector<RenderStep>{renderStep4});
-    _renderPipeline->addStep(renderStep5);
+    //auto renderStep4 = _PostProcessingRenderStep::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader, std::vector<RenderStep>{renderStep3});
+    //_renderPipeline->addStep(renderStep4);
 
-    auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
-    _renderPipeline->addStep(renderStep6);
+    //auto renderStep5 = _PostProcessingRenderStep::create(Const::FresnelVertexShader, Const::FresnelFragmentShader, std::vector<RenderStep>{renderStep4});
+    //_renderPipeline->addStep(renderStep5);
 
-    auto renderStep7 = _PointRenderStep::createWithSharedVbo(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
-    _renderPipeline->addStep(renderStep7);
+    //auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
+    //_renderPipeline->addStep(renderStep6);
 
-    auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
-    _renderPipeline->addStep(renderStep8);
+    //auto renderStep7 = _PointRenderStep::createWithSharedVbo(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
+    //_renderPipeline->addStep(renderStep7);
+
+    //auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
+    //_renderPipeline->addStep(renderStep8);
 }
 
 void SimulationView::markReferenceDomain()

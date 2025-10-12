@@ -15,7 +15,7 @@ struct Objects;
 struct Creature;
 
 struct SimulationData;
-struct BufferData;
+struct CudaGeometryBuffers;
 class SelectionResult;
 struct CellTO;
 struct ClusterAccessTO;
@@ -33,8 +33,8 @@ using DataAccessKernelsService = std::shared_ptr<_DataAccessKernelsService>;
 class _GarbageCollectorKernelsService;
 using GarbageCollectorKernelsService = std::shared_ptr<_GarbageCollectorKernelsService>;
 
-class _RenderingKernelsService;
-using RenderingKernelsService = std::shared_ptr<_RenderingKernelsService>;
+class _GeometryKernelsService;
+using GeometryKernelsService = std::shared_ptr<_GeometryKernelsService>;
 
 class _EditKernelsService;
 using EditKernelsService = std::shared_ptr<_EditKernelsService>;

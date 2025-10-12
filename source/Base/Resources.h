@@ -25,6 +25,9 @@ namespace Const
     std::filesystem::path const ObjectForegroundVertexShader = ShaderPath / "ObjectForeground.vs";
     std::filesystem::path const ObjectForegroundFragmentShader = ShaderPath / "ObjectForeground.fs";
 
+    std::filesystem::path const LineVertexShader = ShaderPath / "Line.vs";
+    std::filesystem::path const LineFragmentShader = ShaderPath / "Line.fs";
+
     std::filesystem::path const BlurHorizontalVertexShader = ShaderPath / "BlurHorizontal.vs";
     std::filesystem::path const BlurHorizontalFragmentShader = ShaderPath / "BlurHorizontal.fs";
 

@@ -30,7 +30,7 @@ public:
      * Resizes buffers if necessary and fills it with data for rendering.
      * If the GPU is busy for a specified duration, the buffers will not be updated and std::nullopt will be returned.
      */
-    virtual std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(RenderBuffers const& buffers) = 0;
+    virtual std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers) = 0;
 
     virtual bool isSyncSimulationWithRendering() const = 0;
     virtual void setSyncSimulationWithRendering(bool value) = 0;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/RenderData.h"
+#include "EngineInterface/GeometryBuffers.h"
 #include "EngineInterface/SimulationFacade.h"
 
 #include "Definitions.h"
@@ -22,4 +22,5 @@ private:
     std::vector<RenderStep> _steps;
 
     NumRenderObjects _numObjects;
+    GeometryBuffers _geometryBuffers;
 };

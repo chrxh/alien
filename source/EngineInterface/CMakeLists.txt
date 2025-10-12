@@ -23,6 +23,8 @@ add_library(EngineInterface
     GenomeDescriptionInfoService.h
     GenomeDescriptionValidationService.cpp
     GenomeDescriptionValidationService.h
+    GeometryBuffers.cpp
+    GeometryBuffers.h
     Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp

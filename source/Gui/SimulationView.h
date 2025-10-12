@@ -6,7 +6,6 @@
 #include "Base/Definitions.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
-#include "EngineInterface/RenderData.h"
 
 #include "Definitions.h"
 
@@ -60,46 +59,6 @@ private:
 
     RenderPipeline _renderPipeline;
 
-    NumRenderObjects _numObjects;
-
-    // Shader data for background object rendering
-    Shader _objectBackgroundShader;
-    unsigned int _objectBackgroundTexture;
-    unsigned int _objectBackgroundFbo;
-
-    // Shader data for foreground object rendering
-    Shader _objectForegroundShader;
-    unsigned int _objectForegroundTexture;
-    unsigned int _objectForegroundFbo;
-
-    // Shader data for blur preprocessing
-    Shader _blurHorizontalShader;
-    Shader _blurVerticalShader;
-    unsigned int _blurHorizontalTexture;
-    unsigned int _blurHorizontalFbo;
-    unsigned int _blurVerticalTexture;
-    unsigned int _blurVerticalFbo;
-
-    // Shader data for metaballs post-processing
-    Shader _metaballsShader;
-    unsigned int _metaballsTexture;
-    unsigned int _metaballsFbo;
-
-    // Shader data for subsurface scattering post-processing (new separated shaders)
-    Shader _subsurfaceScatterShader;
-    unsigned int _subsurfaceScatterTexture;
-    unsigned int _subsurfaceScatterFbo;
-    
-    // Shader data for Fresnel effect post-processing
-    Shader _fresnelShader;
-    unsigned int _fresnelTexture;
-    unsigned int _fresnelFbo;
-    
-    // Shader data for merge post-processing
-    Shader _mergeShader;
-    unsigned int _mergeTexture;
-    unsigned int _mergeFbo;
-    
     // Screen background texture (dark blue background)
     unsigned int _screenBackgroundTexture;
 

@@ -4,8 +4,6 @@ add_library(EngineGpuKernels
     Array.cuh
     AttackerProcessor.cuh
     Base.cuh
-    BufferData.cu
-    BufferData.cuh
     CellConnectionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
@@ -14,11 +12,13 @@ add_library(EngineGpuKernels
     Constants.cuh
     ConstructorHelper.cuh
     ConstructorProcessor.cuh
-    CudaTOProvider.cu
-    CudaTOProvider.cuh
+    CudaGeometryBuffers.cu
+    CudaGeometryBuffers.cuh
     CudaMemoryManager.cuh
     CudaNumberGenerator.cuh
     CudaShapeGenerator.cuh
+    CudaTOProvider.cu
+    CudaTOProvider.cuh
     DataAccessKernels.cu
     DataAccessKernels.cuh
     DataAccessKernelsService.cu
@@ -43,6 +43,10 @@ add_library(EngineGpuKernels
     GeneratorProcessor.cuh
     Genome.cuh
     GenomeTO.cuh
+    GeometryKernels.cu
+    GeometryKernels.cuh
+    GeometryKernelsService.cu
+    GeometryKernelsService.cuh
     HashMap.cuh
     HashSet.cuh
     InjectorProcessor.cuh
@@ -65,10 +69,6 @@ add_library(EngineGpuKernels
     PreprocessedSimulationData.cuh
     RadiationProcessor.cuh
     ReconnectorProcessor.cuh
-    RenderingKernels.cu
-    RenderingKernels.cuh
-    RenderingKernelsService.cu
-    RenderingKernelsService.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
     SignalProcessor.cuh

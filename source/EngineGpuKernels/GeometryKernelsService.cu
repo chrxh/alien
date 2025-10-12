@@ -1,16 +1,30 @@
-﻿#include "RenderingKernelsService.cuh"
+﻿#include "GeometryKernelsService.cuh"
 
-#include "BufferData.cuh"
-#include "RenderingKernels.cuh"
+#include "EngineInterface/SettingsForSimulation.h"
 
-void _RenderingKernelsService::drawImage(
+#include "CudaGeometryBuffers.cuh"
+#include "GeometryKernels.cuh"
+
+_GeometryKernelsService::_GeometryKernelsService()
+{
+    auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.acquireMemory(1, _numLineIndices);
+}
+
+_GeometryKernelsService::~_GeometryKernelsService()
+{
+    auto& memoryManager = CudaMemoryManager::getInstance();
+    memoryManager.freeMemory(_numLineIndices);
+}
+
+void _GeometryKernelsService::drawImage(
     SettingsForSimulation const& settings,
     float2 rectUpperLeft,
     float2 rectLowerRight,
     int2 imageSize,
     float zoom,
     SimulationData data,
-    BufferData renderingData)
+    CudaGeometryBuffers renderingData)
 {
     //auto const& gpuSettings = settings.cudaSettings;
 
@@ -43,26 +57,42 @@ void _RenderingKernelsService::drawImage(
     //}
 }
 
-NumRenderObjects _RenderingKernelsService::getNumRenderObjects(SimulationData data)
+NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data)
 {
+    auto const& gpuSettings = settings.cudaSettings;
+
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
+    
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractNumLineIndices, data, _numLineIndices);
+    cudaDeviceSynchronize();
+    result.lineIndices = copyToHost(_numLineIndices);
+
     return result;
 }
 
-void _RenderingKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, BufferData& renderingData)
+void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData)
 {
     auto const& gpuSettings = settings.cudaSettings;
     
-    // Extract object data
-    CHECK_FOR_CUDA_ERROR(cudaMemset(renderingData.numVertices, 0, sizeof(uint64_t)));
-
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
     VertexData* mappedBuffer;
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedBuffer), &bufferSize, renderingData.vertexBuffer));
 
-    KERNEL_CALL(cudaExtractObjectData, data.worldSize, data.objects.cells, data.objects.particles, mappedBuffer, renderingData.numVertices);
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
+    unsigned int* mappedLineIndexBuffer;
+    size_t lineIndexBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
+
+    // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
+    KERNEL_CALL(cudaExtractObjectData, data, mappedBuffer);
+    
+    // Second kernel: Extract line indices from cell connections
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
 }
