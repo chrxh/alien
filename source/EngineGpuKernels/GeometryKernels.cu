@@ -824,38 +824,42 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
         
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
-        uint64_t hash = cell->id * 2654435761u;  // Knuth's multiplicative hash
-        hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
-        hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
-        hash = hash ^ (hash >> 16);
-        float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
-        objectData[index].zPos = normalizedHash * 0.4f - 0.2f;  // Range [-10, 10]
+        //if (cell->cellType == CellType_Structure) {
+            uint64_t hash = cell->id * 2654435761u;  // Knuth's multiplicative hash
+            hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
+            hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
+            hash = hash ^ (hash >> 16);
+            float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
+            objectData[index].zPos = normalizedHash * 0.4f - 0.2f;  // Range [-10, 10]
+        //} else {
+        //    objectData[index].zPos = toFloat(cell->nodeIndex % 20) / 20.0f;
+        //}
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;
     }
 
     // Process particles - each particle goes after all cells
-    auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-    auto numCells = data.objects.cells.getNumEntries();
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto const& particle = data.objects.particles.at(index);
-        if (!particle) {
-            continue;
-        }
+    //auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    //auto numCells = data.objects.cells.getNumEntries();
+    //for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
+    //    auto const& particle = data.objects.particles.at(index);
+    //    if (!particle) {
+    //        continue;
+    //    }
 
-        auto pos = particle->pos;
-        map.correctPosition(pos);
+    //    auto pos = particle->pos;
+    //    map.correctPosition(pos);
 
-        // Write particle data after all cells
-        auto bufferIndex = numCells + index;
-        objectData[bufferIndex].pos[0] = pos.x;
-        objectData[bufferIndex].pos[1] = pos.y;
-        objectData[bufferIndex].color[0] = 0.2f;
-        objectData[bufferIndex].color[1] = 0.2f;
-        objectData[bufferIndex].color[2] = 0.0f;
-        objectData[bufferIndex].zPos = 0.0f;  // Particles don't need z-position
-    }
+    //    // Write particle data after all cells
+    //    auto bufferIndex = numCells + index;
+    //    objectData[bufferIndex].pos[0] = pos.x;
+    //    objectData[bufferIndex].pos[1] = pos.y;
+    //    objectData[bufferIndex].color[0] = 0.2f;
+    //    objectData[bufferIndex].color[1] = 0.2f;
+    //    objectData[bufferIndex].color[2] = 0.0f;
+    //    objectData[bufferIndex].zPos = 0.0f;  // Particles don't need z-position
+    //}
 }
 
 __global__ void cudaExtractNumLineIndices(SimulationData data, uint64_t* numLineIndices)

@@ -64,7 +64,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     auto const& gpuSettings = settings.cudaSettings;
 
     NumRenderObjects result;
-    result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
+    result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
     
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractNumLineIndices, data, _numLineIndices);
