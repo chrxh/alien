@@ -10,6 +10,7 @@ GeometryBuffers _GeometryBuffers::create()
     glGenVertexArrays(1, &result->_vao);
     glGenBuffers(1, &result->_vbo);
     glGenBuffers(1, &result->_ebo);
+    glGenBuffers(1, &result->_tbo);
     return GeometryBuffers(result);
 }
 
@@ -25,5 +26,10 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
         glBindVertexArray(getVao());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getEbo());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_lineIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+    }
+    if (numRenderObjects.triangleIndices >= _triangleIndexBufferCapacity) {
+        _triangleIndexBufferCapacity = std::max(numRenderObjects.triangleIndices * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getTbo());
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_triangleIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
     }
 }

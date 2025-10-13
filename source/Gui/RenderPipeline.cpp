@@ -128,6 +128,9 @@ void _RenderPipeline::execute()
         if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(currentRenderStep)) {
             lineRenderStep->execute(_numObjects.lineIndices, _geometryBuffers, generalRenderInfo, _simulationFacade);
         }
+        if (auto triangleRenderStep = std::dynamic_pointer_cast<_TriangleRenderStep>(currentRenderStep)) {
+            triangleRenderStep->execute(_numObjects.triangleIndices, _geometryBuffers, generalRenderInfo, _simulationFacade);
+        }
         if (auto postProcessingRenderStep = std::dynamic_pointer_cast<_PostProcessingRenderStep>(currentRenderStep)) {
             postProcessingRenderStep->execute(generalRenderInfo, _simulationFacade);
         }

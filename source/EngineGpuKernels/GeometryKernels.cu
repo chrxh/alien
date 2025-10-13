@@ -893,3 +893,85 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
         }
     }
 }
+
+__global__ void cudaExtractNumTriangleIndices(SimulationData data, uint64_t* numTriangleIndices)
+{
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+
+        // Iterate through all pairs of connections to find triangles
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectedCell1 = cell->connections[i].cell;
+            
+            // Get next connection (wrapping around)
+            int nextI = (i + 1) % cell->numConnections;
+            if (nextI < cell->numConnections) {
+                auto connectedCell2 = cell->connections[nextI].cell;
+                
+                // Check if connectedCell1 and connectedCell2 are also connected to each other
+                bool areConnected = false;
+                for (int j = 0; j < connectedCell1->numConnections; ++j) {
+                    if (connectedCell1->connections[j].cell == connectedCell2) {
+                        areConnected = true;
+                        break;
+                    }
+                }
+                
+                // Only add triangle once (avoid duplicates by checking IDs)
+                if (areConnected && cell->id < connectedCell1->id && cell->id < connectedCell2->id) {
+                    if (Math::length(cell->pos - connectedCell1->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
+                        Math::length(cell->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
+                        Math::length(connectedCell1->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell1->color]) {
+                        alienAtomicAdd64(numTriangleIndices, uint64_t(3));
+                    }
+                }
+            }
+        }
+    }
+}
+
+__global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices)
+{
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        uint64_t cellIndex = cell->tempValue.as_uint64;
+
+        // Iterate through all pairs of connections to find triangles
+        for (int i = 0; i < cell->numConnections; ++i) {
+            auto connectedCell1 = cell->connections[i].cell;
+            
+            // Get next connection (wrapping around)
+            int nextI = (i + 1) % cell->numConnections;
+            if (nextI < cell->numConnections) {
+                auto connectedCell2 = cell->connections[nextI].cell;
+                
+                // Check if connectedCell1 and connectedCell2 are also connected to each other
+                bool areConnected = false;
+                for (int j = 0; j < connectedCell1->numConnections; ++j) {
+                    if (connectedCell1->connections[j].cell == connectedCell2) {
+                        areConnected = true;
+                        break;
+                    }
+                }
+                
+                // Only add triangle once (avoid duplicates by checking IDs)
+                if (areConnected && cell->id < connectedCell1->id && cell->id < connectedCell2->id) {
+                    if (Math::length(cell->pos - connectedCell1->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
+                        Math::length(cell->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
+                        Math::length(connectedCell1->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell1->color]) {
+                        uint64_t connectedIndex1 = connectedCell1->tempValue.as_uint64;
+                        uint64_t connectedIndex2 = connectedCell2->tempValue.as_uint64;
+                        uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
+                        triangleIndices[triangleIndex] = static_cast<unsigned int>(cellIndex);
+                        triangleIndices[triangleIndex + 1] = static_cast<unsigned int>(connectedIndex1);
+                        triangleIndices[triangleIndex + 2] = static_cast<unsigned int>(connectedIndex2);
+                    }
+                }
+            }
+        }
+    }
+}

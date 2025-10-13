@@ -33,4 +33,9 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
         unregisterBufferResource(lineIndexBuffer);
     }
     lineIndexBuffer = registerBufferResource(buffers->getEbo());
+
+    if (triangleIndexBuffer != nullptr) {
+        unregisterBufferResource(triangleIndexBuffer);
+    }
+    triangleIndexBuffer = registerBufferResource(buffers->getTbo());
 }

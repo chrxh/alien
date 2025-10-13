@@ -202,10 +202,13 @@ void SimulationView::setupRenderPipeline()
     auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader));
     _renderPipeline->addStep(step1);
 
-    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader), {step1});
+    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), {step1});
+    _renderPipeline->addStep(step1b);
+
+    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader), {step1b});
     _renderPipeline->addStep(step2);
 
-    auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1, step2});
+    auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1b, step2});
     step3->setUniform("mode", 1);
     _renderPipeline->addStep(step3);
 

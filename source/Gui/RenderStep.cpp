@@ -160,6 +160,47 @@ _LineRenderStep::_LineRenderStep(Shader const& shader, std::optional<RenderTarge
 {
 }
 
+TriangleRenderStep _TriangleRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+{
+    return TriangleRenderStep(new _TriangleRenderStep(shader, target, dependentSteps));
+}
+
+TriangleRenderStep _TriangleRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+{
+    return TriangleRenderStep(new _TriangleRenderStep(shader, std::nullopt, dependentSteps));
+}
+
+void _TriangleRenderStep::execute(
+    uint64_t const& numTriangles,
+    GeometryBuffers const& geometryBuffers,
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade)
+{
+    auto viewSize = Viewport::get().getViewSize();
+
+    setFramebuffer(renderInfo);
+    glViewport(0, 0, viewSize.x, viewSize.y);
+    
+    // Enable blending for anti-aliasing
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    
+    activateShader(simulationFacade);
+    
+    // Draw triangles
+    glBindVertexArray(geometryBuffers->getVao());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryBuffers->getTbo());
+    glDrawElements(GL_TRIANGLES, toInt(numTriangles), GL_UNSIGNED_INT, 0);
+    
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_TriangleRenderStep::_TriangleRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
+    : _RenderStep(shader, target, dependentSteps)
+{
+}
+
 PostProcessingRenderStep _PostProcessingRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
 {
     return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, target, dependentSteps));

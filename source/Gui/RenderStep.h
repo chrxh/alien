@@ -34,6 +34,7 @@ class _RenderStep
     friend _PointRenderStep;
     friend _PostProcessingRenderStep;
     friend _LineRenderStep;
+    friend _TriangleRenderStep;
 
 public:
     virtual ~_RenderStep() = default;
@@ -89,6 +90,21 @@ protected:
 
 private:
     _LineRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
+};
+
+class _TriangleRenderStep : public _RenderStep
+{
+    friend _RenderPipeline;
+
+public:
+    static TriangleRenderStep create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps = {});
+    static TriangleRenderStep create(Shader const& shader, std::vector<RenderStep> const& dependentSteps = {});
+
+protected:
+    void execute(uint64_t const& numTriangles, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+
+private:
+    _TriangleRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
 };
 
 class _PostProcessingRenderStep : public _RenderStep
