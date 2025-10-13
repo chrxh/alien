@@ -8,9 +8,6 @@ out vec3 fragColor;
 
 void main()
 {
-    // Calculate average color of the three vertices
-    vec3 avgColor = (vertexColor[0] + vertexColor[1] + vertexColor[2]) / 3.0;
-    
     // Create 3D positions for lighting calculation
     vec3 pos0 = vec3(gl_in[0].gl_Position.xy, vertexZPos[0]);
     vec3 pos1 = vec3(gl_in[1].gl_Position.xy, vertexZPos[1]);
@@ -22,21 +19,18 @@ void main()
     vec3 normal = normalize(cross(edge1, edge2));
     
     // Light direction from front (camera looks at -Z, so light from +Z)
-    vec3 lightDir = normalize(vec3(-1.0, -1.0, -1.0));
+    vec3 lightDir = vec3(0.0, 0.0, 1.0);
     
     // Calculate lighting (dot product of normal and light direction)
     // Clamp to [0, 1] range
     float lightIntensity = max(0.0, dot(normal, lightDir));
     
-    // Apply lighting: blend with white color by up to 20% based on light intensity
-    vec3 litColor = mix(avgColor, vec3(1.0, 1.0, 0.0), lightIntensity * 0.2);
-    //vec3 litColor = clamp(avgColor + vec3(1.0) * lightIntensity, 0.0, 1.0);
-    
-    // Output the triangle with the lit color
+    // Output the triangle with per-vertex lit colors (will be interpolated by GPU)
     for (int i = 0; i < 3; i++)
     {
         gl_Position = gl_in[i].gl_Position;
-        fragColor = litColor;
+        // Apply lighting to each vertex color individually
+        fragColor = mix(vertexColor[i], vec3(1.0, 1.0, 1.0), lightIntensity * 0.2);
         EmitVertex();
     }
     EndPrimitive();
