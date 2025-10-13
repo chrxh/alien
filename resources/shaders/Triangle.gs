@@ -29,7 +29,7 @@ void main()
     float lightIntensity = max(0.0, dot(normal, lightDir));
     
     // Apply lighting: blend with white color by up to 20% based on light intensity
-    vec3 litColor = mix(avgColor, vec3(1.0), lightIntensity * 0.5);
+    vec3 litColor = mix(avgColor, vec3(1.0, 1.0, 0.0), lightIntensity * 0.2);
     //vec3 litColor = clamp(avgColor + vec3(1.0) * lightIntensity, 0.0, 1.0);
     
     // Output the triangle with the lit color

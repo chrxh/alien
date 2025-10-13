@@ -815,22 +815,28 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
         }
         }
         
+        auto luminance = (cell->energy + 800.0f) / 1000.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
+        if (cell->selected == 1) {
+            luminance = (luminance + 0.2f) * 1.5f;
+        }
+        //luminance = min(1.0f, luminance);
+
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
-        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
-        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
-        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f;
-        
+        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + luminance / 10.0f;
+        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + luminance / 10.0f;
+        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + luminance / 10.0f;
+
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
         //if (cell->cellType == CellType_Structure) {
-            uint64_t hash = cell->id * 2654435761u;  // Knuth's multiplicative hash
-            hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
-            hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
-            hash = hash ^ (hash >> 16);
-            float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
-            objectData[index].zPos = normalizedHash * 0.4f - 0.2f;  // Range [-10, 10]
+        uint64_t hash = cell->id * 2654435761u;  // Knuth's multiplicative hash
+        hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
+        hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
+        hash = hash ^ (hash >> 16);
+        float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
+        objectData[index].zPos = normalizedHash * 0.4f - 0.2f;  // Range [-10, 10]
         //} else {
         //    objectData[index].zPos = toFloat(cell->nodeIndex % 20) / 20.0f;
         //}

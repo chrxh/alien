@@ -86,6 +86,40 @@ void SimulationView::draw()
             markReferenceDomain();
         }
 
+        // Draw overlay if activated
+        if (_overlay) {
+            ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+            auto parameters = _simulationFacade->getSimulationParameters();
+            for (auto const& overlayElement : _overlay->elements) {
+                if (_cellDetailOverlayActive && overlayElement.cell) {
+                    {
+                        auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
+                        auto viewPos =
+                            Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
+                        auto text = Const::CellTypeStrings.at(overlayElement.cellType);
+                        drawList->AddText(
+                            StyleRepository::get().getMediumFont(),
+                            fontSizeUnit,
+                            {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
+                            Const::CellTypeOverlayShadowColor,
+                            text.c_str());
+                        drawList->AddText(
+                            StyleRepository::get().getMediumFont(),
+                            fontSizeUnit,
+                            {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
+                            Const::CellTypeOverlayColor,
+                            text.c_str());
+                    }
+                }
+
+                if (overlayElement.selected == 1) {
+                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
+                    if (Viewport::get().isVisible(viewPos)) {
+                        drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                    }
+                }
+            }
+        }
     } else {
         glClearColor(0, 0, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
