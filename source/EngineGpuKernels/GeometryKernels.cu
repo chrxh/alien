@@ -815,7 +815,7 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
         }
         }
         
-        auto luminance = (cell->energy + 400.0f) / 500.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
+        auto luminance = (cell->energy + 300.0f) / 500.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
         if (cell->selected == 1) {
             luminance = (luminance + 0.1f) * 1.3f;
         }

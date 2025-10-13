@@ -12,7 +12,7 @@ void main()
     vec2 texelSize = 1.0 / viewportSize;
     vec4 result = vec4(0.0);
     float totalWeight = 0.0;
-    float blurRadius = zoom / 12.0;
+    float blurRadius = zoom / 24.0;
     
     // Dynamic blur based on radius
     int radius = max(1, int(ceil(blurRadius)));
