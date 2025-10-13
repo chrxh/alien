@@ -199,10 +199,12 @@ void SimulationView::setupRenderPipeline()
 {
     _renderPipeline = std::make_shared<_RenderPipeline>(_simulationFacade);
 
-    auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader));
+    auto sharedTarget = _TextureTarget::create();
+    
+    auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
     _renderPipeline->addStep(step1);
 
-    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), {step1});
+    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {step1});
     _renderPipeline->addStep(step1b);
 
     auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader), {step1b});
