@@ -15,7 +15,7 @@ struct VertexData
 {
     float pos[2];    // x, y position
     float color[3];  // r, g, b color
-    float padding;
+    float zPos;      // z position for lighting (was padding)
 };
 
 class _GeometryBuffers

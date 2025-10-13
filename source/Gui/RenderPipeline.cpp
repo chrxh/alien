@@ -26,6 +26,10 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
     glEnableVertexAttribArray(1);
     
+    // Z-position (1 float) - used for lighting in triangle rendering
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
     // Bind EBO (will be filled by CUDA later)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 }
