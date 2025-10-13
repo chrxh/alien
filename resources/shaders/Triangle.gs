@@ -22,14 +22,15 @@ void main()
     vec3 normal = normalize(cross(edge1, edge2));
     
     // Light direction from front (camera looks at -Z, so light from +Z)
-    vec3 lightDir = vec3(0.0, 0.0, 1.0);
+    vec3 lightDir = normalize(vec3(-1.0, -1.0, -1.0));
     
     // Calculate lighting (dot product of normal and light direction)
     // Clamp to [0, 1] range
     float lightIntensity = max(0.0, dot(normal, lightDir));
     
     // Apply lighting: blend with white color by up to 20% based on light intensity
-    vec3 litColor = mix(avgColor, vec3(1.0, 1.0, 1.0), lightIntensity * 0.2);
+    vec3 litColor = mix(avgColor, vec3(1.0), lightIntensity * 0.5);
+    //vec3 litColor = clamp(avgColor + vec3(1.0) * lightIntensity, 0.0, 1.0);
     
     // Output the triangle with the lit color
     for (int i = 0; i < 3; i++)

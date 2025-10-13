@@ -829,7 +829,7 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
         hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
         hash = hash ^ (hash >> 16);
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
-        objectData[index].zPos = normalizedHash * 20.0f - 10.0f;  // Range [-10, 10]
+        objectData[index].zPos = normalizedHash * 0.4f - 0.2f;  // Range [-10, 10]
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;
