@@ -201,28 +201,28 @@ void SimulationView::setupRenderPipeline()
 
     auto sharedTarget = _TextureTarget::create();
     
-    auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
-    _renderPipeline->addStep(step1);
+    //auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
+    //_renderPipeline->addStep(step1);
 
-    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {step1});
+    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {/*step1*/});
     _renderPipeline->addStep(step1b);
 
-    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader), {step1b});
+    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader));
     _renderPipeline->addStep(step2);
 
     auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1b, step2});
     step3->setUniform("mode", 1);
     _renderPipeline->addStep(step3);
 
-    auto step4 =
-        _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step3});
-    _renderPipeline->addStep(step4);
+    //auto step4 =
+    //    _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step3});
+    //_renderPipeline->addStep(step4);
 
-    auto step5 = _PostProcessingRenderStep::create(_Shader::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader), {step4});
-    _renderPipeline->addStep(step5);
+    //auto step5 = _PostProcessingRenderStep::create(_Shader::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader), {step4});
+    //_renderPipeline->addStep(step5);
 
-    auto step6 = _PostProcessingRenderStep::create(_Shader::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader), {step5});
-    _renderPipeline->addStep(step6);
+    //auto step6 = _PostProcessingRenderStep::create(_Shader::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader), {step5});
+    //_renderPipeline->addStep(step6);
 
     //auto shader7 = _Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader);
     //auto renderStep7 = _PostProcessingRenderStep::create(shader7, std::vector<RenderStep>{renderStep6});

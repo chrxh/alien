@@ -35,7 +35,12 @@ void _RenderStep::setTarget(RenderTarget const& target)
     _target = target;
 }
 
-void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
+void _RenderStep::setClearBackground(bool value)
+{
+    _clearBackground = value;
+}
+
+void _RenderStep::prepareRendering(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
     auto worldSize = simulationFacade->getWorldSize();
     auto worldRect = Viewport::get().getVisibleWorldRect();
@@ -54,15 +59,20 @@ void _RenderStep::activateShader(SimulationFacade const& simulationFacade)
             _shader->setInt(key, std::get<int>(value));
         }
     }
-}
 
-void _RenderStep::setFramebuffer(GeneralRenderInfo const& renderInfo)
-{
     if (std::holds_alternative<TextureTarget>(_target.value())) {
         auto textureTarget = std::get<TextureTarget>(_target.value());
         glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
     } else {
         glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
+    }
+
+    glViewport(0, 0, viewSize.x, viewSize.y);
+
+    if (_clearBackground) {
+        // Clear with black background
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
 }
 
@@ -82,24 +92,15 @@ void _PointRenderStep::execute(
     GeneralRenderInfo const& renderInfo,
     SimulationFacade const& simulationFacade)
 {
-    auto viewSize = Viewport::get().getViewSize();
-
-    setFramebuffer(renderInfo);
-    glViewport(0, 0, viewSize.x, viewSize.y);
-
-    // Clear with black background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Enable blending for anti-aliasing
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    prepareRendering(renderInfo, simulationFacade);
 
     // Enable point sprites
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    activateShader(simulationFacade);
+    // Enable blending for anti-aliasing
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     // Draw points
     glBindVertexArray(geometryBuffers->getVao());
@@ -130,24 +131,15 @@ void _LineRenderStep::execute(
     GeneralRenderInfo const& renderInfo,
     SimulationFacade const& simulationFacade)
 {
-    auto viewSize = Viewport::get().getViewSize();
-    auto zoom = Viewport::get().getZoomFactor();
-
-    setFramebuffer(renderInfo);
-    glViewport(0, 0, viewSize.x, viewSize.y);
+    prepareRendering(renderInfo, simulationFacade);
     
-    // Clear with black background
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    
-    activateShader(simulationFacade);
-    
+
     // Draw lines
     glBindVertexArray(geometryBuffers->getVao());
+    auto zoom = Viewport::get().getZoomFactor();
     glLineWidth(zoom * 0.1f);
     glDrawElements(GL_LINES, toInt(numLines), GL_UNSIGNED_INT, 0);
     
@@ -176,17 +168,12 @@ void _TriangleRenderStep::execute(
     GeneralRenderInfo const& renderInfo,
     SimulationFacade const& simulationFacade)
 {
-    auto viewSize = Viewport::get().getViewSize();
+    prepareRendering(renderInfo, simulationFacade);
 
-    setFramebuffer(renderInfo);
-    glViewport(0, 0, viewSize.x, viewSize.y);
-    
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    
-    activateShader(simulationFacade);
-    
+    glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, GL_ONE);
+
     // Draw triangles
     glBindVertexArray(geometryBuffers->getVao());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryBuffers->getTbo());
@@ -213,36 +200,28 @@ PostProcessingRenderStep _PostProcessingRenderStep::create(Shader const& shader,
 
 void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
-        activateShader(simulationFacade);
-    
-        glBindVertexArray(_vao);
-    
-        // Input
-        auto numDependentSteps = _dependentSteps.size();
-        CHECK(numDependentSteps <= 2);
-        if (numDependentSteps >= 1) {
-            auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(0)->getTarget().value());
+    prepareRendering(renderInfo, simulationFacade);
 
-            _shader->setInt("inputTexture1", 0);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
-        }
-        if (numDependentSteps >= 2) {
-            auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(1)->getTarget().value());
-
-            _shader->setInt("inputTexture2", 1);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
-        }
+    glBindVertexArray(_vao);
     
-        // Output
-        if (std::holds_alternative<TextureTarget>(_target.value())) {
-            auto textureTarget = std::get<TextureTarget>(_target.value());
-            glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
-        } else {
-            glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
-        }
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    auto numDependentSteps = _dependentSteps.size();
+    CHECK(numDependentSteps <= 2);
+    if (numDependentSteps >= 1) {
+        auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(0)->getTarget().value());
+
+        _shader->setInt("inputTexture1", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
+    }
+    if (numDependentSteps >= 2) {
+        auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(1)->getTarget().value());
+
+        _shader->setInt("inputTexture2", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
+    }
+    
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 _PostProcessingRenderStep::_PostProcessingRenderStep(

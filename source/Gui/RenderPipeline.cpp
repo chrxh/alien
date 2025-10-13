@@ -37,17 +37,15 @@ void _RenderPipeline::addStep(RenderStep const& step)
 
 void _RenderPipeline::finalize()
 {
-    // Start with point renderer
-    RenderStep startRenderStep;
+    std::vector<RenderStep> stepsWithoutDependencies;
     for (auto const& step : _steps) {
-        if (std::dynamic_pointer_cast<_PointRenderStep>(step)) {
-            startRenderStep = step;
-            break;
+        if (step->getDependentSteps().empty()) {
+            stepsWithoutDependencies.emplace_back(step);
         }
     }
-    CHECK(startRenderStep);
+    CHECK(!stepsWithoutDependencies.empty());
 
-    auto currentRenderStep = startRenderStep;
+    auto currentRenderStep = stepsWithoutDependencies.front();
     std::set<RenderStep> finishedSteps;
     do {
         finishedSteps.insert(currentRenderStep);
@@ -62,6 +60,18 @@ void _RenderPipeline::finalize()
         }
         currentRenderStep = nextRenderStep;
     } while (currentRenderStep);
+
+    std::set<RenderTarget> initialTargets;
+    for (auto const& step : stepsWithoutDependencies) {
+        initialTargets.insert(step->getTarget().value());
+    }
+
+    for (auto const& step : stepsWithoutDependencies) {
+        if (initialTargets.contains(step->getTarget().value())) {
+            step->setClearBackground(true);
+            initialTargets.erase(step->getTarget().value());
+        }
+    }
 }
 
 void _RenderPipeline::resize(IntVector2D const& size)

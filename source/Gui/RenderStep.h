@@ -19,6 +19,8 @@ private:
 };
 struct ScreenTarget
 {
+    auto operator<=>(ScreenTarget const&) const = default;
+
     // FBO is automatically determined
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
@@ -52,11 +54,12 @@ protected:
 
     std::optional<RenderTarget> const& getTarget() const;
     void setTarget(RenderTarget const& target);
-    void activateShader(SimulationFacade const& simulationFacade);
-    void setFramebuffer(GeneralRenderInfo const& renderInfo);
+    void setClearBackground(bool value);
+    void prepareRendering(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
     Shader _shader;
     std::optional<RenderTarget> _target;
+    bool _clearBackground = false;
     std::vector<RenderStep> _dependentSteps;
 
     std::map<std::string, std::variant<int>> _uniformValues;
