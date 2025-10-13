@@ -46,6 +46,7 @@ void _RenderStep::prepareRendering(GeneralRenderInfo const& renderInfo, Simulati
     auto worldRect = Viewport::get().getVisibleWorldRect();
     auto viewSize = Viewport::get().getViewSize();
     auto zoom = Viewport::get().getZoomFactor();
+    //auto timestep = simulationFacade->getCurrentTimestep();
 
     _shader->use();
     _shader->setFloat("zoom", zoom);
@@ -53,10 +54,14 @@ void _RenderStep::prepareRendering(GeneralRenderInfo const& renderInfo, Simulati
     _shader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
     _shader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
     _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+    //_shader->setFloat("lightAngle", toFloat(timestep % 10000) / 10000.0f * 360.0f);
 
     for (auto const& [key, value] : _uniformValues) {
         if (std::holds_alternative<int>(value)) {
             _shader->setInt(key, std::get<int>(value));
+        }
+        if (std::holds_alternative<float>(value)) {
+            _shader->setFloat(key, std::get<float>(value));
         }
     }
 

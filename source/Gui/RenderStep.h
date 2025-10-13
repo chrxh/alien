@@ -62,7 +62,7 @@ protected:
     bool _clearBackground = false;
     std::vector<RenderStep> _dependentSteps;
 
-    std::map<std::string, std::variant<int>> _uniformValues;
+    std::map<std::string, std::variant<int, float>> _uniformValues;
 };
 
 class _PointRenderStep : public _RenderStep

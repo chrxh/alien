@@ -6,6 +6,10 @@ in vec3 vertexColor[];
 in float vertexZPos[];
 out vec3 fragColor;
 
+//uniform float lightAngle;
+
+#define PI 3.1415926538
+
 void main()
 {
     // Create 3D positions for lighting calculation
@@ -19,7 +23,8 @@ void main()
     vec3 normal = normalize(cross(edge1, edge2));
     
     // Light direction from front (camera looks at -Z, so light from +Z)
-    vec3 lightDir = vec3(0.0, 0.0, 1.0);
+//    vec3 lightDir = normalize(vec3(sin(lightAngle / 180.0 * PI), cos(lightAngle / 180.0 * PI), -1.0));
+    vec3 lightDir = normalize(vec3(1.0, 1.0, -1.0));
     
     // Calculate lighting (dot product of normal and light direction)
     // Clamp to [0, 1] range
@@ -30,7 +35,8 @@ void main()
     {
         gl_Position = gl_in[i].gl_Position;
         // Apply lighting to each vertex color individually
-        fragColor = mix(vertexColor[i], vec3(1.0, 1.0, 1.0), lightIntensity * 0.2);
+        //fragColor = mix(vertexColor[i], vec3(1.0, 1.0, 0.0), lightIntensity * 0.2);
+        fragColor = vertexColor[i] * (0.8 + lightIntensity * 0.2);
         EmitVertex();
     }
     EndPrimitive();

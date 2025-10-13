@@ -20,5 +20,5 @@ void main()
     vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
     ndc.y = -ndc.y; // Flip Y coordinate
     gl_Position = vec4(ndc, 0.0, 1.0);
-    gl_PointSize = radius * 0.3;
+    gl_PointSize = radius * 0.4;
 }
