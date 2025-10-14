@@ -244,12 +244,12 @@ void SimulationView::setupRenderPipeline()
     auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader));
     _renderPipeline->addStep(step2);
 
-    auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1b, step2});
-    step3->setUniform("mode", 1);
-    _renderPipeline->addStep(step3);
+    //auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1b, step2});
+    //step3->setUniform("mode", 1);
+    //_renderPipeline->addStep(step3);
 
     auto step4 =
-        _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step3});
+        _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step1b});
     _renderPipeline->addStep(step4);
 
     auto step5 = _PostProcessingRenderStep::create(_Shader::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader), {step4});
@@ -263,7 +263,7 @@ void SimulationView::setupRenderPipeline()
     _renderPipeline->addStep(step7);
 
     auto step8 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step7, step2});
-    step8->setUniform("mode", 0);
+    step8->setUniform("mode", 1);
     _renderPipeline->addStep(step8);
 
     //auto step7 =

@@ -48,5 +48,4 @@ __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUp
 __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectData);
 __global__ void cudaExtractNumLineIndices(SimulationData data, uint64_t* numLineIndices);
 __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices);
-__global__ void cudaExtractNumTriangleIndices(SimulationData data, uint64_t* numTriangleIndices);
 __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices);

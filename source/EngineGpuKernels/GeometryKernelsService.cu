@@ -72,7 +72,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     result.lineIndices = copyToHost(_numLineIndices);
 
     setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractNumTriangleIndices, data, _numTriangleIndices);
+    KERNEL_CALL(cudaExtractTriangleIndices, data, nullptr, _numTriangleIndices);
     cudaDeviceSynchronize();
     result.triangleIndices = copyToHost(_numTriangleIndices);
 

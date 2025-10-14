@@ -830,16 +830,12 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
 
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
-        //if (cell->cellType == CellType_Structure) {
         uint64_t hash = cell->id * 2654435761u;  // Knuth's multiplicative hash
         hash = (hash ^ (hash >> 16)) * 0x85ebca6b;
         hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
         hash = hash ^ (hash >> 16);
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         objectData[index].zPos = normalizedHash * 0.4f - 0.2f;  // Range [-10, 10]
-        //} else {
-        //    objectData[index].zPos = toFloat(cell->nodeIndex % 20) / 20.0f;
-        //}
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;
@@ -914,83 +910,57 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
     }
 }
 
-__global__ void cudaExtractNumTriangleIndices(SimulationData data, uint64_t* numTriangleIndices)
-{
-    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& cell = data.objects.cells.at(index);
-
-        // Iterate through all pairs of connections to find triangles
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectedCell1 = cell->connections[i].cell;
-            
-            // Get next connection (wrapping around)
-            int nextI = (i + 1) % cell->numConnections;
-            if (nextI < cell->numConnections) {
-                auto connectedCell2 = cell->connections[nextI].cell;
-                
-                // Check if connectedCell1 and connectedCell2 are also connected to each other
-                bool areConnected = false;
-                for (int j = 0; j < connectedCell1->numConnections; ++j) {
-                    if (connectedCell1->connections[j].cell == connectedCell2) {
-                        areConnected = true;
-                        break;
-                    }
-                }
-                
-                // Only add triangle once (avoid duplicates by checking IDs)
-                if (areConnected && cell->id < connectedCell1->id && cell->id < connectedCell2->id) {
-                    if (Math::length(cell->pos - connectedCell1->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
-                        Math::length(cell->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
-                        Math::length(connectedCell1->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell1->color]) {
-                        alienAtomicAdd64(numTriangleIndices, uint64_t(3));
-                    }
-                }
-            }
-        }
-    }
-}
-
 __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
+    auto addTriangle = [&](Cell* cell, uint64_t cellIndex, Cell* connectedCell, Cell* prevConnectedCell) {
+        // Only add triangle once (avoid duplicates by checking ids)
+        if (cell->id < connectedCell->id && cell->id < prevConnectedCell->id) {
+            if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]
+                && Math::length(cell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]
+                && Math::length(connectedCell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell->color]) {
+                uint64_t connectedIndex1 = connectedCell->tempValue.as_uint64;
+                uint64_t connectedIndex2 = prevConnectedCell->tempValue.as_uint64;
+                uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
+                if (triangleIndices != nullptr) {
+                    triangleIndices[triangleIndex] = static_cast<unsigned int>(cellIndex);
+                    triangleIndices[triangleIndex + 1] = static_cast<unsigned int>(connectedIndex1);
+                    triangleIndices[triangleIndex + 2] = static_cast<unsigned int>(connectedIndex2);
+                }
+            }
+        }
+    };
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        uint64_t cellIndex = cell->tempValue.as_uint64;
+        if (cell->numConnections == 0) {
+            continue;
+        }
+        bool first = true;
+        int backIndices[MAX_CELL_BONDS];
+        for (int i = 0, numConnections = cell->numConnections; i < numConnections + 1; ++i) {
+            auto connectionIndex = i % numConnections;
+            auto const& connectedCell = cell->connections[connectionIndex].cell;
+            auto backIndex = connectedCell->getConnectionIndex(cell);
+            backIndices[connectionIndex] = backIndex;
+            if (first) {
+                first = false;
+                continue;
+            }
+            auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
+            auto const& prevConnectedCell = cell->connections[prevIndex].cell;
+            auto prevBackIndex = backIndices[prevIndex];
 
-        // Iterate through all pairs of connections to find triangles
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectedCell1 = cell->connections[i].cell;
-            
-            // Get next connection (wrapping around)
-            int nextI = (i + 1) % cell->numConnections;
-            if (nextI < cell->numConnections) {
-                auto connectedCell2 = cell->connections[nextI].cell;
-                
-                // Check if connectedCell1 and connectedCell2 are also connected to each other
-                bool areConnected = false;
-                for (int j = 0; j < connectedCell1->numConnections; ++j) {
-                    if (connectedCell1->connections[j].cell == connectedCell2) {
-                        areConnected = true;
-                        break;
-                    }
-                }
-                
-                // Only add triangle once (avoid duplicates by checking IDs)
-                if (areConnected && cell->id < connectedCell1->id && cell->id < connectedCell2->id) {
-                    if (Math::length(cell->pos - connectedCell1->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
-                        Math::length(cell->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color] &&
-                        Math::length(connectedCell1->pos - connectedCell2->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell1->color]) {
-                        uint64_t connectedIndex1 = connectedCell1->tempValue.as_uint64;
-                        uint64_t connectedIndex2 = connectedCell2->tempValue.as_uint64;
-                        uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
-                        triangleIndices[triangleIndex] = static_cast<unsigned int>(cellIndex);
-                        triangleIndices[triangleIndex + 1] = static_cast<unsigned int>(connectedIndex1);
-                        triangleIndices[triangleIndex + 2] = static_cast<unsigned int>(connectedIndex2);
-                    }
-                }
+            // Triangle?
+            if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == connectedCell) {
+                addTriangle(cell, index, prevConnectedCell, connectedCell);
+            }
+
+            // Rectangle?
+            auto fourthCell = connectedCell->getConnectedCell(backIndex + 1);
+            if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == fourthCell) {
+                addTriangle(cell, index, connectedCell, fourthCell);
+                addTriangle(cell, index, fourthCell, prevConnectedCell);
             }
         }
     }
