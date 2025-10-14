@@ -4,6 +4,6 @@ out vec4 FragColor;
 
 void main()
 {
-    // Use the lit color from geometry shader
+    // Use the color from vertex shader (includes lighting)
     FragColor = vec4(fragColor, 1.0);
 }

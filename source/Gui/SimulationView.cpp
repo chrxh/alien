@@ -235,7 +235,7 @@ void SimulationView::setupRenderPipeline()
 
     auto sharedTarget = _TextureTarget::create();
     
-    auto step1a = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader, Const::LineGeometryShader), sharedTarget);
+    auto step1a = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
     _renderPipeline->addStep(step1a);
 
     auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {step1a});

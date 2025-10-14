@@ -27,7 +27,6 @@ namespace Const
 
     std::filesystem::path const LineVertexShader = ShaderPath / "Line.vs";
     std::filesystem::path const LineFragmentShader = ShaderPath / "Line.fs";
-    std::filesystem::path const LineGeometryShader = ShaderPath / "Line.gs";
 
     std::filesystem::path const TriangleVertexShader = ShaderPath / "Triangle.vs";
     std::filesystem::path const TriangleFragmentShader = ShaderPath / "Triangle.fs";
