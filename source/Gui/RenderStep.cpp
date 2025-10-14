@@ -142,10 +142,8 @@ void _LineRenderStep::execute(
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-    // Draw lines
+    // Draw lines (geometry shader will convert to quads with proper width)
     glBindVertexArray(geometryBuffers->getVaoForPointsAndLines());
-    auto zoom = Viewport::get().getZoomFactor();
-    glLineWidth(zoom * 0.1f);
     glDrawElements(GL_LINES, toInt(numLines), GL_UNSIGNED_INT, 0);
     
     // Disable blending
