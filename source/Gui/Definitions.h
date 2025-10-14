@@ -164,6 +164,9 @@ using PointRenderStep = std::shared_ptr<_PointRenderStep>;
 class _LineRenderStep;
 using LineRenderStep = std::shared_ptr<_LineRenderStep>;
 
+class _TriangleRenderStep;
+using TriangleRenderStep = std::shared_ptr<_TriangleRenderStep>;
+
 class _PostProcessingRenderStep;
 using PostProcessingRenderStep = std::shared_ptr<_PostProcessingRenderStep>;
 

@@ -9,12 +9,14 @@ _GeometryKernelsService::_GeometryKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _numLineIndices);
+    memoryManager.acquireMemory(1, _numTriangleIndices);
 }
 
 _GeometryKernelsService::~_GeometryKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_numLineIndices);
+    memoryManager.freeMemory(_numTriangleIndices);
 }
 
 void _GeometryKernelsService::drawImage(
@@ -62,12 +64,17 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     auto const& gpuSettings = settings.cudaSettings;
 
     NumRenderObjects result;
-    result.vertices = data.objects.cells.getNumEntries_host() + data.objects.particles.getNumEntries_host();
+    result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
     
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractNumLineIndices, data, _numLineIndices);
+    KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
     cudaDeviceSynchronize();
     result.lineIndices = copyToHost(_numLineIndices);
+
+    setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractTriangleIndices, data, nullptr, _numTriangleIndices);
+    cudaDeviceSynchronize();
+    result.triangleIndices = copyToHost(_numTriangleIndices);
 
     return result;
 }
@@ -86,6 +93,11 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     size_t lineIndexBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
 
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.triangleIndexBuffer));
+    unsigned int* mappedTriangleIndexBuffer;
+    size_t triangleIndexBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
+
     // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
     KERNEL_CALL(cudaExtractObjectData, data, mappedBuffer);
     
@@ -93,6 +105,11 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices);
 
+    // Third kernel: Extract triangle indices from cell connections
+    setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices);
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 }

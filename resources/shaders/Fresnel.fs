@@ -44,7 +44,7 @@ void main()
     
     // Apply Fresnel effect: enhance edges with a subtle highlight
     // Fresnel intensity is based on edge strength and inverse thickness
-    float fresnelIntensity = edgeStrength * (1.0 - brightness * 0.5) * 1.5 * zoom / 40.0;
+    float fresnelIntensity = edgeStrength * (1.0 - brightness * 0.5) * 0.5 * zoom / 40.0;
     
     // Add Fresnel highlight to the color
     vec3 fresnelColor = color.rgb + vec3(fresnelIntensity);

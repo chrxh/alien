@@ -19,6 +19,8 @@ private:
 };
 struct ScreenTarget
 {
+    auto operator<=>(ScreenTarget const&) const = default;
+
     // FBO is automatically determined
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
@@ -34,6 +36,7 @@ class _RenderStep
     friend _PointRenderStep;
     friend _PostProcessingRenderStep;
     friend _LineRenderStep;
+    friend _TriangleRenderStep;
 
 public:
     virtual ~_RenderStep() = default;
@@ -51,14 +54,15 @@ protected:
 
     std::optional<RenderTarget> const& getTarget() const;
     void setTarget(RenderTarget const& target);
-    void activateShader(SimulationFacade const& simulationFacade);
-    void setFramebuffer(GeneralRenderInfo const& renderInfo);
+    void setClearBackground(bool value);
+    void prepareRendering(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
     Shader _shader;
     std::optional<RenderTarget> _target;
+    bool _clearBackground = false;
     std::vector<RenderStep> _dependentSteps;
 
-    std::map<std::string, std::variant<int>> _uniformValues;
+    std::map<std::string, std::variant<int, float>> _uniformValues;
 };
 
 class _PointRenderStep : public _RenderStep
@@ -89,6 +93,21 @@ protected:
 
 private:
     _LineRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
+};
+
+class _TriangleRenderStep : public _RenderStep
+{
+    friend _RenderPipeline;
+
+public:
+    static TriangleRenderStep create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps = {});
+    static TriangleRenderStep create(Shader const& shader, std::vector<RenderStep> const& dependentSteps = {});
+
+protected:
+    void execute(uint64_t const& numTriangles, GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+
+private:
+    _TriangleRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps);
 };
 
 class _PostProcessingRenderStep : public _RenderStep

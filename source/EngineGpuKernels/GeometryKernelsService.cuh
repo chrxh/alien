@@ -28,4 +28,5 @@ public:
 
 private:
     uint64_t* _numLineIndices;
+    uint64_t* _numTriangleIndices;
 };

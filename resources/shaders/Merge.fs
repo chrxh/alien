@@ -15,12 +15,13 @@ void main()
     vec4 color2 = texture(inputTexture2, texCoord);
 
     if (mode == 0) {
-        vec3 mergedColor = color1.rgb * 0.5 + color2.rgb * 0.5;
+        vec3 mergedColor = clamp(color1.rgb * 0.5 + color2.rgb * 0.5, 0.0, 1.0);
         FragColor = vec4(mergedColor, 1.0f);
     } else if (mode == 1) {
         float brightness = clamp(dot(color2.rgb, vec3(1.0)), 0.0, 1.0);
-        vec3 finalColor = mix(color1.rgb, color2.rgb, brightness);
+        vec3 finalColor = mix(color1.rgb * 0.7, color2.rgb, brightness);
         FragColor = vec4(finalColor, 1.0f);
+        //FragColor = vec4(color1.rgb * 0.4 + color2.rgb * 0.6, 1.0f);
     } else {
         FragColor = vec4(0.0);
     }

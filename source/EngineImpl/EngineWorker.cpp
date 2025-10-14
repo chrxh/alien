@@ -254,6 +254,9 @@ float EngineWorker::getTps() const
 
 uint64_t EngineWorker::getCurrentTimestep() const
 {
+    if (_simulationCudaFacade == nullptr) {
+        return 0ull;
+    }
     return _simulationCudaFacade->getCurrentTimestep();
 }
 

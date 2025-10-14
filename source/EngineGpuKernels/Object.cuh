@@ -372,6 +372,8 @@ struct Cell
         return 0;
     }
 
+    __device__ __inline__ Cell* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].cell; }
+
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
         if ((connectionIndex1 - connectionIndex2 + numConnections) % numConnections == 0) {

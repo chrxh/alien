@@ -86,6 +86,40 @@ void SimulationView::draw()
             markReferenceDomain();
         }
 
+        // Draw overlay if activated
+        if (_overlay) {
+            ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+            auto parameters = _simulationFacade->getSimulationParameters();
+            for (auto const& overlayElement : _overlay->elements) {
+                if (_cellDetailOverlayActive && overlayElement.cell) {
+                    {
+                        auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
+                        auto viewPos =
+                            Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
+                        auto text = Const::CellTypeStrings.at(overlayElement.cellType);
+                        drawList->AddText(
+                            StyleRepository::get().getMediumFont(),
+                            fontSizeUnit,
+                            {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
+                            Const::CellTypeOverlayShadowColor,
+                            text.c_str());
+                        drawList->AddText(
+                            StyleRepository::get().getMediumFont(),
+                            fontSizeUnit,
+                            {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
+                            Const::CellTypeOverlayColor,
+                            text.c_str());
+                    }
+                }
+
+                if (overlayElement.selected == 1) {
+                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
+                    if (Viewport::get().isVisible(viewPos)) {
+                        drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
+                    }
+                }
+            }
+        }
     } else {
         glClearColor(0, 0, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -199,18 +233,23 @@ void SimulationView::setupRenderPipeline()
 {
     _renderPipeline = std::make_shared<_RenderPipeline>(_simulationFacade);
 
-    auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader));
-    _renderPipeline->addStep(step1);
+    auto sharedTarget = _TextureTarget::create();
+    
+    auto step1a = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
+    _renderPipeline->addStep(step1a);
 
-    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectBackgroundVertexShader, Const::ObjectBackgroundFragmentShader), {step1});
+    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {step1a});
+    _renderPipeline->addStep(step1b);
+
+    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader));
     _renderPipeline->addStep(step2);
 
-    auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1, step2});
-    step3->setUniform("mode", 1);
-    _renderPipeline->addStep(step3);
+    //auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1b, step2});
+    //step3->setUniform("mode", 1);
+    //_renderPipeline->addStep(step3);
 
     auto step4 =
-        _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step3});
+        _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step1b});
     _renderPipeline->addStep(step4);
 
     auto step5 = _PostProcessingRenderStep::create(_Shader::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader), {step4});
@@ -219,22 +258,18 @@ void SimulationView::setupRenderPipeline()
     auto step6 = _PostProcessingRenderStep::create(_Shader::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader), {step5});
     _renderPipeline->addStep(step6);
 
-    //auto shader7 = _Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader);
-    //auto renderStep7 = _PostProcessingRenderStep::create(shader7, std::vector<RenderStep>{renderStep6});
-    //_renderPipeline->addStep(renderStep7);
+    auto step7 =
+        _PostProcessingRenderStep::create(_Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader), std::vector<RenderStep>{step6});
+    _renderPipeline->addStep(step7);
 
-    //auto shader8 = _Shader::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader);
-    //auto renderStep8 = _PostProcessingRenderStep::create(shader8, ScreenTarget(), std::vector<RenderStep>{renderStep7});
-    //_renderPipeline->addStep(renderStep8);
+    auto step8 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step7, step2});
+    step8->setUniform("mode", 1);
+    _renderPipeline->addStep(step8);
 
-    //auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
-    //_renderPipeline->addStep(renderStep6);
 
-    //auto renderStep7 = _PointRenderStep::createWithSharedVbo(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
-    //_renderPipeline->addStep(renderStep7);
-
-    //auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
-    //_renderPipeline->addStep(renderStep8);
+    //auto step7 = _PostProcessingRenderStep::create(
+    //    _Shader::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader), ScreenTarget(), std::vector<RenderStep>{step6});
+    //_renderPipeline->addStep(step7);
 
     _renderPipeline->finalize();
 }
