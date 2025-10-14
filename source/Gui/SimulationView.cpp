@@ -262,9 +262,13 @@ void SimulationView::setupRenderPipeline()
         _PostProcessingRenderStep::create(_Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader), std::vector<RenderStep>{step6});
     _renderPipeline->addStep(step7);
 
-    auto step8 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step7, step2});
-    step8->setUniform("mode", 1);
-    _renderPipeline->addStep(step8);
+    //auto step8 = _PostProcessingRenderStep::create(
+    //    _Shader::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader), std::vector<RenderStep>{step7});
+    //_renderPipeline->addStep(step8);
+
+    auto step9 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step7, step2});
+    step9->setUniform("mode", 1);
+    _renderPipeline->addStep(step9);
 
 
     //auto step7 = _PostProcessingRenderStep::create(
