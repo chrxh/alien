@@ -23,11 +23,11 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Color (3 floats) - not used for lines but needed for compatibility
+        // Color (3 floats) - used for line colors
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        // Z-position (1 float) - used for lighting in triangle rendering
+        // Z-position (1 float) - used for lighting calculations
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
