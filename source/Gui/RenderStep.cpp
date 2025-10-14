@@ -108,7 +108,7 @@ void _PointRenderStep::execute(
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     // Draw points
-    glBindVertexArray(geometryBuffers->getVao());
+    glBindVertexArray(geometryBuffers->getVaoForPointsAndLines());
     glDrawArrays(GL_POINTS, 0, toInt(numVertices));
 
     // Disable blending and point sprites
@@ -143,7 +143,7 @@ void _LineRenderStep::execute(
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     // Draw lines
-    glBindVertexArray(geometryBuffers->getVao());
+    glBindVertexArray(geometryBuffers->getVaoForPointsAndLines());
     auto zoom = Viewport::get().getZoomFactor();
     glLineWidth(zoom * 0.1f);
     glDrawElements(GL_LINES, toInt(numLines), GL_UNSIGNED_INT, 0);
@@ -177,11 +177,11 @@ void _TriangleRenderStep::execute(
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
-    glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, GL_ONE);
+    glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
 
     // Draw triangles
-    glBindVertexArray(geometryBuffers->getVao());
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryBuffers->getTbo());
+    glBindVertexArray(geometryBuffers->getVaoForTriangles());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(numTriangles), GL_UNSIGNED_INT, 0);
     
     // Disable blending

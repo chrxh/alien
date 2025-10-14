@@ -10,28 +10,54 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
     : _simulationFacade(simulationFacade)
     , _geometryBuffers(_GeometryBuffers::create())
 {
-    auto vao = _geometryBuffers->getVao();
-    auto vbo = _geometryBuffers->getVbo();
-    auto ebo = _geometryBuffers->getEbo();
-    
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    
-    // Setup vertex attributes for VertexData (same as PointRenderStep)
-    // Position (2 floats)
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
-    glEnableVertexAttribArray(0);
-    
-    // Color (3 floats) - not used for lines but needed for compatibility
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    
-    // Z-position (1 float) - used for lighting in triangle rendering
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-    
-    // Bind EBO (will be filled by CUDA later)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    {
+        auto vao = _geometryBuffers->getVaoForPointsAndLines();
+        auto vbo = _geometryBuffers->getVbo();
+        auto ebo = _geometryBuffers->getEboForLines();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for VertexData (same as PointRenderStep)
+        // Position (2 floats)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Color (3 floats) - not used for lines but needed for compatibility
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        // Z-position (1 float) - used for lighting in triangle rendering
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
+        // Bind EBO (will be filled by CUDA later)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    }
+    {
+        auto vao = _geometryBuffers->getVaoForTriangles();
+        auto vbo = _geometryBuffers->getVbo();
+        auto ebo = _geometryBuffers->getEboForTriangles();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for VertexData (same as PointRenderStep)
+        // Position (2 floats)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Color (3 floats) - not used for lines but needed for compatibility
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        // Z-position (1 float) - used for lighting in triangle rendering
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
+        // Bind EBO (will be filled by CUDA later)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    }
 }
 
 void _RenderPipeline::addStep(RenderStep const& step)
@@ -113,14 +139,14 @@ void _RenderPipeline::resize(IntVector2D const& size)
 void _RenderPipeline::execute()
 {
     // Start with point renderer
-    RenderStep startRenderStep;
+    std::vector<RenderStep> stepsWithoutDependencies;
     for (auto const& step : _steps) {
-        if (std::dynamic_pointer_cast<_PointRenderStep>(step)) {
-            startRenderStep = step;
-            break;
+        if (step->getDependentSteps().empty()) {
+            stepsWithoutDependencies.emplace_back(step);
         }
     }
-    CHECK(startRenderStep);
+    CHECK(!stepsWithoutDependencies.empty());
+    auto currentRenderStep = stepsWithoutDependencies.front();
 
     // Copy vertex buffer from Cuda to OpenGL
     auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers);
@@ -131,7 +157,6 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
-    auto currentRenderStep = startRenderStep;
     std::set<RenderStep> finishedSteps;
     do {
         finishedSteps.insert(currentRenderStep);

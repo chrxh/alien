@@ -235,10 +235,10 @@ void SimulationView::setupRenderPipeline()
 
     auto sharedTarget = _TextureTarget::create();
     
-    //auto step1 = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
-    //_renderPipeline->addStep(step1);
+    auto step1a = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
+    _renderPipeline->addStep(step1a);
 
-    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {/*step1*/});
+    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {step1a});
     _renderPipeline->addStep(step1b);
 
     auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader));
@@ -266,22 +266,10 @@ void SimulationView::setupRenderPipeline()
     step8->setUniform("mode", 1);
     _renderPipeline->addStep(step8);
 
-    //auto step7 =
-    //    _PostProcessingRenderStep::create(_Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader), std::vector<RenderStep>{step6});
-    //_renderPipeline->addStep(step7);
 
     //auto step7 = _PostProcessingRenderStep::create(
     //    _Shader::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader), ScreenTarget(), std::vector<RenderStep>{step6});
     //_renderPipeline->addStep(step7);
-
-    //auto renderStep6 = _PostProcessingRenderStep::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader, std::vector<RenderStep>{renderStep5});
-    //_renderPipeline->addStep(renderStep6);
-
-    //auto renderStep7 = _PointRenderStep::createWithSharedVbo(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader, renderStep1);
-    //_renderPipeline->addStep(renderStep7);
-
-    //auto renderStep8 = _PostProcessingRenderStep::create(Const::MergeVertexShader, Const::MergeFragmentShader, std::vector<RenderStep>{renderStep6, renderStep7});
-    //_renderPipeline->addStep(renderStep8);
 
     _renderPipeline->finalize();
 }

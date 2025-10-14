@@ -23,18 +23,20 @@ class _GeometryBuffers
 public:
     static GeometryBuffers create();
 
-    unsigned int getVao() const { return _vao; }
+    unsigned int getVaoForPointsAndLines() const { return _vaoForPointsAndLines; }
+    unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
     unsigned int getVbo() const { return _vbo; }
-    unsigned int getEbo() const { return _ebo; }
-    unsigned int getTbo() const { return _tbo; }
+    unsigned int getEboForLines() const { return _eboForLines; }
+    unsigned int getEboForTriangles() const { return _eboForTriangles; }
 
     void resizeIfNecessary(NumRenderObjects const& numRenderObjects);
 
 private:
-    unsigned int _vao = 0;
+    unsigned int _vaoForPointsAndLines = 0;
+    unsigned int _vaoForTriangles = 0;
     unsigned int _vbo = 0;
-    unsigned int _ebo = 0;
-    unsigned int _tbo = 0;
+    unsigned int _eboForLines = 0;
+    unsigned int _eboForTriangles = 0;
 
     uint64_t _vertexBufferCapacity = 0;
     uint64_t _lineIndexBufferCapacity = 0;
