@@ -67,7 +67,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
     
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractNumLineIndices, data, _numLineIndices);
+    KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
     cudaDeviceSynchronize();
     result.lineIndices = copyToHost(_numLineIndices);
 

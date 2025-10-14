@@ -864,25 +864,6 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
     //}
 }
 
-__global__ void cudaExtractNumLineIndices(SimulationData data, uint64_t* numLineIndices)
-{
-    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto const& cell = data.objects.cells.at(index);
-
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectedCell = cell->connections[i].cell;
-            // Only add each connection once (from lower index to higher index to avoid duplicates)
-            if (cell->id < connectedCell->id) {
-                if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
-                    alienAtomicAdd64(numLineIndices, uint64_t(2));
-                }
-            }
-        }
-    }
-}
-
 __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
@@ -900,10 +881,12 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
             // Only add each connection once (from lower index to higher index to avoid duplicates)
             if (cell->id < connectedCell->id) {
                 if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
-                    uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
                     uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
-                    lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
-                    lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
+                    if (lineIndices != nullptr) {
+                        uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
+                        lineIndices[lineIndex] = static_cast<unsigned int>(cellIndex);
+                        lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
+                    }
                 }
             }
         }
