@@ -1,14 +1,17 @@
 #include "RenderPipeline.h"
 
+#include <ranges>
+
 #include "EngineInterface/GeometryBuffers.h"
 
 #include "RenderStep.h"
 #include "RenderStep.h"
 #include "Shader.h"
 
-_RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
+_RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, RenderBlocks&& blocks)
     : _simulationFacade(simulationFacade)
     , _geometryBuffers(_GeometryBuffers::create())
+    , _blocks(std::move(blocks))
 {
     {
         auto vao = _geometryBuffers->getVaoForPointsAndLines();
@@ -23,11 +26,11 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Color (3 floats) - not used for lines but needed for compatibility
+        // Color (3 floats) - used for line colors
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
-        // Z-position (1 float) - used for lighting in triangle rendering
+        // Z-position (1 float) - used for lighting calculations
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
@@ -58,59 +61,89 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade)
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     }
-}
 
-void _RenderPipeline::addStep(RenderStep const& step)
-{
-    _steps.emplace_back(step);
-}
+    CHECK(!_blocks.empty());
+    CHECK(_blocks.back().size() == 1);
 
-void _RenderPipeline::finalize()
-{
-    std::vector<RenderStep> stepsWithoutDependencies;
-    for (auto const& step : _steps) {
-        if (step->getDependentSteps().empty()) {
-            stepsWithoutDependencies.emplace_back(step);
-        }
-    }
-    CHECK(!stepsWithoutDependencies.empty());
+    for (int i = 0; i < _blocks.size(); ++i) {
+        auto& block = _blocks.at(i);
+        auto isFirstBlock = i == 0;
+        auto isLastBlock = i == _blocks.size() - 1;
+        for (auto& queue : block) {
+            RenderTarget target;
+            for (int j = 0; j < queue.size(); ++j) {
+                auto& step = queue.at(j);
+                auto isLastStep = j == queue.size() - 1;
+                auto isFirstStep = j == 0;
 
-    auto currentRenderStep = stepsWithoutDependencies.front();
-    std::set<RenderStep> finishedSteps;
-    do {
-        finishedSteps.insert(currentRenderStep);
-        auto nextRenderStep = findNextStep(finishedSteps);
-        if (!currentRenderStep->getTarget().has_value()) {
-            auto finalStep = nextRenderStep == nullptr;
-            if (finalStep) {
-                currentRenderStep->setTarget(ScreenTarget());
-            } else {
-                currentRenderStep->setTarget(_TextureTarget::create());
+                if (!step->isUsePreviousOutput()) {
+                    target = isLastBlock && isLastStep ? RenderTarget(ScreenTarget()) : RenderTarget(_TextureTarget::create());
+                }
+                step->setTarget(target);
+
+                if (isFirstBlock && isFirstStep) {
+                    step->setClearBackground(true);
+                }
             }
         }
-        currentRenderStep = nextRenderStep;
-    } while (currentRenderStep);
-
-    std::set<RenderTarget> initialTargets;
-    for (auto const& step : stepsWithoutDependencies) {
-        initialTargets.insert(step->getTarget().value());
-    }
-
-    for (auto const& step : stepsWithoutDependencies) {
-        if (initialTargets.contains(step->getTarget().value())) {
-            step->setClearBackground(true);
-            initialTargets.erase(step->getTarget().value());
-        }
     }
 }
+
+//void _RenderPipeline::addStep(RenderStep const& step)
+//{
+//    _steps.emplace_back(step);
+//}
+//
+//void _RenderPipeline::finalize()
+//{
+//    std::vector<RenderStep> stepsWithoutDependencies;
+//    for (auto const& step : _steps) {
+//        if (step->getDependentSteps().empty()) {
+//            stepsWithoutDependencies.emplace_back(step);
+//        }
+//    }
+//    CHECK(!stepsWithoutDependencies.empty());
+//
+//    auto currentRenderStep = stepsWithoutDependencies.front();
+//    std::set<RenderStep> finishedSteps;
+//    do {
+//        finishedSteps.insert(currentRenderStep);
+//        auto nextRenderStep = findNextStep(finishedSteps);
+//        if (!currentRenderStep->getTarget().has_value()) {
+//            auto finalStep = nextRenderStep == nullptr;
+//            if (finalStep) {
+//                currentRenderStep->setTarget(ScreenTarget());
+//            } else {
+//                currentRenderStep->setTarget(_TextureTarget::create());
+//            }
+//        }
+//        currentRenderStep = nextRenderStep;
+//    } while (currentRenderStep);
+//
+//    std::set<RenderTarget> initialTargets;
+//    for (auto const& step : stepsWithoutDependencies) {
+//        initialTargets.insert(step->getTarget().value());
+//    }
+//
+//    for (auto const& step : stepsWithoutDependencies) {
+//        if (initialTargets.contains(step->getTarget().value())) {
+//            step->setClearBackground(true);
+//            initialTargets.erase(step->getTarget().value());
+//        }
+//    }
+//}
 
 void _RenderPipeline::resize(IntVector2D const& size)
 {
+    // Collect texture targets which needs to be resized
     std::set<TextureTarget> textureTargets;
-
-    for (auto const& step : _steps) {
-        if (std::holds_alternative<TextureTarget>(step->getTarget().value())) {
-            textureTargets.insert(std::get<TextureTarget>(step->getTarget().value()));
+    for (auto const& block : _blocks) {
+        for (auto const& queue : block) {
+            for (auto const& step : queue) {
+                if (std::holds_alternative<TextureTarget>(step->getTarget().value())) {
+                    textureTargets.insert(std::get<TextureTarget>(step->getTarget().value()));
+                }
+            }
         }
     }
 
@@ -138,72 +171,44 @@ void _RenderPipeline::resize(IntVector2D const& size)
 
 void _RenderPipeline::execute()
 {
-    // Start with point renderer
-    std::vector<RenderStep> stepsWithoutDependencies;
-    for (auto const& step : _steps) {
-        if (step->getDependentSteps().empty()) {
-            stepsWithoutDependencies.emplace_back(step);
-        }
-    }
-    CHECK(!stepsWithoutDependencies.empty());
-    auto currentRenderStep = stepsWithoutDependencies.front();
-
     // Copy vertex buffer from Cuda to OpenGL
-    auto numRenderObjects = _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers);
-    if (numRenderObjects.has_value()) {
-        _numObjects = *numRenderObjects;
-    }
+    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers);
 
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
-    std::set<RenderStep> finishedSteps;
-    do {
-        finishedSteps.insert(currentRenderStep);
-        auto nextRenderStep = findNextStep(finishedSteps);
-        if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep>(currentRenderStep)) {
-            pointRenderStep->execute(_numObjects.vertices, _geometryBuffers, generalRenderInfo, _simulationFacade);
+    std::optional<RenderBlock> prevBlock;
+    for (auto const& block : _blocks) {
+        for (auto const& queue : block) {
+            std::vector<RenderStep> dependentSteps;
+            if (prevBlock.has_value()) {
+                for (auto const& dependentQueue : prevBlock.value()) {
+                    dependentSteps.emplace_back(dependentQueue.back());
+                }
+            }
+            executeStep(queue.front(), generalRenderInfo, dependentSteps);
+            for (auto const& [prevStep, step] : std::views::zip(queue, queue | std::views::drop(1))) {
+                executeStep(step, generalRenderInfo, {prevStep});
+            }
         }
-        if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(currentRenderStep)) {
-            lineRenderStep->execute(_numObjects.lineIndices, _geometryBuffers, generalRenderInfo, _simulationFacade);
-        }
-        if (auto triangleRenderStep = std::dynamic_pointer_cast<_TriangleRenderStep>(currentRenderStep)) {
-            triangleRenderStep->execute(_numObjects.triangleIndices, _geometryBuffers, generalRenderInfo, _simulationFacade);
-        }
-        if (auto postProcessingRenderStep = std::dynamic_pointer_cast<_PostProcessingRenderStep>(currentRenderStep)) {
-            postProcessingRenderStep->execute(generalRenderInfo, _simulationFacade);
-        }
-        currentRenderStep = nextRenderStep;
-    } while (currentRenderStep);
+        prevBlock = block;
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
 }
 
-namespace
+void _RenderPipeline::executeStep(RenderStep const& step, GeneralRenderInfo const& generalRenderInfo, std::vector<RenderStep> const& dependentSteps)
 {
-    // Proofs if steps1 is contained in steps2
-    bool isContained(std::vector<RenderStep> const& steps1, std::set<RenderStep> const& steps2)
-    {
-        for (auto const& step : steps1) {
-            if (!steps2.contains(step)) {
-                return false;
-            }
-        }
-        return true;
+    if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep>(step)) {
+        pointRenderStep->execute(_geometryBuffers, generalRenderInfo, _simulationFacade);
     }
-}
-
-RenderStep _RenderPipeline::findNextStep(std::set<RenderStep> const& finishedSteps) const
-{
-    std::vector<RenderStep> result;
-    for (auto const& candidate : _steps) {
-        if (finishedSteps.contains(candidate)) {
-            continue;
-        }
-        auto const& prevSteps = candidate->getDependentSteps();
-        if (isContained(prevSteps, finishedSteps)) {
-            return candidate;
-        }
+    if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(step)) {
+        lineRenderStep->execute(_geometryBuffers, generalRenderInfo, _simulationFacade);
     }
-    return nullptr;
+    if (auto triangleRenderStep = std::dynamic_pointer_cast<_TriangleRenderStep>(step)) {
+        triangleRenderStep->execute(_geometryBuffers, generalRenderInfo, _simulationFacade);
+    }
+    if (auto postProcessingRenderStep = std::dynamic_pointer_cast<_PostProcessingRenderStep>(step)) {
+        postProcessingRenderStep->execute(generalRenderInfo, _simulationFacade, dependentSteps);
+    }
 }

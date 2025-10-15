@@ -1,8 +1,9 @@
 #version 330 core
+in vec3 fragColor;
 out vec4 FragColor;
 
 void main()
 {
-    // White color for all lines
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    // Use the lit color from geometry shader
+    FragColor = vec4(fragColor, 1.0);
 }

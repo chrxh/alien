@@ -37,9 +37,9 @@ std::string _SimulationFacadeImpl::getGpuName() const
     return _worker.getGpuName();
 }
 
-std::optional<NumRenderObjects> _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
+void _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
 {
-    return _worker.tryCopyBuffersFromCudaToOpenGL(geometryBuffers);
+    _worker.tryCopyBuffersFromCudaToOpenGL(geometryBuffers);
 }
 
 bool _SimulationFacadeImpl::isSyncSimulationWithRendering() const

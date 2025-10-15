@@ -17,6 +17,7 @@ GeometryBuffers _GeometryBuffers::create()
 
 void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObjects)
 {
+    _numObjects = numRenderObjects;
     if (numRenderObjects.vertices >= _vertexBufferCapacity) {
         _vertexBufferCapacity = std::max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVbo());
@@ -34,4 +35,9 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getEboForTriangles());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_triangleIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
     }
+}
+
+NumRenderObjects _GeometryBuffers::getNumObjects() const
+{
+    return _numObjects;
 }

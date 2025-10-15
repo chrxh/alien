@@ -23,7 +23,7 @@ public:
 
     std::string getGpuName() const override;
 
-    std::optional<NumRenderObjects> tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers) override;
+    void tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers) override;
 
     bool isSyncSimulationWithRendering() const override;
     void setSyncSimulationWithRendering(bool value) override;

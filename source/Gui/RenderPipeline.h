@@ -5,23 +5,24 @@
 
 #include "Definitions.h"
 
+using RenderQueue = std::vector<RenderStep>;
+using RenderBlock = std::vector<RenderQueue>;
+using RenderBlocks = std::vector<RenderBlock>;
+
 class _RenderPipeline
 {
 public:
-    _RenderPipeline(SimulationFacade const& simulationFacade);
-
-    void addStep(RenderStep const& step);
-    void finalize();
+    _RenderPipeline(SimulationFacade const& simulationFacade, RenderBlocks&& blocks);
 
     void resize(IntVector2D const& size);
     void execute();
 
 private:
-    RenderStep findNextStep(std::set<RenderStep> const& finishedSteps) const;
+    void executeStep(RenderStep const& step, GeneralRenderInfo const& generalRenderInfo, std::vector<RenderStep> const& dependentSteps);
 
     SimulationFacade _simulationFacade;
-    std::vector<RenderStep> _steps;
-
-    NumRenderObjects _numObjects;
+    RenderBlocks _blocks;
+    
     GeometryBuffers _geometryBuffers;
 };
+

@@ -231,47 +231,29 @@ void SimulationView::updateMotionBlur()
 
 void SimulationView::setupRenderPipeline()
 {
-    _renderPipeline = std::make_shared<_RenderPipeline>(_simulationFacade);
-
-    auto sharedTarget = _TextureTarget::create();
-    
-    auto step1a = _LineRenderStep::create(_Shader::create(Const::LineVertexShader, Const::LineFragmentShader), sharedTarget);
-    _renderPipeline->addStep(step1a);
-
-    auto step1b = _TriangleRenderStep::create(_Shader::create(Const::TriangleVertexShader, Const::TriangleFragmentShader, Const::TriangleGeometryShader), sharedTarget, {step1a});
-    _renderPipeline->addStep(step1b);
-
-    auto step2 = _PointRenderStep::create(_Shader::create(Const::ObjectForegroundVertexShader, Const::ObjectForegroundFragmentShader));
-    _renderPipeline->addStep(step2);
-
-    //auto step3 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step1b, step2});
-    //step3->setUniform("mode", 1);
-    //_renderPipeline->addStep(step3);
-
-    auto step4 =
-        _PostProcessingRenderStep::create(_Shader::create(Const::BlurHorizontalVertexShader, Const::BlurHorizontalFragmentShader), {step1b});
-    _renderPipeline->addStep(step4);
-
-    auto step5 = _PostProcessingRenderStep::create(_Shader::create(Const::BlurVerticalVertexShader, Const::BlurVerticalFragmentShader), {step4});
-    _renderPipeline->addStep(step5);
-
-    auto step6 = _PostProcessingRenderStep::create(_Shader::create(Const::MetaballsVertexShader, Const::MetaballsFragmentShader), {step5});
-    _renderPipeline->addStep(step6);
-
-    auto step7 =
-        _PostProcessingRenderStep::create(_Shader::create(Const::FresnelVertexShader, Const::FresnelFragmentShader), std::vector<RenderStep>{step6});
-    _renderPipeline->addStep(step7);
-
-    auto step8 = _PostProcessingRenderStep::create(_Shader::create(Const::MergeVertexShader, Const::MergeFragmentShader), {step7, step2});
-    step8->setUniform("mode", 1);
-    _renderPipeline->addStep(step8);
-
-
-    //auto step7 = _PostProcessingRenderStep::create(
-    //    _Shader::create(Const::SubsurfaceScatterVertexShader, Const::SubsurfaceScatterFragmentShader), ScreenTarget(), std::vector<RenderStep>{step6});
-    //_renderPipeline->addStep(step7);
-
-    _renderPipeline->finalize();
+    _renderPipeline = std::make_shared<_RenderPipeline>(
+        _simulationFacade,
+        RenderBlocks{
+            {
+                {
+                    _LineRenderStep::create(Const::LineShader),
+                    _TriangleRenderStep::create(Const::TriangleShader, true),
+                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
+                    _PostProcessingRenderStep::create(Const::BlurVerticalShader),
+                    _PostProcessingRenderStep::create(Const::MetaballsShader),
+                    // _PostProcessingRenderStep::create(Const::FresnelShader),
+                    // _PostProcessingRenderStep::create(Const::SubsurfaceScatterShader),
+                },
+                {
+                    _PointRenderStep::create(Const::PointLargeShader),
+                },
+            },
+            {
+                {
+                    _PostProcessingRenderStep::create(Const::MergeShader),
+                },
+            },
+        });
 }
 
 void SimulationView::markReferenceDomain()
