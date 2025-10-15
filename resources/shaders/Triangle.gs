@@ -36,7 +36,7 @@ void main()
         gl_Position = gl_in[i].gl_Position;
         // Apply lighting to each vertex color individually
         //fragColor = mix(vertexColor[i], vec3(1.0, 1.0, 0.0), lightIntensity * 0.2);
-        fragColor = vertexColor[i] * (0.8 + lightIntensity * 0.2);
+        fragColor = vertexColor[i] * (0.8 + lightIntensity * 0.3);
         EmitVertex();
     }
     EndPrimitive();

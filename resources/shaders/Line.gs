@@ -25,7 +25,7 @@ void main()
     
     // Line width in NDC coordinates
     // zoom * 0.1 pixels converted to NDC space
-    float lineWidth = (zoom * 0.3) / viewportSize.x * 2.0;
+    float lineWidth = (zoom * 0.15) / viewportSize.x * 2.0;
     vec2 offset = perp * lineWidth * 0.5;
     
     // Create 3D positions for lighting calculation
