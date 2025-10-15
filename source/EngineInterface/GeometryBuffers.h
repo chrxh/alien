@@ -31,6 +31,8 @@ public:
 
     void resizeIfNecessary(NumRenderObjects const& numRenderObjects);
 
+    NumRenderObjects getNumObjects() const;
+
 private:
     unsigned int _vaoForPointsAndLines = 0;
     unsigned int _vaoForTriangles = 0;
@@ -41,6 +43,8 @@ private:
     uint64_t _vertexBufferCapacity = 0;
     uint64_t _lineIndexBufferCapacity = 0;
     uint64_t _triangleIndexBufferCapacity = 0;
+
+    NumRenderObjects _numObjects;
 
     _GeometryBuffers() = default;
 };

@@ -13,17 +13,27 @@ TextureTarget _TextureTarget::create()
     return TextureTarget(new _TextureTarget());
 }
 
-std::vector<RenderStep> const& _RenderStep::getDependentSteps() const
+_RenderStep::_RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+    : _usePreviousOutput(usePreviousOutput)
 {
-    return _dependentSteps;
+    auto vertexShaderPath = shaderFilename;
+    vertexShaderPath.replace_extension(".vs");
+    auto fragmentShaderPath = shaderFilename;
+    fragmentShaderPath.replace_extension(".fs");
+    auto geometryShaderPath = shaderFilename;
+    geometryShaderPath.replace_extension(".gs");
+
+    if (!std::filesystem::exists(geometryShaderPath)) {
+        geometryShaderPath = std::filesystem::path();  // empty path disables geometry shader
+    }
+
+    _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
 }
 
-
-_RenderStep::_RenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
-    : _shader(shader)
-    , _target(target)
-    , _dependentSteps(dependentSteps)
-{}
+bool _RenderStep::isUsePreviousOutput() const
+{
+    return _usePreviousOutput;
+}
 
 std::optional<RenderTarget> const& _RenderStep::getTarget() const
 {
@@ -40,7 +50,7 @@ void _RenderStep::setClearBackground(bool value)
     _clearBackground = value;
 }
 
-void _RenderStep::prepareRendering(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+void _RenderStep::prepareExecution(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
     auto worldSize = simulationFacade->getWorldSize();
     auto worldRect = Viewport::get().getVisibleWorldRect();
@@ -81,23 +91,14 @@ void _RenderStep::prepareRendering(GeneralRenderInfo const& renderInfo, Simulati
     }
 }
 
-PointRenderStep _PointRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+PointRenderStep _PointRenderStep::create(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
 {
-    return PointRenderStep(new _PointRenderStep(shader, target, dependentSteps));
+    return PointRenderStep(new _PointRenderStep(shaderFilename, usePreviousOutput));
 }
 
-PointRenderStep _PointRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+void _PointRenderStep::execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
-    return PointRenderStep(new _PointRenderStep(shader, std::nullopt, dependentSteps));
-}
-
-void _PointRenderStep::execute(
-    uint64_t const& numVertices,
-    GeometryBuffers const& geometryBuffers,
-    GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade)
-{
-    prepareRendering(renderInfo, simulationFacade);
+    prepareExecution(renderInfo, simulationFacade);
 
     // Enable point sprites
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -109,34 +110,25 @@ void _PointRenderStep::execute(
 
     // Draw points
     glBindVertexArray(geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(numVertices));
+    glDrawArrays(GL_POINTS, 0, toInt(geometryBuffers->getNumObjects().vertices));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
 }
 
-_PointRenderStep::_PointRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(shader, target, dependentSteps)
+_PointRenderStep::_PointRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+    : _RenderStep(shaderFilename, usePreviousOutput)
 {}
 
-LineRenderStep _LineRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+LineRenderStep _LineRenderStep::create(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
 {
-    return LineRenderStep(new _LineRenderStep(shader, target, dependentSteps));
+    return LineRenderStep(new _LineRenderStep(shaderFilename, usePreviousOutput));
 }
 
-LineRenderStep _LineRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+void _LineRenderStep::execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
-    return LineRenderStep(new _LineRenderStep(shader, std::nullopt, dependentSteps));
-}
-
-void _LineRenderStep::execute(
-    uint64_t const& numLines,
-    GeometryBuffers const& geometryBuffers,
-    GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade)
-{
-    prepareRendering(renderInfo, simulationFacade);
+    prepareExecution(renderInfo, simulationFacade);
     
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -144,34 +136,25 @@ void _LineRenderStep::execute(
 
     // Draw lines (geometry shader will convert to quads with proper width)
     glBindVertexArray(geometryBuffers->getVaoForPointsAndLines());
-    glDrawElements(GL_LINES, toInt(numLines), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, toInt(geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
     
     // Disable blending
     glDisable(GL_BLEND);
 }
 
-_LineRenderStep::_LineRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(shader, target, dependentSteps)
+_LineRenderStep::_LineRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+    : _RenderStep(shaderFilename, usePreviousOutput)
 {
 }
 
-TriangleRenderStep _TriangleRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+TriangleRenderStep _TriangleRenderStep::create(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
 {
-    return TriangleRenderStep(new _TriangleRenderStep(shader, target, dependentSteps));
+    return TriangleRenderStep(new _TriangleRenderStep(shaderFilename, usePreviousOutput));
 }
 
-TriangleRenderStep _TriangleRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+void _TriangleRenderStep::execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
 {
-    return TriangleRenderStep(new _TriangleRenderStep(shader, std::nullopt, dependentSteps));
-}
-
-void _TriangleRenderStep::execute(
-    uint64_t const& numTriangles,
-    GeometryBuffers const& geometryBuffers,
-    GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade)
-{
-    prepareRendering(renderInfo, simulationFacade);
+    prepareExecution(renderInfo, simulationFacade);
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -180,44 +163,42 @@ void _TriangleRenderStep::execute(
     // Draw triangles
     glBindVertexArray(geometryBuffers->getVaoForTriangles());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometryBuffers->getEboForTriangles());
-    glDrawElements(GL_TRIANGLES, toInt(numTriangles), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, toInt(geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
     
     // Disable blending
     glDisable(GL_BLEND);
 }
 
-_TriangleRenderStep::_TriangleRenderStep(Shader const& shader, std::optional<RenderTarget> const& target, std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(shader, target, dependentSteps)
+_TriangleRenderStep::_TriangleRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+    : _RenderStep(shaderFilename, usePreviousOutput)
 {
 }
 
-PostProcessingRenderStep _PostProcessingRenderStep::create(Shader const& shader, RenderTarget const& target, std::vector<RenderStep> const& dependentSteps)
+PostProcessingRenderStep _PostProcessingRenderStep::create(std::filesystem::path const& shaderFilename)
 {
-    return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, target, dependentSteps));
+    return PostProcessingRenderStep(new _PostProcessingRenderStep(shaderFilename));
 }
 
-PostProcessingRenderStep _PostProcessingRenderStep::create(Shader const& shader, std::vector<RenderStep> const& dependentSteps)
+void _PostProcessingRenderStep::execute(
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade,
+    std::vector<RenderStep> const& dependentSteps)
 {
-    return PostProcessingRenderStep(new _PostProcessingRenderStep(shader, std::nullopt, dependentSteps));
-}
-
-void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
-{
-    prepareRendering(renderInfo, simulationFacade);
+    prepareExecution(renderInfo, simulationFacade);
 
     glBindVertexArray(_vao);
     
-    auto numDependentSteps = _dependentSteps.size();
+    auto numDependentSteps = dependentSteps.size();
     CHECK(numDependentSteps <= 2);
     if (numDependentSteps >= 1) {
-        auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(0)->getTarget().value());
+        auto textureTarget = std::get<TextureTarget>(dependentSteps.at(0)->getTarget().value());
 
         _shader->setInt("inputTexture1", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
     }
     if (numDependentSteps >= 2) {
-        auto textureTarget = std::get<TextureTarget>(_dependentSteps.at(1)->getTarget().value());
+        auto textureTarget = std::get<TextureTarget>(dependentSteps.at(1)->getTarget().value());
 
         _shader->setInt("inputTexture2", 1);
         glActiveTexture(GL_TEXTURE1);
@@ -227,11 +208,8 @@ void _PostProcessingRenderStep::execute(GeneralRenderInfo const& renderInfo, Sim
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(
-    Shader const& shader,
-    std::optional<RenderTarget> const& target,
-    std::vector<RenderStep> const& dependentSteps)
-    : _RenderStep(shader, target, dependentSteps)
+_PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const& shaderFilename)
+    : _RenderStep(shaderFilename, false)
 {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);

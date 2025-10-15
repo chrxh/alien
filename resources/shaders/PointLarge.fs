@@ -23,6 +23,6 @@ void main()
         angle -= 360.0;
     }
     float factor = min(1.0, 60.0 / (abs(angle) + 1.0));
-    float alpha = max(0.0, (1.0 - smoothstep(0.3, 0.5, dist)) * smoothstep(0.0, 0.3, dist) * factor);
+    float alpha = max(0.0, (1.0 - smoothstep(0.3, 0.5, dist)) * smoothstep(0.0, 0.1, dist) * factor);
     FragColor = vec4(vColor * alpha, 1.0);
 }

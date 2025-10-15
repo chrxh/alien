@@ -39,17 +39,14 @@ std::string EngineWorker::getGpuName() const
     return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
-std::optional<NumRenderObjects> EngineWorker::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
+void EngineWorker::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 
     if (!access.isTimeout()) {
-        auto result = _simulationCudaFacade->copyBuffersFromCudaToOpenGL(geometryBuffers);
+        _simulationCudaFacade->copyBuffersFromCudaToOpenGL(geometryBuffers);
         syncSimulationWithRenderingIfDesired();
-
-        return result;
     }
-    return std::nullopt;
 }
 
 bool EngineWorker::isSyncSimulationWithRendering() const
