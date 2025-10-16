@@ -234,25 +234,37 @@ void SimulationView::setupRenderPipeline()
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
         RenderBlocks{
-            {
+            RenderBlock().sequences({
                 {
                     _LineRenderStep::create(Const::LineShader),
                     _TriangleRenderStep::create(Const::TriangleShader, true),
                     _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
                     _PostProcessingRenderStep::create(Const::BlurVerticalShader),
                     _PostProcessingRenderStep::create(Const::MetaballsShader),
-                    // _PostProcessingRenderStep::create(Const::FresnelShader),
-                    // _PostProcessingRenderStep::create(Const::SubsurfaceScatterShader),
                 },
                 {
                     _PointRenderStep::create(Const::PointLargeShader),
                 },
-            },
-            {
+            }),
+            RenderBlock().sequences({
                 {
                     _PostProcessingRenderStep::create(Const::MergeShader),
                 },
-            },
+            }),
+            RenderBlock().sequences({
+                {
+                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
+                    _PostProcessingRenderStep::create(Const::BlurVerticalShader),
+                },
+                {
+                    _ForwardRenderStep::create(),
+                },
+            }),
+            RenderBlock().sequences({
+                {
+                    _PostProcessingRenderStep::create(Const::MergeShader),
+                },
+            }),
         });
 }
 

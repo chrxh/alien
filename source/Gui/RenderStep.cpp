@@ -30,6 +30,10 @@ _RenderStep::_RenderStep(std::filesystem::path const& shaderFilename, bool usePr
     _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
 }
 
+_RenderStep::_RenderStep(bool usePreviousOutput)
+    : _usePreviousOutput(usePreviousOutput)
+{}
+
 bool _RenderStep::isUsePreviousOutput() const
 {
     return _usePreviousOutput;
@@ -96,7 +100,11 @@ PointRenderStep _PointRenderStep::create(std::filesystem::path const& shaderFile
     return PointRenderStep(new _PointRenderStep(shaderFilename, usePreviousOutput));
 }
 
-void _PointRenderStep::execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+void _PointRenderStep::execute(
+    GeometryBuffers const& geometryBuffers,
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade,
+    std::vector<RenderStep> const& dependentSteps)
 {
     prepareExecution(renderInfo, simulationFacade);
 
@@ -126,7 +134,11 @@ LineRenderStep _LineRenderStep::create(std::filesystem::path const& shaderFilena
     return LineRenderStep(new _LineRenderStep(shaderFilename, usePreviousOutput));
 }
 
-void _LineRenderStep::execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+void _LineRenderStep::execute(
+    GeometryBuffers const& geometryBuffers,
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade,
+    std::vector<RenderStep> const& dependentSteps)
 {
     prepareExecution(renderInfo, simulationFacade);
     
@@ -152,7 +164,11 @@ TriangleRenderStep _TriangleRenderStep::create(std::filesystem::path const& shad
     return TriangleRenderStep(new _TriangleRenderStep(shaderFilename, usePreviousOutput));
 }
 
-void _TriangleRenderStep::execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+void _TriangleRenderStep::execute(
+    GeometryBuffers const& geometryBuffers,
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade,
+    std::vector<RenderStep> const& dependentSteps)
 {
     prepareExecution(renderInfo, simulationFacade);
 
@@ -180,6 +196,7 @@ PostProcessingRenderStep _PostProcessingRenderStep::create(std::filesystem::path
 }
 
 void _PostProcessingRenderStep::execute(
+    GeometryBuffers const& geometryBuffers,
     GeneralRenderInfo const& renderInfo,
     SimulationFacade const& simulationFacade,
     std::vector<RenderStep> const& dependentSteps)
@@ -246,4 +263,23 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const
     // Texture coordinate attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+}
+
+ForwardRenderStep _ForwardRenderStep::create()
+{
+    return ForwardRenderStep(new _ForwardRenderStep());
+}
+
+void _ForwardRenderStep::execute(
+    GeometryBuffers const& geometryBuffers,
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade,
+    std::vector<RenderStep> const& dependentSteps)
+{
+    // Do nothing
+}
+
+_ForwardRenderStep::_ForwardRenderStep()
+    : _RenderStep(true)
+{
 }

@@ -170,6 +170,9 @@ using TriangleRenderStep = std::shared_ptr<_TriangleRenderStep>;
 class _PostProcessingRenderStep;
 using PostProcessingRenderStep = std::shared_ptr<_PostProcessingRenderStep>;
 
+class _ForwardRenderStep;
+using ForwardRenderStep = std::shared_ptr<_ForwardRenderStep>;
+
 class _TextureTarget;
 using TextureTarget = std::shared_ptr<_TextureTarget>;
 

@@ -33,12 +33,6 @@ struct GeneralRenderInfo
 
 class _RenderStep
 {
-    friend _RenderPipeline;
-    friend _PointRenderStep;
-    friend _PostProcessingRenderStep;
-    friend _LineRenderStep;
-    friend _TriangleRenderStep;
-
 public:
     virtual ~_RenderStep() = default;
 
@@ -48,14 +42,21 @@ public:
         _uniformValues.insert_or_assign(name, value);
     }
 
-protected:
-    _RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
+    virtual void execute(
+        GeometryBuffers const& geometryBuffers,
+        GeneralRenderInfo const& renderInfo,
+        SimulationFacade const& simulationFacade,
+        std::vector<RenderStep> const& dependentSteps) = 0;
 
     bool isUsePreviousOutput() const;
     std::optional<RenderTarget> const& getTarget() const;
     void setTarget(RenderTarget const& target);
 
     void setClearBackground(bool value);
+
+protected:
+    _RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
+    _RenderStep(bool usePreviousOutput);
 
     void prepareExecution(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
@@ -69,13 +70,15 @@ protected:
 
 class _PointRenderStep : public _RenderStep
 {
-    friend _RenderPipeline;
-
 public:
     static PointRenderStep create(std::filesystem::path const& shaderFilename, bool usePreviousOutput = false);
 
 protected:
-    void execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void execute(
+        GeometryBuffers const& geometryBuffers,
+        GeneralRenderInfo const& renderInfo,
+        SimulationFacade const& simulationFacade,
+        std::vector<RenderStep> const& dependentSteps) override;
 
 private:
     _PointRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
@@ -89,7 +92,11 @@ public:
     static LineRenderStep create(std::filesystem::path const& shaderFilename, bool usePreviousOutput = false);
 
 protected:
-    void execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void execute(
+        GeometryBuffers const& geometryBuffers,
+        GeneralRenderInfo const& renderInfo,
+        SimulationFacade const& simulationFacade,
+        std::vector<RenderStep> const& dependentSteps) override;
 
 private:
     _LineRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
@@ -97,13 +104,15 @@ private:
 
 class _TriangleRenderStep : public _RenderStep
 {
-    friend _RenderPipeline;
-
 public:
     static TriangleRenderStep create(std::filesystem::path const& shaderFilename, bool usePreviousOutput = false);
 
 protected:
-    void execute(GeometryBuffers const& geometryBuffers, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void execute(
+        GeometryBuffers const& geometryBuffers,
+        GeneralRenderInfo const& renderInfo,
+        SimulationFacade const& simulationFacade,
+        std::vector<RenderStep> const& dependentSteps) override;
 
 private:
     _TriangleRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
@@ -111,13 +120,15 @@ private:
 
 class _PostProcessingRenderStep : public _RenderStep
 {
-    friend _RenderPipeline;
-
 public:
     static PostProcessingRenderStep create(std::filesystem::path const& shaderFilename);
 
 protected:
-    void execute(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade, std::vector<RenderStep> const& dependentSteps);
+    void execute(
+        GeometryBuffers const& geometryBuffers,
+        GeneralRenderInfo const& renderInfo,
+        SimulationFacade const& simulationFacade,
+        std::vector<RenderStep> const& dependentSteps) override;
 
 private:
     _PostProcessingRenderStep(std::filesystem::path const& shaderFilename);
@@ -125,4 +136,20 @@ private:
     unsigned int _vao = 0;
     unsigned int _vbo = 0;
     unsigned int _ebo = 0;
+};
+
+class _ForwardRenderStep : public _RenderStep
+{
+public:
+    static ForwardRenderStep create();
+
+protected:
+    void execute(
+        GeometryBuffers const& geometryBuffers,
+        GeneralRenderInfo const& renderInfo,
+        SimulationFacade const& simulationFacade,
+        std::vector<RenderStep> const& dependentSteps) override;
+
+private:
+    _ForwardRenderStep();
 };

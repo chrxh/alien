@@ -63,83 +63,76 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
     }
 
     CHECK(!_blocks.empty());
-    CHECK(_blocks.back().size() == 1);
+    CHECK(_blocks.back()._sequences.size() == 1);
 
-    for (int i = 0; i < _blocks.size(); ++i) {
-        auto& block = _blocks.at(i);
-        auto isFirstBlock = i == 0;
-        auto isLastBlock = i == _blocks.size() - 1;
-        for (auto& queue : block) {
-            RenderTarget target;
-            for (int j = 0; j < queue.size(); ++j) {
-                auto& step = queue.at(j);
-                auto isLastStep = j == queue.size() - 1;
-                auto isFirstStep = j == 0;
+    for (auto& sequence : _blocks.front()) {
+        sequence.front()->setClearBackground(true);
+    }
 
-                if (!step->isUsePreviousOutput()) {
-                    target = isLastBlock && isLastStep ? RenderTarget(ScreenTarget()) : RenderTarget(_TextureTarget::create());
+    // Setup render targets for each step in the pipeline
+    auto getPreviousTarget = [&](size_t i, size_t j, size_t k) {
+        if (k > 0) {
+            // Previous step in the same sequence
+            auto& prevStep = _blocks.at(i).at(j).at(k - 1);
+            return prevStep->getTarget().value();
+        } else if (i > 0) {
+            // Last step in the last sequence of the previous block
+            auto& prevBlock = _blocks.at(i - 1);
+            auto& prevQueue = prevBlock.back();
+            auto& prevStep = prevQueue.back();
+            return prevStep->getTarget().value();
+        } else {
+            return RenderTarget(ScreenTarget());
+        }
+    };
+    auto furtherTargetsAvailable = [&](size_t i, size_t j, size_t k) {
+        // Checking current sequence
+        for (size_t stepIdx = k + 1; stepIdx < _blocks.at(i).at(j).size(); ++stepIdx) {
+            if (!_blocks.at(i).at(j).at(stepIdx)->isUsePreviousOutput()) {
+                return true;
+            }
+        }
+        // Checking subsequent sequences in following blocks
+        for (size_t blockIdx = i + 1; blockIdx < _blocks.size(); ++blockIdx) {
+            for (size_t sequenceIdx = 0; sequenceIdx < _blocks.at(blockIdx).size(); ++sequenceIdx) {
+                for (size_t stepIdx = 0; stepIdx < _blocks.at(blockIdx).at(sequenceIdx).size(); ++stepIdx) {
+                    if (!_blocks.at(blockIdx).at(sequenceIdx).at(stepIdx)->isUsePreviousOutput()) {
+                        return true;
+                    }
                 }
-                step->setTarget(target);
+            }
+        }
+        return false;
+    };
+    for (size_t i = 0; i < _blocks.size(); ++i) {
+        auto& block = _blocks.at(i);
 
-                if (isFirstBlock && isFirstStep) {
-                    step->setClearBackground(true);
+        for (size_t j = 0; j < block._sequences.size(); ++j) {
+            auto& sequence = block._sequences.at(j);
+
+            for (size_t k = 0; k < sequence.size(); ++k) {
+                auto& step = sequence.at(k);
+                if (step->isUsePreviousOutput()) {
+                    step->setTarget(getPreviousTarget(i, j, k));
+                } else {
+                    if (furtherTargetsAvailable(i, j, k)) {
+                        step->setTarget(RenderTarget(_TextureTarget::create()));
+                    } else {
+                        step->setTarget(RenderTarget(ScreenTarget()));
+                    }
                 }
             }
         }
     }
 }
 
-//void _RenderPipeline::addStep(RenderStep const& step)
-//{
-//    _steps.emplace_back(step);
-//}
-//
-//void _RenderPipeline::finalize()
-//{
-//    std::vector<RenderStep> stepsWithoutDependencies;
-//    for (auto const& step : _steps) {
-//        if (step->getDependentSteps().empty()) {
-//            stepsWithoutDependencies.emplace_back(step);
-//        }
-//    }
-//    CHECK(!stepsWithoutDependencies.empty());
-//
-//    auto currentRenderStep = stepsWithoutDependencies.front();
-//    std::set<RenderStep> finishedSteps;
-//    do {
-//        finishedSteps.insert(currentRenderStep);
-//        auto nextRenderStep = findNextStep(finishedSteps);
-//        if (!currentRenderStep->getTarget().has_value()) {
-//            auto finalStep = nextRenderStep == nullptr;
-//            if (finalStep) {
-//                currentRenderStep->setTarget(ScreenTarget());
-//            } else {
-//                currentRenderStep->setTarget(_TextureTarget::create());
-//            }
-//        }
-//        currentRenderStep = nextRenderStep;
-//    } while (currentRenderStep);
-//
-//    std::set<RenderTarget> initialTargets;
-//    for (auto const& step : stepsWithoutDependencies) {
-//        initialTargets.insert(step->getTarget().value());
-//    }
-//
-//    for (auto const& step : stepsWithoutDependencies) {
-//        if (initialTargets.contains(step->getTarget().value())) {
-//            step->setClearBackground(true);
-//            initialTargets.erase(step->getTarget().value());
-//        }
-//    }
-//}
-
 void _RenderPipeline::resize(IntVector2D const& size)
 {
     // Collect texture targets which needs to be resized
     std::set<TextureTarget> textureTargets;
     for (auto const& block : _blocks) {
-        for (auto const& queue : block) {
-            for (auto const& step : queue) {
+        for (auto const& sequence : block._sequences) {
+            for (auto const& step : sequence) {
                 if (std::holds_alternative<TextureTarget>(step->getTarget().value())) {
                     textureTargets.insert(std::get<TextureTarget>(step->getTarget().value()));
                 }
@@ -179,36 +172,20 @@ void _RenderPipeline::execute()
 
     std::optional<RenderBlock> prevBlock;
     for (auto const& block : _blocks) {
-        for (auto const& queue : block) {
+        for (auto const& sequence : block._sequences) {
             std::vector<RenderStep> dependentSteps;
             if (prevBlock.has_value()) {
                 for (auto const& dependentQueue : prevBlock.value()) {
                     dependentSteps.emplace_back(dependentQueue.back());
                 }
             }
-            executeStep(queue.front(), generalRenderInfo, dependentSteps);
-            for (auto const& [prevStep, step] : std::views::zip(queue, queue | std::views::drop(1))) {
-                executeStep(step, generalRenderInfo, {prevStep});
+            sequence.front()->execute(_geometryBuffers, generalRenderInfo, _simulationFacade, dependentSteps);
+            for (auto const& [prevStep, step] : std::views::zip(sequence, sequence | std::views::drop(1))) {
+                step->execute(_geometryBuffers, generalRenderInfo, _simulationFacade, {prevStep});
             }
         }
         prevBlock = block;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
-}
-
-void _RenderPipeline::executeStep(RenderStep const& step, GeneralRenderInfo const& generalRenderInfo, std::vector<RenderStep> const& dependentSteps)
-{
-    if (auto pointRenderStep = std::dynamic_pointer_cast<_PointRenderStep>(step)) {
-        pointRenderStep->execute(_geometryBuffers, generalRenderInfo, _simulationFacade);
-    }
-    if (auto lineRenderStep = std::dynamic_pointer_cast<_LineRenderStep>(step)) {
-        lineRenderStep->execute(_geometryBuffers, generalRenderInfo, _simulationFacade);
-    }
-    if (auto triangleRenderStep = std::dynamic_pointer_cast<_TriangleRenderStep>(step)) {
-        triangleRenderStep->execute(_geometryBuffers, generalRenderInfo, _simulationFacade);
-    }
-    if (auto postProcessingRenderStep = std::dynamic_pointer_cast<_PostProcessingRenderStep>(step)) {
-        postProcessingRenderStep->execute(generalRenderInfo, _simulationFacade, dependentSteps);
-    }
 }
