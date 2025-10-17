@@ -13,7 +13,7 @@ bool RenderSequence::subsequentStepsHaveTarget(size_t index) const
 {
     for (size_t i = index + 1; i < _steps.size(); ++i) {
         auto const& step = _steps.at(i);
-        if (!step->getPreviousTarget().has_value()) {
+        if (!step->getPreviousTargetSelection().has_value()) {
             return true;
         }
     }
@@ -175,7 +175,7 @@ void _RenderPipeline::forEachStep(
 
                     // Determine target
                     RenderTarget target;
-                    if (auto previousTarget = step->getPreviousTarget()) {
+                    if (auto previousTarget = step->getPreviousTargetSelection()) {
                         target = previousTargets.at(previousTarget.value());
                     } else {
                         if (!sequence.subsequentStepsHaveTarget(l) && isLastBlock) {
