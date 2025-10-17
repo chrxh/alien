@@ -13,7 +13,7 @@ bool RenderSequence::subsequentStepsHaveTarget(size_t index) const
 {
     for (size_t i = index + 1; i < _steps.size(); ++i) {
         auto const& step = _steps.at(i);
-        if (!step->isUsePreviousTarget()) {
+        if (!step->getPreviousTarget().has_value()) {
             return true;
         }
     }
@@ -175,15 +175,14 @@ void _RenderPipeline::forEachStep(
 
                     // Determine target
                     RenderTarget target;
-                    if (!step->isUsePreviousTarget()) {
+                    if (auto previousTarget = step->getPreviousTarget()) {
+                        target = previousTargets.at(previousTarget.value());
+                    } else {
                         if (!sequence.subsequentStepsHaveTarget(l) && isLastBlock) {
                             target = RenderTarget(ScreenTarget());
                         } else {
                             target = getTextureTarget(step);
                         }
-                    } else {
-                        CHECK(previousTargets.size() == 1);
-                        target = previousTargets.front();
                     }
                     // Execute render step
                     auto clearBackground = i == 0 && k == 0 && l == 0;

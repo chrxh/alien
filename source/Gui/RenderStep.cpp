@@ -13,8 +13,11 @@ TextureTarget _TextureTarget::create()
     return TextureTarget(new _TextureTarget());
 }
 
-_RenderStep::_RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput, std::map<std::string, UniformValueType> const& uniformValues)
-    : _usePreviousOutput(usePreviousOutput)
+_RenderStep::_RenderStep(
+    std::filesystem::path const& shaderFilename,
+    std::optional<int> const& previousTargetSelection,
+    std::map<std::string, UniformValueType> const& uniformValues)
+    : _previousTargetSelection(previousTargetSelection)
     , _uniformValues(uniformValues)
 {
     auto vertexShaderPath = shaderFilename;
@@ -31,13 +34,13 @@ _RenderStep::_RenderStep(std::filesystem::path const& shaderFilename, bool usePr
     _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
 }
 
-_RenderStep::_RenderStep(bool usePreviousOutput)
-    : _usePreviousOutput(usePreviousOutput)
+_RenderStep::_RenderStep(bool previousTargetSelection)
+    : _previousTargetSelection(previousTargetSelection)
 {}
 
-bool _RenderStep::isUsePreviousTarget() const
+std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
 {
-    return _usePreviousOutput;
+    return _previousTargetSelection;
 }
 
 std::optional<TextureTarget> const& _RenderStep::getTextureTarget() const
@@ -93,9 +96,9 @@ void _RenderStep::prepareExecution(
     }
 }
 
-PointRenderStep _PointRenderStep::create(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+PointRenderStep _PointRenderStep::create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
 {
-    return PointRenderStep(new _PointRenderStep(shaderFilename, usePreviousOutput));
+    return PointRenderStep(new _PointRenderStep(shaderFilename, previousTargetSelection));
 }
 
 void _PointRenderStep::execute(
@@ -125,13 +128,13 @@ void _PointRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_PointRenderStep::_PointRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
-    : _RenderStep(shaderFilename, usePreviousOutput)
+_PointRenderStep::_PointRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
+    : _RenderStep(shaderFilename, previousTargetSelection)
 {}
 
-LineRenderStep _LineRenderStep::create(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+LineRenderStep _LineRenderStep::create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
 {
-    return LineRenderStep(new _LineRenderStep(shaderFilename, usePreviousOutput));
+    return LineRenderStep(new _LineRenderStep(shaderFilename, previousTargetSelection));
 }
 
 void _LineRenderStep::execute(
@@ -156,14 +159,14 @@ void _LineRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_LineRenderStep::_LineRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
-    : _RenderStep(shaderFilename, usePreviousOutput)
+_LineRenderStep::_LineRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
+    : _RenderStep(shaderFilename, previousTargetSelection)
 {
 }
 
-TriangleRenderStep _TriangleRenderStep::create(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+TriangleRenderStep _TriangleRenderStep::create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
 {
-    return TriangleRenderStep(new _TriangleRenderStep(shaderFilename, usePreviousOutput));
+    return TriangleRenderStep(new _TriangleRenderStep(shaderFilename, previousTargetSelection));
 }
 
 void _TriangleRenderStep::execute(
@@ -189,16 +192,17 @@ void _TriangleRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_TriangleRenderStep::_TriangleRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
-    : _RenderStep(shaderFilename, usePreviousOutput)
+_TriangleRenderStep::_TriangleRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
+    : _RenderStep(shaderFilename, previousTargetSelection)
 {
 }
 
 PostProcessingRenderStep _PostProcessingRenderStep::create(
     std::filesystem::path const& shaderFilename,
+    std::optional<int> const& previousTargetSelection,
     std::map<std::string, UniformValueType> const& uniformValues)
 {
-    return PostProcessingRenderStep(new _PostProcessingRenderStep(shaderFilename, uniformValues));
+    return PostProcessingRenderStep(new _PostProcessingRenderStep(shaderFilename, previousTargetSelection, uniformValues));
 }
 
 void _PostProcessingRenderStep::execute(
@@ -229,8 +233,11 @@ void _PostProcessingRenderStep::execute(
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const& shaderFilename, std::map<std::string, UniformValueType> const& uniformValues)
-    : _RenderStep(shaderFilename, false, uniformValues)
+_PostProcessingRenderStep::_PostProcessingRenderStep(
+    std::filesystem::path const& shaderFilename,
+    std::optional<int> const& previousTargetSelection,
+    std::map<std::string, UniformValueType> const& uniformValues)
+    : _RenderStep(shaderFilename, previousTargetSelection, uniformValues)
 {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
@@ -269,9 +276,9 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const
     glEnableVertexAttribArray(1);
 }
 
-ForwardRenderStep _ForwardRenderStep::create()
+ForwardRenderStep _ForwardRenderStep::create(int previousTargetSelection)
 {
-    return ForwardRenderStep(new _ForwardRenderStep());
+    return ForwardRenderStep(new _ForwardRenderStep(previousTargetSelection));
 }
 
 void _ForwardRenderStep::execute(
@@ -285,7 +292,7 @@ void _ForwardRenderStep::execute(
     // Do nothing
 }
 
-_ForwardRenderStep::_ForwardRenderStep()
-    : _RenderStep(true)
+_ForwardRenderStep::_ForwardRenderStep(int previousTargetSelection)
+    : _RenderStep(previousTargetSelection)
 {
 }
