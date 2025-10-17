@@ -234,37 +234,39 @@ void SimulationView::setupRenderPipeline()
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
         RenderBlocks{
-            RenderBlock().sequences({
-                {
+            RenderBlock{
+                RenderSequence().steps({
                     _LineRenderStep::create(Const::LineShader),
                     _TriangleRenderStep::create(Const::TriangleShader, true),
                     _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
                     _PostProcessingRenderStep::create(Const::BlurVerticalShader),
                     _PostProcessingRenderStep::create(Const::MetaballsShader),
-                },
-                {
+                    // _PostProcessingRenderStep::create(Const::FresnelShader),
+                    // _PostProcessingRenderStep::create(Const::SubsurfaceScatterShader),
+                }),
+                RenderSequence().steps({
                     _PointRenderStep::create(Const::PointLargeShader),
-                },
-            }),
-            RenderBlock().sequences({
-                {
+                }),
+            },
+            RenderBlock{
+                RenderSequence().steps({
                     _PostProcessingRenderStep::create(Const::MergeShader),
-                },
-            }),
-            RenderBlock().sequences({
-                {
+                }),
+            },
+            RenderBlock{
+                RenderSequence().repetitions(10).steps({
                     _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
                     _PostProcessingRenderStep::create(Const::BlurVerticalShader),
-                },
-                {
+                    }),
+                RenderSequence().steps({
                     _ForwardRenderStep::create(),
-                },
-            }),
-            RenderBlock().sequences({
-                {
+                })
+            },
+            RenderBlock{
+                RenderSequence().steps({
                     _PostProcessingRenderStep::create(Const::MergeShader),
-                },
-            }),
+                }),
+            },
         });
 }
 

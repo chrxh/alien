@@ -43,27 +43,32 @@ public:
     }
 
     virtual void execute(
+        // Input
         GeometryBuffers const& geometryBuffers,
+        std::vector<unsigned int> const& textures,
+        bool clearBackground,
+
+        // Output
+        RenderTarget const& target,
+
+        // Misc
         GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade,
-        std::vector<RenderStep> const& dependentSteps) = 0;
+        SimulationFacade const& simulationFacade) = 0;
 
-    bool isUsePreviousOutput() const;
-    std::optional<RenderTarget> const& getTarget() const;
-    void setTarget(RenderTarget const& target);
+    bool isUsePreviousTarget() const;
 
-    void setClearBackground(bool value);
+    std::optional<TextureTarget> const& getTextureTarget() const;
+    void setTextureTarget(TextureTarget const& target);
 
 protected:
     _RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
     _RenderStep(bool usePreviousOutput);
 
-    void prepareExecution(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void prepareExecution(bool clearBackground, RenderTarget const& target, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
     Shader _shader;
     bool _usePreviousOutput;
-    std::optional<RenderTarget> _target;
-    bool _clearBackground = false;
+    std::optional<TextureTarget> _target;
 
     std::map<std::string, std::variant<int, float>> _uniformValues;
 };
@@ -76,9 +81,11 @@ public:
 protected:
     void execute(
         GeometryBuffers const& geometryBuffers,
+        std::vector<unsigned int> const& textures,
+        bool clearBackground,
+        RenderTarget const& target,
         GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade,
-        std::vector<RenderStep> const& dependentSteps) override;
+        SimulationFacade const& simulationFacade) override;
 
 private:
     _PointRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
@@ -94,9 +101,11 @@ public:
 protected:
     void execute(
         GeometryBuffers const& geometryBuffers,
+        std::vector<unsigned int> const& textures,
+        bool clearBackground,
+        RenderTarget const& target,
         GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade,
-        std::vector<RenderStep> const& dependentSteps) override;
+        SimulationFacade const& simulationFacade) override;
 
 private:
     _LineRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
@@ -110,9 +119,11 @@ public:
 protected:
     void execute(
         GeometryBuffers const& geometryBuffers,
+        std::vector<unsigned int> const& textures,
+        bool clearBackground,
+        RenderTarget const& target,
         GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade,
-        std::vector<RenderStep> const& dependentSteps) override;
+        SimulationFacade const& simulationFacade) override;
 
 private:
     _TriangleRenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
@@ -126,9 +137,11 @@ public:
 protected:
     void execute(
         GeometryBuffers const& geometryBuffers,
+        std::vector<unsigned int> const& textures,
+        bool clearBackground,
+        RenderTarget const& target,
         GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade,
-        std::vector<RenderStep> const& dependentSteps) override;
+        SimulationFacade const& simulationFacade) override;
 
 private:
     _PostProcessingRenderStep(std::filesystem::path const& shaderFilename);
@@ -146,9 +159,11 @@ public:
 protected:
     void execute(
         GeometryBuffers const& geometryBuffers,
+        std::vector<unsigned int> const& textures,
+        bool clearBackground,
+        RenderTarget const& target,
         GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade,
-        std::vector<RenderStep> const& dependentSteps) override;
+        SimulationFacade const& simulationFacade) override;
 
 private:
     _ForwardRenderStep();

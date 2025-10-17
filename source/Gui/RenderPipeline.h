@@ -6,14 +6,16 @@
 #include "Definitions.h"
 
 // Contains RenderSteps that must be executed in order
-using RenderSequence = std::vector<RenderStep>;
+struct RenderSequence
+{
+    MEMBER(RenderSequence, std::vector<RenderStep>, steps, {});
+    MEMBER(RenderSequence, int, repetitions, 1);
+
+    bool subsequentStepsHaveTarget(size_t index) const;
+};
 
 // Contains RenderSequences that are independent
-struct RenderBlock
-{
-    MEMBER(RenderBlock, std::vector<RenderSequence>, sequences, {});
-    MEMBER(RenderBlock, int, repetitions, 1);
-};
+using RenderBlock = std::vector<RenderSequence>;
 
 // Contains RenderBlocks that must be executed in order
 using RenderBlocks = std::vector<RenderBlock>;

@@ -2,11 +2,23 @@
 
 #include <ranges>
 
+#include <boost/range/adaptor/indexed.hpp>
+
 #include "EngineInterface/GeometryBuffers.h"
 
 #include "RenderStep.h"
-#include "RenderStep.h"
 #include "Shader.h"
+
+bool RenderSequence::subsequentStepsHaveTarget(size_t index) const
+{
+    for (size_t i = index + 1; i < _steps.size(); ++i) {
+        auto const& step = _steps.at(i);
+        if (!step->isUsePreviousTarget()) {
+            return true;
+        }
+    }
+    return false;
+}
 
 _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, RenderBlocks&& blocks)
     : _simulationFacade(simulationFacade)
@@ -63,63 +75,22 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
     }
 
     CHECK(!_blocks.empty());
-    CHECK(_blocks.back()._sequences.size() == 1);
+    CHECK(_blocks.back().size() == 1);
 
-    for (auto& sequence : _blocks.front()) {
-        sequence.front()->setClearBackground(true);
-    }
-
-    // Setup render targets for each step in the pipeline
-    auto getPreviousTarget = [&](size_t i, size_t j, size_t k) {
-        if (k > 0) {
-            // Previous step in the same sequence
-            auto& prevStep = _blocks.at(i).at(j).at(k - 1);
-            return prevStep->getTarget().value();
-        } else if (i > 0) {
-            // Last step in the last sequence of the previous block
-            auto& prevBlock = _blocks.at(i - 1);
-            auto& prevQueue = prevBlock.back();
-            auto& prevStep = prevQueue.back();
-            return prevStep->getTarget().value();
-        } else {
-            return RenderTarget(ScreenTarget());
-        }
-    };
-    auto furtherTargetsAvailable = [&](size_t i, size_t j, size_t k) {
-        // Checking current sequence
-        for (size_t stepIdx = k + 1; stepIdx < _blocks.at(i).at(j).size(); ++stepIdx) {
-            if (!_blocks.at(i).at(j).at(stepIdx)->isUsePreviousOutput()) {
-                return true;
-            }
-        }
-        // Checking subsequent sequences in following blocks
-        for (size_t blockIdx = i + 1; blockIdx < _blocks.size(); ++blockIdx) {
-            for (size_t sequenceIdx = 0; sequenceIdx < _blocks.at(blockIdx).size(); ++sequenceIdx) {
-                for (size_t stepIdx = 0; stepIdx < _blocks.at(blockIdx).at(sequenceIdx).size(); ++stepIdx) {
-                    if (!_blocks.at(blockIdx).at(sequenceIdx).at(stepIdx)->isUsePreviousOutput()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    };
     for (size_t i = 0; i < _blocks.size(); ++i) {
         auto& block = _blocks.at(i);
+        auto isLastBlock = (i == _blocks.size() - 1);
 
-        for (size_t j = 0; j < block._sequences.size(); ++j) {
-            auto& sequence = block._sequences.at(j);
+        for (size_t j = 0; j < block.size(); ++j) {
+            auto& sequence = block.at(j);
 
-            for (size_t k = 0; k < sequence.size(); ++k) {
-                auto& step = sequence.at(k);
-                if (step->isUsePreviousOutput()) {
-                    step->setTarget(getPreviousTarget(i, j, k));
+            for (size_t k = 0; k < sequence._steps.size(); ++k) {
+                auto& step = sequence._steps.at(k);
+                auto isLastStep = (k == sequence._steps.size() - 1);
+                if (step->isUsePreviousTarget() || (isLastBlock && isLastStep && sequence._repetitions == 1)) {
+                    // No own texture target for step necessary
                 } else {
-                    if (furtherTargetsAvailable(i, j, k)) {
-                        step->setTarget(RenderTarget(_TextureTarget::create()));
-                    } else {
-                        step->setTarget(RenderTarget(ScreenTarget()));
-                    }
+                    step->setTextureTarget(_TextureTarget::create());
                 }
             }
         }
@@ -131,10 +102,10 @@ void _RenderPipeline::resize(IntVector2D const& size)
     // Collect texture targets which needs to be resized
     std::set<TextureTarget> textureTargets;
     for (auto const& block : _blocks) {
-        for (auto const& sequence : block._sequences) {
-            for (auto const& step : sequence) {
-                if (std::holds_alternative<TextureTarget>(step->getTarget().value())) {
-                    textureTargets.insert(std::get<TextureTarget>(step->getTarget().value()));
+        for (auto const& sequence : block) {
+            for (auto const& step : sequence._steps) {
+                if (step->getTextureTarget().has_value()) {
+                    textureTargets.insert(step->getTextureTarget().value());
                 }
             }
         }
@@ -162,6 +133,20 @@ void _RenderPipeline::resize(IntVector2D const& size)
     }
 }
 
+namespace
+{
+    std::vector<unsigned int> getTextures(std::vector<RenderTarget> const& targets)
+    {
+        std::vector<unsigned int> result;
+        for (auto const& target : targets) {
+            if (std::holds_alternative<TextureTarget>(target)) {
+                result.emplace_back(std::get<TextureTarget>(target)->texture);
+            }
+        }
+        return result;
+    }
+}
+
 void _RenderPipeline::execute()
 {
     // Copy vertex buffer from Cuda to OpenGL
@@ -170,21 +155,44 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
-    std::optional<RenderBlock> prevBlock;
-    for (auto const& block : _blocks) {
-        for (auto const& sequence : block._sequences) {
-            std::vector<RenderStep> dependentSteps;
-            if (prevBlock.has_value()) {
-                for (auto const& dependentQueue : prevBlock.value()) {
-                    dependentSteps.emplace_back(dependentQueue.back());
+    std::vector<RenderTarget> previousBlockTargets;
+    for (size_t i = 0; i < _blocks.size(); ++i) {
+        auto& block = _blocks.at(i);
+        auto isLastBlock = (i == _blocks.size() - 1);
+
+        std::vector<RenderTarget> blockTargets;
+        for (size_t j = 0; j < block.size(); ++j) {
+            auto& sequence = block.at(j);
+
+            std::vector<RenderTarget> previousTargets = previousBlockTargets;
+            for (int k = 0; k < sequence._repetitions; ++k) {
+                for (size_t l = 0; l < sequence._steps.size(); ++l) {
+                    auto& step = sequence._steps.at(l);
+
+                    // Determine target
+                    RenderTarget target;
+                    if (!step->isUsePreviousTarget()) {
+                        if (!sequence.subsequentStepsHaveTarget(l) && isLastBlock) {
+                            target = RenderTarget(ScreenTarget());
+                        } else {
+                            target = RenderTarget(step->getTextureTarget().value());
+                        }
+                    } else {
+                        CHECK(previousTargets.size() == 1);
+                        target = previousTargets.front();
+                    }
+                    // Execute render step
+                    auto clearBackground = i == 0 && k == 0 && l == 0;
+                    step->execute(_geometryBuffers, getTextures(previousTargets), clearBackground, target, generalRenderInfo, _simulationFacade);
+
+                    // Current output is input for next step
+                    previousTargets = {target};
                 }
             }
-            sequence.front()->execute(_geometryBuffers, generalRenderInfo, _simulationFacade, dependentSteps);
-            for (auto const& [prevStep, step] : std::views::zip(sequence, sequence | std::views::drop(1))) {
-                step->execute(_geometryBuffers, generalRenderInfo, _simulationFacade, {prevStep});
-            }
+            CHECK(previousTargets.size() == 1);
+            blockTargets.emplace_back(previousTargets.front());
         }
-        prevBlock = block;
+        previousBlockTargets = blockTargets;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);

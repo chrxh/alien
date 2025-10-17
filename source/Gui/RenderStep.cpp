@@ -34,27 +34,26 @@ _RenderStep::_RenderStep(bool usePreviousOutput)
     : _usePreviousOutput(usePreviousOutput)
 {}
 
-bool _RenderStep::isUsePreviousOutput() const
+bool _RenderStep::isUsePreviousTarget() const
 {
     return _usePreviousOutput;
 }
 
-std::optional<RenderTarget> const& _RenderStep::getTarget() const
+std::optional<TextureTarget> const& _RenderStep::getTextureTarget() const
 {
     return _target;
 }
 
-void _RenderStep::setTarget(RenderTarget const& target)
+void _RenderStep::setTextureTarget(TextureTarget const& target)
 {
     _target = target;
 }
 
-void _RenderStep::setClearBackground(bool value)
-{
-    _clearBackground = value;
-}
-
-void _RenderStep::prepareExecution(GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade)
+void _RenderStep::prepareExecution(
+    bool clearBackground,
+    RenderTarget const& target,
+    GeneralRenderInfo const& renderInfo,
+    SimulationFacade const& simulationFacade)
 {
     auto worldSize = simulationFacade->getWorldSize();
     auto worldRect = Viewport::get().getVisibleWorldRect();
@@ -79,16 +78,14 @@ void _RenderStep::prepareExecution(GeneralRenderInfo const& renderInfo, Simulati
         }
     }
 
-    if (std::holds_alternative<TextureTarget>(_target.value())) {
-        auto textureTarget = std::get<TextureTarget>(_target.value());
-        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
-    } else {
+    if (std::holds_alternative<ScreenTarget>(target)) {
         glBindFramebuffer(GL_FRAMEBUFFER, renderInfo.screenFbo);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, std::get<TextureTarget>(target)->fbo);
     }
-
     glViewport(0, 0, viewSize.x, viewSize.y);
 
-    if (_clearBackground) {
+    if (clearBackground) {
         // Clear with black background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -102,11 +99,13 @@ PointRenderStep _PointRenderStep::create(std::filesystem::path const& shaderFile
 
 void _PointRenderStep::execute(
     GeometryBuffers const& geometryBuffers,
+    std::vector<unsigned> const& textures,
+    bool clearBackground,
+    RenderTarget const& target,
     GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade,
-    std::vector<RenderStep> const& dependentSteps)
+    SimulationFacade const& simulationFacade)
 {
-    prepareExecution(renderInfo, simulationFacade);
+    prepareExecution(clearBackground, target, renderInfo, simulationFacade);
 
     // Enable point sprites
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -136,11 +135,13 @@ LineRenderStep _LineRenderStep::create(std::filesystem::path const& shaderFilena
 
 void _LineRenderStep::execute(
     GeometryBuffers const& geometryBuffers,
+    std::vector<unsigned int> const& textures,
+    bool clearBackground,
+    RenderTarget const& target,
     GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade,
-    std::vector<RenderStep> const& dependentSteps)
+    SimulationFacade const& simulationFacade)
 {
-    prepareExecution(renderInfo, simulationFacade);
+    prepareExecution(clearBackground, target, renderInfo, simulationFacade);
     
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -166,11 +167,13 @@ TriangleRenderStep _TriangleRenderStep::create(std::filesystem::path const& shad
 
 void _TriangleRenderStep::execute(
     GeometryBuffers const& geometryBuffers,
+    std::vector<unsigned int> const& textures,
+    bool clearBackground,
+    RenderTarget const& target,
     GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade,
-    std::vector<RenderStep> const& dependentSteps)
+    SimulationFacade const& simulationFacade)
 {
-    prepareExecution(renderInfo, simulationFacade);
+    prepareExecution(clearBackground, target, renderInfo, simulationFacade);
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -197,29 +200,27 @@ PostProcessingRenderStep _PostProcessingRenderStep::create(std::filesystem::path
 
 void _PostProcessingRenderStep::execute(
     GeometryBuffers const& geometryBuffers,
+    std::vector<unsigned int> const& textures,
+    bool clearBackground,
+    RenderTarget const& target,
     GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade,
-    std::vector<RenderStep> const& dependentSteps)
+    SimulationFacade const& simulationFacade)
 {
-    prepareExecution(renderInfo, simulationFacade);
+    prepareExecution(clearBackground, target, renderInfo, simulationFacade);
 
     glBindVertexArray(_vao);
     
-    auto numDependentSteps = dependentSteps.size();
-    CHECK(numDependentSteps <= 2);
-    if (numDependentSteps >= 1) {
-        auto textureTarget = std::get<TextureTarget>(dependentSteps.at(0)->getTarget().value());
-
+    auto numTextures = textures.size();
+    CHECK(numTextures <= 2);
+    if (numTextures >= 1) {
         _shader->setInt("inputTexture1", 0);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
+        glBindTexture(GL_TEXTURE_2D, textures.at(0));
     }
-    if (numDependentSteps >= 2) {
-        auto textureTarget = std::get<TextureTarget>(dependentSteps.at(1)->getTarget().value());
-
+    if (numTextures >= 2) {
         _shader->setInt("inputTexture2", 1);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
+        glBindTexture(GL_TEXTURE_2D, textures.at(1));
     }
     
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -272,9 +273,11 @@ ForwardRenderStep _ForwardRenderStep::create()
 
 void _ForwardRenderStep::execute(
     GeometryBuffers const& geometryBuffers,
+    std::vector<unsigned int> const& textures,
+    bool clearBackground,
+    RenderTarget const& target,
     GeneralRenderInfo const& renderInfo,
-    SimulationFacade const& simulationFacade,
-    std::vector<RenderStep> const& dependentSteps)
+    SimulationFacade const& simulationFacade)
 {
     // Do nothing
 }
