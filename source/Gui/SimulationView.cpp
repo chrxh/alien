@@ -275,6 +275,13 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(Const::MergeShader),
                 }),
             },
+
+            // Fifth render block: Apply tone mapping and gamma correction
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(Const::ToneMappingShader),
+                }),
+            },
         });
 }
 

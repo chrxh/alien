@@ -29,6 +29,7 @@ namespace Const
     std::filesystem::path const FresnelShader = ShaderPath / "Fresnel";
     std::filesystem::path const SubsurfaceScatterShader = ShaderPath / "SubsurfaceScatter";
     std::filesystem::path const MergeShader = ShaderPath / "Merge";
+    std::filesystem::path const ToneMappingShader = ShaderPath / "ToneMapping";
 
     std::filesystem::path const EditorOnFilename = ImagesPath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ImagesPath / "editor off.png";

@@ -27,5 +27,5 @@ void main()
     // Output with metaball effect - modulate color intensity
     vec3 outputColor = color.rgb * metaball;
     
-    FragColor = clamp(vec4(outputColor, 1.0f), 0.0, 1.0);
+    FragColor = vec4(outputColor, 1.0f);
 }
