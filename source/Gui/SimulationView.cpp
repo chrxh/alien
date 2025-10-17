@@ -240,8 +240,8 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _LineRenderStep::create(Const::LineShader),
                     _TriangleRenderStep::create(Const::TriangleShader, true),
-                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
-                    _PostProcessingRenderStep::create(Const::BlurVerticalShader),
+                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader, {{"strength", 0.1f}}),
+                    _PostProcessingRenderStep::create(Const::BlurVerticalShader, {{"strength", 0.1f}}),
                     _PostProcessingRenderStep::create(Const::MetaballsShader),
                     // _PostProcessingRenderStep::create(Const::FresnelShader),
                     // _PostProcessingRenderStep::create(Const::SubsurfaceScatterShader),
@@ -261,24 +261,18 @@ void SimulationView::setupRenderPipeline()
             // Third render block: Apply blur in one sequence (10x times) and keep original buffer in another sequence
             RenderBlock{
                 RenderSequence().repetitions(10).steps({
-                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
-                    _PostProcessingRenderStep::create(Const::BlurVerticalShader),
+                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader, {{"strength", 1.25f}}),
+                    _PostProcessingRenderStep::create(Const::BlurVerticalShader, {{"strength", 1.25f}}),
                     }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(),
                 })
             },
 
-            // Fourth render block: Merge blur scene with original scene
+            // Fourth render block: Merge blur scene with original scene and tone mapping
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(Const::MergeShader),
-                }),
-            },
-
-            // Fifth render block: Apply tone mapping and gamma correction
-            RenderBlock{
-                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(Const::MergeBlurShader),
                     _PostProcessingRenderStep::create(Const::ToneMappingShader),
                 }),
             },

@@ -5,5 +5,5 @@ out vec4 FragColor;
 void main()
 {
     // Use the averaged color from geometry shader with some transparency
-    FragColor = vec4(fragColor, 0.3);
+    FragColor = vec4(fragColor, 1.0);
 }

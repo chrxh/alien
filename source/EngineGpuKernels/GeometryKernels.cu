@@ -815,18 +815,22 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
         }
         }
         
-        auto luminance = (cell->energy + 300.0f) / 500.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
+        auto luminance = (cell->energy + 100.0f) / 300.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
+        auto white = luminance / 10.0f;
         if (cell->selected == 1) {
-            luminance = (luminance + 0.1f) * 1.3f;
+            luminance = (luminance + 0.1f) * 1.7f;
+            white = 0.5f;
         }
-        //luminance = min(1.0f, luminance);
+        if (cell->selected == 2) {
+            luminance = luminance * 1.3f;
+        }
 
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
-        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + luminance / 10.0f;
-        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + luminance / 10.0f;
-        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + luminance / 10.0f;
+        objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
+        objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
+        objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
