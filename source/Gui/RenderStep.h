@@ -31,6 +31,8 @@ struct GeneralRenderInfo
     int screenFbo = 0;
 };
 
+using UniformValueType = std::variant<int, float>;
+
 class _RenderStep
 {
 public:
@@ -61,7 +63,7 @@ public:
     void setTextureTarget(TextureTarget const& target);
 
 protected:
-    _RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput);
+    _RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput, std::map<std::string, UniformValueType> const& uniformValues = {});
     _RenderStep(bool usePreviousOutput);
 
     void prepareExecution(bool clearBackground, RenderTarget const& target, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
@@ -70,7 +72,7 @@ protected:
     bool _usePreviousOutput;
     std::optional<TextureTarget> _target;
 
-    std::map<std::string, std::variant<int, float>> _uniformValues;
+    std::map<std::string, UniformValueType> _uniformValues;
 };
 
 class _PointRenderStep : public _RenderStep
@@ -132,7 +134,7 @@ private:
 class _PostProcessingRenderStep : public _RenderStep
 {
 public:
-    static PostProcessingRenderStep create(std::filesystem::path const& shaderFilename);
+    static PostProcessingRenderStep create(std::filesystem::path const& shaderFilename, std::map<std::string, UniformValueType> const& uniformValues = {});
 
 protected:
     void execute(
@@ -144,7 +146,7 @@ protected:
         SimulationFacade const& simulationFacade) override;
 
 private:
-    _PostProcessingRenderStep(std::filesystem::path const& shaderFilename);
+    _PostProcessingRenderStep(std::filesystem::path const& shaderFilename, std::map<std::string, UniformValueType> const& uniformValues);
 
     unsigned int _vao = 0;
     unsigned int _vbo = 0;

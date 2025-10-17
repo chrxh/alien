@@ -13,8 +13,9 @@ TextureTarget _TextureTarget::create()
     return TextureTarget(new _TextureTarget());
 }
 
-_RenderStep::_RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput)
+_RenderStep::_RenderStep(std::filesystem::path const& shaderFilename, bool usePreviousOutput, std::map<std::string, UniformValueType> const& uniformValues)
     : _usePreviousOutput(usePreviousOutput)
+    , _uniformValues(uniformValues)
 {
     auto vertexShaderPath = shaderFilename;
     vertexShaderPath.replace_extension(".vs");
@@ -193,9 +194,11 @@ _TriangleRenderStep::_TriangleRenderStep(std::filesystem::path const& shaderFile
 {
 }
 
-PostProcessingRenderStep _PostProcessingRenderStep::create(std::filesystem::path const& shaderFilename)
+PostProcessingRenderStep _PostProcessingRenderStep::create(
+    std::filesystem::path const& shaderFilename,
+    std::map<std::string, UniformValueType> const& uniformValues)
 {
-    return PostProcessingRenderStep(new _PostProcessingRenderStep(shaderFilename));
+    return PostProcessingRenderStep(new _PostProcessingRenderStep(shaderFilename, uniformValues));
 }
 
 void _PostProcessingRenderStep::execute(
@@ -226,8 +229,8 @@ void _PostProcessingRenderStep::execute(
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const& shaderFilename)
-    : _RenderStep(shaderFilename, false)
+_PostProcessingRenderStep::_PostProcessingRenderStep(std::filesystem::path const& shaderFilename, std::map<std::string, UniformValueType> const& uniformValues)
+    : _RenderStep(shaderFilename, false, uniformValues)
 {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);

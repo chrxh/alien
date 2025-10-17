@@ -6,13 +6,14 @@ in vec2 texCoord;
 uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
 uniform float zoom;
+uniform float strength;
 
 void main()
 {
     vec2 texelSize = 1.0 / viewportSize;
     vec4 result = vec4(0.0);
     float totalWeight = 0.0;
-    float blurRadius = zoom / 16.0;
+    float blurRadius = zoom * strength;
     
     // Dynamic blur based on radius
     int radius = max(1, int(ceil(blurRadius)));
