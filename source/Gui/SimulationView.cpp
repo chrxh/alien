@@ -234,6 +234,8 @@ void SimulationView::setupRenderPipeline()
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
         RenderBlocks{
+
+            // First render block: Render foreground and background scene on different render sequences
             RenderBlock{
                 RenderSequence().steps({
                     _LineRenderStep::create(Const::LineShader),
@@ -248,11 +250,15 @@ void SimulationView::setupRenderPipeline()
                     _PointRenderStep::create(Const::PointLargeShader),
                 }),
             },
+
+            // Second render block: Merge foreground and background
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(Const::MergeShader),
                 }),
             },
+
+            // Third render block: Apply blur in one sequence (10x times) and keep original buffer in another sequence
             RenderBlock{
                 RenderSequence().repetitions(10).steps({
                     _PostProcessingRenderStep::create(Const::BlurHorizontalShader),
@@ -262,6 +268,8 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(),
                 })
             },
+
+            // Fourth render block: Merge blur scene with original scene
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(Const::MergeShader),
