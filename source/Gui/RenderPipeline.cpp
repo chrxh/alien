@@ -77,24 +77,14 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);
 
-    for (size_t i = 0; i < _blocks.size(); ++i) {
-        auto& block = _blocks.at(i);
-        auto isLastBlock = (i == _blocks.size() - 1);
-
-        for (size_t j = 0; j < block.size(); ++j) {
-            auto& sequence = block.at(j);
-
-            for (size_t k = 0; k < sequence._steps.size(); ++k) {
-                auto& step = sequence._steps.at(k);
-                auto isLastStep = (k == sequence._steps.size() - 1);
-                if (step->isUsePreviousTarget() || (isLastBlock && isLastStep && sequence._repetitions == 1)) {
-                    // No own texture target for step necessary
-                } else {
-                    step->setTextureTarget(_TextureTarget::create());
-                }
-            }
-        }
-    }
+    // Create texture targets for all steps which need one
+    forEachStep(
+        [](RenderStep& step) {
+            auto result = _TextureTarget::create();
+            step->setTextureTarget(result);
+            return result;
+        },
+        [](RenderStep&, std::vector<unsigned int> const&, bool, RenderTarget const&) {});
 }
 
 void _RenderPipeline::resize(IntVector2D const& size)
@@ -155,6 +145,20 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
+    forEachStep([](RenderStep& step) {
+            return step->getTextureTarget().value();
+        },
+        [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target) {
+            step->execute(_geometryBuffers, textures, clearBackground, target, generalRenderInfo, _simulationFacade);
+        });
+
+    glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
+}
+
+void _RenderPipeline::forEachStep(
+    std::function<TextureTarget(RenderStep& step)> const& getTextureTarget,
+    std::function<void(RenderStep& step, std::vector<unsigned> const& textures, bool clearBackground, RenderTarget const& target)> const& executeStep)
+{
     std::vector<RenderTarget> previousBlockTargets;
     for (size_t i = 0; i < _blocks.size(); ++i) {
         auto& block = _blocks.at(i);
@@ -175,7 +179,7 @@ void _RenderPipeline::execute()
                         if (!sequence.subsequentStepsHaveTarget(l) && isLastBlock) {
                             target = RenderTarget(ScreenTarget());
                         } else {
-                            target = RenderTarget(step->getTextureTarget().value());
+                            target = getTextureTarget(step);
                         }
                     } else {
                         CHECK(previousTargets.size() == 1);
@@ -183,7 +187,7 @@ void _RenderPipeline::execute()
                     }
                     // Execute render step
                     auto clearBackground = i == 0 && k == 0 && l == 0;
-                    step->execute(_geometryBuffers, getTextures(previousTargets), clearBackground, target, generalRenderInfo, _simulationFacade);
+                    executeStep(step, getTextures(previousTargets), clearBackground, target);
 
                     // Current output is input for next step
                     previousTargets = {target};
@@ -194,6 +198,4 @@ void _RenderPipeline::execute()
         }
         previousBlockTargets = blockTargets;
     }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
 }
