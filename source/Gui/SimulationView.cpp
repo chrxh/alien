@@ -258,11 +258,11 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Third render block: Apply blur in one sequence (10x times) and keep original buffer in another sequence
+            // Third render block: Apply blur in one sequence (4x times) and keep original buffer in another sequence
             RenderBlock{
-                RenderSequence().repetitions(10).steps({
-                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader, {{"strength", 1.25f}}),
-                    _PostProcessingRenderStep::create(Const::BlurVerticalShader, {{"strength", 1.25f}}),
+                RenderSequence().repetitions(4).steps({
+                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader, {{"strength", 2.0f}}),
+                    _PostProcessingRenderStep::create(Const::BlurVerticalShader, {{"strength", 2.0f}}),
                     }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(),

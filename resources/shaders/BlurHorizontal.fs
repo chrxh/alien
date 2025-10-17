@@ -11,23 +11,24 @@ uniform float strength;
 void main()
 {
     vec2 texelSize = 1.0 / viewportSize;
-    vec4 result = vec4(0.0);
-    float totalWeight = 0.0;
-    float blurRadius = zoom * strength;
     
-    // Dynamic blur based on radius
-    int radius = max(1, int(ceil(blurRadius)));
+    // Use fixed kernel size for better performance
+    // Precomputed Gaussian weights for 13-tap kernel (sigma ~= 4.0)
+    const float weights[7] = float[7](
+        0.19638, 0.29675, 0.09450, 0.01038, 0.00038, 0.00000, 0.00000
+    );
     
-    // Apply horizontal Gaussian blur
-    for (int x = -radius; x <= radius; x++) {
-        float distance = float(x);
-        // Gaussian weight calculation
-        float weight = exp(-0.5 * (distance * distance) / (blurRadius * blurRadius));
-        vec2 offset = vec2(distance * texelSize.x, 0.0);
-        result += texture(inputTexture1, texCoord + offset) * weight;
-        totalWeight += weight;
+    vec4 result = texture(inputTexture1, texCoord) * weights[0];
+    
+    // Scale offset by strength and zoom for adaptive blur
+    float offset = strength * max(1.0, zoom * 0.1);
+    
+    // Apply horizontal blur with fixed 13-tap kernel
+    for (int i = 1; i < 7; i++) {
+        float off = float(i) * texelSize.x * offset;
+        result += texture(inputTexture1, texCoord + vec2(off, 0.0)) * weights[i];
+        result += texture(inputTexture1, texCoord - vec2(off, 0.0)) * weights[i];
     }
     
-    // Normalize by total weight
-    FragColor = result / totalWeight;
+    FragColor = result;
 }
