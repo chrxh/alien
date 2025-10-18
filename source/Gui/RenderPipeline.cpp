@@ -27,7 +27,7 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
 {
     {
         auto vao = _geometryBuffers->getVaoForPointsAndLines();
-        auto vbo = _geometryBuffers->getVbo();
+        auto vbo = _geometryBuffers->getVboForCells();
         auto ebo = _geometryBuffers->getEboForLines();
 
         glBindVertexArray(vao);
@@ -47,7 +47,7 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
     }
     {
         auto vao = _geometryBuffers->getVaoForTriangles();
-        auto vbo = _geometryBuffers->getVbo();
+        auto vbo = _geometryBuffers->getVboForCells();
         auto ebo = _geometryBuffers->getEboForTriangles();
 
         glBindVertexArray(vao);

@@ -32,7 +32,7 @@ public:
     unsigned int getVaoForPointsAndLines() const { return _vaoForPointsAndLines; }
     unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
     unsigned int getVaoForEnergyParticles() const { return _vaoForEnergyParticles; }
-    unsigned int getVbo() const { return _vbo; }
+    unsigned int getVboForCells() const { return _vboForCells; }
     unsigned int getVboForEnergyParticles() const { return _vboForEnergyParticles; }
     unsigned int getEboForLines() const { return _eboForLines; }
     unsigned int getEboForTriangles() const { return _eboForTriangles; }
@@ -45,7 +45,7 @@ private:
     unsigned int _vaoForPointsAndLines = 0;
     unsigned int _vaoForTriangles = 0;
     unsigned int _vaoForEnergyParticles = 0;
-    unsigned int _vbo = 0;
+    unsigned int _vboForCells = 0;
     unsigned int _vboForEnergyParticles = 0;
     unsigned int _eboForLines = 0;
     unsigned int _eboForTriangles = 0;

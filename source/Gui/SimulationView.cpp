@@ -235,7 +235,7 @@ void SimulationView::setupRenderPipeline()
         _simulationFacade,
         RenderBlocks{
 
-            // Render block 1: Render foreground and background scene on different render sequences
+            // Render block 1: Render foreground, background and particle scenes in different render sequences
             RenderBlock{
                 RenderSequence().steps({
                     _LineRenderStep::create(StepParameters().shader(Const::LineShader)),

@@ -8,7 +8,7 @@ GeometryBuffers _GeometryBuffers::create()
 {
     auto result = new _GeometryBuffers();
     glGenVertexArrays(1, &result->_vaoForPointsAndLines);
-    glGenBuffers(1, &result->_vbo);
+    glGenBuffers(1, &result->_vboForCells);
     glGenBuffers(1, &result->_eboForLines);
     glGenVertexArrays(1, &result->_vaoForTriangles);
     glGenBuffers(1, &result->_eboForTriangles);
@@ -22,7 +22,7 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
     _numObjects = numRenderObjects;
     if (numRenderObjects.vertices >= _vertexBufferCapacity) {
         _vertexBufferCapacity = std::max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
-        glBindBuffer(GL_ARRAY_BUFFER, getVbo());
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
         glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(CellVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.energyParticles >= _energyParticleBufferCapacity) {
