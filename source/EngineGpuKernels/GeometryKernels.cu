@@ -866,10 +866,10 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
     //    auto bufferIndex = numCells + index;
     //    objectData[bufferIndex].pos[0] = pos.x;
     //    objectData[bufferIndex].pos[1] = pos.y;
+    //    objectData[bufferIndex].pos[2] = 0.0f;  // Particles don't need z-position for lighting
     //    objectData[bufferIndex].color[0] = 0.2f;
     //    objectData[bufferIndex].color[1] = 0.2f;
     //    objectData[bufferIndex].color[2] = 0.0f;
-    //    objectData[bufferIndex].zPos = 0.0f;  // Particles don't need z-position
     //}
 }
 
