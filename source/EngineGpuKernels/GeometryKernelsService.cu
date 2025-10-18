@@ -65,6 +65,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
 
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
+    result.energyParticles = data.objects.particles.getNumEntries_host();
     
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
@@ -88,6 +89,11 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedBuffer), &bufferSize, renderingData.vertexBuffer));
 
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.energyParticleBuffer));
+    VertexData* mappedEnergyParticleBuffer;
+    size_t energyParticleBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
     unsigned int* mappedLineIndexBuffer;
     size_t lineIndexBufferSize;
@@ -98,8 +104,11 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     size_t triangleIndexBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
 
-    // First kernel: Extract vertex data (cells at indices 0..numCells-1, particles at numCells..numCells+numParticles-1)
+    // First kernel: Extract vertex data (cells at indices 0..numCells-1)
     KERNEL_CALL(cudaExtractObjectData, data, mappedBuffer);
+    
+    // Extract energy particle data
+    KERNEL_CALL(cudaExtractEnergyParticleData, data, mappedEnergyParticleBuffer);
     
     // Second kernel: Extract line indices from cell connections
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
@@ -110,6 +119,7 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     KERNEL_CALL(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices);
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 }

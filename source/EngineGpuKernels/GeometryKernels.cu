@@ -951,3 +951,32 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         }
     }
 }
+
+__global__ void cudaExtractEnergyParticleData(SimulationData data, VertexData* energyParticleData)
+{
+    // Process energy particles - each particle goes to its index position
+    auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
+        auto const& particle = data.objects.particles.at(index);
+        if (!particle) {
+            continue;
+        }
+
+        auto pos = particle->pos;
+
+        // Light yellow color for energy particles
+        float intensity = max(min((particle->energy + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
+        if (particle->selected) {
+            intensity *= 2.5f;
+        }
+        intensity = max(0.08f, intensity);
+
+        // Write energy particle data
+        energyParticleData[index].pos[0] = pos.x;
+        energyParticleData[index].pos[1] = pos.y;
+        energyParticleData[index].pos[2] = 0.0f;  // Energy particles don't need z-position for lighting
+        energyParticleData[index].color[0] = intensity * 1.0f;  // Red component
+        energyParticleData[index].color[1] = intensity * 1.0f;  // Green component
+        energyParticleData[index].color[2] = intensity * 0.5f;  // Blue component (reduced for yellow tint)
+    }
+}
