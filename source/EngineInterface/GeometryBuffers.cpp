@@ -23,12 +23,12 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
     if (numRenderObjects.vertices >= _vertexBufferCapacity) {
         _vertexBufferCapacity = std::max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVbo());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(CellVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.energyParticles >= _energyParticleBufferCapacity) {
         _energyParticleBufferCapacity = std::max(numRenderObjects.energyParticles * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergyParticles());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_energyParticleBufferCapacity * sizeof(VertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(_energyParticleBufferCapacity * sizeof(EnergyParticleVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));

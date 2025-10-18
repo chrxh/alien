@@ -85,12 +85,12 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     auto const& gpuSettings = settings.cudaSettings;
     
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
-    VertexData* mappedBuffer;
+    CellVertexData* mappedBuffer;
     size_t bufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedBuffer), &bufferSize, renderingData.vertexBuffer));
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.energyParticleBuffer));
-    VertexData* mappedEnergyParticleBuffer;
+    EnergyParticleVertexData* mappedEnergyParticleBuffer;
     size_t energyParticleBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
 

@@ -52,4 +52,5 @@ class _GeometryBuffers;
 using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 
 struct NumRenderObjects;
-struct VertexData;
+struct CellVertexData;
+struct EnergyParticleVertexData;

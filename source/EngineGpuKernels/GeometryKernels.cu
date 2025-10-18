@@ -768,7 +768,7 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
-__global__ void cudaExtractObjectData(SimulationData data, VertexData* objectData)
+__global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
     auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
@@ -952,7 +952,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractEnergyParticleData(SimulationData data, VertexData* energyParticleData)
+__global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData)
 {
     // Process energy particles - each particle goes to its index position
     auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());

@@ -12,9 +12,15 @@ struct NumRenderObjects
     uint64_t energyParticles;
 };
 
-struct VertexData
+struct CellVertexData
 {
     float pos[3];    // x, y, z position (z used for lighting)
+    float color[3];  // r, g, b color
+};
+
+struct EnergyParticleVertexData
+{
+    float pos[3];    // x, y, z position
     float color[3];  // r, g, b color
 };
 
