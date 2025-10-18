@@ -84,7 +84,7 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
             step->setTextureTarget(result);
             return result;
         },
-        [](RenderStep&, std::vector<unsigned int> const&, bool, RenderTarget const&) {});
+        [](RenderStep&, std::vector<unsigned int> const&, bool, RenderTarget const&, float) {});
 }
 
 void _RenderPipeline::resize(IntVector2D const& size)
@@ -125,8 +125,16 @@ void _RenderPipeline::execute()
 
     forEachStep(
         [](RenderStep& step) { return step->getTextureTarget(); },
-        [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target) {
-            step->execute(_geometryBuffers, textures, clearBackground, target, generalRenderInfo, _simulationFacade);
+        [this,
+         &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target, float scale) {
+            step->execute(ExecutionParameters()
+                              .geometryBuffers(_geometryBuffers)
+                              .textures(textures)
+                              .clearBackground(clearBackground)
+                              .target(target)
+                              .scale(scale) 
+                              .renderInfo(generalRenderInfo)
+                              .simulationFacade(_simulationFacade));
         });
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
@@ -134,44 +142,54 @@ void _RenderPipeline::execute()
 
 void _RenderPipeline::forEachStep(
     std::function<TextureTarget(RenderStep& step)> const& getTextureTarget,
-    std::function<void(RenderStep& step, std::vector<unsigned> const& textures, bool clearBackground, RenderTarget const& target)> const& executeStep)
+    std::function<void(RenderStep& step, std::vector<unsigned> const& textures, bool clearBackground, RenderTarget const& target, float scale)> const& executeStep)
 {
     std::vector<RenderTarget> previousBlockTargets;
+    std::vector<float> previousBlockScales;
     for (size_t i = 0; i < _blocks.size(); ++i) {
         auto& block = _blocks.at(i);
         auto isLastBlock = (i == _blocks.size() - 1);
 
         std::vector<RenderTarget> blockTargets;
+        std::vector<float> blockScales;
         for (size_t j = 0; j < block.size(); ++j) {
             auto& sequence = block.at(j);
 
             std::vector<RenderTarget> previousTargets = previousBlockTargets;
+            std::vector<float> previousScales = previousBlockScales;
             for (int k = 0; k < sequence._repetitions; ++k) {
                 for (size_t l = 0; l < sequence._steps.size(); ++l) {
                     auto& step = sequence._steps.at(l);
 
                     // Determine target
                     RenderTarget target;
+                    float scale;
                     if (auto previousTarget = step->getPreviousTargetSelection()) {
                         target = previousTargets.at(previousTarget.value());
+                        scale = previousScales.at(previousTarget.value());
                     } else {
                         if (!sequence.subsequentStepsHaveTarget(l) && isLastBlock) {
                             target = RenderTarget(ScreenTarget());
+                            scale = 1.0f;
                         } else {
                             target = getTextureTarget(step);
+                            scale = step->getTextureScale();
                         }
                     }
                     // Execute render step
                     auto clearBackground = i == 0 && k == 0 && l == 0;
-                    executeStep(step, getTextures(previousTargets), clearBackground, target);
+                    executeStep(step, getTextures(previousTargets), clearBackground, target, scale);
 
                     // Current output is input for next step
                     previousTargets = {target};
+                    previousScales = {scale};
                 }
             }
             CHECK(previousTargets.size() == 1);
             blockTargets.emplace_back(previousTargets.front());
+            blockScales.emplace_back(previousScales.front());
         }
         previousBlockTargets = blockTargets;
+        previousBlockScales = blockScales;
     }
 }

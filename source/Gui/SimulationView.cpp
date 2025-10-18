@@ -268,16 +268,29 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block 4: Two outputs: blur in one sequence (10x times) and original
+            // Render block 4: Two outputs: wide-range bloom with downscale chain and original
             RenderBlock{
-                RenderSequence().repetitions(10).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}})),
-                    }),
+                RenderSequence().repetitions(6).steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.0f)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.0f / 1.5f)),
+                }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                })
-            },
+                })},
+
+            // Render block 4: Two outputs: wide-range bloom with upscale chain and original
+            RenderBlock{
+                RenderSequence().repetitions(6).steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.0f)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.5f)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                })},
 
             // Render block 5: Merge and tone mapping
             RenderBlock{

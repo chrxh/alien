@@ -32,7 +32,8 @@ public:
 private:
     void forEachStep(
         std::function<TextureTarget(RenderStep& step)> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target)> const& executeStep);
+        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target, float scale)> const&
+            executeStep);
 
     SimulationFacade _simulationFacade;
     RenderBlocks _blocks;
