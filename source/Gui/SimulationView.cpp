@@ -235,7 +235,7 @@ void SimulationView::setupRenderPipeline()
         _simulationFacade,
         RenderBlocks{
 
-            // First render block: Render foreground and background scene on different render sequences
+            // Render block 1: Render foreground and background scene on different render sequences
             RenderBlock{
                 RenderSequence().steps({
                     _LineRenderStep::create(Const::LineShader),
@@ -251,25 +251,35 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Second render block: Merge foreground and background
+            // Render block 2: Merge foreground and background
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(Const::MergeShader),
                 }),
             },
 
-            // Third render block: Apply blur in one sequence (10x times) and keep original buffer in another sequence
+            // Render block 3: Two outputs: Threshold and original
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(Const::ThresholdShader),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(0),
+                }),
+            },
+
+            // Render block 4: Two outputs: blur in one sequence (10x times) and original
             RenderBlock{
                 RenderSequence().repetitions(10).steps({
                     _PostProcessingRenderStep::create(Const::BlurHorizontalShader, std::nullopt, {{"strength", 1.25f}}),
                     _PostProcessingRenderStep::create(Const::BlurVerticalShader, std::nullopt, {{"strength", 1.25f}}),
                     }),
                 RenderSequence().steps({
-                    _ForwardRenderStep::create(0),
+                    _ForwardRenderStep::create(1),
                 })
             },
 
-            // Fourth render block: Merge blur scene with original scene and tone mapping
+            // Render block 5: Merge and tone mapping
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(Const::MergeBlurShader),

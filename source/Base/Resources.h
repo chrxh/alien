@@ -28,6 +28,7 @@ namespace Const
     std::filesystem::path const MetaballsShader = ShaderPath / "Metaballs";
     std::filesystem::path const FresnelShader = ShaderPath / "Fresnel";
     std::filesystem::path const SubsurfaceScatterShader = ShaderPath / "SubsurfaceScatter";
+    std::filesystem::path const ThresholdShader = ShaderPath / "Threshold";
     std::filesystem::path const MergeShader = ShaderPath / "Merge";
     std::filesystem::path const MergeBlurShader = ShaderPath / "MergeBlur";
     std::filesystem::path const ToneMappingShader = ShaderPath / "ToneMapping";
