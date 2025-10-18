@@ -16,7 +16,7 @@ void main()
 
     if (mode == 0) {
         float brightness = dot(color2.rgb, vec3(1.0));
-        vec3 finalColor = mix(color1.rgb * 1.0, color2.rgb, brightness);
+        vec3 finalColor = mix(color1.rgb * 0.8, color2.rgb, brightness);
         FragColor = vec4(finalColor, 1.0f);
         // vec3 mergedColor = color1.rgb * 0.7 + color2.rgb * 0.3;
         // FragColor = vec4(mergedColor, 1.0f);

@@ -825,6 +825,10 @@ __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectDat
             luminance = luminance * 1.3f;
         }
 
+        if (cell->signalState == SignalState_Active) {
+            white = 0.4f;
+        }
+
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;

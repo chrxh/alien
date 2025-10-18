@@ -62,7 +62,7 @@ void _RenderStep::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, toInt(toFloat(size.x) * _textureScale), toInt(toFloat(size.y) * _textureScale), 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     // Init framebuffer
     glGenFramebuffers(1, &_target->fbo);
@@ -111,7 +111,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     } else {
         glBindFramebuffer(GL_FRAMEBUFFER, std::get<TextureTarget>(parameters._target)->fbo);
     }
-    glViewport(0, 0, toInt(toFloat(viewSize.x) * _textureScale), toInt(toFloat(viewSize.y) * _textureScale));
+    glViewport(0, 0, toInt(toFloat(viewSize.x) * parameters._scale), toInt(toFloat(viewSize.y) * parameters._scale));
 
     if (parameters._clearBackground) {
         // Clear with black background

@@ -49,6 +49,7 @@ struct ExecutionParameters
 
     // Output
     MEMBER(ExecutionParameters, RenderTarget, target, ScreenTarget());
+    MEMBER(ExecutionParameters, float, scale, 1.0f);
 
     // Misc
     MEMBER(ExecutionParameters, GeneralRenderInfo, renderInfo, GeneralRenderInfo());
