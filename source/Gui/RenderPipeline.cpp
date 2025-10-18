@@ -34,17 +34,13 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         // Setup vertex attributes for VertexData (same as PointRenderStep)
-        // Position (2 floats)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+        // Position (3 floats: x, y, z)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Color (3 floats) - used for line colors
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+        // Color (3 floats: r, g, b)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-
-        // Z-position (1 float) - used for lighting calculations
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
-        glEnableVertexAttribArray(2);
 
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -58,17 +54,13 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         // Setup vertex attributes for VertexData (same as PointRenderStep)
-        // Position (2 floats)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+        // Position (3 floats: x, y, z)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
-        // Color (3 floats) - not used for lines but needed for compatibility
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(2 * sizeof(float)));
+        // Color (3 floats: r, g, b)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-
-        // Z-position (1 float) - used for lighting in triangle rendering
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(5 * sizeof(float)));
-        glEnableVertexAttribArray(2);
 
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
