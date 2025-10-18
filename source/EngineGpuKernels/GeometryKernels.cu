@@ -770,18 +770,12 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
 
 __global__ void cudaExtractObjectData(SimulationData data, VertexData* objectData)
 {
-    BaseMap const& map = data.cellMap;
-
     // Process cells - each cell goes to its index position
     auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        if (!cell) {
-            continue;
-        }
 
         auto pos = cell->pos;
-        map.correctPosition(pos);
 
         uint32_t cellColor;
         switch (calcMod(cell->color, MAX_COLORS)) {

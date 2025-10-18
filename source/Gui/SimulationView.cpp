@@ -243,8 +243,8 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::MetaballsShader)),
-                    // _PostProcessingRenderStep::create(Const::FresnelShader),
-                    // _PostProcessingRenderStep::create(Const::SubsurfaceScatterShader),
+                    // _PostProcessingRenderStep::create(StepParameters().shader(Const::FresnelShader)),
+                    // _PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
                 }),
                 RenderSequence().steps({
                     _PointRenderStep::create(StepParameters().shader(Const::PointLargeShader)),
