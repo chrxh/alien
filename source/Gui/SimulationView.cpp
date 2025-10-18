@@ -268,11 +268,29 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block 4: Two outputs: blur in one sequence (10x times) and original
+            // Render block 4: Two outputs: optimized bloom with downscale/upscale chain and original
+            // Downscale chain: blur + downscale by 0.5 (3 times)
             RenderBlock{
-                RenderSequence().repetitions(10).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}})),
+                RenderSequence().steps({
+                    // First downscale: blur at 0.5 scale
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.5f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.5f)),
+                    // Second downscale: blur at 0.25 scale
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.25f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.25f)),
+                    // Third downscale: blur at 0.125 scale
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.125f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.125f)),
+                    // Upscale chain: blur + upscale by 2.0 (3 times)
+                    // First upscale: scale back to 0.25
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.25f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.25f)),
+                    // Second upscale: scale back to 0.5
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.5f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}}).textureScale(0.5f)),
+                    // Third upscale: scale back to 1.0
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}}).textureScale(1.0f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}}).textureScale(1.0f)),
                     }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
