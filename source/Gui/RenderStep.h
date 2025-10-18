@@ -85,16 +85,16 @@ protected:
     UniformValueMap _uniformValues;
 };
 
-class _PointRenderStep : public _RenderStep
+class _CellRenderStep : public _RenderStep
 {
 public:
-    static PointRenderStep create(StepParameters const& parameters);
+    static CellRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(ExecutionParameters const& parameters) override;
 
 private:
-    _PointRenderStep(StepParameters const& parameters);
+    _CellRenderStep(StepParameters const& parameters);
 };
 
 class _LineRenderStep : public _RenderStep

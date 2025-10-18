@@ -120,12 +120,12 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     }
 }
 
-PointRenderStep _PointRenderStep::create(StepParameters const& parameters)
+CellRenderStep _CellRenderStep::create(StepParameters const& parameters)
 {
-    return PointRenderStep(new _PointRenderStep(parameters));
+    return CellRenderStep(new _CellRenderStep(parameters));
 }
 
-void _PointRenderStep::execute(ExecutionParameters const& parameters)
+void _CellRenderStep::execute(ExecutionParameters const& parameters)
 {
     prepareExecution(parameters);
 
@@ -146,7 +146,7 @@ void _PointRenderStep::execute(ExecutionParameters const& parameters)
     glDisable(GL_BLEND);
 }
 
-_PointRenderStep::_PointRenderStep(StepParameters const& parameters)
+_CellRenderStep::_CellRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
 

@@ -247,7 +247,7 @@ void SimulationView::setupRenderPipeline()
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
                 }),
                 RenderSequence().steps({
-                    _PointRenderStep::create(StepParameters().shader(Const::PointLargeShader)),
+                    _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader)),
                 }),
                 RenderSequence().steps({
                     _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader)),

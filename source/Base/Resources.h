@@ -19,8 +19,8 @@ namespace Const
     std::filesystem::path const SettingsFilename = AutosavePath / "settings.json";
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
-    std::filesystem::path const PointSmallShader = ShaderPath / "PointSmall";
-    std::filesystem::path const PointLargeShader = ShaderPath / "PointLarge";
+    std::filesystem::path const CellSmallShader = ShaderPath / "CellSmall";
+    std::filesystem::path const CellLargeShader = ShaderPath / "CellLarge";
     std::filesystem::path const EnergyParticleShader = ShaderPath / "EnergyParticle";
     std::filesystem::path const LineShader = ShaderPath / "Line";
     std::filesystem::path const TriangleShader = ShaderPath / "Triangle";
