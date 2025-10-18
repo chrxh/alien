@@ -126,7 +126,13 @@ void _RenderPipeline::execute()
     forEachStep(
         [](RenderStep& step) { return step->getTextureTarget(); },
         [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target) {
-            step->execute(_geometryBuffers, textures, clearBackground, target, generalRenderInfo, _simulationFacade);
+            step->execute(ExecutionParameters()
+                              .geometryBuffers(_geometryBuffers)
+                              .textures(textures)
+                              .clearBackground(clearBackground)
+                              .target(target)
+                              .renderInfo(generalRenderInfo)
+                              .simulationFacade(_simulationFacade));
         });
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);

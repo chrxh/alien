@@ -40,23 +40,27 @@ struct StepParameters
     MEMBER(StepParameters, float, textureScale, 1.0f);
 };
 
+struct ExecutionParameters
+{
+    // Input
+    MEMBER(ExecutionParameters, GeometryBuffers, geometryBuffers, GeometryBuffers());
+    MEMBER(ExecutionParameters, std::vector<unsigned int>, textures, {});
+    MEMBER(ExecutionParameters, bool, clearBackground, false);
+
+    // Output
+    MEMBER(ExecutionParameters, RenderTarget, target, ScreenTarget());
+
+    // Misc
+    MEMBER(ExecutionParameters, GeneralRenderInfo, renderInfo, GeneralRenderInfo());
+    MEMBER(ExecutionParameters, SimulationFacade, simulationFacade, SimulationFacade());
+};
+
 class _RenderStep
 {
 public:
     virtual ~_RenderStep() = default;
 
-    virtual void execute(
-        // Input
-        GeometryBuffers const& geometryBuffers,
-        std::vector<unsigned int> const& textures,
-        bool clearBackground,
-
-        // Output
-        RenderTarget const& target,
-
-        // Misc
-        GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade) = 0;
+    virtual void execute(ExecutionParameters const& parameters) = 0;
 
     std::optional<int> const& getPreviousTargetSelection() const;
 
@@ -65,10 +69,13 @@ public:
 
     void resize(IntVector2D const& size);
 
+    float getTextureScale() const;
+    void setTextureScale(float scale);
+
 protected:
     _RenderStep(StepParameters const& parameters);
 
-    void prepareExecution(bool clearBackground, RenderTarget const& target, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
+    void prepareExecution(ExecutionParameters const& parameters);
 
     Shader _shader;
     std::optional<int> _previousTargetSelection;
@@ -83,13 +90,7 @@ public:
     static PointRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(
-        GeometryBuffers const& geometryBuffers,
-        std::vector<unsigned int> const& textures,
-        bool clearBackground,
-        RenderTarget const& target,
-        GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade) override;
+    void execute(ExecutionParameters const& parameters) override;
 
 private:
     _PointRenderStep(StepParameters const& parameters);
@@ -103,13 +104,7 @@ public:
     static LineRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(
-        GeometryBuffers const& geometryBuffers,
-        std::vector<unsigned int> const& textures,
-        bool clearBackground,
-        RenderTarget const& target,
-        GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade) override;
+    void execute(ExecutionParameters const& parameters) override;
 
 private:
     _LineRenderStep(StepParameters const& parameters);
@@ -121,13 +116,7 @@ public:
     static TriangleRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(
-        GeometryBuffers const& geometryBuffers,
-        std::vector<unsigned int> const& textures,
-        bool clearBackground,
-        RenderTarget const& target,
-        GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade) override;
+    void execute(ExecutionParameters const& parameters) override;
 
 private:
     _TriangleRenderStep(StepParameters const& parameters);
@@ -139,13 +128,7 @@ public:
     static PostProcessingRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(
-        GeometryBuffers const& geometryBuffers,
-        std::vector<unsigned int> const& textures,
-        bool clearBackground,
-        RenderTarget const& target,
-        GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade) override;
+    void execute(ExecutionParameters const& parameters) override;
 
 private:
     _PostProcessingRenderStep(StepParameters const& parameters);
@@ -161,13 +144,7 @@ public:
     static ForwardRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(
-        GeometryBuffers const& geometryBuffers,
-        std::vector<unsigned int> const& textures,
-        bool clearBackground,
-        RenderTarget const& target,
-        GeneralRenderInfo const& renderInfo,
-        SimulationFacade const& simulationFacade) override;
+    void execute(ExecutionParameters const& parameters) override;
 
 private:
     _ForwardRenderStep(StepParameters const& parameters);
