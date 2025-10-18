@@ -37,6 +37,7 @@ struct StepParameters
     MEMBER(StepParameters, std::filesystem::path, shader, std::filesystem::path());
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, UniformValueMap, uniformValues, {});
+    MEMBER(StepParameters, float, textureScale, 1.0f);
 };
 
 class _RenderStep
@@ -59,8 +60,10 @@ public:
 
     std::optional<int> const& getPreviousTargetSelection() const;
 
-    std::optional<TextureTarget> const& getTextureTarget() const;
+    TextureTarget const& getTextureTarget() const;
     void setTextureTarget(TextureTarget const& target);
+
+    void resize(IntVector2D const& size);
 
 protected:
     _RenderStep(StepParameters const& parameters);
@@ -69,8 +72,8 @@ protected:
 
     Shader _shader;
     std::optional<int> _previousTargetSelection;
-    std::optional<TextureTarget> _target;
-
+    TextureTarget _target;
+    float _textureScale = 1.0f;
     UniformValueMap _uniformValues;
 };
 

@@ -15,6 +15,7 @@ TextureTarget _TextureTarget::create()
 
 _RenderStep::_RenderStep(StepParameters const& parameters)
     : _previousTargetSelection(parameters._previousTargetSelection)
+    , _textureScale(parameters._textureScale)
     , _uniformValues(parameters._uniformValues)
 {
     if (!parameters._shader.empty()) {
@@ -38,7 +39,7 @@ std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
     return _previousTargetSelection;
 }
 
-std::optional<TextureTarget> const& _RenderStep::getTextureTarget() const
+TextureTarget const& _RenderStep::getTextureTarget() const
 {
     return _target;
 }
@@ -46,6 +47,28 @@ std::optional<TextureTarget> const& _RenderStep::getTextureTarget() const
 void _RenderStep::setTextureTarget(TextureTarget const& target)
 {
     _target = target;
+}
+
+void _RenderStep::resize(IntVector2D const& size)
+{
+    if (_target->initialized) {
+        glDeleteFramebuffers(1, &_target->fbo);
+        glDeleteTextures(1, &_target->texture);
+    }
+    // Init output texture
+    glGenTextures(1, &_target->texture);
+    glBindTexture(GL_TEXTURE_2D, _target->texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+    // Init framebuffer
+    glGenFramebuffers(1, &_target->fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _target->fbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _target->texture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void _RenderStep::prepareExecution(

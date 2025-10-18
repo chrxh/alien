@@ -89,37 +89,15 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
 
 void _RenderPipeline::resize(IntVector2D const& size)
 {
-    // Collect texture targets which needs to be resized
     std::set<TextureTarget> textureTargets;
     for (auto const& block : _blocks) {
         for (auto const& sequence : block) {
             for (auto const& step : sequence._steps) {
-                if (step->getTextureTarget().has_value()) {
-                    textureTargets.insert(step->getTextureTarget().value());
+                if (step->getTextureTarget() != nullptr) {
+                    step->resize(size);
                 }
             }
         }
-    }
-
-    for (auto& textureTarget : textureTargets) {
-        if (textureTarget->initialized) {
-            glDeleteFramebuffers(1, &textureTarget->fbo);
-            glDeleteTextures(1, &textureTarget->texture);
-        } 
-        // Init output texture
-        glGenTextures(1, &textureTarget->texture);
-        glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-        
-        // Init framebuffer
-        glGenFramebuffers(1, &textureTarget->fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget->texture, 0);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
 
@@ -145,9 +123,8 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
-    forEachStep([](RenderStep& step) {
-            return step->getTextureTarget().value();
-        },
+    forEachStep(
+        [](RenderStep& step) { return step->getTextureTarget(); },
         [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target) {
             step->execute(_geometryBuffers, textures, clearBackground, target, generalRenderInfo, _simulationFacade);
         });
