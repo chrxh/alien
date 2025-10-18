@@ -129,7 +129,7 @@ void EngineWorker::addAndSelectSimulationData(Description&& dataToUpdate)
 void EngineWorker::setSimulationData(Description const& dataToUpdate)
 {
     if (!dataToUpdate.hasUniqueIds()) {
-        throw std::runtime_error("Cell ids are not unique.");
+        throw std::runtime_error("Object ids are not unique.");
     }
 
     EngineWorkerGuard access(this);

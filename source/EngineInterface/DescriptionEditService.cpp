@@ -132,7 +132,7 @@ namespace
             std::vector<ConnectionDescription> newConnections;
             float angleToAdd = 0;
             for (auto connection : cell._connections) {
-                auto const& connectingCell = data.getCellRef(connection._cellId);
+                auto const& connectingCell = data.getCellRef(connection._cellId, cache);
                 if (/*spaceCalculator.distance*/ Math::length(cell._pos - connectingCell._pos) > threshold) {
                     angleToAdd += connection._angleFromPrevious;
                 } else {
@@ -154,14 +154,13 @@ void DescriptionEditService::duplicate(Description& data, IntVector2D const& ori
 {
     correctConnectionsForNonCreatures(data, origSize);
 
-    auto clone = Description(data);
-    clone.assignNewIds();
-
     SpaceCalculator spaceCalc(origSize);
 
     Description result;
     for (int incX = 0; incX < size.x; incX += origSize.x) {
         for (int incY = 0; incY < size.y; incY += origSize.y) {
+            auto clone = Description(data);
+            clone.assignNewIds();
             for (auto creature : clone._creatures) {
                 topologyCorrection(spaceCalc, creature);
                 auto origPos = calcCenter(creature);
@@ -180,7 +179,7 @@ void DescriptionEditService::duplicate(Description& data, IntVector2D const& ori
                     result._cells.emplace_back(cell);
                 }
             }
-            for (auto particle : data._particles) {
+            for (auto particle : clone._particles) {
                 auto origPos = particle._pos;
                 particle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
                 if (particle._pos.x < size.x && particle._pos.y < size.y) {
