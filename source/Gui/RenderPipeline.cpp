@@ -33,13 +33,13 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        // Setup vertex attributes for VertexData (same as PointRenderStep)
+        // Setup vertex attributes for CellVertexData (same as PointRenderStep)
         // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // Bind EBO (will be filled by CUDA later)
@@ -53,17 +53,33 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        // Setup vertex attributes for VertexData (same as PointRenderStep)
+        // Setup vertex attributes for CellVertexData (same as PointRenderStep)
         // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    }
+    {
+        auto vao = _geometryBuffers->getVaoForEnergyParticles();
+        auto vbo = _geometryBuffers->getVboForEnergyParticles();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for EnergyParticleVertexData
+        // Position (3 floats: x, y, z)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyParticleVertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Color (3 floats: r, g, b)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyParticleVertexData), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
     }
 
     CHECK(!_blocks.empty());

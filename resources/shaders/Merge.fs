@@ -5,18 +5,28 @@ in vec2 texCoord;
 
 uniform sampler2D inputTexture1;
 uniform sampler2D inputTexture2;
+uniform sampler2D inputTexture3;
 uniform vec2 viewportSize;
 uniform float zoom;
 uniform int mode;
+uniform int numTextures;
 
 void main()
 {
     vec4 color1 = texture(inputTexture1, texCoord);
     vec4 color2 = texture(inputTexture2, texCoord);
+    vec4 color3 = vec4(0.0);
+    if (numTextures >= 3) {
+        color3 = texture(inputTexture3, texCoord);
+    }
 
     if (mode == 0) {
         float brightness = dot(color2.rgb, vec3(1.0));
         vec3 finalColor = mix(color1.rgb * 0.8, color2.rgb, brightness);
+        // Add energy particles additively
+        if (numTextures >= 3) {
+            finalColor += color3.rgb * color3.a;
+        }
         FragColor = vec4(finalColor, 1.0f);
         // vec3 mergedColor = color1.rgb * 0.7 + color2.rgb * 0.3;
         // FragColor = vec4(mergedColor, 1.0f);

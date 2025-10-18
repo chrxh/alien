@@ -150,3 +150,15 @@ protected:
 private:
     _ForwardRenderStep(StepParameters const& parameters);
 };
+
+class _EnergyParticleRenderStep : public _RenderStep
+{
+public:
+    static EnergyParticleRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters const& parameters) override;
+
+private:
+    _EnergyParticleRenderStep(StepParameters const& parameters);
+};

@@ -215,7 +215,8 @@ void _PostProcessingRenderStep::execute(ExecutionParameters const& parameters)
     glBindVertexArray(_vao);
     
     auto numTextures = parameters._textures.size();
-    CHECK(numTextures <= 2);
+    CHECK(numTextures <= 3);
+    _shader->setInt("numTextures", toInt(numTextures));
     if (numTextures >= 1) {
         _shader->setInt("inputTexture1", 0);
         glActiveTexture(GL_TEXTURE0);
@@ -225,6 +226,11 @@ void _PostProcessingRenderStep::execute(ExecutionParameters const& parameters)
         _shader->setInt("inputTexture2", 1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, parameters._textures.at(1));
+    }
+    if (numTextures >= 3) {
+        _shader->setInt("inputTexture3", 2);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, parameters._textures.at(2));
     }
     
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -284,3 +290,33 @@ _ForwardRenderStep::_ForwardRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {
 }
+
+EnergyParticleRenderStep _EnergyParticleRenderStep::create(StepParameters const& parameters)
+{
+    return EnergyParticleRenderStep(new _EnergyParticleRenderStep(parameters));
+}
+
+void _EnergyParticleRenderStep::execute(ExecutionParameters const& parameters)
+{
+    prepareExecution(parameters);
+
+    // Enable point sprites
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_POINT_SPRITE);
+
+    // Enable additive blending for energy particles
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Draw energy particles
+    glBindVertexArray(parameters._geometryBuffers->getVaoForEnergyParticles());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().energyParticles));
+
+    // Disable blending and point sprites
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glDisable(GL_BLEND);
+}
+
+_EnergyParticleRenderStep::_EnergyParticleRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}

@@ -249,9 +249,12 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PointRenderStep::create(StepParameters().shader(Const::PointLargeShader)),
                 }),
+                RenderSequence().steps({
+                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader)),
+                }),
             },
 
-            // Render block 2: Merge foreground and background
+            // Render block 2: Merge foreground, background, and energy particles
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeShader)),

@@ -8,6 +8,7 @@
 struct CudaGeometryBuffers
 {
     cudaGraphicsResource* vertexBuffer = nullptr;
+    cudaGraphicsResource* energyParticleBuffer = nullptr;
     cudaGraphicsResource* lineIndexBuffer = nullptr;
     cudaGraphicsResource* triangleIndexBuffer = nullptr;
 
