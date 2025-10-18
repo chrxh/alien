@@ -13,30 +13,25 @@ TextureTarget _TextureTarget::create()
     return TextureTarget(new _TextureTarget());
 }
 
-_RenderStep::_RenderStep(
-    std::filesystem::path const& shaderFilename,
-    std::optional<int> const& previousTargetSelection,
-    std::map<std::string, UniformValueType> const& uniformValues)
-    : _previousTargetSelection(previousTargetSelection)
-    , _uniformValues(uniformValues)
+_RenderStep::_RenderStep(StepParameters const& parameters)
+    : _previousTargetSelection(parameters._previousTargetSelection)
+    , _uniformValues(parameters._uniformValues)
 {
-    auto vertexShaderPath = shaderFilename;
-    vertexShaderPath.replace_extension(".vs");
-    auto fragmentShaderPath = shaderFilename;
-    fragmentShaderPath.replace_extension(".fs");
-    auto geometryShaderPath = shaderFilename;
-    geometryShaderPath.replace_extension(".gs");
+    if (!parameters._shader.empty()) {
+        auto vertexShaderPath = parameters._shader;
+        vertexShaderPath.replace_extension(".vs");
+        auto fragmentShaderPath = parameters._shader;
+        fragmentShaderPath.replace_extension(".fs");
+        auto geometryShaderPath = parameters._shader;
+        geometryShaderPath.replace_extension(".gs");
 
-    if (!std::filesystem::exists(geometryShaderPath)) {
-        geometryShaderPath = std::filesystem::path();  // empty path disables geometry shader
+        if (!std::filesystem::exists(geometryShaderPath)) {
+            geometryShaderPath = std::filesystem::path();  // empty path disables geometry shader
+        }
+
+        _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
     }
-
-    _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
 }
-
-_RenderStep::_RenderStep(bool previousTargetSelection)
-    : _previousTargetSelection(previousTargetSelection)
-{}
 
 std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
 {
@@ -96,9 +91,9 @@ void _RenderStep::prepareExecution(
     }
 }
 
-PointRenderStep _PointRenderStep::create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
+PointRenderStep _PointRenderStep::create(StepParameters const& parameters)
 {
-    return PointRenderStep(new _PointRenderStep(shaderFilename, previousTargetSelection));
+    return PointRenderStep(new _PointRenderStep(parameters));
 }
 
 void _PointRenderStep::execute(
@@ -128,13 +123,13 @@ void _PointRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_PointRenderStep::_PointRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
-    : _RenderStep(shaderFilename, previousTargetSelection)
+_PointRenderStep::_PointRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
 {}
 
-LineRenderStep _LineRenderStep::create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
+LineRenderStep _LineRenderStep::create(StepParameters const& parameters)
 {
-    return LineRenderStep(new _LineRenderStep(shaderFilename, previousTargetSelection));
+    return LineRenderStep(new _LineRenderStep(parameters));
 }
 
 void _LineRenderStep::execute(
@@ -159,14 +154,14 @@ void _LineRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_LineRenderStep::_LineRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
-    : _RenderStep(shaderFilename, previousTargetSelection)
+_LineRenderStep::_LineRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
 {
 }
 
-TriangleRenderStep _TriangleRenderStep::create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
+TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
 {
-    return TriangleRenderStep(new _TriangleRenderStep(shaderFilename, previousTargetSelection));
+    return TriangleRenderStep(new _TriangleRenderStep(parameters));
 }
 
 void _TriangleRenderStep::execute(
@@ -192,17 +187,14 @@ void _TriangleRenderStep::execute(
     glDisable(GL_BLEND);
 }
 
-_TriangleRenderStep::_TriangleRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection)
-    : _RenderStep(shaderFilename, previousTargetSelection)
+_TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
 {
 }
 
-PostProcessingRenderStep _PostProcessingRenderStep::create(
-    std::filesystem::path const& shaderFilename,
-    std::optional<int> const& previousTargetSelection,
-    std::map<std::string, UniformValueType> const& uniformValues)
+PostProcessingRenderStep _PostProcessingRenderStep::create(StepParameters const& parameters)
 {
-    return PostProcessingRenderStep(new _PostProcessingRenderStep(shaderFilename, previousTargetSelection, uniformValues));
+    return PostProcessingRenderStep(new _PostProcessingRenderStep(parameters));
 }
 
 void _PostProcessingRenderStep::execute(
@@ -233,11 +225,8 @@ void _PostProcessingRenderStep::execute(
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-_PostProcessingRenderStep::_PostProcessingRenderStep(
-    std::filesystem::path const& shaderFilename,
-    std::optional<int> const& previousTargetSelection,
-    std::map<std::string, UniformValueType> const& uniformValues)
-    : _RenderStep(shaderFilename, previousTargetSelection, uniformValues)
+_PostProcessingRenderStep::_PostProcessingRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
 {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
@@ -276,9 +265,9 @@ _PostProcessingRenderStep::_PostProcessingRenderStep(
     glEnableVertexAttribArray(1);
 }
 
-ForwardRenderStep _ForwardRenderStep::create(int previousTargetSelection)
+ForwardRenderStep _ForwardRenderStep::create(StepParameters const& parameters)
 {
-    return ForwardRenderStep(new _ForwardRenderStep(previousTargetSelection));
+    return ForwardRenderStep(new _ForwardRenderStep(parameters));
 }
 
 void _ForwardRenderStep::execute(
@@ -292,7 +281,7 @@ void _ForwardRenderStep::execute(
     // Do nothing
 }
 
-_ForwardRenderStep::_ForwardRenderStep(int previousTargetSelection)
-    : _RenderStep(previousTargetSelection)
+_ForwardRenderStep::_ForwardRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
 {
 }

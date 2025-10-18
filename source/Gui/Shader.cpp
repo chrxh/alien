@@ -32,7 +32,7 @@ void _Shader::setVec2(const std::string& name, float x, float y) const
     glUniform2f(glGetUniformLocation(_id, name.c_str()), x, y);
 }
 
-void _Shader::checkCompileErrors(GLuint shader, std::string type)
+void _Shader::checkCompileErrors(GLuint shader, std::string type, std::filesystem::path const& path)
 {
     GLint success;
     GLchar infoLog[1024];
@@ -41,6 +41,7 @@ void _Shader::checkCompileErrors(GLuint shader, std::string type)
         if (!success) {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
             std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
+                      << "FILE: " << path << "\n"
                       << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
         }
     } else {
@@ -48,6 +49,7 @@ void _Shader::checkCompileErrors(GLuint shader, std::string type)
         if (!success) {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
             std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
+                      << "FILE: " << path << "\n"
                       << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
         }
     }
@@ -104,13 +106,13 @@ _Shader::_Shader(
     vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
-    checkCompileErrors(vertex, "VERTEX");
+    checkCompileErrors(vertex, "VERTEX", vertexPath);
 
     // Fragment Shader
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
-    checkCompileErrors(fragment, "FRAGMENT");
+    checkCompileErrors(fragment, "FRAGMENT", fragmentPath);
 
     // If geometry shader is given, compile geometry shader
     unsigned int geometry;
@@ -119,7 +121,7 @@ _Shader::_Shader(
         geometry = glCreateShader(GL_GEOMETRY_SHADER);
         glShaderSource(geometry, 1, &gShaderCode, NULL);
         glCompileShader(geometry);
-        checkCompileErrors(geometry, "GEOMETRY");
+        checkCompileErrors(geometry, "GEOMETRY", geometryPath);
     }
     // Shader Program
     _id = glCreateProgram();
@@ -129,9 +131,9 @@ _Shader::_Shader(
         glAttachShader(_id, geometry);
     }
     glLinkProgram(_id);
-    checkCompileErrors(_id, "PROGRAM");
+    checkCompileErrors(_id, "PROGRAM", {});
 
-    // Delete the shaders as they're linked into our program now and no longer necessery
+    // Delete the shaders as they're linked into our program now and no longer necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
     if (!geometryPath.empty()) {

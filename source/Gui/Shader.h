@@ -27,7 +27,7 @@ private:
         std::filesystem::path const& fragmentPath,
         std::filesystem::path const& geometryPath);
 
-    void checkCompileErrors(GLuint shader, std::string type);
+    void checkCompileErrors(GLuint shader, std::string type, std::filesystem::path const& path);
 
     unsigned int _id = 0;
 };

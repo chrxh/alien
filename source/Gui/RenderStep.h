@@ -20,8 +20,6 @@ private:
 };
 struct ScreenTarget
 {
-    auto operator<=>(ScreenTarget const&) const = default;
-
     // FBO is automatically determined
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
@@ -32,6 +30,14 @@ struct GeneralRenderInfo
 };
 
 using UniformValueType = std::variant<int, float>;
+using UniformValueMap = std::map<std::string, UniformValueType>;
+
+struct StepParameters
+{
+    MEMBER(StepParameters, std::filesystem::path, shader, std::filesystem::path());
+    MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
+    MEMBER(StepParameters, UniformValueMap, uniformValues, {});
+};
 
 class _RenderStep
 {
@@ -57,11 +63,7 @@ public:
     void setTextureTarget(TextureTarget const& target);
 
 protected:
-    _RenderStep(
-        std::filesystem::path const& shaderFilename,
-        std::optional<int> const& previousTargetSelection = std::nullopt,
-        std::map<std::string, UniformValueType> const& uniformValues = {});
-    _RenderStep(bool usePreviousOutput);
+    _RenderStep(StepParameters const& parameters);
 
     void prepareExecution(bool clearBackground, RenderTarget const& target, GeneralRenderInfo const& renderInfo, SimulationFacade const& simulationFacade);
 
@@ -69,13 +71,13 @@ protected:
     std::optional<int> _previousTargetSelection;
     std::optional<TextureTarget> _target;
 
-    std::map<std::string, UniformValueType> _uniformValues;
+    UniformValueMap _uniformValues;
 };
 
 class _PointRenderStep : public _RenderStep
 {
 public:
-    static PointRenderStep create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection = std::nullopt);
+    static PointRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(
@@ -87,7 +89,7 @@ protected:
         SimulationFacade const& simulationFacade) override;
 
 private:
-    _PointRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection);
+    _PointRenderStep(StepParameters const& parameters);
 };
 
 class _LineRenderStep : public _RenderStep
@@ -95,7 +97,7 @@ class _LineRenderStep : public _RenderStep
     friend _RenderPipeline;
 
 public:
-    static LineRenderStep create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection = std::nullopt);
+    static LineRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(
@@ -107,13 +109,13 @@ protected:
         SimulationFacade const& simulationFacade) override;
 
 private:
-    _LineRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection);
+    _LineRenderStep(StepParameters const& parameters);
 };
 
 class _TriangleRenderStep : public _RenderStep
 {
 public:
-    static TriangleRenderStep create(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection = std::nullopt);
+    static TriangleRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(
@@ -125,16 +127,13 @@ protected:
         SimulationFacade const& simulationFacade) override;
 
 private:
-    _TriangleRenderStep(std::filesystem::path const& shaderFilename, std::optional<int> const& previousTargetSelection);
+    _TriangleRenderStep(StepParameters const& parameters);
 };
 
 class _PostProcessingRenderStep : public _RenderStep
 {
 public:
-    static PostProcessingRenderStep create(
-        std::filesystem::path const& shaderFilename,
-        std::optional<int> const& previousTargetSelection = std::nullopt,
-        std::map<std::string, UniformValueType> const& uniformValues = {});
+    static PostProcessingRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(
@@ -146,10 +145,7 @@ protected:
         SimulationFacade const& simulationFacade) override;
 
 private:
-    _PostProcessingRenderStep(
-        std::filesystem::path const& shaderFilename,
-        std::optional<int> const& previousTargetSelection,
-        std::map<std::string, UniformValueType> const& uniformValues);
+    _PostProcessingRenderStep(StepParameters const& parameters);
 
     unsigned int _vao = 0;
     unsigned int _vbo = 0;
@@ -159,7 +155,7 @@ private:
 class _ForwardRenderStep : public _RenderStep
 {
 public:
-    static ForwardRenderStep create(int previousTargetSelection);
+    static ForwardRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(
@@ -171,5 +167,5 @@ protected:
         SimulationFacade const& simulationFacade) override;
 
 private:
-    _ForwardRenderStep(int previousTargetSelection);
+    _ForwardRenderStep(StepParameters const& parameters);
 };

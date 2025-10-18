@@ -238,52 +238,52 @@ void SimulationView::setupRenderPipeline()
             // Render block 1: Render foreground and background scene on different render sequences
             RenderBlock{
                 RenderSequence().steps({
-                    _LineRenderStep::create(Const::LineShader),
-                    _TriangleRenderStep::create(Const::TriangleShader, 0),
-                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader, std::nullopt, {{"strength", 0.1f}}),
-                    _PostProcessingRenderStep::create(Const::BlurVerticalShader, std::nullopt, {{"strength", 0.1f}}),
-                    _PostProcessingRenderStep::create(Const::MetaballsShader),
+                    _LineRenderStep::create(StepParameters().shader(Const::LineShader)),
+                    _TriangleRenderStep::create(StepParameters().shader(Const::TriangleShader).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MetaballsShader)),
                     // _PostProcessingRenderStep::create(Const::FresnelShader),
                     // _PostProcessingRenderStep::create(Const::SubsurfaceScatterShader),
                 }),
                 RenderSequence().steps({
-                    _PointRenderStep::create(Const::PointLargeShader),
+                    _PointRenderStep::create(StepParameters().shader(Const::PointLargeShader)),
                 }),
             },
 
             // Render block 2: Merge foreground and background
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(Const::MergeShader),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeShader)),
                 }),
             },
 
             // Render block 3: Two outputs: Threshold and original
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(Const::ThresholdShader),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ThresholdShader)),
                 }),
                 RenderSequence().steps({
-                    _ForwardRenderStep::create(0),
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
             },
 
             // Render block 4: Two outputs: blur in one sequence (10x times) and original
             RenderBlock{
                 RenderSequence().repetitions(10).steps({
-                    _PostProcessingRenderStep::create(Const::BlurHorizontalShader, std::nullopt, {{"strength", 1.25f}}),
-                    _PostProcessingRenderStep::create(Const::BlurVerticalShader, std::nullopt, {{"strength", 1.25f}}),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 1.25f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 1.25f}})),
                     }),
                 RenderSequence().steps({
-                    _ForwardRenderStep::create(1),
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })
             },
 
             // Render block 5: Merge and tone mapping
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(Const::MergeBlurShader),
-                    _PostProcessingRenderStep::create(Const::ToneMappingShader),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeBlurShader)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },
         });
