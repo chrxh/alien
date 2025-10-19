@@ -247,7 +247,7 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().repetitions(4).steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f / 2.0f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(0.5f)),
                 }),
                 RenderSequence().steps({
                     _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).uniformValues({{"ballSize", 0.2f}})),
@@ -340,7 +340,7 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.3f * 0.3f}, {"colorFactor2", 1.0f}})),
+                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.5f}, {"colorFactor2", 1.0f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },
