@@ -301,7 +301,7 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters()
                                                           .shader(Const::MergeAdditiveShader)
-                                                          .uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 0.5f}, {"colorFactor3", 0.5f}})),
+                                                          .uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 0.3f}, {"colorFactor3", 0.5f}})),
                 }),
             },
 
@@ -343,7 +343,7 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.5f}, {"colorFactor2", 1.0f}})),
+                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 1.0f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },
