@@ -965,11 +965,11 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
         auto pos = particle->pos;
 
         // Light yellow color for energy particles
-        float intensity = max(min((particle->energy + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
+        float intensity = (particle->energy + 5.0f) / 200.0f;
+        //max(min((particle->energy + 10.0f) * 5, 450.0f), 20.0f) / 1000.0f;
         if (particle->selected) {
             intensity *= 2.5f;
         }
-        intensity = max(0.08f, intensity);
 
         // Write energy particle data
         energyParticleData[index].pos[0] = pos.x;

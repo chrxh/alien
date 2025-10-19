@@ -61,7 +61,7 @@ class _RenderStep
 public:
     virtual ~_RenderStep() = default;
 
-    virtual void execute(ExecutionParameters const& parameters) = 0;
+    virtual void execute(ExecutionParameters parameters) = 0;
 
     std::optional<int> const& getPreviousTargetSelection() const;
 
@@ -91,7 +91,7 @@ public:
     static CellRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(ExecutionParameters const& parameters) override;
+    void execute(ExecutionParameters parameters) override;
 
 private:
     _CellRenderStep(StepParameters const& parameters);
@@ -105,7 +105,7 @@ public:
     static LineRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(ExecutionParameters const& parameters) override;
+    void execute(ExecutionParameters parameters) override;
 
 private:
     _LineRenderStep(StepParameters const& parameters);
@@ -117,7 +117,7 @@ public:
     static TriangleRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(ExecutionParameters const& parameters) override;
+    void execute(ExecutionParameters parameters) override;
 
 private:
     _TriangleRenderStep(StepParameters const& parameters);
@@ -129,7 +129,7 @@ public:
     static PostProcessingRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(ExecutionParameters const& parameters) override;
+    void execute(ExecutionParameters parameters) override;
 
 private:
     _PostProcessingRenderStep(StepParameters const& parameters);
@@ -145,7 +145,7 @@ public:
     static ForwardRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(ExecutionParameters const& parameters) override;
+    void execute(ExecutionParameters parameters) override;
 
 private:
     _ForwardRenderStep(StepParameters const& parameters);
@@ -157,7 +157,7 @@ public:
     static EnergyParticleRenderStep create(StepParameters const& parameters);
 
 protected:
-    void execute(ExecutionParameters const& parameters) override;
+    void execute(ExecutionParameters parameters) override;
 
 private:
     _EnergyParticleRenderStep(StepParameters const& parameters);

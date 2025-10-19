@@ -92,7 +92,7 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
             step->setTextureTarget(result);
             return result;
         },
-        [](RenderStep&, std::vector<unsigned int> const&, bool, RenderTarget const&, float) {});
+        [](RenderStep&, std::vector<unsigned int> const&, RenderTarget const&, float) {});
 }
 
 void _RenderPipeline::resize(IntVector2D const& size)
@@ -134,11 +134,10 @@ void _RenderPipeline::execute()
     forEachStep(
         [](RenderStep& step) { return step->getTextureTarget(); },
         [this,
-         &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, bool clearBackground, RenderTarget const& target, float scale) {
+         &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target, float scale) {
             step->execute(ExecutionParameters()
                               .geometryBuffers(_geometryBuffers)
                               .textures(textures)
-                              .clearBackground(clearBackground)
                               .target(target)
                               .scale(scale) 
                               .renderInfo(generalRenderInfo)
@@ -150,7 +149,7 @@ void _RenderPipeline::execute()
 
 void _RenderPipeline::forEachStep(
     std::function<TextureTarget(RenderStep& step)> const& getTextureTarget,
-    std::function<void(RenderStep& step, std::vector<unsigned> const& textures, bool clearBackground, RenderTarget const& target, float scale)> const& executeStep)
+    std::function<void(RenderStep& step, std::vector<unsigned> const& textures, RenderTarget const& target, float scale)> const& executeStep)
 {
     std::vector<RenderTarget> previousBlockTargets;
     std::vector<float> previousBlockScales;
@@ -185,8 +184,7 @@ void _RenderPipeline::forEachStep(
                         }
                     }
                     // Execute render step
-                    auto clearBackground = i == 0 && k == 0 && l == 0;
-                    executeStep(step, getTextures(previousTargets), clearBackground, target, scale);
+                    executeStep(step, getTextures(previousTargets), target, scale);
 
                     // Current output is input for next step
                     previousTargets = {target};

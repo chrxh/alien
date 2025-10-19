@@ -235,8 +235,50 @@ void SimulationView::setupRenderPipeline()
         _simulationFacade,
         RenderBlocks{
 
-            // Render block 1: Render foreground, background and particle scenes in different render sequences
+            // Render block: Render energy particles
             RenderBlock{
+                RenderSequence().steps({
+                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).uniformValues({{"ballSize", 2.0f}})),
+                }),
+            },
+
+            // Render block: Downscale blur for energy particles
+            RenderBlock{
+                RenderSequence().repetitions(4).steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f / 2.0f)),
+                }),
+                RenderSequence().steps({
+                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).uniformValues({{"ballSize", 0.2f}})),
+                }),
+            },
+
+            // Render block: Upscale blur for energy particles
+            RenderBlock{
+                RenderSequence().repetitions(4).steps({
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(2.0f)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                }),
+            },
+
+            // Render block: Merge (bloom) energy particles
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeMaxShader).uniformValues({{"colorFactor1", 0.8f}})),
+                }),
+            },
+
+            // Render block: Render cells in different sequences
+            RenderBlock{
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+                }),
                 RenderSequence().steps({
                     _LineRenderStep::create(StepParameters().shader(Const::LineShader)),
                     _TriangleRenderStep::create(StepParameters().shader(Const::TriangleShader).previousTargetSelection(0)),
@@ -249,19 +291,16 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader)),
                 }),
-                RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader)),
-                }),
             },
 
-            // Render block 2: Merge foreground, background, and energy particles
+            // Render block: Merge foreground, background, and energy particles
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeShader)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeLayersShader)),
                 }),
             },
 
-            // Render block 3: Two outputs: Threshold and original
+            // Render block: Two outputs: Threshold and original
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ThresholdShader)),
@@ -271,7 +310,7 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block 4: Two outputs: wide-range bloom with downscale chain and original
+            // Render block: Two outputs: wide-range bloom with downscale chain and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
@@ -283,7 +322,7 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
 
-            // Render block 4: Two outputs: wide-range bloom with upscale chain and original
+            // Render block: Two outputs: wide-range bloom with upscale chain and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
@@ -295,10 +334,10 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
 
-            // Render block 5: Merge and tone mapping
+            // Render block: Merge and tone mapping
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeBlurShader)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.3f * 0.3f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },

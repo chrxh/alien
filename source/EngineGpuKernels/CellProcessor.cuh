@@ -970,6 +970,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         }
 
         if (flow > 0) {
+            flow = min(2.0f, flow);
             auto orig = atomicAdd(&cell->energy, -flow);
             if (orig < cellMinEnergy) {
                 atomicAdd(&cell->energy, flow);

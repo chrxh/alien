@@ -125,8 +125,11 @@ CellRenderStep _CellRenderStep::create(StepParameters const& parameters)
     return CellRenderStep(new _CellRenderStep(parameters));
 }
 
-void _CellRenderStep::execute(ExecutionParameters const& parameters)
+void _CellRenderStep::execute(ExecutionParameters parameters)
 {
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
     prepareExecution(parameters);
 
     // Enable point sprites
@@ -155,8 +158,11 @@ LineRenderStep _LineRenderStep::create(StepParameters const& parameters)
     return LineRenderStep(new _LineRenderStep(parameters));
 }
 
-void _LineRenderStep::execute(ExecutionParameters const& parameters)
+void _LineRenderStep::execute(ExecutionParameters parameters)
 {
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
     prepareExecution(parameters);
     
     // Enable blending for anti-aliasing
@@ -181,8 +187,11 @@ TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
     return TriangleRenderStep(new _TriangleRenderStep(parameters));
 }
 
-void _TriangleRenderStep::execute(ExecutionParameters const& parameters)
+void _TriangleRenderStep::execute(ExecutionParameters parameters)
 {
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
     prepareExecution(parameters);
 
     // Enable blending for anti-aliasing
@@ -208,8 +217,9 @@ PostProcessingRenderStep _PostProcessingRenderStep::create(StepParameters const&
     return PostProcessingRenderStep(new _PostProcessingRenderStep(parameters));
 }
 
-void _PostProcessingRenderStep::execute(ExecutionParameters const& parameters)
+void _PostProcessingRenderStep::execute(ExecutionParameters parameters)
 {
+    parameters._clearBackground = false;
     prepareExecution(parameters);
 
     glBindVertexArray(_vao);
@@ -281,7 +291,7 @@ ForwardRenderStep _ForwardRenderStep::create(StepParameters const& parameters)
     return ForwardRenderStep(new _ForwardRenderStep(parameters));
 }
 
-void _ForwardRenderStep::execute(ExecutionParameters const& parameters)
+void _ForwardRenderStep::execute(ExecutionParameters parameters)
 {
     // Do nothing
 }
@@ -296,8 +306,11 @@ EnergyParticleRenderStep _EnergyParticleRenderStep::create(StepParameters const&
     return EnergyParticleRenderStep(new _EnergyParticleRenderStep(parameters));
 }
 
-void _EnergyParticleRenderStep::execute(ExecutionParameters const& parameters)
+void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
 {
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
     prepareExecution(parameters);
 
     // Enable point sprites

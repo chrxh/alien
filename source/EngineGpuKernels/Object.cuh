@@ -368,7 +368,7 @@ struct Cell
                 return i;
             }
         }
-        CUDA_CHECK(false);
+        //CUDA_CHECK(false);
         return 0;
     }
 
