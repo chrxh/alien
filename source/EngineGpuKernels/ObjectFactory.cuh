@@ -442,12 +442,13 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellTriggered = CellTriggered_No;
+    cell->creature = nullptr;
     cell->nodeIndex = 0;
-    cell->geneIndex = 0;
     cell->parentNodeIndex = 0;
+    cell->geneIndex = 0;
     cell->cellType = CellType_Free;
     cell->neuralNetwork = nullptr;
-
+    
     return cell;
 }
 
