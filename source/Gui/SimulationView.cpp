@@ -293,10 +293,12 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block: Merge foreground, background, and energy particles
+            // Render block: Merge energy, background and foreground texture
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeLayersShader)),
+                    _PostProcessingRenderStep::create(StepParameters()
+                                                          .shader(Const::MergeAdditiveShader)
+                                                          .uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 0.5f}, {"colorFactor3", 0.5f}})),
                 }),
             },
 
@@ -337,7 +339,8 @@ void SimulationView::setupRenderPipeline()
             // Render block: Merge and tone mapping
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.3f * 0.3f}})),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.3f * 0.3f}, {"colorFactor2", 1.0f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },
