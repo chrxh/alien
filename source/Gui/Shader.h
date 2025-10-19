@@ -16,10 +16,11 @@ public:
         std::filesystem::path const& geometryPath = std::filesystem::path());
 
     void use();
-    void setBool(const std::string& name, bool value) const;
-    void setInt(const std::string& name, int value) const;
-    void setFloat(const std::string& name, float value) const;
-    void setVec2(const std::string& name, float x, float y) const;
+    void setBool(std::string const& name, bool value) const;
+    void setInt(std::string const& name, int value) const;
+    void setFloat(std::string const& name, float value) const;
+    void setVec2(std::string const& name, RealVector2D const& value) const;
+    void setVec3(std::string const& name, RealVector3D const& value) const;
 
 private:
     _Shader(

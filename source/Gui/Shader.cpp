@@ -14,22 +14,27 @@ void _Shader::use()
 {
     glUseProgram(_id);
 }
-void _Shader::setBool(const std::string& name, bool value) const
+void _Shader::setBool(std::string const& name, bool value) const
 {
     glUniform1i(glGetUniformLocation(_id, name.c_str()), (int)value);
 }
-void _Shader::setInt(const std::string& name, int value) const
+void _Shader::setInt(std::string const& name, int value) const
 {
     glUniform1i(glGetUniformLocation(_id, name.c_str()), value);
 }
-void _Shader::setFloat(const std::string& name, float value) const
+void _Shader::setFloat(std::string const& name, float value) const
 {
     glUniform1f(glGetUniformLocation(_id, name.c_str()), value);
 }
 
-void _Shader::setVec2(const std::string& name, float x, float y) const
+void _Shader::setVec2(std::string const& name, RealVector2D const& value) const
 {
-    glUniform2f(glGetUniformLocation(_id, name.c_str()), x, y);
+    glUniform2f(glGetUniformLocation(_id, name.c_str()), value.x, value.y);
+}
+
+void _Shader::setVec3(std::string const& name, RealVector3D const& value) const
+{
+    glUniform3f(glGetUniformLocation(_id, name.c_str()), value.x, value.y, value.z);
 }
 
 void _Shader::checkCompileErrors(GLuint shader, std::string type, std::filesystem::path const& path)

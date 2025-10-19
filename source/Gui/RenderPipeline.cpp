@@ -67,7 +67,7 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glEnableVertexAttribArray(1);
 
         // States (1 int)
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(6 * sizeof(float)));
+        glVertexAttribIPointer(2, 1, GL_INT, sizeof(CellVertexData), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         // Bind EBO (will be filled by CUDA later)

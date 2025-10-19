@@ -93,9 +93,9 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     _shader->use();
     _shader->setFloat("zoom", zoom);
     _shader->setFloat("radius", _preventMoirePatterns ? std::max(6.0f, zoom) : zoom);
-    _shader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
-    _shader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
-    _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
+    _shader->setVec2("worldSize", toRealVector2D(worldSize));
+    _shader->setVec2("rectUpperLeft", worldRect.topLeft);
+    _shader->setVec2("viewportSize", toRealVector2D(viewSize));
     //_shader->setFloat("lightAngle", toFloat(timestep % 10000) / 10000.0f * 360.0f);
 
     for (auto const& [key, value] : _uniformValues) {

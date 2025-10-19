@@ -839,33 +839,12 @@ __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objec
         objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
-        objectData[index].isActive = (cell->signalState == SignalState_Active) ? 1 : 0;
+
+        objectData[index].state = cell->signalState;
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;
     }
-
-    // Process particles - each particle goes after all cells
-    //auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-    //auto numCells = data.objects.cells.getNumEntries();
-    //for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-    //    auto const& particle = data.objects.particles.at(index);
-    //    if (!particle) {
-    //        continue;
-    //    }
-
-    //    auto pos = particle->pos;
-    //    map.correctPosition(pos);
-
-    //    // Write particle data after all cells
-    //    auto bufferIndex = numCells + index;
-    //    objectData[bufferIndex].pos[0] = pos.x;
-    //    objectData[bufferIndex].pos[1] = pos.y;
-    //    objectData[bufferIndex].pos[2] = 0.0f;  // Particles don't need z-position for lighting
-    //    objectData[bufferIndex].color[0] = 0.2f;
-    //    objectData[bufferIndex].color[1] = 0.2f;
-    //    objectData[bufferIndex].color[2] = 0.0f;
-    //}
 }
 
 __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices)

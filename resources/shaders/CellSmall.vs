@@ -1,7 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
-layout (location = 2) in float isActive;
+layout (location = 2) in int state;
 
 out vec3 vColor;
 
@@ -13,13 +13,21 @@ uniform vec2 viewportSize;
 
 void main()
 {
-    vColor = isActive > 0.5 ? vec3(1.0) : aColor;
-    
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos.xy - rectUpperLeft;
     vec2 screenPos = relativePos * zoom;
     vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
     ndc.y = -ndc.y; // Flip Y coordinate
     gl_Position = vec4(ndc, 0.0, 1.0);
-    gl_PointSize = radius * 0.2;
+
+    if (state == 1 && zoom > 6.0f) {
+        vColor = mix(aColor, vec3(1.0), 0.1);
+        gl_PointSize = radius * 0.3;
+    } else if (state == 2 && zoom > 6.0f) {
+        vColor = mix(aColor, vec3(1.0), 0.2);
+        gl_PointSize = radius * 0.4;
+    } else {
+        vColor = aColor;
+        gl_PointSize = radius * 0.2;
+    }
 }

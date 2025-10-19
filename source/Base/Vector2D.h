@@ -64,6 +64,16 @@ struct RealVector2D
     RealVector2D operator/(float divisor) const;
 };
 
+struct RealVector3D
+{
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+
+    auto operator<=>(RealVector3D const& other) const = default;
+    bool operator==(RealVector3D const& other) const = default;
+};
+
 inline IntVector2D toIntVector2D(RealVector2D const& v)
 {
     return {static_cast<int>(v.x), static_cast<int>(v.y)};
