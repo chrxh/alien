@@ -1959,10 +1959,12 @@ namespace
         if (allowInfinity && value == Infinity<T>::value) {
             return "Infinity";
         }
-       
+        if (tryMaintainFormat) {
+            return format;
+        }
         if constexpr (std::is_same_v<T, float>) {
             // Extract decimal places from format string like "%.3f"
-            int decimalPlaces = 3; // default
+            int decimalPlaces = 6; // default
             auto dotPos = format.find('.');
             if (dotPos != std::string::npos) {
                 auto fPos = format.find('f', dotPos);
@@ -2075,7 +2077,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                         + applyFormatToValue(maxValue, parameters._format, parameters._infinity);
                 }
             } else {
-                format = applyFormatToValue(value[color], parameters._format, parameters._infinity);
+                format = applyFormatToValue(value[color], parameters._format, parameters._infinity, true);
             }
             sliderValue = minValue;
         }
