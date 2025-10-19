@@ -20,11 +20,6 @@
 #include "OverlayController.h"
 #include "MainLoopEntityController.h"
 
-namespace
-{
-    auto const MaxInspectorWindowsToAdd = 10;
-}
-
 void EditorController::init(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
@@ -75,14 +70,11 @@ void EditorController::onCloseAllInspectorWindows()
 
 void EditorController::onInspectSelectedObjects()
 {
-    auto selection = EditorModel::get().getSelectionShallowData();
-    if (selection.numCells + selection.numParticles <= MaxInspectorWindowsToAdd) {
-        Description selectedData = _simulationFacade->getSelectedSimulationData(false);
-        onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false);
-    } else {
+    Description selectedData = _simulationFacade->getSelectedSimulationData(false);
+    if(!onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false)) {
         showMessage(
             "Inspection not possible",
-            "Too many objects are selected for inspection. A maximum of " + std::to_string(MaxInspectorWindowsToAdd)
+            "Too many objects are selected for inspection. A maximum of " + std::to_string(Const::MaxInspectedObjects)
                 + " objects are allowed.");
     }
 }
@@ -97,11 +89,31 @@ void EditorController::onInspectSelectedGenomes()
     onInspectObjects(constructors, true);
 }
 
-void EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab)
+bool EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
-        return;
+        return true;
     }
+
+    // Filter entities if cells are selected
+    std::vector<ExtendedCellOrParticleDescription> filteredEntities;
+    auto areCellsSelected = false;
+    for (auto const& cellOrParticle : entities) {
+        if (std::holds_alternative<ExtendedCellDescription>(cellOrParticle)) {
+            areCellsSelected = true;
+            break;
+        }
+    }
+    if (areCellsSelected) {
+        for (auto const& cellOrParticle : entities) {
+            if (std::holds_alternative<ExtendedCellDescription>(cellOrParticle)) {
+                filteredEntities.emplace_back(cellOrParticle);
+            }
+        }
+    } else {
+        filteredEntities = entities;
+    }
+
     auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
 
     std::set<uint64_t> inspectedIds;
@@ -109,25 +121,25 @@ void EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
         inspectedIds.insert(inspectorWindow->getId());
     }
     auto origInspectedIds = inspectedIds;
-    for (auto const& entity : entities) {
+    for (auto const& entity : filteredEntities) {
         inspectedIds.insert(DescriptionEditService::get().getId(entity));
     }
 
     std::vector<ExtendedCellOrParticleDescription> newEntities;
-    for (auto const& entity : entities) {
+    for (auto const& entity : filteredEntities) {
         if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
         }
     }
     if (newEntities.empty()) {
-        return;
+        return true;
     }
     if (inspectedIds.size() > Const::MaxInspectedObjects) {
-        return;
+        return false;
     }
     RealVector2D center;
     int num = 0;
-    for (auto const& entity : entities) {
+    for (auto const& entity : filteredEntities) {
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
         center += entityPos;
         ++num;
@@ -135,7 +147,7 @@ void EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
     center = center / num;
 
     float maxDistanceFromCenter = 0;
-    for (auto const& entity : entities) {
+    for (auto const& entity : filteredEntities) {
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
         auto distanceFromCenter = toFloat(Math::length(entityPos - center));
         maxDistanceFromCenter = std::max(maxDistanceFromCenter, distanceFromCenter);
@@ -155,6 +167,7 @@ void EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
         _inspectorWindows.emplace_back(
             std::make_shared<_InspectorWindow>(_simulationFacade, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
+    return true;
 }
 
 bool EditorController::isCopyingPossible() const

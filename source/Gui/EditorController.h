@@ -21,7 +21,7 @@ public:
 
     void onInspectSelectedObjects();
     void onInspectSelectedGenomes();
-    void onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab);
+    bool onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab);
 
     bool isCopyingPossible() const;
     void onCopy();
