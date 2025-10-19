@@ -38,6 +38,7 @@ struct StepParameters
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, UniformValueMap, uniformValues, {});
     MEMBER(StepParameters, float, textureScale, 1.0f);
+    MEMBER(StepParameters, bool, preventMoirePatterns, true);
 };
 
 struct ExecutionParameters
@@ -82,6 +83,7 @@ protected:
     std::optional<int> _previousTargetSelection;
     TextureTarget _target;
     float _textureScale = 1.0f;
+    bool _preventMoirePatterns = true;
     UniformValueMap _uniformValues;
 };
 

@@ -238,7 +238,8 @@ void SimulationView::setupRenderPipeline()
             // Render block: Render energy particles
             RenderBlock{
                 RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).uniformValues({{"ballSize", 2.0f}})),
+                    _EnergyParticleRenderStep::create(
+                        StepParameters().shader(Const::EnergyParticleShader).uniformValues({{"ballSize", 2.0f}}).preventMoirePatterns(false)),
                 }),
             },
 
@@ -264,6 +265,16 @@ void SimulationView::setupRenderPipeline()
                         StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                }),
+            },
+
+            // Render block: Zoom brightness correction for energy particles
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).uniformValues({{"strength", 0.5f}})),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -301,7 +312,7 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters()
                                                           .shader(Const::MergeAdditiveShader)
-                                                          .uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 0.3f}, {"colorFactor3", 0.5f}})),
+                                                          .uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 0.6f}, {"colorFactor3", 0.5f}})),
                 }),
             },
 
@@ -315,7 +326,7 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block: Two outputs: wide-range bloom with downscale chain and original
+            // Render block: Two outputs: downscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
@@ -327,7 +338,7 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
 
-            // Render block: Two outputs: wide-range bloom with upscale chain and original
+            // Render block: Two outputs: upscale blur  and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
@@ -339,11 +350,21 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
 
+            RenderBlock{
+                RenderSequence().steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).uniformValues({{"strength", 0.5f}})),
+                }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+                }),
+            },
+
             // Render block: Merge and tone mapping
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 1.0f}, {"colorFactor2", 1.0f}})),
+                        StepParameters().shader(Const::MergeAdditiveShader).uniformValues({{"colorFactor1", 0.5f}, {"colorFactor2", 1.0f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).uniformValues({{"strength", 1.0f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },

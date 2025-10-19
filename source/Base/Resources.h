@@ -36,6 +36,7 @@ namespace Const
     std::filesystem::path const DownSamplerShader = ShaderPath / "DownSampler";
     std::filesystem::path const UpSamplerShader = ShaderPath / "UpSampler";
     std::filesystem::path const ToneMappingShader = ShaderPath / "ToneMapping";
+    std::filesystem::path const ZoomBrightnessCorrectionShader = ShaderPath / "ZoomBrightnessCorrection";
 
     std::filesystem::path const EditorOnFilename = ImagesPath / "editor on.png";
     std::filesystem::path const EditorOffFilename = ImagesPath / "editor off.png";

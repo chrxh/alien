@@ -17,6 +17,7 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
     , _uniformValues(parameters._uniformValues)
+    , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
     if (!parameters._shader.empty()) {
         auto vertexShaderPath = parameters._shader;
@@ -91,7 +92,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
 
     _shader->use();
     _shader->setFloat("zoom", zoom);
-    _shader->setFloat("radius", std::max(6.0f, zoom));  // std::max to avoid moire patterns at low zoom factors
+    _shader->setFloat("radius", _preventMoirePatterns ? std::max(6.0f, zoom) : zoom);
     _shader->setVec2("worldSize", toFloat(worldSize.x), toFloat(worldSize.y));
     _shader->setVec2("rectUpperLeft", worldRect.topLeft.x, worldRect.topLeft.y);
     _shader->setVec2("viewportSize", toFloat(viewSize.x), toFloat(viewSize.y));
