@@ -33,6 +33,8 @@ namespace Const
     std::filesystem::path const MergeAdditiveShader = ShaderPath / "MergeAdditive";
     std::filesystem::path const MergeLayersShader = ShaderPath / "MergeLayers";
     std::filesystem::path const MergeMaxShader = ShaderPath / "MergeMax";
+    std::filesystem::path const DownSamplerShader = ShaderPath / "DownSampler";
+    std::filesystem::path const UpSamplerShader = ShaderPath / "UpSampler";
     std::filesystem::path const ToneMappingShader = ShaderPath / "ToneMapping";
 
     std::filesystem::path const EditorOnFilename = ImagesPath / "editor on.png";

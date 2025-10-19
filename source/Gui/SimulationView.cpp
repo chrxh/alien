@@ -247,7 +247,9 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().repetitions(4).steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(0.5f)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::DownSamplerShader).textureScale(0.5f)),
                 }),
                 RenderSequence().steps({
                     _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).uniformValues({{"ballSize", 0.2f}})),
@@ -257,10 +259,11 @@ void SimulationView::setupRenderPipeline()
             // Render block: Upscale blur for energy particles
             RenderBlock{
                 RenderSequence().repetitions(4).steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::UpSamplerShader).textureScale(2.0f)),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(2.0f)),
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
