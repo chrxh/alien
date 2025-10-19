@@ -1964,7 +1964,7 @@ namespace
         }
         if constexpr (std::is_same_v<T, float>) {
             // Extract decimal places from format string like "%.3f"
-            int decimalPlaces = 6; // default
+            int decimalPlaces = 3; // default
             auto dotPos = format.find('.');
             if (dotPos != std::string::npos) {
                 auto fPos = format.find('f', dotPos);
