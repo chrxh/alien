@@ -16,6 +16,7 @@ struct CellVertexData
 {
     float pos[3];    // x, y, z position (z used for lighting)
     float color[3];  // r, g, b color
+    float isActive;
 };
 
 struct EnergyParticleVertexData

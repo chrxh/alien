@@ -1,6 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
+layout (location = 2) in float isActive;
 
 out vec3 vColor;
 
@@ -12,7 +13,7 @@ uniform vec2 viewportSize;
 
 void main()
 {
-    vColor = aColor;
+    vColor = isActive > 0.5 ? vec3(1.0) : aColor;
     
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos.xy - rectUpperLeft;

@@ -819,9 +819,9 @@ __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objec
             luminance = luminance * 1.3f;
         }
 
-        if (cell->signalState == SignalState_Active) {
-            white = 0.4f;
-        }
+        //if (cell->signalState == SignalState_Active) {
+        //    white = 0.4f;
+        //}
 
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
@@ -839,6 +839,7 @@ __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objec
         objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
+        objectData[index].isActive = (cell->signalState == SignalState_Active) ? 1 : 0;
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;

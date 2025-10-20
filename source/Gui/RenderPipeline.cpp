@@ -42,6 +42,10 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
+        // States (1 int)
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     }
@@ -61,6 +65,10 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         // Color (3 floats: r, g, b)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
+
+        // States (1 int)
+        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(CellVertexData), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
 
         // Bind EBO (will be filled by CUDA later)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
