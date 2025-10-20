@@ -2,7 +2,11 @@
 out vec4 FragColor;
 
 in vec3 vColor;
+in vec2 vWorldPos;
+
 uniform float zoom;
+uniform vec2 worldSize;
+uniform float radius;
 
 void main()
 {
@@ -12,6 +16,17 @@ void main()
     
     // Discard pixels outside the circle
     if (dist > 0.5) {
+        discard;
+    }
+    
+    // Calculate the world position of this pixel
+    // Point size is in screen pixels, we need to convert back to world space
+    vec2 pixelOffset = (coord * 2.0) * (radius * 2.0) / zoom;
+    vec2 pixelWorldPos = vWorldPos + pixelOffset;
+    
+    // Clip pixels outside world boundaries (pixel-wise clipping)
+    if (pixelWorldPos.x < 0.0 || pixelWorldPos.x > worldSize.x ||
+        pixelWorldPos.y < 0.0 || pixelWorldPos.y > worldSize.y) {
         discard;
     }
     
