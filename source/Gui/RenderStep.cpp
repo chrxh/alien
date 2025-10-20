@@ -344,12 +344,12 @@ _EnergyParticleRenderStep::_EnergyParticleRenderStep(StepParameters const& param
     : _RenderStep(parameters)
 {}
 
-ZoneRenderStep _ZoneRenderStep::create(StepParameters const& parameters)
+LocationRenderStep _LocationRenderStep::create(StepParameters const& parameters)
 {
-    return ZoneRenderStep(new _ZoneRenderStep(parameters));
+    return LocationRenderStep(new _LocationRenderStep(parameters));
 }
 
-void _ZoneRenderStep::execute(ExecutionParameters parameters)
+void _LocationRenderStep::execute(ExecutionParameters parameters)
 {
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
@@ -360,19 +360,19 @@ void _ZoneRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    // Enable blending for semi-transparent zones
+    // Enable blending for semi-transparent locations
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Draw zone points
-    glBindVertexArray(parameters._geometryBuffers->getVaoForZones());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().zones));
+    // Draw location points
+    glBindVertexArray(parameters._geometryBuffers->getVaoForLocations());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().locations));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
 }
 
-_ZoneRenderStep::_ZoneRenderStep(StepParameters const& parameters)
+_LocationRenderStep::_LocationRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}

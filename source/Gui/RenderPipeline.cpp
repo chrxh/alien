@@ -90,39 +90,39 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glEnableVertexAttribArray(1);
     }
     {
-        auto vao = _geometryBuffers->getVaoForZones();
-        auto vbo = _geometryBuffers->getVboForZones();
+        auto vao = _geometryBuffers->getVaoForLocations();
+        auto vbo = _geometryBuffers->getVboForLocations();
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        // Setup vertex attributes for ZoneVertexData
+        // Setup vertex attributes for LocationVertexData
         // Position (2 floats: x, y)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(2 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // Shape type (1 int)
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ZoneVertexData), (void*)(5 * sizeof(float)));
+        glVertexAttribIPointer(2, 1, GL_INT, sizeof(LocationVertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         // Dimension1 (1 float: radius or width)
-        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(5 * sizeof(float) + sizeof(int)));
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(5 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(3);
 
         // Dimension2 (1 float: unused or height)
-        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(4);
 
         // FadeoutRadius (1 float)
-        glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(7 * sizeof(float) + sizeof(int)));
+        glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(7 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(5);
 
         // Opacity (1 float)
-        glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(8 * sizeof(float) + sizeof(int)));
+        glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(8 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(6);
     }
 
