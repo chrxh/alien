@@ -116,6 +116,10 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         // Dimension2 (1 float: unused or height)
         glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(4);
+
+        // FadeoutRadius (1 float)
+        glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(7 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(5);
     }
 
     CHECK(!_blocks.empty());

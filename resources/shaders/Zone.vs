@@ -4,12 +4,14 @@ layout (location = 1) in vec3 aColor;
 layout (location = 2) in int aShapeType;
 layout (location = 3) in float aDimension1;
 layout (location = 4) in float aDimension2;
+layout (location = 5) in float aFadeoutRadius;
 
 out vec3 vColor;
 out vec2 vWorldPos;
 flat out int vShapeType;
 out float vDimension1;
 out float vDimension2;
+out float vFadeoutRadius;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -24,6 +26,7 @@ void main()
     vShapeType = aShapeType;
     vDimension1 = aDimension1;
     vDimension2 = aDimension2;
+    vFadeoutRadius = aFadeoutRadius;
     
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos - rectUpperLeft;
@@ -32,8 +35,8 @@ void main()
     ndc.y = -ndc.y; // Flip Y coordinate
     gl_Position = vec4(ndc, 0.0, 1.0);
     
-    // Set point size based on shape dimensions and zoom
-    // Use max dimension to ensure shape fits in point
-    float maxDim = (aShapeType == 0) ? aDimension1 * 2.0 : max(aDimension1, aDimension2);
+    // Set point size based on shape dimensions, fadeout radius and zoom
+    // Use max dimension + fadeout to ensure entire zone (including fadeout) fits in point
+    float maxDim = (aShapeType == 0) ? (aDimension1 + aFadeoutRadius) * 2.0 : max(aDimension1 + aFadeoutRadius, aDimension2 + aFadeoutRadius);
     gl_PointSize = maxDim * zoom + 4.0;  // Add 4 pixels for anti-aliasing
 }

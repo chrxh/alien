@@ -33,6 +33,7 @@ struct ZoneVertexData
     int shapeType;      // 0 = circular, 1 = rectangular
     float dimension1;   // radius for circular, width for rectangular
     float dimension2;   // unused for circular, height for rectangular
+    float fadeoutRadius; // fadeout radius for the zone
 };
 
 class _GeometryBuffers
