@@ -974,6 +974,9 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
         auto pos = cudaSimulationParameters.layerPosition.layerValues[i];
         auto color = cudaSimulationParameters.backgroundColor.layerValues[i].value;
+        auto shapeType = cudaSimulationParameters.layerShape.layerValues[i];
+        auto radius = cudaSimulationParameters.layerCoreRadius.layerValues[i];
+        auto rect = cudaSimulationParameters.layerCoreRect.layerValues[i];
 
         // Render at 5 positions for periodic boundaries (center, +/-x, +/-y offsets)
         float offsets[5][2] = {
@@ -991,6 +994,14 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
                 zoneData[zoneIndex].color[0] = color.r;
                 zoneData[zoneIndex].color[1] = color.g;
                 zoneData[zoneIndex].color[2] = color.b;
+                zoneData[zoneIndex].shapeType = shapeType;  // 0 = circular, 1 = rectangular
+                if (shapeType == 0) {  // Circular
+                    zoneData[zoneIndex].dimension1 = radius;
+                    zoneData[zoneIndex].dimension2 = 0.0f;
+                } else {  // Rectangular
+                    zoneData[zoneIndex].dimension1 = rect.x;
+                    zoneData[zoneIndex].dimension2 = rect.y;
+                }
             }
             zoneIndex++;
         }
@@ -1001,6 +1012,9 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
         auto pos = cudaSimulationParameters.sourcePosition.sourceValues[i];
         // Use a distinct color for sources (e.g., yellow)
         float3 color = {1.0f, 1.0f, 0.5f};
+        auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];
+        auto radius = cudaSimulationParameters.sourceCircularRadius.sourceValues[i];
+        auto rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[i];
 
         // Render at 5 positions for periodic boundaries
         float offsets[5][2] = {
@@ -1018,6 +1032,14 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
                 zoneData[zoneIndex].color[0] = color.x;
                 zoneData[zoneIndex].color[1] = color.y;
                 zoneData[zoneIndex].color[2] = color.z;
+                zoneData[zoneIndex].shapeType = shapeType;  // 0 = circular, 1 = rectangular
+                if (shapeType == 0) {  // Circular
+                    zoneData[zoneIndex].dimension1 = radius;
+                    zoneData[zoneIndex].dimension2 = 0.0f;
+                } else {  // Rectangular
+                    zoneData[zoneIndex].dimension1 = rect.x;
+                    zoneData[zoneIndex].dimension2 = rect.y;
+                }
             }
             zoneIndex++;
         }

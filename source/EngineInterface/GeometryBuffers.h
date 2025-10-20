@@ -28,8 +28,11 @@ struct EnergyParticleVertexData
 
 struct ZoneVertexData
 {
-    float pos[2];    // x, y position
-    float color[3];  // r, g, b color
+    float pos[2];       // x, y position
+    float color[3];     // r, g, b color
+    int shapeType;      // 0 = circular, 1 = rectangular
+    float dimension1;   // radius for circular, width for rectangular
+    float dimension2;   // unused for circular, height for rectangular
 };
 
 class _GeometryBuffers

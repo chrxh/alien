@@ -104,6 +104,18 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         // Color (3 floats: r, g, b)
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
+
+        // Shape type (1 int)
+        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ZoneVertexData), (void*)(5 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
+        // Dimension1 (1 float: radius or width)
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(5 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(3);
+
+        // Dimension2 (1 float: unused or height)
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(6 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(4);
     }
 
     CHECK(!_blocks.empty());
