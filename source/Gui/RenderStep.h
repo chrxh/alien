@@ -3,6 +3,7 @@
 #include <variant>
 #include <filesystem>
 
+#include "Base/MathTypes.h"
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"

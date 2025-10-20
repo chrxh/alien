@@ -17,7 +17,7 @@ void main()
     // Point size is in screen pixels, we need to convert back to world space
     vec2 coord = gl_PointCoord - vec2(0.5, 0.5);
     float maxDim = (vShapeType == 0) ? vDimension1 * 2.0 : max(vDimension1, vDimension2);
-    vec2 pixelOffset = (coord * 2.0) * (maxDim * zoom + 4.0) / zoom;
+    vec2 pixelOffset = (coord * 1.0) * (maxDim * zoom + 4.0) / zoom;
     vec2 pixelWorldPos = vWorldPos + pixelOffset;
     
     // Clip pixels outside world boundaries (pixel-wise clipping)
@@ -61,9 +61,6 @@ void main()
         
         alpha = smoothstep(0.0, edgeThickness, distToEdge);
     }
-    
-    // Reduce overall alpha to make zones semi-transparent
-    alpha *= 0.3;
     
     FragColor = vec4(vColor, alpha);
 }
