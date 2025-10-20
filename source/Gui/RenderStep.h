@@ -29,16 +29,17 @@ struct GeneralRenderInfo
     int screenFbo = 0;
 };
 
-using UniformValueType = std::variant<int, float>;
+using UniformValueType = std::variant<int, float, RealVector3D>;
 using UniformValueMap = std::map<std::string, UniformValueType>;
 
 struct StepParameters
 {
     MEMBER(StepParameters, std::filesystem::path, shader, std::filesystem::path());
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
-    MEMBER(StepParameters, UniformValueMap, uniformValues, {});
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, bool, preventMoirePatterns, true);
+    MEMBER(StepParameters, UniformValueMap, uniforms, {});
+    MEMBER(StepParameters, std::function<UniformValueMap()>, uniformFunc, {});
 };
 
 struct ExecutionParameters
@@ -84,7 +85,8 @@ protected:
     TextureTarget _target;
     float _textureScale = 1.0f;
     bool _preventMoirePatterns = true;
-    UniformValueMap _uniformValues;
+    UniformValueMap _uniforms;
+    std::function<UniformValueMap()> _uniformFunc;
 };
 
 class _CellRenderStep : public _RenderStep

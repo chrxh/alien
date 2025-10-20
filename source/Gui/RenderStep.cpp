@@ -16,7 +16,8 @@ TextureTarget _TextureTarget::create()
 _RenderStep::_RenderStep(StepParameters const& parameters)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
-    , _uniformValues(parameters._uniformValues)
+    , _uniforms(parameters._uniforms)
+    , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
     if (!parameters._shader.empty()) {
@@ -98,12 +99,20 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     _shader->setVec2("viewportSize", toRealVector2D(viewSize));
     //_shader->setFloat("lightAngle", toFloat(timestep % 10000) / 10000.0f * 360.0f);
 
-    for (auto const& [key, value] : _uniformValues) {
+    auto uniforms = _uniforms;
+    if (_uniformFunc) {
+        auto uniformFunc = _uniformFunc();
+        uniforms.insert(uniformFunc.begin(), uniformFunc.end());
+    }
+    for (auto const& [key, value] : uniforms) {
         if (std::holds_alternative<int>(value)) {
             _shader->setInt(key, std::get<int>(value));
         }
         if (std::holds_alternative<float>(value)) {
             _shader->setFloat(key, std::get<float>(value));
+        }
+        if (std::holds_alternative<RealVector3D>(value)) {
+            _shader->setVec3(key, std::get<RealVector3D>(value));
         }
     }
 
