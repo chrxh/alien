@@ -25,6 +25,7 @@ namespace Const
     std::filesystem::path const EnergyParticleShader = ShaderPath / "EnergyParticle";
     std::filesystem::path const LineShader = ShaderPath / "Line";
     std::filesystem::path const TriangleShader = ShaderPath / "Triangle";
+    std::filesystem::path const ZoneShader = ShaderPath / "Zone";
     std::filesystem::path const BlurHorizontalShader = ShaderPath / "BlurHorizontal";
     std::filesystem::path const BlurVerticalShader = ShaderPath / "BlurVertical";
     std::filesystem::path const MetaballsShader = ShaderPath / "Metaballs";

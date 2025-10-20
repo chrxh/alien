@@ -3,6 +3,7 @@
 #include <variant>
 #include <filesystem>
 
+#include "Base/MathTypes.h"
 #include "EngineInterface/Definitions.h"
 
 #include "Definitions.h"
@@ -165,4 +166,16 @@ protected:
 
 private:
     _EnergyParticleRenderStep(StepParameters const& parameters);
+};
+
+class _ZoneRenderStep : public _RenderStep
+{
+public:
+    static ZoneRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _ZoneRenderStep(StepParameters const& parameters);
 };
