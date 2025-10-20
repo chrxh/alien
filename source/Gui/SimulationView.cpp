@@ -307,7 +307,7 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block: Merge energy, background and foreground texture
+            // Render block: Merge energy, blur cells and cells
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters()
@@ -338,7 +338,7 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
 
-            // Render block: Two outputs: upscale blur  and original
+            // Render block: Two outputs: upscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
@@ -372,15 +372,15 @@ void SimulationView::setupRenderPipeline()
             // Render block: Background
             RenderBlock{
                 RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
-                }),
-                RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BackgroundShader).uniforms({{"background", RealVector3D{0.0f, 0.0f, 0.1f}}}).preventMoirePatterns(false)),
                 }),
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+                }),
             },
 
-            // Render block: Merge energy, background and foreground texture
+            // Render block: Merge background and foreground
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
