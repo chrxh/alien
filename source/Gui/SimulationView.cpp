@@ -307,7 +307,8 @@ void SimulationView::setupRenderPipeline()
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
                 }),
                 RenderSequence().steps({
-                    _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader)),
+                    _ZoneRenderStep::create(StepParameters().shader(Const::ZoneShader).preventMoirePatterns(false)),
+                    _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader).previousTargetSelection(0)),
                 }),
             },
 
