@@ -176,6 +176,9 @@ using ForwardRenderStep = std::shared_ptr<_ForwardRenderStep>;
 class _EnergyParticleRenderStep;
 using EnergyParticleRenderStep = std::shared_ptr<_EnergyParticleRenderStep>;
 
+class _ZoneRenderStep;
+using ZoneRenderStep = std::shared_ptr<_ZoneRenderStep>;
+
 class _TextureTarget;
 using TextureTarget = std::shared_ptr<_TextureTarget>;
 

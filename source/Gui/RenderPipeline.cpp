@@ -89,6 +89,22 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(EnergyParticleVertexData), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
     }
+    {
+        auto vao = _geometryBuffers->getVaoForZones();
+        auto vbo = _geometryBuffers->getVboForZones();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for ZoneVertexData
+        // Position (2 floats: x, y)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Color (3 floats: r, g, b)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
 
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);

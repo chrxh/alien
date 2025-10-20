@@ -962,3 +962,64 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
         energyParticleData[index].color[2] = intensity * 0.5f;  // Blue component (reduced for yellow tint)
     }
 }
+
+__global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneData)
+{
+    // Extract zone data for layers and sources
+    // Each zone is rendered 5 times (normal + 4 world offsets for periodic boundaries)
+    auto worldSize = data.worldSize;
+    int zoneIndex = 0;
+
+    // Process layers
+    for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
+        auto pos = cudaSimulationParameters.layerPosition.layerValues[i];
+        auto color = cudaSimulationParameters.backgroundColor.layerValues[i].value;
+
+        // Render at 5 positions for periodic boundaries (center, +/-x, +/-y offsets)
+        float offsets[5][2] = {
+            {0.0f, 0.0f},
+            {static_cast<float>(worldSize.x), 0.0f},
+            {-static_cast<float>(worldSize.x), 0.0f},
+            {0.0f, static_cast<float>(worldSize.y)},
+            {0.0f, -static_cast<float>(worldSize.y)}
+        };
+
+        for (int j = 0; j < 5; ++j) {
+            if (zoneData != nullptr) {
+                zoneData[zoneIndex].pos[0] = pos.x + offsets[j][0];
+                zoneData[zoneIndex].pos[1] = pos.y + offsets[j][1];
+                zoneData[zoneIndex].color[0] = color.r;
+                zoneData[zoneIndex].color[1] = color.g;
+                zoneData[zoneIndex].color[2] = color.b;
+            }
+            zoneIndex++;
+        }
+    }
+
+    // Process sources
+    for (int i = 0; i < cudaSimulationParameters.numSources; ++i) {
+        auto pos = cudaSimulationParameters.sourcePosition.sourceValues[i];
+        // Use a distinct color for sources (e.g., yellow)
+        float3 color = {1.0f, 1.0f, 0.5f};
+
+        // Render at 5 positions for periodic boundaries
+        float offsets[5][2] = {
+            {0.0f, 0.0f},
+            {static_cast<float>(worldSize.x), 0.0f},
+            {-static_cast<float>(worldSize.x), 0.0f},
+            {0.0f, static_cast<float>(worldSize.y)},
+            {0.0f, -static_cast<float>(worldSize.y)}
+        };
+
+        for (int j = 0; j < 5; ++j) {
+            if (zoneData != nullptr) {
+                zoneData[zoneIndex].pos[0] = pos.x + offsets[j][0];
+                zoneData[zoneIndex].pos[1] = pos.y + offsets[j][1];
+                zoneData[zoneIndex].color[0] = color.x;
+                zoneData[zoneIndex].color[1] = color.y;
+                zoneData[zoneIndex].color[2] = color.z;
+            }
+            zoneIndex++;
+        }
+    }
+}
