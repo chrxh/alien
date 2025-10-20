@@ -5,6 +5,7 @@ layout (location = 2) in int aShapeType;
 layout (location = 3) in float aDimension1;
 layout (location = 4) in float aDimension2;
 layout (location = 5) in float aFadeoutRadius;
+layout (location = 6) in float aOpacity;
 
 out vec3 vColor;
 out vec2 vWorldPos;
@@ -12,6 +13,7 @@ flat out int vShapeType;
 out float vDimension1;
 out float vDimension2;
 out float vFadeoutRadius;
+out float vOpacity;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -27,6 +29,7 @@ void main()
     vDimension1 = aDimension1;
     vDimension2 = aDimension2;
     vFadeoutRadius = aFadeoutRadius;
+    vOpacity = aOpacity;
     
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos - rectUpperLeft;

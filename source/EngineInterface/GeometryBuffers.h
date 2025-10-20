@@ -34,6 +34,7 @@ struct ZoneVertexData
     float dimension1;   // radius for circular, width for rectangular
     float dimension2;   // unused for circular, height for rectangular
     float fadeoutRadius; // fadeout radius for the zone
+    float opacity;      // opacity/transparency of the zone
 };
 
 class _GeometryBuffers

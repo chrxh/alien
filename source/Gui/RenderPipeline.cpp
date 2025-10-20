@@ -120,6 +120,10 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         // FadeoutRadius (1 float)
         glVertexAttribPointer(5, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(7 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(5);
+
+        // Opacity (1 float)
+        glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(ZoneVertexData), (void*)(8 * sizeof(float) + sizeof(int)));
+        glEnableVertexAttribArray(6);
     }
 
     CHECK(!_blocks.empty());

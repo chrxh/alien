@@ -7,6 +7,7 @@ flat in int vShapeType;
 in float vDimension1;
 in float vDimension2;
 in float vFadeoutRadius;
+in float vOpacity;
 
 uniform float zoom;
 uniform vec2 worldSize;
@@ -82,6 +83,9 @@ void main()
             alpha = smoothstep(0.0, edgeThickness, distToEdgeInside);
         }
     }
+    
+    // Apply layer opacity to the calculated alpha
+    alpha *= vOpacity;
     
     FragColor = vec4(vColor, alpha);
 }

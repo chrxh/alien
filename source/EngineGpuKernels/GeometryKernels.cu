@@ -978,6 +978,7 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
         auto radius = cudaSimulationParameters.layerCoreRadius.layerValues[i];
         auto rect = cudaSimulationParameters.layerCoreRect.layerValues[i];
         auto fadeoutRadius = cudaSimulationParameters.layerFadeoutRadius.layerValues[i];
+        auto opacity = cudaSimulationParameters.layerOpacity.layerValues[i];
 
         // Render at 5 positions for periodic boundaries (center, +/-x, +/-y offsets)
         float offsets[5][2] = {
@@ -1004,6 +1005,7 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
                     zoneData[zoneIndex].dimension2 = rect.y;
                 }
                 zoneData[zoneIndex].fadeoutRadius = fadeoutRadius;
+                zoneData[zoneIndex].opacity = opacity;
             }
             zoneIndex++;
         }
@@ -1043,6 +1045,7 @@ __global__ void cudaExtractZoneData(SimulationData data, ZoneVertexData* zoneDat
                     zoneData[zoneIndex].dimension2 = rect.y;
                 }
                 zoneData[zoneIndex].fadeoutRadius = 0.0f;  // Sources don't have fadeout
+                zoneData[zoneIndex].opacity = 1.0f;  // Sources are fully opaque
             }
             zoneIndex++;
         }
