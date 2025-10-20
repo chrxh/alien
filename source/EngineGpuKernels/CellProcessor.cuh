@@ -942,9 +942,9 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         if (cell->numConnections == 0) {
             continue;
         }
-        if (cell->cellState == CellState_Constructing || cell->cellState == CellState_Activating) {
-            continue;
-        }
+        //if (cell->cellState == CellState_Constructing || cell->cellState == CellState_Activating) {
+        //    continue;
+        //}
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);

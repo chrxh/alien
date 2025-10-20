@@ -16,6 +16,8 @@ add_library(Base
     Macros.h
     Math.cpp
     Math.h
+    MathTypes.cpp
+    MathTypes.h
     Physics.cpp
     Physics.h
     Resources.h
@@ -23,8 +25,6 @@ add_library(Base
     StringHelper.cpp
     StringHelper.h
     UnlockGuard.h
-    Vector2D.cpp
-    Vector2D.h
     VersionParserService.cpp
     VersionParserService.h)
 

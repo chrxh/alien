@@ -64,14 +64,13 @@ struct RealVector2D
     RealVector2D operator/(float divisor) const;
 };
 
-struct RealVector3D
+struct FloatColorRGB
 {
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
+    float r = 0;
+    float g = 0;
+    float b = 0;
 
-    auto operator<=>(RealVector3D const& other) const = default;
-    bool operator==(RealVector3D const& other) const = default;
+    bool operator==(FloatColorRGB const&) const = default;
 };
 
 inline IntVector2D toIntVector2D(RealVector2D const& v)

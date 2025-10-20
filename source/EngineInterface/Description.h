@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 #include "Base/Macros.h"
-#include "Base/Vector2D.h"
+#include "Base/MathTypes.h"
 
 #include "Definitions.h"
 #include "GenomeDescription.h"
@@ -62,7 +62,7 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(ConstructorDescription, int, constructionActivationTime, 100);
     MEMBER(ConstructorDescription, float, constructionAngle, 0.0f);
-    MEMBER(ConstructorDescription, ProvideEnergy, provideEnergy, ProvideEnergy_CellAndGene);
+    MEMBER(ConstructorDescription, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
 
     // Genome data
     MEMBER(ConstructorDescription, int, geneIndex, 0);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <limits>
-
+ 
 #include "Colors.h"
 
 template <typename T>
@@ -141,15 +141,6 @@ enum class LocationType
     Base,
     Layer,
     Source
-};
-
-struct FloatColorRGB
-{
-    float r = 0;
-    float g = 0;
-    float b = 0;
-
-    bool operator==(FloatColorRGB const&) const = default;
 };
 
 using Char64 = char[64];

@@ -32,9 +32,9 @@ void _Shader::setVec2(std::string const& name, RealVector2D const& value) const
     glUniform2f(glGetUniformLocation(_id, name.c_str()), value.x, value.y);
 }
 
-void _Shader::setVec3(std::string const& name, RealVector3D const& value) const
+void _Shader::setVec3(std::string const& name, FloatColorRGB const& value) const
 {
-    glUniform3f(glGetUniformLocation(_id, name.c_str()), value.x, value.y, value.z);
+    glUniform3f(glGetUniformLocation(_id, name.c_str()), value.r, value.g, value.b);
 }
 
 void _Shader::checkCompileErrors(GLuint shader, std::string type, std::filesystem::path const& path)

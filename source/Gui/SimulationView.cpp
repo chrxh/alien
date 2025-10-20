@@ -231,6 +231,10 @@ void SimulationView::updateMotionBlur()
 
 void SimulationView::setupRenderPipeline()
 {
+    auto currentBackgroundColor = [this] {
+        FloatColorRGB background = _simulationFacade->getSimulationParameters().backgroundColor.baseValue;
+        return UniformValueMap{{"background", background}};
+    };
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
         RenderBlocks{
@@ -373,7 +377,7 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BackgroundShader).uniforms({{"background", RealVector3D{0.0f, 0.0f, 0.1f}}}).preventMoirePatterns(false)),
+                        StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor).preventMoirePatterns(false)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),

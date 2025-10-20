@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstring>
 
-#include "Base/Vector2D.h"
+#include "Base/MathTypes.h"
 
 #include "CellTypeConstants.h"
 #include "SimulationParametersTypes.h"

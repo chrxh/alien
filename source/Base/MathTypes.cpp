@@ -1,4 +1,4 @@
-#include "Vector2D.h"
+#include "MathTypes.h"
 
 void IntVector2D::operator-=(IntVector2D const& vec)
 {

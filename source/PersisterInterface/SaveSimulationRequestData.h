@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Base/Vector2D.h"
+#include "Base/MathTypes.h"
 
 struct SaveSimulationRequestData
 {

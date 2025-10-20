@@ -14,7 +14,7 @@
 #include <cstdint>
 
 #include "Exceptions.h"
-#include "Vector2D.h"
+#include "MathTypes.h"
 #include "Macros.h"
 
 using std::int32_t;

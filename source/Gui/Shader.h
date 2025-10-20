@@ -20,7 +20,7 @@ public:
     void setInt(std::string const& name, int value) const;
     void setFloat(std::string const& name, float value) const;
     void setVec2(std::string const& name, RealVector2D const& value) const;
-    void setVec3(std::string const& name, RealVector3D const& value) const;
+    void setVec3(std::string const& name, FloatColorRGB const& value) const;
 
 private:
     _Shader(

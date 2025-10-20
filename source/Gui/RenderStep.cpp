@@ -111,8 +111,8 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
         if (std::holds_alternative<float>(value)) {
             _shader->setFloat(key, std::get<float>(value));
         }
-        if (std::holds_alternative<RealVector3D>(value)) {
-            _shader->setVec3(key, std::get<RealVector3D>(value));
+        if (std::holds_alternative<FloatColorRGB>(value)) {
+            _shader->setVec3(key, std::get<FloatColorRGB>(value));
         }
     }
 
