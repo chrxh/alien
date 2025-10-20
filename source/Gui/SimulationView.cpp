@@ -247,9 +247,9 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().repetitions(4).steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::DownSamplerShader).textureScale(0.5f)),
                 }),
                 RenderSequence().steps({
@@ -262,9 +262,9 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().repetitions(4).steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::UpSamplerShader).textureScale(2.0f)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}}).textureScale(1.0f)),
+                        StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}})),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -299,7 +299,7 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::MetaballsShader)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::FresnelShader)),
+                    //_PostProcessingRenderStep::create(StepParameters().shader(Const::FresnelShader)),
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
                 }),
                 RenderSequence().steps({
@@ -330,7 +330,7 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.0f)),
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.25f}})),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.0f / 1.5f)),
                 }),
@@ -342,7 +342,7 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.0f)),
+                        StepParameters().shader(Const::BlurHorizontalShader).uniformValues({{"strength", 0.25f}})),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurVerticalShader).uniformValues({{"strength", 0.25f}}).textureScale(1.5f)),
                 }),

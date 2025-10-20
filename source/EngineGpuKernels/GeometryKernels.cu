@@ -943,10 +943,12 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             }
 
             // Rectangle?
-            auto fourthCell = connectedCell->getConnectedCell(backIndex + 1);
-            if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == fourthCell) {
-                addTriangle(cell, index, connectedCell, fourthCell);
-                addTriangle(cell, index, fourthCell, prevConnectedCell);
+            auto fourthCellCandidate1 = connectedCell->getConnectedCell(backIndex + 1);
+            auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
+            if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != cell && fourthCellCandidate2 != cell
+                && connectedCell != prevConnectedCell) {
+                addTriangle(cell, index, connectedCell, fourthCellCandidate1);
+                addTriangle(cell, index, fourthCellCandidate1, prevConnectedCell);
             }
         }
     }
