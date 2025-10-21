@@ -1,0 +1,220 @@
+{
+  "$schema": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://spdx.org/spdxdocs/vcpkg-boost-x64-linux-2024-05-15-cf25596e-5900-4c97-9ce7-89d11fd37ecf",
+  "name": "vcpkg-boost:x64-linux@2024-05-15 3e8531442602c010b262b2c797853d56bf0ca2712f7387b97be67cbe7cf3ab74",
+  "creationInfo": {
+    "creators": [
+      "Tool: vcpkg-2025-10-16-71538f2694db93da4668782d094768ba74c45991"
+    ],
+    "created": "2025-10-21T20:15:23Z"
+  },
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-port-file-1",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-4"
+    }
+  ],
+  "packages": [
+    {
+      "name": "vcpkg-boost",
+      "SPDXID": "SPDXRef-port",
+      "versionInfo": "2024-05-15",
+      "downloadLocation": "git+https://github.com/Microsoft/vcpkg@aca8ab6ec76d120c4482a629de23cad5ad7e4643",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is the port (recipe) consumed by vcpkg."
+    },
+    {
+      "name": "vcpkg-boost:x64-linux",
+      "SPDXID": "SPDXRef-binary",
+      "versionInfo": "3e8531442602c010b262b2c797853d56bf0ca2712f7387b97be67cbe7cf3ab74",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is a binary package built by vcpkg."
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./boost-install.cmake",
+      "SPDXID": "SPDXRef-port-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "19f0f619f254311a6b55bee022a584ae1ff040d3bdb0728e646833e62c9e6dc9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-port-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1a5c536c91efe25c64bf85acbb031ee37f79a0ab5ed3ff1dd64bdb317174b888"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./usage.in",
+      "SPDXID": "SPDXRef-port-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8af069bf0969049bf10b8df8fb5ba55184bf1b816fb61773022555ef35d038a4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./portfile.cmake",
+      "SPDXID": "SPDXRef-port-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ce7596f5f687382765463a53fd02aae8a4aecc4ab1d009b8eade3f5bcfc4066b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg-port-config.cmake",
+      "SPDXID": "SPDXRef-port-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "265420304e6dc003f7771114d1ce18392b055b6b54e666edecf74a6ad07b5464"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./BUILD_INFO",
+      "SPDXID": "SPDXRef-binary-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f06935fb5861a728489192b7c73f0a7be648ef1c6ffe989ac30cbece025ba1c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-boost/boost-install.cmake",
+      "SPDXID": "SPDXRef-binary-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "19f0f619f254311a6b55bee022a584ae1ff040d3bdb0728e646833e62c9e6dc9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-boost/copyright",
+      "SPDXID": "SPDXRef-binary-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1ee376fc340e0aa6ad6a3581c94126e741468705096ac92263048a21daa86460"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-boost/usage.in",
+      "SPDXID": "SPDXRef-binary-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8af069bf0969049bf10b8df8fb5ba55184bf1b816fb61773022555ef35d038a4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-boost/vcpkg-port-config.cmake",
+      "SPDXID": "SPDXRef-binary-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "265420304e6dc003f7771114d1ce18392b055b6b54e666edecf74a6ad07b5464"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    }
+  ]
+}

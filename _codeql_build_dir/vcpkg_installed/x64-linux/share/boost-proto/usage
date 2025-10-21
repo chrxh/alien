@@ -1,0 +1,9 @@
+The package boost-proto is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS proto)
+    target_link_libraries(main PRIVATE Boost::proto)
+
+or the generated cmake configs via:
+
+    find_package(boost_proto REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::proto)

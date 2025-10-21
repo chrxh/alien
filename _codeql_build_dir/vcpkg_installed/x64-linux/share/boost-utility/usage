@@ -1,0 +1,9 @@
+The package boost-utility is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS utility)
+    target_link_libraries(main PRIVATE Boost::utility)
+
+or the generated cmake configs via:
+
+    find_package(boost_utility REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::utility)

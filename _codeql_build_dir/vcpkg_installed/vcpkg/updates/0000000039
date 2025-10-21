@@ -1,0 +1,9 @@
+Package: boost-mp11
+Version: 1.85.0
+Port-Version: 1
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 810f6c9788b2da244153d05b611cb49852445e9f7761c5350e7b303a11b4d132
+Description: Boost mp11 module
+Status: install ok installed

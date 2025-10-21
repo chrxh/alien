@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: CLI11
+Description: C++ command line parser
+Version: 2.4.2
+
+
+Libs: "-L${libdir}" -lCLI11
+Cflags: "-I${includedir}" -DCLI11_COMPILE

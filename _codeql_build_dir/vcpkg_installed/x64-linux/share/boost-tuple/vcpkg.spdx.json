@@ -1,0 +1,253 @@
+{
+  "$schema": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://spdx.org/spdxdocs/boost-tuple-x64-linux-1.85.0#1-ad40ae60-577e-4304-9229-009e18e88db8",
+  "name": "boost-tuple:x64-linux@1.85.0#1 3de0a292b3394768839af1ccfadda07c024b1f331e0e1fdad62318fe80cd04f5",
+  "creationInfo": {
+    "creators": [
+      "Tool: vcpkg-2025-10-16-71538f2694db93da4668782d094768ba74c45991"
+    ],
+    "created": "2025-10-21T20:15:32Z"
+  },
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-port-file-0",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-5"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-6"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-7"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-8"
+    }
+  ],
+  "packages": [
+    {
+      "name": "boost-tuple",
+      "SPDXID": "SPDXRef-port",
+      "versionInfo": "1.85.0#1",
+      "downloadLocation": "git+https://github.com/Microsoft/vcpkg@0f3d4dcd2e276bfcf1af7e3eaab6503d281e5407",
+      "homepage": "https://www.boost.org/libs/tuple",
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "description": "Boost tuple module",
+      "comment": "This is the port (recipe) consumed by vcpkg."
+    },
+    {
+      "name": "boost-tuple:x64-linux",
+      "SPDXID": "SPDXRef-binary",
+      "versionInfo": "3de0a292b3394768839af1ccfadda07c024b1f331e0e1fdad62318fe80cd04f5",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is a binary package built by vcpkg."
+    },
+    {
+      "SPDXID": "SPDXRef-resource-0",
+      "name": "boostorg/tuple",
+      "downloadLocation": "git+https://github.com/boostorg/tuple@boost-1.85.0",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "11ea811ce559c3cd810aed21362e5bb3e9aaadc01f08289f4f1b9db9b48d8ffdfbf158596fa54513e4f53e97da3a6344f80c0e6de5c992dfe2cc91e087fa5def"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-port-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f4dd0156ea8eaed05780200665c4091d1a64e3c60da8f2fa7a8931291228012"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./portfile.cmake",
+      "SPDXID": "SPDXRef-port-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c1f4df4a4b612f782372fe4f97a1b8e64ccefb4e2c73e0485cb8b55a56b4cad1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./BUILD_INFO",
+      "SPDXID": "SPDXRef-binary-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b17d8abcb0fd6454b3c1ec6556988d624863978121b87c51af8b1b6d937db69a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/tuple/tuple_comparison.hpp",
+      "SPDXID": "SPDXRef-binary-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e6cd6837eea28cb3214dd1c3da0af6170cf8cd39e21a45e626942b86068d0caf"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/tuple/tuple_io.hpp",
+      "SPDXID": "SPDXRef-binary-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "05345c2d1b6531669b83018cfadbe6a2efecdea5b1e2db7f2df04391be8f9e52"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/tuple/detail/tuple_basic.hpp",
+      "SPDXID": "SPDXRef-binary-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "eb193fedf6226479343deef55fe96a5de79e98bc748fb43644f48326c4218553"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/tuple/tuple.hpp",
+      "SPDXID": "SPDXRef-binary-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0c52b682feb7a103101803dbd423afe8bdedd2b23fd4d5d8d6324ab80eaec16d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_tuple/boost_tuple-targets.cmake",
+      "SPDXID": "SPDXRef-binary-file-5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5a39f8493c39b60cf04fc04402be9fbec6fe63f897f07e4e8df1e02625774667"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_tuple/boost_tuple-config.cmake",
+      "SPDXID": "SPDXRef-binary-file-6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5c654198a8d60c7824c594d0b21bb35e4d86eb07f3a90315e1609ccd9828425f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_tuple/boost_tuple-config-version.cmake",
+      "SPDXID": "SPDXRef-binary-file-7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ae13b10fb65baff0c2b07e69a8c91a14f8f6b96915bb01a30e323409fc21ae2b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost-tuple/copyright",
+      "SPDXID": "SPDXRef-binary-file-8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    }
+  ]
+}

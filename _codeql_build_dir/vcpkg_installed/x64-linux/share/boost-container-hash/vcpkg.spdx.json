@@ -1,0 +1,508 @@
+{
+  "$schema": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://spdx.org/spdxdocs/boost-container-hash-x64-linux-1.85.0#1-32de8294-da90-458d-9937-7352326f26f8",
+  "name": "boost-container-hash:x64-linux@1.85.0#1 4eae361aaf16f63d6e4fca7c5005ddab6c114570703a8f3985c02d95623b3eeb",
+  "creationInfo": {
+    "creators": [
+      "Tool: vcpkg-2025-10-16-71538f2694db93da4668782d094768ba74c45991"
+    ],
+    "created": "2025-10-21T20:15:29Z"
+  },
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-port-file-0",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-5"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-6"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-7"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-8"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-9"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-10"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-11"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-12"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-13"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-14"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-15"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-16"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-17"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-18"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-19"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-20"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-21"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-22"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-23"
+    }
+  ],
+  "packages": [
+    {
+      "name": "boost-container-hash",
+      "SPDXID": "SPDXRef-port",
+      "versionInfo": "1.85.0#1",
+      "downloadLocation": "git+https://github.com/Microsoft/vcpkg@dea487fe4339749373fbbb3d67d38bc07f25fcd6",
+      "homepage": "https://www.boost.org/libs/container_hash",
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "description": "Boost container_hash module",
+      "comment": "This is the port (recipe) consumed by vcpkg."
+    },
+    {
+      "name": "boost-container-hash:x64-linux",
+      "SPDXID": "SPDXRef-binary",
+      "versionInfo": "4eae361aaf16f63d6e4fca7c5005ddab6c114570703a8f3985c02d95623b3eeb",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is a binary package built by vcpkg."
+    },
+    {
+      "SPDXID": "SPDXRef-resource-0",
+      "name": "boostorg/container_hash",
+      "downloadLocation": "git+https://github.com/boostorg/container_hash@boost-1.85.0",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "47dc9e3960ceb861e132a5cccd11c8da47e054ae815c0d907838caa7d69b6f9a1e264542d8bba779c0c84e88b4b8cd53408fdab9662708e6ead49413e21a2b7b"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-port-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6cab1c807dac756ed1c049514830d6764bb06446054bffd85f3c19459d9f4493"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./portfile.cmake",
+      "SPDXID": "SPDXRef-port-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f4dac95b8fa87da90ed5bb8f44f5962289c7e9063c8576f50648f2fff4422814"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./BUILD_INFO",
+      "SPDXID": "SPDXRef-binary-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b17d8abcb0fd6454b3c1ec6556988d624863978121b87c51af8b1b6d937db69a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/functional/hash/extensions.hpp",
+      "SPDXID": "SPDXRef-binary-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "efc474537dd76c2c774623fffe518e17f599c44ab6b20fb68dbc39ed0cd1f359"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/functional/hash/hash_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a0177e56687b53ed7aaee092cd10244379e8078dbcb6d2ed1d85487da783f36a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/functional/hash/hash.hpp",
+      "SPDXID": "SPDXRef-binary-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3c1e756b0c98774fb26f75e8880ff4bbcfc53e18d8a39e686b32c7af45baa2d1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/functional/hash_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a0177e56687b53ed7aaee092cd10244379e8078dbcb6d2ed1d85487da783f36a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/functional/hash.hpp",
+      "SPDXID": "SPDXRef-binary-file-5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3c1e756b0c98774fb26f75e8880ff4bbcfc53e18d8a39e686b32c7af45baa2d1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/is_unordered_range.hpp",
+      "SPDXID": "SPDXRef-binary-file-6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "54a7be2502089b3d8a04e7bc183adbffe04638402675bf8621fbd669fc02f719"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/is_range.hpp",
+      "SPDXID": "SPDXRef-binary-file-7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "79d8e81ed700ecc081eb4bab8419484ac03e8c2ba2ef1997b23cc79ed4f44a07"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/is_contiguous_range.hpp",
+      "SPDXID": "SPDXRef-binary-file-8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5d258f384b265ba52f67c67eac81e6fab85550db542a4eb7ce727756857bc1b5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/extensions.hpp",
+      "SPDXID": "SPDXRef-binary-file-9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "89e8099bb8dd5f3b6483dc63a7ed7d92b027f106dd2ce51d88821561cd70a228"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/hash_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-10",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cad327a09e87b41f48d53a22b2b8ed5c14f09a43cce6dc5016702b33c2ae8d3a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/is_described_class.hpp",
+      "SPDXID": "SPDXRef-binary-file-11",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "99cee6b9592dc52e3f8417181e419a8ab996e484f928c216da213d8329a94bc3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/hash.hpp",
+      "SPDXID": "SPDXRef-binary-file-12",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d35f144dba1c27423ddcca4cf0f87cd2447ed001d872ced4c0948ee70c03e2c4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/detail/hash_tuple_like.hpp",
+      "SPDXID": "SPDXRef-binary-file-13",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4bd8e61bf55499bd8704f90d13e7ed6d2bd4b5a7278bb1e6803c0203e3c9915d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/detail/limits.hpp",
+      "SPDXID": "SPDXRef-binary-file-14",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c613d375e4eb0fabc92ed9cf13d2f8557577212068fd0110d40593305089483e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/detail/hash_mix.hpp",
+      "SPDXID": "SPDXRef-binary-file-15",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "806139b076c7fc8069974cf7d064212e89a2403d7d9a2fcf54df18d278d3170e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/detail/hash_range.hpp",
+      "SPDXID": "SPDXRef-binary-file-16",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8c6d38d647485ada3b944c590c3a33cdbdbdfbabbf055f4320eeadfa7ef7d607"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/detail/mulx.hpp",
+      "SPDXID": "SPDXRef-binary-file-17",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "089767657e904c530e88aa3eba7685ddea5bd89e38e5b9a26b3bb5f6b0fa3c15"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/detail/hash_integral.hpp",
+      "SPDXID": "SPDXRef-binary-file-18",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "76c8eb65912f83f9a96bd189ac26ff9105831e8ffda213e7b5d223d66da82629"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container_hash/is_tuple_like.hpp",
+      "SPDXID": "SPDXRef-binary-file-19",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "544786ee8ef46d835dc47efc54babcc7b7083aabaa2ada42f895f356f4f9e88c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container_hash/boost_container_hash-config-version.cmake",
+      "SPDXID": "SPDXRef-binary-file-20",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ae13b10fb65baff0c2b07e69a8c91a14f8f6b96915bb01a30e323409fc21ae2b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container_hash/boost_container_hash-config.cmake",
+      "SPDXID": "SPDXRef-binary-file-21",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "90513528a850a7a611bbbe2e1ddc11ebab2438bc2c7786feb1ed01c6bf4ee4fe"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container_hash/boost_container_hash-targets.cmake",
+      "SPDXID": "SPDXRef-binary-file-22",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3cafea5267b7c771e40dd8cebf053fb074fb53d5f559479b7039bf59bf961911"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost-container-hash/copyright",
+      "SPDXID": "SPDXRef-binary-file-23",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    }
+  ]
+}

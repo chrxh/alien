@@ -1,0 +1,10 @@
+x64-linux/
+x64-linux/share/
+x64-linux/share/vcpkg-cmake-get-vars/
+x64-linux/share/vcpkg-cmake-get-vars/cmake_get_vars/
+x64-linux/share/vcpkg-cmake-get-vars/cmake_get_vars/CMakeLists.txt
+x64-linux/share/vcpkg-cmake-get-vars/copyright
+x64-linux/share/vcpkg-cmake-get-vars/vcpkg-port-config.cmake
+x64-linux/share/vcpkg-cmake-get-vars/vcpkg.spdx.json
+x64-linux/share/vcpkg-cmake-get-vars/vcpkg_abi_info.txt
+x64-linux/share/vcpkg-cmake-get-vars/vcpkg_cmake_get_vars.cmake

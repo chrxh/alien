@@ -1,0 +1,220 @@
+{
+  "$schema": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://spdx.org/spdxdocs/vcpkg-cmake-get-vars-x64-linux-2023-12-31-cb467b0c-8992-45e3-a673-b433de035f12",
+  "name": "vcpkg-cmake-get-vars:x64-linux@2023-12-31 0a548ada5fe8527a5abdf7da5ddc07f356cda1c98664bcccd4dfe0049f0b94a4",
+  "creationInfo": {
+    "creators": [
+      "Tool: vcpkg-2025-10-16-71538f2694db93da4668782d094768ba74c45991"
+    ],
+    "created": "2025-10-21T20:18:53Z"
+  },
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-port-file-1",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-4"
+    }
+  ],
+  "packages": [
+    {
+      "name": "vcpkg-cmake-get-vars",
+      "SPDXID": "SPDXRef-port",
+      "versionInfo": "2023-12-31",
+      "downloadLocation": "git+https://github.com/Microsoft/vcpkg@725c841810ceb8de33da68ea879eb8f0b4d6c94c",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is the port (recipe) consumed by vcpkg."
+    },
+    {
+      "name": "vcpkg-cmake-get-vars:x64-linux",
+      "SPDXID": "SPDXRef-binary",
+      "versionInfo": "0a548ada5fe8527a5abdf7da5ddc07f356cda1c98664bcccd4dfe0049f0b94a4",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is a binary package built by vcpkg."
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./cmake_get_vars/CMakeLists.txt",
+      "SPDXID": "SPDXRef-port-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "75a1291434249775e2f82942e9e04b41efef3e8cded19c30a9940c691ad9148f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-port-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "90ff3bf8d338ffa039b69e800a1758c30f939085efcf1dfcee4d975871475a09"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./portfile.cmake",
+      "SPDXID": "SPDXRef-port-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bbcf9d6b88dd539617f4cfc1f76acbbe9a6e31fc373d79c1c626278768ea2e2a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg_cmake_get_vars.cmake",
+      "SPDXID": "SPDXRef-port-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "da894e0dafa6ef0acdc641f12b02633f273322d86a6d2e7065dc56134478cea3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg-port-config.cmake",
+      "SPDXID": "SPDXRef-port-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4fd4c2e909bbdf069eb3c59b4b847b0b386cdb41840714e12b34b7eff41f9e22"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./BUILD_INFO",
+      "SPDXID": "SPDXRef-binary-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f06935fb5861a728489192b7c73f0a7be648ef1c6ffe989ac30cbece025ba1c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-cmake-get-vars/cmake_get_vars/CMakeLists.txt",
+      "SPDXID": "SPDXRef-binary-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "75a1291434249775e2f82942e9e04b41efef3e8cded19c30a9940c691ad9148f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-cmake-get-vars/copyright",
+      "SPDXID": "SPDXRef-binary-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1ee376fc340e0aa6ad6a3581c94126e741468705096ac92263048a21daa86460"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-cmake-get-vars/vcpkg_cmake_get_vars.cmake",
+      "SPDXID": "SPDXRef-binary-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "da894e0dafa6ef0acdc641f12b02633f273322d86a6d2e7065dc56134478cea3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/vcpkg-cmake-get-vars/vcpkg-port-config.cmake",
+      "SPDXID": "SPDXRef-binary-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4fd4c2e909bbdf069eb3c59b4b847b0b386cdb41840714e12b34b7eff41f9e22"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    }
+  ]
+}

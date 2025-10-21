@@ -1,0 +1,9 @@
+The package boost-multi-index is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS multi_index)
+    target_link_libraries(main PRIVATE Boost::multi_index)
+
+or the generated cmake configs via:
+
+    find_package(boost_multi_index REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::multi_index)

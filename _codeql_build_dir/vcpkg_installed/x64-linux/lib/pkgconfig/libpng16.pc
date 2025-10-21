@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/libpng16
+
+Name: libpng
+Description: Loads and saves PNG files
+Version: 1.6.43
+
+Libs: "-L${libdir}" -lpng16 -lm
+Requires: zlib
+Cflags: "-I${includedir}"

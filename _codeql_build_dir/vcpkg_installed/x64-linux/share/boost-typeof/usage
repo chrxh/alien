@@ -1,0 +1,9 @@
+The package boost-typeof is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS typeof)
+    target_link_libraries(main PRIVATE Boost::typeof)
+
+or the generated cmake configs via:
+
+    find_package(boost_typeof REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::typeof)

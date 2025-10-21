@@ -1,0 +1,9 @@
+The package boost-headers is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS headers)
+    target_link_libraries(main PRIVATE Boost::headers)
+
+or the generated cmake configs via:
+
+    find_package(boost_headers REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::headers)

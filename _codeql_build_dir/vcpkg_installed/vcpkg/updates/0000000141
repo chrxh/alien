@@ -1,0 +1,6 @@
+Package: glad
+Feature: loader
+Architecture: x64-linux
+Multi-Arch: same
+Description: Generate loader logic.
+Status: install ok half-installed

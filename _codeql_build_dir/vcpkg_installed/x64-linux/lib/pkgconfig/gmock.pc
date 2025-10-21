@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: gmock
+Description: GoogleMock (without main() function)
+Version: 1.14.0
+URL: https://github.com/google/googletest
+
+Libs: "-L${libdir}" -lgmock
+Requires: gtest = 1.14.0
+Cflags: "-I${includedir}" -DGTEST_HAS_PTHREAD=1

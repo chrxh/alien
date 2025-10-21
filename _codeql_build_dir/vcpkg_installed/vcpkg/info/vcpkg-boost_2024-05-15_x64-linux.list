@@ -1,0 +1,9 @@
+x64-linux/
+x64-linux/share/
+x64-linux/share/vcpkg-boost/
+x64-linux/share/vcpkg-boost/boost-install.cmake
+x64-linux/share/vcpkg-boost/copyright
+x64-linux/share/vcpkg-boost/usage.in
+x64-linux/share/vcpkg-boost/vcpkg-port-config.cmake
+x64-linux/share/vcpkg-boost/vcpkg.spdx.json
+x64-linux/share/vcpkg-boost/vcpkg_abi_info.txt

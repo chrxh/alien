@@ -1,0 +1,9 @@
+The package boost-smart-ptr is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS smart_ptr)
+    target_link_libraries(main PRIVATE Boost::smart_ptr)
+
+or the generated cmake configs via:
+
+    find_package(boost_smart_ptr REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::smart_ptr)

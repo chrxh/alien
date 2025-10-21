@@ -1,0 +1,2072 @@
+{
+  "$schema": "https://raw.githubusercontent.com/spdx/spdx-spec/v2.2.1/schemas/spdx-schema.json",
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "documentNamespace": "https://spdx.org/spdxdocs/boost-container-x64-linux-1.85.0#1-ef3e0d40-f3dc-4f3c-8194-ab8b58f44163",
+  "name": "boost-container:x64-linux@1.85.0#1 7a879ef054cca9c2df85113fed4672341c4155aa724d8a01682f81b829df1524",
+  "creationInfo": {
+    "creators": [
+      "Tool: vcpkg-2025-10-16-71538f2694db93da4668782d094768ba74c45991"
+    ],
+    "created": "2025-10-21T20:15:48Z"
+  },
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "GENERATES",
+      "relatedSpdxElement": "SPDXRef-binary"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-port-file-1",
+      "relationshipType": "DEPENDENCY_MANIFEST_OF",
+      "relatedSpdxElement": "SPDXRef-port"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-port",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-port-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-0"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-1"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-2"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-3"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-4"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-5"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-6"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-7"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-8"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-9"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-10"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-11"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-12"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-13"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-14"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-15"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-16"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-17"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-18"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-19"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-20"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-21"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-22"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-23"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-24"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-25"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-26"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-27"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-28"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-30"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-31"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-32"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-33"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-34"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-35"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-36"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-37"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-38"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-39"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-40"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-41"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-42"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-43"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-44"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-45"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-46"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-47"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-48"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-49"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-50"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-51"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-52"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-53"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-54"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-55"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-56"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-57"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-58"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-59"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-60"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-61"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-62"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-63"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-64"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-65"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-66"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-67"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-68"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-69"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-70"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-71"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-72"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-73"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-74"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-75"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-76"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-77"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-78"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-79"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-80"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-81"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-82"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-83"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-84"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-85"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-86"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-87"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-88"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-89"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-90"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-91"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-92"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-93"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-94"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-95"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-96"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-97"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-98"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-99"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-100"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-101"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-102"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-103"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-104"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-105"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-106"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-107"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-108"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-109"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-110"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-111"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-112"
+    },
+    {
+      "spdxElementId": "SPDXRef-binary",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-binary-file-113"
+    }
+  ],
+  "packages": [
+    {
+      "name": "boost-container",
+      "SPDXID": "SPDXRef-port",
+      "versionInfo": "1.85.0#1",
+      "downloadLocation": "git+https://github.com/Microsoft/vcpkg@b304461cda37cd06d1097cc5135c3eb178eb5036",
+      "homepage": "https://www.boost.org/libs/container",
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "description": "Boost container module",
+      "comment": "This is the port (recipe) consumed by vcpkg."
+    },
+    {
+      "name": "boost-container:x64-linux",
+      "SPDXID": "SPDXRef-binary",
+      "versionInfo": "7a879ef054cca9c2df85113fed4672341c4155aa724d8a01682f81b829df1524",
+      "downloadLocation": "NONE",
+      "licenseConcluded": "BSL-1.0",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "This is a binary package built by vcpkg."
+    },
+    {
+      "SPDXID": "SPDXRef-resource-0",
+      "name": "boostorg/container",
+      "downloadLocation": "git+https://github.com/boostorg/container@boost-1.85.0",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "checksums": [
+        {
+          "algorithm": "SHA512",
+          "checksumValue": "7b287d5739abdbe08a8a0cb150e513c4feff43731ad923b115aa50d07200586c9b526eb144e7e3f1f191e6ba290032512b216d01cba5178173a3501f6cb37c39"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "fileName": "./posix-threads.diff",
+      "SPDXID": "SPDXRef-port-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "94aff70844c47aed2a5460b63d92527e6557780beea19037ee949f9a8d3a42a5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./vcpkg.json",
+      "SPDXID": "SPDXRef-port-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fca46a427eb1113689694772c5362a12d0d2f9f77961cb3a8712f7fc271cae39"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./no-static-assert.diff",
+      "SPDXID": "SPDXRef-port-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f62418ab07bfd734dfb03084857fbe61d9ef71f9688dd40d41d593877234a668"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./portfile.cmake",
+      "SPDXID": "SPDXRef-port-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a2b08be0b083b59ba4e3834891be04a47540354242a05932d0fc98a1445e2b35"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./lib/libboost_container.a",
+      "SPDXID": "SPDXRef-binary-file-0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "19aeecd87dfe06d336456a0bb6ae5be8872febb8f71348e5ecbf93605b86ea05"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./BUILD_INFO",
+      "SPDXID": "SPDXRef-binary-file-1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b17d8abcb0fd6454b3c1ec6556988d624863978121b87c51af8b1b6d937db69a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./debug/lib/libboost_container.a",
+      "SPDXID": "SPDXRef-binary-file-2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ff8fb51cc73f819c2d9ca4add92180dd72ecef9dfed7349ed846f77e2548e4d6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/scoped_allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5eaee3c193c764ed65e904b59d21ce5e4247268d476eefd40425c56fb7ab7a34"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/set.hpp",
+      "SPDXID": "SPDXRef-binary-file-4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "036bad78c2d1069730be9727cc1a3e1617f51764260805282459f5bf77f4813f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/slist.hpp",
+      "SPDXID": "SPDXRef-binary-file-5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "45dea000e252e2d17aa6368c2dce1419263fd949ddaa3b30efeb09cca0e7b478"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/uses_allocator_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e10f25e2777a0d866180e6a2d97add1f976ddb1e4e2e7c67be04ac34c90fb013"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/scoped_allocator_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f05c469dbff10c113be2986dcb448cd857a8f0bcb6d5b3ae9ccd46a0aa76d242"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/options.hpp",
+      "SPDXID": "SPDXRef-binary-file-8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "102d85bda38a749f43c5dca3918b3e69971fcd106613de240adca3e3a1b9b6ce"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/string.hpp",
+      "SPDXID": "SPDXRef-binary-file-9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "785e15bcc840004669e28e805f429b84e47ffa45c420f5246f1f112c39d894b7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/adaptive_pool.hpp",
+      "SPDXID": "SPDXRef-binary-file-10",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cda82d091eae8f83afc4c75318603c116a688a42ffcf675f9337c16d0b4b8697"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/container_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-11",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1467815af9de8e0b2d256630a5a1ba23a0d8dd4162d0e631d786b50e9af81869"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/stable_vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-12",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "07ebdf3f04d76fc88e12b532ab10127a0c724408b05fe24834293a9951f3556e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/deque.hpp",
+      "SPDXID": "SPDXRef-binary-file-13",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9c164767a10f71eaf7cadf2138ff5d925f25ad02501bc31d47ca7684c8cb354f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-14",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6270c7dfc24e3862036de5e21087b6f667df36480d7c90812b421b3e58b1d51a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/throw_exception.hpp",
+      "SPDXID": "SPDXRef-binary-file-15",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aedf23407b639ab60e196378becc0f5f84a713b265c7193e1b61ab0bd9d5ade8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/node_handle.hpp",
+      "SPDXID": "SPDXRef-binary-file-16",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b3381bddb1f19618abb0d5b8aca5af6e25a06911cf1bb3e4ed61fe34fa2e21c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/set.hpp",
+      "SPDXID": "SPDXRef-binary-file-17",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e48645929e7b95e859822f002841acecbbb9613b75524a6f8356d4adc57272fe"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/global_resource.hpp",
+      "SPDXID": "SPDXRef-binary-file-18",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fe13078fb58fdb561a201478193545824dfd7c5cb7a457eb4a4be357bbce8b42"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/slist.hpp",
+      "SPDXID": "SPDXRef-binary-file-19",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "82ed1aeafbb1a55dd1f106877f63dcbc01d404c759b7ec009c21b69dc0bec219"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/memory_resource.hpp",
+      "SPDXID": "SPDXRef-binary-file-20",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0e350525fdae750d1f8279c259094175c3c975512afd411e6d6f6b5876682a6c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/resource_adaptor.hpp",
+      "SPDXID": "SPDXRef-binary-file-21",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cb8e41bfecb60f8e6364f121ebd3baa37e61e4d65070824a59586b140fc90019"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/string.hpp",
+      "SPDXID": "SPDXRef-binary-file-22",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "653a19c4302f866bc3d9f53d203000777b42b633ace6d071253eadad13bb9ce4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/polymorphic_allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-23",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ca517ccae83310a659e0ce8e956dd9d2fb237453a0a80b22f322c24b276c860e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/stable_vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-24",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d35304a610c0a425c275923ba8cf2f453590e5f2abc89a909f7dc2807676d011"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/deque.hpp",
+      "SPDXID": "SPDXRef-binary-file-25",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c84b9bd31b180b49b59797f79cf27ab3e241596316fca3ce4c7fd1be49cead71"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/small_vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-26",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a50c69e5a22c8767ccf005e6826249ebdb80b05d20f18ec8e2a6ce9722ebd56e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/flat_map.hpp",
+      "SPDXID": "SPDXRef-binary-file-27",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "81e151eb16824c8cb7337b06f8d69e8fd57759913b2e87662b595cbf8fae8ace"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/devector.hpp",
+      "SPDXID": "SPDXRef-binary-file-28",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c75d59a07358edd288deb655c924e4d4c95c441a24e79682fb34d8bf7188322a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/unsynchronized_pool_resource.hpp",
+      "SPDXID": "SPDXRef-binary-file-29",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4ef0f9e466b52b700cf921e850ee1abb69817809c5fff07abb88d5fd21b402f5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/synchronized_pool_resource.hpp",
+      "SPDXID": "SPDXRef-binary-file-30",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ed979747cc6f6385494729ff7de81d343dcba562ddb8000e6c93864df786cd79"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-31",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "331eb4eb5266c349bd8feab278634abf367c6c763ea015ceefd965b951d38516"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/map.hpp",
+      "SPDXID": "SPDXRef-binary-file-32",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "617314d31645256f4274ae8d4f927858e2658faea6c4c86000c80262b4a0b3af"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/list.hpp",
+      "SPDXID": "SPDXRef-binary-file-33",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b517bf3972e964569806a899f41dca6314049369f4decbd4b1dd700ea3aa3f21"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/pool_options.hpp",
+      "SPDXID": "SPDXRef-binary-file-34",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f8525dcffff4f7a89745453eb6252d807b37b21bfb8919e62e5be3263a18ff9c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/monotonic_buffer_resource.hpp",
+      "SPDXID": "SPDXRef-binary-file-35",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c2b397e7a51685d70b81b830adcc6ba8457e01963884dd366b79019f4d92b2c2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/pmr/flat_set.hpp",
+      "SPDXID": "SPDXRef-binary-file-36",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5806f4a8a9aa69d4d691a84f892c8564ce082c22e010d5c09a94233941a0949b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/small_vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-37",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9ecdf2c932ae496cbdb08381c1330e425d312789d9ac3c877779f0058b18d575"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/flat_map.hpp",
+      "SPDXID": "SPDXRef-binary-file-38",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a44d45937db14ac9e09165013cc92bbe3c259d5e079a5a9b07c87030945b8b7a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/uses_allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-39",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "74301a9e236dcced388e0dafae3cd8b73841e1fa8270b1ceb6dbfc2472ebaac4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/devector.hpp",
+      "SPDXID": "SPDXRef-binary-file-40",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "542ab71d141e921fc8c10b05e195268a640c43a847ccb06a5a91c2ba73ae5ee2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/node_allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-41",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ea6703798aa4fbf2bd19c8f4d00a4fb442a71ffb3d81b022148d18372ae3e78d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/variadic_templates_tools.hpp",
+      "SPDXID": "SPDXRef-binary-file-42",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "30189e4df53bc5ff1dcb896b27c1e9afa19494d5097d40dceddfffcb9572c9d8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/node_pool_impl.hpp",
+      "SPDXID": "SPDXRef-binary-file-43",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4b5c92c3ace0c8c813710850df176976230730f07692f108cd3378b9cba117d4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/is_container.hpp",
+      "SPDXID": "SPDXRef-binary-file-44",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ba4afbad108697e0751ecdf07daf1c366ea4fc951331812584e67a4843675ab3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/flat_tree.hpp",
+      "SPDXID": "SPDXRef-binary-file-45",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c72b7f75515ae0c7f060337946ef37d535af3d977d2569b53fd971430c4c9940"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/adaptive_node_pool_impl.hpp",
+      "SPDXID": "SPDXRef-binary-file-46",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "109ff30ccc5263fa9813c9c48e920d93e16b3a18cf5b08664120961d303c832d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/addressof.hpp",
+      "SPDXID": "SPDXRef-binary-file-47",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ac6a7c76f79d4bda76dfb71a474ad4fd57e5bad71737a037ea17bce93ec8ce74"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/allocation_type.hpp",
+      "SPDXID": "SPDXRef-binary-file-48",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "81611e89ed54d9deb3fd03c648e6f58e45fca65410f1a846cd422d4b562d8a1d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/next_capacity.hpp",
+      "SPDXID": "SPDXRef-binary-file-49",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d512aded7cde4f15eaf995b139de74cf918a247a47d35ffb713a594bff5ee0c7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/copy_move_algo.hpp",
+      "SPDXID": "SPDXRef-binary-file-50",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e26064bd16cbf842e26377e0a4fe8e587a8f1a0ead61fb66c793a429ee64c113"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/config_begin.hpp",
+      "SPDXID": "SPDXRef-binary-file-51",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a639538ea3b8f46e46aeec6eb070223412ae167cad4d573d9afaec685d9241fc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/algorithm.hpp",
+      "SPDXID": "SPDXRef-binary-file-52",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ae4a85b20eeae6d1c360a50445a99e53be49f9e057a7419615705a277b609995"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/iterator.hpp",
+      "SPDXID": "SPDXRef-binary-file-53",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "472b38b75574634c9e3e1e0bacb1f7102ab90b6924d539518cde792b8952dd3b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/alloc_helpers.hpp",
+      "SPDXID": "SPDXRef-binary-file-54",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "00da1b4240cda3358a8acae0e737c807e6208a2cedc11732961e520400be8d0a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/mutex.hpp",
+      "SPDXID": "SPDXRef-binary-file-55",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e416d49adf70678bcbab23dc39eb4e4f564cf5125faefa1cd974a7ea6a1bd634"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/placement_new.hpp",
+      "SPDXID": "SPDXRef-binary-file-56",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "06965d2f1297af897e3cf355d7fac2eb70dda2b21ba93acda6cba292f96eed3e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/pool_common.hpp",
+      "SPDXID": "SPDXRef-binary-file-57",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d440b96963a29471b32fce299ea92240cc5e26bf534739a66bed15f92499d2c9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/is_contiguous_container.hpp",
+      "SPDXID": "SPDXRef-binary-file-58",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "875dfbd63fa8ed5dc76b71ac52f2dc85115879148364d8288b22b6fe7bcfe0ee"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/pair_key_mapped_of_value.hpp",
+      "SPDXID": "SPDXRef-binary-file-59",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b48b142f084d7d3b1693f5d03a6e9bb4857ca178cc697e2b1fe06c38041a3b99"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/auto_link.hpp",
+      "SPDXID": "SPDXRef-binary-file-60",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7e711211ac22c58b18ccd0dac1f8b6c21556f86e3009d4611e6bded25f45ee7d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/thread_mutex.hpp",
+      "SPDXID": "SPDXRef-binary-file-61",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4bf8d7d235ac9a9550a74204f1ddd3465b9633010ee821fe533d5899c86dd2e0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/minimal_char_traits_header.hpp",
+      "SPDXID": "SPDXRef-binary-file-62",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a34e6549640689dacfd8f82d945bf97eeb29a729a1c309bf6533f85b7efef9db"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/singleton.hpp",
+      "SPDXID": "SPDXRef-binary-file-63",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3928673e1293f043baa56dac6c38cf7e0bed2f7df6873483c83824aab97ff1af"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/version_type.hpp",
+      "SPDXID": "SPDXRef-binary-file-64",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e50b26f1805ce3ca3234ba141eb4c3e1002e49905e8bd84533bf13a3a91b7d31"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/pool_common_alloc.hpp",
+      "SPDXID": "SPDXRef-binary-file-65",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1d7493b74aba630860bc4b709a386528fd8c921ee9acbb8f972dac01bb8b9b67"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/allocator_version_traits.hpp",
+      "SPDXID": "SPDXRef-binary-file-66",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7b328839e5d9a6f8cca1a414322981b1c7b2c9831a5c5f2607d5b5cc43e080ba"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/container_rebind.hpp",
+      "SPDXID": "SPDXRef-binary-file-67",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9e50160ebde42e111681ff77aa65dd15b19acf386e107d4c0f3959f5c86db605"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/adaptive_node_pool.hpp",
+      "SPDXID": "SPDXRef-binary-file-68",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e8b6ead6b68e382279da1e06994ec609d7f13a459ae821e113685601dd8d270e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/math_functions.hpp",
+      "SPDXID": "SPDXRef-binary-file-69",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ae9c330a15704a865673f3cbdcbd2de1cf06f369fd8f0c6a8cd5e18f327d18fb"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/config_end.hpp",
+      "SPDXID": "SPDXRef-binary-file-70",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "30fb52bea2f7e43f79eba2376ca2655d8b2aa89401d985e4162ec7672b036518"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/value_init.hpp",
+      "SPDXID": "SPDXRef-binary-file-71",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "54e9ac1ee56395d70ffed4253d0afcae8f7c314ca0063bf5f335a2a2c43f2540"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/iterator_to_raw_pointer.hpp",
+      "SPDXID": "SPDXRef-binary-file-72",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "758d0974971f187b130aa6ddea90c633932daa7d0ea3b1065988f37fb89611f7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/mpl.hpp",
+      "SPDXID": "SPDXRef-binary-file-73",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "732e3cc34296ad127d2c5d27f37118ea93933a130a2435b56ae2cef738ecbf81"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/dispatch_uses_allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-74",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0948f498a286ed7c38936a0e04f10f65de0ad2a2a8b53b6a1319c1526368b4fa"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/is_pair.hpp",
+      "SPDXID": "SPDXRef-binary-file-75",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "11aca7901527565c47d29b136a92c0f6aff18bc3f9d84add69297f951ca1c23c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/type_traits.hpp",
+      "SPDXID": "SPDXRef-binary-file-76",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "41985897fa6fff8f0c351933d4846d725b7346bf26d12b3d6d9ff26bbd25ed39"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/guards_dended.hpp",
+      "SPDXID": "SPDXRef-binary-file-77",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e38803766805241b4e4fd7253e13a910a98fa556ff7d92e5f60aed2fdb7f8b03"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/tree.hpp",
+      "SPDXID": "SPDXRef-binary-file-78",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2574d36bb18ee3edf944e5f85e586b1a8d95212b4560b4e903d89c83af73bd5e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/iterators.hpp",
+      "SPDXID": "SPDXRef-binary-file-79",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "389fc98465215c0a1768230cf2679931761dad73b510db612ade95ee7f68c001"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/advanced_insert_int.hpp",
+      "SPDXID": "SPDXRef-binary-file-80",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f88792a81cf6157a95787be2202461d1ad8a2520d1502e5e5d762cf89711a208"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/destroyers.hpp",
+      "SPDXID": "SPDXRef-binary-file-81",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1aa32e379132f5a8f86349c60c19b62daf4d108f09b11acf50ac826d48707a5f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/block_list.hpp",
+      "SPDXID": "SPDXRef-binary-file-82",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "232049a1c4bb39506db1ca30aea6030765a8b5c65c0831e67aa58b7e848254da"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/compare_functors.hpp",
+      "SPDXID": "SPDXRef-binary-file-83",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "77db03f7b7718df1ce6eabc656e8c6956fa114bea5f1ce56a36e959b44f73e42"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/workaround.hpp",
+      "SPDXID": "SPDXRef-binary-file-84",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e8b0bb8bbc409b83ac6efd6748fc5bd77c8565013329511ad5e32a573f528b57"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/node_pool.hpp",
+      "SPDXID": "SPDXRef-binary-file-85",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b49f5a0449284b021c35e0c3f9c6fa722e1d5cb02882289746399fbef8830f4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/multiallocation_chain.hpp",
+      "SPDXID": "SPDXRef-binary-file-86",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6939b400ce4076c360e21bdaa8f3c502554ca4e12dfac09b27c256a3b5e9a2f7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/node_alloc_holder.hpp",
+      "SPDXID": "SPDXRef-binary-file-87",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "251d9ee0d90ea0fe02c23996271855b01079eb7de59b8829c042d8d34b6d4791"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/value_functors.hpp",
+      "SPDXID": "SPDXRef-binary-file-88",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0ce142f1697df682b20e0a7bf39bad3396d2df6ba4eb77625242e30425fedcda"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/dlmalloc.hpp",
+      "SPDXID": "SPDXRef-binary-file-89",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a808c9bf7add5c4505769d257180cb1b477805f53fa52bf066c6aecbc7569092"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/min_max.hpp",
+      "SPDXID": "SPDXRef-binary-file-90",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "46047136eeeba6892fb4d92ae362e2be20bd8b74e08abde37cc1602f5fbd5e6f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/block_slist.hpp",
+      "SPDXID": "SPDXRef-binary-file-91",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d788ab2a6127e761d5c3f27f25527b812c09f18959a586e700de6712ff92b81e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/pool_resource.hpp",
+      "SPDXID": "SPDXRef-binary-file-92",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f1a45394ceb27e9847e5a29c819f58ca87f7842bdb3f65afea4d7c42c728a814"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/construct_in_place.hpp",
+      "SPDXID": "SPDXRef-binary-file-93",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a077acaa7cbb38b5197615dc4faaa12bed172220523431b9b542e32fa2b80841"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/transform_iterator.hpp",
+      "SPDXID": "SPDXRef-binary-file-94",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "685d7e1dc5896c5d8a49756ff5f20469d97e23eb8332ec618aa7b08e9ac955ab"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/is_sorted.hpp",
+      "SPDXID": "SPDXRef-binary-file-95",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "78082cc7f00dc3b8ed73d601352b4f456c136532bc19f1e8af4190395a61daea"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/alloc_lib.h",
+      "SPDXID": "SPDXRef-binary-file-96",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6dfd4778f113fc80fab6bffdd7590cf96ebbebcda0e35dc89446b606f5932446"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/container_or_allocator_rebind.hpp",
+      "SPDXID": "SPDXRef-binary-file-97",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a5a78979d74814f0b84bede67f3f500a374ae556405f77cf5e5f716db30169fc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/pair.hpp",
+      "SPDXID": "SPDXRef-binary-file-98",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c9111a66eb189a20cfb945454f9dd547ee9775360844ba42b2bd001e9b34c9a9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/function_detector.hpp",
+      "SPDXID": "SPDXRef-binary-file-99",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7c695281459d1ce9a54e8d6023733dbd1e87564cd18a3f7220452daf91c3017b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/detail/std_fwd.hpp",
+      "SPDXID": "SPDXRef-binary-file-100",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e31db3d40f075e0f099741ca190c42ef9881a91279a9e17508c38f392d6f5caf"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/new_allocator.hpp",
+      "SPDXID": "SPDXRef-binary-file-101",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f962d18dc28aebc60ac91adca200e67de96382797d3e3cfe672595f740173cd3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-102",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ab8c00bd1581fc8e4a0ede01cb8f8c960d0ad07467586c24ddb703669ff49967"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/map.hpp",
+      "SPDXID": "SPDXRef-binary-file-103",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "70a1ee5eb4a693b3e5ef68c55f3047284ce6c5c0007c8836f5495e46cb5c45bf"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/list.hpp",
+      "SPDXID": "SPDXRef-binary-file-104",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0067cee2f83f5f343817b6dbfe44bb620e2845c3f8bdaf3de68dabcfceb99ecd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/static_vector.hpp",
+      "SPDXID": "SPDXRef-binary-file-105",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "900e30228e66f7592c7660a3820f28b9e8c5680aae80d5685d35d78241c2ca77"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/flat_set.hpp",
+      "SPDXID": "SPDXRef-binary-file-106",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dcf1d7b09986a0cf571cb9db4ad05e37573da5226b201f56190d36c72e65181c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./include/boost/container/allocator_traits.hpp",
+      "SPDXID": "SPDXRef-binary-file-107",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8853e11f59a1b60cce0bd773cb2c2707a8db08d8b51c4fa7b6030088d6f6468a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost-container/copyright",
+      "SPDXID": "SPDXRef-binary-file-108",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container/boost_container-targets-release.cmake",
+      "SPDXID": "SPDXRef-binary-file-109",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "18a374979302abf2edb861512a47b8ffc05b7bafa81d91ddc016227c3c78f77d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container/boost_container-targets.cmake",
+      "SPDXID": "SPDXRef-binary-file-110",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dec634faae7d7d1bb0f83afdd50d536c6de5a9b2222a339ffaa0a4b7b70ee55a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container/boost_container-config.cmake",
+      "SPDXID": "SPDXRef-binary-file-111",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c0bf56abb00fe87479681b5cfcae4d46ce5098df36a89bd3dbc82862f06b7c0a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container/boost_container-config-version.cmake",
+      "SPDXID": "SPDXRef-binary-file-112",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "39696a23e07e4bd0f5c1c148eedb0ce0410544fc97a9fa8907cfa37447cd5df7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./share/boost_container/boost_container-targets-debug.cmake",
+      "SPDXID": "SPDXRef-binary-file-113",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "772a8e00d8d6bda5b37a87d88f76ce4151d147e030da7c75701c040368608b75"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "copyrightText": "NOASSERTION"
+    }
+  ]
+}

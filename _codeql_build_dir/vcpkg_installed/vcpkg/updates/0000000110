@@ -1,0 +1,9 @@
+Package: boost-atomic
+Version: 1.85.0
+Port-Version: 1
+Depends: boost-align, boost-assert, boost-cmake, boost-config, boost-headers, boost-predef, boost-preprocessor, boost-type-traits, boost-winapi
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 1af78c591df848f14b05d77c918e0b48f12c732a26625ba6e5825869cca79e4b
+Description: Boost atomic module
+Status: install ok half-installed

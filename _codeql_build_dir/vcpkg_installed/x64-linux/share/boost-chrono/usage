@@ -1,0 +1,9 @@
+The package boost-chrono is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS chrono)
+    target_link_libraries(main PRIVATE Boost::chrono)
+
+or the generated cmake configs via:
+
+    find_package(boost_chrono REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::chrono)

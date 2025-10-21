@@ -1,0 +1,9 @@
+The package boost-type-traits is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS type_traits)
+    target_link_libraries(main PRIVATE Boost::type_traits)
+
+or the generated cmake configs via:
+
+    find_package(boost_type_traits REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::type_traits)

@@ -1,0 +1,9 @@
+The package boost-concept-check is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS concept_check)
+    target_link_libraries(main PRIVATE Boost::concept_check)
+
+or the generated cmake configs via:
+
+    find_package(boost_concept_check REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::concept_check)

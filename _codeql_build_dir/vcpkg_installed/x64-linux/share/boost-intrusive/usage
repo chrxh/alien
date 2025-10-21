@@ -1,0 +1,9 @@
+The package boost-intrusive is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS intrusive)
+    target_link_libraries(main PRIVATE Boost::intrusive)
+
+or the generated cmake configs via:
+
+    find_package(boost_intrusive REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::intrusive)

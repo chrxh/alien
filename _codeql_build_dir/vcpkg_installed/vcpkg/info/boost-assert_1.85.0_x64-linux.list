@@ -1,0 +1,16 @@
+x64-linux/
+x64-linux/include/
+x64-linux/include/boost/
+x64-linux/include/boost/assert.hpp
+x64-linux/include/boost/assert/
+x64-linux/include/boost/assert/source_location.hpp
+x64-linux/include/boost/current_function.hpp
+x64-linux/share/
+x64-linux/share/boost-assert/
+x64-linux/share/boost-assert/copyright
+x64-linux/share/boost-assert/vcpkg.spdx.json
+x64-linux/share/boost-assert/vcpkg_abi_info.txt
+x64-linux/share/boost_assert/
+x64-linux/share/boost_assert/boost_assert-config-version.cmake
+x64-linux/share/boost_assert/boost_assert-config.cmake
+x64-linux/share/boost_assert/boost_assert-targets.cmake

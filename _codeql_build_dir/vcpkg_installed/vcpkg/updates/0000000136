@@ -1,0 +1,7 @@
+Package: egl-registry
+Version: 2024-01-25
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 4661bde40db753f014498d947127a19290d08cd0318ce40ee0ea161542f5beee
+Description: EGL API and Extension Registry
+Status: install ok half-installed

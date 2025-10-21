@@ -1,0 +1,12 @@
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: glew
+Description: The OpenGL Extension Wrangler library
+Version: 2.2.0
+
+Libs: "-L${libdir}" -lGLEW
+Requires: glu
+Cflags: "-I${includedir}" 

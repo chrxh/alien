@@ -1,0 +1,9 @@
+The package boost-predef is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS predef)
+    target_link_libraries(main PRIVATE Boost::predef)
+
+or the generated cmake configs via:
+
+    find_package(boost_predef REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::predef)

@@ -1,0 +1,9 @@
+The package boost-integer is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS integer)
+    target_link_libraries(main PRIVATE Boost::integer)
+
+or the generated cmake configs via:
+
+    find_package(boost_integer REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::integer)
