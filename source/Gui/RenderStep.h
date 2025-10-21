@@ -179,3 +179,15 @@ protected:
 private:
     _LocationRenderStep(StepParameters const& parameters);
 };
+
+class _SelectedCellRenderStep : public _RenderStep
+{
+public:
+    static SelectedCellRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _SelectedCellRenderStep(StepParameters const& parameters);
+};

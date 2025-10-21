@@ -16,6 +16,8 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_vboForEnergyParticles);
     glGenVertexArrays(1, &result->_vaoForLocations);
     glGenBuffers(1, &result->_vboForLocations);
+    glGenVertexArrays(1, &result->_vaoForSelectedCells);
+    glGenBuffers(1, &result->_vboForSelectedCells);
     return GeometryBuffers(result);
 }
 
@@ -36,6 +38,11 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
         _locationBufferCapacity = std::max(numRenderObjects.locations * 2, static_cast<uint64_t>(1000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForLocations());
         glBufferData(GL_ARRAY_BUFFER, toInt(_locationBufferCapacity * sizeof(LocationVertexData)), nullptr, GL_DYNAMIC_DRAW);
+    }
+    if (numRenderObjects.selectedCells >= _selectedCellBufferCapacity) {
+        _selectedCellBufferCapacity = std::max(numRenderObjects.selectedCells * 2, static_cast<uint64_t>(10000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedCells());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_selectedCellBufferCapacity * sizeof(SelectedCellVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));

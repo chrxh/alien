@@ -11,6 +11,7 @@ struct NumRenderObjects
     uint64_t triangleIndices;
     uint64_t energyParticles;
     uint64_t locations;
+    uint64_t selectedCells;
 };
 
 struct CellVertexData
@@ -37,6 +38,11 @@ struct LocationVertexData
     float opacity;      // opacity/transparency of the location
 };
 
+struct SelectedCellVertexData
+{
+    float pos[2];       // x, y position
+};
+
 class _GeometryBuffers
 {
 public:
@@ -46,9 +52,11 @@ public:
     unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
     unsigned int getVaoForEnergyParticles() const { return _vaoForEnergyParticles; }
     unsigned int getVaoForLocations() const { return _vaoForLocations; }
+    unsigned int getVaoForSelectedCells() const { return _vaoForSelectedCells; }
     unsigned int getVboForCells() const { return _vboForCells; }
     unsigned int getVboForEnergyParticles() const { return _vboForEnergyParticles; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
+    unsigned int getVboForSelectedCells() const { return _vboForSelectedCells; }
     unsigned int getEboForLines() const { return _eboForLines; }
     unsigned int getEboForTriangles() const { return _eboForTriangles; }
 
@@ -61,15 +69,18 @@ private:
     unsigned int _vaoForTriangles = 0;
     unsigned int _vaoForEnergyParticles = 0;
     unsigned int _vaoForLocations = 0;
+    unsigned int _vaoForSelectedCells = 0;
     unsigned int _vboForCells = 0;
     unsigned int _vboForEnergyParticles = 0;
     unsigned int _vboForLocations = 0;
+    unsigned int _vboForSelectedCells = 0;
     unsigned int _eboForLines = 0;
     unsigned int _eboForTriangles = 0;
 
     uint64_t _vertexBufferCapacity = 0;
     uint64_t _energyParticleBufferCapacity = 0;
     uint64_t _locationBufferCapacity = 0;
+    uint64_t _selectedCellBufferCapacity = 0;
     uint64_t _lineIndexBufferCapacity = 0;
     uint64_t _triangleIndexBufferCapacity = 0;
 

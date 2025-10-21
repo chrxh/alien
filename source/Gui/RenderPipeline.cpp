@@ -125,6 +125,18 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, sizeof(LocationVertexData), (void*)(8 * sizeof(float) + sizeof(int)));
         glEnableVertexAttribArray(6);
     }
+    {
+        auto vao = _geometryBuffers->getVaoForSelectedCells();
+        auto vbo = _geometryBuffers->getVboForSelectedCells();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for SelectedCellVertexData
+        // Position (2 floats: x, y)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(SelectedCellVertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+    }
 
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);

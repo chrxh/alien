@@ -29,4 +29,5 @@ public:
 private:
     uint64_t* _numLineIndices;
     uint64_t* _numTriangleIndices;
+    uint64_t* _numSelectedCells;
 };

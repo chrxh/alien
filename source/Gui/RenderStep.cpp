@@ -371,3 +371,31 @@ void _LocationRenderStep::execute(ExecutionParameters parameters)
 _LocationRenderStep::_LocationRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
+
+SelectedCellRenderStep _SelectedCellRenderStep::create(StepParameters const& parameters)
+{
+    return SelectedCellRenderStep(new _SelectedCellRenderStep(parameters));
+}
+
+void _SelectedCellRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for semi-transparent circles
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Draw selected cell points (geometry shader will convert to quads)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForSelectedCells());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().selectedCells));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_SelectedCellRenderStep::_SelectedCellRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}
