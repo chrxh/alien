@@ -589,3 +589,5 @@ external/boost*
 source/tests/testdata/comparison/computation.dat
 *log.txt
 *.deb
+# CodeQL build artifacts
+_codeql*
