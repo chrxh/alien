@@ -34,10 +34,10 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     }
     energyParticleBuffer = registerBufferResource(buffers->getVboForEnergyParticles());
 
-    if (zoneBuffer != nullptr) {
-        unregisterBufferResource(zoneBuffer);
+    if (locationBuffer != nullptr) {
+        unregisterBufferResource(locationBuffer);
     }
-    zoneBuffer = registerBufferResource(buffers->getVboForZones());
+    locationBuffer = registerBufferResource(buffers->getVboForLocations());
 
     if (lineIndexBuffer != nullptr) {
         unregisterBufferResource(lineIndexBuffer);

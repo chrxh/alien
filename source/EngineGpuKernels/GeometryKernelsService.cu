@@ -67,8 +67,8 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
     result.energyParticles = data.objects.particles.getNumEntries_host();
     
-    // Calculate number of zone points: (numLayers + numSources) * 5 (for periodic boundaries)
-    result.zones = (settings.simulationParameters.numLayers + settings.simulationParameters.numSources) * 5;
+    // Calculate number of location points: (numLayers + numSources) * 5 (for periodic boundaries)
+    result.locations = (settings.simulationParameters.numLayers + settings.simulationParameters.numSources) * 5;
     
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
@@ -97,10 +97,10 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     size_t energyParticleBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
 
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.zoneBuffer));
-    ZoneVertexData* mappedZoneBuffer;
-    size_t zoneBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedZoneBuffer), &zoneBufferSize, renderingData.zoneBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
+    LocationVertexData* mappedLocationBuffer;
+    size_t locationBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLocationBuffer), &locationBufferSize, renderingData.locationBuffer));
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
     unsigned int* mappedLineIndexBuffer;
@@ -118,8 +118,8 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     // Extract energy particle data
     KERNEL_CALL(cudaExtractEnergyParticleData, data, mappedEnergyParticleBuffer);
     
-    // Extract zone data
-    KERNEL_CALL_1_1(cudaExtractZoneData, data, mappedZoneBuffer);
+    // Extract location data
+    KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer);
     
     // Second kernel: Extract line indices from cell connections
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
@@ -131,7 +131,7 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.zoneBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 }

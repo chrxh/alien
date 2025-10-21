@@ -168,14 +168,14 @@ private:
     _EnergyParticleRenderStep(StepParameters const& parameters);
 };
 
-class _ZoneRenderStep : public _RenderStep
+class _LocationRenderStep : public _RenderStep
 {
 public:
-    static ZoneRenderStep create(StepParameters const& parameters);
+    static LocationRenderStep create(StepParameters const& parameters);
 
 protected:
     void execute(ExecutionParameters parameters) override;
 
 private:
-    _ZoneRenderStep(StepParameters const& parameters);
+    _LocationRenderStep(StepParameters const& parameters);
 };

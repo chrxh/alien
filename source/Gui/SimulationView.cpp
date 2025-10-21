@@ -50,30 +50,6 @@ void SimulationView::resize(IntVector2D const& size)
 {
     _renderPipeline->resize(size);
     
-    //if (_areTexturesInitialized) {
-    //    glDeleteTextures(1, &_screenBackgroundTexture);
-    //    _areTexturesInitialized = true;
-    //}
-
-    //// Init textures - use RGBA16F for proper floating point color handling
-    //// Create screen background texture (dark blue)
-    //glGenTextures(1, &_screenBackgroundTexture);
-    //glBindTexture(GL_TEXTURE_2D, _screenBackgroundTexture);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //
-    //// Fill with dark blue color (RGB: 0.0, 0.05, 0.15)
-    //std::vector<float> darkBlueData(size.x * size.y * 4);
-    //for (int i = 0; i < size.x * size.y; ++i) {
-    //    darkBlueData[i * 4 + 0] = 0.0f;   // R
-    //    darkBlueData[i * 4 + 1] = 0.0f;  // G
-    //    darkBlueData[i * 4 + 2] = 0.15f;  // B
-    //    darkBlueData[i * 4 + 3] = 1.0f;   // A
-    //}
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, darkBlueData.data());
-
     Viewport::get().setViewSize(size);
 }
 
@@ -378,7 +354,7 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor)),
-                    _ZoneRenderStep::create(StepParameters().shader(Const::ZoneShader).previousTargetSelection(0)),
+                    _LocationRenderStep::create(StepParameters().shader(Const::LocationShader)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
