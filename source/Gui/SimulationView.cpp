@@ -354,8 +354,8 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor)),
-                    _LocationRenderStep::create(StepParameters().shader(Const::LocationShader)),
-                    _SelectedCellRenderStep::create(StepParameters().shader(Const::SelectedCellShader)),
+                    _LocationRenderStep::create(StepParameters().shader(Const::LocationShader).previousTargetSelection(0)),
+                    _SelectedCellRenderStep::create(StepParameters().shader(Const::SelectedCellShader).previousTargetSelection(0)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
