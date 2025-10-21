@@ -1025,7 +1025,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     for (int i = 0; i < cudaSimulationParameters.numSources; ++i) {
         auto pos = cudaSimulationParameters.sourcePosition.sourceValues[i];
         // Use a distinct color for sources (e.g., yellow)
-        float3 color = {1.0f, 1.0f, 0.5f};
+        float3 color = {0.05f, 0.05f, 0.15f};
         auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];
         auto radius = cudaSimulationParameters.sourceCircularRadius.sourceValues[i];
         auto rect = cudaSimulationParameters.sourceRectangularRect.sourceValues[i];
@@ -1050,11 +1050,13 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                 if (shapeType == 0) {  // Circular
                     locationData[locationIndex].dimension1 = radius;
                     locationData[locationIndex].dimension2 = 0.0f;
+                    locationData[locationIndex].fadeoutRadius = radius / 5.0f;
                 } else {  // Rectangular
                     locationData[locationIndex].dimension1 = rect.x;
                     locationData[locationIndex].dimension2 = rect.y;
+                    locationData[locationIndex].fadeoutRadius = 0.0f;
+                    locationData[locationIndex].fadeoutRadius = radius / min(rect.x, rect.y) / 5.0f;
                 }
-                locationData[locationIndex].fadeoutRadius = 0.0f;  // Sources don't have fadeout
                 locationData[locationIndex].opacity = 1.0f;  // Sources are fully opaque
             }
             locationIndex++;
