@@ -96,6 +96,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     _shader->setFloat("radius", _preventMoirePatterns ? std::max(6.0f, zoom) : zoom);
     _shader->setVec2("worldSize", toRealVector2D(worldSize));
     _shader->setVec2("rectUpperLeft", worldRect.topLeft);
+    _shader->setFloat("rectLowerRightX", worldRect.bottomRight.x);
     _shader->setVec2("viewportSize", toRealVector2D(viewSize));
     //_shader->setFloat("lightAngle", toFloat(timestep % 10000) / 10000.0f * 360.0f);
 
@@ -110,6 +111,9 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
         }
         if (std::holds_alternative<float>(value)) {
             _shader->setFloat(key, std::get<float>(value));
+        }
+        if (std::holds_alternative<bool>(value)) {
+            _shader->setBool(key, std::get<bool>(value));
         }
         if (std::holds_alternative<FloatColorRGB>(value)) {
             _shader->setVec3(key, std::get<FloatColorRGB>(value));

@@ -30,7 +30,7 @@ struct GeneralRenderInfo
     int screenFbo = 0;
 };
 
-using UniformValueType = std::variant<int, float, FloatColorRGB>;
+using UniformValueType = std::variant<int, float, bool, FloatColorRGB>;
 using UniformValueMap = std::map<std::string, UniformValueType>;
 
 struct StepParameters

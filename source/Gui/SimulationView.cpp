@@ -209,7 +209,8 @@ void SimulationView::setupRenderPipeline()
 {
     auto currentBackgroundColor = [this] {
         FloatColorRGB background = _simulationFacade->getSimulationParameters().backgroundColor.baseValue;
-        return UniformValueMap{{"background", background}};
+        bool gridLines = _simulationFacade->getSimulationParameters().gridLines.value;
+        return UniformValueMap{{"background", background}, {"gridLines", gridLines}};
     };
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
