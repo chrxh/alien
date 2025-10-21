@@ -15,7 +15,7 @@ void main()
     
     // Circle radius in normalized quad space (0.5 = edge)
     float outerRadius = 0.5;
-    float innerRadius = outerRadius - (2.0 / (zoom * radius)); // Thin circle (2 pixels)
+    float innerRadius = outerRadius - 3.0 / zoom; // Thin circle (2 pixels)
     
     // Discard pixels outside the outer radius
     if (dist > outerRadius) {
@@ -28,8 +28,8 @@ void main()
     }
     
     // Anti-aliasing for smooth edges
-    float outerEdge = smoothstep(outerRadius - 0.02, outerRadius, dist);
-    float innerEdge = smoothstep(innerRadius, innerRadius + 0.02, dist);
+    float outerEdge = smoothstep(outerRadius - 1.5 / zoom, outerRadius, dist);
+    float innerEdge = smoothstep(innerRadius, innerRadius + 1.5 / zoom, dist);
     float alpha = (1.0 - outerEdge) * innerEdge;
     
     // White circle

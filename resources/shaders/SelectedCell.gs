@@ -16,11 +16,11 @@ void main()
     gWorldPos = vWorldPos[0];
     
     // Circle radius in world coordinates (thin white circle)
-    float circleRadius = radius * 0.5;  // Half the cell size for visibility
+    float circleRadius = radius * 0.3;  // Half the cell size for visibility
     
     // Calculate size in NDC coordinates
-    float ndcHalfWidth = (circleRadius * zoom) / viewportSize.x * 2.0;
-    float ndcHalfHeight = (circleRadius * zoom) / viewportSize.y * 2.0;
+    float ndcHalfWidth = circleRadius / viewportSize.x * 2.0;
+    float ndcHalfHeight = circleRadius / viewportSize.y * 2.0;
     
     // Get center position
     vec4 center = gl_in[0].gl_Position;

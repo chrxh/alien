@@ -12,6 +12,7 @@ uniform vec2 rectUpperLeft;
 void main()
 {
     // Convert texture coordinates to screen position (in pixels)
+//    vec2 screenPos = vec2(texCoord.x, 1.0 - texCoord.y) * viewportSize;
     vec2 screenPos = texCoord * viewportSize;
     
     // Convert screen position to world position

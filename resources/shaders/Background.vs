@@ -6,6 +6,7 @@ out vec2 texCoord;
 
 void main()
 {
-    gl_Position = vec4(aPos, 1.0);
+    vec3 flipped = vec3(aPos.x, -aPos.y, 0.0);   // Flip Y coordinate
+    gl_Position = vec4(flipped, 1.0);
     texCoord = aTexCoord;
 }

@@ -1059,7 +1059,7 @@ __global__ void cudaExtractSelectedCellData(SimulationData data, SelectedCellVer
     
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numCells; index += blockDim.x * gridDim.x) {
         auto const& cell = cells.at(index);
-        if (cell->selected == 2) {
+        if (cell->selected == 1) {
             auto outputIndex = alienAtomicAdd64(numSelectedCells, static_cast<uint64_t>(1));
             if (selectedCellData != nullptr) {
                 selectedCellData[outputIndex].pos[0] = cell->pos.x;
