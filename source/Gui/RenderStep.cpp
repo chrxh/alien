@@ -56,6 +56,7 @@ void _RenderStep::resize(IntVector2D const& size)
     if (_target->initialized) {
         glDeleteFramebuffers(1, &_target->fbo);
         glDeleteTextures(1, &_target->texture);
+        glDeleteRenderbuffers(1, &_target->depthRenderbuffer);
     }
     // Init output texture
     glGenTextures(1, &_target->texture);
@@ -66,11 +67,19 @@ void _RenderStep::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
+    // Init depth renderbuffer
+    glGenRenderbuffers(1, &_target->depthRenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, _target->depthRenderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size.x, size.y);
+
     // Init framebuffer
     glGenFramebuffers(1, &_target->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _target->fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _target->texture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _target->depthRenderbuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    _target->initialized = true;
 }
 
 float _RenderStep::getTextureScale() const
