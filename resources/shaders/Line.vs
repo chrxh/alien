@@ -18,7 +18,12 @@ void main()
     vec2 screenPos = relativePos * zoom;
     vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
     ndc.y = -ndc.y; // Flip Y coordinate
-    gl_Position = vec4(ndc, 0.0, 1.0);
+    
+    // Normalize z to depth range [0, 1] - smaller z values should be closer (rendered in front)
+    float normalizedZ = aPos.z / 100.0;
+    normalizedZ = clamp(normalizedZ, 0.0, 1.0);
+    
+    gl_Position = vec4(ndc, normalizedZ, 1.0);
     
     // Pass color and z-position to geometry shader
     vertexColor = aColor;

@@ -126,7 +126,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     if (parameters._clearBackground) {
         // Clear with black background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 }
 
@@ -146,6 +146,10 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
+    // Enable depth testing for z-based occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -154,9 +158,10 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
 
-    // Disable blending and point sprites
+    // Disable blending, point sprites and depth testing
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _CellRenderStep::_CellRenderStep(StepParameters const& parameters)
@@ -175,6 +180,10 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
     
+    // Enable depth testing for z-based occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -183,8 +192,9 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending
+    // Disable blending and depth testing
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
@@ -204,6 +214,10 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
+    // Enable depth testing for z-based occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
@@ -213,8 +227,9 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending
+    // Disable blending and depth testing
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)
