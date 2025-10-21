@@ -1,0 +1,9 @@
+The package boost-core is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS core)
+    target_link_libraries(main PRIVATE Boost::core)
+
+or the generated cmake configs via:
+
+    find_package(boost_core REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::core)

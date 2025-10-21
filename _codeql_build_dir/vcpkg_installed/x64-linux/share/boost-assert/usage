@@ -1,0 +1,9 @@
+The package boost-assert is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS assert)
+    target_link_libraries(main PRIVATE Boost::assert)
+
+or the generated cmake configs via:
+
+    find_package(boost_assert REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::assert)

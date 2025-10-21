@@ -1,0 +1,9 @@
+The package boost-variant2 is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS variant2)
+    target_link_libraries(main PRIVATE Boost::variant2)
+
+or the generated cmake configs via:
+
+    find_package(boost_variant2 REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::variant2)

@@ -1,0 +1,9 @@
+The package boost-preprocessor is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS preprocessor)
+    target_link_libraries(main PRIVATE Boost::preprocessor)
+
+or the generated cmake configs via:
+
+    find_package(boost_preprocessor REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::preprocessor)

@@ -1,0 +1,9 @@
+Package: boost-ratio
+Version: 1.85.0
+Port-Version: 1
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: e0470251775a1940e9f04c22a0d12803cdc9ddbf1a59ac32efaf77f3f98e8c63
+Description: Boost ratio module
+Status: install ok half-installed

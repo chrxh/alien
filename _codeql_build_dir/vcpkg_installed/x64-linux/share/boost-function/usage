@@ -1,0 +1,9 @@
+The package boost-function is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS function)
+    target_link_libraries(main PRIVATE Boost::function)
+
+or the generated cmake configs via:
+
+    find_package(boost_function REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::function)

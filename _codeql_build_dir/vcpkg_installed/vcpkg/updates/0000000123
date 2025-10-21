@@ -1,0 +1,9 @@
+Package: boost-spirit
+Version: 1.85.0
+Port-Version: 1
+Depends: boost-array, boost-assert, boost-cmake, boost-config, boost-core, boost-endian, boost-function, boost-function-types, boost-fusion, boost-headers, boost-integer, boost-io, boost-iterator, boost-move, boost-mpl, boost-optional, boost-phoenix, boost-pool, boost-preprocessor, boost-proto, boost-range, boost-regex, boost-smart-ptr, boost-static-assert, boost-thread, boost-throw-exception, boost-type-traits, boost-typeof, boost-unordered, boost-utility, boost-variant
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 9294b4fce52f0af9ec1d996b169c0a5d1d72de2d61ce9a5d30e720bd7bf079c1
+Description: Boost spirit module
+Status: install ok installed

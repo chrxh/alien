@@ -1,0 +1,9 @@
+The package boost-winapi is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS winapi)
+    target_link_libraries(main PRIVATE Boost::winapi)
+
+or the generated cmake configs via:
+
+    find_package(boost_winapi REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::winapi)

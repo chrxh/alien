@@ -1,0 +1,9 @@
+Package: boost-type-index
+Version: 1.85.0
+Port-Version: 1
+Depends: boost-cmake, boost-config, boost-container-hash, boost-core, boost-headers, boost-throw-exception
+Architecture: x64-linux
+Multi-Arch: same
+Abi: ff23c239535325b85c2371dc53b97d098fe756a6b587c3e6d4e596c2d053e6c8
+Description: Boost type_index module
+Status: install ok installed

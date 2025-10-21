@@ -1,0 +1,9 @@
+The package boost-atomic is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS atomic)
+    target_link_libraries(main PRIVATE Boost::atomic)
+
+or the generated cmake configs via:
+
+    find_package(boost_atomic REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::atomic)

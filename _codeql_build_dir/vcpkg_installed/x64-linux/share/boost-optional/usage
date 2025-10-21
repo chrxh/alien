@@ -1,0 +1,9 @@
+The package boost-optional is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS optional)
+    target_link_libraries(main PRIVATE Boost::optional)
+
+or the generated cmake configs via:
+
+    find_package(boost_optional REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::optional)

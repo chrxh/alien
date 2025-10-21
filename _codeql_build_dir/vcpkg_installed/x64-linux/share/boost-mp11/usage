@@ -1,0 +1,9 @@
+The package boost-mp11 is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS mp11)
+    target_link_libraries(main PRIVATE Boost::mp11)
+
+or the generated cmake configs via:
+
+    find_package(boost_mp11 REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::mp11)

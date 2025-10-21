@@ -1,0 +1,9 @@
+The package boost-spirit is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS spirit)
+    target_link_libraries(main PRIVATE Boost::spirit)
+
+or the generated cmake configs via:
+
+    find_package(boost_spirit REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::spirit)

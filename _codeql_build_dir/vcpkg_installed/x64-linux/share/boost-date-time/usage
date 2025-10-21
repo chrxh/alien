@@ -1,0 +1,9 @@
+The package boost-date-time is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS date_time)
+    target_link_libraries(main PRIVATE Boost::date_time)
+
+or the generated cmake configs via:
+
+    find_package(boost_date_time REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::date_time)

@@ -1,0 +1,9 @@
+The package boost-serialization is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS serialization)
+    target_link_libraries(main PRIVATE Boost::serialization)
+
+or the generated cmake configs via:
+
+    find_package(boost_serialization REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::serialization)

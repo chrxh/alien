@@ -8,6 +8,7 @@ uniform float zoom;
 uniform vec3 background;
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
+uniform vec2 rectLowerRight;
 uniform int gridLines;
 
 // GLSL modulo function that matches CUDA Math::modulo behavior
@@ -40,7 +41,7 @@ void main()
         worldPos.y >= 0.0 && worldPos.y <= worldSize.y) {
         
         // Calculate grid parameters based on view width (matches CUDA logic)
-        float viewWidth = max(1.0, worldSize.x);  // Simplified - could be rectLowerRight.x - rectUpperLeft.x
+        float viewWidth = max(1.0, rectLowerRight.x - rectUpperLeft.x);
         float pixelInWorldSize = viewWidth / worldSize.x;
         float gridDistance = pow(10.0, floor(log(viewWidth) / log(10.0))) / 10.0;
         float maxGridDistance = viewWidth / 10.0;

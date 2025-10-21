@@ -1,0 +1,9 @@
+The package boost-regex is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS regex)
+    target_link_libraries(main PRIVATE Boost::regex)
+
+or the generated cmake configs via:
+
+    find_package(boost_regex REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::regex)

@@ -1,0 +1,9 @@
+The package boost-move is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS move)
+    target_link_libraries(main PRIVATE Boost::move)
+
+or the generated cmake configs via:
+
+    find_package(boost_move REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::move)

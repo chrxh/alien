@@ -1,0 +1,9 @@
+The package boost-io is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS io)
+    target_link_libraries(main PRIVATE Boost::io)
+
+or the generated cmake configs via:
+
+    find_package(boost_io REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::io)

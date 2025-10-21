@@ -1,0 +1,9 @@
+The package boost-mpl is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS mpl)
+    target_link_libraries(main PRIVATE Boost::mpl)
+
+or the generated cmake configs via:
+
+    find_package(boost_mpl REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::mpl)

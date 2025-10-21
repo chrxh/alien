@@ -1,0 +1,9 @@
+The package boost-phoenix is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS phoenix)
+    target_link_libraries(main PRIVATE Boost::phoenix)
+
+or the generated cmake configs via:
+
+    find_package(boost_phoenix REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::phoenix)

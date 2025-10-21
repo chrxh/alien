@@ -1,0 +1,9 @@
+The package boost-container-hash is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS container_hash)
+    target_link_libraries(main PRIVATE Boost::container_hash)
+
+or the generated cmake configs via:
+
+    find_package(boost_container_hash REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::container_hash)

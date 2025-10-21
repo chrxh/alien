@@ -1,0 +1,9 @@
+The package boost-iterator is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS iterator)
+    target_link_libraries(main PRIVATE Boost::iterator)
+
+or the generated cmake configs via:
+
+    find_package(boost_iterator REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::iterator)

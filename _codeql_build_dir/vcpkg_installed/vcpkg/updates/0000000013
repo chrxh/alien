@@ -1,0 +1,9 @@
+Package: boost-config
+Version: 1.85.0
+Port-Version: 1
+Depends: boost-cmake, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 685289da3b30f90db46b1efdae8c27b1d24a7734e0cd12f0485d5a1e36e24c0b
+Description: Boost config module
+Status: install ok installed

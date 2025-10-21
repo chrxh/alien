@@ -1,0 +1,9 @@
+The package boost-describe is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS describe)
+    target_link_libraries(main PRIVATE Boost::describe)
+
+or the generated cmake configs via:
+
+    find_package(boost_describe REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::describe)

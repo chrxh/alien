@@ -1,0 +1,9 @@
+The package boost-lexical-cast is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS lexical_cast)
+    target_link_libraries(main PRIVATE Boost::lexical_cast)
+
+or the generated cmake configs via:
+
+    find_package(boost_lexical_cast REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::lexical_cast)

@@ -1,0 +1,9 @@
+The package boost-property-tree is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS property_tree)
+    target_link_libraries(main PRIVATE Boost::property_tree)
+
+or the generated cmake configs via:
+
+    find_package(boost_property_tree REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::property_tree)
