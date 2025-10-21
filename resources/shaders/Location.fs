@@ -47,7 +47,7 @@ void main()
             // Inside core radius - full opacity with anti-aliasing at edge
             float edgeStart = gDimension1 - 2.0 / zoom;
             float edgeEnd = gDimension1;
-            alpha = 1.0 - smoothstep(edgeStart, edgeEnd, distFromCenter);
+            alpha = 1.0;// - smoothstep(edgeStart, edgeEnd, distFromCenter);
         } else {
             // In fadeout zone - smooth transition from core to edge
             float fadeoutStart = gDimension1;
@@ -77,12 +77,8 @@ void main()
             // Outside rectangle, in fadeout zone
             alpha = 1.0 - smoothstep(0.0, gFadeoutRadius, distToEdge);
         } else {
-            // Inside rectangle - full opacity with anti-aliasing at edge
-            float edgeThickness = 2.0 / zoom;
-            float distToEdgeX = halfSize.x - absOffset.x;
-            float distToEdgeY = halfSize.y - absOffset.y;
-            float distToEdgeInside = min(distToEdgeX, distToEdgeY);
-            alpha = smoothstep(0.0, edgeThickness, distToEdgeInside);
+            // Inside rectangle - full opacity with anti-aliasing 
+            alpha = 1.0f;
         }
     }
     

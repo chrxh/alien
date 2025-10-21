@@ -57,22 +57,22 @@ void main()
     // Generate quad (4 vertices as triangle strip)
     // Bottom-left
     gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(-0.5, -0.5);
+    gQuadCoord = vec2(-0.5, 0.5);
     EmitVertex();
     
     // Bottom-right
     gl_Position = vec4(center.xy + vec2(ndcHalfWidth, -ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(0.5, -0.5);
+    gQuadCoord = vec2(0.5, 0.5);
     EmitVertex();
     
     // Top-left
     gl_Position = vec4(center.xy + vec2(-ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(-0.5, 0.5);
+    gQuadCoord = vec2(-0.5, -0.5);
     EmitVertex();
     
     // Top-right
     gl_Position = vec4(center.xy + vec2(ndcHalfWidth, ndcHalfHeight), center.z, 1.0);
-    gQuadCoord = vec2(0.5, 0.5);
+    gQuadCoord = vec2(0.5, -0.5);
     EmitVertex();
     
     EndPrimitive();
