@@ -307,7 +307,7 @@ void SimulationView::setupRenderPipeline()
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
                 }),
                 RenderSequence().steps({
-                    _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader)),
+                    _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader).previousTargetSelection(0)),
                 }),
             },
 
@@ -377,7 +377,8 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor).preventMoirePatterns(false)),
+                        StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor)),
+                    _ZoneRenderStep::create(StepParameters().shader(Const::ZoneShader).previousTargetSelection(0)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),

@@ -14,6 +14,8 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_eboForTriangles);
     glGenVertexArrays(1, &result->_vaoForEnergyParticles);
     glGenBuffers(1, &result->_vboForEnergyParticles);
+    glGenVertexArrays(1, &result->_vaoForZones);
+    glGenBuffers(1, &result->_vboForZones);
     return GeometryBuffers(result);
 }
 
@@ -29,6 +31,11 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
         _energyParticleBufferCapacity = std::max(numRenderObjects.energyParticles * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergyParticles());
         glBufferData(GL_ARRAY_BUFFER, toInt(_energyParticleBufferCapacity * sizeof(EnergyParticleVertexData)), nullptr, GL_DYNAMIC_DRAW);
+    }
+    if (numRenderObjects.zones >= _zoneBufferCapacity) {
+        _zoneBufferCapacity = std::max(numRenderObjects.zones * 2, static_cast<uint64_t>(1000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForZones());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_zoneBufferCapacity * sizeof(ZoneVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));

@@ -343,3 +343,36 @@ void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
 _EnergyParticleRenderStep::_EnergyParticleRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
+
+ZoneRenderStep _ZoneRenderStep::create(StepParameters const& parameters)
+{
+    return ZoneRenderStep(new _ZoneRenderStep(parameters));
+}
+
+void _ZoneRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable point sprites
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_POINT_SPRITE);
+
+    // Enable blending for semi-transparent zones
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Draw zone points
+    glBindVertexArray(parameters._geometryBuffers->getVaoForZones());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().zones));
+
+    // Disable blending and point sprites
+    glDisable(GL_PROGRAM_POINT_SIZE);
+    glDisable(GL_BLEND);
+}
+
+_ZoneRenderStep::_ZoneRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}
