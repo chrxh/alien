@@ -26,6 +26,7 @@ namespace Const
     std::filesystem::path const LineShader = ShaderPath / "Line";
     std::filesystem::path const TriangleShader = ShaderPath / "Triangle";
     std::filesystem::path const LocationShader = ShaderPath / "Location";
+    std::filesystem::path const SelectedCellShader = ShaderPath / "SelectedCell";
     std::filesystem::path const BlurHorizontalShader = ShaderPath / "BlurHorizontal";
     std::filesystem::path const BlurVerticalShader = ShaderPath / "BlurVertical";
     std::filesystem::path const MetaballsShader = ShaderPath / "Metaballs";

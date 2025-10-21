@@ -1051,3 +1051,20 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         }
     }
 }
+
+__global__ void cudaExtractSelectedCellData(SimulationData data, SelectedCellVertexData* selectedCellData, uint64_t* numSelectedCells)
+{
+    auto const& cells = data.objects.cells;
+    auto numCells = cells.getNumEntries();
+    
+    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numCells; index += blockDim.x * gridDim.x) {
+        auto const& cell = cells.at(index);
+        if (cell->selected == 2) {
+            auto outputIndex = alienAtomicAdd64(numSelectedCells, static_cast<uint64_t>(1));
+            if (selectedCellData != nullptr) {
+                selectedCellData[outputIndex].pos[0] = cell->pos.x;
+                selectedCellData[outputIndex].pos[1] = cell->pos.y;
+            }
+        }
+    }
+}

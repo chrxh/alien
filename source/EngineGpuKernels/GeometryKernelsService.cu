@@ -10,6 +10,7 @@ _GeometryKernelsService::_GeometryKernelsService()
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _numLineIndices);
     memoryManager.acquireMemory(1, _numTriangleIndices);
+    memoryManager.acquireMemory(1, _numSelectedCells);
 }
 
 _GeometryKernelsService::~_GeometryKernelsService()
@@ -17,6 +18,7 @@ _GeometryKernelsService::~_GeometryKernelsService()
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_numLineIndices);
     memoryManager.freeMemory(_numTriangleIndices);
+    memoryManager.freeMemory(_numSelectedCells);
 }
 
 void _GeometryKernelsService::drawImage(
@@ -70,6 +72,12 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     // Calculate number of location points: (numLayers + numSources) * 5 (for periodic boundaries)
     result.locations = (settings.simulationParameters.numLayers + settings.simulationParameters.numSources) * 5;
     
+    // Count selected cells
+    setValueToDevice(_numSelectedCells, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedCellData, data, nullptr, _numSelectedCells);
+    cudaDeviceSynchronize();
+    result.selectedCells = copyToHost(_numSelectedCells);
+    
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
     cudaDeviceSynchronize();
@@ -102,6 +110,11 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     size_t locationBufferSize;
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLocationBuffer), &locationBufferSize, renderingData.locationBuffer));
 
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedCellBuffer));
+    SelectedCellVertexData* mappedSelectedCellBuffer;
+    size_t selectedCellBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedSelectedCellBuffer), &selectedCellBufferSize, renderingData.selectedCellBuffer));
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
     unsigned int* mappedLineIndexBuffer;
     size_t lineIndexBufferSize;
@@ -121,6 +134,10 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     // Extract location data
     KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer);
     
+    // Extract selected cell data
+    setValueToDevice(_numSelectedCells, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedCellData, data, mappedSelectedCellBuffer, _numSelectedCells);
+    
     // Second kernel: Extract line indices from cell connections
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices);
@@ -132,6 +149,7 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedCellBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
 }
