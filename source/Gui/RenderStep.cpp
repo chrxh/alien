@@ -356,20 +356,15 @@ void _LocationRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable point sprites
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glEnable(GL_POINT_SPRITE);
-
     // Enable blending for semi-transparent locations
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Draw location points
+    // Draw location points (geometry shader will convert to quads)
     glBindVertexArray(parameters._geometryBuffers->getVaoForLocations());
     glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().locations));
 
-    // Disable blending and point sprites
-    glDisable(GL_PROGRAM_POINT_SIZE);
+    // Disable blending
     glDisable(GL_BLEND);
 }
 

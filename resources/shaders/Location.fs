@@ -1,13 +1,14 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec3 vColor;
-in vec2 vWorldPos;
-flat in int vShapeType;
-in float vDimension1;
-in float vDimension2;
-in float vFadeoutRadius;
-in float vOpacity;
+in vec3 gColor;
+in vec2 gWorldPos;
+flat in int gShapeType;
+in float gDimension1;
+in float gDimension2;
+in float gFadeoutRadius;
+in float gOpacity;
+in vec2 gQuadCoord;
 
 uniform float zoom;
 uniform vec2 worldSize;
@@ -15,12 +16,13 @@ uniform float radius;
 
 void main()
 {
-    // Calculate the world position of this pixel
-    // Point size is in screen pixels, we need to convert back to world space
-    vec2 coord = gl_PointCoord - vec2(0.5, 0.5);
-    float maxDim = (vShapeType == 0) ? (vDimension1 + vFadeoutRadius) * 2.0 : max(vDimension1 + vFadeoutRadius, vDimension2 + vFadeoutRadius);
-    vec2 pixelOffset = (coord * 1.0) * (maxDim * zoom + 4.0) / zoom;
-    vec2 pixelWorldPos = vWorldPos + pixelOffset;
+    // Calculate the world position of this pixel using quad coordinates
+    // gQuadCoord ranges from -0.5 to 0.5
+    float maxDim = (gShapeType == 0) ? (gDimension1 + gFadeoutRadius) * 2.0 : max(gDimension1 + gFadeoutRadius, gDimension2 + gFadeoutRadius);
+    float padding = 4.0 / zoom;
+    float halfSize = maxDim * 0.5 + padding;
+    vec2 pixelOffset = gQuadCoord * 2.0 * halfSize;
+    vec2 pixelWorldPos = gWorldPos + pixelOffset;
     
     // Clip pixels outside world boundaries (pixel-wise clipping)
     if (pixelWorldPos.x < 0.0 || pixelWorldPos.x > worldSize.x ||
@@ -30,32 +32,32 @@ void main()
     
     float alpha = 0.0;
     
-    if (vShapeType == 0) {
+    if (gShapeType == 0) {
         // Circular shape
-        float dist = length(coord);
-        float normalizedDist = dist * (maxDim * zoom + 4.0) / zoom;
+        // Calculate distance from center using pixel offset in world space
+        float distFromCenter = length(pixelOffset);
         
         // Discard pixels outside the circle + fadeout radius
-        if (normalizedDist > vDimension1 + vFadeoutRadius) {
+        if (distFromCenter > gDimension1 + gFadeoutRadius) {
             discard;
         }
         
         // Calculate alpha based on distance
-        if (normalizedDist <= vDimension1) {
+        if (distFromCenter <= gDimension1) {
             // Inside core radius - full opacity with anti-aliasing at edge
-            float edgeStart = vDimension1 - 2.0 / zoom;
-            float edgeEnd = vDimension1;
-            alpha = 1.0 - smoothstep(edgeStart, edgeEnd, normalizedDist);
+            float edgeStart = gDimension1 - 2.0 / zoom;
+            float edgeEnd = gDimension1;
+            alpha = 1.0 - smoothstep(edgeStart, edgeEnd, distFromCenter);
         } else {
             // In fadeout zone - smooth transition from core to edge
-            float fadeoutStart = vDimension1;
-            float fadeoutEnd = vDimension1 + vFadeoutRadius;
-            alpha = 1.0 - smoothstep(fadeoutStart, fadeoutEnd, normalizedDist);
+            float fadeoutStart = gDimension1;
+            float fadeoutEnd = gDimension1 + gFadeoutRadius;
+            alpha = 1.0 - smoothstep(fadeoutStart, fadeoutEnd, distFromCenter);
         }
         
     } else {
         // Rectangular shape
-        vec2 halfSize = vec2(vDimension1 * 0.5, vDimension2 * 0.5);
+        vec2 halfSize = vec2(gDimension1 * 0.5, gDimension2 * 0.5);
         vec2 absOffset = abs(pixelOffset);
         
         // Calculate distance to rectangle edge (positive = outside, negative = inside)
@@ -66,14 +68,14 @@ void main()
         float distToEdge = length(distanceFromRect);
         
         // Discard pixels outside the rectangle + fadeout radius
-        if (distToEdge > vFadeoutRadius) {
+        if (distToEdge > gFadeoutRadius) {
             discard;
         }
         
         // Calculate alpha based on distance to edge
         if (distToEdge > 0.0) {
             // Outside rectangle, in fadeout zone
-            alpha = 1.0 - smoothstep(0.0, vFadeoutRadius, distToEdge);
+            alpha = 1.0 - smoothstep(0.0, gFadeoutRadius, distToEdge);
         } else {
             // Inside rectangle - full opacity with anti-aliasing at edge
             float edgeThickness = 2.0 / zoom;
@@ -85,7 +87,7 @@ void main()
     }
     
     // Apply layer opacity to the calculated alpha
-    alpha *= vOpacity;
+    alpha *= gOpacity;
     
-    FragColor = vec4(vColor, alpha);
+    FragColor = vec4(gColor, alpha);
 }
