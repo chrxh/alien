@@ -40,7 +40,7 @@ void main()
         maxDim = (vDimension1[0] + vFadeoutRadius[0]) * 2.0;
     } else {
         // Rectangular: max of width and height + fadeout
-        maxDim = max(vDimension1[0] + vFadeoutRadius[0], vDimension2[0] + vFadeoutRadius[0]);
+        maxDim = max(vDimension1[0] + vFadeoutRadius[0] * 2, vDimension2[0] + vFadeoutRadius[0] * 2);
     }
     
     // Add some padding for anti-aliasing (4 pixels worth in world space)

@@ -18,7 +18,13 @@ void main()
 {
     // Calculate the world position of this pixel using quad coordinates
     // gQuadCoord ranges from -0.5 to 0.5
-    float maxDim = (gShapeType == 0) ? (gDimension1 + gFadeoutRadius) * 2.0 : max(gDimension1 + gFadeoutRadius, gDimension2 + gFadeoutRadius);
+    float maxDim = (gShapeType == 0) ? (gDimension1 + gFadeoutRadius) * 2.0 : max(gDimension1 + gFadeoutRadius * 2, gDimension2 + gFadeoutRadius * 2);
+    // vec2 maxDim;
+    // if (gShapeType == 0) {
+    //     maxDim = vec2((gDimension1 + gFadeoutRadius) * 2.0, (gDimension1 + gFadeoutRadius) * 2.0);
+    // } else {
+    //     maxDim = vec2(gDimension1 + gFadeoutRadius * 2.0, gDimension2 + gFadeoutRadius * 2.0);
+    // }
     float padding = 4.0 / zoom;
     float halfSize = maxDim * 0.5 + padding;
     vec2 pixelOffset = gQuadCoord * 2.0 * halfSize;
@@ -71,7 +77,15 @@ void main()
         if (distToEdge > gFadeoutRadius) {
             discard;
         }
-        
+
+        // Discard when closer to other wrapped edge
+        if (abs(pixelOffset.x) - halfSize.x > (worldSize.x - gDimension1) / 2) {
+            discard;
+        }
+        if (abs(pixelOffset.y) - halfSize.y > (worldSize.y - gDimension2) / 2) {
+            discard;
+        }
+       
         // Calculate alpha based on distance to edge
         if (distToEdge > 0.0) {
             // Outside rectangle, in fadeout zone
