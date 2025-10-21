@@ -5,6 +5,15 @@
 ## Project Overview
 ALIEN is an artificial life simulation tool based on a specialized 2D particle engine in CUDA for soft bodies and fluids. Each simulated body consists of a network of particles that can be upgraded with higher-level functions, ranging from pure information processing capabilities to physical equipment (such as sensors, muscles, weapons, constructors, etc.) whose executions are orchestrated by neural networks. The bodies can be thought of as agents or digital organisms operating in a common environment.
 
+## Security Configuration
+
+### CodeQL Security Checks
+**DO NOT use CodeQL security checks on this repository.** The repository is too large for CodeQL analysis to complete successfully. 
+
+- Do NOT run the `codeql_checker` tool
+- Do NOT attempt any CodeQL security scanning
+- Skip all security vulnerability scanning steps that involve CodeQL
+
 ## Working Effectively
 
 ### Bootstrap, Build, and Test the Repository
