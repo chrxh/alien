@@ -1,9 +1,0 @@
-Package: cereal
-Version: 1.3.2
-Port-Version: 1
-Depends: vcpkg-cmake, vcpkg-cmake-config
-Architecture: x64-linux
-Multi-Arch: same
-Abi: 13426430ffe7aa521f61c18fa7de8b059dce80f6e3a67f4183512c96dc4f9bb4
-Description: a header-only C++11 serialization library (built in support for binary, XML and JSon)
-Status: install ok installed

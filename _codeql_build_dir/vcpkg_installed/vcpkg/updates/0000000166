@@ -1,7 +1,0 @@
-Package: freetype
-Feature: zlib
-Depends: zlib
-Architecture: x64-linux
-Multi-Arch: same
-Description: Use zlib instead of internal library for DEFLATE
-Status: install ok half-installed

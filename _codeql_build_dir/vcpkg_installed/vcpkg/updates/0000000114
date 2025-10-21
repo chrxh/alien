@@ -1,9 +1,0 @@
-Package: boost-proto
-Version: 1.85.0
-Port-Version: 1
-Depends: boost-cmake, boost-config, boost-core, boost-fusion, boost-headers, boost-mpl, boost-preprocessor, boost-range, boost-static-assert, boost-type-traits, boost-typeof, boost-utility
-Architecture: x64-linux
-Multi-Arch: same
-Abi: 65a76eb35233561797f3b3e324d93681a431d37473d2631f98995e6ce2471f30
-Description: Boost proto module
-Status: install ok half-installed

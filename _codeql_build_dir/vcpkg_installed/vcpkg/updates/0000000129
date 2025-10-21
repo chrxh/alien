@@ -1,9 +1,0 @@
-Package: boost-any
-Version: 1.85.0
-Port-Version: 1
-Depends: boost-assert, boost-cmake, boost-config, boost-headers, boost-throw-exception, boost-type-index
-Architecture: x64-linux
-Multi-Arch: same
-Abi: c7cd3009ca5eb393ef2ca4eddd29ae9be4f2c49664cde0f1dcb5fbb7f42b255d
-Description: Boost any module
-Status: install ok installed

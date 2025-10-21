@@ -1,6 +1,0 @@
-Package: imgui
-Feature: opengl3-binding
-Architecture: x64-linux
-Multi-Arch: same
-Description: Make available OpenGL3/ES/ES2 (modern) binding
-Status: install ok installed

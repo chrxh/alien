@@ -1,7 +1,0 @@
-Package: imgui
-Feature: glfw-binding
-Depends: glfw3
-Architecture: x64-linux
-Multi-Arch: same
-Description: Make available GLFW binding
-Status: install ok half-installed

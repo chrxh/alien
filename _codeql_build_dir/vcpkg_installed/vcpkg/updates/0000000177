@@ -1,7 +1,0 @@
-Package: imgui
-Feature: freetype
-Depends: freetype
-Architecture: x64-linux
-Multi-Arch: same
-Description: Build font atlases using FreeType instead of stb_truetype
-Status: install ok installed

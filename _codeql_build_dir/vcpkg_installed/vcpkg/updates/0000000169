@@ -1,7 +1,0 @@
-Package: freetype
-Feature: bzip2
-Depends: bzip2
-Architecture: x64-linux
-Multi-Arch: same
-Description: Support bzip2 compressed fonts.
-Status: install ok installed

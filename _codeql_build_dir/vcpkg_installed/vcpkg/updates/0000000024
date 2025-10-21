@@ -1,9 +1,0 @@
-Package: boost-preprocessor
-Version: 1.85.0
-Port-Version: 1
-Depends: boost-cmake, boost-config, boost-headers
-Architecture: x64-linux
-Multi-Arch: same
-Abi: dc2a2392c314200b712b7aae1f417e5359632efbe14631fd918a3792700fb6cb
-Description: Boost preprocessor module
-Status: install ok half-installed

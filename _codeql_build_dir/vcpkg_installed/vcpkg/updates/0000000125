@@ -1,9 +1,0 @@
-Package: boost-serialization
-Version: 1.85.0
-Port-Version: 1
-Depends: boost-array, boost-assert, boost-cmake, boost-config, boost-core, boost-detail, boost-function, boost-headers, boost-integer, boost-io, boost-iterator, boost-move, boost-mp11, boost-mpl, boost-optional, boost-predef, boost-preprocessor, boost-smart-ptr, boost-spirit, boost-static-assert, boost-throw-exception, boost-type-traits, boost-utility, boost-variant, boost-variant2
-Architecture: x64-linux
-Multi-Arch: same
-Abi: 9bba82023d4eebbc66ad41a293a1b06113011d24e9d8282d0529668365fd2adf
-Description: Boost serialization module
-Status: install ok installed
