@@ -768,6 +768,44 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
     }
 }
 
+namespace
+{
+    __device__ __inline__ uint32_t getCellColor(int colorCode) {
+        uint32_t result;
+        switch (calcMod(colorCode, MAX_COLORS)) {
+        case 0: {
+            result = Const::IndividualCellColor1;
+            break;
+        }
+        case 1: {
+            result = Const::IndividualCellColor2;
+            break;
+        }
+        case 2: {
+            result = Const::IndividualCellColor3;
+            break;
+        }
+        case 3: {
+            result = Const::IndividualCellColor4;
+            break;
+        }
+        case 4: {
+            result = Const::IndividualCellColor5;
+            break;
+        }
+        case 5: {
+            result = Const::IndividualCellColor6;
+            break;
+        }
+        case 6: {
+            result = Const::IndividualCellColor7;
+            break;
+        }
+        }
+        return result;
+    }
+}
+
 __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
@@ -777,37 +815,7 @@ __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objec
 
         auto pos = cell->pos;
 
-        uint32_t cellColor;
-        switch (calcMod(cell->color, MAX_COLORS)) {
-        case 0: {
-            cellColor = Const::IndividualCellColor1;
-            break;
-        }
-        case 1: {
-            cellColor = Const::IndividualCellColor2;
-            break;
-        }
-        case 2: {
-            cellColor = Const::IndividualCellColor3;
-            break;
-        }
-        case 3: {
-            cellColor = Const::IndividualCellColor4;
-            break;
-        }
-        case 4: {
-            cellColor = Const::IndividualCellColor5;
-            break;
-        }
-        case 5: {
-            cellColor = Const::IndividualCellColor6;
-            break;
-        }
-        case 6: {
-            cellColor = Const::IndividualCellColor7;
-            break;
-        }
-        }
+        auto cellColor = getCellColor(cell->color);
         
         auto luminance = (cell->energy + 100.0f) / 300.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
         auto white = luminance / 10.0f;
@@ -832,10 +840,12 @@ __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.4f - 0.2f;  // Range [-0.2, 0.2]
 
+        auto zOffset = cell->creature != nullptr ? toFloat(cell->creature->id % 1000): 0.0f;
+
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
         objectData[index].pos[1] = pos.y;
-        objectData[index].pos[2] = zPos;
+        objectData[index].pos[2] = zOffset + zPos;
         objectData[index].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
