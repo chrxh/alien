@@ -957,8 +957,8 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
         energyParticleData[index].pos[0] = pos.x;
         energyParticleData[index].pos[1] = pos.y;
         energyParticleData[index].pos[2] = 0.0f;  // Energy particles don't need z-position for lighting
-        energyParticleData[index].color[0] = intensity * 1.0f;  // Red component
-        energyParticleData[index].color[1] = intensity * 1.0f;  // Green component
-        energyParticleData[index].color[2] = intensity * 0.5f;  // Blue component (reduced for yellow tint)
+        energyParticleData[index].color[0] = intensity * 0.25f;  // Red component
+        energyParticleData[index].color[1] = intensity * 0.25f;  // Green component
+        energyParticleData[index].color[2] = intensity * 1.0f;  // Blue component (reduced for yellow tint)
     }
 }
