@@ -197,6 +197,10 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     // Enable depth testing for z-based occlusion
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    
+    // Disable depth writes to prevent z-fighting with triangles
+    // Lines should render on top based on render order, not depth
+    glDepthMask(GL_FALSE);
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -205,6 +209,9 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     // Draw lines (geometry shader will convert to quads with proper width)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
+    
+    // Re-enable depth writes
+    glDepthMask(GL_TRUE);
     
     // Disable blending and depth testing
     glDisable(GL_BLEND);
@@ -234,17 +241,15 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    // Enable blending for anti-aliasing
-    glEnable(GL_BLEND);
-    glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
+    // Disable blending since triangles are opaque
+    glDisable(GL_BLEND);
 
     // Draw triangles
     glBindVertexArray(parameters._geometryBuffers->getVaoForTriangles());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending and depth testing
-    glDisable(GL_BLEND);
+    // Disable depth testing
     glDisable(GL_DEPTH_TEST);
 }
 
