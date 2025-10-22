@@ -3,7 +3,6 @@ layout (lines) in;
 layout (triangle_strip, max_vertices = 4) out;
 
 in vec3 vertexColor[];
-in float vertexZPos[];
 out vec3 fragColor;
 
 uniform vec2 viewportSize;
@@ -29,8 +28,8 @@ void main()
     vec2 offset = perp * lineWidth * 0.5;
     
     // Create 3D positions for lighting calculation
-    vec3 pos0 = vec3(p0.xy, vertexZPos[0]);
-    vec3 pos1 = vec3(p1.xy, vertexZPos[1]);
+    vec3 pos0 = vec3(p0.xyz);
+    vec3 pos1 = vec3(p1.xyz);
     
     // Calculate line direction and a perpendicular normal for lighting
     vec3 lineDir = normalize(pos1 - pos0);

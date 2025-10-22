@@ -4,7 +4,6 @@ layout (location = 1) in vec3 aColor;
 layout (location = 2) in int isActive;
 
 out vec3 vertexColor;
-out float vertexZPos;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -22,7 +21,6 @@ void main()
     // Lines are rendered in front of triangles (apply negative bias to bring forward)
     gl_Position = vec4(ndc, aPos.z, 1.0);
     
-    // Pass color and z-position to geometry shader
+    // Pass color to geometry shader
     vertexColor = aColor;
-    vertexZPos = aPos.z;
 }

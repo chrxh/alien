@@ -4,7 +4,6 @@ layout (location = 1) in vec3 aColor;
 layout (location = 2) in int isActive;
 
 out vec3 vertexColor;
-out float vertexZPos;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -23,5 +22,4 @@ void main()
     
     // Pass color and z-position to geometry shader
     vertexColor = aColor;
-    vertexZPos = aPos.z;
 }
