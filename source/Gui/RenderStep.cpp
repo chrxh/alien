@@ -17,6 +17,7 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
+    , _needDepthBuffer(parameters._needDepthBuffer)
     , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
@@ -56,6 +57,7 @@ void _RenderStep::resize(IntVector2D const& size)
     if (_target->initialized) {
         glDeleteFramebuffers(1, &_target->fbo);
         glDeleteTextures(1, &_target->texture);
+        glDeleteRenderbuffers(1, &_target->depthBuffer);
     }
     // Init output texture
     glGenTextures(1, &_target->texture);
@@ -66,11 +68,25 @@ void _RenderStep::resize(IntVector2D const& size)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
+    // Init depth renderbuffer
+    if (_needDepthBuffer) {
+        glGenRenderbuffers(1, &_target->depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, _target->depthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size.x, size.y);
+    }
+
     // Init framebuffer
+    int currentFramebuffer = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFramebuffer);
     glGenFramebuffers(1, &_target->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _target->fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _target->texture, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if (_needDepthBuffer) {
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _target->depthBuffer);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFramebuffer);
+
+    _target->initialized = true;
 }
 
 float _RenderStep::getTextureScale() const
@@ -127,7 +143,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     if (parameters._clearBackground) {
         // Clear with black background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 }
 
@@ -147,7 +163,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    // Enable blending for anti-aliasing
+   // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -155,7 +171,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
 
-    // Disable blending and point sprites
+    // Disable blending, point sprites and depth testing
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
 }
@@ -166,7 +182,9 @@ _CellRenderStep::_CellRenderStep(StepParameters const& parameters)
 
 LineRenderStep _LineRenderStep::create(StepParameters const& parameters)
 {
-    return LineRenderStep(new _LineRenderStep(parameters));
+    auto lineParameters = parameters;
+    lineParameters._needDepthBuffer = true;
+    return LineRenderStep(new _LineRenderStep(lineParameters));
 }
 
 void _LineRenderStep::execute(ExecutionParameters parameters)
@@ -176,6 +194,10 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
     
+    // Enable depth testing for z-based occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -184,8 +206,9 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending
+    // Disable blending and depth testing
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
@@ -195,7 +218,9 @@ _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
 
 TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
 {
-    return TriangleRenderStep(new _TriangleRenderStep(parameters));
+    auto triangleParameters = parameters;
+    triangleParameters._needDepthBuffer = true;
+    return TriangleRenderStep(new _TriangleRenderStep(triangleParameters));
 }
 
 void _TriangleRenderStep::execute(ExecutionParameters parameters)
@@ -204,6 +229,10 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
         parameters._clearBackground = true;
     }
     prepareExecution(parameters);
+
+    // Enable depth testing for z-based occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -214,8 +243,9 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending
+    // Disable blending and depth testing
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)
