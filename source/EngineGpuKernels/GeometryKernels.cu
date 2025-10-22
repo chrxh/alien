@@ -806,7 +806,7 @@ namespace
     }
 }
 
-__global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objectData)
+__global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
     auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
@@ -838,7 +838,7 @@ __global__ void cudaExtractObjectData(SimulationData data, CellVertexData* objec
         hash = (hash ^ (hash >> 13)) * 0xc2b2ae35;
         hash = hash ^ (hash >> 16);
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
-        float zPos = normalizedHash * 0.4f - 0.2f;  // Range [-0.2, 0.2]
+        float zPos = normalizedHash * 0.8f - 0.4f;  // Range [-0.2, 0.2]
 
         auto zOffset = cell->creature != nullptr ? toFloat(cell->creature->id % 1000): 0.0f;
 

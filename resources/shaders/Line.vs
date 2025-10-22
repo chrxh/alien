@@ -25,7 +25,7 @@ void main()
     normalizedZ = clamp(normalizedZ, 0.0, 1.0);
     
     // Lines are rendered in front of triangles (apply negative bias to bring forward)
-    normalizedZ -= 0.0001;
+    normalizedZ -= 1.1;
     normalizedZ = clamp(normalizedZ, 0.0, 1.0);
     
     gl_Position = vec4(ndc, normalizedZ, 1.0);

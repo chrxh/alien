@@ -126,7 +126,7 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
 
     // First kernel: Extract vertex data (cells at indices 0..numCells-1)
-    KERNEL_CALL(cudaExtractObjectData, data, mappedBuffer);
+    KERNEL_CALL(cudaExtractCellData, data, mappedBuffer);
     
     // Extract energy particle data
     KERNEL_CALL(cudaExtractEnergyParticleData, data, mappedEnergyParticleBuffer);
