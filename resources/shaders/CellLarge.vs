@@ -20,7 +20,8 @@ void main()
     ndc.y = -ndc.y; // Flip Y coordinate
     
     // Normalize z to depth range [0, 1] - smaller z values should be closer (rendered in front)
-    float normalizedZ = aPos.z / 100.0;
+    // Z values range from approximately 0 to 1000 (creature ID % 1000 + random offset)
+    float normalizedZ = aPos.z / 1000.0;
     normalizedZ = clamp(normalizedZ, 0.0, 1.0);
     
     gl_Position = vec4(ndc, normalizedZ, 1.0);
