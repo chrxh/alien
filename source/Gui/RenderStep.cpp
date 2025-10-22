@@ -6,6 +6,7 @@
 #include "RenderPipeline.h"
 
 #include "Shader.h"
+#include "SimulationView.h"
 #include "Viewport.h"
 
 TextureTarget _TextureTarget::create()
@@ -408,6 +409,15 @@ CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters cons
 
 void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 {
+    // Only render if zoom exceeds threshold and overlay is active
+    auto zoom = Viewport::get().getZoomFactor();
+    auto overlayActive = SimulationView::get().isOverlayActive();
+    
+    if (zoom <= 12.0f || !overlayActive) {
+        // Pass through without rendering overlay
+        return;
+    }
+
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
     }

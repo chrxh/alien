@@ -375,7 +375,11 @@ void SimulationView::setupRenderPipeline()
             // Render block: Cell type overlay (only active when zoom > ZoomFactorForOverlay and overlay is active)
             RenderBlock{
                 RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
+                    _CellTypeOverlayRenderStep::create(
+                        StepParameters()
+                            .shader(Const::CellTypeOverlayShader)
+                            .previousTargetSelection(0)
+                            .uniforms({})),
                 }),
             },
         });
