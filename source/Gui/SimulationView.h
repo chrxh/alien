@@ -4,6 +4,8 @@
 
 #include "Base/Singleton.h"
 #include "Base/Definitions.h"
+#include "Base/MathTypes.h"
+
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/OverlayDescriptions.h"
 
