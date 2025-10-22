@@ -191,9 +191,13 @@ void _RenderPipeline::execute()
         [](RenderStep& step) { return step->getTextureTarget(); },
         [this,
          &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target, float scale) {
+            // Merge inputTextures from step parameters with textures from previous targets
+            auto allTextures = step->getInputTextures();
+            allTextures.insert(allTextures.end(), textures.begin(), textures.end());
+            
             step->execute(ExecutionParameters()
                               .geometryBuffers(_geometryBuffers)
-                              .textures(textures)
+                              .textures(allTextures)
                               .target(target)
                               .scale(scale) 
                               .renderInfo(generalRenderInfo)

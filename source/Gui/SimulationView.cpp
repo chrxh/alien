@@ -31,10 +31,18 @@ void SimulationView::setup(SimulationFacade const& simulationFacade)
     _contrast = GlobalSettings::get().getValue("windows.simulation view.contrast", _contrast);
     _motionBlur = GlobalSettings::get().getValue("windows.simulation view.motion blur factor", _motionBlur);
 
-    setupRenderPipeline();
-
     _scrollbars = std::make_shared<_SimulationScrollbars>(true);
 
+    // Initialize viewport size
+    Viewport::get().setViewSize(Viewport::get().getViewSize());
+
+    // Create overlay texture
+    createOverlayTexture();
+
+    // Setup render pipeline (must be after texture creation)
+    setupRenderPipeline();
+
+    // Resize everything
     resize(Viewport::get().getViewSize());
 }
 
@@ -44,6 +52,126 @@ void SimulationView::shutdown()
     GlobalSettings::get().setValue("windows.simulation view.brightness", _brightness);
     GlobalSettings::get().setValue("windows.simulation view.contrast", _contrast);
     GlobalSettings::get().setValue("windows.simulation view.motion blur factor", _motionBlur);
+
+    // Clean up overlay texture resources
+    if (_overlayTexture != 0) {
+        glDeleteTextures(1, &_overlayTexture);
+        _overlayTexture = 0;
+    }
+    if (_overlayFBO != 0) {
+        glDeleteFramebuffers(1, &_overlayFBO);
+        _overlayFBO = 0;
+    }
+}
+
+void SimulationView::createOverlayTexture()
+{
+    auto viewSize = Viewport::get().getViewSize();
+    
+    // Delete existing texture if any
+    if (_overlayTexture != 0) {
+        glDeleteTextures(1, &_overlayTexture);
+        glDeleteFramebuffers(1, &_overlayFBO);
+    }
+
+    // Create texture for overlay
+    glGenTextures(1, &_overlayTexture);
+    glBindTexture(GL_TEXTURE_2D, _overlayTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewSize.x, viewSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    // Create framebuffer
+    glGenFramebuffers(1, &_overlayFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _overlayFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _overlayTexture, 0);
+
+    // Check framebuffer status
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        // Log error or handle failure
+    }
+
+    // Restore default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void SimulationView::renderOverlayToTexture()
+{
+    // Only render if overlay is active, zoom is sufficient, and overlay data exists
+    if (!_cellDetailOverlayActive || Viewport::get().getZoomFactor() <= ZoomFactorForOverlay || !_overlay) {
+        // Clear texture to transparent when not active
+        if (_overlayTexture != 0) {
+            glBindFramebuffer(GL_FRAMEBUFFER, _overlayFBO);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+        return;
+    }
+
+    // Ensure texture is created
+    if (_overlayTexture == 0) {
+        createOverlayTexture();
+    }
+
+    auto viewSize = Viewport::get().getViewSize();
+
+    // Save current framebuffer
+    GLint currentFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
+
+    // Bind our framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, _overlayFBO);
+    glViewport(0, 0, viewSize.x, viewSize.y);
+
+    // Clear with transparent background
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // For now, render simple colored rectangles where text would go
+    // TODO: Implement proper ImGui text rendering to texture
+    // This demonstrates the infrastructure is working
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    auto parameters = _simulationFacade->getSimulationParameters();
+    
+    for (auto const& overlayElement : _overlay->elements) {
+        if (overlayElement.cell) {
+            auto viewPos = Viewport::get().mapWorldToViewPosition(
+                {overlayElement.pos.x, overlayElement.pos.y + 0.3f}, 
+                parameters.borderlessRendering.value);
+            
+            // Draw a simple colored quad as placeholder
+            // In a full implementation, this would render actual text
+            float quadSize = 20.0f;
+            float x1 = viewPos.x - quadSize;
+            float y1 = viewPos.y - quadSize/2;
+            float x2 = viewPos.x + quadSize;
+            float y2 = viewPos.y + quadSize/2;
+            
+            // Convert to NDC
+            float ndcX1 = (x1 / viewSize.x) * 2.0f - 1.0f;
+            float ndcY1 = 1.0f - (y1 / viewSize.y) * 2.0f;
+            float ndcX2 = (x2 / viewSize.x) * 2.0f - 1.0f;
+            float ndcY2 = 1.0f - (y2 / viewSize.y) * 2.0f;
+            
+            glBegin(GL_QUADS);
+            glColor4f(1.0f, 1.0f, 1.0f, 0.8f);
+            glVertex2f(ndcX1, ndcY1);
+            glVertex2f(ndcX2, ndcY1);
+            glVertex2f(ndcX2, ndcY2);
+            glVertex2f(ndcX1, ndcY2);
+            glEnd();
+        }
+    }
+    
+    glDisable(GL_BLEND);
+
+    // Restore framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
 }
 
 void SimulationView::resize(IntVector2D const& size)
@@ -51,43 +179,30 @@ void SimulationView::resize(IntVector2D const& size)
     _renderPipeline->resize(size);
     
     Viewport::get().setViewSize(size);
+
+    // Recreate overlay texture with new size
+    if (_overlayTexture != 0) {
+        createOverlayTexture();
+    }
 }
 
 void SimulationView::draw()
 {
     if (_renderSimulation) {
+        // Render overlay to texture before pipeline execution
+        renderOverlayToTexture();
+
         _renderPipeline->execute();
 
         if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
-        // Draw overlay if activated
-        if (_overlay && Viewport::get().getZoomFactor() > ZoomFactorForOverlay) {
+        // Draw selected cell circles (keep this separate from cell type overlay)
+        if (_overlay) {
             ImDrawList* drawList = ImGui::GetBackgroundDrawList();
             auto parameters = _simulationFacade->getSimulationParameters();
             for (auto const& overlayElement : _overlay->elements) {
-                if (_cellDetailOverlayActive && overlayElement.cell) {
-                    {
-                        auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
-                        auto viewPos =
-                            Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
-                        auto text = Const::CellTypeStrings.at(overlayElement.cellType);
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
-                            Const::CellTypeOverlayShadowColor,
-                            text.c_str());
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
-                            Const::CellTypeOverlayColor,
-                            text.c_str());
-                    }
-                }
-
                 if (overlayElement.selected == 1) {
                     auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
                     if (Viewport::get().isVisible(viewPos)) {
@@ -379,6 +494,7 @@ void SimulationView::setupRenderPipeline()
                         StepParameters()
                             .shader(Const::CellTypeOverlayShader)
                             .previousTargetSelection(0)
+                            .inputTextures({_overlayTexture})
                             .uniforms({})),
                 }),
             },

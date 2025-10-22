@@ -20,6 +20,7 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     , _uniforms(parameters._uniforms)
     , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
+    , _inputTextures(parameters._inputTextures)
 {
     if (!parameters._shader.empty()) {
         auto vertexShaderPath = parameters._shader;

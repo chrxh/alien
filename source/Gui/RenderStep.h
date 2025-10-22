@@ -89,6 +89,10 @@ protected:
     bool _preventMoirePatterns = true;
     UniformValueMap _uniforms;
     std::function<UniformValueMap()> _uniformFunc;
+    std::vector<unsigned int> _inputTextures;
+
+public:
+    std::vector<unsigned int> const& getInputTextures() const { return _inputTextures; }
 };
 
 class _CellRenderStep : public _RenderStep

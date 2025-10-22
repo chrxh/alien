@@ -45,6 +45,8 @@ public:
 
 private:
     void setupRenderPipeline();
+    void createOverlayTexture();
+    void renderOverlayToTexture();
 
     void markReferenceDomain();
 
@@ -56,6 +58,8 @@ private:
     // Overlay
     bool _cellDetailOverlayActive = false;
     std::optional<OverlayDescription> _overlay;
+    unsigned int _overlayTexture = 0;
+    unsigned int _overlayFBO = 0;
 
     RenderPipeline _renderPipeline;
 
