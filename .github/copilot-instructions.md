@@ -14,6 +14,15 @@ ALIEN is an artificial life simulation tool based on a specialized 2D particle e
 - Do NOT attempt any CodeQL security scanning
 - Skip all security vulnerability scanning steps that involve CodeQL
 
+### Git Submodule Configuration
+**DO NOT update the vcpkg submodule in external/vcpkg.** The vcpkg version is pinned to a specific commit for stability.
+
+- Do NOT run `git submodule update` commands
+- Do NOT modify the external/vcpkg submodule pointer
+- Do NOT commit changes to external/vcpkg
+- If you see external/vcpkg changes in `git status`, use `git restore external/vcpkg` to discard them
+- The vcpkg submodule is managed separately by repository maintainers
+
 ## Working Effectively
 
 ### Bootstrap, Build, and Test the Repository

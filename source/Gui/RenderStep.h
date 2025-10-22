@@ -15,6 +15,7 @@ struct _TextureTarget
     bool initialized = false;
     unsigned int fbo = 0;
     unsigned int texture = 0;
+    unsigned int depthBuffer = 0;
 
 private: 
     _TextureTarget() = default;
@@ -39,6 +40,7 @@ struct StepParameters
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, bool, preventMoirePatterns, true);
+    MEMBER(StepParameters, bool, needDepthBuffer, false);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
     MEMBER(StepParameters, std::function<UniformValueMap()>, uniformFunc, {});
 };
@@ -86,6 +88,7 @@ protected:
     TextureTarget _target;
     float _textureScale = 1.0f;
     bool _preventMoirePatterns = true;
+    bool _needDepthBuffer = false;
     UniformValueMap _uniforms;
     std::function<UniformValueMap()> _uniformFunc;
 };
