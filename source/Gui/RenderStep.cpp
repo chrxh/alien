@@ -197,6 +197,7 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     // Enable depth testing for z-based occlusion
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glDepthMask(GL_FALSE);  // Disable depth writes when blending to avoid flickering
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -206,7 +207,8 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending and depth testing
+    // Restore depth writes and disable blending and depth testing
+    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
 }
@@ -233,6 +235,7 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     // Enable depth testing for z-based occlusion
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glDepthMask(GL_FALSE);  // Disable depth writes when blending to avoid flickering
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -243,7 +246,8 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
     
-    // Disable blending and depth testing
+    // Restore depth writes and disable blending and depth testing
+    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
 }
