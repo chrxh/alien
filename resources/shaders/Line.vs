@@ -18,7 +18,6 @@ void main()
     vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
     ndc.y = -ndc.y; // Flip Y coordinate
     
-    // Lines are rendered in front of triangles (apply negative bias to bring forward)
     gl_Position = vec4(ndc, aPos.z, 1.0);
     
     // Pass color to geometry shader
