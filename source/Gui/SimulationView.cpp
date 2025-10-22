@@ -65,43 +65,86 @@ void SimulationView::createCellTypeTextureAtlas()
     
     // Calculate dimensions for each cell type label
     int maxWidth = 0;
-    int totalHeight = 0;
     std::vector<ImVec2> textSizes;
     
     for (auto const& cellTypeStr : Const::CellTypeStrings) {
         auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, cellTypeStr.c_str());
         textSizes.push_back(textSize);
         maxWidth = std::max(maxWidth, toInt(textSize.x) + 10); // Add padding
-        totalHeight += toInt(textSize.y) + 5; // Add padding between rows
     }
     
     // Ensure power-of-2 dimensions for better GPU compatibility
     int textureWidth = 256;  // Fixed width
     int textureHeight = 256; // Fixed height, should be enough for all labels
     
-    // Create pixel buffer
+    // Create pixel buffer (clear to transparent)
     std::vector<uint8_t> pixels(textureWidth * textureHeight * 4, 0); // RGBA
     
-    // Render each cell type string to the buffer
-    // Note: This is a simplified approach. For production, we'd use ImGui's font
-    // rendering or a proper text rendering library. For now, we'll create
-    // a simple colored texture to demonstrate the infrastructure.
+    // Get font atlas data
+    int atlasWidth, atlasHeight;
+    unsigned char* atlasData;
+    font->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
     
-    int yOffset = 0;
+    // Render each cell type string to the buffer using ImGui font
+    int rowHeight = textureHeight / toInt(Const::CellTypeStrings.size());
+    float scale = fontSize / font->FontSize;
+    
     for (size_t i = 0; i < Const::CellTypeStrings.size(); ++i) {
-        int rowHeight = textureHeight / toInt(Const::CellTypeStrings.size());
+        auto const& cellTypeStr = Const::CellTypeStrings[i];
         int startY = toInt(i) * rowHeight;
         
-        // Fill this row with a gradient (placeholder for actual text rendering)
-        for (int y = startY; y < startY + rowHeight - 2; ++y) {
-            for (int x = 0; x < textureWidth; ++x) {
-                int idx = (y * textureWidth + x) * 4;
-                // Create a simple gradient pattern as placeholder
-                pixels[idx + 0] = 255;  // R
-                pixels[idx + 1] = 255;  // G
-                pixels[idx + 2] = 255;  // B
-                pixels[idx + 3] = static_cast<uint8_t>(255.0f * (toFloat(x) / toFloat(textureWidth))); // A (gradient)
+        // Starting position for this text
+        float posX = 5.0f;
+        float posY = toFloat(startY) + 2.0f;
+        
+        // Render each character
+        for (size_t charIdx = 0; charIdx < cellTypeStr.length(); ++charIdx) {
+            char c = cellTypeStr[charIdx];
+            const ImFontGlyph* glyph = font->FindGlyph((ImWchar)c);
+            
+            if (!glyph) {
+                continue;
             }
+            
+            // Calculate glyph position and size
+            float x0 = posX + glyph->X0 * scale;
+            float y0 = posY + glyph->Y0 * scale;
+            float x1 = posX + glyph->X1 * scale;
+            float y1 = posY + glyph->Y1 * scale;
+            
+            // Get texture coordinates in font atlas
+            float u0 = glyph->U0;
+            float v0 = glyph->V0;
+            float u1 = glyph->U1;
+            float v1 = glyph->V1;
+            
+            // Render glyph to our texture buffer
+            for (int py = toInt(y0); py < toInt(y1) && py >= 0 && py < textureHeight; ++py) {
+                for (int px = toInt(x0); px < toInt(x1) && px >= 0 && px < textureWidth; ++px) {
+                    // Calculate texture coordinate in font atlas
+                    float tu = u0 + (u1 - u0) * ((px - x0) / (x1 - x0));
+                    float tv = v0 + (v1 - v0) * ((py - y0) / (y1 - y0));
+                    
+                    int atlasx = toInt(tu * atlasWidth);
+                    int atlasy = toInt(tv * atlasHeight);
+                    
+                    if (atlasx >= 0 && atlasx < atlasWidth && atlasy >= 0 && atlasy < atlasHeight) {
+                        unsigned char alpha = atlasData[atlasy * atlasWidth + atlasx];
+                        
+                        if (alpha > 0) {
+                            // Write to our texture buffer (white text with alpha from font)
+                            int idx = (py * textureWidth + px) * 4;
+                            pixels[idx + 0] = 255;  // R
+                            pixels[idx + 1] = 255;  // G
+                            pixels[idx + 2] = 255;  // B
+                            pixels[idx + 3] = alpha; // A
+                        }
+                    }
+                }
+            }
+            
+            // Advance position for next character
+            posX += glyph->AdvanceX * scale;
         }
     }
     
