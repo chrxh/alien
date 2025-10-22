@@ -41,6 +41,7 @@ struct StepParameters
     MEMBER(StepParameters, bool, preventMoirePatterns, true);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
     MEMBER(StepParameters, std::function<UniformValueMap()>, uniformFunc, {});
+    MEMBER(StepParameters, std::vector<unsigned int>, inputTextures, {});
 };
 
 struct ExecutionParameters
@@ -190,4 +191,16 @@ protected:
 
 private:
     _SelectedCellRenderStep(StepParameters const& parameters);
+};
+
+class _CellTypeOverlayRenderStep : public _RenderStep
+{
+public:
+    static CellTypeOverlayRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _CellTypeOverlayRenderStep(StepParameters const& parameters);
 };

@@ -400,3 +400,39 @@ void _SelectedCellRenderStep::execute(ExecutionParameters parameters)
 _SelectedCellRenderStep::_SelectedCellRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
+
+CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters)
+{
+    return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters));
+}
+
+void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for semi-transparent overlay
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Bind overlay texture if provided
+    auto numTextures = parameters._textures.size();
+    if (numTextures >= 1) {
+        _shader->setInt("overlayTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, parameters._textures.at(0));
+    }
+
+    // Draw overlay points (geometry shader will convert to textured quads)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}

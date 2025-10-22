@@ -63,7 +63,7 @@ void SimulationView::draw()
         }
 
         // Draw overlay if activated
-        if (_overlay) {
+        if (_overlay && Viewport::get().getZoomFactor() > ZoomFactorForOverlay) {
             ImDrawList* drawList = ImGui::GetBackgroundDrawList();
             auto parameters = _simulationFacade->getSimulationParameters();
             for (auto const& overlayElement : _overlay->elements) {
@@ -369,6 +369,13 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 1.0f}})),
+                }),
+            },
+
+            // Render block: Cell type overlay (only active when zoom > ZoomFactorForOverlay and overlay is active)
+            RenderBlock{
+                RenderSequence().steps({
+                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
                 }),
             },
         });

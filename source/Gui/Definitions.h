@@ -182,6 +182,9 @@ using LocationRenderStep = std::shared_ptr<_LocationRenderStep>;
 class _SelectedCellRenderStep;
 using SelectedCellRenderStep = std::shared_ptr<_SelectedCellRenderStep>;
 
+class _CellTypeOverlayRenderStep;
+using CellTypeOverlayRenderStep = std::shared_ptr<_CellTypeOverlayRenderStep>;
+
 class _TextureTarget;
 using TextureTarget = std::shared_ptr<_TextureTarget>;
 
