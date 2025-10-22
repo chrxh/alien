@@ -24,6 +24,10 @@ void main()
     float normalizedZ = aPos.z / 1000.0;
     normalizedZ = clamp(normalizedZ, 0.0, 1.0);
     
+    // Cells are rendered in front of lines (apply negative bias to bring forward)
+    normalizedZ -= 0.0002;
+    normalizedZ = clamp(normalizedZ, 0.0, 1.0);
+    
     gl_Position = vec4(ndc, normalizedZ, 1.0);
 
     if (state == 1 && zoom > 6.0f) {

@@ -24,6 +24,10 @@ void main()
     float normalizedZ = aPos.z / 1000.0;
     normalizedZ = clamp(normalizedZ, 0.0, 1.0);
     
+    // Lines are rendered in front of triangles (apply negative bias to bring forward)
+    normalizedZ -= 0.0001;
+    normalizedZ = clamp(normalizedZ, 0.0, 1.0);
+    
     gl_Position = vec4(ndc, normalizedZ, 1.0);
     
     // Pass color and z-position to geometry shader

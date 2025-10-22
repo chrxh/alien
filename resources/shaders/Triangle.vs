@@ -24,6 +24,8 @@ void main()
     float normalizedZ = aPos.z / 1000.0;
     normalizedZ = clamp(normalizedZ, 0.0, 1.0);
     
+    // Triangles are rendered at the back (no bias added)
+    
     gl_Position = vec4(ndc, normalizedZ, 1.0);
     
     // Pass color and z-position to geometry shader
