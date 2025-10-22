@@ -155,11 +155,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-    // Enable depth testing for z-based occlusion
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LESS);
-
-    // Enable blending for anti-aliasing
+   // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -170,7 +166,6 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     // Disable blending, point sprites and depth testing
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
 }
 
 _CellRenderStep::_CellRenderStep(StepParameters const& parameters)

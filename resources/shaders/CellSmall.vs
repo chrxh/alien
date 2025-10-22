@@ -19,16 +19,7 @@ void main()
     vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
     ndc.y = -ndc.y; // Flip Y coordinate
     
-    // Normalize z to depth range [0, 1] - smaller z values should be closer (rendered in front)
-    // Z values range from approximately 0 to 1000 (creature ID % 1000 + random offset)
-    float normalizedZ = aPos.z / 1000.0;
-    normalizedZ = clamp(normalizedZ, 0.0, 1.0);
-    
-    // Cells are rendered in front of lines (apply negative bias to bring forward)
-    normalizedZ -= 1.2;
-    normalizedZ = clamp(normalizedZ, 0.0, 1.0);
-    
-    gl_Position = vec4(ndc, normalizedZ, 1.0);
+    gl_Position = vec4(ndc, aPos.z, 1.0);
 
     if (state == 1 && zoom > 6.0f) {
         vColor = mix(aColor, vec3(1.0), 0.1);
