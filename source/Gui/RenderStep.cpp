@@ -17,6 +17,7 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
+    , _needDepthBuffer(parameters._needDepthBuffer)
     , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
@@ -56,7 +57,7 @@ void _RenderStep::resize(IntVector2D const& size)
     if (_target->initialized) {
         glDeleteFramebuffers(1, &_target->fbo);
         glDeleteTextures(1, &_target->texture);
-        glDeleteRenderbuffers(1, &_target->depthRenderbuffer);
+        glDeleteRenderbuffers(1, &_target->depthBuffer);
     }
     // Init output texture
     glGenTextures(1, &_target->texture);
@@ -68,16 +69,22 @@ void _RenderStep::resize(IntVector2D const& size)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
 
     // Init depth renderbuffer
-    glGenRenderbuffers(1, &_target->depthRenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, _target->depthRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size.x, size.y);
+    if (_needDepthBuffer) {
+        glGenRenderbuffers(1, &_target->depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, _target->depthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size.x, size.y);
+    }
 
     // Init framebuffer
+    int currentFramebuffer = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFramebuffer);
     glGenFramebuffers(1, &_target->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, _target->fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _target->texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _target->depthRenderbuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if (_needDepthBuffer) {
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _target->depthBuffer);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFramebuffer);
 
     _target->initialized = true;
 }
@@ -174,7 +181,9 @@ _CellRenderStep::_CellRenderStep(StepParameters const& parameters)
 
 LineRenderStep _LineRenderStep::create(StepParameters const& parameters)
 {
-    return LineRenderStep(new _LineRenderStep(parameters));
+    auto lineParameters = parameters;
+    lineParameters._needDepthBuffer = true;
+    return LineRenderStep(new _LineRenderStep(lineParameters));
 }
 
 void _LineRenderStep::execute(ExecutionParameters parameters)
@@ -208,7 +217,9 @@ _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
 
 TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
 {
-    return TriangleRenderStep(new _TriangleRenderStep(parameters));
+    auto triangleParameters = parameters;
+    triangleParameters._needDepthBuffer = true;
+    return TriangleRenderStep(new _TriangleRenderStep(triangleParameters));
 }
 
 void _TriangleRenderStep::execute(ExecutionParameters parameters)
