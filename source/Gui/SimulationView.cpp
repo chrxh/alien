@@ -208,8 +208,10 @@ void SimulationView::updateMotionBlur()
 void SimulationView::setupRenderPipeline()
 {
     auto currentBackgroundColor = [this] {
-        FloatColorRGB background = _simulationFacade->getSimulationParameters().backgroundColor.baseValue;
-        return UniformValueMap{{"background", background}};
+        auto params = _simulationFacade->getSimulationParameters();
+        FloatColorRGB background = params.backgroundColor.baseValue;
+        int gridLines = params.gridLines.value ? 1 : 0;
+        return UniformValueMap{{"background", background}, {"gridLines", gridLines}};
     };
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
