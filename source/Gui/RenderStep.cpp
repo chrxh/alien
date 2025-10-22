@@ -419,9 +419,8 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
         return;
     }
 
-    if (!_previousTargetSelection.has_value()) {
-        parameters._clearBackground = true;
-    }
+    // Don't clear background - we want to composite on top of existing rendering
+    parameters._clearBackground = false;
     prepareExecution(parameters);
 
     // Enable blending for semi-transparent overlay

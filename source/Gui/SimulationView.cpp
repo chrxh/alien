@@ -494,7 +494,6 @@ void SimulationView::setupRenderPipeline()
                     _CellTypeOverlayRenderStep::create(
                         StepParameters()
                             .shader(Const::CellTypeOverlayShader)
-                            .previousTargetSelection(0)
                             .inputTextures({_cellTypeTextureAtlas})
                             .uniforms({})),
                 }),

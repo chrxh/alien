@@ -12,15 +12,18 @@ uniform sampler2D overlayTexture;
 
 void main()
 {
+    // For debugging: just render a semi-transparent white quad to see if anything shows up
+    // Later we'll sample from the texture atlas properly
+    FragColor = vec4(1.0, 1.0, 1.0, 0.5);
+    
     // Sample from the overlay texture
-    // For now, use a simple approach: cell type determines which part of texture to sample
-    vec4 textColor = texture(overlayTexture, gQuadCoord);
+    // vec4 textColor = texture(overlayTexture, gQuadCoord);
     
-    // Only show if there's actually text content (alpha > 0)
-    if (textColor.a < 0.01) {
-        discard;
-    }
+    // // Only show if there's actually text content (alpha > 0)
+    // if (textColor.a < 0.01) {
+    //     discard;
+    // }
     
-    // Output the text color
-    FragColor = textColor;
+    // // Output the text color
+    // FragColor = textColor;
 }
