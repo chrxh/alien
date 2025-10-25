@@ -3,7 +3,7 @@ layout (lines) in;
 layout (triangle_strip, max_vertices = 18) out;
 
 in vec3 vertexColor[];
-in flat int vertexActive[];
+flat in int vertexActive[];
 out vec3 fragColor;
 
 uniform vec2 viewportSize;
