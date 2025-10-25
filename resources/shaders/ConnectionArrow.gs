@@ -136,7 +136,7 @@ void main()
     bool arrowToCell2 = (vertexActive[0] & 2) != 0;
     
     // Line width in NDC coordinates - thinner lines (1-2 pixels)
-    float lineWidth = (zoom * 0.02) / viewportSize.x * 2.0;
+    float lineWidth = (2.0) / viewportSize.x * 2.0;
     // Arrow size - make arrows more visible
     float arrowSize = zoom / 8.0 * 2.0 / viewportSize.x;
     
