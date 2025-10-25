@@ -1171,9 +1171,6 @@ __global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionAr
             // Add connection arrow data (2 vertices for the line)
             uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
             if (connectionArrowData != nullptr) {
-                uint64_t cellIndex = cell->tempValue.as_uint64;
-                uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
-                
                 // Calculate deterministic z-position for both cells (same logic as in cudaExtractCellData)
                 uint64_t hash1 = cell->id * 2654435761u;
                 hash1 = (hash1 ^ (hash1 >> 16)) * 0x85ebca6b;
