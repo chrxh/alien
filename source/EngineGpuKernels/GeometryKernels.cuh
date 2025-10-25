@@ -48,6 +48,6 @@ __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUp
 __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData);
 __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData);
 __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData);
-__global__ void cudaExtractSelectedCellData(SimulationData data, SelectedCellVertexData* selectedCellData, uint64_t* numSelectedCells);
+__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects);
 __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices);
 __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices);
