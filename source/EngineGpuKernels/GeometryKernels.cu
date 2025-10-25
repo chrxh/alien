@@ -850,7 +850,8 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
         objectData[index].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f * luminance + white;
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
-        objectData[index].state = cell->signalState;
+        // Pack both cellType (lower 8 bits) and signalState (upper 8 bits) into state field
+        objectData[index].state = cell->cellType | (cell->signalState << 8);
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;

@@ -1,26 +1,24 @@
 #include "SimulationView.h"
 
 #include <algorithm>
+
 #include <glad/glad.h>
+
 #include <imgui.h>
 
 #include "Base/GlobalSettings.h"
 #include "Base/Resources.h"
+
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/SpaceCalculator.h"
 
 #include "AlienGui.h"
 #include "RenderPipeline.h"
 #include "RenderStep.h"
-#include "SimulationScrollbars.h"
 #include "Shader.h"
-#include "Viewport.h"
+#include "SimulationScrollbars.h"
 #include "StyleRepository.h"
-
-namespace
-{
-    auto constexpr ZoomFactorForOverlay = 12.0f;
-}
+#include "Viewport.h"
 
 void SimulationView::setup(SimulationFacade const& simulationFacade)
 {
@@ -49,7 +47,7 @@ void SimulationView::shutdown()
 void SimulationView::resize(IntVector2D const& size)
 {
     _renderPipeline->resize(size);
-    
+
     Viewport::get().setViewSize(size);
 }
 
@@ -62,40 +60,6 @@ void SimulationView::draw()
             markReferenceDomain();
         }
 
-        // Draw overlay if activated
-        if (_overlay) {
-            ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-            auto parameters = _simulationFacade->getSimulationParameters();
-            for (auto const& overlayElement : _overlay->elements) {
-                if (_cellDetailOverlayActive && overlayElement.cell) {
-                    {
-                        auto fontSizeUnit = std::min(scale(40.0f), Viewport::get().getZoomFactor()) / 2;
-                        auto viewPos =
-                            Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y + 0.3f}, parameters.borderlessRendering.value);
-                        auto text = Const::CellTypeStrings.at(overlayElement.cellType);
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit, viewPos.y},
-                            Const::CellTypeOverlayShadowColor,
-                            text.c_str());
-                        drawList->AddText(
-                            StyleRepository::get().getMediumFont(),
-                            fontSizeUnit,
-                            {viewPos.x - 1.7f * fontSizeUnit + 1, viewPos.y + 1},
-                            Const::CellTypeOverlayColor,
-                            text.c_str());
-                    }
-                }
-
-                if (overlayElement.selected == 1) {
-                    auto viewPos = Viewport::get().mapWorldToViewPosition({overlayElement.pos.x, overlayElement.pos.y}, parameters.borderlessRendering.value);
-                    if (Viewport::get().isVisible(viewPos)) {
-                        drawList->AddCircle({viewPos.x, viewPos.y}, Viewport::get().getZoomFactor() * 0.45f, Const::SelectedCellOverlayColor, 0, 2.0f);
-                    }
-                }
-            }
-        }
     } else {
         glClearColor(0, 0, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -137,7 +101,7 @@ void SimulationView::processSimulationScrollbars()
         auto mainMenubarHeight = scale(22);
 
         auto worldCenter = Viewport::get().getCenterInWorldPos();
-        auto worldRect = RealRect{{0,0}, toRealVector2D(_simulationFacade->getWorldSize())};
+        auto worldRect = RealRect{{0, 0}, toRealVector2D(_simulationFacade->getWorldSize())};
         auto visibleWorldRect = Viewport::get().getVisibleWorldRect();
         auto viewRect =
             RealRect{{viewport->Pos.x, viewport->Pos.y + mainMenubarHeight}, {viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y}};
@@ -201,9 +165,7 @@ void SimulationView::setMotionBlur(float value)
     _motionBlur = value;
 }
 
-void SimulationView::updateMotionBlur()
-{
-}
+void SimulationView::updateMotionBlur() {}
 
 void SimulationView::setupRenderPipeline()
 {
@@ -220,18 +182,18 @@ void SimulationView::setupRenderPipeline()
             // Render block: Render energy particles
             RenderBlock{
                 RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(
-                        StepParameters().shader(Const::EnergyParticleShader).uniforms({{"ballSize", 2.0f}}).preventMoirePatterns(false)/*.previousTargetSelection(0)*/),
+                    _EnergyParticleRenderStep::create(StepParameters()
+                                                          .shader(Const::EnergyParticleShader)
+                                                          .uniforms({{"ballSize", 2.0f}})
+                                                          .preventMoirePatterns(false) /*.previousTargetSelection(0)*/),
                 }),
             },
 
             // Render block: Downscale blur for energy particles
             RenderBlock{
                 RenderSequence().repetitions(4).steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::DownSamplerShader).textureScale(0.5f)),
                 }),
                 RenderSequence().steps({
@@ -243,10 +205,8 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().repetitions(4).steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::UpSamplerShader).textureScale(2.0f)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -285,16 +245,15 @@ void SimulationView::setupRenderPipeline()
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
                 }),
                 RenderSequence().steps({
-                    _CellRenderStep::create(StepParameters().shader(Const::CellLargeShader).previousTargetSelection(0)),
+                    _CellRenderStep::create(StepParameters().shader(Const::CellShader).previousTargetSelection(0)),
                 }),
             },
 
             // Render block: Merge energy, blur cells and cells
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters()
-                                                          .shader(Const::MergeAdditiveShader)
-                                                          .uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 0.6f}, {"colorFactor3", 0.5f}})),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 0.6f}, {"colorFactor3", 0.5f}})),
                 }),
             },
 
@@ -311,8 +270,7 @@ void SimulationView::setupRenderPipeline()
             // Render block: Two outputs: downscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.25f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.25f}})),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.25f}}).textureScale(1.0f / 1.5f)),
                 }),
@@ -323,10 +281,8 @@ void SimulationView::setupRenderPipeline()
             // Render block: Two outputs: upscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.25f}})),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.25f}}).textureScale(1.5f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.25f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.25f}}).textureScale(1.5f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -354,8 +310,7 @@ void SimulationView::setupRenderPipeline()
             // Render block: Background
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BackgroundShader).uniformFunc(currentBackgroundColor)),
                     _LocationRenderStep::create(StepParameters().shader(Const::LocationShader).previousTargetSelection(0)),
                     _SelectedCellRenderStep::create(StepParameters().shader(Const::SelectedCellShader).previousTargetSelection(0)),
                 }),
@@ -369,6 +324,8 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 1.0f}})),
+                    _CellTypeOverlayRenderStep::create(
+                        StepParameters().shader(Const::CellTypeOverlayShader).previousTargetSelection(0)),
                 }),
             },
         });
@@ -386,4 +343,3 @@ void SimulationView::markReferenceDomain()
     drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
     drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
 }
-

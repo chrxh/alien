@@ -138,30 +138,41 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glEnableVertexAttribArray(0);
     }
 
+    // Check for supported pipeline structure
     CHECK(!_blocks.empty());
     CHECK(_blocks.back().size() == 1);
 
     // Create texture targets for all steps which need one
     forEachStep(
-        [](RenderStep& step) {
+        [this]() {
             auto result = _TextureTarget::create();
-            step->setTextureTarget(result);
+            _textureTargets.emplace_back(result);
             return result;
         },
-        [](RenderStep&, std::vector<unsigned int> const&, RenderTarget const&, float) {});
+        [](RenderStep&, std::vector<unsigned int> const&, RenderTarget const&) {});
 }
 
 void _RenderPipeline::resize(IntVector2D const& size)
 {
-    std::set<TextureTarget> textureTargets;
-    for (auto const& block : _blocks) {
-        for (auto const& sequence : block) {
-            for (auto const& step : sequence._steps) {
-                if (step->getTextureTarget() != nullptr) {
-                    step->resize(size);
-                }
-            }
+    for (auto const& textureTarget : _textureTargets) {
+        if (textureTarget->initialized) {
+            glDeleteFramebuffers(1, &textureTarget->fbo);
+            glDeleteTextures(1, &textureTarget->texture);
         }
+        // Init output texture
+        glGenTextures(1, &textureTarget->texture);
+        glBindTexture(GL_TEXTURE_2D, textureTarget->texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
+
+        // Init framebuffer
+        glGenFramebuffers(1, &textureTarget->fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, textureTarget->fbo);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget->texture, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 }
 
@@ -187,71 +198,135 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
+    int currentTextureTargetIndex = 0;
     forEachStep(
-        [](RenderStep& step) { return step->getTextureTarget(); },
-        [this,
-         &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target, float scale) {
+        [this, &currentTextureTargetIndex] { return _textureTargets.at(currentTextureTargetIndex++); },
+        [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target) {
+            // Merge inputTextures from step parameters with textures from previous targets
+            auto allTextures = step->getInputTextures();
+            allTextures.insert(allTextures.end(), textures.begin(), textures.end());
+
             step->execute(ExecutionParameters()
                               .geometryBuffers(_geometryBuffers)
-                              .textures(textures)
+                              .textures(allTextures)
                               .target(target)
-                              .scale(scale) 
                               .renderInfo(generalRenderInfo)
                               .simulationFacade(_simulationFacade));
         });
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
 }
-
 void _RenderPipeline::forEachStep(
-    std::function<TextureTarget(RenderStep& step)> const& getTextureTarget,
-    std::function<void(RenderStep& step, std::vector<unsigned> const& textures, RenderTarget const& target, float scale)> const& executeStep)
+    std::function<TextureTarget()> const& getTextureTarget,
+    std::function<void(RenderStep&, std::vector<unsigned> const&, RenderTarget const&)> const& executeStep)
 {
+    std::map<RenderTarget, TargetInfo> usedTargets;
+
     std::vector<RenderTarget> previousBlockTargets;
-    std::vector<float> previousBlockScales;
     for (size_t i = 0; i < _blocks.size(); ++i) {
         auto& block = _blocks.at(i);
         auto isLastBlock = (i == _blocks.size() - 1);
 
         std::vector<RenderTarget> blockTargets;
-        std::vector<float> blockScales;
         for (size_t j = 0; j < block.size(); ++j) {
             auto& sequence = block.at(j);
 
             std::vector<RenderTarget> previousTargets = previousBlockTargets;
-            std::vector<float> previousScales = previousBlockScales;
             for (int k = 0; k < sequence._repetitions; ++k) {
                 for (size_t l = 0; l < sequence._steps.size(); ++l) {
                     auto& step = sequence._steps.at(l);
 
                     // Determine target
-                    RenderTarget target;
-                    float scale;
-                    if (auto previousTarget = step->getPreviousTargetSelection()) {
-                        target = previousTargets.at(previousTarget.value());
-                        scale = previousScales.at(previousTarget.value());
-                    } else {
-                        if (!sequence.subsequentStepsHaveTarget(l) && isLastBlock) {
-                            target = RenderTarget(ScreenTarget());
-                            scale = 1.0f;
-                        } else {
-                            target = getTextureTarget(step);
-                            scale = step->getTextureScale();
-                        }
-                    }
+                    auto target = determineRenderTarget(
+                        step,
+                        sequence,
+                        block,
+                        i,
+                        j,
+                        k,
+                        l,
+                        isLastBlock,
+                        getTextureTarget,
+                        previousTargets,
+                        usedTargets);
+
                     // Execute render step
-                    executeStep(step, getTextures(previousTargets), target, scale);
+                    executeStep(step, getTextures(previousTargets), target);
 
                     // Current output is input for next step
                     previousTargets = {target};
-                    previousScales = {scale};
                 }
             }
             CHECK(previousTargets.size() == 1);
             blockTargets.emplace_back(previousTargets.front());
-            blockScales.emplace_back(previousScales.front());
         }
         previousBlockTargets = blockTargets;
-        previousBlockScales = blockScales;
     }
+}
+
+RenderTarget _RenderPipeline::determineRenderTarget(
+    RenderStep const& step,
+    RenderSequence const& sequence,
+    RenderBlock const& block,
+    size_t blockIndex,
+    size_t sequenceIndex,
+    size_t repetitionIndex,
+    size_t stepIndex,
+    bool isLastBlock,
+    std::function<TextureTarget()> const& getTextureTarget,
+    std::vector<RenderTarget> const& previousTargets,
+    std::map<RenderTarget, TargetInfo>& usedTargets)
+{
+    RenderTarget target;
+    if (auto previousTarget = step->getPreviousTargetSelection()) {
+        target = previousTargets.at(previousTarget.value());
+        if (std::holds_alternative<TextureTarget>(target) && usedTargets.contains(target)) {
+            TargetInfo targetInfo{
+                .block = blockIndex,
+                .lastStepInSequence = (stepIndex == sequence._steps.size() - 1) && (repetitionIndex == sequence._repetitions - 1),
+            };
+            usedTargets.at(target) = targetInfo;
+        }
+    } else {
+        if (!sequence.subsequentStepsHaveTarget(stepIndex) && isLastBlock) {
+            target = RenderTarget(ScreenTarget());
+        } else {
+
+            auto reuseTarget = false;
+            for (auto const& [usedTarget, targetInfo] : usedTargets) {
+
+                // Do not reuse targets which are used as input
+                auto findResult = std::ranges::find(previousTargets, usedTarget);
+                if (findResult != previousTargets.end()) {
+                    continue;
+                }
+                // Do not reuse targets from the same block since they could be used in the next block
+                if (targetInfo.block == blockIndex && targetInfo.lastStepInSequence && !isLastBlock) {
+                    continue;
+                }
+                // Do not reuse targets from the previous block if they are still used in the current block
+                if (targetInfo.block == blockIndex - 1 && targetInfo.lastStepInSequence
+                    && (stepIndex < sequence._steps.size() - 1 || repetitionIndex < sequence._repetitions - 1)) {
+                    continue;
+                }
+                if (targetInfo.block == blockIndex - 1 && targetInfo.lastStepInSequence
+                    && (sequenceIndex < block.size() - 1 || repetitionIndex < sequence._repetitions - 1)) {
+                    continue;
+                }
+                target = usedTarget;
+                reuseTarget = true;
+            }
+
+            if (!reuseTarget || std::ranges::find(previousTargets, target) != previousTargets.end()) {
+                target = getTextureTarget();
+            }
+        
+            TargetInfo targetInfo{
+                .block = blockIndex,
+                .lastStepInSequence = (stepIndex == sequence._steps.size() - 1) && (repetitionIndex == sequence._repetitions - 1),
+            };
+            usedTargets.insert_or_assign(target, targetInfo);
+        }
+    }
+    return target;
 }

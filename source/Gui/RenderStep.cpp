@@ -1,12 +1,19 @@
 #include "RenderStep.h"
 
-#include "EngineInterface/SimulationFacade.h"
+#include "Base/Math.h"
 #include "EngineInterface/GeometryBuffers.h"
+#include "EngineInterface/SimulationFacade.h"
 
 #include "RenderPipeline.h"
-
 #include "Shader.h"
+#include "SimulationView.h"
+#include "StyleRepository.h"
 #include "Viewport.h"
+
+namespace
+{
+    auto constexpr ZoomFactorForOverlay = 15.0f;
+}
 
 TextureTarget _TextureTarget::create()
 {
@@ -17,7 +24,6 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     : _previousTargetSelection(parameters._previousTargetSelection)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
-    , _needDepthBuffer(parameters._needDepthBuffer)
     , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
@@ -32,7 +38,8 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
         if (!std::filesystem::exists(geometryShaderPath)) {
             geometryShaderPath = std::filesystem::path();  // empty path disables geometry shader
         }
-
+        CHECK(std::filesystem::exists(vertexShaderPath));
+        CHECK(std::filesystem::exists(fragmentShaderPath));
         _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
     }
 }
@@ -42,59 +49,12 @@ std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
     return _previousTargetSelection;
 }
 
-TextureTarget const& _RenderStep::getTextureTarget() const
-{
-    return _target;
-}
-
-void _RenderStep::setTextureTarget(TextureTarget const& target)
-{
-    _target = target;
-}
-
-void _RenderStep::resize(IntVector2D const& size)
-{
-    if (_target->initialized) {
-        glDeleteFramebuffers(1, &_target->fbo);
-        glDeleteTextures(1, &_target->texture);
-        glDeleteRenderbuffers(1, &_target->depthBuffer);
-    }
-    // Init output texture
-    glGenTextures(1, &_target->texture);
-    glBindTexture(GL_TEXTURE_2D, _target->texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, size.x, size.y, 0, GL_RGBA, GL_FLOAT, NULL);
-
-    // Init depth renderbuffer
-    if (_needDepthBuffer) {
-        glGenRenderbuffers(1, &_target->depthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, _target->depthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, size.x, size.y);
-    }
-
-    // Init framebuffer
-    int currentFramebuffer = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFramebuffer);
-    glGenFramebuffers(1, &_target->fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _target->fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _target->texture, 0);
-    if (_needDepthBuffer) {
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _target->depthBuffer);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, currentFramebuffer);
-
-    _target->initialized = true;
-}
-
-float _RenderStep::getTextureScale() const
+float _RenderStep::getTextureScaling() const
 {
     return _textureScale;
 }
 
-void _RenderStep::setTextureScale(float scale)
+void _RenderStep::setTextureScaling(float scale)
 {
     _textureScale = scale;
 }
@@ -138,12 +98,12 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     } else {
         glBindFramebuffer(GL_FRAMEBUFFER, std::get<TextureTarget>(parameters._target)->fbo);
     }
-    glViewport(0, 0, toInt(toFloat(viewSize.x) * parameters._scale), toInt(toFloat(viewSize.y) * parameters._scale));
+    glViewport(0, 0, toInt(toFloat(viewSize.x) * _textureScale), toInt(toFloat(viewSize.y) * _textureScale));
 
     if (parameters._clearBackground) {
         // Clear with black background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
 }
 
@@ -163,7 +123,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
 
-   // Enable blending for anti-aliasing
+    // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
@@ -171,7 +131,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
 
-    // Disable blending, point sprites and depth testing
+    // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
 }
@@ -182,9 +142,7 @@ _CellRenderStep::_CellRenderStep(StepParameters const& parameters)
 
 LineRenderStep _LineRenderStep::create(StepParameters const& parameters)
 {
-    auto lineParameters = parameters;
-    lineParameters._needDepthBuffer = true;
-    return LineRenderStep(new _LineRenderStep(lineParameters));
+    return LineRenderStep(new _LineRenderStep(parameters));
 }
 
 void _LineRenderStep::execute(ExecutionParameters parameters)
@@ -193,10 +151,6 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
         parameters._clearBackground = true;
     }
     prepareExecution(parameters);
-    
-    // Enable depth testing for z-based occlusion
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
@@ -205,22 +159,18 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     // Draw lines (geometry shader will convert to quads with proper width)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
-    
-    // Disable blending and depth testing
+
+    // Disable blending
     glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
 }
 
 _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-{
-}
+{}
 
 TriangleRenderStep _TriangleRenderStep::create(StepParameters const& parameters)
 {
-    auto triangleParameters = parameters;
-    triangleParameters._needDepthBuffer = true;
-    return TriangleRenderStep(new _TriangleRenderStep(triangleParameters));
+    return TriangleRenderStep(new _TriangleRenderStep(parameters));
 }
 
 void _TriangleRenderStep::execute(ExecutionParameters parameters)
@@ -230,10 +180,6 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
-    // Enable depth testing for z-based occlusion
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
@@ -242,16 +188,14 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForTriangles());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
-    
-    // Disable blending and depth testing
+
+    // Disable blending
     glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
 }
 
 _TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-{
-}
+{}
 
 PostProcessingRenderStep _PostProcessingRenderStep::create(StepParameters const& parameters)
 {
@@ -264,7 +208,7 @@ void _PostProcessingRenderStep::execute(ExecutionParameters parameters)
     prepareExecution(parameters);
 
     glBindVertexArray(_vao);
-    
+
     auto numTextures = parameters._textures.size();
     CHECK(numTextures <= 3);
     _shader->setInt("numTextures", toInt(numTextures));
@@ -283,7 +227,7 @@ void _PostProcessingRenderStep::execute(ExecutionParameters parameters)
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, parameters._textures.at(2));
     }
-    
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -339,8 +283,7 @@ void _ForwardRenderStep::execute(ExecutionParameters parameters)
 
 _ForwardRenderStep::_ForwardRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
-{
-}
+{}
 
 EnergyParticleRenderStep _EnergyParticleRenderStep::create(StepParameters const& parameters)
 {
@@ -430,3 +373,172 @@ void _SelectedCellRenderStep::execute(ExecutionParameters parameters)
 _SelectedCellRenderStep::_SelectedCellRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
+
+CellTypeOverlayRenderStep _CellTypeOverlayRenderStep::create(StepParameters const& parameters)
+{
+    return CellTypeOverlayRenderStep(new _CellTypeOverlayRenderStep(parameters));
+}
+
+_CellTypeOverlayRenderStep::~_CellTypeOverlayRenderStep()
+{
+    if (_cellTypeTextureAtlas != 0) {
+        glDeleteTextures(1, &_cellTypeTextureAtlas);
+        _cellTypeTextureAtlas = 0;
+    }
+}
+
+void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
+{
+    // Only render if zoom exceeds threshold and overlay is active
+    auto zoom = Viewport::get().getZoomFactor();
+    auto overlayActive = SimulationView::get().isOverlayActive();
+
+    if (zoom <= ZoomFactorForOverlay || !overlayActive) {
+        // Pass through without rendering overlay
+        return;
+    }
+
+    // Don't clear background - we want to composite on top of existing rendering
+    parameters._clearBackground = false;
+    prepareExecution(parameters);
+
+    // Enable blending for semi-transparent overlay
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Bind overlay texture
+    _shader->setInt("overlayTexture", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, _cellTypeTextureAtlas);
+
+    // Draw overlay points (geometry shader will convert to textured quads)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_CellTypeOverlayRenderStep::_CellTypeOverlayRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{
+    createCellTypeTextureAtlas();
+}
+
+void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
+{
+    // Create a texture atlas containing all cell type strings
+    // We'll arrange them in a vertical strip, one per row
+    auto font = StyleRepository::get().getDefaultFont();
+    float fontSize = 16.0f;  // Base font size for rendering
+
+    // Calculate dimensions for each cell type label
+    std::vector<ImVec2> textSizes;
+
+    for (auto const& cellTypeStr : Const::CellTypeStrings) {
+        auto textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, cellTypeStr.c_str());
+        textSizes.push_back(textSize);
+    }
+
+    int textureWidth = 512;   // Fixed width
+    int textureHeight = 512;  // Fixed height, should be enough for all labels
+
+    // Create pixel buffer (clear to transparent)
+    std::vector<uint8_t> pixels(textureWidth * textureHeight * 4, 0);  // RGBA
+
+    // Get font atlas data
+    int atlasWidth, atlasHeight;
+    unsigned char* atlasData;
+    font->ContainerAtlas->GetTexDataAsAlpha8(&atlasData, &atlasWidth, &atlasHeight);
+
+    // Render each cell type string to the buffer using ImGui font
+    int rowHeight = 20;
+    float scale = fontSize / font->FontSize;
+
+    for (size_t i = 0; i < Const::CellTypeStrings.size(); ++i) {
+        auto const& cellTypeStr = Const::CellTypeStrings[i];
+        float posY = toFloat(i * rowHeight) + 2.0f;
+        float posX = 5.0f;
+
+        // Render background to glyph area
+        for (int py = toInt(posY); py < toInt(posY) + rowHeight - 2; ++py) {
+            for (int px = 3; px < toInt(textSizes.at(i).x) + 7; ++px) {
+                int idx = (py * textureWidth + px) * 4;
+                pixels[idx + 0] = 255;   // R
+                pixels[idx + 1] = 255;   // G
+                pixels[idx + 2] = 255;   // B
+                pixels[idx + 3] = 20;  // A
+            }
+        }
+        for (int py = toInt(posY) + 1; py < toInt(posY) + rowHeight - 4; ++py) {
+            for (int px = 4; px < toInt(textSizes.at(i).x) + 6; ++px) {
+                int idx = (py * textureWidth + px) * 4;
+                pixels[idx + 0] = 0;  // R
+                pixels[idx + 1] = 0;  // G
+                pixels[idx + 2] = 0;  // B
+                pixels[idx + 3] = 20;  // A
+            }
+        }
+
+        // Render each character
+        for (size_t charIdx = 0; charIdx < cellTypeStr.length(); ++charIdx) {
+            char character = cellTypeStr[charIdx];
+            auto glyph = font->FindGlyph((ImWchar)character);
+            CHECK(glyph);
+
+            // Calculate glyph position and size
+            float x0 = posX + glyph->X0 * scale;
+            float y0 = posY + glyph->Y0 * scale;
+            float x1 = posX + glyph->X1 * scale;
+            float y1 = posY + glyph->Y1 * scale;
+
+            // Get texture coordinates in font atlas
+            float u0 = glyph->U0;
+            float v0 = glyph->V0;
+            float u1 = glyph->U1;
+            float v1 = glyph->V1;
+
+            // Render glyph to our texture buffer
+            for (int py = toInt(y0); py <= toInt(y1); ++py) {
+                for (int px = toInt(x0); px <= toInt(x1); ++px) {
+                    // Calculate texture coordinate in font atlas
+                    float tu = u0 + (u1 - u0) * ((px - x0) / (x1 - x0));
+                    float tv = v0 + (v1 - v0) * ((py - y0) / (y1 - y0));
+
+                    int atlasx = toInt(tu * atlasWidth);
+                    int atlasy = toInt(tv * atlasHeight);
+
+                    int idx = (py * textureWidth + px) * 4;
+
+                    if (atlasx >= 0 && atlasx < atlasWidth && atlasy >= 0 && atlasy < atlasHeight) {
+                        auto alpha = atlasData[atlasy * atlasWidth + atlasx];
+
+                        if (alpha > 0) {
+                            // Write to our texture buffer (white text with alpha from font)
+                            pixels[idx + 0] = 255;    // R
+                            pixels[idx + 1] = 255;    // G
+                            pixels[idx + 2] = 255;    // B
+                            pixels[idx + 3] = toInt(toFloat(alpha) * 0.5f);  // A
+                        }
+                    }
+                }
+            }
+
+            // Advance position for next character
+            posX += glyph->AdvanceX * scale;
+        }
+    }
+
+    // Create OpenGL texture
+    glGenTextures(1, &_cellTypeTextureAtlas);
+    glBindTexture(GL_TEXTURE_2D, _cellTypeTextureAtlas);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+}

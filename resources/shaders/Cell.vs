@@ -21,11 +21,12 @@ void main()
     
     // Cells are rendered in front of lines (apply negative bias to bring forward)
     gl_Position = vec4(ndc, aPos.z, 1.0);
-
-    if (state == 1 && zoom > 6.0f) {
+    
+    int signalState = state >> 8;
+    if (signalState == 1 && zoom > 6.0f) {
         vColor = mix(aColor, vec3(1.0), 0.1);
         gl_PointSize = radius * 0.5;
-    } else if (state == 2 && zoom > 6.0f) {
+    } else if (signalState == 2 && zoom > 6.0f) {
         vColor = mix(aColor, vec3(1.0), 0.2);
         gl_PointSize = radius * 0.6;
     } else {

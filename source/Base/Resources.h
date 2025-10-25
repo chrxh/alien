@@ -20,13 +20,13 @@ namespace Const
     std::filesystem::path const SavepointTableFilename = "savepoints.json";
 
     std::filesystem::path const BackgroundShader = ShaderPath / "Background";
-    std::filesystem::path const CellSmallShader = ShaderPath / "CellSmall";
-    std::filesystem::path const CellLargeShader = ShaderPath / "CellLarge";
+    std::filesystem::path const CellShader = ShaderPath / "Cell";
     std::filesystem::path const EnergyParticleShader = ShaderPath / "EnergyParticle";
     std::filesystem::path const LineShader = ShaderPath / "Line";
     std::filesystem::path const TriangleShader = ShaderPath / "Triangle";
     std::filesystem::path const LocationShader = ShaderPath / "Location";
     std::filesystem::path const SelectedCellShader = ShaderPath / "SelectedCell";
+    std::filesystem::path const CellTypeOverlayShader = ShaderPath / "CellTypeOverlay";
     std::filesystem::path const BlurHorizontalShader = ShaderPath / "BlurHorizontal";
     std::filesystem::path const BlurVerticalShader = ShaderPath / "BlurVertical";
     std::filesystem::path const MetaballsShader = ShaderPath / "Metaballs";

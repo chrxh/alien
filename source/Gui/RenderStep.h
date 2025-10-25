@@ -1,7 +1,7 @@
 #pragma once
 
-#include <variant>
 #include <filesystem>
+#include <variant>
 
 #include "Base/MathTypes.h"
 #include "EngineInterface/Definitions.h"
@@ -15,13 +15,15 @@ struct _TextureTarget
     bool initialized = false;
     unsigned int fbo = 0;
     unsigned int texture = 0;
-    unsigned int depthBuffer = 0;
 
-private: 
+private:
     _TextureTarget() = default;
 };
 struct ScreenTarget
 {
+    auto operator<=>(ScreenTarget const&) const = default;
+    bool operator==(ScreenTarget const&) const = default;
+
     // FBO is automatically determined
 };
 using RenderTarget = std::variant<ScreenTarget, TextureTarget>;
@@ -40,7 +42,6 @@ struct StepParameters
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, bool, preventMoirePatterns, true);
-    MEMBER(StepParameters, bool, needDepthBuffer, false);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
     MEMBER(StepParameters, std::function<UniformValueMap()>, uniformFunc, {});
 };
@@ -54,7 +55,6 @@ struct ExecutionParameters
 
     // Output
     MEMBER(ExecutionParameters, RenderTarget, target, ScreenTarget());
-    MEMBER(ExecutionParameters, float, scale, 1.0f);
 
     // Misc
     MEMBER(ExecutionParameters, GeneralRenderInfo, renderInfo, GeneralRenderInfo());
@@ -70,13 +70,8 @@ public:
 
     std::optional<int> const& getPreviousTargetSelection() const;
 
-    TextureTarget const& getTextureTarget() const;
-    void setTextureTarget(TextureTarget const& target);
-
-    void resize(IntVector2D const& size);
-
-    float getTextureScale() const;
-    void setTextureScale(float scale);
+    float getTextureScaling() const;
+    void setTextureScaling(float scale);
 
 protected:
     _RenderStep(StepParameters const& parameters);
@@ -85,12 +80,14 @@ protected:
 
     Shader _shader;
     std::optional<int> _previousTargetSelection;
-    TextureTarget _target;
     float _textureScale = 1.0f;
     bool _preventMoirePatterns = true;
-    bool _needDepthBuffer = false;
     UniformValueMap _uniforms;
     std::function<UniformValueMap()> _uniformFunc;
+    std::vector<unsigned int> _inputTextures;
+
+public:
+    std::vector<unsigned int> const& getInputTextures() const { return _inputTextures; }
 };
 
 class _CellRenderStep : public _RenderStep
@@ -193,4 +190,21 @@ protected:
 
 private:
     _SelectedCellRenderStep(StepParameters const& parameters);
+};
+
+class _CellTypeOverlayRenderStep : public _RenderStep
+{
+public:
+    static CellTypeOverlayRenderStep create(StepParameters const& parameters);
+    ~_CellTypeOverlayRenderStep();
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _CellTypeOverlayRenderStep(StepParameters const& parameters);
+
+    void createCellTypeTextureAtlas();
+
+    unsigned int _cellTypeTextureAtlas = 0;
 };

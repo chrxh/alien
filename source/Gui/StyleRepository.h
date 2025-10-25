@@ -130,6 +130,8 @@ public :
 
     ImFont* getIconFont() const;
 
+    ImFont* getDefaultFont() const;
+
     ImFont* getSmallBoldFont() const;
     ImFont* getMediumBoldFont() const;
 

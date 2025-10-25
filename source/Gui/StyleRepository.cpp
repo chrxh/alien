@@ -77,6 +77,11 @@ ImFont* StyleRepository::getIconFont() const
     return _iconFont;
 }
 
+ImFont* StyleRepository::getDefaultFont() const
+{
+    return ImGui::GetIO().Fonts->Fonts[0];
+}
+
 ImFont* StyleRepository::getSmallBoldFont() const
 {
     return _smallBoldFont;

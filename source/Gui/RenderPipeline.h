@@ -31,13 +31,32 @@ public:
 
 private:
     void forEachStep(
-        std::function<TextureTarget(RenderStep& step)> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target, float scale)> const&
+        std::function<TextureTarget()> const& getTextureTarget,
+        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target)> const&
             executeStep);
+
+    struct TargetInfo
+    {
+        size_t block = 0;
+        bool lastStepInSequence = false;
+    };
+    RenderTarget determineRenderTarget(
+        RenderStep const& step,
+        RenderSequence const& sequence,
+        RenderBlock const& block,
+        size_t blockIndex,
+        size_t sequenceIndex,
+        size_t repetitionIndex,
+        size_t stepIndex,
+        bool isLastBlock,
+        std::function<TextureTarget()> const& getTextureTarget,
+        std::vector<RenderTarget> const& previousTargets,
+        std::map<RenderTarget, TargetInfo>& usedTargets);
 
     SimulationFacade _simulationFacade;
     RenderBlocks _blocks;
     
     GeometryBuffers _geometryBuffers;
+    std::vector<TextureTarget> _textureTargets;
 };
 
