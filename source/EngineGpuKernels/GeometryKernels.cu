@@ -1065,7 +1065,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedCellData(SimulationData data, SelectedCellVertexData* selectedCellData, uint64_t* numSelectedCells)
+__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
 {
     auto const& cells = data.objects.cells;
     auto numCells = cells.getNumEntries();
@@ -1073,10 +1073,10 @@ __global__ void cudaExtractSelectedCellData(SimulationData data, SelectedCellVer
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numCells; index += blockDim.x * gridDim.x) {
         auto const& cell = cells.at(index);
         if (cell->selected == 1) {
-            auto outputIndex = alienAtomicAdd64(numSelectedCells, static_cast<uint64_t>(1));
-            if (selectedCellData != nullptr) {
-                selectedCellData[outputIndex].pos[0] = cell->pos.x;
-                selectedCellData[outputIndex].pos[1] = cell->pos.y;
+            auto outputIndex = alienAtomicAdd64(numSelectedObjects, static_cast<uint64_t>(1));
+            if (selectedObjectData != nullptr) {
+                selectedObjectData[outputIndex].pos[0] = cell->pos.x;
+                selectedObjectData[outputIndex].pos[1] = cell->pos.y;
             }
         }
     }

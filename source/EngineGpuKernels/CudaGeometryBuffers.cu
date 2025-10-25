@@ -39,10 +39,10 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     }
     locationBuffer = registerBufferResource(buffers->getVboForLocations());
 
-    if (selectedCellBuffer != nullptr) {
-        unregisterBufferResource(selectedCellBuffer);
+    if (selectedObjectBuffer != nullptr) {
+        unregisterBufferResource(selectedObjectBuffer);
     }
-    selectedCellBuffer = registerBufferResource(buffers->getVboForSelectedCells());
+    selectedObjectBuffer = registerBufferResource(buffers->getVboForSelectedObjects());
 
     if (lineIndexBuffer != nullptr) {
         unregisterBufferResource(lineIndexBuffer);
