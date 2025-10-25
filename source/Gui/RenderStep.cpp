@@ -362,7 +362,7 @@ void _SelectedObjectRenderStep::execute(ExecutionParameters parameters)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Draw selected object points (geometry shader will convert to quads)
+    // Draw selected objects (cells and energy particles) as points (geometry shader will convert to quads)
     glBindVertexArray(parameters._geometryBuffers->getVaoForSelectedObjects());
     glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().selectedObjects));
 
