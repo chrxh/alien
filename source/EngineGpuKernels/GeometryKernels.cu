@@ -1097,3 +1097,114 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
         }
     }
 }
+
+__global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
+{
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        
+        // Calculate signal angle restrictions for this cell
+        auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
+        auto signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
+        signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+        signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
+        
+        auto summedAngle = 0.0f;
+        
+        // Process each connection from this cell
+        for (int i = 0; i < cell->numConnections; ++i) {
+            if (i > 0) {
+                summedAngle += cell->connections[i].angleFromPrevious;
+            }
+            
+            auto connectedCell = cell->connections[i].cell;
+            
+            // Only add each connection once (from lower id to higher id to avoid duplicates)
+            if (cell->id >= connectedCell->id) {
+                continue;
+            }
+            
+            // Check if this connection should be drawn
+            if (Math::length(cell->pos - connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
+                continue;
+            }
+            
+            // Determine if signal can flow from cell1 to cell2
+            bool arrowToCell2 = !cell->signalRestriction.active 
+                || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+            
+            // Determine if signal can flow from cell2 to cell1
+            // Need to calculate the reverse angle from connectedCell's perspective
+            auto signalAngleRestrictionStart2 = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
+            auto signalAngleRestrictionEnd2 = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
+            signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
+            signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
+            
+            // Find the angle of this connection from connectedCell's perspective
+            auto summedAngle2 = 0.0f;
+            bool arrowToCell1 = false;
+            for (int j = 0; j < connectedCell->numConnections; ++j) {
+                if (j > 0) {
+                    summedAngle2 += connectedCell->connections[j].angleFromPrevious;
+                }
+                if (connectedCell->connections[j].cell->id == cell->id) {
+                    arrowToCell1 = !connectedCell->signalRestriction.active 
+                        || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
+                    break;
+                }
+            }
+            
+            // Get cell colors
+            auto cellColor = getCellColor(cell->color);
+            auto connectedCellColor = getCellColor(connectedCell->color);
+            
+            // Calculate averaged color
+            auto avgColorR = (toFloat((cellColor >> 16) & 0xff) + toFloat((connectedCellColor >> 16) & 0xff)) / 2.0f / 255.0f;
+            auto avgColorG = (toFloat((cellColor >> 8) & 0xff) + toFloat((connectedCellColor >> 8) & 0xff)) / 2.0f / 255.0f;
+            auto avgColorB = (toFloat(cellColor & 0xff) + toFloat(connectedCellColor & 0xff)) / 2.0f / 255.0f;
+            
+            // Encode arrow direction in flags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
+            int arrowFlags = (arrowToCell1 ? 1 : 0) | (arrowToCell2 ? 2 : 0);
+            
+            // Add connection arrow data (2 vertices for the line)
+            uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
+            if (connectionArrowData != nullptr) {
+                uint64_t cellIndex = cell->tempValue.as_uint64;
+                uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
+                
+                // Calculate deterministic z-position for both cells (same logic as in cudaExtractCellData)
+                uint64_t hash1 = cell->id * 2654435761u;
+                hash1 = (hash1 ^ (hash1 >> 16)) * 0x85ebca6b;
+                hash1 = (hash1 ^ (hash1 >> 13)) * 0xc2b2ae35;
+                hash1 = hash1 ^ (hash1 >> 16);
+                float zPos1 = toFloat(hash1 & 0xFFFFFF) / toFloat(0xFFFFFF) * 0.05f;
+                
+                uint64_t hash2 = connectedCell->id * 2654435761u;
+                hash2 = (hash2 ^ (hash2 >> 16)) * 0x85ebca6b;
+                hash2 = (hash2 ^ (hash2 >> 13)) * 0xc2b2ae35;
+                hash2 = hash2 ^ (hash2 >> 16);
+                float zPos2 = toFloat(hash2 & 0xFFFFFF) / toFloat(0xFFFFFF) * 0.05f;
+                
+                // First vertex (cell1)
+                connectionArrowData[vertexIndex].pos[0] = cell->pos.x;
+                connectionArrowData[vertexIndex].pos[1] = cell->pos.y;
+                connectionArrowData[vertexIndex].pos[2] = zPos1;
+                connectionArrowData[vertexIndex].color[0] = avgColorR;
+                connectionArrowData[vertexIndex].color[1] = avgColorG;
+                connectionArrowData[vertexIndex].color[2] = avgColorB;
+                connectionArrowData[vertexIndex].arrowFlags = arrowFlags;
+                
+                // Second vertex (cell2)
+                connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
+                connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
+                connectionArrowData[vertexIndex + 1].pos[2] = zPos2;
+                connectionArrowData[vertexIndex + 1].color[0] = avgColorR;
+                connectionArrowData[vertexIndex + 1].color[1] = avgColorG;
+                connectionArrowData[vertexIndex + 1].color[2] = avgColorB;
+                connectionArrowData[vertexIndex + 1].arrowFlags = arrowFlags;
+            }
+        }
+    }
+}

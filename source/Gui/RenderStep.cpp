@@ -542,3 +542,31 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+ConnectionArrowRenderStep _ConnectionArrowRenderStep::create(StepParameters const& parameters)
+{
+    return ConnectionArrowRenderStep(new _ConnectionArrowRenderStep(parameters));
+}
+
+void _ConnectionArrowRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for arrows
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Draw connection arrows (geometry shader will convert to lines with arrows)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForConnectionArrows());
+    glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().connectionArrowVertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_ConnectionArrowRenderStep::_ConnectionArrowRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}

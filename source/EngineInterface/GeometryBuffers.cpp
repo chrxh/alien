@@ -18,6 +18,8 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_vboForLocations);
     glGenVertexArrays(1, &result->_vaoForSelectedObjects);
     glGenBuffers(1, &result->_vboForSelectedObjects);
+    glGenVertexArrays(1, &result->_vaoForConnectionArrows);
+    glGenBuffers(1, &result->_vboForConnectionArrows);
     return GeometryBuffers(result);
 }
 
@@ -55,6 +57,11 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
         glBindVertexArray(getVaoForTriangles());
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, getEboForTriangles());
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, toInt(_triangleIndexBufferCapacity * sizeof(unsigned int)), nullptr, GL_DYNAMIC_DRAW);
+    }
+    if (numRenderObjects.connectionArrowVertices >= _connectionArrowVertexBufferCapacity) {
+        _connectionArrowVertexBufferCapacity = std::max(numRenderObjects.connectionArrowVertices * 2, static_cast<uint64_t>(100000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForConnectionArrows());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_connectionArrowVertexBufferCapacity * sizeof(ConnectionArrowVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
 }
 

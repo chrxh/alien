@@ -10,6 +10,7 @@ _GeometryKernelsService::_GeometryKernelsService()
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _numLineIndices);
     memoryManager.acquireMemory(1, _numTriangleIndices);
+    memoryManager.acquireMemory(1, _numConnectionArrowVertices);
     memoryManager.acquireMemory(1, _numSelectedObjects);
 }
 
@@ -18,6 +19,7 @@ _GeometryKernelsService::~_GeometryKernelsService()
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_numLineIndices);
     memoryManager.freeMemory(_numTriangleIndices);
+    memoryManager.freeMemory(_numConnectionArrowVertices);
     memoryManager.freeMemory(_numSelectedObjects);
 }
 
@@ -88,6 +90,11 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     cudaDeviceSynchronize();
     result.triangleIndices = copyToHost(_numTriangleIndices);
 
+    setValueToDevice(_numConnectionArrowVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractConnectionArrowData, data, nullptr, _numConnectionArrowVertices);
+    cudaDeviceSynchronize();
+    result.connectionArrowVertices = copyToHost(_numConnectionArrowVertices);
+
     return result;
 }
 
@@ -146,10 +153,20 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices);
 
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.connectionArrowBuffer));
+    ConnectionArrowVertexData* mappedConnectionArrowBuffer;
+    size_t connectionArrowBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedConnectionArrowBuffer), &connectionArrowBufferSize, renderingData.connectionArrowBuffer));
+
+    // Fourth kernel: Extract connection arrow data
+    setValueToDevice(_numConnectionArrowVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractConnectionArrowData, data, mappedConnectionArrowBuffer, _numConnectionArrowVertices);
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.connectionArrowBuffer));
 }
