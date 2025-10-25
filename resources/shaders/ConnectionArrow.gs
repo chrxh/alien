@@ -62,7 +62,7 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
 void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float arrowSize)
 {
     // Create arrowhead at the end of the line
-    // Two lines forming a V shape pointing in the direction
+    // Arrow has 90-degree tip with both sides at 45 degrees to the baseline
     
     vec3 pos = vec3(basePos.xyz);
     vec3 normal = normalize(vec3(-dir.y, dir.x, 0.0));
@@ -70,9 +70,15 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     float lightIntensity = max(0.0, dot(normal, lightDir));
     vec3 litColor = color * (0.8 + lightIntensity * 0.2);
     
-    // Calculate arrow parts - they point backward from the end position
-    vec2 arrowDir1 = normalize(vec2(-dir.x + dir.y, -dir.x - dir.y)) * arrowSize;
-    vec2 arrowDir2 = normalize(vec2(-dir.x - dir.y, dir.x - dir.y)) * arrowSize;
+    // Calculate arrow parts with proper 45-degree angles
+    // Rotate the direction vector by +45 and -45 degrees, then reverse it
+    float cos45 = 0.70710678118; // cos(45 degrees) = sqrt(2)/2
+    float sin45 = 0.70710678118; // sin(45 degrees) = sqrt(2)/2
+    
+    // Rotate by -45 degrees (clockwise) and reverse: both sides point backward from tip
+    vec2 arrowDir1 = vec2(-dir.x * cos45 - dir.y * sin45, dir.x * sin45 - dir.y * cos45) * arrowSize;
+    // Rotate by +45 degrees (counter-clockwise) and reverse
+    vec2 arrowDir2 = vec2(-dir.x * cos45 + dir.y * sin45, -dir.x * sin45 - dir.y * cos45) * arrowSize;
     
     vec4 arrowTip = basePos;
     vec4 arrowPoint1 = vec4(basePos.xy + arrowDir1, basePos.z, 1.0);
