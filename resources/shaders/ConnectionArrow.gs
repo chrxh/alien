@@ -135,9 +135,10 @@ void main()
     bool arrowToCell1 = (vertexActive[0] & 1) != 0;
     bool arrowToCell2 = (vertexActive[0] & 2) != 0;
     
-    // Line width in NDC coordinates
-    float lineWidth = (zoom * 0.15) / viewportSize.x * 2.0;
-    float arrowSize = zoom / 14.0 * 2.0 / viewportSize.x;
+    // Line width in NDC coordinates - thinner lines (1-2 pixels)
+    float lineWidth = (zoom * 0.02) / viewportSize.x * 2.0;
+    // Arrow size - make arrows more visible
+    float arrowSize = zoom / 8.0 * 2.0 / viewportSize.x;
     
     // Average color for the connection
     vec3 avgColor = (vertexColor[0] + vertexColor[1]) * 0.5;
