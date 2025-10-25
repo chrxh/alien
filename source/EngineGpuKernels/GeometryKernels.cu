@@ -1171,23 +1171,11 @@ __global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionAr
             // Add connection arrow data (2 vertices for the line)
             uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
             if (connectionArrowData != nullptr) {
-                // Calculate deterministic z-position for both cells (same logic as in cudaExtractCellData)
-                uint64_t hash1 = cell->id * 2654435761u;
-                hash1 = (hash1 ^ (hash1 >> 16)) * 0x85ebca6b;
-                hash1 = (hash1 ^ (hash1 >> 13)) * 0xc2b2ae35;
-                hash1 = hash1 ^ (hash1 >> 16);
-                float zPos1 = toFloat(hash1 & 0xFFFFFF) / toFloat(0xFFFFFF) * 0.05f;
-                
-                uint64_t hash2 = connectedCell->id * 2654435761u;
-                hash2 = (hash2 ^ (hash2 >> 16)) * 0x85ebca6b;
-                hash2 = (hash2 ^ (hash2 >> 13)) * 0xc2b2ae35;
-                hash2 = hash2 ^ (hash2 >> 16);
-                float zPos2 = toFloat(hash2 & 0xFFFFFF) / toFloat(0xFFFFFF) * 0.05f;
-                
+               
                 // First vertex (cell1)
                 connectionArrowData[vertexIndex].pos[0] = cell->pos.x;
                 connectionArrowData[vertexIndex].pos[1] = cell->pos.y;
-                connectionArrowData[vertexIndex].pos[2] = zPos1;
+                connectionArrowData[vertexIndex].pos[2] = 0;
                 connectionArrowData[vertexIndex].color[0] = avgColorR;
                 connectionArrowData[vertexIndex].color[1] = avgColorG;
                 connectionArrowData[vertexIndex].color[2] = avgColorB;
@@ -1196,7 +1184,7 @@ __global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionAr
                 // Second vertex (cell2)
                 connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
                 connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
-                connectionArrowData[vertexIndex + 1].pos[2] = zPos2;
+                connectionArrowData[vertexIndex + 1].pos[2] = 0;
                 connectionArrowData[vertexIndex + 1].color[0] = avgColorR;
                 connectionArrowData[vertexIndex + 1].color[1] = avgColorG;
                 connectionArrowData[vertexIndex + 1].color[2] = avgColorB;
