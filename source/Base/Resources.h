@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include "Gui/ShaderSources.h"
+#include "ShaderSources.h"
 
 namespace Const
 {
