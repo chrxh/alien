@@ -27,20 +27,8 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
-    if (!parameters._shader.empty()) {
-        auto vertexShaderPath = parameters._shader;
-        vertexShaderPath.replace_extension(".vs");
-        auto fragmentShaderPath = parameters._shader;
-        fragmentShaderPath.replace_extension(".fs");
-        auto geometryShaderPath = parameters._shader;
-        geometryShaderPath.replace_extension(".gs");
-
-        if (!std::filesystem::exists(geometryShaderPath)) {
-            geometryShaderPath = std::filesystem::path();  // empty path disables geometry shader
-        }
-        CHECK(std::filesystem::exists(vertexShaderPath));
-        CHECK(std::filesystem::exists(fragmentShaderPath));
-        _shader = _Shader::create(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
+    if (!parameters._shader.vertex.empty()) {
+        _shader = _Shader::createFromSource(parameters._shader.vertex, parameters._shader.fragment, parameters._shader.geometry);
     }
 }
 
