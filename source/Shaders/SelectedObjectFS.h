@@ -19,7 +19,7 @@ uniform vec2 worldSize;
 uniform float radius;
 
 const float PI = 3.14159265359;
-const float DEG_TO_RAD = PI / 180.0;
+const float RAD_TO_DEG = 180.0 / PI;
 
 void main()
 {
@@ -50,7 +50,7 @@ void main()
         // Calculate angle of current pixel relative to center
         // Note: gQuadCoord.x is horizontal (right = positive), gQuadCoord.y is vertical (down = positive)
         // We need to convert this to the same coordinate system used in the preview (0 degrees = up, clockwise)
-        float pixelAngle = atan(gQuadCoord.x, -gQuadCoord.y) / DEG_TO_RAD;
+        float pixelAngle = atan(gQuadCoord.x, -gQuadCoord.y) * RAD_TO_DEG;
         
         // Normalize to 0-360 range
         if (pixelAngle < 0.0) {
