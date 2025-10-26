@@ -12,7 +12,7 @@
 
 namespace
 {
-    auto constexpr ZoomFactorForOverlay = 25.0f;
+    auto constexpr ZoomFactorForCellDetails = 25.0f;    // Cell type strings and arrows
 }
 
 TextureTarget _TextureTarget::create()
@@ -393,7 +393,7 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
     auto zoom = Viewport::get().getZoomFactor();
     auto overlayActive = SimulationView::get().isOverlayActive();
 
-    if (zoom <= ZoomFactorForOverlay || !overlayActive) {
+    if (zoom <= ZoomFactorForCellDetails || !overlayActive) {
         return;
     }
 
@@ -542,15 +542,15 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-ConnectionArrowRenderStep _ConnectionArrowRenderStep::create(StepParameters const& parameters)
+SelectedConnectionRenderStep _SelectedConnectionRenderStep::create(StepParameters const& parameters)
 {
-    return ConnectionArrowRenderStep(new _ConnectionArrowRenderStep(parameters));
+    return SelectedConnectionRenderStep(new _SelectedConnectionRenderStep(parameters));
 }
 
-void _ConnectionArrowRenderStep::execute(ExecutionParameters parameters)
+void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
 {
     auto zoom = Viewport::get().getZoomFactor();
-    if (zoom <= ZoomFactorForOverlay) {
+    if (zoom <= ZoomFactorForCellDetails) {
         return;
     }
 
@@ -571,6 +571,6 @@ void _ConnectionArrowRenderStep::execute(ExecutionParameters parameters)
     glDisable(GL_BLEND);
 }
 
-_ConnectionArrowRenderStep::_ConnectionArrowRenderStep(StepParameters const& parameters)
+_SelectedConnectionRenderStep::_SelectedConnectionRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}

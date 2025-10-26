@@ -324,8 +324,8 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 1.0f}})),
-                    _ConnectionArrowRenderStep::create(
-                        StepParameters().shader(Const::ConnectionArrowShader).previousTargetSelection(0)),
+                    _SelectedConnectionRenderStep::create(
+                        StepParameters().shader(Const::SelectedConnectionShader).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(Const::CellTypeOverlayShader).previousTargetSelection(0)),
                 }),
             },

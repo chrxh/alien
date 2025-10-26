@@ -185,8 +185,8 @@ using SelectedObjectRenderStep = std::shared_ptr<_SelectedObjectRenderStep>;
 class _CellTypeOverlayRenderStep;
 using CellTypeOverlayRenderStep = std::shared_ptr<_CellTypeOverlayRenderStep>;
 
-class _ConnectionArrowRenderStep;
-using ConnectionArrowRenderStep = std::shared_ptr<_ConnectionArrowRenderStep>;
+class _SelectedConnectionRenderStep;
+using SelectedConnectionRenderStep = std::shared_ptr<_SelectedConnectionRenderStep>;
 
 class _TextureTarget;
 using TextureTarget = std::shared_ptr<_TextureTarget>;
