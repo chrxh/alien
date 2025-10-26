@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view AttackEventFS = R"(#version 330 core
+    std::string_view const AttackEventFS = R"(#version 330 core
 in vec3 fragColor;
 in vec2 lineCoord;
 out vec4 FragColor;

@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view SelectedObjectFS = R"(#version 330 core
+    std::string_view const SelectedObjectFS = R"(#version 330 core
 out vec4 FragColor;
 
 in vec2 gWorldPos;

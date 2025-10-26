@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view EnergyParticleFS = R"(#version 330 core
+    std::string_view const EnergyParticleFS = R"(#version 330 core
 out vec4 FragColor;
 
 in vec3 vColor;

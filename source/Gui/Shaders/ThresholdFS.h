@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view ThresholdFS = R"(#version 330 core
+    std::string_view const ThresholdFS = R"(#version 330 core
 out vec4 FragColor;
 
 in vec2 texCoord;

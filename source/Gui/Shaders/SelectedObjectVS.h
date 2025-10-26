@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view SelectedObjectVS = R"(#version 330 core
+    std::string_view const SelectedObjectVS = R"(#version 330 core
 layout (location = 0) in vec2 aPos;
 
 out vec2 vWorldPos;

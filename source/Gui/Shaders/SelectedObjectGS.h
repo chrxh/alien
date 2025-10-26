@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view SelectedObjectGS = R"(#version 330 core
+    std::string_view const SelectedObjectGS = R"(#version 330 core
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 

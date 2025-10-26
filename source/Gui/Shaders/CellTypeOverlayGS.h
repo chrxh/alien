@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view CellTypeOverlayGS = R"(#version 330 core
+    std::string_view const CellTypeOverlayGS = R"(#version 330 core
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 

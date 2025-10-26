@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view MergeAdditiveVS = R"(#version 330 core
+    std::string_view const MergeAdditiveVS = R"(#version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec2 aTexCoord;
 

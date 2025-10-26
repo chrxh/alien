@@ -4,7 +4,7 @@
 
 namespace Shaders
 {
-    constexpr std::string_view TriangleFS = R"(#version 330 core
+    std::string_view const TriangleFS = R"(#version 330 core
 in vec3 fragColor;
 out vec4 FragColor;
 
