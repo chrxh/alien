@@ -67,7 +67,6 @@
 #include "NewPasswordDialog.h"
 #include "ImageToPatternDialog.h"
 #include "GenericFileDialog.h"
-#include "ShaderWindow.h"
 #include "ExitDialog.h"
 #include "AutosaveWindow.h"
 #include "FileTransferController.h"
@@ -142,7 +141,6 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     FileTransferController::get().setup(_persisterFacade, _simulationFacade);
     NetworkTransferController::get().setup(_simulationFacade, _persisterFacade);
     LoginController::get().setup(_simulationFacade, _persisterFacade);
-    ShaderWindow::get().setup();
     AboutDialog::get().setup();
     CreateUserDialog::get().setup();
     DeleteUserDialog::get().setup();
