@@ -44,6 +44,12 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     }
 }
 
+StepParameters& StepParameters::addUniform(std::string const& key, UniformValueType const& value)
+{
+    _uniforms.emplace(key, value);
+    return *this;
+}
+
 std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
 {
     return _previousTargetSelection;

@@ -46,6 +46,8 @@ struct StepParameters
     MEMBER(StepParameters, bool, preventMoirePatterns, true);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
     MEMBER(StepParameters, std::function<UniformValueMap(SimulationParameters const&)>, uniformFunc, {});
+
+    StepParameters& addUniform(std::string const& key, UniformValueType const& value);
 };
 
 struct ExecutionParameters
