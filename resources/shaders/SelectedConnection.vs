@@ -13,10 +13,11 @@ uniform vec2 viewportSize;
 
 void main()
 {
-    // Transform world position to normalized device coordinates
+    // Transform world position to screen coordinates
+    // Note: Transform to normalized device coordinates (screenPos / viewportSize) * 2.0 - 1.0 is done in geometry shader.
     vec2 relativePos = aPos.xy - rectUpperLeft;
     vec2 screenPos = relativePos * zoom;
-    vec2 ndc = screenPos; //(screenPos / viewportSize) * 2.0 - 1.0;
+	vec2 ndc = screenPos;
     ndc.y = ndc.y; // Flip Y coordinate
     
     gl_Position = vec4(ndc, aPos.z, 1.0);
