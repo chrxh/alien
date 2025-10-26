@@ -4,7 +4,9 @@
 #include <variant>
 
 #include "Base/MathTypes.h"
+
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "Definitions.h"
 
@@ -43,7 +45,9 @@ struct StepParameters
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, bool, preventMoirePatterns, true);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
-    MEMBER(StepParameters, std::function<UniformValueMap()>, uniformFunc, {});
+    MEMBER(StepParameters, std::function<UniformValueMap(SimulationParameters const&)>, uniformFunc, {});
+
+    StepParameters& addUniform(std::string const& key, UniformValueType const& value);
 };
 
 struct ExecutionParameters
@@ -59,6 +63,7 @@ struct ExecutionParameters
     // Misc
     MEMBER(ExecutionParameters, GeneralRenderInfo, renderInfo, GeneralRenderInfo());
     MEMBER(ExecutionParameters, SimulationFacade, simulationFacade, SimulationFacade());
+    MEMBER(ExecutionParameters, std::shared_ptr<SimulationParameters>, simulationParameters, nullptr);
 };
 
 class _RenderStep
@@ -83,7 +88,7 @@ protected:
     float _textureScale = 1.0f;
     bool _preventMoirePatterns = true;
     UniformValueMap _uniforms;
-    std::function<UniformValueMap()> _uniformFunc;
+    std::function<UniformValueMap(SimulationParameters const&)> _uniformFunc;
     std::vector<unsigned int> _inputTextures;
 
 public:
@@ -219,4 +224,16 @@ protected:
 
 private:
     _SelectedConnectionRenderStep(StepParameters const& parameters);
+};
+
+class _AttackEventRenderStep : public _RenderStep
+{
+public:
+    static AttackEventRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _AttackEventRenderStep(StepParameters const& parameters);
 };

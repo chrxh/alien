@@ -13,6 +13,7 @@ struct NumRenderObjects
     uint64_t locations;
     uint64_t selectedObjects;
     uint64_t connectionArrowVertices;
+    uint64_t attackEventVertices;
 };
 
 struct CellVertexData
@@ -51,6 +52,12 @@ struct ConnectionArrowVertexData
     int arrowFlags;  // bit 0: arrow to first vertex, bit 1: arrow to second vertex
 };
 
+struct AttackEventVertexData
+{
+    float pos[2];    // x, y position
+    float color[3];  // r, g, b color (red for attacked)
+};
+
 class _GeometryBuffers
 {
 public:
@@ -62,11 +69,13 @@ public:
     unsigned int getVaoForLocations() const { return _vaoForLocations; }
     unsigned int getVaoForSelectedObjects() const { return _vaoForSelectedObjects; }
     unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
+    unsigned int getVaoForAttackEvents() const { return _vaoForAttackEvents; }
     unsigned int getVboForCells() const { return _vboForCells; }
     unsigned int getVboForEnergyParticles() const { return _vboForEnergyParticles; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
     unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
     unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
+    unsigned int getVboForAttackEvents() const { return _vboForAttackEvents; }
     unsigned int getEboForLines() const { return _eboForLines; }
     unsigned int getEboForTriangles() const { return _eboForTriangles; }
 
@@ -81,11 +90,13 @@ private:
     unsigned int _vaoForLocations = 0;
     unsigned int _vaoForSelectedObjects = 0;
     unsigned int _vaoForSelectedConnections = 0;
+    unsigned int _vaoForAttackEvents = 0;
     unsigned int _vboForCells = 0;
     unsigned int _vboForEnergyParticles = 0;
     unsigned int _vboForLocations = 0;
     unsigned int _vboForSelectedObjects = 0;
     unsigned int _vboForSelectedConnections = 0;
+    unsigned int _vboForAttackEvents = 0;
     unsigned int _eboForLines = 0;
     unsigned int _eboForTriangles = 0;
 
@@ -94,6 +105,7 @@ private:
     uint64_t _locationBufferCapacity = 0;
     uint64_t _selectedObjectBufferCapacity = 0;
     uint64_t _connectionArrowVertexBufferCapacity = 0;
+    uint64_t _attackEventVertexBufferCapacity = 0;
     uint64_t _lineIndexBufferCapacity = 0;
     uint64_t _triangleIndexBufferCapacity = 0;
 

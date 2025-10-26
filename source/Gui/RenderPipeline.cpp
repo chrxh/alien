@@ -157,6 +157,22 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glVertexAttribIPointer(2, 1, GL_INT, sizeof(ConnectionArrowVertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
     }
+    {
+        auto vao = _geometryBuffers->getVaoForAttackEvents();
+        auto vbo = _geometryBuffers->getVboForAttackEvents();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for AttackEventVertexData
+        // Position (2 floats: x, y)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Color (3 floats: r, g, b)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
 
     // Check for supported pipeline structure
     CHECK(!_blocks.empty());
@@ -218,10 +234,11 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
+    auto simParameters = std::make_shared<SimulationParameters>(_simulationFacade->getSimulationParameters());
     int currentTextureTargetIndex = 0;
     forEachStep(
         [this, &currentTextureTargetIndex] { return _textureTargets.at(currentTextureTargetIndex++); },
-        [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target) {
+        [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target) {
             // Merge inputTextures from step parameters with textures from previous targets
             auto allTextures = step->getInputTextures();
             allTextures.insert(allTextures.end(), textures.begin(), textures.end());
@@ -231,7 +248,8 @@ void _RenderPipeline::execute()
                               .textures(allTextures)
                               .target(target)
                               .renderInfo(generalRenderInfo)
-                              .simulationFacade(_simulationFacade));
+                              .simulationFacade(_simulationFacade)
+                              .simulationParameters(simParameters));
         });
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);

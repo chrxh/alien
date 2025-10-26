@@ -44,6 +44,12 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     }
 }
 
+StepParameters& StepParameters::addUniform(std::string const& key, UniformValueType const& value)
+{
+    _uniforms.emplace(key, value);
+    return *this;
+}
+
 std::optional<int> const& _RenderStep::getPreviousTargetSelection() const
 {
     return _previousTargetSelection;
@@ -78,7 +84,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
 
     auto uniforms = _uniforms;
     if (_uniformFunc) {
-        auto uniformFunc = _uniformFunc();
+        auto uniformFunc = _uniformFunc(*parameters._simulationParameters);
         uniforms.insert(uniformFunc.begin(), uniformFunc.end());
     }
     for (auto const& [key, value] : uniforms) {
@@ -572,5 +578,36 @@ void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
 }
 
 _SelectedConnectionRenderStep::_SelectedConnectionRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}
+
+AttackEventRenderStep _AttackEventRenderStep::create(StepParameters const& parameters)
+{
+    return AttackEventRenderStep(new _AttackEventRenderStep(parameters));
+}
+
+void _AttackEventRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!parameters._simulationParameters->attackVisualization.value) {
+        return;
+    }
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for dashed lines
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Draw attack event lines (geometry shader will convert to dashed quads)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForAttackEvents());
+    glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().attackEventVertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_AttackEventRenderStep::_AttackEventRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}

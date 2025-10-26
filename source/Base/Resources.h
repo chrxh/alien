@@ -24,6 +24,7 @@ namespace Const
     std::filesystem::path const EnergyParticleShader = ShaderPath / "EnergyParticle";
     std::filesystem::path const LineShader = ShaderPath / "Line";
     std::filesystem::path const TriangleShader = ShaderPath / "Triangle";
+    std::filesystem::path const AttackEventShader = ShaderPath / "AttackEvent";
     std::filesystem::path const LocationShader = ShaderPath / "Location";
     std::filesystem::path const SelectedObjectShader = ShaderPath / "SelectedObject";
     std::filesystem::path const SelectedConnectionShader = ShaderPath / "SelectedConnection";

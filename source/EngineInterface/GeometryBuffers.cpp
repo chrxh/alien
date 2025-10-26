@@ -20,6 +20,8 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_vboForSelectedObjects);
     glGenVertexArrays(1, &result->_vaoForSelectedConnections);
     glGenBuffers(1, &result->_vboForSelectedConnections);
+    glGenVertexArrays(1, &result->_vaoForAttackEvents);
+    glGenBuffers(1, &result->_vboForAttackEvents);
     return GeometryBuffers(result);
 }
 
@@ -62,6 +64,11 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
         _connectionArrowVertexBufferCapacity = std::max(numRenderObjects.connectionArrowVertices * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedConnections());
         glBufferData(GL_ARRAY_BUFFER, toInt(_connectionArrowVertexBufferCapacity * sizeof(ConnectionArrowVertexData)), nullptr, GL_DYNAMIC_DRAW);
+    }
+    if (numRenderObjects.attackEventVertices >= _attackEventVertexBufferCapacity) {
+        _attackEventVertexBufferCapacity = std::max(numRenderObjects.attackEventVertices * 2, static_cast<uint64_t>(10000));
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForAttackEvents());
+        glBufferData(GL_ARRAY_BUFFER, toInt(_attackEventVertexBufferCapacity * sizeof(AttackEventVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
 }
 

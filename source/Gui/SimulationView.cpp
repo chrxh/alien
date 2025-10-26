@@ -169,10 +169,9 @@ void SimulationView::updateMotionBlur() {}
 
 void SimulationView::setupRenderPipeline()
 {
-    auto currentBackgroundColor = [this] {
-        auto params = _simulationFacade->getSimulationParameters();
-        FloatColorRGB background = params.backgroundColor.baseValue;
-        int gridLines = params.gridLines.value ? 1 : 0;
+    auto currentBackgroundColor = [this](SimulationParameters const& parameters) {
+        FloatColorRGB background = parameters.backgroundColor.baseValue;
+        int gridLines = parameters.gridLines.value ? 1 : 0;
         return UniformValueMap{{"background", background}, {"gridLines", gridLines}};
     };
     _renderPipeline = std::make_shared<_RenderPipeline>(
@@ -183,21 +182,20 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _EnergyParticleRenderStep::create(StepParameters()
-                                                          .shader(Const::EnergyParticleShader)
-                                                          .uniforms({{"ballSize", 2.0f}})
-                                                          .preventMoirePatterns(false) /*.previousTargetSelection(0)*/),
+                                                          .shader(Const::EnergyParticleShader).addUniform("ballSize", 2.0f)
+                                                          .preventMoirePatterns(false)),
                 }),
             },
 
             // Render block: Downscale blur for energy particles
             RenderBlock{
                 RenderSequence().repetitions(4).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).addUniform("strength", 0.1f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::DownSamplerShader).textureScale(0.5f)),
                 }),
                 RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).uniforms({{"ballSize", 0.2f}})),
+                    _EnergyParticleRenderStep::create(StepParameters().shader(Const::EnergyParticleShader).addUniform("ballSize", 0.2f)),
                 }),
             },
 
@@ -205,8 +203,8 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().repetitions(4).steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::UpSamplerShader).textureScale(2.0f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).addUniform("strength", 0.1f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).addUniform("strength", 0.1f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -216,7 +214,7 @@ void SimulationView::setupRenderPipeline()
             // Render block: Zoom brightness correction for energy particles
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).uniforms({{"strength", 0.5f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).addUniform("strength", 0.5f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -226,7 +224,7 @@ void SimulationView::setupRenderPipeline()
             // Render block: Merge energy particles for bloom
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeMaxShader).uniforms({{"colorFactor1", 0.8f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::MergeMaxShader).addUniform("colorFactor1", 0.8f)),
                 }),
             },
 
@@ -238,8 +236,9 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _LineRenderStep::create(StepParameters().shader(Const::LineShader)),
                     _TriangleRenderStep::create(StepParameters().shader(Const::TriangleShader).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.1f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.1f}})),
+                    _AttackEventRenderStep::create(StepParameters().shader(Const::AttackEventShader).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).addUniform("strength", 0.1f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::MetaballsShader)),
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::FresnelShader)),
                     //_PostProcessingRenderStep::create(StepParameters().shader(Const::SubsurfaceScatterShader)),
@@ -252,8 +251,11 @@ void SimulationView::setupRenderPipeline()
             // Render block: Merge energy, blur cells and cells
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 0.6f}, {"colorFactor3", 0.5f}})),
+                    _PostProcessingRenderStep::create(StepParameters()
+                        .shader(Const::MergeAdditiveShader)
+                        .addUniform("colorFactor1", 1.0f)
+                        .addUniform("colorFactor2", 0.6f)
+                        .addUniform("colorFactor3", 0.5f)),
                 }),
             },
 
@@ -270,9 +272,9 @@ void SimulationView::setupRenderPipeline()
             // Render block: Two outputs: downscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.25f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).addUniform("strength", 0.25f)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.25f}}).textureScale(1.0f / 1.5f)),
+                        StepParameters().shader(Const::BlurVerticalShader).addUniform("strength", 0.25f).textureScale(1.0f / 1.5f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -281,8 +283,8 @@ void SimulationView::setupRenderPipeline()
             // Render block: Two outputs: upscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).uniforms({{"strength", 0.25f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).uniforms({{"strength", 0.25f}}).textureScale(1.5f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurHorizontalShader).addUniform("strength", 0.25f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::BlurVerticalShader).addUniform("strength", 0.25f).textureScale(1.5f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -290,7 +292,7 @@ void SimulationView::setupRenderPipeline()
 
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).uniforms({{"strength", 0.5f}})),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).addUniform("strength", 0.5f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -301,8 +303,8 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 0.5f}, {"colorFactor2", 1.0f}})),
-                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).uniforms({{"strength", 1.0f}})),
+                        StepParameters().shader(Const::MergeAdditiveShader).addUniform("colorFactor1", 0.5f).addUniform("colorFactor2", 1.0f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(Const::ZoomBrightnessCorrectionShader).addUniform("strength", 1.0f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(Const::ToneMappingShader)),
                 }),
             },
@@ -323,7 +325,7 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(Const::MergeAdditiveShader).uniforms({{"colorFactor1", 1.0f}, {"colorFactor2", 1.0f}})),
+                        StepParameters().shader(Const::MergeAdditiveShader).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
                     _SelectedConnectionRenderStep::create(
                         StepParameters().shader(Const::SelectedConnectionShader).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(Const::CellTypeOverlayShader).previousTargetSelection(0)),
