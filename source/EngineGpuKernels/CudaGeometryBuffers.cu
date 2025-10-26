@@ -58,4 +58,9 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
         unregisterBufferResource(selectedConnectionBuffer);
     }
     selectedConnectionBuffer = registerBufferResource(buffers->getVboForSelectedConnections());
+
+    if (attackEventBuffer != nullptr) {
+        unregisterBufferResource(attackEventBuffer);
+    }
+    attackEventBuffer = registerBufferResource(buffers->getVboForAttackEvents());
 }

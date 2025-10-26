@@ -12,6 +12,7 @@ _GeometryKernelsService::_GeometryKernelsService()
     memoryManager.acquireMemory(1, _numTriangleIndices);
     memoryManager.acquireMemory(1, _numSelectedConnectionVertices);
     memoryManager.acquireMemory(1, _numSelectedObjects);
+    memoryManager.acquireMemory(1, _numAttackEventVertices);
 }
 
 _GeometryKernelsService::~_GeometryKernelsService()
@@ -21,6 +22,7 @@ _GeometryKernelsService::~_GeometryKernelsService()
     memoryManager.freeMemory(_numTriangleIndices);
     memoryManager.freeMemory(_numSelectedConnectionVertices);
     memoryManager.freeMemory(_numSelectedObjects);
+    memoryManager.freeMemory(_numAttackEventVertices);
 }
 
 void _GeometryKernelsService::drawImage(
@@ -95,6 +97,11 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     cudaDeviceSynchronize();
     result.connectionArrowVertices = copyToHost(_numSelectedConnectionVertices);
 
+    setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices);
+    cudaDeviceSynchronize();
+    result.attackEventVertices = copyToHost(_numAttackEventVertices);
+
     return result;
 }
 
@@ -162,6 +169,15 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices);
 
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.attackEventBuffer));
+    AttackEventVertexData* mappedAttackEventBuffer;
+    size_t attackEventBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedAttackEventBuffer), &attackEventBufferSize, renderingData.attackEventBuffer));
+
+    // Fifth kernel: Extract attack event data
+    setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractAttackEventData, data, mappedAttackEventBuffer, _numAttackEventVertices);
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
@@ -169,4 +185,5 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
 }

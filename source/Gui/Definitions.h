@@ -188,6 +188,9 @@ using CellTypeOverlayRenderStep = std::shared_ptr<_CellTypeOverlayRenderStep>;
 class _SelectedConnectionRenderStep;
 using SelectedConnectionRenderStep = std::shared_ptr<_SelectedConnectionRenderStep>;
 
+class _AttackEventRenderStep;
+using AttackEventRenderStep = std::shared_ptr<_AttackEventRenderStep>;
+
 class _TextureTarget;
 using TextureTarget = std::shared_ptr<_TextureTarget>;
 

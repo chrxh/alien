@@ -1189,3 +1189,40 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         }
     }
 }
+__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices)
+{
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        
+        // Only process cells that have been attacked and have attackVisualization enabled
+        if (cell->eventCounter > 0 && cell->event == CellEvent_Attacked 
+            && cudaSimulationParameters.attackVisualization.value) {
+            
+            // Check if the attacker position is close enough to draw
+            if (Math::length(cell->eventPos - cell->pos) < 10.0f) {
+                // Add attack event line data (2 vertices for the line: from attacker to attacked)
+                uint64_t vertexIndex = alienAtomicAdd64(numAttackEventVertices, uint64_t(2));
+                if (attackEventData != nullptr) {
+                    // Red color for attacked event
+                    float redColor[3] = {0.5f, 0.0f, 0.0f};
+                    
+                    // First vertex (attacker position - from eventPos)
+                    attackEventData[vertexIndex].pos[0] = cell->eventPos.x;
+                    attackEventData[vertexIndex].pos[1] = cell->eventPos.y;
+                    attackEventData[vertexIndex].color[0] = redColor[0];
+                    attackEventData[vertexIndex].color[1] = redColor[1];
+                    attackEventData[vertexIndex].color[2] = redColor[2];
+                    
+                    // Second vertex (attacked cell position)
+                    attackEventData[vertexIndex + 1].pos[0] = cell->pos.x;
+                    attackEventData[vertexIndex + 1].pos[1] = cell->pos.y;
+                    attackEventData[vertexIndex + 1].color[0] = redColor[0];
+                    attackEventData[vertexIndex + 1].color[1] = redColor[1];
+                    attackEventData[vertexIndex + 1].color[2] = redColor[2];
+                }
+            }
+        }
+    }
+}

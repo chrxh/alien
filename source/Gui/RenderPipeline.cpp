@@ -157,6 +157,22 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glVertexAttribIPointer(2, 1, GL_INT, sizeof(ConnectionArrowVertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
     }
+    {
+        auto vao = _geometryBuffers->getVaoForAttackEvents();
+        auto vbo = _geometryBuffers->getVboForAttackEvents();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for AttackEventVertexData
+        // Position (2 floats: x, y)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Color (3 floats: r, g, b)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
 
     // Check for supported pipeline structure
     CHECK(!_blocks.empty());

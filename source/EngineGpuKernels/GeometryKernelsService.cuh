@@ -31,4 +31,5 @@ private:
     uint64_t* _numTriangleIndices;
     uint64_t* _numSelectedConnectionVertices;
     uint64_t* _numSelectedObjects;
+    uint64_t* _numAttackEventVertices;
 };

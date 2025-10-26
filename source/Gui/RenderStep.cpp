@@ -574,3 +574,31 @@ void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
 _SelectedConnectionRenderStep::_SelectedConnectionRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
+
+AttackEventRenderStep _AttackEventRenderStep::create(StepParameters const& parameters)
+{
+    return AttackEventRenderStep(new _AttackEventRenderStep(parameters));
+}
+
+void _AttackEventRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for dashed lines
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Draw attack event lines (geometry shader will convert to dashed quads)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForAttackEvents());
+    glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().attackEventVertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_AttackEventRenderStep::_AttackEventRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}

@@ -220,3 +220,15 @@ protected:
 private:
     _SelectedConnectionRenderStep(StepParameters const& parameters);
 };
+
+class _AttackEventRenderStep : public _RenderStep
+{
+public:
+    static AttackEventRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _AttackEventRenderStep(StepParameters const& parameters);
+};
