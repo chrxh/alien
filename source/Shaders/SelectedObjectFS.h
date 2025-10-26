@@ -26,27 +26,36 @@ void main()
     // Calculate distance from center using quad coordinates
     float dist = length(gQuadCoord);
     
-    // Circle radius in normalized quad space (0.5 = edge)
-    float outerRadius = 0.5;
-    float innerRadius = outerRadius - 3.0 / zoom; // Thin circle (2 pixels)
-    
-    // Discard pixels outside the outer radius
-    if (dist > outerRadius) {
-        discard;
+    if (gHasSignalRestriction == 0) {
+
+        // Circle radius in normalized quad space (0.5 = edge)
+        float outerRadius = 0.5;
+        float middleRadius = 0.4;
+        float innerRadius = middleRadius - 3.0 / zoom; // Thin circle (2 pixels)
+
+        if (dist > outerRadius || dist < innerRadius) {
+            discard;
+        }
+
+        // Anti-aliasing for smooth edges
+        float outerEdge = smoothstep(outerRadius - 1.5 / zoom, outerRadius, dist);
+        float innerEdge = smoothstep(innerRadius, innerRadius + 1.5 / zoom, dist);
+        float alpha = (1.0 - outerEdge) * innerEdge;
+        FragColor = vec4(1.0, 1.0, 1.0, dist > middleRadius ? 0.2 : 0.5);
     }
-    
-    // Discard pixels inside the inner radius (creating a hollow circle)
-    if (dist < innerRadius) {
-        discard;
-    }
-    
-    // Anti-aliasing for smooth edges
-    float outerEdge = smoothstep(outerRadius - 1.5 / zoom, outerRadius, dist);
-    float innerEdge = smoothstep(innerRadius, innerRadius + 1.5 / zoom, dist);
-    float alpha = (1.0 - outerEdge) * innerEdge;
-    
+
     // If signal restriction is active, check if the current pixel is within the allowed angle range
-    if (gHasSignalRestriction == 1) {
+    else if (gHasSignalRestriction == 1) {
+    
+        // Circle radius in normalized quad space (0.5 = edge)
+        float outerRadius = 0.5;
+        float middleRadius = 0.4;
+        float innerRadius = middleRadius - 3.0 / zoom; // Thin circle (2 pixels)
+
+        if (dist > outerRadius || dist < innerRadius) {
+            discard;
+        }
+
         // Calculate angle of current pixel relative to center
         // Note: gQuadCoord.x is horizontal (right = positive), gQuadCoord.y is vertical (down = positive)
         // We need to convert this to the same coordinate system used in the preview (0 degrees = up, clockwise)
@@ -67,13 +76,15 @@ void main()
             inRange = (pixelAngle >= gStartAngle || pixelAngle <= gEndAngle);
         }
         
-        if (!inRange) {
+        float alpha = 0.2;
+        if (dist <= middleRadius) {
+            alpha = 0.5;
+        } else if (!inRange) {
             discard;
         }
+
+        FragColor = vec4(1.0, 1.0, 1.0, alpha);
     }
-    
-    // White circle
-    FragColor = vec4(1.0, 1.0, 1.0, alpha);
 }
 )";
 }

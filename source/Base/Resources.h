@@ -2,8 +2,6 @@
 
 #include <filesystem>
 
-#include "Shaders/ShaderSources.h"
-
 namespace Const
 {
     std::string const ProgramVersion = "5.0.0-alpha.1";

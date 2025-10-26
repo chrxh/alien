@@ -133,8 +133,8 @@ void main()
     
     // Calculate line direction
     vec2 dir = normalize(p1.xy - p0.xy);
-	p0.xy = p0.xy + dir * 0.2 * zoom;
-	p1.xy = p1.xy - dir * 0.2 * zoom;
+	p0.xy = p0.xy + dir * 0.3 * zoom;
+	p1.xy = p1.xy - dir * 0.3 * zoom;
     
     // Draw the main line
     emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth);
