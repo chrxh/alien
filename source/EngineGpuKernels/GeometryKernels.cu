@@ -1098,7 +1098,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
     }
 }
 
-__global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
+__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 

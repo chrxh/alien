@@ -13,7 +13,7 @@ struct CudaGeometryBuffers
     cudaGraphicsResource* selectedObjectBuffer = nullptr;
     cudaGraphicsResource* lineIndexBuffer = nullptr;
     cudaGraphicsResource* triangleIndexBuffer = nullptr;
-    cudaGraphicsResource* connectionArrowBuffer = nullptr;
+    cudaGraphicsResource* selectedConnectionBuffer = nullptr;
 
     void registerBuffers(GeometryBuffers const& buffers);
 };

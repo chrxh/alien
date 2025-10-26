@@ -54,8 +54,8 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
     }
     triangleIndexBuffer = registerBufferResource(buffers->getEboForTriangles());
 
-    if (connectionArrowBuffer != nullptr) {
-        unregisterBufferResource(connectionArrowBuffer);
+    if (selectedConnectionBuffer != nullptr) {
+        unregisterBufferResource(selectedConnectionBuffer);
     }
-    connectionArrowBuffer = registerBufferResource(buffers->getVboForConnectionArrows());
+    selectedConnectionBuffer = registerBufferResource(buffers->getVboForSelectedConnections());
 }
