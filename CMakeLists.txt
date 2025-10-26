@@ -77,6 +77,7 @@ add_subdirectory(source/NetworkTests)
 add_subdirectory(source/PersisterImpl)
 add_subdirectory(source/PersisterInterface)
 add_subdirectory(source/PersisterTests)
+add_subdirectory(source/Shaders)
 
 # Copy resources to the build location
 add_custom_command(

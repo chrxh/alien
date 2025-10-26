@@ -9,7 +9,7 @@
 #include "EngineInterface/SimulationParameters.h"
 
 #include "Definitions.h"
-#include "../ShaderSources.h"
+#include "Shaders/ShaderSources.h"
 
 struct _TextureTarget
 {
@@ -41,7 +41,7 @@ using UniformValueMap = std::map<std::string, UniformValueType>;
 
 struct StepParameters
 {
-    MEMBER(StepParameters, ShaderSources::ShaderSource const*, shader, nullptr);
+    MEMBER(StepParameters, ShaderSources::ShaderSource, shader, ShaderSources::ShaderSource());
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, float, textureScale, 1.0f);
     MEMBER(StepParameters, bool, preventMoirePatterns, true);

@@ -27,9 +27,8 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     , _uniformFunc(parameters._uniformFunc)
     , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
-    if (parameters._shader != nullptr) {
-        auto const& shaderSource = *parameters._shader;
-        _shader = _Shader::createFromSource(shaderSource.vertex, shaderSource.fragment, shaderSource.geometry);
+    if (!parameters._shader.vertex.empty()) {
+        _shader = _Shader::createFromSource(parameters._shader.vertex, parameters._shader.fragment, parameters._shader.geometry);
     }
 }
 
