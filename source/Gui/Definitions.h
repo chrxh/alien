@@ -73,8 +73,6 @@ class FpsController;
 
 class BrowserWindow;
 
-class ShaderWindow;
-
 class LoginDialog;
 
 class UploadSimulationDialog;

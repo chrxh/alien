@@ -127,8 +127,6 @@ PUBLIC
     SelectionWindow.h
     Shader.cpp
     Shader.h
-    ShaderWindow.cpp
-    ShaderWindow.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp

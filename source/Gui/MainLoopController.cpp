@@ -37,7 +37,6 @@
 #include "NewSimulationDialog.h"
 #include "PatternEditorWindow.h"
 #include "SelectionWindow.h"
-#include "ShaderWindow.h"
 #include "SimulationInteractionController.h"
 #include "SpatialControlWindow.h"
 #include "StatisticsWindow.h"
@@ -418,18 +417,10 @@ void MainLoopController::processMenubar()
             .closeMenuWhenItemClicked(false),
         [&] { SimulationParametersMainWindow::get().setOn(!SimulationParametersMainWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Shader parameters")
-            .keyAlt(true)
-            .key(ImGuiKey_5)
-            .selected(ShaderWindow::get().isOn())
-            .closeMenuWhenItemClicked(false),
-        [&] { ShaderWindow::get().setOn(!ShaderWindow::get().isOn()); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Autosave").keyAlt(true).key(ImGuiKey_6).selected(AutosaveWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("Autosave").keyAlt(true).key(ImGuiKey_5).selected(AutosaveWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { AutosaveWindow::get().setOn(!AutosaveWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_7).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("Log").keyAlt(true).key(ImGuiKey_6).selected(LogWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { LogWindow::get().setOn(!LogWindow::get().isOn()); });
     AlienGui::EndMenu();
 
