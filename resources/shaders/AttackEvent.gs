@@ -22,7 +22,7 @@ void main()
     vec2 perp = vec2(-dir.y, dir.x);
     
     // Line width in NDC coordinates (same as Line.gs)
-    float lineWidth = (zoom * 0.15) / viewportSize.x * 2.0;
+    float lineWidth = (zoom * 0.40) / viewportSize.x * 2.0;
     vec2 offset = perp * lineWidth * 0.5;
     
     // Calculate line length for dashed pattern
@@ -33,13 +33,13 @@ void main()
     
     // Generate quad (4 vertices as triangle strip)
     // Vertex 0 (bottom-left)
-    gl_Position = vec4(p0.xy - offset, 0.0, 1.0);
+    gl_Position = vec4(p0.xy - offset / 4, 0.0, 1.0);
     fragColor = color;
     lineCoord = vec2(0.0, 0.0);
     EmitVertex();
     
     // Vertex 1 (top-left)
-    gl_Position = vec4(p0.xy + offset, 0.0, 1.0);
+    gl_Position = vec4(p0.xy + offset / 4, 0.0, 1.0);
     fragColor = color;
     lineCoord = vec2(0.0, 1.0);
     EmitVertex();
