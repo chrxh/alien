@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <string>
+#include <string_view>
 
 #include <glad/glad.h>
 
@@ -14,6 +15,11 @@ public:
         std::filesystem::path const& vertexPath,
         std::filesystem::path const& fragmentPath,
         std::filesystem::path const& geometryPath = std::filesystem::path());
+
+    static Shader createFromSource(
+        std::string_view vertexSource,
+        std::string_view fragmentSource,
+        std::string_view geometrySource = "");
 
     void use();
     void setBool(std::string const& name, bool value) const;
@@ -28,7 +34,12 @@ private:
         std::filesystem::path const& fragmentPath,
         std::filesystem::path const& geometryPath);
 
-    void checkCompileErrors(GLuint shader, std::string type, std::filesystem::path const& path);
+    _Shader(
+        std::string_view vertexSource,
+        std::string_view fragmentSource,
+        std::string_view geometrySource);
+
+    void checkCompileErrors(GLuint shader, std::string type, std::string const& identifier);
 
     unsigned int _id = 0;
 };
