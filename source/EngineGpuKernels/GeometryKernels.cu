@@ -1160,11 +1160,6 @@ __global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionAr
             auto cellColor = getCellColor(cell->color);
             auto connectedCellColor = getCellColor(connectedCell->color);
             
-            // Calculate averaged color
-            auto avgColorR = (toFloat((cellColor >> 16) & 0xff) + toFloat((connectedCellColor >> 16) & 0xff)) / 2.0f / 255.0f;
-            auto avgColorG = (toFloat((cellColor >> 8) & 0xff) + toFloat((connectedCellColor >> 8) & 0xff)) / 2.0f / 255.0f;
-            auto avgColorB = (toFloat(cellColor & 0xff) + toFloat(connectedCellColor & 0xff)) / 2.0f / 255.0f;
-            
             // Encode arrow direction in flags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
             int arrowFlags = (arrowToCell1 ? 1 : 0) | (arrowToCell2 ? 2 : 0);
             
@@ -1176,18 +1171,18 @@ __global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionAr
                 connectionArrowData[vertexIndex].pos[0] = cell->pos.x;
                 connectionArrowData[vertexIndex].pos[1] = cell->pos.y;
                 connectionArrowData[vertexIndex].pos[2] = 0;
-                connectionArrowData[vertexIndex].color[0] = avgColorR;
-                connectionArrowData[vertexIndex].color[1] = avgColorG;
-                connectionArrowData[vertexIndex].color[2] = avgColorB;
+                connectionArrowData[vertexIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex].color[2] = toFloat((cellColor >> 0) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].arrowFlags = arrowFlags;
                 
                 // Second vertex (cell2)
                 connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
                 connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
                 connectionArrowData[vertexIndex + 1].pos[2] = 0;
-                connectionArrowData[vertexIndex + 1].color[0] = avgColorR;
-                connectionArrowData[vertexIndex + 1].color[1] = avgColorG;
-                connectionArrowData[vertexIndex + 1].color[2] = avgColorB;
+                connectionArrowData[vertexIndex + 1].color[0] = toFloat((connectedCellColor >> 16) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].color[1] = toFloat((connectedCellColor >> 8) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].color[2] = toFloat((connectedCellColor >> 0) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex + 1].arrowFlags = arrowFlags;
             }
         }
