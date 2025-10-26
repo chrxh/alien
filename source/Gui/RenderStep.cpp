@@ -12,7 +12,7 @@
 
 namespace
 {
-    auto constexpr ZoomFactorForOverlay = 15.0f;
+    auto constexpr ZoomFactorForOverlay = 25.0f;
 }
 
 TextureTarget _TextureTarget::create()
@@ -394,7 +394,6 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
     auto overlayActive = SimulationView::get().isOverlayActive();
 
     if (zoom <= ZoomFactorForOverlay || !overlayActive) {
-        // Pass through without rendering overlay
         return;
     }
 
@@ -550,6 +549,11 @@ ConnectionArrowRenderStep _ConnectionArrowRenderStep::create(StepParameters cons
 
 void _ConnectionArrowRenderStep::execute(ExecutionParameters parameters)
 {
+    auto zoom = Viewport::get().getZoomFactor();
+    if (zoom <= ZoomFactorForOverlay) {
+        return;
+    }
+
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
     }

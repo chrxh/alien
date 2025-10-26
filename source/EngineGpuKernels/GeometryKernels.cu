@@ -1104,6 +1104,9 @@ __global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionAr
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
+        if (cell->selected == 0) {
+            continue;
+        }
         
         // Calculate signal angle restrictions for this cell
         auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;

@@ -17,16 +17,15 @@ uniform float radius;
 
 void main()
 {
-    // Only emit geometry if we have a valid cell type (0-12)
     int cellType = vCellType[0];
     
     gColor = vColor[0];
     gWorldPos = vWorldPos[0];
     
     // Calculate size in NDC coordinates
-    float clampedZoom = min(30, zoom);
-    float ndcWidth = 480.0 / viewportSize.x * 2.0 * clampedZoom / 20;
-    float ndcHeight = 20.0 / viewportSize.y * 2.0 * clampedZoom / 20;
+    float clampedZoom = min(40, zoom);
+    float ndcWidth = 480.0 / viewportSize.x * 2.0 * clampedZoom / 30;
+    float ndcHeight = 20.0 / viewportSize.y * 2.0 * clampedZoom / 30;
     
     // Get center position (cell position)
     vec4 center = gl_in[0].gl_Position;
