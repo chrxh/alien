@@ -2,9 +2,71 @@ cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 
 project(Shaders)
 
-# This is a header-only library
-add_library(Shaders INTERFACE)
+# Header-only library with explicit file listing for VS project generation
+add_library(Shaders INTERFACE
+    AllShaders.h
+    AttackEventFS.h
+    AttackEventGS.h
+    AttackEventVS.h
+    BackgroundFS.h
+    BackgroundVS.h
+    BlurHorizontalFS.h
+    BlurHorizontalVS.h
+    BlurVerticalFS.h
+    BlurVerticalVS.h
+    CellFS.h
+    CellTypeOverlayFS.h
+    CellTypeOverlayGS.h
+    CellTypeOverlayVS.h
+    CellVS.h
+    DownSamplerFS.h
+    DownSamplerVS.h
+    EnergyParticleFS.h
+    EnergyParticleVS.h
+    FresnelFS.h
+    FresnelVS.h
+    LineFS.h
+    LineGS.h
+    LineVS.h
+    LocationFS.h
+    LocationGS.h
+    LocationVS.h
+    MergeAdditiveFS.h
+    MergeAdditiveVS.h
+    MergeLayersFS.h
+    MergeLayersVS.h
+    MergeMaxFS.h
+    MergeMaxVS.h
+    MetaballsFS.h
+    MetaballsVS.h
+    SelectedConnectionFS.h
+    SelectedConnectionGS.h
+    SelectedConnectionVS.h
+    SelectedObjectFS.h
+    SelectedObjectGS.h
+    SelectedObjectVS.h
+    ShaderSources.h
+    SubsurfaceScatterFS.h
+    SubsurfaceScatterVS.h
+    ThresholdFS.h
+    ThresholdVS.h
+    ToneMappingFS.h
+    ToneMappingVS.h
+    TriangleFS.h
+    TriangleGS.h
+    TriangleVS.h
+    UpSamplerFS.h
+    UpSamplerVS.h
+    ZoomBrightnessCorrectionFS.h
+    ZoomBrightnessCorrectionVS.h
+)
 
 target_include_directories(Shaders INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
+
+# Ensure headers show up in IDE
+set_target_properties(Shaders PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/..
+)
+
