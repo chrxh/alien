@@ -78,7 +78,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
 
     auto uniforms = _uniforms;
     if (_uniformFunc) {
-        auto uniformFunc = _uniformFunc();
+        auto uniformFunc = _uniformFunc(*parameters._simulationParameters);
         uniforms.insert(uniformFunc.begin(), uniformFunc.end());
     }
     for (auto const& [key, value] : uniforms) {

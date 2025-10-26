@@ -169,10 +169,9 @@ void SimulationView::updateMotionBlur() {}
 
 void SimulationView::setupRenderPipeline()
 {
-    auto currentBackgroundColor = [this] {
-        auto params = _simulationFacade->getSimulationParameters();
-        FloatColorRGB background = params.backgroundColor.baseValue;
-        int gridLines = params.gridLines.value ? 1 : 0;
+    auto currentBackgroundColor = [this](SimulationParameters const& parameters) {
+        FloatColorRGB background = parameters.backgroundColor.baseValue;
+        int gridLines = parameters.gridLines.value ? 1 : 0;
         return UniformValueMap{{"background", background}, {"gridLines", gridLines}};
     };
     _renderPipeline = std::make_shared<_RenderPipeline>(
@@ -185,7 +184,7 @@ void SimulationView::setupRenderPipeline()
                     _EnergyParticleRenderStep::create(StepParameters()
                                                           .shader(Const::EnergyParticleShader)
                                                           .uniforms({{"ballSize", 2.0f}})
-                                                          .preventMoirePatterns(false) /*.previousTargetSelection(0)*/),
+                                                          .preventMoirePatterns(false)),
                 }),
             },
 
