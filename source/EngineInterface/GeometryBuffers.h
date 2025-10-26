@@ -61,12 +61,12 @@ public:
     unsigned int getVaoForEnergyParticles() const { return _vaoForEnergyParticles; }
     unsigned int getVaoForLocations() const { return _vaoForLocations; }
     unsigned int getVaoForSelectedObjects() const { return _vaoForSelectedObjects; }
-    unsigned int getVaoForConnectionArrows() const { return _vaoForConnectionArrows; }
+    unsigned int getVaoForSelectedConnections() const { return _vaoForSelectedConnections; }
     unsigned int getVboForCells() const { return _vboForCells; }
     unsigned int getVboForEnergyParticles() const { return _vboForEnergyParticles; }
     unsigned int getVboForLocations() const { return _vboForLocations; }
     unsigned int getVboForSelectedObjects() const { return _vboForSelectedObjects; }
-    unsigned int getVboForConnectionArrows() const { return _vboForConnectionArrows; }
+    unsigned int getVboForSelectedConnections() const { return _vboForSelectedConnections; }
     unsigned int getEboForLines() const { return _eboForLines; }
     unsigned int getEboForTriangles() const { return _eboForTriangles; }
 
@@ -80,12 +80,12 @@ private:
     unsigned int _vaoForEnergyParticles = 0;
     unsigned int _vaoForLocations = 0;
     unsigned int _vaoForSelectedObjects = 0;
-    unsigned int _vaoForConnectionArrows = 0;
+    unsigned int _vaoForSelectedConnections = 0;
     unsigned int _vboForCells = 0;
     unsigned int _vboForEnergyParticles = 0;
     unsigned int _vboForLocations = 0;
     unsigned int _vboForSelectedObjects = 0;
-    unsigned int _vboForConnectionArrows = 0;
+    unsigned int _vboForSelectedConnections = 0;
     unsigned int _eboForLines = 0;
     unsigned int _eboForTriangles = 0;
 

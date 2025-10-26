@@ -138,8 +138,8 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glEnableVertexAttribArray(0);
     }
     {
-        auto vao = _geometryBuffers->getVaoForConnectionArrows();
-        auto vbo = _geometryBuffers->getVboForConnectionArrows();
+        auto vao = _geometryBuffers->getVaoForSelectedConnections();
+        auto vbo = _geometryBuffers->getVboForSelectedConnections();
 
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);

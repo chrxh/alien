@@ -18,8 +18,8 @@ GeometryBuffers _GeometryBuffers::create()
     glGenBuffers(1, &result->_vboForLocations);
     glGenVertexArrays(1, &result->_vaoForSelectedObjects);
     glGenBuffers(1, &result->_vboForSelectedObjects);
-    glGenVertexArrays(1, &result->_vaoForConnectionArrows);
-    glGenBuffers(1, &result->_vboForConnectionArrows);
+    glGenVertexArrays(1, &result->_vaoForSelectedConnections);
+    glGenBuffers(1, &result->_vboForSelectedConnections);
     return GeometryBuffers(result);
 }
 
@@ -60,7 +60,7 @@ void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObject
     }
     if (numRenderObjects.connectionArrowVertices >= _connectionArrowVertexBufferCapacity) {
         _connectionArrowVertexBufferCapacity = std::max(numRenderObjects.connectionArrowVertices * 2, static_cast<uint64_t>(100000));
-        glBindBuffer(GL_ARRAY_BUFFER, getVboForConnectionArrows());
+        glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedConnections());
         glBufferData(GL_ARRAY_BUFFER, toInt(_connectionArrowVertexBufferCapacity * sizeof(ConnectionArrowVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
 }

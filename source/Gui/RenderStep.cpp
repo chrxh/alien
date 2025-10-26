@@ -564,7 +564,7 @@ void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     // Draw connection arrows (geometry shader will convert to lines with arrows)
-    glBindVertexArray(parameters._geometryBuffers->getVaoForConnectionArrows());
+    glBindVertexArray(parameters._geometryBuffers->getVaoForSelectedConnections());
     glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().connectionArrowVertices));
 
     // Disable blending
