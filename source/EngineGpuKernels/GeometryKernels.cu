@@ -1078,6 +1078,26 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = cell->pos.x;
                 selectedObjectData[outputIndex].pos[1] = cell->pos.y;
+                
+                // Calculate signal angle restrictions for this cell
+                // The 180° offset converts from connection-relative to absolute angles in world space
+                if (cell->signalRestriction.active && cell->numConnections > 0) {
+                    auto const& connectedCell = cell->connections[0].cell;
+                    auto connectionAngle = Math::angleOfVector(connectedCell->pos - cell->pos);
+
+                    auto signalAngleRestrictionStart = connectionAngle + 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
+                    auto signalAngleRestrictionEnd = connectionAngle + 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
+                    signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+                    signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
+                    
+                    selectedObjectData[outputIndex].hasSignalRestriction = 1;
+                    selectedObjectData[outputIndex].startAngle = signalAngleRestrictionStart;
+                    selectedObjectData[outputIndex].endAngle = signalAngleRestrictionEnd;
+                } else {
+                    selectedObjectData[outputIndex].hasSignalRestriction = 0;
+                    selectedObjectData[outputIndex].startAngle = 0.0f;
+                    selectedObjectData[outputIndex].endAngle = 0.0f;
+                }
             }
         }
     }
@@ -1093,6 +1113,9 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = particle->pos.x;
                 selectedObjectData[outputIndex].pos[1] = particle->pos.y;
+                selectedObjectData[outputIndex].hasSignalRestriction = 0;
+                selectedObjectData[outputIndex].startAngle = 0.0f;
+                selectedObjectData[outputIndex].endAngle = 0.0f;
             }
         }
     }

@@ -4,7 +4,8 @@
 
 namespace Shaders
 {
-    std::string_view const ToneMappingFS = R"(#version 330 core
+    std::string_view const ToneMappingFS = R"(
+#version 330 core
 out vec4 FragColor;
 
 in vec2 texCoord;

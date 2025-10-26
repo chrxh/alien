@@ -8,8 +8,9 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/SimulationParameters.h"
 
-#include "Definitions.h"
 #include "Shaders/ShaderSources.h"
+
+#include "Definitions.h"
 
 struct _TextureTarget
 {

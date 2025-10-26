@@ -4,7 +4,8 @@
 
 namespace Shaders
 {
-    std::string_view const SelectedConnectionGS = R"(#version 330 core
+    std::string_view const SelectedConnectionGS = R"(
+#version 330 core
 layout (lines) in;
 layout (triangle_strip, max_vertices = 20) out;
 
@@ -132,8 +133,8 @@ void main()
     
     // Calculate line direction
     vec2 dir = normalize(p1.xy - p0.xy);
-	p0.xy = p0.xy + dir * 0.2 * zoom;
-	p1.xy = p1.xy - dir * 0.2 * zoom;
+	p0.xy = p0.xy + dir * 0.28 * zoom;
+	p1.xy = p1.xy - dir * 0.28 * zoom;
     
     // Draw the main line
     emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth);
