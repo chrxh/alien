@@ -1173,7 +1173,6 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 // First vertex (cell1)
                 connectionArrowData[vertexIndex].pos[0] = cell->pos.x;
                 connectionArrowData[vertexIndex].pos[1] = cell->pos.y;
-                connectionArrowData[vertexIndex].pos[2] = 0;
                 connectionArrowData[vertexIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].color[2] = toFloat((cellColor >> 0) & 0xff) / 255.0f;
@@ -1182,7 +1181,6 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 // Second vertex (cell2)
                 connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
                 connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
-                connectionArrowData[vertexIndex + 1].pos[2] = 0;
                 connectionArrowData[vertexIndex + 1].color[0] = toFloat((connectedCellColor >> 16) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex + 1].color[1] = toFloat((connectedCellColor >> 8) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex + 1].color[2] = toFloat((connectedCellColor >> 0) & 0xff) / 255.0f;

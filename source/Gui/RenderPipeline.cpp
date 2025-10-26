@@ -145,16 +145,16 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
         // Setup vertex attributes for ConnectionArrowVertexData
-        // Position (3 floats: x, y, z)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)0);
+        // Position (2 floats: x, y)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)0);
         glEnableVertexAttribArray(0);
 
         // Color (3 floats: r, g, b)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ConnectionArrowVertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         // Arrow flags (1 int)
-        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ConnectionArrowVertexData), (void*)(6 * sizeof(float)));
+        glVertexAttribIPointer(2, 1, GL_INT, sizeof(ConnectionArrowVertexData), (void*)(5 * sizeof(float)));
         glEnableVertexAttribArray(2);
     }
 
