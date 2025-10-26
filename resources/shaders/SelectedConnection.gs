@@ -27,24 +27,20 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
     
     vec2 offset = perp * lineWidth * 0.5;
     
-    // Create 3D positions for lighting calculation
-    vec3 pos0 = vec3(p0.xyz);
-    vec3 pos1 = vec3(p1.xyz);
-    
     // Generate quad (4 vertices as triangle strip)
-    gl_Position = vec4(transform(p0.xy - offset), p0.z, 1.0);
+    gl_Position = vec4(transform(p0.xy - offset), 0.0, 1.0);
     fragColor = color0;
     EmitVertex();
     
-    gl_Position = vec4(transform(p0.xy + offset), p0.z, 1.0);
+    gl_Position = vec4(transform(p0.xy + offset), 0.0, 1.0);
     fragColor = color0;
     EmitVertex();
     
-    gl_Position = vec4(transform(p1.xy - offset), p1.z, 1.0);
+    gl_Position = vec4(transform(p1.xy - offset), 0.0, 1.0);
     fragColor = color1;
     EmitVertex();
     
-    gl_Position = vec4(transform(p1.xy + offset), p1.z, 1.0);
+    gl_Position = vec4(transform(p1.xy + offset), 0.0, 1.0);
     fragColor = color1;
     EmitVertex();
     
@@ -62,26 +58,26 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     vec2 arrowDir2 = normalize(vec2(-dir.x + dir.y, -dir.x - dir.y)) * arrowSize;
     
     vec4 arrowTip = basePos;
-    vec4 arrowPoint1 = vec4(basePos.xy + arrowDir1, basePos.z, 1.0);
-    vec4 arrowPoint2 = vec4(basePos.xy + arrowDir2, basePos.z, 1.0);
+    vec4 arrowPoint1 = vec4(basePos.xy + arrowDir1, 0.0, 1.0);
+    vec4 arrowPoint2 = vec4(basePos.xy + arrowDir2, 0.0, 1.0);
     
     // First arrow line
     vec2 perp1 = normalize(vec2(-arrowDir1.y, arrowDir1.x));
     vec2 offset1 = perp1 * lineWidth * 0.4;
     
-    gl_Position = vec4(transform(arrowTip.xy - offset1), arrowTip.z, 1.0);
+    gl_Position = vec4(transform(arrowTip.xy - offset1), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
-    gl_Position = vec4(transform(arrowTip.xy + offset1), arrowTip.z, 1.0);
+    gl_Position = vec4(transform(arrowTip.xy + offset1), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
-    gl_Position = vec4(transform(arrowPoint1.xy - offset1), arrowPoint1.z, 1.0);
+    gl_Position = vec4(transform(arrowPoint1.xy - offset1), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
-    gl_Position = vec4(transform(arrowPoint1.xy + offset1), arrowPoint1.z, 1.0);
+    gl_Position = vec4(transform(arrowPoint1.xy + offset1), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
@@ -91,19 +87,19 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     vec2 perp2 = normalize(vec2(-arrowDir2.y, arrowDir2.x));
     vec2 offset2 = perp2 * lineWidth * 0.4;
     
-    gl_Position = vec4(transform(arrowTip.xy - offset2), arrowTip.z, 1.0);
+    gl_Position = vec4(transform(arrowTip.xy - offset2), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
-    gl_Position = vec4(transform(arrowTip.xy + offset2), arrowTip.z, 1.0);
+    gl_Position = vec4(transform(arrowTip.xy + offset2), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
-    gl_Position = vec4(transform(arrowPoint2.xy - offset2), arrowPoint2.z, 1.0);
+    gl_Position = vec4(transform(arrowPoint2.xy - offset2), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     
-    gl_Position = vec4(transform(arrowPoint2.xy + offset2), arrowPoint2.z, 1.0);
+    gl_Position = vec4(transform(arrowPoint2.xy + offset2), 0.0, 1.0);
     fragColor = color;
     EmitVertex();
     

@@ -46,7 +46,7 @@ struct SelectedObjectVertexData
 
 struct ConnectionArrowVertexData
 {
-    float pos[3];    // x, y, z position (z used for lighting)
+    float pos[2];    // x, y position
     float color[3];  // r, g, b color
     int arrowFlags;  // bit 0: arrow to first vertex, bit 1: arrow to second vertex
 };
