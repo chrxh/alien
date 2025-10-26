@@ -1,2309 +1,1270 @@
 {
-    "general": {
-        "time step": "85540",
-        "real time": "0",
-        "zoom": "1.16543949",
-        "center": {
-            "x": "918.00494385",
-            "y": "474.97528076"
+    "General": {
+        "Version": "5.0.0-alpha.1",
+        "Time step": "36778",
+        "Real time": "144795",
+        "Zoom": "43.24203873",
+        "Center": {
+            "X": "604.38543701",
+            "Y": "154.29888916"
         },
-        "world size": {
-            "x": "2000",
-            "y": "1000"
+        "World size": {
+            "X": "1000",
+            "Y": "500"
         }
     },
-    "simulation parameters": {
-        "version": "4.11.0",
-        "project name": "<unnamed>",
-        "background color": "1048576",
-        "cell colorization": "1",
-        "cell glow": {
-            "coloring": "1",
-            "radius": "4.00000000",
-            "strength": "0.10000000"
-        },
-        "highlighted cell function": "2",
-        "zoom level": {
-            "neural activity": "2.00000000"
-        },
-        "borderless rendering": "false",
-        "mark reference domain": "true",
-        "show radiation sources": "true",
-        "grid lines": "false",
-        "attack visualization": "false",
-        "muscle movement visualization": "false",
-        "cek": "0.25000000",
-        "time step size": "1.00000000",
-        "motion": {
-            "type": "0"
-        },
-        "fluid": {
-            "smoothing length": "0.66000003",
-            "pressure strength": "0.10000000",
-            "viscosity strength": "0.10000000"
-        },
-        "friction": "0.00200000",
-        "rigidity": "0.00000000",
-        "cell": {
-            "max velocity": "2.00000000",
-            "max binding distance[0]": "3.59999990",
-            "max binding distance[1]": "3.59999990",
-            "max binding distance[2]": "3.59999990",
-            "max binding distance[3]": "3.59999990",
-            "max binding distance[4]": "3.59999990",
-            "max binding distance[5]": "3.59999990",
-            "max binding distance[6]": "3.59999990",
-            "normal energy[0]": "100.00000000",
-            "normal energy[1]": "100.00000000",
-            "normal energy[2]": "100.00000000",
-            "normal energy[3]": "100.00000000",
-            "normal energy[4]": "100.00000000",
-            "normal energy[5]": "100.00000000",
-            "normal energy[6]": "100.00000000",
-            "min distance": "0.10000000",
-            "max force[0]": "0.80000001",
-            "max force[1]": "0.80000001",
-            "max force[2]": "0.80000001",
-            "max force[3]": "0.80000001",
-            "max force[4]": "0.80000001",
-            "max force[5]": "0.80000001",
-            "max force[6]": "0.80000001",
-            "max force decay probability": "0.20000000",
-            "max execution order number": "6",
-            "min energy[0]": "50.00000000",
-            "min energy[1]": "50.00000000",
-            "min energy[2]": "50.00000000",
-            "min energy[3]": "50.00000000",
-            "min energy[4]": "50.00000000",
-            "min energy[5]": "50.00000000",
-            "min energy[6]": "50.00000000",
-            "fusion velocity": "0.82400000",
-            "max binding energy": "500000.00000000",
-            "max age[0]": "223872",
-            "max age[1]": "65000",
-            "max age[2]": "223872",
-            "max age[3]": "223872",
-            "max age[4]": "223872",
-            "max age[5]": "223872",
-            "max age[6]": "223872",
-            "max age": {
-                "balance": {
-                    "enabled": "false",
-                    "interval": "10000"
-                }
-            },
-            "inactive max age activated": "false",
-            "inactive max age[0]": "340282346638528859811704183484516925440.00000000",
-            "inactive max age[1]": "340282346638528859811704183484516925440.00000000",
-            "inactive max age[2]": "340282346638528859811704183484516925440.00000000",
-            "inactive max age[3]": "340282346638528859811704183484516925440.00000000",
-            "inactive max age[4]": "340282346638528859811704183484516925440.00000000",
-            "inactive max age[5]": "340282346638528859811704183484516925440.00000000",
-            "inactive max age[6]": "340282346638528859811704183484516925440.00000000",
-            "nutrient max age activated": "false",
-            "nutrient max age[0]": "2147483647",
-            "nutrient max age[1]": "2147483647",
-            "nutrient max age[2]": "2147483647",
-            "nutrient max age[3]": "2147483647",
-            "nutrient max age[4]": "2147483647",
-            "nutrient max age[5]": "2147483647",
-            "nutrient max age[6]": "2147483647",
-            "reset age after activation": "false",
-            "color transition rules": {
-                "duration[0]": "0",
-                "duration[1]": "0",
-                "duration[2]": "0",
-                "duration[3]": "0",
-                "duration[4]": "0",
-                "duration[5]": "0",
-                "duration[6]": "0",
-                "target color[0]": "0",
-                "target color[1]": "1",
-                "target color[2]": "2",
-                "target color[3]": "3",
-                "target color[4]": "4",
-                "target color[5]": "5",
-                "target color[6]": "6"
-            },
-            "function": {
-                "constructor": {
-                    "external energy": "0.00000000",
-                    "external energy supply rate[0]": "0.00000000",
-                    "external energy supply rate[1]": "0.00000000",
-                    "external energy supply rate[2]": "0.00000000",
-                    "external energy supply rate[3]": "0.00000000",
-                    "external energy supply rate[4]": "0.00000000",
-                    "external energy supply rate[5]": "0.00000000",
-                    "external energy supply rate[6]": "0.00000000",
-                    "pump energy factor[0]": "0.71799999",
-                    "pump energy factor[1]": "0.00000000",
-                    "pump energy factor[2]": "0.71799999",
-                    "pump energy factor[3]": "0.71799999",
-                    "pump energy factor[4]": "0.71799999",
-                    "pump energy factor[5]": "0.71799999",
-                    "pump energy factor[6]": "0.71799999",
-                    "external energy backflow[0]": "0.14360000",
-                    "external energy backflow[1]": "0.00000000",
-                    "external energy backflow[2]": "0.14360000",
-                    "external energy backflow[3]": "0.14360000",
-                    "external energy backflow[4]": "0.14360000",
-                    "external energy backflow[5]": "0.14360000",
-                    "external energy backflow[6]": "0.14360000",
-                    "external energy inflow only for non-self-replicators": "false",
-                    "external energy backflow limit": "340282346638528859811704183484516925440.00000000",
-                    "connecting cell max distance[0]": "1.50000000",
-                    "connecting cell max distance[1]": "1.50000000",
-                    "connecting cell max distance[2]": "1.50000000",
-                    "connecting cell max distance[3]": "1.50000000",
-                    "connecting cell max distance[4]": "1.50000000",
-                    "connecting cell max distance[5]": "1.50000000",
-                    "connecting cell max distance[6]": "1.50000000",
-                    "activity threshold[0]": "0.25000000",
-                    "activity threshold[1]": "0.25000000",
-                    "activity threshold[2]": "0.25000000",
-                    "activity threshold[3]": "0.25000000",
-                    "activity threshold[4]": "0.25000000",
-                    "activity threshold[5]": "0.25000000",
-                    "activity threshold[6]": "0.25000000",
-                    "completeness check for self-replication": "false"
-                },
-                "injector": {
-                    "radius[0]": "2.00000000",
-                    "radius[1]": "2.00000000",
-                    "radius[2]": "2.00000000",
-                    "radius[3]": "2.00000000",
-                    "radius[4]": "2.00000000",
-                    "radius[5]": "2.00000000",
-                    "radius[6]": "2.00000000",
-                    "duration[0, 0]": "1",
-                    "duration[0, 1]": "1",
-                    "duration[0, 2]": "1",
-                    "duration[0, 3]": "1",
-                    "duration[0, 4]": "1",
-                    "duration[0, 5]": "1",
-                    "duration[0, 6]": "1",
-                    "duration[1, 0]": "1",
-                    "duration[1, 1]": "1",
-                    "duration[1, 2]": "1",
-                    "duration[1, 3]": "1",
-                    "duration[1, 4]": "1",
-                    "duration[1, 5]": "1",
-                    "duration[1, 6]": "1",
-                    "duration[2, 0]": "1",
-                    "duration[2, 1]": "1",
-                    "duration[2, 2]": "1",
-                    "duration[2, 3]": "1",
-                    "duration[2, 4]": "1",
-                    "duration[2, 5]": "1",
-                    "duration[2, 6]": "1",
-                    "duration[3, 0]": "1",
-                    "duration[3, 1]": "1",
-                    "duration[3, 2]": "1",
-                    "duration[3, 3]": "1",
-                    "duration[3, 4]": "1",
-                    "duration[3, 5]": "1",
-                    "duration[3, 6]": "1",
-                    "duration[4, 0]": "1",
-                    "duration[4, 1]": "1",
-                    "duration[4, 2]": "1",
-                    "duration[4, 3]": "1",
-                    "duration[4, 4]": "1",
-                    "duration[4, 5]": "1",
-                    "duration[4, 6]": "1",
-                    "duration[5, 0]": "1",
-                    "duration[5, 1]": "1",
-                    "duration[5, 2]": "1",
-                    "duration[5, 3]": "1",
-                    "duration[5, 4]": "1",
-                    "duration[5, 5]": "1",
-                    "duration[5, 6]": "1",
-                    "duration[6, 0]": "1",
-                    "duration[6, 1]": "1",
-                    "duration[6, 2]": "1",
-                    "duration[6, 3]": "1",
-                    "duration[6, 4]": "1",
-                    "duration[6, 5]": "1",
-                    "duration[6, 6]": "1"
-                },
-                "attacker": {
-                    "radius[0]": "1.69799995",
-                    "radius[1]": "1.69799995",
-                    "radius[2]": "1.69799995",
-                    "radius[3]": "1.69799995",
-                    "radius[4]": "1.69799995",
-                    "radius[5]": "1.69799995",
-                    "radius[6]": "1.69799995",
-                    "strength[0]": "0.05000000",
-                    "strength[1]": "0.05000000",
-                    "strength[2]": "0.05000000",
-                    "strength[3]": "0.05000000",
-                    "strength[4]": "0.05000000",
-                    "strength[5]": "0.05000000",
-                    "strength[6]": "0.05000000",
-                    "energy distribution radius[0]": "3.59999990",
-                    "energy distribution radius[1]": "3.59999990",
-                    "energy distribution radius[2]": "3.59999990",
-                    "energy distribution radius[3]": "3.59999990",
-                    "energy distribution radius[4]": "3.59999990",
-                    "energy distribution radius[5]": "3.59999990",
-                    "energy distribution radius[6]": "3.59999990",
-                    "energy distribution value[0]": "10.00000000",
-                    "energy distribution value[1]": "10.00000000",
-                    "energy distribution value[2]": "10.00000000",
-                    "energy distribution value[3]": "10.00000000",
-                    "energy distribution value[4]": "10.00000000",
-                    "energy distribution value[5]": "10.00000000",
-                    "energy distribution value[6]": "10.00000000",
-                    "color inhomogeneity factor[0]": "1.00000000",
-                    "color inhomogeneity factor[1]": "1.00000000",
-                    "color inhomogeneity factor[2]": "1.00000000",
-                    "color inhomogeneity factor[3]": "1.00000000",
-                    "color inhomogeneity factor[4]": "1.00000000",
-                    "color inhomogeneity factor[5]": "1.00000000",
-                    "color inhomogeneity factor[6]": "1.00000000",
-                    "activity threshold": "0.11100000",
-                    "energy cost[0]": "0.00000000",
-                    "energy cost[1]": "0.00000000",
-                    "energy cost[2]": "0.00000000",
-                    "energy cost[3]": "0.00000000",
-                    "energy cost[4]": "0.00000000",
-                    "energy cost[5]": "0.00000000",
-                    "energy cost[6]": "0.00000000",
-                    "geometry deviation exponent[0]": "0.00000000",
-                    "geometry deviation exponent[1]": "0.00000000",
-                    "geometry deviation exponent[2]": "0.00000000",
-                    "geometry deviation exponent[3]": "0.00000000",
-                    "geometry deviation exponent[4]": "0.00000000",
-                    "geometry deviation exponent[5]": "0.00000000",
-                    "geometry deviation exponent[6]": "0.00000000",
-                    "food chain color matrix[0, 0]": "0.00000000",
-                    "food chain color matrix[0, 1]": "0.00000000",
-                    "food chain color matrix[0, 2]": "1.00000000",
-                    "food chain color matrix[0, 3]": "0.20000000",
-                    "food chain color matrix[0, 4]": "0.20000000",
-                    "food chain color matrix[0, 5]": "0.20000000",
-                    "food chain color matrix[0, 6]": "0.20000000",
-                    "food chain color matrix[1, 0]": "0.00000000",
-                    "food chain color matrix[1, 1]": "0.00000000",
-                    "food chain color matrix[1, 2]": "1.00000000",
-                    "food chain color matrix[1, 3]": "0.20000000",
-                    "food chain color matrix[1, 4]": "0.20000000",
-                    "food chain color matrix[1, 5]": "0.20000000",
-                    "food chain color matrix[1, 6]": "0.20000000",
-                    "food chain color matrix[2, 0]": "0.00000000",
-                    "food chain color matrix[2, 1]": "0.00000000",
-                    "food chain color matrix[2, 2]": "0.00000000",
-                    "food chain color matrix[2, 3]": "0.00000000",
-                    "food chain color matrix[2, 4]": "0.00000000",
-                    "food chain color matrix[2, 5]": "0.00000000",
-                    "food chain color matrix[2, 6]": "0.00000000",
-                    "food chain color matrix[3, 0]": "0.00000000",
-                    "food chain color matrix[3, 1]": "0.00000000",
-                    "food chain color matrix[3, 2]": "0.00000000",
-                    "food chain color matrix[3, 3]": "0.00000000",
-                    "food chain color matrix[3, 4]": "0.00000000",
-                    "food chain color matrix[3, 5]": "0.00000000",
-                    "food chain color matrix[3, 6]": "0.00000000",
-                    "food chain color matrix[4, 0]": "0.00000000",
-                    "food chain color matrix[4, 1]": "0.00000000",
-                    "food chain color matrix[4, 2]": "0.00000000",
-                    "food chain color matrix[4, 3]": "0.00000000",
-                    "food chain color matrix[4, 4]": "0.00000000",
-                    "food chain color matrix[4, 5]": "0.00000000",
-                    "food chain color matrix[4, 6]": "0.00000000",
-                    "food chain color matrix[5, 0]": "0.00000000",
-                    "food chain color matrix[5, 1]": "0.00000000",
-                    "food chain color matrix[5, 2]": "0.00000000",
-                    "food chain color matrix[5, 3]": "0.00000000",
-                    "food chain color matrix[5, 4]": "0.00000000",
-                    "food chain color matrix[5, 5]": "0.00000000",
-                    "food chain color matrix[5, 6]": "0.00000000",
-                    "food chain color matrix[6, 0]": "0.00000000",
-                    "food chain color matrix[6, 1]": "0.00000000",
-                    "food chain color matrix[6, 2]": "0.00000000",
-                    "food chain color matrix[6, 3]": "0.00000000",
-                    "food chain color matrix[6, 4]": "0.00000000",
-                    "food chain color matrix[6, 5]": "0.00000000",
-                    "food chain color matrix[6, 6]": "0.00000000",
-                    "connections mismatch penalty[0]": "0.33000001",
-                    "connections mismatch penalty[1]": "0.33000001",
-                    "connections mismatch penalty[2]": "0.33000001",
-                    "connections mismatch penalty[3]": "0.33000001",
-                    "connections mismatch penalty[4]": "0.33000001",
-                    "connections mismatch penalty[5]": "0.33000001",
-                    "connections mismatch penalty[6]": "0.33000001",
-                    "genome size bonus[0, 0]": "0.00000000",
-                    "genome size bonus[0, 1]": "0.00000000",
-                    "genome size bonus[0, 2]": "0.00000000",
-                    "genome size bonus[0, 3]": "0.00000000",
-                    "genome size bonus[0, 4]": "0.00000000",
-                    "genome size bonus[0, 5]": "0.00000000",
-                    "genome size bonus[0, 6]": "0.00000000",
-                    "genome size bonus[1, 0]": "0.00000000",
-                    "genome size bonus[1, 1]": "0.00000000",
-                    "genome size bonus[1, 2]": "0.00000000",
-                    "genome size bonus[1, 3]": "0.00000000",
-                    "genome size bonus[1, 4]": "0.00000000",
-                    "genome size bonus[1, 5]": "0.00000000",
-                    "genome size bonus[1, 6]": "0.00000000",
-                    "genome size bonus[2, 0]": "0.00000000",
-                    "genome size bonus[2, 1]": "0.00000000",
-                    "genome size bonus[2, 2]": "0.00000000",
-                    "genome size bonus[2, 3]": "0.00000000",
-                    "genome size bonus[2, 4]": "0.00000000",
-                    "genome size bonus[2, 5]": "0.00000000",
-                    "genome size bonus[2, 6]": "0.00000000",
-                    "genome size bonus[3, 0]": "0.00000000",
-                    "genome size bonus[3, 1]": "0.00000000",
-                    "genome size bonus[3, 2]": "0.00000000",
-                    "genome size bonus[3, 3]": "0.00000000",
-                    "genome size bonus[3, 4]": "0.00000000",
-                    "genome size bonus[3, 5]": "0.00000000",
-                    "genome size bonus[3, 6]": "0.00000000",
-                    "genome size bonus[4, 0]": "0.00000000",
-                    "genome size bonus[4, 1]": "0.00000000",
-                    "genome size bonus[4, 2]": "0.00000000",
-                    "genome size bonus[4, 3]": "0.00000000",
-                    "genome size bonus[4, 4]": "0.00000000",
-                    "genome size bonus[4, 5]": "0.00000000",
-                    "genome size bonus[4, 6]": "0.00000000",
-                    "genome size bonus[5, 0]": "0.00000000",
-                    "genome size bonus[5, 1]": "0.00000000",
-                    "genome size bonus[5, 2]": "0.00000000",
-                    "genome size bonus[5, 3]": "0.00000000",
-                    "genome size bonus[5, 4]": "0.00000000",
-                    "genome size bonus[5, 5]": "0.00000000",
-                    "genome size bonus[5, 6]": "0.00000000",
-                    "genome size bonus[6, 0]": "0.00000000",
-                    "genome size bonus[6, 1]": "0.00000000",
-                    "genome size bonus[6, 2]": "0.00000000",
-                    "genome size bonus[6, 3]": "0.00000000",
-                    "genome size bonus[6, 4]": "0.00000000",
-                    "genome size bonus[6, 5]": "0.00000000",
-                    "genome size bonus[6, 6]": "0.00000000",
-                    "same mutant penalty[0, 0]": "0.00000000",
-                    "same mutant penalty[0, 1]": "0.00000000",
-                    "same mutant penalty[0, 2]": "0.00000000",
-                    "same mutant penalty[0, 3]": "0.00000000",
-                    "same mutant penalty[0, 4]": "0.00000000",
-                    "same mutant penalty[0, 5]": "0.00000000",
-                    "same mutant penalty[0, 6]": "0.00000000",
-                    "same mutant penalty[1, 0]": "0.00000000",
-                    "same mutant penalty[1, 1]": "0.00000000",
-                    "same mutant penalty[1, 2]": "0.00000000",
-                    "same mutant penalty[1, 3]": "0.00000000",
-                    "same mutant penalty[1, 4]": "0.00000000",
-                    "same mutant penalty[1, 5]": "0.00000000",
-                    "same mutant penalty[1, 6]": "0.00000000",
-                    "same mutant penalty[2, 0]": "0.00000000",
-                    "same mutant penalty[2, 1]": "0.00000000",
-                    "same mutant penalty[2, 2]": "0.00000000",
-                    "same mutant penalty[2, 3]": "0.00000000",
-                    "same mutant penalty[2, 4]": "0.00000000",
-                    "same mutant penalty[2, 5]": "0.00000000",
-                    "same mutant penalty[2, 6]": "0.00000000",
-                    "same mutant penalty[3, 0]": "0.00000000",
-                    "same mutant penalty[3, 1]": "0.00000000",
-                    "same mutant penalty[3, 2]": "0.00000000",
-                    "same mutant penalty[3, 3]": "0.00000000",
-                    "same mutant penalty[3, 4]": "0.00000000",
-                    "same mutant penalty[3, 5]": "0.00000000",
-                    "same mutant penalty[3, 6]": "0.00000000",
-                    "same mutant penalty[4, 0]": "0.00000000",
-                    "same mutant penalty[4, 1]": "0.00000000",
-                    "same mutant penalty[4, 2]": "0.00000000",
-                    "same mutant penalty[4, 3]": "0.00000000",
-                    "same mutant penalty[4, 4]": "0.00000000",
-                    "same mutant penalty[4, 5]": "0.00000000",
-                    "same mutant penalty[4, 6]": "0.00000000",
-                    "same mutant penalty[5, 0]": "0.00000000",
-                    "same mutant penalty[5, 1]": "0.00000000",
-                    "same mutant penalty[5, 2]": "0.00000000",
-                    "same mutant penalty[5, 3]": "0.00000000",
-                    "same mutant penalty[5, 4]": "0.00000000",
-                    "same mutant penalty[5, 5]": "0.00000000",
-                    "same mutant penalty[5, 6]": "0.00000000",
-                    "same mutant penalty[6, 0]": "0.00000000",
-                    "same mutant penalty[6, 1]": "0.00000000",
-                    "same mutant penalty[6, 2]": "0.00000000",
-                    "same mutant penalty[6, 3]": "0.00000000",
-                    "same mutant penalty[6, 4]": "0.00000000",
-                    "same mutant penalty[6, 5]": "0.00000000",
-                    "same mutant penalty[6, 6]": "0.00000000",
-                    "new complex mutant penalty[0, 0]": "0.00000000",
-                    "new complex mutant penalty[0, 1]": "0.00000000",
-                    "new complex mutant penalty[0, 2]": "0.00000000",
-                    "new complex mutant penalty[0, 3]": "0.00000000",
-                    "new complex mutant penalty[0, 4]": "0.00000000",
-                    "new complex mutant penalty[0, 5]": "0.00000000",
-                    "new complex mutant penalty[0, 6]": "0.00000000",
-                    "new complex mutant penalty[1, 0]": "0.00000000",
-                    "new complex mutant penalty[1, 1]": "0.00000000",
-                    "new complex mutant penalty[1, 2]": "0.00000000",
-                    "new complex mutant penalty[1, 3]": "0.00000000",
-                    "new complex mutant penalty[1, 4]": "0.00000000",
-                    "new complex mutant penalty[1, 5]": "0.00000000",
-                    "new complex mutant penalty[1, 6]": "0.00000000",
-                    "new complex mutant penalty[2, 0]": "0.00000000",
-                    "new complex mutant penalty[2, 1]": "0.00000000",
-                    "new complex mutant penalty[2, 2]": "0.00000000",
-                    "new complex mutant penalty[2, 3]": "0.00000000",
-                    "new complex mutant penalty[2, 4]": "0.00000000",
-                    "new complex mutant penalty[2, 5]": "0.00000000",
-                    "new complex mutant penalty[2, 6]": "0.00000000",
-                    "new complex mutant penalty[3, 0]": "0.00000000",
-                    "new complex mutant penalty[3, 1]": "0.00000000",
-                    "new complex mutant penalty[3, 2]": "0.00000000",
-                    "new complex mutant penalty[3, 3]": "0.00000000",
-                    "new complex mutant penalty[3, 4]": "0.00000000",
-                    "new complex mutant penalty[3, 5]": "0.00000000",
-                    "new complex mutant penalty[3, 6]": "0.00000000",
-                    "new complex mutant penalty[4, 0]": "0.00000000",
-                    "new complex mutant penalty[4, 1]": "0.00000000",
-                    "new complex mutant penalty[4, 2]": "0.00000000",
-                    "new complex mutant penalty[4, 3]": "0.00000000",
-                    "new complex mutant penalty[4, 4]": "0.00000000",
-                    "new complex mutant penalty[4, 5]": "0.00000000",
-                    "new complex mutant penalty[4, 6]": "0.00000000",
-                    "new complex mutant penalty[5, 0]": "0.00000000",
-                    "new complex mutant penalty[5, 1]": "0.00000000",
-                    "new complex mutant penalty[5, 2]": "0.00000000",
-                    "new complex mutant penalty[5, 3]": "0.00000000",
-                    "new complex mutant penalty[5, 4]": "0.00000000",
-                    "new complex mutant penalty[5, 5]": "0.00000000",
-                    "new complex mutant penalty[5, 6]": "0.00000000",
-                    "new complex mutant penalty[6, 0]": "0.00000000",
-                    "new complex mutant penalty[6, 1]": "0.00000000",
-                    "new complex mutant penalty[6, 2]": "0.00000000",
-                    "new complex mutant penalty[6, 3]": "0.00000000",
-                    "new complex mutant penalty[6, 4]": "0.00000000",
-                    "new complex mutant penalty[6, 5]": "0.00000000",
-                    "new complex mutant penalty[6, 6]": "0.00000000",
-                    "sensor detection factor[0]": "0.00000000",
-                    "sensor detection factor[1]": "0.00000000",
-                    "sensor detection factor[2]": "0.00000000",
-                    "sensor detection factor[3]": "0.00000000",
-                    "sensor detection factor[4]": "0.00000000",
-                    "sensor detection factor[5]": "0.00000000",
-                    "sensor detection factor[6]": "0.00000000",
-                    "destroy cells": "false"
-                },
-                "defender": {
-                    "against attacker strength[0]": "1.50000000",
-                    "against attacker strength[1]": "1.50000000",
-                    "against attacker strength[2]": "1.50000000",
-                    "against attacker strength[3]": "1.50000000",
-                    "against attacker strength[4]": "1.50000000",
-                    "against attacker strength[5]": "1.50000000",
-                    "against attacker strength[6]": "1.50000000",
-                    "against injector strength[0]": "1.50000000",
-                    "against injector strength[1]": "1.50000000",
-                    "against injector strength[2]": "1.50000000",
-                    "against injector strength[3]": "1.50000000",
-                    "against injector strength[4]": "1.50000000",
-                    "against injector strength[5]": "1.50000000",
-                    "against injector strength[6]": "1.50000000"
-                },
-                "transmitter": {
-                    "energy distribution same creature": "true",
-                    "energy distribution radius[0]": "3.59999990",
-                    "energy distribution radius[1]": "3.59999990",
-                    "energy distribution radius[2]": "3.59999990",
-                    "energy distribution radius[3]": "3.59999990",
-                    "energy distribution radius[4]": "3.59999990",
-                    "energy distribution radius[5]": "3.59999990",
-                    "energy distribution radius[6]": "3.59999990",
-                    "energy distribution value[0]": "10.00000000",
-                    "energy distribution value[1]": "10.00000000",
-                    "energy distribution value[2]": "10.00000000",
-                    "energy distribution value[3]": "10.00000000",
-                    "energy distribution value[4]": "10.00000000",
-                    "energy distribution value[5]": "10.00000000",
-                    "energy distribution value[6]": "10.00000000"
-                },
-                "muscle": {
-                    "contraction expansion delta[0]": "0.05000000",
-                    "contraction expansion delta[1]": "0.05000000",
-                    "contraction expansion delta[2]": "0.05000000",
-                    "contraction expansion delta[3]": "0.05000000",
-                    "contraction expansion delta[4]": "0.05000000",
-                    "contraction expansion delta[5]": "0.05000000",
-                    "contraction expansion delta[6]": "0.05000000",
-                    "movement acceleration[0]": "0.00900000",
-                    "movement acceleration[1]": "0.00900000",
-                    "movement acceleration[2]": "0.00900000",
-                    "movement acceleration[3]": "0.00900000",
-                    "movement acceleration[4]": "0.00900000",
-                    "movement acceleration[5]": "0.00900000",
-                    "movement acceleration[6]": "0.00900000",
-                    "bending angle[0]": "5.00000000",
-                    "bending angle[1]": "5.00000000",
-                    "bending angle[2]": "5.00000000",
-                    "bending angle[3]": "5.00000000",
-                    "bending angle[4]": "5.00000000",
-                    "bending angle[5]": "5.00000000",
-                    "bending angle[6]": "5.00000000",
-                    "bending acceleration[0]": "0.13500001",
-                    "bending acceleration[1]": "0.13500001",
-                    "bending acceleration[2]": "0.13500001",
-                    "bending acceleration[3]": "0.13500001",
-                    "bending acceleration[4]": "0.13500001",
-                    "bending acceleration[5]": "0.13500001",
-                    "bending acceleration[6]": "0.13500001",
-                    "bending acceleration threshold": "0.10000000",
-                    "movement toward targeted object": "false"
-                },
-                "sensor": {
-                    "range[0]": "223.76400757",
-                    "range[1]": "223.76400757",
-                    "range[2]": "223.76400757",
-                    "range[3]": "223.76400757",
-                    "range[4]": "223.76400757",
-                    "range[5]": "223.76400757",
-                    "range[6]": "223.76400757",
-                    "activity threshold": "0.25000000"
-                },
-                "reconnector": {
-                    "radius[0]": "2.00000000",
-                    "radius[1]": "2.00000000",
-                    "radius[2]": "2.00000000",
-                    "radius[3]": "2.00000000",
-                    "radius[4]": "2.00000000",
-                    "radius[5]": "2.00000000",
-                    "radius[6]": "2.00000000",
-                    "activity threshold": "0.10000000"
-                },
-                "detonator": {
-                    "radius[0]": "10.00000000",
-                    "radius[1]": "10.00000000",
-                    "radius[2]": "10.00000000",
-                    "radius[3]": "10.00000000",
-                    "radius[4]": "10.00000000",
-                    "radius[5]": "10.00000000",
-                    "radius[6]": "10.00000000",
-                    "chain explosion probability[0]": "0.00000000",
-                    "chain explosion probability[1]": "0.00000000",
-                    "chain explosion probability[2]": "0.00000000",
-                    "chain explosion probability[3]": "0.00000000",
-                    "chain explosion probability[4]": "0.00000000",
-                    "chain explosion probability[5]": "0.00000000",
-                    "chain explosion probability[6]": "0.00000000",
-                    "activity threshold": "0.10000000"
-                }
-            },
-            "death consequences": "2",
-            "death probability[0]": "0.00010000",
-            "death probability[1]": "0.00010000",
-            "death probability[2]": "0.00010000",
-            "death probability[3]": "0.00010000",
-            "death probability[4]": "0.00010000",
-            "death probability[5]": "0.00010000",
-            "death probability[6]": "0.00010000",
-            "copy mutation": {
-                "neuron data[0]": "0.00000000",
-                "neuron data[1]": "0.00000000",
-                "neuron data[2]": "0.00000000",
-                "neuron data[3]": "0.00000000",
-                "neuron data[4]": "0.00000000",
-                "neuron data[5]": "0.00000000",
-                "neuron data[6]": "0.00000000",
-                "cell properties[0]": "0.00000000",
-                "cell properties[1]": "0.00000000",
-                "cell properties[2]": "0.00000000",
-                "cell properties[3]": "0.00000000",
-                "cell properties[4]": "0.00000000",
-                "cell properties[5]": "0.00000000",
-                "cell properties[6]": "0.00000000",
-                "geometry[0]": "0.00000000",
-                "geometry[1]": "0.00000000",
-                "geometry[2]": "0.00000000",
-                "geometry[3]": "0.00000000",
-                "geometry[4]": "0.00000000",
-                "geometry[5]": "0.00000000",
-                "geometry[6]": "0.00000000",
-                "custom geometry[0]": "0.00000000",
-                "custom geometry[1]": "0.00000000",
-                "custom geometry[2]": "0.00000000",
-                "custom geometry[3]": "0.00000000",
-                "custom geometry[4]": "0.00000000",
-                "custom geometry[5]": "0.00000000",
-                "custom geometry[6]": "0.00000000",
-                "cell function[0]": "0.00000000",
-                "cell function[1]": "0.00000000",
-                "cell function[2]": "0.00000000",
-                "cell function[3]": "0.00000000",
-                "cell function[4]": "0.00000000",
-                "cell function[5]": "0.00000000",
-                "cell function[6]": "0.00000000",
-                "insertion[0]": "0.00000000",
-                "insertion[1]": "0.00000000",
-                "insertion[2]": "0.00000000",
-                "insertion[3]": "0.00000000",
-                "insertion[4]": "0.00000000",
-                "insertion[5]": "0.00000000",
-                "insertion[6]": "0.00000000",
-                "deletion[0]": "0.00000000",
-                "deletion[1]": "0.00000000",
-                "deletion[2]": "0.00000000",
-                "deletion[3]": "0.00000000",
-                "deletion[4]": "0.00000000",
-                "deletion[5]": "0.00000000",
-                "deletion[6]": "0.00000000",
-                "translation[0]": "0.00000000",
-                "translation[1]": "0.00000000",
-                "translation[2]": "0.00000000",
-                "translation[3]": "0.00000000",
-                "translation[4]": "0.00000000",
-                "translation[5]": "0.00000000",
-                "translation[6]": "0.00000000",
-                "duplication[0]": "0.00000000",
-                "duplication[1]": "0.00000000",
-                "duplication[2]": "0.00000000",
-                "duplication[3]": "0.00000000",
-                "duplication[4]": "0.00000000",
-                "duplication[5]": "0.00000000",
-                "duplication[6]": "0.00000000",
-                "cell color[0]": "0.00000000",
-                "cell color[1]": "0.00000000",
-                "cell color[2]": "0.00000000",
-                "cell color[3]": "0.00000000",
-                "cell color[4]": "0.00000000",
-                "cell color[5]": "0.00000000",
-                "cell color[6]": "0.00000000",
-                "subgenome color[0]": "0.00000000",
-                "subgenome color[1]": "0.00000000",
-                "subgenome color[2]": "0.00000000",
-                "subgenome color[3]": "0.00000000",
-                "subgenome color[4]": "0.00000000",
-                "subgenome color[5]": "0.00000000",
-                "subgenome color[6]": "0.00000000",
-                "genome color[0]": "0.00000000",
-                "genome color[1]": "0.00000000",
-                "genome color[2]": "0.00000000",
-                "genome color[3]": "0.00000000",
-                "genome color[4]": "0.00000000",
-                "genome color[5]": "0.00000000",
-                "genome color[6]": "0.00000000",
-                "color transition[0, 0]": "true",
-                "color transition[0, 1]": "true",
-                "color transition[0, 2]": "true",
-                "color transition[0, 3]": "true",
-                "color transition[0, 4]": "true",
-                "color transition[0, 5]": "true",
-                "color transition[0, 6]": "true",
-                "color transition[1, 0]": "true",
-                "color transition[1, 1]": "true",
-                "color transition[1, 2]": "true",
-                "color transition[1, 3]": "true",
-                "color transition[1, 4]": "true",
-                "color transition[1, 5]": "true",
-                "color transition[1, 6]": "true",
-                "color transition[2, 0]": "true",
-                "color transition[2, 1]": "true",
-                "color transition[2, 2]": "true",
-                "color transition[2, 3]": "true",
-                "color transition[2, 4]": "true",
-                "color transition[2, 5]": "true",
-                "color transition[2, 6]": "true",
-                "color transition[3, 0]": "true",
-                "color transition[3, 1]": "true",
-                "color transition[3, 2]": "true",
-                "color transition[3, 3]": "true",
-                "color transition[3, 4]": "true",
-                "color transition[3, 5]": "true",
-                "color transition[3, 6]": "true",
-                "color transition[4, 0]": "true",
-                "color transition[4, 1]": "true",
-                "color transition[4, 2]": "true",
-                "color transition[4, 3]": "true",
-                "color transition[4, 4]": "true",
-                "color transition[4, 5]": "true",
-                "color transition[4, 6]": "true",
-                "color transition[5, 0]": "true",
-                "color transition[5, 1]": "true",
-                "color transition[5, 2]": "true",
-                "color transition[5, 3]": "true",
-                "color transition[5, 4]": "true",
-                "color transition[5, 5]": "true",
-                "color transition[5, 6]": "true",
-                "color transition[6, 0]": "true",
-                "color transition[6, 1]": "true",
-                "color transition[6, 2]": "true",
-                "color transition[6, 3]": "true",
-                "color transition[6, 4]": "true",
-                "color transition[6, 5]": "true",
-                "color transition[6, 6]": "true",
-                "self replication flag": "false",
-                "prevent depth increase": "false"
-            }
-        },
-        "genome complexity": {
-            "genome complexity ramification factor[0]": "0.00000000",
-            "genome complexity ramification factor[1]": "0.00000000",
-            "genome complexity ramification factor[2]": "0.00000000",
-            "genome complexity ramification factor[3]": "0.00000000",
-            "genome complexity ramification factor[4]": "0.00000000",
-            "genome complexity ramification factor[5]": "0.00000000",
-            "genome complexity ramification factor[6]": "0.00000000",
-            "genome complexity size factor[0]": "1.00000000",
-            "genome complexity size factor[1]": "1.00000000",
-            "genome complexity size factor[2]": "1.00000000",
-            "genome complexity size factor[3]": "1.00000000",
-            "genome complexity size factor[4]": "1.00000000",
-            "genome complexity size factor[5]": "1.00000000",
-            "genome complexity size factor[6]": "1.00000000",
-            "genome complexity neuron factor[0]": "0.00000000",
-            "genome complexity neuron factor[1]": "0.00000000",
-            "genome complexity neuron factor[2]": "0.00000000",
-            "genome complexity neuron factor[3]": "0.00000000",
-            "genome complexity neuron factor[4]": "0.00000000",
-            "genome complexity neuron factor[5]": "0.00000000",
-            "genome complexity neuron factor[6]": "0.00000000"
-        },
-        "radiation": {
-            "factor[0]": "0.00002600",
-            "factor[1]": "0.00009300",
-            "factor[2]": "0.00002600",
-            "factor[3]": "0.00002600",
-            "factor[4]": "0.00002600",
-            "factor[5]": "0.00002600",
-            "factor[6]": "0.00002600",
-            "probability": "0.03000000",
-            "velocity multiplier": "1.00000000",
-            "velocity perturbation": "0.50000000",
-            "disable sources": "false",
-            "absorption[0]": "0.23770000",
-            "absorption[1]": "0.06790000",
-            "absorption[2]": "0.23000000",
-            "absorption[3]": "0.23000000",
-            "absorption[4]": "0.23000000",
-            "absorption[5]": "0.23000000",
-            "absorption[6]": "0.23000000",
-            "absorption velocity penalty[0]": "0.00000000",
-            "absorption velocity penalty[1]": "0.00000000",
-            "absorption velocity penalty[2]": "0.00000000",
-            "absorption velocity penalty[3]": "0.00000000",
-            "absorption velocity penalty[4]": "0.00000000",
-            "absorption velocity penalty[5]": "0.00000000",
-            "absorption velocity penalty[6]": "0.00000000",
-            "absorption low velocity penalty[0]": "0.00000000",
-            "absorption low velocity penalty[1]": "0.00000000",
-            "absorption low velocity penalty[2]": "0.00000000",
-            "absorption low velocity penalty[3]": "0.00000000",
-            "absorption low velocity penalty[4]": "0.00000000",
-            "absorption low velocity penalty[5]": "0.00000000",
-            "absorption low velocity penalty[6]": "0.00000000",
-            "absorption low connection penalty[0]": "0.00000000",
-            "absorption low connection penalty[1]": "0.00000000",
-            "absorption low connection penalty[2]": "0.00000000",
-            "absorption low connection penalty[3]": "0.00000000",
-            "absorption low connection penalty[4]": "0.00000000",
-            "absorption low connection penalty[5]": "0.00000000",
-            "absorption low connection penalty[6]": "0.00000000",
-            "absorption low genome complexity penalty[0]": "0.00000000",
-            "absorption low genome complexity penalty[1]": "0.00000000",
-            "absorption low genome complexity penalty[2]": "0.00000000",
-            "absorption low genome complexity penalty[3]": "0.00000000",
-            "absorption low genome complexity penalty[4]": "0.00000000",
-            "absorption low genome complexity penalty[5]": "0.00000000",
-            "absorption low genome complexity penalty[6]": "0.00000000",
-            "min cell age[0]": "29648",
-            "min cell age[1]": "0",
-            "min cell age[2]": "0",
-            "min cell age[3]": "0",
-            "min cell age[4]": "0",
-            "min cell age[5]": "0",
-            "min cell age[6]": "0"
-        },
-        "high radiation": {
-            "min cell energy[0]": "1483.98205566",
-            "min cell energy[1]": "1483.98205566",
-            "min cell energy[2]": "1483.98205566",
-            "min cell energy[3]": "1483.98205566",
-            "min cell energy[4]": "1483.98205566",
-            "min cell energy[5]": "1483.98205566",
-            "min cell energy[6]": "1483.98205566",
-            "factor[0]": "0.00047800",
-            "factor[1]": "0.00047800",
-            "factor[2]": "0.00047800",
-            "factor[3]": "0.00047800",
-            "factor[4]": "0.00047800",
-            "factor[5]": "0.00047800",
-            "factor[6]": "0.00047800"
-        },
-        "particle": {
-            "transformation allowed": "false",
-            "transformation": {
-                "random cell function": "false",
-                "max genome size": "300"
-            },
-            "split energy[0]": "340282346638528859811704183484516925440.00000000",
-            "split energy[1]": "340282346638528859811704183484516925440.00000000",
-            "split energy[2]": "340282346638528859811704183484516925440.00000000",
-            "split energy[3]": "340282346638528859811704183484516925440.00000000",
-            "split energy[4]": "340282346638528859811704183484516925440.00000000",
-            "split energy[5]": "340282346638528859811704183484516925440.00000000",
-            "split energy[6]": "340282346638528859811704183484516925440.00000000"
-        },
-        "legacy": {
-            "cell": {
-                "function": {
-                    "muscle": {
-                        "movement angle from sensor": "false"
-                    }
+    "Simulation parameters": {
+        "Number of layers": "0",
+        "Number of sources": "0",
+        "General": {
+            "Project name": {
+                "Base": {
+                    "Value": "<unnamed>"
                 }
             }
         },
-        "particle sources": {
-            "num sources": "3",
-            "base strength pinned": "true",
-            "0": {
-                "pos": {
-                    "x": "502.00000000",
-                    "y": "502.00000000"
-                },
-                "vel": {
-                    "x": "0.00000000",
-                    "y": "0.00000000"
-                },
-                "use angle": "false",
-                "strength": "0.33333334",
-                "strength pinned": "false",
-                "angle": "0.00000000",
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "radius": "82.00000000"
+        "Visualization": {
+            "Background color": {
+                "Base": {
+                    "Value": {
+                        "R": "0.00000000",
+                        "G": "0.00000000",
+                        "B": "0.10600000"
                     }
                 }
             },
-            "1": {
-                "pos": {
-                    "x": "1378.00000000",
-                    "y": "500.00000000"
+            "Primary cell coloring": {
+                "Base": {
+                    "Value": "1"
                 },
-                "vel": {
-                    "x": "0.00000000",
-                    "y": "0.00000000"
-                },
-                "use angle": "false",
-                "strength": "0.33333334",
-                "strength pinned": "false",
-                "angle": "0.00000000",
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "radius": "44.00000000"
+                "Specific cell function": {
+                    "Highlighted cell function": {
+                        "Base": {
+                            "Value": "4"
+                        }
                     }
                 }
             },
-            "2": {
-                "pos": {
-                    "x": "182.00000000",
-                    "y": "500.00000000"
-                },
-                "vel": {
-                    "x": "0.00000000",
-                    "y": "0.00000000"
-                },
-                "use angle": "true",
-                "strength": "0.33333334",
-                "strength pinned": "false",
-                "angle": "90.00000000",
-                "shape": {
-                    "type": "1",
-                    "rectangular": {
-                        "width": "1.00000000",
-                        "height": "164.00000000"
-                    }
+            "Cell radius": {
+                "Base": {
+                    "Value": "0.25000000"
+                }
+            },
+            "Zoom level for neural activity": {
+                "Base": {
+                    "Value": "2.00000000"
+                }
+            },
+            "Attack visualization": {
+                "Base": {
+                    "Value": "true"
+                }
+            },
+            "Muscle movement visualization": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Borderless rendering": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Grid lines": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Mark reference domain": {
+                "Base": {
+                    "Value": "true"
                 }
             }
         },
-        "spots": {
-            "num spots": "3",
-            "0": {
-                "color": "4279964178",
-                "pos": {
-                    "x": "500.00000000",
-                    "y": "500.00000000"
+        "Numerics": {
+            "Time step size": {
+                "Base": {
+                    "Value": "1.00000000"
+                }
+            }
+        },
+        "Physics: Motion": {
+            "Motion type": {
+                "Base": {
+                    "Value": "0"
                 },
-                "vel": {
-                    "x": "0.00000000",
-                    "y": "0.00000000"
-                },
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "367.70001221"
-                    }
-                },
-                "flow": {
-                    "type": "1",
-                    "radial": {
-                        "orientation": "0",
-                        "strength": "0.00305000",
-                        "drift angle": "2.59999990"
-                    }
-                },
-                "fadeout radius": "154.80000305",
-                "friction": {
-                    "activated": "false",
-                    "value": "0.00200000"
-                },
-                "rigidity": {
-                    "activated": "false",
-                    "value": "0.00000000"
-                },
-                "radiation": {
-                    "disable sources": {
-                        "activated": "false",
-                        "value": "false"
-                    },
-                    "absorption": {
-                        "activated": "false"
-                    },
-                    "absorption[0]": "0.23770000",
-                    "absorption[1]": "0.06790000",
-                    "absorption[2]": "0.23000000",
-                    "absorption[3]": "0.23000000",
-                    "absorption[4]": "0.23000000",
-                    "absorption[5]": "0.23000000",
-                    "absorption[6]": "0.23000000",
-                    "absorption low velocity penalty": {
-                        "activated": "false"
-                    },
-                    "absorption low velocity penalty[0]": "0.00000000",
-                    "absorption low velocity penalty[1]": "0.00000000",
-                    "absorption low velocity penalty[2]": "0.00000000",
-                    "absorption low velocity penalty[3]": "0.00000000",
-                    "absorption low velocity penalty[4]": "0.00000000",
-                    "absorption low velocity penalty[5]": "0.00000000",
-                    "absorption low velocity penalty[6]": "0.00000000",
-                    "absorption low genome complexity penalty": {
-                        "activated": "false"
-                    },
-                    "absorption low genome complexity penalty[0]": "0.00000000",
-                    "absorption low genome complexity penalty[1]": "0.00000000",
-                    "absorption low genome complexity penalty[2]": "0.00000000",
-                    "absorption low genome complexity penalty[3]": "0.00000000",
-                    "absorption low genome complexity penalty[4]": "0.00000000",
-                    "absorption low genome complexity penalty[5]": "0.00000000",
-                    "absorption low genome complexity penalty[6]": "0.00000000",
-                    "factor": {
-                        "activated": "true"
-                    },
-                    "factor[0]": "0.00001600",
-                    "factor[1]": "0.00001600",
-                    "factor[2]": "0.00001600",
-                    "factor[3]": "0.00001600",
-                    "factor[4]": "0.00001600",
-                    "factor[5]": "0.00001600",
-                    "factor[6]": "0.00001600"
-                },
-                "cell": {
-                    "max force": {
-                        "activated": "false"
-                    },
-                    "max force[0]": "0.80000001",
-                    "max force[1]": "0.80000001",
-                    "max force[2]": "0.80000001",
-                    "max force[3]": "0.80000001",
-                    "max force[4]": "0.80000001",
-                    "max force[5]": "0.80000001",
-                    "max force[6]": "0.80000001",
-                    "min energy": {
-                        "activated": "false"
-                    },
-                    "min energy[0]": "50.00000000",
-                    "min energy[1]": "50.00000000",
-                    "min energy[2]": "50.00000000",
-                    "min energy[3]": "50.00000000",
-                    "min energy[4]": "50.00000000",
-                    "min energy[5]": "50.00000000",
-                    "min energy[6]": "50.00000000",
-                    "death probability": {
-                        "activated": "false"
-                    },
-                    "death probability[0]": "0.00100000",
-                    "death probability[1]": "0.00100000",
-                    "death probability[2]": "0.00100000",
-                    "death probability[3]": "0.00100000",
-                    "death probability[4]": "0.00100000",
-                    "death probability[5]": "0.00100000",
-                    "death probability[6]": "0.00100000",
-                    "fusion velocity": {
-                        "activated": "false",
-                        "value": "0.82400000"
-                    },
-                    "max binding energy": {
-                        "activated": "false",
-                        "value": "500000.00000000"
-                    },
-                    "inactive max age": {
-                        "activated": "false"
-                    },
-                    "inactive max age[0]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[1]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[2]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[3]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[4]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[5]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[6]": "340282346638528859811704183484516925440.00000000",
-                    "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
-                        "duration[1]": "0",
-                        "duration[2]": "0",
-                        "duration[3]": "0",
-                        "duration[4]": "0",
-                        "duration[5]": "0",
-                        "duration[6]": "0",
-                        "target color[0]": "0",
-                        "target color[1]": "1",
-                        "target color[2]": "2",
-                        "target color[3]": "3",
-                        "target color[4]": "4",
-                        "target color[5]": "5",
-                        "target color[6]": "6"
-                    },
-                    "function": {
-                        "attacker": {
-                            "energy cost": {
-                                "activated": "false"
-                            },
-                            "energy cost[0]": "0.00000000",
-                            "energy cost[1]": "0.00000000",
-                            "energy cost[2]": "0.00000000",
-                            "energy cost[3]": "0.00000000",
-                            "energy cost[4]": "0.00000000",
-                            "energy cost[5]": "0.00000000",
-                            "energy cost[6]": "0.00000000",
-                            "food chain color matrix": {
-                                "activated": "false",
-                                "value[0, 0]": "1.00000000",
-                                "value[0, 1]": "1.00000000",
-                                "value[0, 2]": "1.00000000",
-                                "value[0, 3]": "1.00000000",
-                                "value[0, 4]": "1.00000000",
-                                "value[0, 5]": "1.00000000",
-                                "value[0, 6]": "1.00000000",
-                                "value[1, 0]": "1.00000000",
-                                "value[1, 1]": "1.00000000",
-                                "value[1, 2]": "1.00000000",
-                                "value[1, 3]": "1.00000000",
-                                "value[1, 4]": "1.00000000",
-                                "value[1, 5]": "1.00000000",
-                                "value[1, 6]": "1.00000000",
-                                "value[2, 0]": "1.00000000",
-                                "value[2, 1]": "1.00000000",
-                                "value[2, 2]": "1.00000000",
-                                "value[2, 3]": "1.00000000",
-                                "value[2, 4]": "1.00000000",
-                                "value[2, 5]": "1.00000000",
-                                "value[2, 6]": "1.00000000",
-                                "value[3, 0]": "1.00000000",
-                                "value[3, 1]": "1.00000000",
-                                "value[3, 2]": "1.00000000",
-                                "value[3, 3]": "1.00000000",
-                                "value[3, 4]": "1.00000000",
-                                "value[3, 5]": "1.00000000",
-                                "value[3, 6]": "1.00000000",
-                                "value[4, 0]": "1.00000000",
-                                "value[4, 1]": "1.00000000",
-                                "value[4, 2]": "1.00000000",
-                                "value[4, 3]": "1.00000000",
-                                "value[4, 4]": "1.00000000",
-                                "value[4, 5]": "1.00000000",
-                                "value[4, 6]": "1.00000000",
-                                "value[5, 0]": "1.00000000",
-                                "value[5, 1]": "1.00000000",
-                                "value[5, 2]": "1.00000000",
-                                "value[5, 3]": "1.00000000",
-                                "value[5, 4]": "1.00000000",
-                                "value[5, 5]": "1.00000000",
-                                "value[5, 6]": "1.00000000",
-                                "value[6, 0]": "1.00000000",
-                                "value[6, 1]": "1.00000000",
-                                "value[6, 2]": "1.00000000",
-                                "value[6, 3]": "1.00000000",
-                                "value[6, 4]": "1.00000000",
-                                "value[6, 5]": "1.00000000",
-                                "value[6, 6]": "1.00000000"
-                            },
-                            "genome size bonus": {
-                                "activated": "false",
-                                "value[0, 0]": "0.00000000",
-                                "value[0, 1]": "0.00000000",
-                                "value[0, 2]": "0.00000000",
-                                "value[0, 3]": "0.00000000",
-                                "value[0, 4]": "0.00000000",
-                                "value[0, 5]": "0.00000000",
-                                "value[0, 6]": "0.00000000",
-                                "value[1, 0]": "0.00000000",
-                                "value[1, 1]": "0.00000000",
-                                "value[1, 2]": "0.00000000",
-                                "value[1, 3]": "0.00000000",
-                                "value[1, 4]": "0.00000000",
-                                "value[1, 5]": "0.00000000",
-                                "value[1, 6]": "0.00000000",
-                                "value[2, 0]": "0.00000000",
-                                "value[2, 1]": "0.00000000",
-                                "value[2, 2]": "0.00000000",
-                                "value[2, 3]": "0.00000000",
-                                "value[2, 4]": "0.00000000",
-                                "value[2, 5]": "0.00000000",
-                                "value[2, 6]": "0.00000000",
-                                "value[3, 0]": "0.00000000",
-                                "value[3, 1]": "0.00000000",
-                                "value[3, 2]": "0.00000000",
-                                "value[3, 3]": "0.00000000",
-                                "value[3, 4]": "0.00000000",
-                                "value[3, 5]": "0.00000000",
-                                "value[3, 6]": "0.00000000",
-                                "value[4, 0]": "0.00000000",
-                                "value[4, 1]": "0.00000000",
-                                "value[4, 2]": "0.00000000",
-                                "value[4, 3]": "0.00000000",
-                                "value[4, 4]": "0.00000000",
-                                "value[4, 5]": "0.00000000",
-                                "value[4, 6]": "0.00000000",
-                                "value[5, 0]": "0.00000000",
-                                "value[5, 1]": "0.00000000",
-                                "value[5, 2]": "0.00000000",
-                                "value[5, 3]": "0.00000000",
-                                "value[5, 4]": "0.00000000",
-                                "value[5, 5]": "0.00000000",
-                                "value[5, 6]": "0.00000000",
-                                "value[6, 0]": "0.00000000",
-                                "value[6, 1]": "0.00000000",
-                                "value[6, 2]": "0.00000000",
-                                "value[6, 3]": "0.00000000",
-                                "value[6, 4]": "0.00000000",
-                                "value[6, 5]": "0.00000000",
-                                "value[6, 6]": "0.00000000"
-                            },
-                            "new complex mutant penalty": {
-                                "activated": "false",
-                                "value[0, 0]": "0.00000000",
-                                "value[0, 1]": "0.00000000",
-                                "value[0, 2]": "0.00000000",
-                                "value[0, 3]": "0.00000000",
-                                "value[0, 4]": "0.00000000",
-                                "value[0, 5]": "0.00000000",
-                                "value[0, 6]": "0.00000000",
-                                "value[1, 0]": "0.00000000",
-                                "value[1, 1]": "0.00000000",
-                                "value[1, 2]": "0.00000000",
-                                "value[1, 3]": "0.00000000",
-                                "value[1, 4]": "0.00000000",
-                                "value[1, 5]": "0.00000000",
-                                "value[1, 6]": "0.00000000",
-                                "value[2, 0]": "0.00000000",
-                                "value[2, 1]": "0.00000000",
-                                "value[2, 2]": "0.00000000",
-                                "value[2, 3]": "0.00000000",
-                                "value[2, 4]": "0.00000000",
-                                "value[2, 5]": "0.00000000",
-                                "value[2, 6]": "0.00000000",
-                                "value[3, 0]": "0.00000000",
-                                "value[3, 1]": "0.00000000",
-                                "value[3, 2]": "0.00000000",
-                                "value[3, 3]": "0.00000000",
-                                "value[3, 4]": "0.00000000",
-                                "value[3, 5]": "0.00000000",
-                                "value[3, 6]": "0.00000000",
-                                "value[4, 0]": "0.00000000",
-                                "value[4, 1]": "0.00000000",
-                                "value[4, 2]": "0.00000000",
-                                "value[4, 3]": "0.00000000",
-                                "value[4, 4]": "0.00000000",
-                                "value[4, 5]": "0.00000000",
-                                "value[4, 6]": "0.00000000",
-                                "value[5, 0]": "0.00000000",
-                                "value[5, 1]": "0.00000000",
-                                "value[5, 2]": "0.00000000",
-                                "value[5, 3]": "0.00000000",
-                                "value[5, 4]": "0.00000000",
-                                "value[5, 5]": "0.00000000",
-                                "value[5, 6]": "0.00000000",
-                                "value[6, 0]": "0.00000000",
-                                "value[6, 1]": "0.00000000",
-                                "value[6, 2]": "0.00000000",
-                                "value[6, 3]": "0.00000000",
-                                "value[6, 4]": "0.00000000",
-                                "value[6, 5]": "0.00000000",
-                                "value[6, 6]": "0.00000000"
-                            },
-                            "geometry deviation exponent": {
-                                "activated": "false"
-                            },
-                            "geometry deviation exponent[0]": "0.00000000",
-                            "geometry deviation exponent[1]": "0.00000000",
-                            "geometry deviation exponent[2]": "0.00000000",
-                            "geometry deviation exponent[3]": "0.00000000",
-                            "geometry deviation exponent[4]": "0.00000000",
-                            "geometry deviation exponent[5]": "0.00000000",
-                            "geometry deviation exponent[6]": "0.00000000",
-                            "connections mismatch penalty": {
-                                "activated": "false"
-                            },
-                            "connections mismatch penalty[0]": "0.33000001",
-                            "connections mismatch penalty[1]": "0.33000001",
-                            "connections mismatch penalty[2]": "0.33000001",
-                            "connections mismatch penalty[3]": "0.33000001",
-                            "connections mismatch penalty[4]": "0.33000001",
-                            "connections mismatch penalty[5]": "0.33000001",
-                            "connections mismatch penalty[6]": "0.33000001"
+                "Fluid solver": {
+                    "Smoothing length": {
+                        "Base": {
+                            "Value": "0.80000001"
                         }
                     },
-                    "copy mutation": {
-                        "neuron data": {
-                            "activated": "false"
-                        },
-                        "neuron data[0]": "900.00000000",
-                        "neuron data[1]": "900.00000000",
-                        "neuron data[2]": "0.00000000",
-                        "neuron data[3]": "0.00000000",
-                        "neuron data[4]": "0.00000000",
-                        "neuron data[5]": "0.00000000",
-                        "neuron data[6]": "2500.00000000",
-                        "cell properties": {
-                            "activated": "false"
-                        },
-                        "cell properties[0]": "0.00000000",
-                        "cell properties[1]": "0.00000000",
-                        "cell properties[2]": "0.00000000",
-                        "cell properties[3]": "0.00000000",
-                        "cell properties[4]": "0.00000000",
-                        "cell properties[5]": "0.00000000",
-                        "cell properties[6]": "0.00000000",
-                        "geometry": {
-                            "activated": "false"
-                        },
-                        "geometry[0]": "40842892819043895476224.00000000",
-                        "geometry[1]": "0.00000000",
-                        "geometry[2]": "0.00000000",
-                        "geometry[3]": "0.00000000",
-                        "geometry[4]": "0.00000000",
-                        "geometry[5]": "1250.00000000",
-                        "geometry[6]": "0.00000000",
-                        "custom geometry": {
-                            "activated": "false"
-                        },
-                        "custom geometry[0]": "0.00000000",
-                        "custom geometry[1]": "1250.00000000",
-                        "custom geometry[2]": "37.50000000",
-                        "custom geometry[3]": "37.50000000",
-                        "custom geometry[4]": "37.50000000",
-                        "custom geometry[5]": "37.50000000",
-                        "custom geometry[6]": "37.50000000",
-                        "cell function": {
-                            "activated": "false"
-                        },
-                        "cell function[0]": "0.00000000",
-                        "cell function[1]": "0.00000000",
-                        "cell function[2]": "0.00000000",
-                        "cell function[3]": "0.00000000",
-                        "cell function[4]": "-1088771659399168.00000000",
-                        "cell function[5]": "0.00000000",
-                        "cell function[6]": "0.00000000",
-                        "insertion": {
-                            "activated": "false"
-                        },
-                        "insertion[0]": "37.50000000",
-                        "insertion[1]": "25.00000000",
-                        "insertion[2]": "0.00000000",
-                        "insertion[3]": "63750.00000000",
-                        "insertion[4]": "63750.00000000",
-                        "insertion[5]": "63750.00000000",
-                        "insertion[6]": "63750.00000000",
-                        "deletion": {
-                            "activated": "false"
-                        },
-                        "deletion[0]": "0.00000000",
-                        "deletion[1]": "0.00000000",
-                        "deletion[2]": "0.00000000",
-                        "deletion[3]": "0.00000000",
-                        "deletion[4]": "61934074331136.00000000",
-                        "deletion[5]": "0.00000000",
-                        "deletion[6]": "0.00000000",
-                        "translation": {
-                            "activated": "false"
-                        },
-                        "translation[0]": "22171407864929487683584.00000000",
-                        "translation[1]": "0.00000000",
-                        "translation[2]": "500.00000000",
-                        "translation[3]": "50000.00000000",
-                        "translation[4]": "-21775589417418752.00000000",
-                        "translation[5]": "0.00000000",
-                        "translation[6]": "-21775589417418752.00000000",
-                        "duplication": {
-                            "activated": "false"
-                        },
-                        "duplication[0]": "23789033297086559289344.00000000",
-                        "duplication[1]": "0.00000000",
-                        "duplication[2]": "0.00000000",
-                        "duplication[3]": "0.00000000",
-                        "duplication[4]": "22171277260540293939200.00000000",
-                        "duplication[5]": "0.00000000",
-                        "duplication[6]": "0.00000000",
-                        "cell color": {
-                            "activated": "false"
-                        },
-                        "cell color[0]": "-1090898876170240.00000000",
-                        "cell color[1]": "0.00000000",
-                        "cell color[2]": "0.00000000",
-                        "cell color[3]": "0.00000000",
-                        "cell color[4]": "-1088779444027392.00000000",
-                        "cell color[5]": "0.00000000",
-                        "cell color[6]": "0.00000000",
-                        "subgenome color": {
-                            "activated": "false"
-                        },
-                        "subgenome color[0]": "1238681453068288.00000000",
-                        "subgenome color[1]": "0.00000000",
-                        "subgenome color[2]": "0.00000000",
-                        "subgenome color[3]": "0.00000000",
-                        "subgenome color[4]": "0.59172744",
-                        "subgenome color[5]": "0.00000000",
-                        "subgenome color[6]": "-21859727826747392.00000000",
-                        "genome color": {
-                            "activated": "false"
-                        },
-                        "genome color[0]": "-21817978597146624.00000000",
-                        "genome color[1]": "0.00000000",
-                        "genome color[2]": "-21775853557907456.00000000",
-                        "genome color[3]": "0.00000000",
-                        "genome color[4]": "22156971576323951558656.00000000",
-                        "genome color[5]": "0.00000000",
-                        "genome color[6]": "0.00000000"
+                    "Pressure": {
+                        "Base": {
+                            "Value": "0.10000000"
+                        }
+                    },
+                    "Viscosity": {
+                        "Base": {
+                            "Value": "0.10000000"
+                        }
+                    }
+                },
+                "Collision-based solver": {
+                    "Repulsion strength": {
+                        "Base": {
+                            "Value": "0.08000000"
+                        }
+                    },
+                    "Maximum collision distance": {
+                        "Base": {
+                            "Value": "1.29999995"
+                        }
                     }
                 }
             },
-            "1": {
-                "color": "4279635733",
-                "pos": {
-                    "x": "1374.19995117",
-                    "y": "500.00000000"
-                },
-                "vel": {
-                    "x": "0.00000000",
-                    "y": "0.00000000"
-                },
-                "shape": {
-                    "type": "0",
-                    "circular": {
-                        "core radius": "216.10000610"
-                    }
-                },
-                "flow": {
-                    "type": "1",
-                    "radial": {
-                        "orientation": "0",
-                        "strength": "0.00305000",
-                        "drift angle": "9.00000000"
-                    }
-                },
-                "fadeout radius": "116.09999847",
-                "friction": {
-                    "activated": "false",
-                    "value": "0.00200000"
-                },
-                "rigidity": {
-                    "activated": "false",
-                    "value": "0.00000000"
-                },
-                "radiation": {
-                    "disable sources": {
-                        "activated": "false",
-                        "value": "false"
-                    },
-                    "absorption": {
-                        "activated": "false"
-                    },
-                    "absorption[0]": "0.23770000",
-                    "absorption[1]": "0.06790000",
-                    "absorption[2]": "0.23000000",
-                    "absorption[3]": "0.23000000",
-                    "absorption[4]": "0.23000000",
-                    "absorption[5]": "0.23000000",
-                    "absorption[6]": "0.23000000",
-                    "absorption low velocity penalty": {
-                        "activated": "false"
-                    },
-                    "absorption low velocity penalty[0]": "0.00000000",
-                    "absorption low velocity penalty[1]": "0.00000000",
-                    "absorption low velocity penalty[2]": "0.00000000",
-                    "absorption low velocity penalty[3]": "0.00000000",
-                    "absorption low velocity penalty[4]": "0.00000000",
-                    "absorption low velocity penalty[5]": "0.00000000",
-                    "absorption low velocity penalty[6]": "0.00000000",
-                    "absorption low genome complexity penalty": {
-                        "activated": "false"
-                    },
-                    "absorption low genome complexity penalty[0]": "0.00000000",
-                    "absorption low genome complexity penalty[1]": "0.00000000",
-                    "absorption low genome complexity penalty[2]": "0.00000000",
-                    "absorption low genome complexity penalty[3]": "0.00000000",
-                    "absorption low genome complexity penalty[4]": "0.00000000",
-                    "absorption low genome complexity penalty[5]": "0.00000000",
-                    "absorption low genome complexity penalty[6]": "0.00000000",
-                    "factor": {
-                        "activated": "true"
-                    },
-                    "factor[0]": "0.00001600",
-                    "factor[1]": "0.00001600",
-                    "factor[2]": "0.00001600",
-                    "factor[3]": "0.00001600",
-                    "factor[4]": "0.00001600",
-                    "factor[5]": "0.00001600",
-                    "factor[6]": "0.00001600"
-                },
-                "cell": {
-                    "max force": {
-                        "activated": "false"
-                    },
-                    "max force[0]": "0.80000001",
-                    "max force[1]": "0.80000001",
-                    "max force[2]": "0.80000001",
-                    "max force[3]": "0.80000001",
-                    "max force[4]": "0.80000001",
-                    "max force[5]": "0.80000001",
-                    "max force[6]": "0.80000001",
-                    "min energy": {
-                        "activated": "false"
-                    },
-                    "min energy[0]": "50.00000000",
-                    "min energy[1]": "50.00000000",
-                    "min energy[2]": "50.00000000",
-                    "min energy[3]": "50.00000000",
-                    "min energy[4]": "50.00000000",
-                    "min energy[5]": "50.00000000",
-                    "min energy[6]": "50.00000000",
-                    "death probability": {
-                        "activated": "false"
-                    },
-                    "death probability[0]": "0.00100000",
-                    "death probability[1]": "0.00100000",
-                    "death probability[2]": "0.00100000",
-                    "death probability[3]": "0.00100000",
-                    "death probability[4]": "0.00100000",
-                    "death probability[5]": "0.00100000",
-                    "death probability[6]": "0.00100000",
-                    "fusion velocity": {
-                        "activated": "false",
-                        "value": "0.82400000"
-                    },
-                    "max binding energy": {
-                        "activated": "false",
-                        "value": "500000.00000000"
-                    },
-                    "inactive max age": {
-                        "activated": "false"
-                    },
-                    "inactive max age[0]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[1]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[2]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[3]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[4]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[5]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[6]": "340282346638528859811704183484516925440.00000000",
-                    "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
-                        "duration[1]": "0",
-                        "duration[2]": "0",
-                        "duration[3]": "0",
-                        "duration[4]": "0",
-                        "duration[5]": "0",
-                        "duration[6]": "0",
-                        "target color[0]": "0",
-                        "target color[1]": "1",
-                        "target color[2]": "2",
-                        "target color[3]": "3",
-                        "target color[4]": "4",
-                        "target color[5]": "5",
-                        "target color[6]": "6"
-                    },
-                    "function": {
-                        "attacker": {
-                            "energy cost": {
-                                "activated": "false"
-                            },
-                            "energy cost[0]": "0.00000000",
-                            "energy cost[1]": "0.00000000",
-                            "energy cost[2]": "0.00000000",
-                            "energy cost[3]": "0.00000000",
-                            "energy cost[4]": "0.00000000",
-                            "energy cost[5]": "0.00000000",
-                            "energy cost[6]": "0.00000000",
-                            "food chain color matrix": {
-                                "activated": "false",
-                                "value[0, 0]": "1.00000000",
-                                "value[0, 1]": "1.00000000",
-                                "value[0, 2]": "1.00000000",
-                                "value[0, 3]": "1.00000000",
-                                "value[0, 4]": "1.00000000",
-                                "value[0, 5]": "1.00000000",
-                                "value[0, 6]": "1.00000000",
-                                "value[1, 0]": "1.00000000",
-                                "value[1, 1]": "1.00000000",
-                                "value[1, 2]": "1.00000000",
-                                "value[1, 3]": "1.00000000",
-                                "value[1, 4]": "1.00000000",
-                                "value[1, 5]": "1.00000000",
-                                "value[1, 6]": "1.00000000",
-                                "value[2, 0]": "1.00000000",
-                                "value[2, 1]": "1.00000000",
-                                "value[2, 2]": "1.00000000",
-                                "value[2, 3]": "1.00000000",
-                                "value[2, 4]": "1.00000000",
-                                "value[2, 5]": "1.00000000",
-                                "value[2, 6]": "1.00000000",
-                                "value[3, 0]": "1.00000000",
-                                "value[3, 1]": "1.00000000",
-                                "value[3, 2]": "1.00000000",
-                                "value[3, 3]": "1.00000000",
-                                "value[3, 4]": "1.00000000",
-                                "value[3, 5]": "1.00000000",
-                                "value[3, 6]": "1.00000000",
-                                "value[4, 0]": "1.00000000",
-                                "value[4, 1]": "1.00000000",
-                                "value[4, 2]": "1.00000000",
-                                "value[4, 3]": "1.00000000",
-                                "value[4, 4]": "1.00000000",
-                                "value[4, 5]": "1.00000000",
-                                "value[4, 6]": "1.00000000",
-                                "value[5, 0]": "1.00000000",
-                                "value[5, 1]": "1.00000000",
-                                "value[5, 2]": "1.00000000",
-                                "value[5, 3]": "1.00000000",
-                                "value[5, 4]": "1.00000000",
-                                "value[5, 5]": "1.00000000",
-                                "value[5, 6]": "1.00000000",
-                                "value[6, 0]": "1.00000000",
-                                "value[6, 1]": "1.00000000",
-                                "value[6, 2]": "1.00000000",
-                                "value[6, 3]": "1.00000000",
-                                "value[6, 4]": "1.00000000",
-                                "value[6, 5]": "1.00000000",
-                                "value[6, 6]": "1.00000000"
-                            },
-                            "genome size bonus": {
-                                "activated": "false",
-                                "value[0, 0]": "0.00000000",
-                                "value[0, 1]": "0.00000000",
-                                "value[0, 2]": "0.00000000",
-                                "value[0, 3]": "0.00000000",
-                                "value[0, 4]": "0.00000000",
-                                "value[0, 5]": "0.00000000",
-                                "value[0, 6]": "0.00000000",
-                                "value[1, 0]": "0.00000000",
-                                "value[1, 1]": "0.00000000",
-                                "value[1, 2]": "0.00000000",
-                                "value[1, 3]": "0.00000000",
-                                "value[1, 4]": "0.00000000",
-                                "value[1, 5]": "0.00000000",
-                                "value[1, 6]": "0.00000000",
-                                "value[2, 0]": "0.00000000",
-                                "value[2, 1]": "0.00000000",
-                                "value[2, 2]": "0.00000000",
-                                "value[2, 3]": "0.00000000",
-                                "value[2, 4]": "0.00000000",
-                                "value[2, 5]": "0.00000000",
-                                "value[2, 6]": "0.00000000",
-                                "value[3, 0]": "0.00000000",
-                                "value[3, 1]": "0.00000000",
-                                "value[3, 2]": "0.00000000",
-                                "value[3, 3]": "0.00000000",
-                                "value[3, 4]": "0.00000000",
-                                "value[3, 5]": "0.00000000",
-                                "value[3, 6]": "0.00000000",
-                                "value[4, 0]": "0.00000000",
-                                "value[4, 1]": "0.00000000",
-                                "value[4, 2]": "0.00000000",
-                                "value[4, 3]": "0.00000000",
-                                "value[4, 4]": "0.00000000",
-                                "value[4, 5]": "0.00000000",
-                                "value[4, 6]": "0.00000000",
-                                "value[5, 0]": "0.00000000",
-                                "value[5, 1]": "0.00000000",
-                                "value[5, 2]": "0.00000000",
-                                "value[5, 3]": "0.00000000",
-                                "value[5, 4]": "0.00000000",
-                                "value[5, 5]": "0.00000000",
-                                "value[5, 6]": "0.00000000",
-                                "value[6, 0]": "0.00000000",
-                                "value[6, 1]": "0.00000000",
-                                "value[6, 2]": "0.00000000",
-                                "value[6, 3]": "0.00000000",
-                                "value[6, 4]": "0.00000000",
-                                "value[6, 5]": "0.00000000",
-                                "value[6, 6]": "0.00000000"
-                            },
-                            "new complex mutant penalty": {
-                                "activated": "false",
-                                "value[0, 0]": "0.00000000",
-                                "value[0, 1]": "0.00000000",
-                                "value[0, 2]": "0.00000000",
-                                "value[0, 3]": "0.00000000",
-                                "value[0, 4]": "0.00000000",
-                                "value[0, 5]": "0.00000000",
-                                "value[0, 6]": "0.00000000",
-                                "value[1, 0]": "0.00000000",
-                                "value[1, 1]": "0.00000000",
-                                "value[1, 2]": "0.00000000",
-                                "value[1, 3]": "0.00000000",
-                                "value[1, 4]": "0.00000000",
-                                "value[1, 5]": "0.00000000",
-                                "value[1, 6]": "0.00000000",
-                                "value[2, 0]": "0.00000000",
-                                "value[2, 1]": "0.00000000",
-                                "value[2, 2]": "0.00000000",
-                                "value[2, 3]": "0.00000000",
-                                "value[2, 4]": "0.00000000",
-                                "value[2, 5]": "0.00000000",
-                                "value[2, 6]": "0.00000000",
-                                "value[3, 0]": "0.00000000",
-                                "value[3, 1]": "0.00000000",
-                                "value[3, 2]": "0.00000000",
-                                "value[3, 3]": "0.00000000",
-                                "value[3, 4]": "0.00000000",
-                                "value[3, 5]": "0.00000000",
-                                "value[3, 6]": "0.00000000",
-                                "value[4, 0]": "0.00000000",
-                                "value[4, 1]": "0.00000000",
-                                "value[4, 2]": "0.00000000",
-                                "value[4, 3]": "0.00000000",
-                                "value[4, 4]": "0.00000000",
-                                "value[4, 5]": "0.00000000",
-                                "value[4, 6]": "0.00000000",
-                                "value[5, 0]": "0.00000000",
-                                "value[5, 1]": "0.00000000",
-                                "value[5, 2]": "0.00000000",
-                                "value[5, 3]": "0.00000000",
-                                "value[5, 4]": "0.00000000",
-                                "value[5, 5]": "0.00000000",
-                                "value[5, 6]": "0.00000000",
-                                "value[6, 0]": "0.00000000",
-                                "value[6, 1]": "0.00000000",
-                                "value[6, 2]": "0.00000000",
-                                "value[6, 3]": "0.00000000",
-                                "value[6, 4]": "0.00000000",
-                                "value[6, 5]": "0.00000000",
-                                "value[6, 6]": "0.00000000"
-                            },
-                            "geometry deviation exponent": {
-                                "activated": "false"
-                            },
-                            "geometry deviation exponent[0]": "0.00000000",
-                            "geometry deviation exponent[1]": "0.00000000",
-                            "geometry deviation exponent[2]": "0.00000000",
-                            "geometry deviation exponent[3]": "0.00000000",
-                            "geometry deviation exponent[4]": "0.00000000",
-                            "geometry deviation exponent[5]": "0.00000000",
-                            "geometry deviation exponent[6]": "0.00000000",
-                            "connections mismatch penalty": {
-                                "activated": "false"
-                            },
-                            "connections mismatch penalty[0]": "0.33000001",
-                            "connections mismatch penalty[1]": "0.33000001",
-                            "connections mismatch penalty[2]": "0.33000001",
-                            "connections mismatch penalty[3]": "0.33000001",
-                            "connections mismatch penalty[4]": "0.33000001",
-                            "connections mismatch penalty[5]": "0.33000001",
-                            "connections mismatch penalty[6]": "0.33000001"
-                        }
-                    },
-                    "copy mutation": {
-                        "neuron data": {
-                            "activated": "false"
-                        },
-                        "neuron data[0]": "0.00000000",
-                        "neuron data[1]": "0.00000000",
-                        "neuron data[2]": "0.00000000",
-                        "neuron data[3]": "0.00000000",
-                        "neuron data[4]": "0.00000000",
-                        "neuron data[5]": "0.00000000",
-                        "neuron data[6]": "0.00000000",
-                        "cell properties": {
-                            "activated": "false"
-                        },
-                        "cell properties[0]": "0.00000000",
-                        "cell properties[1]": "0.00000000",
-                        "cell properties[2]": "0.00000000",
-                        "cell properties[3]": "0.00000000",
-                        "cell properties[4]": "0.00000000",
-                        "cell properties[5]": "0.00000000",
-                        "cell properties[6]": "0.00000000",
-                        "geometry": {
-                            "activated": "false"
-                        },
-                        "geometry[0]": "0.00000000",
-                        "geometry[1]": "0.00000000",
-                        "geometry[2]": "0.00000000",
-                        "geometry[3]": "0.00000000",
-                        "geometry[4]": "0.00000000",
-                        "geometry[5]": "0.00000000",
-                        "geometry[6]": "0.00000000",
-                        "custom geometry": {
-                            "activated": "false"
-                        },
-                        "custom geometry[0]": "0.00000000",
-                        "custom geometry[1]": "0.00000000",
-                        "custom geometry[2]": "0.00000000",
-                        "custom geometry[3]": "0.00000000",
-                        "custom geometry[4]": "0.00000000",
-                        "custom geometry[5]": "0.00000000",
-                        "custom geometry[6]": "0.00000000",
-                        "cell function": {
-                            "activated": "false"
-                        },
-                        "cell function[0]": "0.00000000",
-                        "cell function[1]": "0.00000000",
-                        "cell function[2]": "0.00000000",
-                        "cell function[3]": "0.00000000",
-                        "cell function[4]": "0.00000000",
-                        "cell function[5]": "0.00000000",
-                        "cell function[6]": "0.00000000",
-                        "insertion": {
-                            "activated": "false"
-                        },
-                        "insertion[0]": "0.00000000",
-                        "insertion[1]": "0.00000000",
-                        "insertion[2]": "0.00000000",
-                        "insertion[3]": "0.00000000",
-                        "insertion[4]": "0.00000000",
-                        "insertion[5]": "0.00000000",
-                        "insertion[6]": "0.00000000",
-                        "deletion": {
-                            "activated": "false"
-                        },
-                        "deletion[0]": "0.00000000",
-                        "deletion[1]": "0.00000000",
-                        "deletion[2]": "0.00000000",
-                        "deletion[3]": "0.00000000",
-                        "deletion[4]": "0.00000000",
-                        "deletion[5]": "0.00000000",
-                        "deletion[6]": "0.00000000",
-                        "translation": {
-                            "activated": "false"
-                        },
-                        "translation[0]": "0.00000000",
-                        "translation[1]": "0.00000000",
-                        "translation[2]": "0.00000000",
-                        "translation[3]": "0.00000000",
-                        "translation[4]": "0.00000000",
-                        "translation[5]": "0.00000000",
-                        "translation[6]": "0.00000000",
-                        "duplication": {
-                            "activated": "false"
-                        },
-                        "duplication[0]": "0.00000000",
-                        "duplication[1]": "0.00000000",
-                        "duplication[2]": "0.00000000",
-                        "duplication[3]": "0.00000000",
-                        "duplication[4]": "0.00000000",
-                        "duplication[5]": "0.00000000",
-                        "duplication[6]": "0.00000000",
-                        "cell color": {
-                            "activated": "false"
-                        },
-                        "cell color[0]": "0.00000000",
-                        "cell color[1]": "0.00000000",
-                        "cell color[2]": "0.00000000",
-                        "cell color[3]": "0.00000000",
-                        "cell color[4]": "0.00000000",
-                        "cell color[5]": "0.00000000",
-                        "cell color[6]": "0.00000000",
-                        "subgenome color": {
-                            "activated": "false"
-                        },
-                        "subgenome color[0]": "0.00000000",
-                        "subgenome color[1]": "0.00000000",
-                        "subgenome color[2]": "0.00000000",
-                        "subgenome color[3]": "0.00000000",
-                        "subgenome color[4]": "0.00000000",
-                        "subgenome color[5]": "0.00000000",
-                        "subgenome color[6]": "0.00000000",
-                        "genome color": {
-                            "activated": "false"
-                        },
-                        "genome color[0]": "0.00000000",
-                        "genome color[1]": "0.00000000",
-                        "genome color[2]": "0.00000000",
-                        "genome color[3]": "0.00000000",
-                        "genome color[4]": "0.00000000",
-                        "genome color[5]": "0.00000000",
-                        "genome color[6]": "0.00000000"
-                    }
+            "Friction": {
+                "Base": {
+                    "Value": "0.00100000"
                 }
             },
-            "2": {
-                "color": "4278190080",
-                "pos": {
-                    "x": "1000.00000000",
-                    "y": "0.00000000"
-                },
-                "vel": {
-                    "x": "0.00000000",
-                    "y": "0.00000000"
-                },
-                "shape": {
-                    "type": "1",
-                    "rectangular": {
-                        "core width": "2000.00000000",
-                        "core height": "54.79999924"
-                    }
-                },
-                "flow": {
-                    "type": "0"
-                },
-                "fadeout radius": "166.66667175",
-                "friction": {
-                    "activated": "false",
-                    "value": "0.00200000"
-                },
-                "rigidity": {
-                    "activated": "false",
-                    "value": "0.00000000"
-                },
-                "radiation": {
-                    "disable sources": {
-                        "activated": "false",
-                        "value": "false"
+            "Inner friction": {
+                "Base": {
+                    "Value": "0.60000002"
+                }
+            },
+            "Rigidity": {
+                "Base": {
+                    "Value": "0.00000000"
+                }
+            }
+        },
+        "Physics: Thresholds": {
+            "Maximum velocity": {
+                "Base": {
+                    "Value": "2.00000000"
+                }
+            },
+            "Maximum force": {
+                "Base": {
+                    "Color 0": "0.80000001",
+                    "Color 1": "0.80000001",
+                    "Color 2": "0.80000001",
+                    "Color 3": "0.80000001",
+                    "Color 4": "0.80000001",
+                    "Color 5": "0.80000001",
+                    "Color 6": "0.80000001"
+                }
+            },
+            "Minimum distance": {
+                "Base": {
+                    "Value": "0.30000001"
+                }
+            }
+        },
+        "Physics: Binding": {
+            "Maximum distance": {
+                "Base": {
+                    "Color 0": "3.59999990",
+                    "Color 1": "3.59999990",
+                    "Color 2": "3.59999990",
+                    "Color 3": "3.59999990",
+                    "Color 4": "3.59999990",
+                    "Color 5": "3.59999990",
+                    "Color 6": "3.59999990"
+                }
+            },
+            "Fusion velocity": {
+                "Base": {
+                    "Value": "0.10000000"
+                }
+            },
+            "Maximum energy": {
+                "Base": {
+                    "Value": "340282346638528859811704183484516925440.00000000"
+                }
+            }
+        },
+        "Radiation": {
+            "Relative strength": {
+                "Base": {
+                    "Pinned": "false"
+                }
+            },
+            "Absorption factor": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000"
+                }
+            },
+            "Radiation type I: Strength": {
+                "Base": {
+                    "Color 0": "0.00002000",
+                    "Color 1": "0.00002000",
+                    "Color 2": "0.00002000",
+                    "Color 3": "0.00002000",
+                    "Color 4": "0.00002000",
+                    "Color 5": "0.00002000",
+                    "Color 6": "0.00002000"
+                }
+            },
+            "Radiation type I: Minimum age": {
+                "Base": {
+                    "Color 0": "0",
+                    "Color 1": "0",
+                    "Color 2": "0",
+                    "Color 3": "0",
+                    "Color 4": "0",
+                    "Color 5": "0",
+                    "Color 6": "0"
+                }
+            },
+            "Radiation type II: Strength": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Radiation type II: Energy threshold": {
+                "Base": {
+                    "Color 0": "500.00000000",
+                    "Color 1": "500.00000000",
+                    "Color 2": "500.00000000",
+                    "Color 3": "500.00000000",
+                    "Color 4": "500.00000000",
+                    "Color 5": "500.00000000",
+                    "Color 6": "500.00000000"
+                }
+            },
+            "Minimum split energy": {
+                "Base": {
+                    "Color 0": "340282346638528859811704183484516925440.00000000",
+                    "Color 1": "340282346638528859811704183484516925440.00000000",
+                    "Color 2": "340282346638528859811704183484516925440.00000000",
+                    "Color 3": "340282346638528859811704183484516925440.00000000",
+                    "Color 4": "340282346638528859811704183484516925440.00000000",
+                    "Color 5": "340282346638528859811704183484516925440.00000000",
+                    "Color 6": "340282346638528859811704183484516925440.00000000"
+                }
+            },
+            "Energy to cell transformation": {
+                "Base": {
+                    "Value": "false"
+                }
+            }
+        },
+        "Cell life cycle": {
+            "Maximum age": {
+                "Base": {
+                    "Color 0": "2147483647",
+                    "Color 1": "2147483647",
+                    "Color 2": "2147483647",
+                    "Color 3": "2147483647",
+                    "Color 4": "2147483647",
+                    "Color 5": "2147483647",
+                    "Color 6": "2147483647"
+                }
+            },
+            "Minimum energy": {
+                "Base": {
+                    "Color 0": "50.00000000",
+                    "Color 1": "50.00000000",
+                    "Color 2": "50.00000000",
+                    "Color 3": "50.00000000",
+                    "Color 4": "50.00000000",
+                    "Color 5": "50.00000000",
+                    "Color 6": "50.00000000"
+                }
+            },
+            "Normal energy": {
+                "Base": {
+                    "Color 0": "100.00000000",
+                    "Color 1": "100.00000000",
+                    "Color 2": "100.00000000",
+                    "Color 3": "100.00000000",
+                    "Color 4": "100.00000000",
+                    "Color 5": "100.00000000",
+                    "Color 6": "100.00000000"
+                }
+            },
+            "Decay rate of dying cells": {
+                "Base": {
+                    "Color 0": "0.00100000",
+                    "Color 1": "0.00100000",
+                    "Color 2": "0.00100000",
+                    "Color 3": "0.00100000",
+                    "Color 4": "0.00100000",
+                    "Color 5": "0.00100000",
+                    "Color 6": "0.00100000"
+                }
+            },
+            "Cell death consequences": {
+                "Base": {
+                    "Value": "2"
+                }
+            }
+        },
+        "Genome copy mutations": {
+            "Neural nets": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Cell properties": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Geometry": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Custom geometry": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Cell function type": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Insertion": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Deletion": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Translation": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Duplication": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Individual cell color": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Sub-genome color": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Genome color": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Color transitions": {
+                "Base": {
+                    "Color 0,0": "true",
+                    "Color 0,1": "true",
+                    "Color 0,2": "true",
+                    "Color 0,3": "true",
+                    "Color 0,4": "true",
+                    "Color 0,5": "true",
+                    "Color 0,6": "true",
+                    "Color 1,0": "true",
+                    "Color 1,1": "true",
+                    "Color 1,2": "true",
+                    "Color 1,3": "true",
+                    "Color 1,4": "true",
+                    "Color 1,5": "true",
+                    "Color 1,6": "true",
+                    "Color 2,0": "true",
+                    "Color 2,1": "true",
+                    "Color 2,2": "true",
+                    "Color 2,3": "true",
+                    "Color 2,4": "true",
+                    "Color 2,5": "true",
+                    "Color 2,6": "true",
+                    "Color 3,0": "true",
+                    "Color 3,1": "true",
+                    "Color 3,2": "true",
+                    "Color 3,3": "true",
+                    "Color 3,4": "true",
+                    "Color 3,5": "true",
+                    "Color 3,6": "true",
+                    "Color 4,0": "true",
+                    "Color 4,1": "true",
+                    "Color 4,2": "true",
+                    "Color 4,3": "true",
+                    "Color 4,4": "true",
+                    "Color 4,5": "true",
+                    "Color 4,6": "true",
+                    "Color 5,0": "true",
+                    "Color 5,1": "true",
+                    "Color 5,2": "true",
+                    "Color 5,3": "true",
+                    "Color 5,4": "true",
+                    "Color 5,5": "true",
+                    "Color 5,6": "true",
+                    "Color 6,0": "true",
+                    "Color 6,1": "true",
+                    "Color 6,2": "true",
+                    "Color 6,3": "true",
+                    "Color 6,4": "true",
+                    "Color 6,5": "true",
+                    "Color 6,6": "true"
+                }
+            },
+            "Prevent genome depth increase": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Mutate self-replication": {
+                "Base": {
+                    "Value": "false"
+                }
+            }
+        },
+        "Cell type: Attacker": {
+            "Energy cost": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Food chain color matrix": {
+                "Base": {
+                    "Color 0,0": "1.00000000",
+                    "Color 0,1": "1.00000000",
+                    "Color 0,2": "1.00000000",
+                    "Color 0,3": "1.00000000",
+                    "Color 0,4": "1.00000000",
+                    "Color 0,5": "1.00000000",
+                    "Color 0,6": "1.00000000",
+                    "Color 1,0": "1.00000000",
+                    "Color 1,1": "1.00000000",
+                    "Color 1,2": "1.00000000",
+                    "Color 1,3": "1.00000000",
+                    "Color 1,4": "1.00000000",
+                    "Color 1,5": "1.00000000",
+                    "Color 1,6": "1.00000000",
+                    "Color 2,0": "1.00000000",
+                    "Color 2,1": "1.00000000",
+                    "Color 2,2": "1.00000000",
+                    "Color 2,3": "1.00000000",
+                    "Color 2,4": "1.00000000",
+                    "Color 2,5": "1.00000000",
+                    "Color 2,6": "1.00000000",
+                    "Color 3,0": "1.00000000",
+                    "Color 3,1": "1.00000000",
+                    "Color 3,2": "1.00000000",
+                    "Color 3,3": "1.00000000",
+                    "Color 3,4": "1.00000000",
+                    "Color 3,5": "1.00000000",
+                    "Color 3,6": "1.00000000",
+                    "Color 4,0": "1.00000000",
+                    "Color 4,1": "1.00000000",
+                    "Color 4,2": "1.00000000",
+                    "Color 4,3": "1.00000000",
+                    "Color 4,4": "1.00000000",
+                    "Color 4,5": "1.00000000",
+                    "Color 4,6": "1.00000000",
+                    "Color 5,0": "1.00000000",
+                    "Color 5,1": "1.00000000",
+                    "Color 5,2": "1.00000000",
+                    "Color 5,3": "1.00000000",
+                    "Color 5,4": "1.00000000",
+                    "Color 5,5": "1.00000000",
+                    "Color 5,6": "1.00000000",
+                    "Color 6,0": "1.00000000",
+                    "Color 6,1": "1.00000000",
+                    "Color 6,2": "1.00000000",
+                    "Color 6,3": "1.00000000",
+                    "Color 6,4": "1.00000000",
+                    "Color 6,5": "1.00000000",
+                    "Color 6,6": "1.00000000"
+                }
+            },
+            "Attack strength": {
+                "Base": {
+                    "Color 0": "0.05000000",
+                    "Color 1": "0.05000000",
+                    "Color 2": "0.05000000",
+                    "Color 3": "0.05000000",
+                    "Color 4": "0.05000000",
+                    "Color 5": "0.05000000",
+                    "Color 6": "0.05000000"
+                }
+            },
+            "Attack radius": {
+                "Base": {
+                    "Color 0": "3.00000000",
+                    "Color 1": "3.00000000",
+                    "Color 2": "3.00000000",
+                    "Color 3": "3.00000000",
+                    "Color 4": "3.00000000",
+                    "Color 5": "3.00000000",
+                    "Color 6": "3.00000000"
+                }
+            },
+            "Complex creature protection": {
+                "Base": {
+                    "Color 0,0": "0.00000000",
+                    "Color 0,1": "0.00000000",
+                    "Color 0,2": "0.00000000",
+                    "Color 0,3": "0.00000000",
+                    "Color 0,4": "0.00000000",
+                    "Color 0,5": "0.00000000",
+                    "Color 0,6": "0.00000000",
+                    "Color 1,0": "0.00000000",
+                    "Color 1,1": "0.00000000",
+                    "Color 1,2": "0.00000000",
+                    "Color 1,3": "0.00000000",
+                    "Color 1,4": "0.00000000",
+                    "Color 1,5": "0.00000000",
+                    "Color 1,6": "0.00000000",
+                    "Color 2,0": "0.00000000",
+                    "Color 2,1": "0.00000000",
+                    "Color 2,2": "0.00000000",
+                    "Color 2,3": "0.00000000",
+                    "Color 2,4": "0.00000000",
+                    "Color 2,5": "0.00000000",
+                    "Color 2,6": "0.00000000",
+                    "Color 3,0": "0.00000000",
+                    "Color 3,1": "0.00000000",
+                    "Color 3,2": "0.00000000",
+                    "Color 3,3": "0.00000000",
+                    "Color 3,4": "0.00000000",
+                    "Color 3,5": "0.00000000",
+                    "Color 3,6": "0.00000000",
+                    "Color 4,0": "0.00000000",
+                    "Color 4,1": "0.00000000",
+                    "Color 4,2": "0.00000000",
+                    "Color 4,3": "0.00000000",
+                    "Color 4,4": "0.00000000",
+                    "Color 4,5": "0.00000000",
+                    "Color 4,6": "0.00000000",
+                    "Color 5,0": "0.00000000",
+                    "Color 5,1": "0.00000000",
+                    "Color 5,2": "0.00000000",
+                    "Color 5,3": "0.00000000",
+                    "Color 5,4": "0.00000000",
+                    "Color 5,5": "0.00000000",
+                    "Color 5,6": "0.00000000",
+                    "Color 6,0": "0.00000000",
+                    "Color 6,1": "0.00000000",
+                    "Color 6,2": "0.00000000",
+                    "Color 6,3": "0.00000000",
+                    "Color 6,4": "0.00000000",
+                    "Color 6,5": "0.00000000",
+                    "Color 6,6": "0.00000000"
+                }
+            },
+            "Destroy cells": {
+                "Base": {
+                    "Value": "true"
+                }
+            }
+        },
+        "Cell type: Constructor": {
+            "Connection distance": {
+                "Base": {
+                    "Color 0": "2.50000000",
+                    "Color 1": "2.50000000",
+                    "Color 2": "2.50000000",
+                    "Color 3": "2.50000000",
+                    "Color 4": "2.50000000",
+                    "Color 5": "2.50000000",
+                    "Color 6": "2.50000000"
+                }
+            },
+            "Completeness check": {
+                "Base": {
+                    "Value": "false"
+                }
+            }
+        },
+        "Cell type: Defender": {
+            "Anti-attacker strength": {
+                "Base": {
+                    "Color 0": "0.50000000",
+                    "Color 1": "0.50000000",
+                    "Color 2": "0.50000000",
+                    "Color 3": "0.50000000",
+                    "Color 4": "0.50000000",
+                    "Color 5": "0.50000000",
+                    "Color 6": "0.50000000"
+                }
+            },
+            "Anti-injector strength": {
+                "Base": {
+                    "Color 0": "0.50000000",
+                    "Color 1": "0.50000000",
+                    "Color 2": "0.50000000",
+                    "Color 3": "0.50000000",
+                    "Color 4": "0.50000000",
+                    "Color 5": "0.50000000",
+                    "Color 6": "0.50000000"
+                }
+            }
+        },
+        "Cell type: Injector": {
+            "Injection radius": {
+                "Base": {
+                    "Color 0": "3.00000000",
+                    "Color 1": "3.00000000",
+                    "Color 2": "3.00000000",
+                    "Color 3": "3.00000000",
+                    "Color 4": "3.00000000",
+                    "Color 5": "3.00000000",
+                    "Color 6": "3.00000000"
+                }
+            },
+            "Injection time": {
+                "Base": {
+                    "Color 0,0": "3",
+                    "Color 0,1": "3",
+                    "Color 0,2": "3",
+                    "Color 0,3": "3",
+                    "Color 0,4": "3",
+                    "Color 0,5": "3",
+                    "Color 0,6": "3",
+                    "Color 1,0": "3",
+                    "Color 1,1": "3",
+                    "Color 1,2": "3",
+                    "Color 1,3": "3",
+                    "Color 1,4": "3",
+                    "Color 1,5": "3",
+                    "Color 1,6": "3",
+                    "Color 2,0": "3",
+                    "Color 2,1": "3",
+                    "Color 2,2": "3",
+                    "Color 2,3": "3",
+                    "Color 2,4": "3",
+                    "Color 2,5": "3",
+                    "Color 2,6": "3",
+                    "Color 3,0": "3",
+                    "Color 3,1": "3",
+                    "Color 3,2": "3",
+                    "Color 3,3": "3",
+                    "Color 3,4": "3",
+                    "Color 3,5": "3",
+                    "Color 3,6": "3",
+                    "Color 4,0": "3",
+                    "Color 4,1": "3",
+                    "Color 4,2": "3",
+                    "Color 4,3": "3",
+                    "Color 4,4": "3",
+                    "Color 4,5": "3",
+                    "Color 4,6": "3",
+                    "Color 5,0": "3",
+                    "Color 5,1": "3",
+                    "Color 5,2": "3",
+                    "Color 5,3": "3",
+                    "Color 5,4": "3",
+                    "Color 5,5": "3",
+                    "Color 5,6": "3",
+                    "Color 6,0": "3",
+                    "Color 6,1": "3",
+                    "Color 6,2": "3",
+                    "Color 6,3": "3",
+                    "Color 6,4": "3",
+                    "Color 6,5": "3",
+                    "Color 6,6": "3"
+                }
+            }
+        },
+        "Cell type: Muscle": {
+            "Energy cost": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Movement acceleration": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000"
+                }
+            },
+            "Crawling acceleration": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000"
+                }
+            },
+            "Bending acceleration": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000"
+                }
+            }
+        },
+        "Cell type: Sensor": {
+            "Radius": {
+                "Base": {
+                    "Color 0": "255.00000000",
+                    "Color 1": "255.00000000",
+                    "Color 2": "255.00000000",
+                    "Color 3": "255.00000000",
+                    "Color 4": "255.00000000",
+                    "Color 5": "255.00000000",
+                    "Color 6": "255.00000000"
+                }
+            }
+        },
+        "Cell type: Transmitter": {
+            "Energy distribution radius": {
+                "Base": {
+                    "Color 0": "3.59999990",
+                    "Color 1": "3.59999990",
+                    "Color 2": "3.59999990",
+                    "Color 3": "3.59999990",
+                    "Color 4": "3.59999990",
+                    "Color 5": "3.59999990",
+                    "Color 6": "3.59999990"
+                }
+            },
+            "Energy distribution Value": {
+                "Base": {
+                    "Color 0": "10.00000000",
+                    "Color 1": "10.00000000",
+                    "Color 2": "10.00000000",
+                    "Color 3": "10.00000000",
+                    "Color 4": "10.00000000",
+                    "Color 5": "10.00000000",
+                    "Color 6": "10.00000000"
+                }
+            },
+            "Same creature energy distribution": {
+                "Base": {
+                    "Value": "true"
+                }
+            }
+        },
+        "Cell type: Reconnector": {
+            "Radius": {
+                "Base": {
+                    "Color 0": "2.00000000",
+                    "Color 1": "2.00000000",
+                    "Color 2": "2.00000000",
+                    "Color 3": "2.00000000",
+                    "Color 4": "2.00000000",
+                    "Color 5": "2.00000000",
+                    "Color 6": "2.00000000"
+                }
+            }
+        },
+        "Cell type: Detonator": {
+            "Blast radius": {
+                "Base": {
+                    "Color 0": "10.00000000",
+                    "Color 1": "10.00000000",
+                    "Color 2": "10.00000000",
+                    "Color 3": "10.00000000",
+                    "Color 4": "10.00000000",
+                    "Color 5": "10.00000000",
+                    "Color 6": "10.00000000"
+                }
+            },
+            "Chain explosion probability": {
+                "Base": {
+                    "Color 0": "0.20000000",
+                    "Color 1": "0.20000000",
+                    "Color 2": "0.20000000",
+                    "Color 3": "0.20000000",
+                    "Color 4": "0.20000000",
+                    "Color 5": "0.20000000",
+                    "Color 6": "0.20000000"
+                }
+            }
+        },
+        "Advanced energy absorption control": {
+            "Enabled": "false",
+            "Low genome complexity penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Low connection penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "High velocity penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Low velocity penalty": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            }
+        },
+        "Advanced attacker control": {
+            "Enabled": "false",
+            "Same mutant protection": {
+                "Base": {
+                    "Color 0,0": "0.00000000",
+                    "Color 0,1": "0.00000000",
+                    "Color 0,2": "0.00000000",
+                    "Color 0,3": "0.00000000",
+                    "Color 0,4": "0.00000000",
+                    "Color 0,5": "0.00000000",
+                    "Color 0,6": "0.00000000",
+                    "Color 1,0": "0.00000000",
+                    "Color 1,1": "0.00000000",
+                    "Color 1,2": "0.00000000",
+                    "Color 1,3": "0.00000000",
+                    "Color 1,4": "0.00000000",
+                    "Color 1,5": "0.00000000",
+                    "Color 1,6": "0.00000000",
+                    "Color 2,0": "0.00000000",
+                    "Color 2,1": "0.00000000",
+                    "Color 2,2": "0.00000000",
+                    "Color 2,3": "0.00000000",
+                    "Color 2,4": "0.00000000",
+                    "Color 2,5": "0.00000000",
+                    "Color 2,6": "0.00000000",
+                    "Color 3,0": "0.00000000",
+                    "Color 3,1": "0.00000000",
+                    "Color 3,2": "0.00000000",
+                    "Color 3,3": "0.00000000",
+                    "Color 3,4": "0.00000000",
+                    "Color 3,5": "0.00000000",
+                    "Color 3,6": "0.00000000",
+                    "Color 4,0": "0.00000000",
+                    "Color 4,1": "0.00000000",
+                    "Color 4,2": "0.00000000",
+                    "Color 4,3": "0.00000000",
+                    "Color 4,4": "0.00000000",
+                    "Color 4,5": "0.00000000",
+                    "Color 4,6": "0.00000000",
+                    "Color 5,0": "0.00000000",
+                    "Color 5,1": "0.00000000",
+                    "Color 5,2": "0.00000000",
+                    "Color 5,3": "0.00000000",
+                    "Color 5,4": "0.00000000",
+                    "Color 5,5": "0.00000000",
+                    "Color 5,6": "0.00000000",
+                    "Color 6,0": "0.00000000",
+                    "Color 6,1": "0.00000000",
+                    "Color 6,2": "0.00000000",
+                    "Color 6,3": "0.00000000",
+                    "Color 6,4": "0.00000000",
+                    "Color 6,5": "0.00000000",
+                    "Color 6,6": "0.00000000"
+                }
+            },
+            "New complex mutant protection": {
+                "Base": {
+                    "Color 0,0": "0.00000000",
+                    "Color 0,1": "0.00000000",
+                    "Color 0,2": "0.00000000",
+                    "Color 0,3": "0.00000000",
+                    "Color 0,4": "0.00000000",
+                    "Color 0,5": "0.00000000",
+                    "Color 0,6": "0.00000000",
+                    "Color 1,0": "0.00000000",
+                    "Color 1,1": "0.00000000",
+                    "Color 1,2": "0.00000000",
+                    "Color 1,3": "0.00000000",
+                    "Color 1,4": "0.00000000",
+                    "Color 1,5": "0.00000000",
+                    "Color 1,6": "0.00000000",
+                    "Color 2,0": "0.00000000",
+                    "Color 2,1": "0.00000000",
+                    "Color 2,2": "0.00000000",
+                    "Color 2,3": "0.00000000",
+                    "Color 2,4": "0.00000000",
+                    "Color 2,5": "0.00000000",
+                    "Color 2,6": "0.00000000",
+                    "Color 3,0": "0.00000000",
+                    "Color 3,1": "0.00000000",
+                    "Color 3,2": "0.00000000",
+                    "Color 3,3": "0.00000000",
+                    "Color 3,4": "0.00000000",
+                    "Color 3,5": "0.00000000",
+                    "Color 3,6": "0.00000000",
+                    "Color 4,0": "0.00000000",
+                    "Color 4,1": "0.00000000",
+                    "Color 4,2": "0.00000000",
+                    "Color 4,3": "0.00000000",
+                    "Color 4,4": "0.00000000",
+                    "Color 4,5": "0.00000000",
+                    "Color 4,6": "0.00000000",
+                    "Color 5,0": "0.00000000",
+                    "Color 5,1": "0.00000000",
+                    "Color 5,2": "0.00000000",
+                    "Color 5,3": "0.00000000",
+                    "Color 5,4": "0.00000000",
+                    "Color 5,5": "0.00000000",
+                    "Color 5,6": "0.00000000",
+                    "Color 6,0": "0.00000000",
+                    "Color 6,1": "0.00000000",
+                    "Color 6,2": "0.00000000",
+                    "Color 6,3": "0.00000000",
+                    "Color 6,4": "0.00000000",
+                    "Color 6,5": "0.00000000",
+                    "Color 6,6": "0.00000000"
+                }
+            },
+            "Sensor detection factor": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Geometry deviation protection": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Connections mismatch protection": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            }
+        },
+        "Cell age limiter": {
+            "Enabled": "false",
+            "Maximum inactive cell age": {
+                "Base": {
+                    "Color 0": "340282346638528859811704183484516925440.00000000",
+                    "Color 1": "340282346638528859811704183484516925440.00000000",
+                    "Color 2": "340282346638528859811704183484516925440.00000000",
+                    "Color 3": "340282346638528859811704183484516925440.00000000",
+                    "Color 4": "340282346638528859811704183484516925440.00000000",
+                    "Color 5": "340282346638528859811704183484516925440.00000000",
+                    "Color 6": "340282346638528859811704183484516925440.00000000"
+                }
+            },
+            "Maximum free cell age": {
+                "Base": {
+                    "Color 0": "2147483647",
+                    "Color 1": "2147483647",
+                    "Color 2": "2147483647",
+                    "Color 3": "2147483647",
+                    "Color 4": "2147483647",
+                    "Color 5": "2147483647",
+                    "Color 6": "2147483647"
+                }
+            },
+            "Reset age after construction": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Maximum age balancing": {
+                "Base": {
+                    "Value": "10000",
+                    "Enabled": "false"
+                }
+            }
+        },
+        "Cell color transition rules": {
+            "Enabled": "false",
+            "Target color and duration": {
+                "Base": {
+                    "Color 0": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     },
-                    "absorption": {
-                        "activated": "false"
+                    "Color 1": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     },
-                    "absorption[0]": "0.23770000",
-                    "absorption[1]": "0.06790000",
-                    "absorption[2]": "0.23000000",
-                    "absorption[3]": "0.23000000",
-                    "absorption[4]": "0.23000000",
-                    "absorption[5]": "0.23000000",
-                    "absorption[6]": "0.23000000",
-                    "absorption low velocity penalty": {
-                        "activated": "false"
+                    "Color 2": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     },
-                    "absorption low velocity penalty[0]": "0.00000000",
-                    "absorption low velocity penalty[1]": "0.00000000",
-                    "absorption low velocity penalty[2]": "0.00000000",
-                    "absorption low velocity penalty[3]": "0.00000000",
-                    "absorption low velocity penalty[4]": "0.00000000",
-                    "absorption low velocity penalty[5]": "0.00000000",
-                    "absorption low velocity penalty[6]": "0.00000000",
-                    "absorption low genome complexity penalty": {
-                        "activated": "false"
+                    "Color 3": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     },
-                    "absorption low genome complexity penalty[0]": "0.00000000",
-                    "absorption low genome complexity penalty[1]": "0.00000000",
-                    "absorption low genome complexity penalty[2]": "0.00000000",
-                    "absorption low genome complexity penalty[3]": "0.00000000",
-                    "absorption low genome complexity penalty[4]": "0.00000000",
-                    "absorption low genome complexity penalty[5]": "0.00000000",
-                    "absorption low genome complexity penalty[6]": "0.00000000",
-                    "factor": {
-                        "activated": "false"
+                    "Color 4": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     },
-                    "factor[0]": "0.00003400",
-                    "factor[1]": "0.00003400",
-                    "factor[2]": "0.00003400",
-                    "factor[3]": "0.00003400",
-                    "factor[4]": "0.00003400",
-                    "factor[5]": "0.00003400",
-                    "factor[6]": "0.00003400"
-                },
-                "cell": {
-                    "max force": {
-                        "activated": "false"
+                    "Color 5": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     },
-                    "max force[0]": "0.80000001",
-                    "max force[1]": "0.80000001",
-                    "max force[2]": "0.80000001",
-                    "max force[3]": "0.80000001",
-                    "max force[4]": "0.80000001",
-                    "max force[5]": "0.80000001",
-                    "max force[6]": "0.80000001",
-                    "min energy": {
-                        "activated": "false"
-                    },
-                    "min energy[0]": "50.00000000",
-                    "min energy[1]": "50.00000000",
-                    "min energy[2]": "50.00000000",
-                    "min energy[3]": "50.00000000",
-                    "min energy[4]": "50.00000000",
-                    "min energy[5]": "50.00000000",
-                    "min energy[6]": "50.00000000",
-                    "death probability": {
-                        "activated": "false"
-                    },
-                    "death probability[0]": "0.00100000",
-                    "death probability[1]": "0.00100000",
-                    "death probability[2]": "0.00100000",
-                    "death probability[3]": "0.00100000",
-                    "death probability[4]": "0.00100000",
-                    "death probability[5]": "0.00100000",
-                    "death probability[6]": "0.00100000",
-                    "fusion velocity": {
-                        "activated": "false",
-                        "value": "0.82400000"
-                    },
-                    "max binding energy": {
-                        "activated": "false",
-                        "value": "500000.00000000"
-                    },
-                    "inactive max age": {
-                        "activated": "false"
-                    },
-                    "inactive max age[0]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[1]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[2]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[3]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[4]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[5]": "340282346638528859811704183484516925440.00000000",
-                    "inactive max age[6]": "340282346638528859811704183484516925440.00000000",
-                    "color transition rules": {
-                        "activated": "false",
-                        "duration[0]": "0",
-                        "duration[1]": "0",
-                        "duration[2]": "0",
-                        "duration[3]": "0",
-                        "duration[4]": "0",
-                        "duration[5]": "0",
-                        "duration[6]": "0",
-                        "target color[0]": "0",
-                        "target color[1]": "1",
-                        "target color[2]": "2",
-                        "target color[3]": "3",
-                        "target color[4]": "4",
-                        "target color[5]": "5",
-                        "target color[6]": "6"
-                    },
-                    "function": {
-                        "attacker": {
-                            "energy cost": {
-                                "activated": "false"
-                            },
-                            "energy cost[0]": "0.00000000",
-                            "energy cost[1]": "0.00000000",
-                            "energy cost[2]": "0.00000000",
-                            "energy cost[3]": "0.00000000",
-                            "energy cost[4]": "0.00000000",
-                            "energy cost[5]": "0.00000000",
-                            "energy cost[6]": "0.00000000",
-                            "food chain color matrix": {
-                                "activated": "false",
-                                "value[0, 0]": "1.00000000",
-                                "value[0, 1]": "1.00000000",
-                                "value[0, 2]": "1.00000000",
-                                "value[0, 3]": "1.00000000",
-                                "value[0, 4]": "1.00000000",
-                                "value[0, 5]": "1.00000000",
-                                "value[0, 6]": "1.00000000",
-                                "value[1, 0]": "1.00000000",
-                                "value[1, 1]": "1.00000000",
-                                "value[1, 2]": "1.00000000",
-                                "value[1, 3]": "1.00000000",
-                                "value[1, 4]": "1.00000000",
-                                "value[1, 5]": "1.00000000",
-                                "value[1, 6]": "1.00000000",
-                                "value[2, 0]": "1.00000000",
-                                "value[2, 1]": "1.00000000",
-                                "value[2, 2]": "1.00000000",
-                                "value[2, 3]": "1.00000000",
-                                "value[2, 4]": "1.00000000",
-                                "value[2, 5]": "1.00000000",
-                                "value[2, 6]": "1.00000000",
-                                "value[3, 0]": "1.00000000",
-                                "value[3, 1]": "1.00000000",
-                                "value[3, 2]": "1.00000000",
-                                "value[3, 3]": "1.00000000",
-                                "value[3, 4]": "1.00000000",
-                                "value[3, 5]": "1.00000000",
-                                "value[3, 6]": "1.00000000",
-                                "value[4, 0]": "1.00000000",
-                                "value[4, 1]": "1.00000000",
-                                "value[4, 2]": "1.00000000",
-                                "value[4, 3]": "1.00000000",
-                                "value[4, 4]": "1.00000000",
-                                "value[4, 5]": "1.00000000",
-                                "value[4, 6]": "1.00000000",
-                                "value[5, 0]": "1.00000000",
-                                "value[5, 1]": "1.00000000",
-                                "value[5, 2]": "1.00000000",
-                                "value[5, 3]": "1.00000000",
-                                "value[5, 4]": "1.00000000",
-                                "value[5, 5]": "1.00000000",
-                                "value[5, 6]": "1.00000000",
-                                "value[6, 0]": "1.00000000",
-                                "value[6, 1]": "1.00000000",
-                                "value[6, 2]": "1.00000000",
-                                "value[6, 3]": "1.00000000",
-                                "value[6, 4]": "1.00000000",
-                                "value[6, 5]": "1.00000000",
-                                "value[6, 6]": "1.00000000"
-                            },
-                            "genome size bonus": {
-                                "activated": "false",
-                                "value[0, 0]": "0.00000000",
-                                "value[0, 1]": "0.00000000",
-                                "value[0, 2]": "0.00000000",
-                                "value[0, 3]": "0.00000000",
-                                "value[0, 4]": "0.00000000",
-                                "value[0, 5]": "0.00000000",
-                                "value[0, 6]": "0.00000000",
-                                "value[1, 0]": "0.00000000",
-                                "value[1, 1]": "0.00000000",
-                                "value[1, 2]": "0.00000000",
-                                "value[1, 3]": "0.00000000",
-                                "value[1, 4]": "0.00000000",
-                                "value[1, 5]": "0.00000000",
-                                "value[1, 6]": "0.00000000",
-                                "value[2, 0]": "0.00000000",
-                                "value[2, 1]": "0.00000000",
-                                "value[2, 2]": "0.00000000",
-                                "value[2, 3]": "0.00000000",
-                                "value[2, 4]": "0.00000000",
-                                "value[2, 5]": "0.00000000",
-                                "value[2, 6]": "0.00000000",
-                                "value[3, 0]": "0.00000000",
-                                "value[3, 1]": "0.00000000",
-                                "value[3, 2]": "0.00000000",
-                                "value[3, 3]": "0.00000000",
-                                "value[3, 4]": "0.00000000",
-                                "value[3, 5]": "0.00000000",
-                                "value[3, 6]": "0.00000000",
-                                "value[4, 0]": "0.00000000",
-                                "value[4, 1]": "0.00000000",
-                                "value[4, 2]": "0.00000000",
-                                "value[4, 3]": "0.00000000",
-                                "value[4, 4]": "0.00000000",
-                                "value[4, 5]": "0.00000000",
-                                "value[4, 6]": "0.00000000",
-                                "value[5, 0]": "0.00000000",
-                                "value[5, 1]": "0.00000000",
-                                "value[5, 2]": "0.00000000",
-                                "value[5, 3]": "0.00000000",
-                                "value[5, 4]": "0.00000000",
-                                "value[5, 5]": "0.00000000",
-                                "value[5, 6]": "0.00000000",
-                                "value[6, 0]": "0.00000000",
-                                "value[6, 1]": "0.00000000",
-                                "value[6, 2]": "0.00000000",
-                                "value[6, 3]": "0.00000000",
-                                "value[6, 4]": "0.00000000",
-                                "value[6, 5]": "0.00000000",
-                                "value[6, 6]": "0.00000000"
-                            },
-                            "new complex mutant penalty": {
-                                "activated": "false",
-                                "value[0, 0]": "0.00000000",
-                                "value[0, 1]": "0.00000000",
-                                "value[0, 2]": "0.00000000",
-                                "value[0, 3]": "0.00000000",
-                                "value[0, 4]": "0.00000000",
-                                "value[0, 5]": "0.00000000",
-                                "value[0, 6]": "0.00000000",
-                                "value[1, 0]": "0.00000000",
-                                "value[1, 1]": "0.00000000",
-                                "value[1, 2]": "0.00000000",
-                                "value[1, 3]": "0.00000000",
-                                "value[1, 4]": "0.00000000",
-                                "value[1, 5]": "0.00000000",
-                                "value[1, 6]": "0.00000000",
-                                "value[2, 0]": "0.00000000",
-                                "value[2, 1]": "0.00000000",
-                                "value[2, 2]": "0.00000000",
-                                "value[2, 3]": "0.00000000",
-                                "value[2, 4]": "0.00000000",
-                                "value[2, 5]": "0.00000000",
-                                "value[2, 6]": "0.00000000",
-                                "value[3, 0]": "0.00000000",
-                                "value[3, 1]": "0.00000000",
-                                "value[3, 2]": "0.00000000",
-                                "value[3, 3]": "0.00000000",
-                                "value[3, 4]": "0.00000000",
-                                "value[3, 5]": "0.00000000",
-                                "value[3, 6]": "0.00000000",
-                                "value[4, 0]": "0.00000000",
-                                "value[4, 1]": "0.00000000",
-                                "value[4, 2]": "0.00000000",
-                                "value[4, 3]": "0.00000000",
-                                "value[4, 4]": "0.00000000",
-                                "value[4, 5]": "0.00000000",
-                                "value[4, 6]": "0.00000000",
-                                "value[5, 0]": "0.00000000",
-                                "value[5, 1]": "0.00000000",
-                                "value[5, 2]": "0.00000000",
-                                "value[5, 3]": "0.00000000",
-                                "value[5, 4]": "0.00000000",
-                                "value[5, 5]": "0.00000000",
-                                "value[5, 6]": "0.00000000",
-                                "value[6, 0]": "0.00000000",
-                                "value[6, 1]": "0.00000000",
-                                "value[6, 2]": "0.00000000",
-                                "value[6, 3]": "0.00000000",
-                                "value[6, 4]": "0.00000000",
-                                "value[6, 5]": "0.00000000",
-                                "value[6, 6]": "0.00000000"
-                            },
-                            "geometry deviation exponent": {
-                                "activated": "false"
-                            },
-                            "geometry deviation exponent[0]": "0.00000000",
-                            "geometry deviation exponent[1]": "0.00000000",
-                            "geometry deviation exponent[2]": "0.00000000",
-                            "geometry deviation exponent[3]": "0.00000000",
-                            "geometry deviation exponent[4]": "0.00000000",
-                            "geometry deviation exponent[5]": "0.00000000",
-                            "geometry deviation exponent[6]": "0.00000000",
-                            "connections mismatch penalty": {
-                                "activated": "false"
-                            },
-                            "connections mismatch penalty[0]": "0.33000001",
-                            "connections mismatch penalty[1]": "0.33000001",
-                            "connections mismatch penalty[2]": "0.33000001",
-                            "connections mismatch penalty[3]": "0.33000001",
-                            "connections mismatch penalty[4]": "0.33000001",
-                            "connections mismatch penalty[5]": "0.33000001",
-                            "connections mismatch penalty[6]": "0.33000001"
-                        }
-                    },
-                    "copy mutation": {
-                        "neuron data": {
-                            "activated": "false"
-                        },
-                        "neuron data[0]": "0.00000000",
-                        "neuron data[1]": "0.00000000",
-                        "neuron data[2]": "0.00000000",
-                        "neuron data[3]": "0.00000000",
-                        "neuron data[4]": "0.00000000",
-                        "neuron data[5]": "0.00000000",
-                        "neuron data[6]": "0.00000000",
-                        "cell properties": {
-                            "activated": "false"
-                        },
-                        "cell properties[0]": "0.00000000",
-                        "cell properties[1]": "0.00000000",
-                        "cell properties[2]": "0.00000000",
-                        "cell properties[3]": "0.00000000",
-                        "cell properties[4]": "0.00000000",
-                        "cell properties[5]": "0.00000000",
-                        "cell properties[6]": "0.00000000",
-                        "geometry": {
-                            "activated": "false"
-                        },
-                        "geometry[0]": "0.00000000",
-                        "geometry[1]": "0.00000000",
-                        "geometry[2]": "0.00000000",
-                        "geometry[3]": "0.00000000",
-                        "geometry[4]": "0.00000000",
-                        "geometry[5]": "0.00000000",
-                        "geometry[6]": "0.00000000",
-                        "custom geometry": {
-                            "activated": "false"
-                        },
-                        "custom geometry[0]": "0.00000000",
-                        "custom geometry[1]": "0.00000000",
-                        "custom geometry[2]": "0.00000000",
-                        "custom geometry[3]": "0.00000000",
-                        "custom geometry[4]": "0.00000000",
-                        "custom geometry[5]": "0.00000000",
-                        "custom geometry[6]": "0.00000000",
-                        "cell function": {
-                            "activated": "false"
-                        },
-                        "cell function[0]": "0.00000000",
-                        "cell function[1]": "0.00000000",
-                        "cell function[2]": "0.00000000",
-                        "cell function[3]": "0.00000000",
-                        "cell function[4]": "0.00000000",
-                        "cell function[5]": "0.00000000",
-                        "cell function[6]": "0.00000000",
-                        "insertion": {
-                            "activated": "false"
-                        },
-                        "insertion[0]": "0.00000000",
-                        "insertion[1]": "0.00000000",
-                        "insertion[2]": "0.00000000",
-                        "insertion[3]": "0.00000000",
-                        "insertion[4]": "0.00000000",
-                        "insertion[5]": "0.00000000",
-                        "insertion[6]": "0.00000000",
-                        "deletion": {
-                            "activated": "false"
-                        },
-                        "deletion[0]": "0.00000000",
-                        "deletion[1]": "0.00000000",
-                        "deletion[2]": "0.00000000",
-                        "deletion[3]": "0.00000000",
-                        "deletion[4]": "0.00000000",
-                        "deletion[5]": "0.00000000",
-                        "deletion[6]": "0.00000000",
-                        "translation": {
-                            "activated": "false"
-                        },
-                        "translation[0]": "0.00000000",
-                        "translation[1]": "0.00000000",
-                        "translation[2]": "0.00000000",
-                        "translation[3]": "0.00000000",
-                        "translation[4]": "0.00000000",
-                        "translation[5]": "0.00000000",
-                        "translation[6]": "0.00000000",
-                        "duplication": {
-                            "activated": "false"
-                        },
-                        "duplication[0]": "0.00000000",
-                        "duplication[1]": "0.00000000",
-                        "duplication[2]": "0.00000000",
-                        "duplication[3]": "0.00000000",
-                        "duplication[4]": "0.00000000",
-                        "duplication[5]": "0.00000000",
-                        "duplication[6]": "0.00000000",
-                        "cell color": {
-                            "activated": "false"
-                        },
-                        "cell color[0]": "0.00000000",
-                        "cell color[1]": "0.00000000",
-                        "cell color[2]": "0.00000000",
-                        "cell color[3]": "0.00000000",
-                        "cell color[4]": "0.00000000",
-                        "cell color[5]": "0.00000000",
-                        "cell color[6]": "0.00000000",
-                        "subgenome color": {
-                            "activated": "false"
-                        },
-                        "subgenome color[0]": "0.00000000",
-                        "subgenome color[1]": "0.00000000",
-                        "subgenome color[2]": "0.00000000",
-                        "subgenome color[3]": "0.00000000",
-                        "subgenome color[4]": "0.00000000",
-                        "subgenome color[5]": "0.00000000",
-                        "subgenome color[6]": "0.00000000",
-                        "genome color": {
-                            "activated": "false"
-                        },
-                        "genome color[0]": "0.00000000",
-                        "genome color[1]": "0.00000000",
-                        "genome color[2]": "0.00000000",
-                        "genome color[3]": "0.00000000",
-                        "genome color[4]": "0.00000000",
-                        "genome color[5]": "0.00000000",
-                        "genome color[6]": "0.00000000"
+                    "Color 6": {
+                        "Duration": "2147483647",
+                        "Target": "0"
                     }
                 }
             }
         },
-        "features": {
-            "genome complexity measurement": "false",
-            "additional absorption control": "false",
-            "additional attacker control": "true",
-            "external energy": "true",
-            "cell color transition rules": "false",
-            "cell age limiter": "false",
-            "cell glow": "false",
-            "legacy modes": "true"
+        "Cell glow": {
+            "Enabled": "false",
+            "Coloring": {
+                "Base": {
+                    "Value": "1"
+                }
+            },
+            "Radius": {
+                "Base": {
+                    "Value": "4.00000000"
+                }
+            },
+            "Strength": {
+                "Base": {
+                    "Color 0": "0.20000000",
+                    "Color 1": "0.20000000",
+                    "Color 2": "0.20000000",
+                    "Color 3": "0.20000000",
+                    "Color 4": "0.20000000",
+                    "Color 5": "0.20000000",
+                    "Color 6": "0.20000000"
+                }
+            }
+        },
+        "Customize deletion mutations": {
+            "Enabled": "false",
+            "Minimum size": {
+                "Base": {
+                    "Value": "0"
+                }
+            }
+        },
+        "Customize neuron mutations": {
+            "Enabled": "false",
+            "Affected weights": {
+                "Base": {
+                    "Value": "0.20000000"
+                }
+            },
+            "Affected biases": {
+                "Base": {
+                    "Value": "0.20000000"
+                }
+            },
+            "Affected activation functions": {
+                "Base": {
+                    "Value": "0.05000000"
+                }
+            },
+            "Reinforcement factor": {
+                "Base": {
+                    "Value": "1.04999995"
+                }
+            },
+            "Damping factor": {
+                "Base": {
+                    "Value": "1.04999995"
+                }
+            },
+            "Offset": {
+                "Base": {
+                    "Value": "0.05000000"
+                }
+            }
+        },
+        "External energy control": {
+            "Enabled": "true",
+            "External energy amount": {
+                "Base": {
+                    "Value": "0.00000000"
+                }
+            },
+            "Inflow": {
+                "Base": {
+                    "Color 0": "1.00000000",
+                    "Color 1": "1.00000000",
+                    "Color 2": "1.00000000",
+                    "Color 3": "1.00000000",
+                    "Color 4": "1.00000000",
+                    "Color 5": "1.00000000",
+                    "Color 6": "1.00000000"
+                }
+            },
+            "Conditional inflow": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Inflow only for non-replicators": {
+                "Base": {
+                    "Value": "false"
+                }
+            },
+            "Backflow": {
+                "Base": {
+                    "Color 0": "0.00000000",
+                    "Color 1": "0.00000000",
+                    "Color 2": "0.00000000",
+                    "Color 3": "0.00000000",
+                    "Color 4": "0.00000000",
+                    "Color 5": "0.00000000",
+                    "Color 6": "0.00000000"
+                }
+            },
+            "Backflow limit": {
+                "Base": {
+                    "Value": "340282346638528859811704183484516925440.00000000"
+                }
+            }
         }
     }
 }

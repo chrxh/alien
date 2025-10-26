@@ -33,7 +33,7 @@ struct SimulationParameters
     BaseParameter<CellType> highlightedCellType = {CellType_Constructor};
     BaseParameter<float> cellRadius = {0.25f};
     BaseParameter<float> zoomLevelForNeuronVisualization = {2.0f};
-    BaseParameter<bool> attackVisualization = {false};
+    BaseParameter<bool> attackVisualization = {true};
     BaseParameter<bool> muscleMovementVisualization = {false};
     BaseParameter<bool> borderlessRendering = {false};
     BaseParameter<bool> gridLines = {false};

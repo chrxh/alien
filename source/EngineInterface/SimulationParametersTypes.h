@@ -94,7 +94,7 @@ struct BaseLayerParameter
 template <typename T>
 struct SourceParameter
 {
-    T sourceValues[MAX_LAYERS];
+    T sourceValues[MAX_SOURCES];
 
     bool operator==(SourceParameter<T> const&) const = default;
 };

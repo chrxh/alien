@@ -1024,6 +1024,9 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
 
     // Process sources
     for (int i = 0; i < cudaSimulationParameters.numSources; ++i) {
+        if (!cudaSimulationParameters.sourceShowRadiationCenter.sourceValues[i]) {
+            continue;
+        }
         auto pos = cudaSimulationParameters.sourcePosition.sourceValues[i];
         // Use a distinct color for sources (e.g., yellow)
         float3 color = {0.05f, 0.05f, 0.15f};
