@@ -20,6 +20,8 @@ uniform float radius;
 
 const float PI = 3.14159265359;
 const float RAD_TO_DEG = 180.0 / PI;
+const float AlphaForRestriction = 0.1;
+const float AlphaForCircle = 0.3;
 
 void main()
 {
@@ -37,11 +39,7 @@ void main()
             discard;
         }
 
-        // Anti-aliasing for smooth edges
-        float outerEdge = smoothstep(outerRadius - 1.5 / zoom, outerRadius, dist);
-        float innerEdge = smoothstep(innerRadius, innerRadius + 1.5 / zoom, dist);
-        float alpha = (1.0 - outerEdge) * innerEdge;
-        FragColor = vec4(1.0, 1.0, 1.0, dist > middleRadius ? 0.2 : 0.5);
+        FragColor = vec4(1.0, 1.0, 1.0, dist > middleRadius ? AlphaForRestriction : AlphaForCircle);
     }
 
     // If signal restriction is active, check if the current pixel is within the allowed angle range
@@ -76,9 +74,9 @@ void main()
             inRange = (pixelAngle >= gStartAngle || pixelAngle <= gEndAngle);
         }
         
-        float alpha = 0.2;
+        float alpha = AlphaForRestriction;
         if (dist <= middleRadius) {
-            alpha = 0.5;
+            alpha = AlphaForCircle;
         } else if (!inRange) {
             discard;
         }

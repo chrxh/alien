@@ -1082,8 +1082,11 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
                 // Calculate signal angle restrictions for this cell
                 // The 180° offset converts from connection-relative to absolute angles in world space
                 if (cell->signalRestriction.active && cell->numConnections > 0) {
-                    auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
-                    auto signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
+                    auto const& connectedCell = cell->connections[0].cell;
+                    auto connectionAngle = Math::angleOfVector(connectedCell->pos - cell->pos);
+
+                    auto signalAngleRestrictionStart = connectionAngle + 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
+                    auto signalAngleRestrictionEnd = connectionAngle + 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
                     signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
                     signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
                     
