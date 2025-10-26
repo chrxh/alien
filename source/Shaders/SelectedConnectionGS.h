@@ -4,7 +4,8 @@
 
 namespace Shaders
 {
-    std::string_view const SelectedConnectionGS = R"(#version 330 core
+    std::string_view const SelectedConnectionGS = R"(
+#version 330 core
 layout (lines) in;
 layout (triangle_strip, max_vertices = 20) out;
 

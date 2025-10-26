@@ -4,7 +4,8 @@
 
 namespace Shaders
 {
-    std::string_view const LocationGS = R"(#version 330 core
+    std::string_view const LocationGS = R"(
+#version 330 core
 layout (points) in;
 layout (triangle_strip, max_vertices = 4) out;
 

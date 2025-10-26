@@ -4,10 +4,17 @@
 
 namespace Shaders
 {
-    std::string_view const SelectedObjectVS = R"(#version 330 core
+    std::string_view const SelectedObjectVS = R"(
+#version 330 core
 layout (location = 0) in vec2 aPos;
+layout (location = 1) in int aHasSignalRestriction;
+layout (location = 2) in float aStartAngle;
+layout (location = 3) in float aEndAngle;
 
 out vec2 vWorldPos;
+flat out int vHasSignalRestriction;
+flat out float vStartAngle;
+flat out float vEndAngle;
 
 uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
@@ -18,6 +25,9 @@ uniform vec2 viewportSize;
 void main()
 {
     vWorldPos = aPos;
+    vHasSignalRestriction = aHasSignalRestriction;
+    vStartAngle = aStartAngle;
+    vEndAngle = aEndAngle;
     
     // Transform world position to normalized device coordinates
     vec2 relativePos = aPos - rectUpperLeft;

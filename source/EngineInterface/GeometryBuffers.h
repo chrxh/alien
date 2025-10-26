@@ -42,7 +42,10 @@ struct LocationVertexData
 
 struct SelectedObjectVertexData
 {
-    float pos[2];       // x, y position
+    float pos[2];              // x, y position
+    int hasSignalRestriction;  // 1 if signal restriction is active, 0 otherwise
+    float startAngle;          // start angle in degrees (0-360)
+    float endAngle;            // end angle in degrees (0-360)
 };
 
 struct ConnectionArrowVertexData
