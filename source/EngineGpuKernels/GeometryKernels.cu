@@ -1197,8 +1197,7 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         auto const& cell = data.objects.cells.at(index);
         
         // Only process cells that have been attacked and have attackVisualization enabled
-        if (cell->eventCounter > 0 && cell->event == CellEvent_Attacked 
-            && cudaSimulationParameters.attackVisualization.value) {
+        if (cell->eventCounter > 0 && cell->event == CellEvent_Attacked) {
             
             // Check if the attacker position is close enough to draw
             if (Math::length(cell->eventPos - cell->pos) < 10.0f) {

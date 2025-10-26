@@ -4,7 +4,9 @@
 #include <variant>
 
 #include "Base/MathTypes.h"
+
 #include "EngineInterface/Definitions.h"
+#include "EngineInterface/SimulationParameters.h"
 
 #include "Definitions.h"
 
@@ -59,6 +61,7 @@ struct ExecutionParameters
     // Misc
     MEMBER(ExecutionParameters, GeneralRenderInfo, renderInfo, GeneralRenderInfo());
     MEMBER(ExecutionParameters, SimulationFacade, simulationFacade, SimulationFacade());
+    MEMBER(ExecutionParameters, std::shared_ptr<SimulationParameters>, simulationParameters, nullptr);
 };
 
 class _RenderStep

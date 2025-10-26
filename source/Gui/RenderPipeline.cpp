@@ -234,10 +234,11 @@ void _RenderPipeline::execute()
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
+    auto simParameters = std::make_shared<SimulationParameters>(_simulationFacade->getSimulationParameters());
     int currentTextureTargetIndex = 0;
     forEachStep(
         [this, &currentTextureTargetIndex] { return _textureTargets.at(currentTextureTargetIndex++); },
-        [this, &generalRenderInfo](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target) {
+        [this, &generalRenderInfo, &simParameters](RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target) {
             // Merge inputTextures from step parameters with textures from previous targets
             auto allTextures = step->getInputTextures();
             allTextures.insert(allTextures.end(), textures.begin(), textures.end());
@@ -247,7 +248,8 @@ void _RenderPipeline::execute()
                               .textures(allTextures)
                               .target(target)
                               .renderInfo(generalRenderInfo)
-                              .simulationFacade(_simulationFacade));
+                              .simulationFacade(_simulationFacade)
+                              .simulationParameters(simParameters));
         });
 
     glBindFramebuffer(GL_FRAMEBUFFER, generalRenderInfo.screenFbo);
