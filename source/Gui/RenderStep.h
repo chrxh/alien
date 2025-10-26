@@ -208,3 +208,15 @@ private:
 
     unsigned int _cellTypeTextureAtlas = 0;
 };
+
+class _SelectedConnectionRenderStep : public _RenderStep
+{
+public:
+    static SelectedConnectionRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _SelectedConnectionRenderStep(StepParameters const& parameters);
+};

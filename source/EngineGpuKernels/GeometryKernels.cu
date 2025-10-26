@@ -1097,3 +1097,97 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
         }
     }
 }
+
+__global__ void cudaExtractConnectionArrowData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
+{
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        if (cell->selected == 0) {
+            continue;
+        }
+        
+        // Calculate signal angle restrictions for this cell
+        auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
+        auto signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
+        signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
+        signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
+        
+        auto summedAngle = 0.0f;
+        
+        // Process each connection from this cell
+        for (int i = 0; i < cell->numConnections; ++i) {
+            if (i > 0) {
+                summedAngle += cell->connections[i].angleFromPrevious;
+            }
+            
+            auto connectedCell = cell->connections[i].cell;
+            
+            // Only add each connection once (from lower id to higher id to avoid duplicates)
+            if (cell->id >= connectedCell->id) {
+                continue;
+            }
+            
+            // Check if this connection should be drawn
+            if (Math::length(cell->pos - connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
+                continue;
+            }
+            
+            // Determine if signal can flow from cell1 to cell2
+            bool arrowToCell2 = !cell->signalRestriction.active 
+                || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+            
+            // Determine if signal can flow from cell2 to cell1
+            // Need to calculate the reverse angle from connectedCell's perspective
+            auto signalAngleRestrictionStart2 = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
+            auto signalAngleRestrictionEnd2 = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
+            signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
+            signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
+            
+            // Find the angle of this connection from connectedCell's perspective
+            auto summedAngle2 = 0.0f;
+            bool arrowToCell1 = false;
+            for (int j = 0; j < connectedCell->numConnections; ++j) {
+                if (j > 0) {
+                    summedAngle2 += connectedCell->connections[j].angleFromPrevious;
+                }
+                if (connectedCell->connections[j].cell->id == cell->id) {
+                    arrowToCell1 = !connectedCell->signalRestriction.active 
+                        || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
+                    break;
+                }
+            }
+            
+            // Get cell colors
+            auto cellColor = getCellColor(cell->color);
+            auto connectedCellColor = getCellColor(connectedCell->color);
+            
+            // Encode arrow direction in flags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
+            int arrowFlags = (arrowToCell1 ? 1 : 0) | (arrowToCell2 ? 2 : 0);
+            
+            // Add connection arrow data (2 vertices for the line)
+            uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
+            if (connectionArrowData != nullptr) {
+               
+                // First vertex (cell1)
+                connectionArrowData[vertexIndex].pos[0] = cell->pos.x;
+                connectionArrowData[vertexIndex].pos[1] = cell->pos.y;
+                connectionArrowData[vertexIndex].pos[2] = 0;
+                connectionArrowData[vertexIndex].color[0] = toFloat((cellColor >> 16) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex].color[2] = toFloat((cellColor >> 0) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex].arrowFlags = arrowFlags;
+                
+                // Second vertex (cell2)
+                connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
+                connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
+                connectionArrowData[vertexIndex + 1].pos[2] = 0;
+                connectionArrowData[vertexIndex + 1].color[0] = toFloat((connectedCellColor >> 16) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].color[1] = toFloat((connectedCellColor >> 8) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].color[2] = toFloat((connectedCellColor >> 0) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].arrowFlags = arrowFlags;
+            }
+        }
+    }
+}

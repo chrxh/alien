@@ -12,7 +12,7 @@
 
 namespace
 {
-    auto constexpr ZoomFactorForOverlay = 15.0f;
+    auto constexpr ZoomFactorForCellDetails = 25.0f;    // Cell type strings and arrows
 }
 
 TextureTarget _TextureTarget::create()
@@ -393,8 +393,7 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
     auto zoom = Viewport::get().getZoomFactor();
     auto overlayActive = SimulationView::get().isOverlayActive();
 
-    if (zoom <= ZoomFactorForOverlay || !overlayActive) {
-        // Pass through without rendering overlay
+    if (zoom <= ZoomFactorForCellDetails || !overlayActive) {
         return;
     }
 
@@ -542,3 +541,36 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
 
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+SelectedConnectionRenderStep _SelectedConnectionRenderStep::create(StepParameters const& parameters)
+{
+    return SelectedConnectionRenderStep(new _SelectedConnectionRenderStep(parameters));
+}
+
+void _SelectedConnectionRenderStep::execute(ExecutionParameters parameters)
+{
+    auto zoom = Viewport::get().getZoomFactor();
+    if (zoom <= ZoomFactorForCellDetails) {
+        return;
+    }
+
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for arrows
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Draw connection arrows (geometry shader will convert to lines with arrows)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForConnectionArrows());
+    glDrawArrays(GL_LINES, 0, toInt(parameters._geometryBuffers->getNumObjects().connectionArrowVertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_SelectedConnectionRenderStep::_SelectedConnectionRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}

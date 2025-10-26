@@ -16,7 +16,7 @@ void main()
     gWorldPos = vWorldPos[0];
     
     // Circle radius in world coordinates (thin white circle)
-    float circleRadius = radius * 0.3;  // Half the cell size for visibility
+    float circleRadius = radius * 0.35;
     
     // Calculate size in NDC coordinates
     float ndcHalfWidth = circleRadius / viewportSize.x * 2.0;

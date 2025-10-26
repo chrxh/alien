@@ -4,7 +4,7 @@
 
 namespace Const
 {
-    std::string const ProgramVersion = "5.0.0-alpha.0";
+    std::string const ProgramVersion = "5.0.0-alpha.1";
     std::string const DiscordURL = "https://discord.gg/7bjyZdXXQ2";
     std::string const AlienURL = "alien-project.org";
 
@@ -26,6 +26,7 @@ namespace Const
     std::filesystem::path const TriangleShader = ShaderPath / "Triangle";
     std::filesystem::path const LocationShader = ShaderPath / "Location";
     std::filesystem::path const SelectedObjectShader = ShaderPath / "SelectedObject";
+    std::filesystem::path const SelectedConnectionShader = ShaderPath / "SelectedConnection";
     std::filesystem::path const CellTypeOverlayShader = ShaderPath / "CellTypeOverlay";
     std::filesystem::path const BlurHorizontalShader = ShaderPath / "BlurHorizontal";
     std::filesystem::path const BlurVerticalShader = ShaderPath / "BlurVertical";
