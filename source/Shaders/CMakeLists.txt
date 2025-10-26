@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
-
-project(Shaders)
-
-# Header-only library with explicit file listing for VS project generation
 add_library(Shaders INTERFACE
     AllShaders.h
     AttackEventFS.h
@@ -60,13 +55,3 @@ add_library(Shaders INTERFACE
     ZoomBrightnessCorrectionFS.h
     ZoomBrightnessCorrectionVS.h
 )
-
-target_include_directories(Shaders INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-)
-
-# Ensure headers show up in IDE
-set_target_properties(Shaders PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/..
-)
-
