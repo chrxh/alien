@@ -806,7 +806,22 @@ namespace
     }
 }
 
-__global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData)
+namespace
+{
+    __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& rectUpperLeft, int2 const& worldSize)
+    {
+        if (cudaSimulationParameters.borderlessRendering.value) {
+            pos.x -= rectUpperLeft.x;
+            pos.y -= rectUpperLeft.y;
+            pos.x = Math::modulo(pos.x, toFloat(worldSize.x));
+            pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
+            pos.x += rectUpperLeft.x;
+            pos.y += rectUpperLeft.y;
+        }
+    }
+}
+
+__global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData, float2 visibleTopLeft)
 {
     // Process cells - each cell goes to its index position
     auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
@@ -814,6 +829,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
         auto const& cell = data.objects.cells.at(index);
 
         auto pos = cell->pos;
+        correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
 
         auto cellColor = getCellColor(cell->color);
         
@@ -826,10 +842,6 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
         if (cell->selected == 2) {
             luminance = luminance * 1.3f;
         }
-
-        //if (cell->signalState == SignalState_Active) {
-        //    white = 0.4f;
-        //}
 
         // Calculate deterministic z-position based on cell id for lighting
         // Use a simple hash function to get a pseudo-random value in range [0, 1]
@@ -858,7 +870,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
     }
 }
 
-__global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices)
+__global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices, float2 visibleTopLeft)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
@@ -887,7 +899,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
     }
 }
 
-__global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices)
+__global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices, float2 visibleTopLeft)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
@@ -945,7 +957,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     }
 }
 
-__global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData)
+__global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData, float2 visibleTopLeft)
 {
     // Process energy particles - each particle goes to its index position
     auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
@@ -974,7 +986,7 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
     }
 }
 
-__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations)
+__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft)
 {
     // Extract location data for layers and sources
     // Each location is rendered 5 times (normal + 4 world offsets for periodic boundaries)
@@ -1067,7 +1079,8 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
+__global__ void
+cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects, float2 visibleTopLeft)
 {
     // Process selected cells
     auto const& cells = data.objects.cells;
@@ -1123,7 +1136,11 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
     }
 }
 
-__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
+__global__ void cudaExtractSelectedConnectionData(
+    SimulationData data,
+    ConnectionArrowVertexData* connectionArrowData,
+    uint64_t* numConnectionArrowVertices,
+    float2 visibleTopLeft)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
@@ -1214,7 +1231,7 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         }
     }
 }
-__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices)
+__global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices, float2 visibleTopLeft)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
@@ -1250,7 +1267,8 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         }
     }
 }
-__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices)
+__global__ void
+cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices, float2 visibleTopLeft)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 

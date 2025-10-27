@@ -8,6 +8,7 @@
 
 #include "RenderStep.h"
 #include "Shader.h"
+#include "Viewport.h"
 
 bool RenderSequence::subsequentStepsHaveTarget(size_t index) const
 {
@@ -257,7 +258,7 @@ namespace
 void _RenderPipeline::execute()
 {
     // Copy vertex buffer from Cuda to OpenGL
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers);
+    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers, Viewport::get().getVisibleWorldRect());
 
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);

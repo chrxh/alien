@@ -14,8 +14,8 @@ public:
     _GeometryKernelsService();
     ~_GeometryKernelsService();
 
-    NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data);
-    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData);
+    NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
+    void extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData, RealRect const& visibleWorldRect);
 
 private:
     uint64_t* _numLineIndices;

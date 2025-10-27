@@ -122,16 +122,16 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers)
+void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
 
-    auto numRenderObjects = _geometryKernels->getNumRenderObjects(_settings, simulationData);
+    auto numRenderObjects = _geometryKernels->getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     geometryBuffers->updateNumObjects(numRenderObjects);
     _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
-    _geometryKernels->extractObjectData(_settings, simulationData, *_cudaGeometryBuffers);
+    _geometryKernels->extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
     syncAndCheck();
 }
 

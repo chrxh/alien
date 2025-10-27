@@ -45,7 +45,7 @@ public:
 
     Ids getMaxIds() const;
 
-    void copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers);
+    void copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect);
     TO getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight);  // DataTO is unmanaged (i.e. must be deleted by the caller)
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
