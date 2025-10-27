@@ -123,7 +123,7 @@ __global__ void cudaNextTimestep_cellType_prepare_substep2(SimulationData data)
     SignalProcessor::collectCellTypeOperations(data);
     CellProcessor::cellStateTransition_applyNextState(data);
     CellProcessor::frontAngleUpdate_applyFutureValue(data);
-    CellProcessor::updateRenderingData(data);
+    CellProcessor::updateCellEvents(data);
 }
 
 __global__ void cudaNextTimestep_cellType_generator(SimulationData data, SimulationStatistics statistics)

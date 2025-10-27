@@ -48,7 +48,7 @@ public:
 
     __inline__ __device__ static void resetDensity(SimulationData& data);
 
-    __inline__ __device__ static void updateRenderingData(SimulationData& data);
+    __inline__ __device__ static void updateCellEvents(SimulationData& data);
 
     __inline__ __device__ static void performEnergyFlow(SimulationData& data);
 
@@ -919,7 +919,7 @@ __inline__ __device__ void CellProcessor::resetDensity(SimulationData& data)
     }
 }
 
-__inline__ __device__ void CellProcessor::updateRenderingData(SimulationData& data)
+__inline__ __device__ void CellProcessor::updateCellEvents(SimulationData& data)
 {
     auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());

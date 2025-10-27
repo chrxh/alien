@@ -25,7 +25,7 @@ GeometryBuffers _GeometryBuffers::create()
     return GeometryBuffers(result);
 }
 
-void _GeometryBuffers::resizeIfNecessary(NumRenderObjects const& numRenderObjects)
+void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
     _numObjects = numRenderObjects;
     if (numRenderObjects.vertices >= _vertexBufferCapacity) {

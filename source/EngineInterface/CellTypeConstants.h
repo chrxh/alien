@@ -64,7 +64,7 @@ enum CellState_
     CellState_Detaching,
     CellState_Reviving,
     CellState_Dying,
-    CellState_Count
+    CellState_Count,
 };
 
 using ActivationFunction = uint8_t;
@@ -75,7 +75,7 @@ enum ActivationFunction_
     ActivationFunction_Identity,
     ActivationFunction_Abs,
     ActivationFunction_Gaussian,
-    ActivationFunction_Count
+    ActivationFunction_Count,
 };
 
 using SignalState = uint8_t;
@@ -121,7 +121,7 @@ enum SensorRestrictToCreatures_
     SensorRestrictToCreatures_RestrictToStructures,
     SensorRestrictToCreatures_RestrictToLessComplexMutants,
     SensorRestrictToCreatures_RestrictToMoreComplexMutants,
-    SensorRestrictToCreatures_Count
+    SensorRestrictToCreatures_Count,
 };
 
 namespace Const
@@ -151,7 +151,7 @@ enum MuscleMode_
     MuscleMode_AutoCrawling,
     MuscleMode_ManualCrawling,
     MuscleMode_DirectMovement,
-    MuscleMode_Count
+    MuscleMode_Count,
 };
 
 namespace Const
@@ -168,7 +168,7 @@ enum DefenderMode_
 {
     DefenderMode_DefendAgainstAttacker,
     DefenderMode_DefendAgainstInjector,
-    DefenderMode_Count
+    DefenderMode_Count,
 };
 
 namespace Const
@@ -188,7 +188,7 @@ enum ConstructorAlignment_
     ConstructorAngleAlignment_90 = 3,
     ConstructorAngleAlignment_72 = 4,
     ConstructorAngleAlignment_60 = 5,
-    ConstructorAngleAlignment_Count = 6
+    ConstructorAngleAlignment_Count = 6,
 };
 
 namespace Const
@@ -209,7 +209,7 @@ enum ConstructorShape_
     ConstructorShape_Lolli,
     ConstructorShape_SmallLolli,
     ConstructorShape_Zigzag,
-    ConstructorShape_Count
+    ConstructorShape_Count,
 };
 
 using ProvideEnergy = uint8_t;
@@ -217,7 +217,7 @@ enum ProvideEnergy_
 {
     ProvideEnergy_CellOnly,
     ProvideEnergy_CellAndGene,
-    ProvideEnergy_FreeGeneration
+    ProvideEnergy_FreeGeneration,
 };
 
 namespace Const
@@ -234,7 +234,7 @@ enum GeneratorPulseType_
 {
     GeneratorPulseType_Positive,
     GeneratorPulseType_Alternation,
-    GeneratorPulseType_Count
+    GeneratorPulseType_Count,
 };
 
 //**********************
@@ -245,7 +245,7 @@ enum InjectorMode_
 {
     InjectorMode_InjectOnlyEmptyCells,
     InjectorMode_InjectAll,
-    InjectorMode_Count
+    InjectorMode_Count,
 };
 
 namespace Const
@@ -261,7 +261,7 @@ enum DetonatorState_
 {
     DetonatorState_Ready,
     DetonatorState_Activated,
-    DetonatorState_Exploded
+    DetonatorState_Exploded,
 };
 
 //*************************
@@ -277,7 +277,7 @@ enum ReconnectorRestrictToCreatures_
     ReconnectorRestrictToCreatures_RestrictToStructures,
     ReconnectorRestrictToCreatures_RestrictToLessComplexMutants,
     ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants,
-    ReconnectorRestrictToCreatures_Count
+    ReconnectorRestrictToCreatures_Count,
 };
 
 namespace Const
@@ -291,7 +291,8 @@ enum CellEvent_
 {
     CellEvent_No,
     CellEvent_Attacking,
-    CellEvent_Attacked
+    CellEvent_Attacked,
+    CellEvent_Detonation,
 };
 
 using CellTriggered = uint8_t;
@@ -305,7 +306,7 @@ using SignalOrigin = uint8_t;
 enum SignalOrigin_
 {
     SignalOrigin_Unknown,
-    SignalOrigin_Sensor
+    SignalOrigin_Sensor,
 };
 
 using EnergyDistributionMode = int;
@@ -313,5 +314,5 @@ enum EnergyDistributionMode_
 {
     EnergyDistributionMode_ConnectedCells,
     EnergyDistributionMode_TransmittersAndConstructors,
-    EnergyDistributionMode_Count
+    EnergyDistributionMode_Count,
 };

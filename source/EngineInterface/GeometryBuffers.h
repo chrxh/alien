@@ -82,7 +82,7 @@ public:
     unsigned int getEboForLines() const { return _eboForLines; }
     unsigned int getEboForTriangles() const { return _eboForTriangles; }
 
-    void resizeIfNecessary(NumRenderObjects const& numRenderObjects);
+    void updateNumObjects(NumRenderObjects const& numRenderObjects);
 
     NumRenderObjects getNumObjects() const;
 

@@ -128,7 +128,7 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     auto simulationData = getSimulationDataPtrCopy();
 
     auto numRenderObjects = _geometryKernels->getNumRenderObjects(_settings, simulationData);
-    geometryBuffers->resizeIfNecessary(numRenderObjects);
+    geometryBuffers->updateNumObjects(numRenderObjects);
     _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
     _geometryKernels->extractObjectData(_settings, simulationData, *_cudaGeometryBuffers);
