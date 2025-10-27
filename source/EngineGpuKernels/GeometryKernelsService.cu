@@ -32,7 +32,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     auto const& gpuSettings = settings.cudaSettings;
 
     NumRenderObjects result;
-    result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
+    result.cells = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
     result.energyParticles = data.objects.particles.getNumEntries_host();
     
     // Count selected objects

@@ -6,11 +6,12 @@
 
 struct NumRenderObjects
 {
-    uint64_t vertices;
-    uint64_t lineIndices;
-    uint64_t triangleIndices;
+    uint64_t cells;
     uint64_t energyParticles;
     uint64_t locations;
+    uint64_t lineIndices;
+
+    uint64_t triangleIndices;
     uint64_t selectedObjects;
     uint64_t connectionArrowVertices;
     uint64_t attackEventVertices;

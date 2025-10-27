@@ -28,8 +28,8 @@ GeometryBuffers _GeometryBuffers::create()
 void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
     _numObjects = numRenderObjects;
-    if (numRenderObjects.vertices >= _vertexBufferCapacity) {
-        _vertexBufferCapacity = std::max(numRenderObjects.vertices * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.cells >= _vertexBufferCapacity) {
+        _vertexBufferCapacity = std::max(numRenderObjects.cells * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
         glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(CellVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }

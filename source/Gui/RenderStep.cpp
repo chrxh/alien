@@ -123,7 +123,7 @@ void _CellRenderStep::execute(ExecutionParameters parameters)
 
     // Draw points
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().cells));
 
     // Disable blending and point sprites
     glDisable(GL_PROGRAM_POINT_SIZE);
@@ -406,7 +406,7 @@ void _CellTypeOverlayRenderStep::execute(ExecutionParameters parameters)
 
     // Draw overlay points (geometry shader will convert to textured quads)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
-    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().vertices));
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().cells));
 
     // Disable blending
     glDisable(GL_BLEND);
