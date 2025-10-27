@@ -188,6 +188,8 @@ using SelectedConnectionRenderStep = std::shared_ptr<_SelectedConnectionRenderSt
 
 class _AttackEventRenderStep;
 using AttackEventRenderStep = std::shared_ptr<_AttackEventRenderStep>;
+class _DetonationEventRenderStep;
+using DetonationEventRenderStep = std::shared_ptr<_DetonationEventRenderStep>;
 
 class _TextureTarget;
 using TextureTarget = std::shared_ptr<_TextureTarget>;

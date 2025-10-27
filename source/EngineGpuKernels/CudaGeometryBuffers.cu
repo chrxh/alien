@@ -63,4 +63,9 @@ void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
         unregisterBufferResource(attackEventBuffer);
     }
     attackEventBuffer = registerBufferResource(buffers->getVboForAttackEvents());
+
+    if (detonationEventBuffer != nullptr) {
+        unregisterBufferResource(detonationEventBuffer);
+    }
+    detonationEventBuffer = registerBufferResource(buffers->getVboForDetonationEvents());
 }

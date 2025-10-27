@@ -239,3 +239,15 @@ protected:
 private:
     _AttackEventRenderStep(StepParameters const& parameters);
 };
+
+class _DetonationEventRenderStep : public _RenderStep
+{
+public:
+    static DetonationEventRenderStep create(StepParameters const& parameters);
+
+protected:
+    void execute(ExecutionParameters parameters) override;
+
+private:
+    _DetonationEventRenderStep(StepParameters const& parameters);
+};

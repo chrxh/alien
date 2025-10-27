@@ -15,6 +15,7 @@ struct CudaGeometryBuffers
     cudaGraphicsResource* triangleIndexBuffer = nullptr;
     cudaGraphicsResource* selectedConnectionBuffer = nullptr;
     cudaGraphicsResource* attackEventBuffer = nullptr;
+    cudaGraphicsResource* detonationEventBuffer = nullptr;
 
     void registerBuffers(GeometryBuffers const& buffers);
 };

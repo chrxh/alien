@@ -13,6 +13,7 @@ _GeometryKernelsService::_GeometryKernelsService()
     memoryManager.acquireMemory(1, _numSelectedConnectionVertices);
     memoryManager.acquireMemory(1, _numSelectedObjects);
     memoryManager.acquireMemory(1, _numAttackEventVertices);
+    memoryManager.acquireMemory(1, _numDetonationEventVertices);
     memoryManager.acquireMemory(1, _numLocations);
 }
 
@@ -24,6 +25,7 @@ _GeometryKernelsService::~_GeometryKernelsService()
     memoryManager.freeMemory(_numSelectedConnectionVertices);
     memoryManager.freeMemory(_numSelectedObjects);
     memoryManager.freeMemory(_numAttackEventVertices);
+    memoryManager.freeMemory(_numDetonationEventVertices);
     memoryManager.freeMemory(_numLocations);
 }
 
@@ -60,6 +62,11 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     KERNEL_CALL(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices);
     cudaDeviceSynchronize();
     result.attackEventVertices = copyToHost(_numAttackEventVertices);
+
+    setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractDetonationEventData, data, nullptr, _numDetonationEventVertices);
+    cudaDeviceSynchronize();
+    result.detonationEventVertices = copyToHost(_numDetonationEventVertices);
 
     setValueToDevice(_numLocations, static_cast<uint64_t>(0));
     KERNEL_CALL_1_1(cudaExtractLocationData, data, nullptr, _numLocations);
@@ -143,6 +150,15 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractAttackEventData, data, mappedAttackEventBuffer, _numAttackEventVertices);
 
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.detonationEventBuffer));
+    DetonationEventVertexData* mappedDetonationEventBuffer;
+    size_t detonationEventBufferSize;
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedDetonationEventBuffer), &detonationEventBufferSize, renderingData.detonationEventBuffer));
+
+    // Sixth kernel: Extract detonation event data
+    setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices);
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.vertexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
@@ -151,4 +167,5 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
 }
