@@ -974,12 +974,11 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
     }
 }
 
-__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData)
+__global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations)
 {
     // Extract location data for layers and sources
     // Each location is rendered 5 times (normal + 4 world offsets for periodic boundaries)
     auto worldSize = data.worldSize;
-    int locationIndex = 0;
 
     // Process layers
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
@@ -1002,23 +1001,23 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
 
         for (int j = 0; j < 5; ++j) {
             if (locationData != nullptr) {
-                locationData[locationIndex].pos[0] = pos.x + offsets[j][0];
-                locationData[locationIndex].pos[1] = pos.y + offsets[j][1];
-                locationData[locationIndex].color[0] = color.r;
-                locationData[locationIndex].color[1] = color.g;
-                locationData[locationIndex].color[2] = color.b;
-                locationData[locationIndex].shapeType = shapeType;  // 0 = circular, 1 = rectangular
+                locationData[*numLocations].pos[0] = pos.x + offsets[j][0];
+                locationData[*numLocations].pos[1] = pos.y + offsets[j][1];
+                locationData[*numLocations].color[0] = color.r;
+                locationData[*numLocations].color[1] = color.g;
+                locationData[*numLocations].color[2] = color.b;
+                locationData[*numLocations].shapeType = shapeType;  // 0 = circular, 1 = rectangular
                 if (shapeType == 0) {  // Circular
-                    locationData[locationIndex].dimension1 = radius;
-                    locationData[locationIndex].dimension2 = 0.0f;
+                    locationData[*numLocations].dimension1 = radius;
+                    locationData[*numLocations].dimension2 = 0.0f;
                 } else {  // Rectangular
-                    locationData[locationIndex].dimension1 = rect.x;
-                    locationData[locationIndex].dimension2 = rect.y;
+                    locationData[*numLocations].dimension1 = rect.x;
+                    locationData[*numLocations].dimension2 = rect.y;
                 }
-                locationData[locationIndex].fadeoutRadius = fadeoutRadius;
-                locationData[locationIndex].opacity = opacity;
+                locationData[*numLocations].fadeoutRadius = fadeoutRadius;
+                locationData[*numLocations].opacity = opacity;
             }
-            locationIndex++;
+            ++(*numLocations);
         }
     }
 
@@ -1045,25 +1044,25 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
 
         for (int j = 0; j < 5; ++j) {
             if (locationData != nullptr) {
-                locationData[locationIndex].pos[0] = pos.x + offsets[j][0];
-                locationData[locationIndex].pos[1] = pos.y + offsets[j][1];
-                locationData[locationIndex].color[0] = color.x;
-                locationData[locationIndex].color[1] = color.y;
-                locationData[locationIndex].color[2] = color.z;
-                locationData[locationIndex].shapeType = shapeType;  // 0 = circular, 1 = rectangular
+                locationData[*numLocations].pos[0] = pos.x + offsets[j][0];
+                locationData[*numLocations].pos[1] = pos.y + offsets[j][1];
+                locationData[*numLocations].color[0] = color.x;
+                locationData[*numLocations].color[1] = color.y;
+                locationData[*numLocations].color[2] = color.z;
+                locationData[*numLocations].shapeType = shapeType;  // 0 = circular, 1 = rectangular
                 if (shapeType == 0) {  // Circular
-                    locationData[locationIndex].dimension1 = radius;
-                    locationData[locationIndex].dimension2 = 0.0f;
-                    locationData[locationIndex].fadeoutRadius = radius / 5.0f;
+                    locationData[*numLocations].dimension1 = radius;
+                    locationData[*numLocations].dimension2 = 0.0f;
+                    locationData[*numLocations].fadeoutRadius = radius / 5.0f;
                 } else {  // Rectangular
-                    locationData[locationIndex].dimension1 = rect.x;
-                    locationData[locationIndex].dimension2 = rect.y;
-                    locationData[locationIndex].fadeoutRadius = 0.0f;
-                    locationData[locationIndex].fadeoutRadius = radius / min(rect.x, rect.y) / 5.0f;
+                    locationData[*numLocations].dimension1 = rect.x;
+                    locationData[*numLocations].dimension2 = rect.y;
+                    locationData[*numLocations].fadeoutRadius = 0.0f;
+                    locationData[*numLocations].fadeoutRadius = radius / min(rect.x, rect.y) / 5.0f;
                 }
-                locationData[locationIndex].opacity = 1.0f;  // Sources are fully opaque
+                locationData[*numLocations].opacity = 1.0f;  // Sources are fully opaque
             }
-            locationIndex++;
+            ++(*numLocations);
         }
     }
 }

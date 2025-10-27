@@ -13,6 +13,7 @@ _GeometryKernelsService::_GeometryKernelsService()
     memoryManager.acquireMemory(1, _numSelectedConnectionVertices);
     memoryManager.acquireMemory(1, _numSelectedObjects);
     memoryManager.acquireMemory(1, _numAttackEventVertices);
+    memoryManager.acquireMemory(1, _numLocations);
 }
 
 _GeometryKernelsService::~_GeometryKernelsService()
@@ -23,46 +24,7 @@ _GeometryKernelsService::~_GeometryKernelsService()
     memoryManager.freeMemory(_numSelectedConnectionVertices);
     memoryManager.freeMemory(_numSelectedObjects);
     memoryManager.freeMemory(_numAttackEventVertices);
-}
-
-void _GeometryKernelsService::drawImage(
-    SettingsForSimulation const& settings,
-    float2 rectUpperLeft,
-    float2 rectLowerRight,
-    int2 imageSize,
-    float zoom,
-    SimulationData data,
-    CudaGeometryBuffers renderingData)
-{
-    //auto const& gpuSettings = settings.cudaSettings;
-
-    //KERNEL_CALL(cudaBackground, targetImage, imageSize, data.worldSize, zoom, rectUpperLeft, rectLowerRight);
-    //KERNEL_CALL_1_1(cudaPrepareFilteringForRendering, data.tempObjects.cells, data.tempObjects.particles);
-    //KERNEL_CALL(cudaFilterCellsForRendering, data.worldSize, rectUpperLeft, data.objects.cells, data.tempObjects.cells, imageSize, zoom);
-    //KERNEL_CALL(cudaFilterParticlesForRendering, data.worldSize, rectUpperLeft, data.objects.particles, data.tempObjects.particles, imageSize, zoom);
-    //KERNEL_CALL(cudaDrawCells, data.timestep, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.cells, targetImage, imageSize, zoom);
-    //KERNEL_CALL(cudaDrawParticles, data.worldSize, rectUpperLeft, rectLowerRight, data.tempObjects.particles, targetImage, imageSize, zoom);
-    //KERNEL_CALL_1_1(cudaDrawRadiationSources, targetImage, rectUpperLeft, data.worldSize, imageSize, zoom);
-
-    //if (settings.simulationParameters.cellGlowToggle.value) {
-    //    int blocks;
-    //    int threadsPerBlock;
-    //    if (zoom < 4) {
-    //        blocks = 2048;
-    //        threadsPerBlock = 32;
-    //    } else if (zoom < 30) {
-    //        blocks = 512;
-    //        threadsPerBlock = 16;
-    //    } else {
-    //        blocks = 32;
-    //        threadsPerBlock = 1024;
-    //    }
-    //    cudaDrawCellGlow<<<blocks, threadsPerBlock>>>(data.worldSize, rectUpperLeft, data.tempObjects.cells, targetImage, imageSize, zoom);
-    //}
-
-    //if (settings.simulationParameters.borderlessRendering.value) {
-    //    KERNEL_CALL(cudaDrawRepetition, data.worldSize, imageSize, rectUpperLeft, rectLowerRight, targetImage, zoom);
-    //}
+    memoryManager.freeMemory(_numLocations);
 }
 
 NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data)
@@ -72,9 +34,6 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     NumRenderObjects result;
     result.vertices = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
     result.energyParticles = data.objects.particles.getNumEntries_host();
-    
-    // Calculate number of location points: (numLayers + numSources) * 5 (for periodic boundaries)
-    result.locations = (settings.simulationParameters.numLayers + settings.simulationParameters.numSources) * 5;
     
     // Count selected objects
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
@@ -101,6 +60,11 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     KERNEL_CALL(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices);
     cudaDeviceSynchronize();
     result.attackEventVertices = copyToHost(_numAttackEventVertices);
+
+    setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+    KERNEL_CALL_1_1(cudaExtractLocationData, data, nullptr, _numLocations);
+    cudaDeviceSynchronize();
+    result.locations = copyToHost(_numLocations);
 
     return result;
 }
@@ -146,7 +110,8 @@ void _GeometryKernelsService::extractObjectData(SettingsForSimulation const& set
     KERNEL_CALL(cudaExtractEnergyParticleData, data, mappedEnergyParticleBuffer);
     
     // Extract location data
-    KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer);
+    setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+    KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer, _numLocations);
     
     // Extract selected object data
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
