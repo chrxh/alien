@@ -1269,7 +1269,7 @@ __global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEv
                 
                 // Radius proportional to eventCounter
                 // Scale the radius based on eventCounter (make it visible)
-                detonationEventData[vertexIndex].radius = toFloat(cell->eventCounter) * 2.0f;
+                detonationEventData[vertexIndex].radius = toFloat(cell->eventCounter * cell->eventCounter) / 3.0f;
             }
         }
     }
