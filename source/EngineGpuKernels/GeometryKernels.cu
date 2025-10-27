@@ -1250,3 +1250,27 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         }
     }
 }
+__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices)
+{
+    auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        
+        // Only process cells that have detonation event
+        if (cell->eventCounter > 0 && cell->event == CellEvent_Detonation) {
+            
+            // Add detonation event point data (1 vertex for the circle center)
+            uint64_t vertexIndex = alienAtomicAdd64(numDetonationEventVertices, uint64_t(1));
+            if (detonationEventData != nullptr) {
+                // Position of the detonation
+                detonationEventData[vertexIndex].pos[0] = cell->pos.x;
+                detonationEventData[vertexIndex].pos[1] = cell->pos.y;
+                
+                // Radius proportional to eventCounter
+                // Scale the radius based on eventCounter (make it visible)
+                detonationEventData[vertexIndex].radius = toFloat(cell->eventCounter * cell->eventCounter) / 3.0f;
+            }
+        }
+    }
+}

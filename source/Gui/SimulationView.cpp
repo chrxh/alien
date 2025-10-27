@@ -237,6 +237,7 @@ void SimulationView::setupRenderPipeline()
                     _LineRenderStep::create(StepParameters().shader(ShaderSources::Line)),
                     _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
                     _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
+                    _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),

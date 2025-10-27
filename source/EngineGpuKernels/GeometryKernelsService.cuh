@@ -23,5 +23,6 @@ private:
     uint64_t* _numSelectedConnectionVertices;
     uint64_t* _numSelectedObjects;
     uint64_t* _numAttackEventVertices;
+    uint64_t* _numDetonationEventVertices;
     uint64_t* _numLocations;
 };

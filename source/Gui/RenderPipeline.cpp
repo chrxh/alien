@@ -185,6 +185,22 @@ _RenderPipeline::_RenderPipeline(SimulationFacade const& simulationFacade, Rende
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(AttackEventVertexData), (void*)(2 * sizeof(float)));
         glEnableVertexAttribArray(1);
     }
+    {
+        auto vao = _geometryBuffers->getVaoForDetonationEvents();
+        auto vbo = _geometryBuffers->getVboForDetonationEvents();
+
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Setup vertex attributes for DetonationEventVertexData
+        // Position (2 floats: x, y)
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(DetonationEventVertexData), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        // Radius (1 float)
+        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(DetonationEventVertexData), (void*)(2 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+    }
 
     // Check for supported pipeline structure
     CHECK(!_blocks.empty());

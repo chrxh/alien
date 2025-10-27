@@ -599,3 +599,34 @@ void _AttackEventRenderStep::execute(ExecutionParameters parameters)
 _AttackEventRenderStep::_AttackEventRenderStep(StepParameters const& parameters)
     : _RenderStep(parameters)
 {}
+
+DetonationEventRenderStep _DetonationEventRenderStep::create(StepParameters const& parameters)
+{
+    return DetonationEventRenderStep(new _DetonationEventRenderStep(parameters));
+}
+
+void _DetonationEventRenderStep::execute(ExecutionParameters parameters)
+{
+    if (!parameters._simulationParameters->attackVisualization.value) {
+        return;
+    }
+    if (!_previousTargetSelection.has_value()) {
+        parameters._clearBackground = true;
+    }
+    prepareExecution(parameters);
+
+    // Enable blending for glowing circles
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Draw detonation event circles (geometry shader will convert points to quads)
+    glBindVertexArray(parameters._geometryBuffers->getVaoForDetonationEvents());
+    glDrawArrays(GL_POINTS, 0, toInt(parameters._geometryBuffers->getNumObjects().detonationEventVertices));
+
+    // Disable blending
+    glDisable(GL_BLEND);
+}
+
+_DetonationEventRenderStep::_DetonationEventRenderStep(StepParameters const& parameters)
+    : _RenderStep(parameters)
+{}
