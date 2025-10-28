@@ -24,11 +24,9 @@ float modulo(float x, float y) {
 void main()
 {
     // This shader implements periodic copying of the input texture
-    // based on cudaDrawRepetition from GeometryKernels.cu
-    
     if (!borderlessRendering) {
         // If borderless rendering is disabled, just pass through the input
-        FragColor = texture(inputTexture1, texCoord);
+        FragColor = texture(inputTexture1, vec2(texCoord.x, 1.0 - texCoord.y));
         return;
     }
     
@@ -38,33 +36,21 @@ void main()
     // Calculate universe image size (world size in pixels)
     vec2 universeImageSize = worldSize * zoom;
     
-    // Check if we're outside the universe bounds
-    if (screenPos.x >= universeImageSize.x || screenPos.y >= universeImageSize.y) {
-        // We're outside the universe, need to copy from wrapped position
-        
-        // Convert screen position to world position
-        vec2 worldPos = screenPos / zoom + rectUpperLeft;
-        
-        // Map world position back to image position with modulo wrapping
-        vec2 refPos = (worldPos - rectUpperLeft) * zoom;
-        refPos.x = modulo(refPos.x, universeImageSize.x);
-        refPos.y = modulo(refPos.y, universeImageSize.y);
-        
-        // Convert back to texture coordinates
-        vec2 refTexCoord = refPos / viewportSize;
-        
-        // Check if reference position is valid
-        if (refPos.x >= 0.0 && refPos.x < viewportSize.x && 
-            refPos.y >= 0.0 && refPos.y < viewportSize.y) {
-            FragColor = texture(inputTexture1, refTexCoord);
-        } else {
-            // Invalid reference, keep original
-            FragColor = texture(inputTexture1, texCoord);
-        }
-    } else {
-        // We're inside the universe bounds, just pass through
-        FragColor = texture(inputTexture1, texCoord);
-    }
+    FragColor = vec4(1.0);
+    
+    // Convert screen position to world position
+    vec2 worldPos = screenPos / zoom + rectUpperLeft;
+    
+    // Map world position back to image position with modulo wrapping
+    vec2 refPos = (worldPos - rectUpperLeft) * zoom;
+    refPos.x = modulo(refPos.x, universeImageSize.x);
+    refPos.y = modulo(refPos.y, universeImageSize.y);
+    refPos = clamp(refPos, vec2(0.0), universeImageSize - vec2(0.0));
+    
+    // Convert back to texture coordinates
+    vec2 refTexCoord = refPos / viewportSize;
+    
+    FragColor = texture(inputTexture1, vec2(refTexCoord.x, 1.0 - refTexCoord.y));
 }
 )";
 }

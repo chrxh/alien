@@ -34,6 +34,8 @@ add_library(Shaders INTERFACE
     MergeMaxVS.h
     MetaballsFS.h
     MetaballsVS.h
+    ModuloCopyFS.h
+    ModuloCopyVS.h
     SelectedConnectionFS.h
     SelectedConnectionGS.h
     SelectedConnectionVS.h
