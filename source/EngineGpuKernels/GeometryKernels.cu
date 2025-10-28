@@ -779,22 +779,28 @@ namespace
             pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
             pos.x += visibleUpperLeft.x;
             pos.y += visibleUpperLeft.y;
+        } else {
+            pos.x = Math::modulo(pos.x, toFloat(worldSize.x));
+            pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
         }
     }
 }
 
 __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft)
 {
-    auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto const& cell = data.objects.cells.at(index);
-        correctPositionForRendering(cell->pos, visibleTopLeft, data.worldSize);
+    {
+        auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& cell = data.objects.cells.at(index);
+            correctPositionForRendering(cell->pos, visibleTopLeft, data.worldSize);
+        }
     }
-
-    auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto const& particle = data.objects.particles.at(index);
-        correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
+    {
+        auto const& partition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto const& particle = data.objects.particles.at(index);
+            correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
+        }
     }
 }
 
@@ -1009,7 +1015,9 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
 
     // Process layers
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
-        auto pos = cudaSimulationParameters.layerPosition.layerValues[i];
+        auto const& pos_asRealVector2D = cudaSimulationParameters.layerPosition.layerValues[i];
+        float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
+        correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
         auto color = cudaSimulationParameters.backgroundColor.layerValues[i].value;
         auto shapeType = cudaSimulationParameters.layerShape.layerValues[i];
         auto radius = cudaSimulationParameters.layerCoreRadius.layerValues[i];
@@ -1053,7 +1061,10 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         if (!cudaSimulationParameters.sourceShowRadiationCenter.sourceValues[i]) {
             continue;
         }
-        auto pos = cudaSimulationParameters.sourcePosition.sourceValues[i];
+        auto const& pos_asRealVector2D = cudaSimulationParameters.sourcePosition.sourceValues[i];
+        float2 pos{pos_asRealVector2D.x, pos_asRealVector2D.y};
+        correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
+
         // Use a distinct color for sources (e.g., yellow)
         float3 color = {0.05f, 0.05f, 0.15f};
         auto shapeType = cudaSimulationParameters.sourceShapeType.sourceValues[i];

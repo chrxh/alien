@@ -88,10 +88,12 @@ void ParametersValidationService::validateAndCorrectIntern(
                         return std::get<RealVector2D>(valueSpec._max);
                     }
                 }();
-                auto arraySize = getArraySize(ref.colorDependence);
-                for (int i = 0; i < arraySize; ++i) {
-                    ref.value[i].x = std::clamp(ref.value[i].x, min.x, max.x);
-                    ref.value[i].y = std::clamp(ref.value[i].y, min.y, max.y);
+                if (!std::holds_alternative<WorldSize>(valueSpec._max)) {
+                    auto arraySize = getArraySize(ref.colorDependence);
+                    for (int i = 0; i < arraySize; ++i) {
+                        ref.value[i].x = std::clamp(ref.value[i].x, min.x, max.x);
+                        ref.value[i].y = std::clamp(ref.value[i].y, min.y, max.y);
+                    }
                 }
             }
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {

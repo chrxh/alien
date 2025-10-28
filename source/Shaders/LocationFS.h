@@ -20,6 +20,7 @@ in vec2 gQuadCoord;
 uniform float zoom;
 uniform vec2 worldSize;
 uniform float radius;
+uniform int borderlessRendering;   // 0 = off, 1 = on
 
 void main()
 {
@@ -38,9 +39,11 @@ void main()
     vec2 pixelWorldPos = gWorldPos + pixelOffset;
     
     // Clip pixels outside world boundaries (pixel-wise clipping)
-    if (pixelWorldPos.x < 0.0 || pixelWorldPos.x > worldSize.x ||
-        pixelWorldPos.y < 0.0 || pixelWorldPos.y > worldSize.y) {
-        discard;
+    if (borderlessRendering == 0) {
+        if (pixelWorldPos.x < 0.0 || pixelWorldPos.x > worldSize.x ||
+            pixelWorldPos.y < 0.0 || pixelWorldPos.y > worldSize.y) {
+            discard;
+        }
     }
     
     float alpha = 0.0;
