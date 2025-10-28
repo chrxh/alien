@@ -323,7 +323,7 @@ void _LocationRenderStep::execute(ExecutionParameters parameters)
         parameters._clearBackground = true;
     }
     prepareExecution(parameters);
-    _shader->setInt("borderlessRendering", parameters._simulationParameters->borderlessRendering.value ? 1 : 0);
+    _shader->setBool("borderlessRendering", parameters._simulationParameters->borderlessRendering.value);
 
     // Enable blending for semi-transparent locations
     glEnable(GL_BLEND);

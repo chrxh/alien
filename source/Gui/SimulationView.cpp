@@ -169,11 +169,14 @@ void SimulationView::updateMotionBlur() {}
 
 void SimulationView::setupRenderPipeline()
 {
-    auto currentBackgroundColor = [this](SimulationParameters const& parameters) {
-        FloatColorRGB background = parameters.backgroundColor.baseValue;
-        int gridLines = parameters.gridLines.value ? 1 : 0;
-        return UniformValueMap{{"background", background}, {"gridLines", gridLines}};
+    auto backgroundVariables = [this](SimulationParameters const& parameters) {
+        return UniformValueMap{
+            {"background", parameters.backgroundColor.baseValue},
+            {"gridLines", parameters.gridLines.value},
+            {"borderlessRendering", parameters.borderlessRendering.value},
+        };
     };
+
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
         RenderBlocks{
@@ -313,7 +316,7 @@ void SimulationView::setupRenderPipeline()
             // Render block: Background
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(currentBackgroundColor)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundVariables)),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
                     _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
                 }),

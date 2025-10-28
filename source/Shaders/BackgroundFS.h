@@ -17,6 +17,7 @@ uniform vec2 worldSize;
 uniform vec2 rectUpperLeft;
 uniform vec2 rectLowerRight;
 uniform bool gridLines;
+uniform bool borderlessRendering;
 
 float modulo(float x, float y) {
     return x - y * floor(x / y);
@@ -33,8 +34,10 @@ void main()
     
     // Check if world position is within world boundaries
     vec3 finalColor;
-    if (worldPos.x >= 0.0 && worldPos.x <= worldSize.x &&
-        worldPos.y >= 0.0 && worldPos.y <= worldSize.y) {
+    if (borderlessRendering ||
+        (worldPos.x >= 0.0 && worldPos.x <= worldSize.x &&
+         worldPos.y >= 0.0 && worldPos.y <= worldSize.y)) {
+
         // Inside world boundaries - render background color
         finalColor = background;
     } else {
@@ -44,7 +47,7 @@ void main()
     
     // Add grid lines if enabled
     if (gridLines) {
-        // Calculate grid parameters (matching CUDA code logic)
+        // Calculate grid parameters
         float viewWidth = max(1.0, rectLowerRight.x - rectUpperLeft.x);
         float PixelInWorldSize = viewWidth / worldSize.x;
         float gridDistance = pow(10.0, floor(log(viewWidth) / log(10.0))) / 10.0;
