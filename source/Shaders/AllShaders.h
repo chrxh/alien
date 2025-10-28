@@ -38,6 +38,8 @@
 #include "MergeMaxVS.h"
 #include "MetaballsFS.h"
 #include "MetaballsVS.h"
+#include "ModuloCopyFS.h"
+#include "ModuloCopyVS.h"
 #include "SelectedConnectionFS.h"
 #include "SelectedConnectionGS.h"
 #include "SelectedConnectionVS.h"

@@ -333,6 +333,10 @@ void SimulationView::setupRenderPipeline()
                     _SelectedConnectionRenderStep::create(
                         StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(
+                        StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc([](SimulationParameters const& parameters) {
+                            return UniformValueMap{{"borderlessRendering", static_cast<int>(parameters.borderlessRendering.value)}};
+                        })),
                 }),
             },
         });

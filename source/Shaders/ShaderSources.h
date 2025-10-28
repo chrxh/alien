@@ -29,6 +29,7 @@ namespace ShaderSources
     inline ShaderSource const MergeLayers{Shaders::MergeLayersVS, Shaders::MergeLayersFS};
     inline ShaderSource const MergeMax{Shaders::MergeMaxVS, Shaders::MergeMaxFS};
     inline ShaderSource const Metaballs{Shaders::MetaballsVS, Shaders::MetaballsFS};
+    inline ShaderSource const ModuloCopy{Shaders::ModuloCopyVS, Shaders::ModuloCopyFS};
     inline ShaderSource const SelectedConnection{Shaders::SelectedConnectionVS, Shaders::SelectedConnectionFS, Shaders::SelectedConnectionGS};
     inline ShaderSource const SelectedObject{Shaders::SelectedObjectVS, Shaders::SelectedObjectFS, Shaders::SelectedObjectGS};
     inline ShaderSource const SubsurfaceScatter{Shaders::SubsurfaceScatterVS, Shaders::SubsurfaceScatterFS};

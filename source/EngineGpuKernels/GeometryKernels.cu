@@ -1025,16 +1025,22 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
         auto fadeoutRadius = cudaSimulationParameters.layerFadeoutRadius.layerValues[i];
         auto opacity = cudaSimulationParameters.layerOpacity.layerValues[i];
 
-        // Render at 5 positions for periodic boundaries (center, +/-x, +/-y offsets)
-        float offsets[5][2] = {
+        // Render at 9 positions for periodic boundaries
+        auto worldSizeX = toFloat(worldSize.x);
+        auto worldSizeY = toFloat(worldSize.y);
+        float offsets[9][2] = {
+            {-worldSizeX, -worldSizeY},
+            {0.0f, -worldSizeY},
+            {worldSizeX, -worldSizeY},
+            {-worldSizeX, 0.0f},
             {0.0f, 0.0f},
-            {static_cast<float>(worldSize.x), 0.0f},
-            {-static_cast<float>(worldSize.x), 0.0f},
-            {0.0f, static_cast<float>(worldSize.y)},
-            {0.0f, -static_cast<float>(worldSize.y)}
+            {worldSizeX, 0.0f},
+            {-worldSizeX, worldSizeY},
+            {0.0f, worldSizeY},
+            {worldSizeX, worldSizeY},
         };
 
-        for (int j = 0; j < 5; ++j) {
+        for (int j = 0; j < 9; ++j) {
             if (locationData != nullptr) {
                 locationData[*numLocations].pos[0] = pos.x + offsets[j][0];
                 locationData[*numLocations].pos[1] = pos.y + offsets[j][1];
