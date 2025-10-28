@@ -127,11 +127,13 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
 
+    _geometryKernels->correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
     auto numRenderObjects = _geometryKernels->getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     geometryBuffers->updateNumObjects(numRenderObjects);
     _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
     _geometryKernels->extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+    _geometryKernels->restorePositions(_settings, simulationData);
     syncAndCheck();
 }
 

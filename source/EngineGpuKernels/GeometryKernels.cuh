@@ -45,6 +45,7 @@ __global__ void cudaDrawParticles(int2 worldSize, float2 rectUpperLeft, float2 r
 __global__ void cudaDrawRadiationSources(uint64_t* targetImage, float2 rectUpperLeft, int2 worldSize, int2 imageSize, float zoom);
 __global__ void cudaDrawRepetition(int2 worldSize, int2 imageSize, float2 rectUpperLeft, float2 rectLowerRight, uint64_t* imageData, float zoom);
 
+__global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft);
 __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData, float2 visibleTopLeft);
 __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData, float2 visibleTopLeft);
 __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData* locationData, uint64_t* numLocations, float2 visibleTopLeft);

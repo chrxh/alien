@@ -29,16 +29,30 @@ _GeometryKernelsService::~_GeometryKernelsService()
     memoryManager.freeMemory(_numLocations);
 }
 
+void _GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
+{
+    auto const& gpuSettings = settings.cudaSettings;
+    float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
+
+    KERNEL_CALL(cudaCorrectPositionsForRendering, data, visibleTopLeft);
+}
+
+void _GeometryKernelsService::restorePositions(SettingsForSimulation const& settings, SimulationData data)
+{
+    auto const& gpuSettings = settings.cudaSettings;
+
+    KERNEL_CALL(cudaCorrectPositionsForRendering, data, float2{0,0});
+}
+
 NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
 {
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
     NumRenderObjects result;
-    result.cells = data.objects.cells.getNumEntries_host()/* + data.objects.particles.getNumEntries_host()*/;
+    result.cells = data.objects.cells.getNumEntries_host();
     result.energyParticles = data.objects.particles.getNumEntries_host();
 
-    // Count selected objects
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects, visibleTopLeft);
     cudaDeviceSynchronize();

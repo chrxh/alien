@@ -770,6 +770,37 @@ __global__ void cudaBackground(uint64_t* imageData, int2 imageSize, int2 worldSi
 
 namespace
 {
+    __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& visibleUpperLeft, int2 const& worldSize)
+    {
+        if (cudaSimulationParameters.borderlessRendering.value) {
+            pos.x -= visibleUpperLeft.x;
+            pos.y -= visibleUpperLeft.y;
+            pos.x = Math::modulo(pos.x, toFloat(worldSize.x));
+            pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
+            pos.x += visibleUpperLeft.x;
+            pos.y += visibleUpperLeft.y;
+        }
+    }
+}
+
+__global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft)
+{
+    auto const& cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        correctPositionForRendering(cell->pos, visibleTopLeft, data.worldSize);
+    }
+
+    auto const& particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
+        auto const& particle = data.objects.particles.at(index);
+        correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
+    }
+}
+
+
+namespace
+{
     __device__ __inline__ uint32_t getCellColor(int colorCode) {
         uint32_t result;
         switch (calcMod(colorCode, MAX_COLORS)) {
@@ -806,21 +837,6 @@ namespace
     }
 }
 
-namespace
-{
-    __device__ __inline__ void correctPositionForRendering(float2& pos, float2 const& rectUpperLeft, int2 const& worldSize)
-    {
-        if (cudaSimulationParameters.borderlessRendering.value) {
-            pos.x -= rectUpperLeft.x;
-            pos.y -= rectUpperLeft.y;
-            pos.x = Math::modulo(pos.x, toFloat(worldSize.x));
-            pos.y = Math::modulo(pos.y, toFloat(worldSize.y));
-            pos.x += rectUpperLeft.x;
-            pos.y += rectUpperLeft.y;
-        }
-    }
-}
-
 __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData, float2 visibleTopLeft)
 {
     // Process cells - each cell goes to its index position
@@ -828,10 +844,9 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
 
-        auto pos = cell->pos;
-        correctPositionForRendering(pos, visibleTopLeft, data.worldSize);
+        auto const& pos = cell->pos;
 
-        auto cellColor = getCellColor(cell->color);
+        auto const& cellColor = getCellColor(cell->color);
         
         auto luminance = (cell->energy + 100.0f) / 300.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
         auto white = luminance / 10.0f;
