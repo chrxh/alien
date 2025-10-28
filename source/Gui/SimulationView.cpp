@@ -317,7 +317,12 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundVariables)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(StepParameters()
+                        .shader(ShaderSources::ModuloCopy)
+                        .previousTargetSelection(0)
+                        .uniformFunc([](SimulationParameters const& parameters) {
+                            return UniformValueMap{{"borderlessRendering", static_cast<int>(parameters.borderlessRendering.value)}};
+                        })),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
                     _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
                 }),
