@@ -179,6 +179,26 @@ void SimulationView::setupRenderPipeline()
     auto moduloUniformFunc = [](SimulationParameters const& parameters) {
         return UniformValueMap{{"borderlessRendering", parameters.borderlessRendering.value}};
     };
+    auto blurFunc = [](SimulationParameters const& parameters) {
+        auto zoom = Viewport::get().getZoomFactor();
+        float strength = 0.015f;
+        if (zoom < 100.0f) {
+            strength *= 3.5f;
+        }
+        if (zoom < 50.0f) {
+            strength *= 2.5f;
+        }
+        if (zoom < 25.0f) {
+            strength *= 2.5f;
+        }
+        if (zoom < 12.0f) {
+            strength *= 2.5f;
+        }
+        if (zoom < 6.0f) {
+            strength *= 2.5f;
+        }
+        return UniformValueMap{{"strength", strength}};
+    };
 
     _renderPipeline = std::make_shared<_RenderPipeline>(
         _simulationFacade,
@@ -283,13 +303,18 @@ void SimulationView::setupRenderPipeline()
 
             // Render block: Two outputs: downscale blur and original
             RenderBlock{
-                RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
+                RenderSequence().repetitions(7).steps({
                     _PostProcessingRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f)
+                                                          .shader(ShaderSources::BlurHorizontal)
+                                                          .uniformFunc(blurFunc)
+                                                          //.addUniform("strength", 0.12f / 8)
                                                           .addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 1.5f)),
+                    _PostProcessingRenderStep::create(StepParameters()
+                                                          .shader(ShaderSources::BlurVertical)
+                                                          .uniformFunc(blurFunc)
+                                                          //.addUniform("strength", 0.12f / 8)
+                                                          .addUniform("zoomDependent", true)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -297,12 +322,12 @@ void SimulationView::setupRenderPipeline()
 
             // Render block: Two outputs: upscale blur and original
             RenderBlock{
-                RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 1.5f)),
+                RenderSequence().repetitions(7).steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),

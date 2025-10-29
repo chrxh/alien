@@ -289,6 +289,8 @@ void _RenderPipeline::forEachStep(
 {
     std::map<RenderTarget, TargetInfo> usedTargets;
 
+    auto zoom = Viewport::get().getZoomFactor();
+
     std::vector<RenderTarget> previousBlockTargets;
     for (size_t i = 0; i < _blocks.size(); ++i) {
         auto& block = _blocks.at(i);
@@ -299,7 +301,25 @@ void _RenderPipeline::forEachStep(
             auto& sequence = block.at(j);
 
             std::vector<RenderTarget> previousTargets = previousBlockTargets;
-            for (int k = 0; k < sequence._repetitions; ++k) {
+            auto repetition = sequence._repetitions;
+            if (repetition > 1) {
+                if (zoom < 100) {
+                    --repetition;
+                }
+                if (zoom < 50) {
+                    --repetition;
+                }
+                if (zoom < 25) {
+                    --repetition;
+                }
+                if (zoom < 12) {
+                    --repetition;
+                }
+                if (zoom < 6) {
+                    --repetition;
+                }
+            }
+            for (int k = 0; k < repetition; ++k) {
                 for (size_t l = 0; l < sequence._steps.size(); ++l) {
                     auto& step = sequence._steps.at(l);
 
