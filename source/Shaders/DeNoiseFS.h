@@ -19,10 +19,10 @@ void main()
     vec4 result = vec4(0.0);
 
     result += texture(inputTexture1, texCoord);
-    result = max(result, texture(inputTexture1, texCoord + vec2(texelSize.x, 0)));
-    result = max(result, texture(inputTexture1, texCoord + vec2(0, texelSize.y)));
-    result = max(result, texture(inputTexture1, texCoord + vec2(texelSize.x, texelSize.y)));
-    FragColor = result;
+    result += texture(inputTexture1, texCoord + vec2(texelSize.x, 0));
+    result += texture(inputTexture1, texCoord + vec2(0, texelSize.y));
+    result += texture(inputTexture1, texCoord + vec2(texelSize.x, texelSize.y));
+    FragColor = result * 0.25;
 }
 )";
 }

@@ -335,6 +335,7 @@ void SimulationView::setupRenderPipeline()
                         StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
                     _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
                 }),
             },
         });
