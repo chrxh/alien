@@ -1206,8 +1206,7 @@ cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* sel
 __global__ void cudaExtractSelectedConnectionData(
     SimulationData data,
     ConnectionArrowVertexData* connectionArrowData,
-    uint64_t* numConnectionArrowVertices,
-    float2 visibleTopLeft)
+    uint64_t* numConnectionArrowVertices)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 

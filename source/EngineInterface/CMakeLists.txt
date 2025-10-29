@@ -60,8 +60,7 @@ add_library(EngineInterface
     StatisticsConverterService.h
     StatisticsHistory.cpp
     StatisticsHistory.h
-    StatisticsRawData.h
-    ZoomLevels.h)
+    StatisticsRawData.h)
 
 target_link_libraries(EngineInterface Base)
 
