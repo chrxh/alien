@@ -34,7 +34,6 @@ struct SimulationParameters
     BaseParameter<float> cellRadius = {0.25f};
     BaseParameter<float> zoomLevelForNeuronVisualization = {2.0f};
     BaseParameter<bool> attackVisualization = {true};
-    BaseParameter<bool> muscleMovementVisualization = {false};
     BaseParameter<bool> borderlessRendering = {false};
     BaseParameter<bool> gridLines = {false};
     BaseParameter<bool> markReferenceDomain = {true};
@@ -273,7 +272,6 @@ struct SimulationParameters
 
     // Expert settings: Cell glow
     ExpertToggle cellGlowToggle = {false};
-    BaseParameter<CellColoring> cellGlowColoring = {CellColoring_CellColor};
     BaseParameter<float> cellGlowRadius = {4.0f};
     BaseParameter<ColorVector<float>> cellGlowStrength = {{0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f}};
 

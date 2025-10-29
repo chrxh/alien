@@ -109,10 +109,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(BoolSpec().member(&SimulationParameters::attackVisualization))
                         .description("If activated, successful attacks of attacker cells are visualized."),
                     ParameterSpec()
-                        .name("Muscle movement visualization")
-                        .reference(BoolSpec().member(&SimulationParameters::muscleMovementVisualization))
-                        .description("If activated, the direction in which muscle cells are moving are visualized."),
-                    ParameterSpec()
                         .name("Borderless rendering")
                         .reference(BoolSpec().member(&SimulationParameters::borderlessRendering))
                         .description("If activated, the simulation is rendered periodically in the view port."),
@@ -813,20 +809,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .name("Cell glow")
                 .expertToggle(&SimulationParameters::cellGlowToggle)
                 .parameters({
-                    ParameterSpec()
-                        .name("Coloring")
-                        .reference(AlternativeSpec()
-                                       .member(&SimulationParameters::cellGlowColoring)
-                                       .alternatives(
-                                           {{"Energy", {}},
-                                            {"Standard cell colors", {}},
-                                            {"Mutants", {}},
-                                            {"Mutants and cell functions", {}},
-                                            {"Cell states", {}},
-                                            {"Genome complexities", {}},
-                                            {"Single cell function", {}},
-                                            {"All cell functions", {}}}))
-                        .description(coloringTooltip),
                     ParameterSpec()
                         .name("Radius")
                         .reference(FloatSpec().member(&SimulationParameters::cellGlowRadius).min(1.0f).max(8.0f))

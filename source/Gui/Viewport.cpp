@@ -1,5 +1,7 @@
 #include "Viewport.h"
 
+#include <algorithm>
+
 #include <GLFW/glfw3.h>
 
 #include "Base/Math.h"
@@ -45,11 +47,13 @@ void Viewport::setViewSize(IntVector2D const& viewSize)
 
 void Viewport::zoom(IntVector2D const& viewPos, float factor)
 {
-    if ((factor > 1.0f && _zoomFactor < 200.0f) || (factor < 1.0f && _zoomFactor > 0.02f)) {
-        auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
-        _zoomFactor *= factor;
-        moveCenter(worldPos, viewPos);
-    }
+    auto worldPos = mapViewToWorldPosition({toFloat(viewPos.x), toFloat(viewPos.y)});
+
+    auto newZoomFactor = _zoomFactor * factor;
+    newZoomFactor = std::clamp(newZoomFactor, 0.02f, 200.0f);
+    _zoomFactor = newZoomFactor;
+
+    moveCenter(worldPos, viewPos);
 }
 
 float Viewport::getZoomSensitivity()
