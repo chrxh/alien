@@ -15,6 +15,7 @@ uniform sampler2D inputTexture2;
 uniform sampler2D inputTexture3;
 uniform vec2 viewportSize;
 uniform float zoom;
+uniform float scale;
 
 void main()
 {
@@ -22,16 +23,26 @@ void main()
     float kernel[9] = float[9](1,2,1, 2,4,2, 1,2,1);
     float wsum = 16.0;
 
-    vec2 texelSize = 1.0 / viewportSize;
-    int k = 0;
-    for (int y = -1; y <= 1; ++y) {
-        for (int x = -1; x <= 1; ++x) {
-            vec2 offset = vec2(x, y) * texelSize;
-            sum += texture(inputTexture1, texCoord + offset).rgb * kernel[k++];
-        }
-    }
+    float offset = (1.0 - 1.0 / scale) / 2;
+    vec2 sourceTexCoord = texCoord / scale + vec2(offset, offset);
+    FragColor = texture(inputTexture1, sourceTexCoord);
 
-    FragColor = vec4(sum / wsum, 1.0);
+
+    //float targetTexSize = scale / 2;
+    //vec2 targetTexCoord = (texCoord - vec2(0.5, 0.5)) / vec2(targetTexSize);
+    //targetTexCoord = (targetTexCoord + vec2(1.0)) / 2;  // Normalize to [0, 1] range
+
+
+    //vec2 texelSize = 1.0 / viewportSize;
+    //int k = 0;
+    //for (int y = -1; y <= 1; ++y) {
+    //    for (int x = -1; x <= 1; ++x) {
+    //        vec2 offset = vec2(x, y) * texelSize;
+    //        sum += texture(inputTexture1, texCoord + offset).rgb * kernel[k++];
+    //    }
+    //}
+
+    //FragColor = vec4(sum / wsum, 1.0);
 }
 )";
 }
