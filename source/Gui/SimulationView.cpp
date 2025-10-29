@@ -169,12 +169,15 @@ void SimulationView::updateMotionBlur() {}
 
 void SimulationView::setupRenderPipeline()
 {
-    auto backgroundVariables = [this](SimulationParameters const& parameters) {
+    auto backgroundUniformFunc = [this](SimulationParameters const& parameters) {
         return UniformValueMap{
             {"background", parameters.backgroundColor.baseValue},
             {"gridLines", parameters.gridLines.value},
             {"borderlessRendering", parameters.borderlessRendering.value},
         };
+    };
+    auto moduloUniformFunc = [](SimulationParameters const& parameters) {
+        return UniformValueMap{{"borderlessRendering", static_cast<int>(parameters.borderlessRendering.value)}};
     };
 
     _renderPipeline = std::make_shared<_RenderPipeline>(
@@ -187,6 +190,7 @@ void SimulationView::setupRenderPipeline()
                     _EnergyParticleRenderStep::create(StepParameters()
                                                           .shader(ShaderSources::EnergyParticle).addUniform("ballSize", 2.0f)
                                                           .preventMoirePatterns(false)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 }),
             },
 
@@ -241,6 +245,7 @@ void SimulationView::setupRenderPipeline()
                     _TriangleRenderStep::create(StepParameters().shader(ShaderSources::Triangle).previousTargetSelection(0)),
                     _AttackEventRenderStep::create(StepParameters().shader(ShaderSources::AttackEvent).previousTargetSelection(0)),
                     _DetonationEventRenderStep::create(StepParameters().shader(ShaderSources::DetonationEvent).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.1f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Metaballs)),
@@ -248,7 +253,8 @@ void SimulationView::setupRenderPipeline()
                     //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::SubsurfaceScatter)),
                 }),
                 RenderSequence().steps({
-                    _CellRenderStep::create(StepParameters().shader(ShaderSources::Cell).previousTargetSelection(0)),
+                    _CellRenderStep::create(StepParameters().shader(ShaderSources::Cell)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 }),
             },
 
@@ -259,7 +265,7 @@ void SimulationView::setupRenderPipeline()
                         .shader(ShaderSources::MergeAdditive)
                         .addUniform("colorFactor1", 1.0f)
                         .addUniform("colorFactor2", 0.6f)
-                        .addUniform("colorFactor3", 0.5f)),
+                        .addUniform("colorFactor3", 1.5f)),
                 }),
             },
 
@@ -316,9 +322,10 @@ void SimulationView::setupRenderPipeline()
             // Render block: Background
             RenderBlock{
                 RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundVariables)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::Background).uniformFunc(backgroundUniformFunc)),
                     _LocationRenderStep::create(StepParameters().shader(ShaderSources::Location).previousTargetSelection(0)),
                     _SelectedObjectRenderStep::create(StepParameters().shader(ShaderSources::SelectedObject).previousTargetSelection(0)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(0)),
@@ -333,10 +340,6 @@ void SimulationView::setupRenderPipeline()
                     _SelectedConnectionRenderStep::create(
                         StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc([](SimulationParameters const& parameters) {
-                            return UniformValueMap{{"borderlessRendering", static_cast<int>(parameters.borderlessRendering.value)}};
-                        })),
                 }),
             },
         });
