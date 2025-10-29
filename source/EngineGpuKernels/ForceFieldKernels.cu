@@ -56,6 +56,8 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
         for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
             if (cudaSimulationParameters.layerForceFieldType.layerValues[i].enabled) {
                 accelerations[i] = calcAcceleration(data.cellMap, pos, i);
+            } else {
+                accelerations[i] = float2{0, 0};
             }
         }
         return ParameterCalculator::calcParameter(float2{0, 0}, accelerations, data, pos);

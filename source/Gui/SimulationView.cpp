@@ -347,8 +347,13 @@ void SimulationView::markReferenceDomain()
     auto worldSize = _simulationFacade->getWorldSize();
     auto p2 = Viewport::get().mapWorldToViewPosition(toRealVector2D(worldSize), false);
     auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
+    auto color2 = ImColor::HSV(0, 0, 0, 0.8f);
     drawList->AddLine({p1.x, p1.y}, {p2.x, p1.y}, color);
     drawList->AddLine({p2.x, p1.y}, {p2.x, p2.y}, color);
     drawList->AddLine({p2.x, p2.y}, {p1.x, p2.y}, color);
     drawList->AddLine({p1.x, p2.y}, {p1.x, p1.y}, color);
+    drawList->AddLine({p1.x - 1.0f, p1.y - 1.0f}, {p2.x + 1.0f, p1.y - 1.0f}, color2);
+    drawList->AddLine({p2.x + 1.0f, p1.y - 1.0f}, {p2.x + 1.0f, p2.y + 1.0f}, color2);
+    drawList->AddLine({p2.x + 1.0f, p2.y + 1.0f}, {p1.x - 1.0f, p2.y + 1.0f}, color2);
+    drawList->AddLine({p1.x - 1.0f, p2.y + 1.0f}, {p1.x - 1.0f, p1.y - 1.0f}, color2);
 }
