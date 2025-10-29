@@ -222,20 +222,11 @@ void SimulationView::setupRenderPipeline()
                 }),
             },
 
-            // Render block: Zoom brightness correction for energy particles
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
-                }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                }),
-            },
-
             // Render block: Merge energy particles for bloom
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::MergeMax).addUniform("colorFactor1", 0.8f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
                 }),
             },
 
@@ -260,6 +251,7 @@ void SimulationView::setupRenderPipeline()
                 }),
                 RenderSequence().steps({
                     _CellRenderStep::create(StepParameters().shader(ShaderSources::Cell)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 }),
             },
@@ -312,14 +304,14 @@ void SimulationView::setupRenderPipeline()
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
 
-            RenderBlock{
-                RenderSequence().steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
-                }),
-                RenderSequence().steps({
-                    _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-                }),
-            },
+            //RenderBlock{
+            //    RenderSequence().steps({
+            //        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
+            //    }),
+            //    RenderSequence().steps({
+            //        _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
+            //    }),
+            //},
 
             // Render block: Merge and tone mapping
             RenderBlock{
