@@ -286,7 +286,8 @@ void SimulationView::setupRenderPipeline()
                                                           .shader(ShaderSources::BlurVertical)
                                                           .addUniform("strength", 0.25f)
                                                           .addUniform("zoomDependent", true)
-                                                          .textureScale(1.0f / 1.5f)),
+                                                          /*.textureScale(1.0f / 1.5f)*/),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).textureScale(1.0f / 1.5f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -295,10 +296,11 @@ void SimulationView::setupRenderPipeline()
             // Render block: Two outputs: upscale blur and original
             RenderBlock{
                 RenderSequence().repetitions(6).steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).textureScale(1.5f)),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f).addUniform("zoomDependent", true).textureScale(1.5f)),
+                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f).addUniform("zoomDependent", true)/*.textureScale(1.5f)*/),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
