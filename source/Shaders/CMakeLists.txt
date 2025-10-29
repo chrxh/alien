@@ -14,6 +14,11 @@ add_library(Shaders INTERFACE
     CellTypeOverlayGS.h
     CellTypeOverlayVS.h
     CellVS.h
+    DeNoiseFS.h
+    DeNoiseVS.h
+    DetonationEventFS.h
+    DetonationEventGS.h
+    DetonationEventVS.h
     DownSamplerFS.h
     DownSamplerVS.h
     EnergyParticleFS.h

@@ -14,14 +14,14 @@ uniform sampler2D inputTexture1;
 uniform vec2 viewportSize;
 uniform float zoom;
 uniform float strength;
+uniform bool zoomDependent;
 
 void main()
 {
     vec2 texelSize = 1.0 / viewportSize;
     vec4 result = vec4(0.0);
     float totalWeight = 0.0;
-    //float blurRadius = min(zoom, zoom * zoom / 20) * strength;
-    float blurRadius = zoom * strength;
+    float blurRadius = zoomDependent ? zoom * strength : strength;
     
     if (blurRadius < 1.0) {
         FragColor = texture(inputTexture1, texCoord);

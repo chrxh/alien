@@ -12,6 +12,7 @@ layout (triangle_strip, max_vertices = 3) out;
 in vec3 vertexColor[];
 out vec3 fragColor;
 
+uniform float zoom;
 //uniform float lightAngle;
 
 #define PI 3.1415926538
@@ -35,6 +36,9 @@ void main()
     // Calculate lighting (dot product of normal and light direction)
     // Clamp to [0, 1] range
     float lightIntensity = max(0.0, dot(normal, lightDir));
+    //if (zoom < 3.0) {
+    //    lightIntensity = 0.0;
+    //}
     
     // Output the triangle with per-vertex lit colors (will be interpolated by GPU)
     for (int i = 0; i < 3; i++)

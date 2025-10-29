@@ -20,6 +20,7 @@ namespace ShaderSources
     inline ShaderSource const Cell{Shaders::CellVS, Shaders::CellFS};
     inline ShaderSource const CellTypeOverlay{Shaders::CellTypeOverlayVS, Shaders::CellTypeOverlayFS, Shaders::CellTypeOverlayGS};
     inline ShaderSource const DetonationEvent{Shaders::DetonationEventVS, Shaders::DetonationEventFS, Shaders::DetonationEventGS};
+    inline ShaderSource const DeNoise{Shaders::DeNoiseVS, Shaders::DeNoiseFS};
     inline ShaderSource const DownSampler{Shaders::DownSamplerVS, Shaders::DownSamplerFS};
     inline ShaderSource const EnergyParticle{Shaders::EnergyParticleVS, Shaders::EnergyParticleFS};
     inline ShaderSource const Fresnel{Shaders::FresnelVS, Shaders::FresnelFS};
