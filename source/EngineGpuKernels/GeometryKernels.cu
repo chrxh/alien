@@ -850,6 +850,41 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
 
+        int isInTriangleOrQuad = 0;
+        if (cell->numConnections > 1) {
+            bool first = true;
+            int backIndices[MAX_CELL_BONDS];
+            for (int i = 0, numConnections = cell->numConnections; i < numConnections + 1; ++i) {
+                auto connectionIndex = i % numConnections;
+                auto const& connectedCell = cell->connections[connectionIndex].cell;
+                auto backIndex = connectedCell->getConnectionIndex(cell);
+                backIndices[connectionIndex] = backIndex;
+                if (first) {
+                    first = false;
+                    continue;
+                }
+                auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
+                auto const& prevConnectedCell = cell->connections[prevIndex].cell;
+                auto prevBackIndex = backIndices[prevIndex];
+
+                // Triangle?
+                if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == connectedCell) {
+                    isInTriangleOrQuad = 1;
+                    break;
+                }
+
+                // Rectangle?
+                auto fourthCellCandidate1 = connectedCell->getConnectedCell(backIndex + 1);
+                auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
+                if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != cell && fourthCellCandidate2 != cell
+                    && connectedCell != prevConnectedCell) {
+                    isInTriangleOrQuad = 1;
+                    break;
+                }
+            }
+        }
+
+
         auto const& pos = cell->pos;
 
         auto const& cellColor = getCellColor(cell->color);
@@ -884,7 +919,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Pack both cellType (lower 8 bits) and signalState (upper 8 bits) into state field
-        objectData[index].state = cell->cellType | (cell->signalState << 8);
+        objectData[index].state = cell->cellType | (cell->signalState << 8) | (isInTriangleOrQuad << 16);
 
         // Store cell index for line extraction (just use the index directly)
         cell->tempValue.as_uint64 = index;
@@ -943,7 +978,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
     };
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        if (cell->numConnections == 0) {
+        if (cell->numConnections <= 1) {
             continue;
         }
         bool first = true;
