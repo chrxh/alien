@@ -22,6 +22,7 @@ void main()
     vec4 result = vec4(0.0);
     float totalWeight = 0.0;
     float blurRadius = zoomDependent ? zoom * strength : strength;
+    blurRadius = min(blurRadius, 20.0);
     
     if (blurRadius < 1.0) {
         FragColor = texture(inputTexture1, texCoord);

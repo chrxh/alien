@@ -45,7 +45,6 @@ struct StepParameters
     MEMBER(StepParameters, ShaderSources::ShaderSource, shader, ShaderSources::ShaderSource());
     MEMBER(StepParameters, std::optional<int>, previousTargetSelection, std::nullopt);
     MEMBER(StepParameters, float, textureScale, 1.0f);
-    MEMBER(StepParameters, bool, preventMoirePatterns, true);
     MEMBER(StepParameters, UniformValueMap, uniforms, {});
     MEMBER(StepParameters, std::function<UniformValueMap(SimulationParameters const&)>, uniformFunc, {});
 
@@ -63,6 +62,7 @@ struct ExecutionParameters
     MEMBER(ExecutionParameters, RenderTarget, target, ScreenTarget());
 
     // Misc
+    MEMBER(ExecutionParameters, float, minBallRadius, 6.0f);
     MEMBER(ExecutionParameters, GeneralRenderInfo, renderInfo, GeneralRenderInfo());
     MEMBER(ExecutionParameters, SimulationFacade, simulationFacade, SimulationFacade());
     MEMBER(ExecutionParameters, std::shared_ptr<SimulationParameters>, simulationParameters, nullptr);
@@ -88,7 +88,6 @@ protected:
     Shader _shader;
     std::optional<int> _previousTargetSelection;
     float _textureScale = 1.0f;
-    bool _preventMoirePatterns = true;
     UniformValueMap _uniforms;
     std::function<UniformValueMap(SimulationParameters const&)> _uniformFunc;
     std::vector<unsigned int> _inputTextures;

@@ -10,6 +10,7 @@ out vec4 FragColor;
 
 in vec3 vColor;
 uniform float zoom;
+uniform bool onBackground;
 
 void main()
 {
@@ -24,18 +25,11 @@ void main()
     
     // Simple falloff for alpha based on distance from center
     float alpha;
-    alpha = 1.0 - smoothstep(0.2, 0.5, dist);
-    // if (zoom > 4.0) {
-    // } else if (zoom > 1.0) {
-    //     float startValue = zoom / 4.0 * 0.5;
-    //     float endValue = 0.5 * zoom * zoom / 4.0;
-    //     alpha = 1.0 - smoothstep(min(startValue, endValue), max(startValue, endValue), dist);
-    // } else {
-    //     if (dist > 0.3) {
-    //         discard;
-    //     }
-    //     alpha = zoom * zoom * 0.3;
-    // }
+    if (onBackground) {
+        alpha = (1.0 - smoothstep(0.0, 0.5, dist)) * 0.05;
+    } else {
+        alpha = 1.0 - smoothstep(0.2, 0.5, dist);
+    }
     
     FragColor = vec4(vColor * alpha, 1.0);
 }

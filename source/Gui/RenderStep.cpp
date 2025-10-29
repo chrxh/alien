@@ -25,7 +25,6 @@ _RenderStep::_RenderStep(StepParameters const& parameters)
     , _textureScale(parameters._textureScale)
     , _uniforms(parameters._uniforms)
     , _uniformFunc(parameters._uniformFunc)
-    , _preventMoirePatterns(parameters._preventMoirePatterns)
 {
     if (!parameters._shader.vertex.empty()) {
         _shader = _Shader::createFromSource(parameters._shader.vertex, parameters._shader.fragment, parameters._shader.geometry);
@@ -63,7 +62,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
 
     _shader->use();
     _shader->setFloat("zoom", zoom);
-    _shader->setFloat("radius", _preventMoirePatterns ? std::max(6.0f, zoom) : zoom);
+    _shader->setFloat("radius", std::max(parameters._minBallRadius, zoom));
     _shader->setVec2("worldSize", toRealVector2D(worldSize));
     _shader->setVec2("rectUpperLeft", worldRect.topLeft);
     _shader->setVec2("rectLowerRight", worldRect.bottomRight);
@@ -289,6 +288,7 @@ void _EnergyParticleRenderStep::execute(ExecutionParameters parameters)
     if (!_previousTargetSelection.has_value()) {
         parameters._clearBackground = true;
     }
+    parameters._minBallRadius = 0.0f;
     prepareExecution(parameters);
 
     // Enable point sprites

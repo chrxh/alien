@@ -188,15 +188,16 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _EnergyParticleRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::EnergyParticle).addUniform("ballSize", 2.0f)
-                                                          .preventMoirePatterns(false)),
+                                                          .shader(ShaderSources::EnergyParticle)
+                                                          .addUniform("ballSize", 10.0f)
+                                                          .addUniform("onBackground", true)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 }),
             },
 
             // Render block: Downscale blur for energy particles
             RenderBlock{
-                RenderSequence().repetitions(4).steps({
+                RenderSequence().repetitions(1).steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(
@@ -204,13 +205,16 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
                 }),
                 RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(StepParameters().shader(ShaderSources::EnergyParticle).addUniform("ballSize", 0.2f)),
+                    _EnergyParticleRenderStep::create(StepParameters()
+                                                          .shader(ShaderSources::EnergyParticle)
+                                                          .addUniform("ballSize", 0.2f)
+                                                          .addUniform("onBackground", false)),
                 }),
             },
 
             // Render block: Upscale blur for energy particles
             RenderBlock{
-                RenderSequence().repetitions(4).steps({
+                RenderSequence().repetitions(1).steps({
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.1f).addUniform("zoomDependent", true)),
@@ -279,14 +283,14 @@ void SimulationView::setupRenderPipeline()
 
             // Render block: Two outputs: downscale blur and original
             RenderBlock{
-                RenderSequence().repetitions(6).steps({
+                RenderSequence().repetitions(5).steps({
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(StepParameters()
                                                           .shader(ShaderSources::BlurVertical)
-                                                          .addUniform("strength", 0.25f)
+                                                          .addUniform("strength", 0.12f)
                                                           .addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 1.5f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 1.0f / 2.0f)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
@@ -294,12 +298,12 @@ void SimulationView::setupRenderPipeline()
 
             // Render block: Two outputs: upscale blur and original
             RenderBlock{
-                RenderSequence().repetitions(6).steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 1.5f)),
+                RenderSequence().repetitions(5).steps({
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
+                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f).addUniform("zoomDependent", true)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
