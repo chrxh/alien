@@ -285,8 +285,7 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(StepParameters()
                                                           .shader(ShaderSources::BlurVertical)
                                                           .addUniform("strength", 0.25f)
-                                                          .addUniform("zoomDependent", true)
-                                                          /*.textureScale(1.0f / 1.5f)*/),
+                                                          .addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).textureScale(1.0f / 1.5f)),
                 }),
                 RenderSequence().steps({
@@ -300,20 +299,11 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
                     _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f).addUniform("zoomDependent", true)/*.textureScale(1.5f)*/),
+                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.25f).addUniform("zoomDependent", true)),
                 }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},
-
-            //RenderBlock{
-            //    RenderSequence().steps({
-            //        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.5f)),
-            //    }),
-            //    RenderSequence().steps({
-            //        _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
-            //    }),
-            //},
 
             // Render block: Merge and tone mapping
             RenderBlock{
@@ -345,7 +335,6 @@ void SimulationView::setupRenderPipeline()
                         StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 1.0f).addUniform("colorFactor2", 1.0f)),
                     _SelectedConnectionRenderStep::create(StepParameters().shader(ShaderSources::SelectedConnection).previousTargetSelection(0)),
                     _CellTypeOverlayRenderStep::create(StepParameters().shader(ShaderSources::CellTypeOverlay).previousTargetSelection(0)),
-                    //_PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DeNoise)),
                 }),
             },
         });
