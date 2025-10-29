@@ -314,7 +314,7 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(
                         StepParameters().shader(ShaderSources::MergeAdditive).addUniform("colorFactor1", 0.5f).addUniform("colorFactor2", 1.0f)),
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 1.0f)),
+                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ZoomBrightnessCorrection).addUniform("strength", 0.6f)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ToneMapping)),
                 }),
             },
