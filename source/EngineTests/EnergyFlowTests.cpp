@@ -27,15 +27,15 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
             data.addConnection(i, i + 1);
         }
     }
-    data._cells.at(0)._energy = 10000.0f;
+    data._cells.at(0)._energy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 600.0f);
+        EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 150.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -57,7 +57,7 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
             data.addConnection(i, i + 1);
         }
     }
-    creature._cells.at(0)._energy = 10000.0f;
+    creature._cells.at(0)._energy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -71,9 +71,9 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {
-            EXPECT_TRUE(actualData.getCellRef(i)._energy > 10000.0f - 500.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy > 900.0f);
         } else {
-            EXPECT_TRUE(actualData.getCellRef(i)._energy < 200.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy < 110.0f);
         }
     }
 }
@@ -106,18 +106,18 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
             }
         }
     }
-    creature._cells.at(0)._energy = 10000.0f;
+    creature._cells.at(0)._energy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     for (int i = 1; i < 41; ++i) {
         if (i == constructorId1) {
-            EXPECT_TRUE(actualData.getCellRef(i)._energy > 10000.0f - 400.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy > 900.0f);
         } else {
-            EXPECT_TRUE(actualData.getCellRef(i)._energy < 200.0f);
+            EXPECT_TRUE(actualData.getCellRef(i)._energy < 110.0f);
         }
     }
 }
@@ -141,15 +141,15 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
             data.addConnection(i, i + 1);
         }
     }
-    creature._cells.at(0)._energy = 10000.0f;
+    creature._cells.at(0)._energy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
 
     for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 600.0f);
+        EXPECT_TRUE(actualData.getCellRef(i + 1)._energy < 150.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -158,7 +158,7 @@ TEST_F(EnergyFlowTests, energyFlowsBranches)
 {
     auto data = Description().cells({
         CellDescription().id(0).pos({100.0f, 99.0f}).energy(100.0f),
-        CellDescription().id(1).pos({100.0f, 100.0f}).energy(2400.0f),
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(240.0f),
         CellDescription().id(2).pos({100.0f, 101.0f}).energy(100.0f),
         CellDescription().id(3).pos({99.0f, 100.0f}).energy(100.0f),
     });
@@ -181,8 +181,8 @@ TEST_F(EnergyFlowTests, energyFlowsBranches)
     {
         auto actualData = _simulationFacade->getSimulationData();
         for (auto const& cell : actualData._cells) {
-            EXPECT_TRUE(cell._energy > 2700.0f / 4  - 50.0f);
-            EXPECT_TRUE(cell._energy < 2700.0f / 4 + 50.0f);
+            EXPECT_TRUE(cell._energy > 540.0f / 4  - 5.0f);
+            EXPECT_TRUE(cell._energy < 540.0f / 4 + 5.0f);
         }
     }
 }
@@ -208,7 +208,7 @@ TEST_F(EnergyFlowTests, energyFlowsNotToConstructorUnderConstruction)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(100);
+    _simulationFacade->calcTimesteps(1000);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualEnergy = getEnergy(actualData);
@@ -241,7 +241,7 @@ TEST_F(EnergyFlowTests, energyFlowsEquallyToActiveConstructors)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(100);
+    _simulationFacade->calcTimesteps(2000);
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualEnergy = getEnergy(actualData);

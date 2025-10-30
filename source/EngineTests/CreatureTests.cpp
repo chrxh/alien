@@ -202,12 +202,9 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
 
     auto genome = createGenomeForCreatureWithLegs(muscleMode, direction);
     auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().geneIndex(0))}),
+        CreatureDescription().genome(genome).cells(
+            {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
     });
-
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = (4 + 4 + 6) * _parameters.normalCellEnergy.value[0] + 10.0f;
-    _simulationFacade->setSimulationParameters(_parameters);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3000);
