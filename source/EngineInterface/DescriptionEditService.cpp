@@ -165,26 +165,26 @@ void DescriptionEditService::duplicate(Description& data, IntVector2D const& ori
                 topologyCorrection(spaceCalc, creature);
                 auto origPos = calcCenter(creature);
                 RealVector2D newPos = {origPos.x + incX, origPos.y + incY};
-                if (newPos.x < size.x && newPos.y < size.y) {
+                //if (newPos.x < size.x && newPos.y < size.y) {
                     for (auto& cell : creature._cells) {
                         cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
                     }
                     result._creatures.emplace_back(creature);
-                }
+                //}
             }
             for (auto cell : clone._cells) {
                 RealVector2D newPos = {cell._pos.x + incX, cell._pos.y + incY};
                 cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
-                if (newPos.x < size.x && newPos.y < size.y) {
+                //if (newPos.x < size.x && newPos.y < size.y) {
                     result._cells.emplace_back(cell);
-                }
+                //}
             }
             for (auto particle : clone._particles) {
                 auto origPos = particle._pos;
                 particle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
-                if (particle._pos.x < size.x && particle._pos.y < size.y) {
+                //if (particle._pos.x < size.x && particle._pos.y < size.y) {
                     result._particles.emplace_back(particle);
-                }
+                //}
             }
         }
     }
