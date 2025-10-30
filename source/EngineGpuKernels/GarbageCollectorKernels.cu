@@ -168,6 +168,7 @@ __global__ void cudaCleanupCreaturesStep2a(Array<Cell*> cells, Heap newHeap)
                 //cell->creature->genome = newGenome;
 
                 auto newGenomeIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newGenome) - newHeap.getArray());
+                newGenome->genomeIndex = newGenomeIndex;
                 alienAtomicExch64(&genome->genomeIndex, newGenomeIndex);
             } else if (origGenomeIndex != 0) {
                 alienAtomicExch64(&genome->genomeIndex, origGenomeIndex);
