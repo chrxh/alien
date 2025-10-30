@@ -183,7 +183,7 @@ void SimulationView::setupRenderPipeline()
     // Number of blur repetitions and blur strengths is based on zoom level to balance performance and quality
     auto blurStrengthFunc = [](SimulationParameters const& parameters) {
         auto zoom = Viewport::get().getZoomFactor();
-        float strength = 0.015f;
+        float strength = 0.035f;
         if (zoom < 100.0f) {
             strength *= 3.5f;
         }
