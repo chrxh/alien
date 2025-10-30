@@ -3191,3 +3191,43 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
         }
     }
 }
+
+TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription().cellType(ConstructorGenomeDescription().geneIndex(1))}),
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    auto largeCreature = CreatureDescription().genome(genome);
+    for (int i = 0; i < 50; ++i) {
+        largeCreature._cells.emplace_back(
+            CellDescription().id(i).pos({toFloat(i), 0.0f}).cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(30)));
+    }
+    auto largeCreatureData = Description().creatures({largeCreature});
+    for (int i = 1; i < 50; ++i) {
+        largeCreatureData.addConnection(i, i - 1);
+    }
+    auto largeData = Description();
+    for (int i = 0; i < 10; ++i) {
+        auto clone = largeCreatureData;
+        DescriptionEditService::get().setCenter(clone, {100.0f, toFloat(i) * 20});
+        largeData.add(std::move(clone));
+    }
+
+    _parameters.externalEnergyControlToggle.value = true;
+    _parameters.externalEnergy.value = 1e7f;
+    _simulationFacade->setSimulationParameters(_parameters);
+    _simulationFacade->setSimulationData(largeData);
+    _simulationFacade->calcTimesteps(10000);
+}
