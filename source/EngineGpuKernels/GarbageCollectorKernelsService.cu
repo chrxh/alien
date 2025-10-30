@@ -1,5 +1,7 @@
 ﻿#include "GarbageCollectorKernelsService.cuh"
 
+#include "DebugKernels.cuh"
+
 _GarbageCollectorKernelsService::_GarbageCollectorKernelsService()
 {
     CudaMemoryManager::getInstance().acquireMemory<bool>(1, _cudaBool);
@@ -22,16 +24,26 @@ void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& g
     KERNEL_CALL_1_1(cudaCheckIfCleanupIsNecessary, data, _cudaBool);
     cudaDeviceSynchronize();
     if (copyToHost(_cudaBool)) {
+        printf("-BBB1---\n");
+        KERNEL_CALL(DEBUG_checkCellsAndParticles, data, nullptr, 0);
+        printf("-BBB2---\n");
+
         KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
         KERNEL_CALL(cudaCleanupParticles, data.objects.particles, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupCreaturesStep1, data.objects.cells);
-        KERNEL_CALL(cudaCleanupCreaturesStep2, data.objects.cells, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCreaturesStep2a, data.objects.cells, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCreaturesStep2b, data.objects.cells, data.tempObjects.heap);
+        KERNEL_CALL(cudaCleanupCreaturesStep2c, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupCreaturesStep3, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cells, data.tempObjects.heap);
         KERNEL_CALL_1_1(cudaSwapHeaps, data);
     }
+
+    printf("-BBB3---\n");
+    KERNEL_CALL(DEBUG_checkCellsAndParticles, data, nullptr, 0);
+    printf("-BBB4---\n");
 }
 
 void _GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& data)
@@ -49,12 +61,18 @@ void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings 
     KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
     KERNEL_CALL(cudaCleanupParticles, data.objects.particles, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCreaturesStep1, data.objects.cells);
-    KERNEL_CALL(cudaCleanupCreaturesStep2, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep2a, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep2b, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep2c, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCreaturesStep3, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep1, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL_1_1(cudaSwapHeaps, data);
+
+    printf("-AAAAAA1---\n");
+    KERNEL_CALL(DEBUG_checkCellsAndParticles, data, nullptr, 0);
+    printf("-AAAAAA2---\n");
 }
 
 void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings, SimulationData const& data)
@@ -66,7 +84,9 @@ void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings
     KERNEL_CALL_1_1(cudaPrepareHeapForCleanup, data);
     KERNEL_CALL(cudaCleanupParticles, data.tempObjects.particles, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCreaturesStep1, data.objects.cells);
-    KERNEL_CALL(cudaCleanupCreaturesStep2, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep2a, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep2b, data.objects.cells, data.tempObjects.heap);
+    KERNEL_CALL(cudaCleanupCreaturesStep2c, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCreaturesStep3, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep1, data.tempObjects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupCellsStep2, data.tempObjects.cells, data.tempObjects.heap);

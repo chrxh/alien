@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <vector>
 #include <string>
 #include <cuda_runtime.h>
@@ -58,7 +59,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define CHECK_FOR_CUDA_ERROR(val) \
     checkAndThrowError( (val), #val, __FILENAME__, __LINE__ )
 
-#define ABORT() asm("trap;");
+#define ABORT() assert(false);
 
 #define NEAR_ZERO 1.0e-4f
 
@@ -75,8 +76,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define KERNEL_CALL(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize(); \
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+        CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
     } \
     else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
@@ -85,8 +85,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define KERNEL_CALL_1_1(func, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<1, 1>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize(); \
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+        CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
     } else { \
         func<<<1, 1>>>(__VA_ARGS__); \
     }
@@ -94,8 +93,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 #define KERNEL_CALL_MOD(func, threadsPerBlock, ...) \
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
-        cudaDeviceSynchronize(); \
-        CHECK_FOR_CUDA_ERROR(cudaGetLastError()); \
+        CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }

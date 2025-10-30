@@ -127,32 +127,31 @@ __global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells)
         auto& cell = cells.at(index);
         if (cell->creature) {
             cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
 
-__global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
+__global__ void cudaCleanupCreaturesStep2a(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        
+
         if (cell->creature) {
-            auto origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
-            if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
-                auto newCreature = newHeap.getTypedSubArray<Creature>(1);
-                auto const& creature = cell->creature;
+            auto const& genome = cell->creature->genome;
+            auto origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
 
-                *newCreature = *creature;
-                newCreature->genome = newHeap.getTypedSubArray<Genome>(1);
-                *newCreature->genome = *creature->genome;
+            if (origGenomeIndex == VALUE_NOT_SET_UINT64) {
+                auto newGenome = newHeap.getTypedSubArray<Genome>(1);
+                *newGenome = *genome;
 
-                auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome->numGenes);
-                newCreature->genome->genes = newGenes;
+                auto newGenes = newHeap.getTypedSubArray<Gene>(genome->numGenes);
+                newGenome->genes = newGenes;
 
-                for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
-                    auto const& gene = &creature->genome->genes[i];
+                for (int i = 0, j = genome->numGenes; i < j; ++i) {
+                    auto const& gene = &genome->genes[i];
                     auto newGene = &newGenes[i];
                     *newGene = *gene;
 
@@ -165,6 +164,49 @@ __global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
                         *newNode = *node;
                     }
                 }
+
+                //cell->creature->genome = newGenome;
+
+                auto newGenomeIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newGenome) - newHeap.getArray());
+                alienAtomicExch64(&genome->genomeIndex, newGenomeIndex);
+            } else if (origGenomeIndex != 0) {
+                alienAtomicExch64(&genome->genomeIndex, origGenomeIndex);
+            }
+        }
+    }
+}
+
+__global__ void cudaCleanupCreaturesStep2b(Array<Cell*> cells, Heap newHeap)
+{
+    PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->creature) {
+            cell->creature->genome = &newHeap.atType<Genome>(cell->creature->genome->genomeIndex);
+
+            if (cell->creature->genome->genomeIndex >= newHeap.getNumEntries()) {
+                printf("CRASH: %llu\n\n\n\n", cell->creature->genome->genomeIndex);
+                ABORT();
+            }
+        }
+    }
+}
+
+__global__ void cudaCleanupCreaturesStep2c(Array<Cell*> cells, Heap newHeap)
+{
+    PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        if (cell->creature) {
+            auto origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+            if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
+                auto newCreature = newHeap.getTypedSubArray<Creature>(1);
+                auto const& creature = cell->creature;
+                *newCreature = *creature;
+
                 auto newCreatureIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature) - newHeap.getArray());
                 alienAtomicExch64(&cell->creature->creatureIndex, newCreatureIndex);
             } else if (origCreatureIndex != 0) {
@@ -180,8 +222,33 @@ __global__ void cudaCleanupCreaturesStep3(Array<Cell*> cells, Heap newHeap)
 
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->creature) {
-            cell->creature = &newHeap.atType<Creature>(cell->creature->creatureIndex);
+        auto const& creature = cell->creature;
+        if (creature) {
+            auto newCreature = &newHeap.atType<Creature>(creature->creatureIndex);
+            cell->creature = newCreature;
+            //newCreature->genome = &newHeap.atType<Genome>(creature->genome->genomeIndex);
+
+
+            //if (creature->genome->genomeIndex == VALUE_NOT_SET_UINT64) {
+            //    printf("OHOOOOH3\n\n\n\n");
+            //    ABORT();
+            //}
+            //if (creature->genome->genomeIndex >= newHeap.getNumEntries()) {
+            //    printf("OHOOOOH\n\n\n\n");
+            //    ABORT();
+            //}
+            //if (reinterpret_cast<uint64_t>(newCreature->genome->genes) < reinterpret_cast<uint64_t>(newHeap.getArray())
+            //    || reinterpret_cast<uint64_t>(newCreature->genome->genes) + sizeof(Gene) * cell->creature->genome->numGenes
+            //        >= reinterpret_cast<uint64_t>(newHeap.getArray() + newHeap.getCapacity())) {
+            //    printf("OHOOOOH2: %llu\n\n\n\n", creature->genome->genomeIndex);
+            //    ABORT();
+            //}
+
+            //auto orig = alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(VALUE_NOT_SET_UINT64));
+            //if (orig != VALUE_NOT_SET_UINT64) {
+            //    cell->creature->genome = &newHeap.atType<Genome>(orig);
+            //}
+
         }
     }
 }

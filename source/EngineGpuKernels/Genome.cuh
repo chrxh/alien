@@ -175,4 +175,7 @@ struct Genome
     Gene* genes;
 
     float frontAngle;
+
+    // Temporary data
+    uint64_t genomeIndex;  // May be invalid
 };
