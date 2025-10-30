@@ -21,15 +21,15 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     printf("wrong creature pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-
-                if (reinterpret_cast<uint64_t>(cell->creature->genome.genes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                    || reinterpret_cast<uint64_t>(cell->creature->genome.genes) + sizeof(Gene) * cell->creature->genome.numGenes
+                // TODO add genome pointer check
+                if (reinterpret_cast<uint64_t>(cell->creature->genome->genes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+                    || reinterpret_cast<uint64_t>(cell->creature->genome->genes) + sizeof(Gene) * cell->creature->genome->numGenes
                         >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
                     printf("wrong genes pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                for (int i = 0; i < cell->creature->genome.numGenes; ++i) {
-                    auto const& gene = cell->creature->genome.genes[i];
+                for (int i = 0; i < cell->creature->genome->numGenes; ++i) {
+                    auto const& gene = cell->creature->genome->genes[i];
                     if (reinterpret_cast<uint64_t>(gene.nodes) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
                         || reinterpret_cast<uint64_t>(gene.nodes) + sizeof(Node) * gene.numNodes
                             >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {

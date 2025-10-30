@@ -39,17 +39,17 @@ namespace
             creatureTO.lineageId = creature->lineageId;
             creatureTO.numCells = creature->numCells;
             creatureTO.frontAngleId = creature->frontAngleId;
-            creatureTO.genome.frontAngle = creature->genome.frontAngle;
-            creatureTO.genome.numGenes = creature->genome.numGenes;
+            creatureTO.genome.frontAngle = creature->genome->frontAngle;
+            creatureTO.genome.numGenes = creature->genome->numGenes;
             for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
-                creatureTO.genome.name[i] = creature->genome.name[i];
+                creatureTO.genome.name[i] = creature->genome->name[i];
             }
 
-            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(creature->genome.numGenes));
+            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(creature->genome->numGenes));
             creatureTO.genome.geneArrayIndex = geneTOArrayStartIndex;
-            for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
+            for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
-                auto const& gene = creature->genome.genes[i];
+                auto const& gene = creature->genome->genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.separation = gene.separation;
                 geneTO.numBranches = gene.numBranches;
@@ -761,9 +761,9 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
         if (cell->creature) {
             ++numGenomes;
             auto const& creature = cell->creature;
-            numGenes += creature->genome.numGenes;
-            for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
-                numNodes += creature->genome.genes[i].numNodes;
+            numGenes += creature->genome->numGenes;
+            for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+                numNodes += creature->genome->genes[i].numNodes;
             }
         }
     }

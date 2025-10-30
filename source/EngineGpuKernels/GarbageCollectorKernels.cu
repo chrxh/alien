@@ -142,14 +142,17 @@ __global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
             auto origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
             if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
                 auto newCreature = newHeap.getTypedSubArray<Creature>(1);
-                *newCreature = *cell->creature;
-
                 auto const& creature = cell->creature;
-                auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome.numGenes);
-                newCreature->genome.genes = newGenes;
 
-                for (int i = 0, j = creature->genome.numGenes; i < j; ++i) {
-                    auto const& gene = &creature->genome.genes[i];
+                *newCreature = *creature;
+                newCreature->genome = newHeap.getTypedSubArray<Genome>(1);
+                *newCreature->genome = *creature->genome;
+
+                auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome->numGenes);
+                newCreature->genome->genes = newGenes;
+
+                for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+                    auto const& gene = &creature->genome->genes[i];
                     auto newGene = &newGenes[i];
                     *newGene = *gene;
 

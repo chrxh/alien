@@ -651,7 +651,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
                 if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->creature != nullptr
                     && cell->cellType == CellType_Constructor) {
                     auto const& constructor = cell->cellTypeData.constructor;
-                    auto const& gene = ConstructorHelper::getCurrentGene(constructor, cell->creature->genome);
+                    auto const& gene = ConstructorHelper::getCurrentGene(constructor, *cell->creature->genome);
                     if (gene->separation) {
                         isSeparation = true;
                     }
@@ -731,7 +731,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
         if (cell->frontAngleId != cell->creature->frontAngleId) {
             if (cell->isFrontAngleRefCell) {
                 cell->frontAngleId = cell->creature->frontAngleId;
-                cell->frontAngle = cell->creature->genome.frontAngle;
+                cell->frontAngle = cell->creature->genome->frontAngle;
             } else {
                 if (cell->tempValue.as_uint32_float.floatPart != FrontAngleId_NoUpdate) {
                     cell->frontAngleId = cell->creature->frontAngleId;
@@ -952,7 +952,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         auto needsEnergy = [](Cell* cell) {
             return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
                 && cell->cellType == CellType_Constructor && cell->creature
-                && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, cell->creature->genome);
+                && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, *cell->creature->genome);
         };
         auto cellNeedsEnergy = needsEnergy(cell);
         auto connectedCellNeedsEnergy = needsEnergy(connectedCell);

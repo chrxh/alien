@@ -270,7 +270,7 @@ struct Creature
     uint32_t lineageId;
     uint32_t numCells;
 
-    Genome genome;
+    Genome* genome;
 
     // Process data
     uint32_t frontAngleId;

@@ -81,15 +81,17 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
     creature->lineageId = creatureTO.lineageId;
     creature->numCells = creatureTO.numCells;
     creature->frontAngleId = creatureTO.frontAngleId;
-    creature->genome.frontAngle = creatureTO.genome.frontAngle;
-    creature->genome.numGenes = creatureTO.genome.numGenes;
+    creature->genome = _data->objects.heap.getTypedSubArray<Genome>(1);
+    
+    creature->genome->frontAngle = creatureTO.genome.frontAngle;
+    creature->genome->numGenes = creatureTO.genome.numGenes;
     for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
-        creature->genome.name[i] = creatureTO.genome.name[i];
+        creature->genome->name[i] = creatureTO.genome.name[i];
     }
 
     auto const& geneTOs = collectionTO.genes + creatureTO.genome.geneArrayIndex;
     auto genes = _data->objects.heap.getTypedSubArray<Gene>(creatureTO.genome.numGenes);
-    creature->genome.genes = genes;
+    creature->genome->genes = genes;
     for (int i = 0, j = creatureTO.genome.numGenes; i < j; ++i) {
         auto const& geneTO = geneTOs[i];
         auto& gene = genes[i];
@@ -460,22 +462,6 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
     newCreature->id = newId;
     newCreature->ancestorId = creature->id;
     newCreature->generation = creature->generation + 1;
-    auto genes = createEmptyGenes(creature->genome.numGenes);
-    newCreature->genome.genes = genes;
-
-    for (int i = 0, numGenes = creature->genome.numGenes; i < numGenes; ++i) {
-        auto gene = &creature->genome.genes[i];
-        auto newGene = &newCreature->genome.genes[i];
-        *newGene = *gene;
-        auto nodes = createEmptyNodes(gene->numNodes);
-        newGene->numNodes = gene->numNodes;
-        newGene->nodes = nodes;
-        for (int j = 0, numNodes = gene->numNodes; j < numNodes; ++j) {
-            auto node = &gene->nodes[j];
-            auto newNode = &newGene->nodes[j];
-            *newNode = *node;
-        }
-    }
     return newCreature;
 }
 
@@ -510,7 +496,7 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 __inline__ __device__ Cell*
 ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, int parentNodeIndex, float2 pos, float2 vel, float energy)
 {
-    auto const& gene = &creature->genome.genes[geneIndex];
+    auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
 
     auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
