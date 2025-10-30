@@ -119,7 +119,7 @@ __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap new
     }
 }
 
-__global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells)
+__global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Cell*> cells)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -132,7 +132,7 @@ __global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells)
     }
 }
 
-__global__ void cudaCleanupCreaturesStep2a(Array<Cell*> cells, Heap newHeap)
+__global__ void cudaCleanupGenomesStep1(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -165,10 +165,10 @@ __global__ void cudaCleanupCreaturesStep2a(Array<Cell*> cells, Heap newHeap)
                     }
                 }
 
-                //cell->creature->genome = newGenome;
-
                 auto newGenomeIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newGenome) - newHeap.getArray());
                 alienAtomicExch64(&genome->genomeIndex, newGenomeIndex);
+                newGenome->genomeIndex = newGenomeIndex;
+
             } else if (origGenomeIndex != 0) {
                 alienAtomicExch64(&genome->genomeIndex, origGenomeIndex);
             }
@@ -176,7 +176,7 @@ __global__ void cudaCleanupCreaturesStep2a(Array<Cell*> cells, Heap newHeap)
     }
 }
 
-__global__ void cudaCleanupCreaturesStep2b(Array<Cell*> cells, Heap newHeap)
+__global__ void cudacudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -184,16 +184,11 @@ __global__ void cudaCleanupCreaturesStep2b(Array<Cell*> cells, Heap newHeap)
         auto& cell = cells.at(index);
         if (cell->creature) {
             cell->creature->genome = &newHeap.atType<Genome>(cell->creature->genome->genomeIndex);
-
-            if (cell->creature->genome->genomeIndex >= newHeap.getNumEntries()) {
-                printf("CRASH: %llu\n\n\n\n", cell->creature->genome->genomeIndex);
-                ABORT();
-            }
         }
     }
 }
 
-__global__ void cudaCleanupCreaturesStep2c(Array<Cell*> cells, Heap newHeap)
+__global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -216,7 +211,7 @@ __global__ void cudaCleanupCreaturesStep2c(Array<Cell*> cells, Heap newHeap)
     }
 }
 
-__global__ void cudaCleanupCreaturesStep3(Array<Cell*> cells, Heap newHeap)
+__global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
 {
     PartitionData cellPartition = calcAllThreadsPartition(cells.getNumEntries());
 
@@ -224,31 +219,7 @@ __global__ void cudaCleanupCreaturesStep3(Array<Cell*> cells, Heap newHeap)
         auto& cell = cells.at(index);
         auto const& creature = cell->creature;
         if (creature) {
-            auto newCreature = &newHeap.atType<Creature>(creature->creatureIndex);
-            cell->creature = newCreature;
-            //newCreature->genome = &newHeap.atType<Genome>(creature->genome->genomeIndex);
-
-
-            //if (creature->genome->genomeIndex == VALUE_NOT_SET_UINT64) {
-            //    printf("OHOOOOH3\n\n\n\n");
-            //    ABORT();
-            //}
-            //if (creature->genome->genomeIndex >= newHeap.getNumEntries()) {
-            //    printf("OHOOOOH\n\n\n\n");
-            //    ABORT();
-            //}
-            //if (reinterpret_cast<uint64_t>(newCreature->genome->genes) < reinterpret_cast<uint64_t>(newHeap.getArray())
-            //    || reinterpret_cast<uint64_t>(newCreature->genome->genes) + sizeof(Gene) * cell->creature->genome->numGenes
-            //        >= reinterpret_cast<uint64_t>(newHeap.getArray() + newHeap.getCapacity())) {
-            //    printf("OHOOOOH2: %llu\n\n\n\n", creature->genome->genomeIndex);
-            //    ABORT();
-            //}
-
-            //auto orig = alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(VALUE_NOT_SET_UINT64));
-            //if (orig != VALUE_NOT_SET_UINT64) {
-            //    cell->creature->genome = &newHeap.atType<Genome>(orig);
-            //}
-
+            cell->creature = &newHeap.atType<Creature>(creature->creatureIndex);
         }
     }
 }

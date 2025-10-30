@@ -10,11 +10,11 @@ __global__ void cudaPreparePointerArraysForCleanup(SimulationData data);
 __global__ void cudaPrepareHeapForCleanup(SimulationData data);
 
 __global__ void cudaCleanupParticles(Array<Particle*> particlePointers, Heap newHeap);
-__global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells);
-__global__ void cudaCleanupCreaturesStep2a(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCreaturesStep2b(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCreaturesStep2c(Array<Cell*> cells, Heap newHeap);
-__global__ void cudaCleanupCreaturesStep3(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaPrepareCleanupCreaturesAndGenomes(Array<Cell*> cells);
+__global__ void cudaCleanupGenomesStep1(Array<Cell*> cells, Heap newHeap);
+__global__ void cudacudaCleanupGenomesStep2(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells, Heap newHeap);
+__global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap);
 __global__ void cudaCleanupCellsStep1(Array<Cell*> cells, Heap newHeap);
 __global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap);
 __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap);
