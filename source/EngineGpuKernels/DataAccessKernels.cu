@@ -729,6 +729,7 @@ __global__ void cudaClearDataTO(TO collectionTO)
     *collectionTO.numCells = 0;
     *collectionTO.numParticles = 0;
     *collectionTO.numCreatures = 0;
+    *collectionTO.numGenomes = 0;
     *collectionTO.numGenes = 0;
     *collectionTO.numNodes = 0;
     *collectionTO.heapSize = 0;
@@ -758,6 +759,7 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
 
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
     uint64_t heapBytes = 0;
+    uint64_t numCreatures = 0;
     uint64_t numGenomes = 0;
     uint64_t numGenes = 0;
     uint64_t numNodes = 0;
@@ -767,6 +769,7 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
         if (cell->creature) {
+            ++numCreatures;
             ++numGenomes;
             auto const& creature = cell->creature;
             numGenes += creature->genome->numGenes;
@@ -775,7 +778,8 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             }
         }
     }
-    alienAtomicAdd64(&arraySizes->creatures, numGenomes);
+    alienAtomicAdd64(&arraySizes->creatures, numCreatures);
+    alienAtomicAdd64(&arraySizes->genomes, numGenomes);
     alienAtomicAdd64(&arraySizes->genes, numGenes);
     alienAtomicAdd64(&arraySizes->nodes, numNodes);
     alienAtomicAdd64(&arraySizes->heap, heapBytes);
@@ -789,7 +793,8 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO collectionTO, ArraySizesForG
         alienAtomicAdd64(
             &arraySizes->heap,
             *collectionTO.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *collectionTO.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
-                + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
+                + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
+                + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
                 + *collectionTO.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 
