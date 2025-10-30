@@ -209,6 +209,7 @@ __global__ void cudaCleanupCreaturesStep2c(Array<Cell*> cells, Heap newHeap)
                 *newCreature = *creature;
 
                 auto newCreatureIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature) - newHeap.getArray());
+                newCreature->creatureIndex = newCreatureIndex;
                 alienAtomicExch64(&cell->creature->creatureIndex, newCreatureIndex);
             } else if (origCreatureIndex != 0) {
                 alienAtomicExch64(&cell->creature->creatureIndex, origCreatureIndex);
