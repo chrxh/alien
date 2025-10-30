@@ -61,10 +61,6 @@ void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings 
     KERNEL_CALL(cudaCleanupCellsStep2, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL(cudaCleanupDependentCellData, data.objects.cells, data.tempObjects.heap);
     KERNEL_CALL_1_1(cudaSwapHeaps, data);
-
-    printf("-AAAAAA1---\n");
-    KERNEL_CALL(DEBUG_checkCellsAndParticles, data, nullptr, 0);
-    printf("-AAAAAA2---\n");
 }
 
 void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings, SimulationData const& data)
