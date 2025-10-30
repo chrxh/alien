@@ -127,6 +127,9 @@ __global__ void cudaCleanupCreaturesStep1(Array<Cell*> cells)
         auto& cell = cells.at(index);
         if (cell->creature) {
             cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            if (cell->creature->genome) {
+                cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+            }
         }
     }
 }
@@ -145,26 +148,43 @@ __global__ void cudaCleanupCreaturesStep2(Array<Cell*> cells, Heap newHeap)
                 auto const& creature = cell->creature;
 
                 *newCreature = *creature;
-                newCreature->genome = newHeap.getTypedSubArray<Genome>(1);
-                *newCreature->genome = *creature->genome;
+                
+                // Handle genome sharing: check if this genome has already been copied
+                auto origGenomeIndex = alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = genome is currently being initialized
+                if (origGenomeIndex == VALUE_NOT_SET_UINT64) {
+                    // First creature with this genome - copy the genome
+                    newCreature->genome = newHeap.getTypedSubArray<Genome>(1);
+                    *newCreature->genome = *creature->genome;
 
-                auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome->numGenes);
-                newCreature->genome->genes = newGenes;
+                    auto newGenes = newHeap.getTypedSubArray<Gene>(creature->genome->numGenes);
+                    newCreature->genome->genes = newGenes;
 
-                for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
-                    auto const& gene = &creature->genome->genes[i];
-                    auto newGene = &newGenes[i];
-                    *newGene = *gene;
+                    for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+                        auto const& gene = &creature->genome->genes[i];
+                        auto newGene = &newGenes[i];
+                        *newGene = *gene;
 
-                    auto newNodes = newHeap.getTypedSubArray<Node>(gene->numNodes);
-                    newGene->nodes = newNodes;
+                        auto newNodes = newHeap.getTypedSubArray<Node>(gene->numNodes);
+                        newGene->nodes = newNodes;
 
-                    for (int i = 0, j = gene->numNodes; i < j; ++i) {
-                        auto const& node = &gene->nodes[i];
-                        auto newNode = &newNodes[i];
-                        *newNode = *node;
+                        for (int i = 0, j = gene->numNodes; i < j; ++i) {
+                            auto const& node = &gene->nodes[i];
+                            auto newNode = &newNodes[i];
+                            *newNode = *node;
+                        }
                     }
+                    auto newGenomeIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature->genome) - newHeap.getArray());
+                    alienAtomicExch64(&creature->genome->genomeIndex, newGenomeIndex);
+                } else {
+                    // Genome is being processed or already processed by another thread
+                    // Wait for genome processing to complete and reuse the genome
+                    while (origGenomeIndex == 0) {
+                        origGenomeIndex = alienAtomicAdd64(&creature->genome->genomeIndex, static_cast<uint64_t>(0));
+                    }
+                    // Reuse the already copied genome
+                    newCreature->genome = &newHeap.atType<Genome>(origGenomeIndex);
                 }
+                
                 auto newCreatureIndex = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(newCreature) - newHeap.getArray());
                 alienAtomicExch64(&cell->creature->creatureIndex, newCreatureIndex);
             } else if (origCreatureIndex != 0) {
