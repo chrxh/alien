@@ -83,16 +83,17 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
     creature->frontAngleId = creatureTO.frontAngleId;
     creature->genome = _data->objects.heap.getTypedSubArray<Genome>(1);
     
-    creature->genome->frontAngle = creatureTO.genome.frontAngle;
-    creature->genome->numGenes = creatureTO.genome.numGenes;
-    for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
-        creature->genome->name[i] = creatureTO.genome.name[i];
+    auto const& genomeTO = collectionTO.genomes[creatureTO.genomeArrayIndex];
+    creature->genome->frontAngle = genomeTO.frontAngle;
+    creature->genome->numGenes = genomeTO.numGenes;
+    for (int i = 0; i < sizeof(genomeTO.name); ++i) {
+        creature->genome->name[i] = genomeTO.name[i];
     }
 
-    auto const& geneTOs = collectionTO.genes + creatureTO.genome.geneArrayIndex;
-    auto genes = _data->objects.heap.getTypedSubArray<Gene>(creatureTO.genome.numGenes);
+    auto const& geneTOs = collectionTO.genes + genomeTO.geneArrayIndex;
+    auto genes = _data->objects.heap.getTypedSubArray<Gene>(genomeTO.numGenes);
     creature->genome->genes = genes;
-    for (int i = 0, j = creatureTO.genome.numGenes; i < j; ++i) {
+    for (int i = 0, j = genomeTO.numGenes; i < j; ++i) {
         auto const& geneTO = geneTOs[i];
         auto& gene = genes[i];
         gene.shape = geneTO.shape;

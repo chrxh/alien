@@ -169,6 +169,7 @@ OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(TO
 TO DescriptionConverterService::convertDescriptionToTO(Description const& data) const
 {
     std::vector<CreatureTO> creatureTOs;
+    std::vector<GenomeTO> genomeTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
     std::vector<CellTO> cellTOs;
@@ -177,7 +178,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& data) 
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     for (auto const& creature : data._creatures) {
-        convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, creature, creatureTOIndexById);
+        convertCreatureToTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, heap, creature, creatureTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
@@ -196,7 +197,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& data) 
         addParticle(particleTOs, particle);
     }
 
-    return provideDataTO(creatureTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
+    return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
 TO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
@@ -208,7 +209,7 @@ TO DescriptionConverterService::convertDescriptionToTO(CellDescription const& ce
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);
 
-    return provideDataTO({}, {}, {}, cellTOs, {}, heap);
+    return provideDataTO({}, {}, {}, {}, cellTOs, {}, heap);
 }
 
 TO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
@@ -217,12 +218,13 @@ TO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const
     std::vector<uint8_t> heap;
     addParticle(particleTOs, particle);
 
-    return provideDataTO({}, {}, {}, {}, particleTOs, heap);
+    return provideDataTO({}, {}, {}, {}, {}, particleTOs, heap);
 }
 
 TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const
 {
     std::vector<CreatureTO> creatureTOs;
+    std::vector<GenomeTO> genomeTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
     std::vector<CellTO> cellTOs;
@@ -231,9 +233,9 @@ TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, Geno
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     auto wrapper = CreatureDescription().id(creatureId).genome(genome);
-    convertCreatureToTO(creatureTOs, geneTOs, nodeTOs, heap, wrapper, creatureTOIndexById);
+    convertCreatureToTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, heap, wrapper, creatureTOIndexById);
 
-    return provideDataTO(creatureTOs, geneTOs, nodeTOs, {}, {}, heap);
+    return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, {}, {}, heap);
 }
 
 DescriptionConverterService::DescriptionConverterService()
@@ -463,13 +465,15 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
     result._lineageId = creatureTO.lineageId;
     result._numCells = creatureTO.numCells;
     result._frontAngleId = creatureTO.frontAngleId;
-    result._genome._name = char64ToString(creatureTO.genome.name);
-    result._genome._frontAngle = creatureTO.genome.frontAngle;
-    result._genome._genes.reserve(creatureTO.genome.numGenes);
 
-    CHECK(creatureTO.genome.geneArrayIndex + creatureTO.genome.numGenes <= *collectionTO.numGenes);
-    for (int i = 0; i < creatureTO.genome.numGenes; ++i) {
-        auto geneTO = collectionTO.genes + creatureTO.genome.geneArrayIndex + i;
+    auto const& genomeTO = collectionTO.genomes[creatureTO.genomeArrayIndex];
+    result._genome._name = char64ToString(genomeTO.name);
+    result._genome._frontAngle = genomeTO.frontAngle;
+    result._genome._genes.reserve(genomeTO.numGenes);
+
+    CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *collectionTO.numGenes);
+    for (int i = 0; i < genomeTO.numGenes; ++i) {
+        auto geneTO = collectionTO.genes + genomeTO.geneArrayIndex + i;
 
         GeneDescription geneDesc;
         geneDesc._name = char64ToString(geneTO->name);
@@ -624,6 +628,7 @@ ParticleDescription DescriptionConverterService::createParticleDescription(TO co
 
 void DescriptionConverterService::convertCreatureToTO(
     std::vector<CreatureTO>& creatureTOs,
+    std::vector<GenomeTO>& genomeTOs,
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
     std::vector<uint8_t>& heap,
@@ -636,6 +641,10 @@ void DescriptionConverterService::convertCreatureToTO(
     CreatureTO& creatureTO = creatureTOs.at(creatureIndex);
     creatureTOIndexById.insert_or_assign(creatureDesc._id, creatureIndex);
 
+    auto genomeIndex = genomeTOs.size();
+    genomeTOs.resize(genomeIndex + 1);
+    GenomeTO& genomeTO = genomeTOs.at(genomeIndex);
+
     auto geneArrayStartIndex = geneTOs.size();
     geneTOs.resize(geneArrayStartIndex + creatureDesc._genome._genes.size());
 
@@ -645,10 +654,12 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
     creatureTO.numCells = creatureDesc._numCells;
-    stringToChar64(creatureDesc._genome._name, creatureTO.genome.name);
-    creatureTO.genome.frontAngle = creatureDesc._genome._frontAngle;
-    creatureTO.genome.numGenes = toInt(creatureDesc._genome._genes.size());
-    creatureTO.genome.geneArrayIndex = geneArrayStartIndex;
+    creatureTO.genomeArrayIndex = genomeIndex;
+
+    stringToChar64(creatureDesc._genome._name, genomeTO.name);
+    genomeTO.frontAngle = creatureDesc._genome._frontAngle;
+    genomeTO.numGenes = toInt(creatureDesc._genome._genes.size());
+    genomeTO.geneArrayIndex = geneArrayStartIndex;
 
     for (auto const& [geneIndex, geneDesc] : creatureDesc._genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
@@ -1008,6 +1019,7 @@ void DescriptionConverterService::setConnections(
 
 TO DescriptionConverterService::provideDataTO(
     std::vector<CreatureTO> const& creatureTOs,
+    std::vector<GenomeTO> const& genomeTOs,
     std::vector<GeneTO> const& geneTOs,
     std::vector<NodeTO> const& nodeTOs,
     std::vector<CellTO> const& cellTOs,
@@ -1016,6 +1028,7 @@ TO DescriptionConverterService::provideDataTO(
 {
     TO result = _collectionTOProvider->provideDataTO(
         {.creatures = creatureTOs.size(),
+         .genomes = genomeTOs.size(),
          .genes = geneTOs.size(),
          .nodes = nodeTOs.size(),
          .cells = cellTOs.size(),
@@ -1023,6 +1036,7 @@ TO DescriptionConverterService::provideDataTO(
          .heap = heap.size()});
 
     *result.numCreatures = creatureTOs.size();
+    *result.numGenomes = genomeTOs.size();
     *result.numGenes = geneTOs.size();
     *result.numNodes = nodeTOs.size();
     *result.numCells = cellTOs.size();
@@ -1030,6 +1044,7 @@ TO DescriptionConverterService::provideDataTO(
     *result.heapSize = heap.size();
 
     std::memcpy(result.creatures, creatureTOs.data(), creatureTOs.size() * sizeof(CreatureTO));
+    std::memcpy(result.genomes, genomeTOs.data(), genomeTOs.size() * sizeof(GenomeTO));
     std::memcpy(result.genes, geneTOs.data(), geneTOs.size() * sizeof(GeneTO));
     std::memcpy(result.nodes, nodeTOs.data(), nodeTOs.size() * sizeof(NodeTO));
     std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));

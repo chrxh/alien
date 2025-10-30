@@ -39,14 +39,22 @@ namespace
             creatureTO.lineageId = creature->lineageId;
             creatureTO.numCells = creature->numCells;
             creatureTO.frontAngleId = creature->frontAngleId;
-            creatureTO.genome.frontAngle = creature->genome->frontAngle;
-            creatureTO.genome.numGenes = creature->genome->numGenes;
-            for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
-                creatureTO.genome.name[i] = creature->genome->name[i];
+
+            auto genomeTOIndex = alienAtomicAdd64(collectionTO.numGenomes, static_cast<uint64_t>(1));
+            if (genomeTOIndex >= collectionTO.capacities.genomes) {
+                printf("Insufficient genome memory for transfer objects.\n");
+                ABORT();
+            }
+            creatureTO.genomeArrayIndex = genomeTOIndex;
+            auto& genomeTO = collectionTO.genomes[genomeTOIndex];
+            genomeTO.frontAngle = creature->genome->frontAngle;
+            genomeTO.numGenes = creature->genome->numGenes;
+            for (int i = 0; i < sizeof(genomeTO.name); ++i) {
+                genomeTO.name[i] = creature->genome->name[i];
             }
 
             auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(creature->genome->numGenes));
-            creatureTO.genome.geneArrayIndex = geneTOArrayStartIndex;
+            genomeTO.geneArrayIndex = geneTOArrayStartIndex;
             for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
                 auto const& gene = creature->genome->genes[i];

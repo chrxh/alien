@@ -31,7 +31,8 @@ private:
     ParticleDescription createParticleDescription(TO const& collectionTO, int particleIndex) const;
 
     void convertCreatureToTO(
-        std::vector<CreatureTO>& genomeTOs,
+        std::vector<CreatureTO>& creatureTOs,
+        std::vector<GenomeTO>& genomeTOs,
         std::vector<GeneTO>& geneTOs,
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
@@ -49,7 +50,8 @@ private:
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
     TO provideDataTO(
-        std::vector<CreatureTO> const& genomeTOs,
+        std::vector<CreatureTO> const& creatureTOs,
+        std::vector<GenomeTO> const& genomeTOs,
         std::vector<GeneTO> const& geneTOs,
         std::vector<NodeTO> const& nodeTOs,
         std::vector<CellTO> const& cellTOs,
