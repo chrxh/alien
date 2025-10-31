@@ -257,7 +257,9 @@ void GenomeEditorWindow::onCreateSeed()
 
     auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
-    auto seed = Description().creatures({
+    
+    Description seed;
+    seed.addCreature(
         CreatureDescription()
             .cells({
                 CellDescription()
@@ -265,9 +267,9 @@ void GenomeEditorWindow::onCreateSeed()
                     .stiffness(1.0f)
                     .color(EditorModel::get().getDefaultColorCode())
                     .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)),
-            })
-            .genome(genome),
-    });
+            }),
+        genome);
+    
     _simulationFacade->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();
 

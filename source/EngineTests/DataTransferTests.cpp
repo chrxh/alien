@@ -241,7 +241,10 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto const CreatureId = 1;
-    auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
+    auto genome = GenomeDescription();
+    
+    Description data;
+    data.addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), genome);
 
     _simulationFacade->setSimulationData(data);
 
@@ -258,9 +261,13 @@ TEST_F(DataTransferTests, changeGenome_successful)
     ASSERT_EQ(1, creature._cells.size());
     EXPECT_EQ(CreatureId, creature._id);
 
-    ASSERT_EQ(1, creature._genome._genes.size());
+    // Find the genome for this creature
+    auto genomeIt = std::find_if(actualData._genomes.begin(), actualData._genomes.end(),
+        [&creature](auto const& g) { return g._id == creature._genomeId; });
+    ASSERT_NE(genomeIt, actualData._genomes.end());
+    ASSERT_EQ(1, genomeIt->_genes.size());
 
-    auto gene = creature._genome._genes.front();
+    auto gene = genomeIt->_genes.front();
     EXPECT_EQ(2, gene._nodes.size());
 }
 
@@ -268,7 +275,10 @@ TEST_F(DataTransferTests, changeGenome_failed)
 {
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
-    auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
+    auto genome = GenomeDescription();
+    
+    Description data;
+    data.addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), genome);
 
     _simulationFacade->setSimulationData(data);
 
@@ -282,12 +292,17 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto constexpr CreatureId1 = 1;
     auto constexpr CreatureId2 = 2;
     auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
-    auto data = Description().creatures(
-        {CreatureDescription()
-             .id(CreatureId1)
-             .genome(genome)
-             .cells({CellDescription().id(1), CellDescription().id(2)}),
-         CreatureDescription().id(CreatureId2).genome(GenomeDescription()).cells({CellDescription().id(3)})});
+    auto genome2 = GenomeDescription();
+    
+    Description data;
+    data.addCreature(
+        CreatureDescription()
+            .id(CreatureId1)
+            .cells({CellDescription().id(1), CellDescription().id(2)}),
+        genome);
+    data.addCreature(
+        CreatureDescription().id(CreatureId2).cells({CellDescription().id(3)}),
+        genome2);
 
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -303,5 +318,9 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto cell1 = inspectedData.getCellRef(1);
     auto cell2 = inspectedData.getCellRef(2);
 
-    EXPECT_EQ(genome, creature._genome);
+    // Find the genome for this creature
+    auto genomeIt = std::find_if(inspectedData._genomes.begin(), inspectedData._genomes.end(),
+        [&creature](auto const& g) { return g._id == creature._genomeId; });
+    ASSERT_NE(genomeIt, inspectedData._genomes.end());
+    EXPECT_EQ(genome, *genomeIt);
 }

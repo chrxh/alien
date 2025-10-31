@@ -103,10 +103,11 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCreatureWithLegs(muscleMode, Direction::Forward);
-    auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells(
+    Description data;
+    data.addCreature(
+        CreatureDescription().cells(
             {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
-    });
+        genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -201,10 +202,13 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCreatureWithLegs(muscleMode, direction);
-    auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells(
-            {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
-    });
+    Description data;
+
+    data.addCreature(
+
+        CreatureDescription().cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
+
+        genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3000);
@@ -259,10 +263,11 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
-    auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells(
+    Description data;
+    data.addCreature(
+        CreatureDescription().cells(
             {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
-    });
+        genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1300);
@@ -309,10 +314,13 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
-    auto data = Description().creatures({
-        CreatureDescription().genome(genome).cells(
-            {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
-    });
+    Description data;
+
+    data.addCreature(
+
+        CreatureDescription().cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
+
+        genome);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1300);
