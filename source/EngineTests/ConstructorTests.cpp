@@ -2865,8 +2865,13 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
 
 
     Description data;
-    data.addCreature(CreatureDescription().id(0).cells({
-            CellDescription(), genome);
+    data.addCreature(
+        CreatureDescription().id(0).cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}),
+            CellDescription().id(2).pos({11.0f, 10.0f}).energy(constructorEnergy).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(3)),
+            CellDescription().id(3).pos({12.0f, 10.0f}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(0),
+        }),
+        genome);
     data.addConnection(0, 1);
 
     _simulationFacade->setSimulationData(data);
