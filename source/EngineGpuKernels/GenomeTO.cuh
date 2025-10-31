@@ -172,6 +172,7 @@ struct GeneTO
 
 struct GenomeTO
 {
+    uint64_t id;
     Char64 name;
     int numGenes;
     uint64_t geneArrayIndex;

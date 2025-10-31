@@ -106,61 +106,20 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 {
     Description result;
 
-    // Genomes (extract from creatures first)
-    std::unordered_map<uint64_t, GenomeDescription> genomesByArrayIndex;
-    for (int i = 0; i < *to.numCreatures; ++i) {
-        auto const& creatureTO = to.creatures[i];
-        auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
-        
-        // Check if we already extracted this genome
-        if (genomesByArrayIndex.find(creatureTO.genomeArrayIndex) == genomesByArrayIndex.end()) {
-            GenomeDescription genome;
-            genome._name = char64ToString(genomeTO.name);
-            genome._frontAngle = genomeTO.frontAngle;
-            genome._genes.reserve(genomeTO.numGenes);
-
-            CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
-            for (int j = 0; j < genomeTO.numGenes; ++j) {
-                auto geneTO = to.genes + genomeTO.geneArrayIndex + j;
-
-                GeneDescription geneDesc;
-                geneDesc._name = char64ToString(geneTO->name);
-                geneDesc._numBranches = geneTO->numBranches;
-                geneDesc._separation = geneTO->separation;
-                geneDesc._shape = geneTO->shape;
-                geneDesc._angleAlignment = geneTO->angleAlignment;
-                geneDesc._stiffness = geneTO->stiffness;
-                geneDesc._connectionDistance = geneTO->connectionDistance;
-                geneDesc._numConcatenations = geneTO->numConcatenations;
-
-                CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
-                for (int k = 0; k < geneTO->numNodes; ++k) {
-                    auto nodeTO = to.nodes + geneTO->nodeArrayIndex + k;
-                    geneDesc._nodes.emplace_back(createNodeDescription(nodeTO));
-                }
-
-                genome._genes.emplace_back(geneDesc);
-            }
-            genomesByArrayIndex[creatureTO.genomeArrayIndex] = genome;
-            result._genomes.emplace_back(genome);
-        }
+    // Genomes
+    for (int i = 0; i < *to.numGenomes; ++i) {
+        auto genome = createGenomeDescription(to, i);
+        result._genomes.emplace_back(genome);
     }
 
     // Creatures
     std::unordered_map<uint64_t, uint64_t> indexByCreatureId;
     for (int i = 0; i < *to.numCreatures; ++i) {
-        auto const& creatureTO = to.creatures[i];
-        auto const& genome = genomesByArrayIndex[creatureTO.genomeArrayIndex];
-        
-        CreatureDescription creature;
-        creature._id = creatureTO.id;
-        creature._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
-        creature._generation = creatureTO.generation;
-        creature._lineageId = creatureTO.lineageId;
-        creature._numCells = creatureTO.numCells;
-        creature._frontAngleId = creatureTO.frontAngleId;
-        creature._genomeId = genome._id;
-        
+        auto creature = createCreatureDescription(to, i);
+        auto genomeTOIndex = to.creatures[i].genomeArrayIndex;
+        auto genomeId = to.genomes[genomeTOIndex].id;
+        creature._genomeId = genomeId;
+
         indexByCreatureId.emplace(creature._id, i);
         result._creatures.emplace_back(creature);
     }
@@ -190,17 +149,22 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 
 TO DescriptionConverterService::convertDescriptionToTO(Description const& description) const
 {
-    std::vector<CreatureTO> creatureTOs;
     std::vector<GenomeTO> genomeTOs;
+    std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
     std::vector<CellTO> cellTOs;
     std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
 
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
+    for (auto const& genome : description._genomes) {
+        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, genome, genomeTOIndexById);
+    }
+
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     for (auto const& creature : description._creatures) {
-        convertCreatureToTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, heap, creature, description._genomes, creatureTOIndexById);
+        convertCreatureToTO(creatureTOs, creature, genomeTOIndexById, creatureTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
@@ -245,18 +209,21 @@ TO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const
 
 TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const
 {
-    std::vector<CreatureTO> creatureTOs;
     std::vector<GenomeTO> genomeTOs;
+    std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
     std::vector<CellTO> cellTOs;
     std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
 
-    std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     auto wrapper = CreatureDescription().id(creatureId).genomeId(genome._id);
-    std::vector<GenomeDescription> genomes = {genome};
-    convertCreatureToTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, heap, wrapper, genomes, creatureTOIndexById);
+
+    std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
+    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, genome, genomeTOIndexById);
+
+    std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
+    convertCreatureToTO(creatureTOs, wrapper, genomeTOIndexById, creatureTOIndexById);
 
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, {}, {}, heap);
 }
@@ -598,166 +565,56 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     }
     return nodeDesc;
 }
-// CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& to, int creatureIndex) const
-// {
-//     CreatureDescription result;
-// 
-//     auto const& creatureTO = to.creatures[creatureIndex];
-//     result._id = creatureTO.id;
-//     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
-//     result._generation = creatureTO.generation;
-//     result._lineageId = creatureTO.lineageId;
-//     result._numCells = creatureTO.numCells;
-//     result._frontAngleId = creatureTO.frontAngleId;
-// 
-//     auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
-//     result._genome._name = char64ToString(genomeTO.name);
-//     result._genome._frontAngle = genomeTO.frontAngle;
-//     result._genome._genes.reserve(genomeTO.numGenes);
-// 
-//     CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
-//     for (int i = 0; i < genomeTO.numGenes; ++i) {
-//         auto geneTO = to.genes + genomeTO.geneArrayIndex + i;
-// 
-//         GeneDescription geneDesc;
-//         geneDesc._name = char64ToString(geneTO->name);
-//         geneDesc._numBranches = geneTO->numBranches;
-//         geneDesc._separation = geneTO->separation;
-//         geneDesc._shape = geneTO->shape;
-//         geneDesc._angleAlignment = geneTO->angleAlignment;
-//         geneDesc._stiffness = geneTO->stiffness;
-//         geneDesc._connectionDistance = geneTO->connectionDistance;
-//         geneDesc._numConcatenations = geneTO->numConcatenations;
-// 
-//         CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
-//         for (int j = 0; j < geneTO->numNodes; ++j) {
-//             auto nodeTO = to.nodes + geneTO->nodeArrayIndex + j;
-// 
-//             NodeDescription nodeDesc;
-//             nodeDesc._referenceAngle = nodeTO->referenceAngle;
-//             nodeDesc._color = nodeTO->color;
-//             nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
-// 
-//             nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
-//             nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
-//             nodeDesc._signalRestriction._active = nodeTO->signalRestriction.active;
-//             nodeDesc._signalRestriction._baseAngle = nodeTO->signalRestriction.baseAngle;
-//             nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
-// 
-//             switch (nodeTO->cellType) {
-//             case CellTypeGenome_Base: {
-//                 BaseGenomeDescription baseDesc;
-//                 nodeDesc._cellType = baseDesc;
-//             } break;
-//             case CellTypeGenome_Depot: {
-//                 DepotGenomeDescription depotDesc;
-//                 depotDesc._mode = nodeTO->cellTypeData.depot.mode;
-//                 nodeDesc._cellType = depotDesc;
-//             } break;
-//             case CellTypeGenome_Constructor: {
-//                 ConstructorGenomeDescription constructorDesc;
-//                 constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval > 0
-//                     ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval)
-//                     : std::nullopt;
-//                 constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
-//                 constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
-//                 constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
-//                 constructorDesc._provideEnergy = nodeTO->cellTypeData.constructor.provideEnergy;
-//                 nodeDesc._cellType = constructorDesc;
-//             } break;
-//             case CellTypeGenome_Sensor: {
-//                 SensorGenomeDescription sensorDesc;
-//                 sensorDesc._autoTriggerInterval =
-//                     nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
-//                 sensorDesc._minDensity = nodeTO->cellTypeData.sensor.minDensity;
-//                 sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.minRange) : std::nullopt;
-//                 sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.maxRange) : std::nullopt;
-//                 sensorDesc._restrictToColor =
-//                     nodeTO->cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(nodeTO->cellTypeData.sensor.restrictToColor) : std::nullopt;
-//                 sensorDesc._restrictToCreatures = nodeTO->cellTypeData.sensor.restrictToCreatures;
-//                 nodeDesc._cellType = sensorDesc;
-//             } break;
-//             case CellTypeGenome_Generator: {
-//                 GeneratorGenomeDescription generatorDesc;
-//                 generatorDesc._autoTriggerInterval = nodeTO->cellTypeData.generator.autoTriggerInterval;
-//                 generatorDesc._pulseType = nodeTO->cellTypeData.generator.pulseType;
-//                 generatorDesc._alternationInterval = nodeTO->cellTypeData.generator.alternationInterval;
-//                 nodeDesc._cellType = generatorDesc;
-//             } break;
-//             case CellTypeGenome_Attacker: {
-//                 AttackerGenomeDescription attackerDesc;
-//                 nodeDesc._cellType = attackerDesc;
-//             } break;
-//             case CellTypeGenome_Injector: {
-//                 InjectorGenomeDescription injectorDesc;
-//                 injectorDesc._mode = nodeTO->cellTypeData.injector.mode;
-//                 nodeDesc._cellType = injectorDesc;
-//             } break;
-//             case CellTypeGenome_Muscle: {
-//                 MuscleGenomeDescription muscleDesc;
-//                 switch (nodeTO->cellTypeData.muscle.mode) {
-//                 case MuscleMode_AutoBending: {
-//                     AutoBendingGenomeDescription bendingDesc;
-//                     bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-//                     bendingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
-//                     muscleDesc._mode = bendingDesc;
-//                 } break;
-//                 case MuscleMode_ManualBending: {
-//                     ManualBendingGenomeDescription bendingDesc;
-//                     bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-//                     bendingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
-//                     muscleDesc._mode = bendingDesc;
-//                 } break;
-//                 case MuscleMode_AngleBending: {
-//                     AngleBendingGenomeDescription bendingDesc;
-//                     bendingDesc._maxAngleDeviation = nodeTO->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-//                     bendingDesc._attractionRepulsionRatio = nodeTO->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
-//                     muscleDesc._mode = bendingDesc;
-//                 } break;
-//                 case MuscleMode_AutoCrawling: {
-//                     AutoCrawlingGenomeDescription crawlingDesc;
-//                     crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-//                     crawlingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
-//                     muscleDesc._mode = crawlingDesc;
-//                 } break;
-//                 case MuscleMode_ManualCrawling: {
-//                     ManualCrawlingGenomeDescription crawlingDesc;
-//                     crawlingDesc._maxDistanceDeviation = nodeTO->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-//                     crawlingDesc._forwardBackwardRatio = nodeTO->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
-//                     muscleDesc._mode = crawlingDesc;
-//                 } break;
-//                 case MuscleMode_DirectMovement: {
-//                     DirectMovementGenomeDescription directMovementDesc;
-//                     muscleDesc._mode = directMovementDesc;
-//                 } break;
-//                 }
-//                 nodeDesc._cellType = muscleDesc;
-//             } break;
-//             case CellTypeGenome_Defender: {
-//                 DefenderGenomeDescription defenderDesc;
-//                 defenderDesc._mode = nodeTO->cellTypeData.defender.mode;
-//                 nodeDesc._cellType = defenderDesc;
-//             } break;
-//             case CellTypeGenome_Reconnector: {
-//                 ReconnectorGenomeDescription reconnectorDesc;
-//                 reconnectorDesc._restrictToColor = nodeTO->cellTypeData.reconnector.restrictToColor;
-//                 reconnectorDesc._restrictToCreatures = nodeTO->cellTypeData.reconnector.restrictToCreatures;
-//                 nodeDesc._cellType = reconnectorDesc;
-//             } break;
-//             case CellTypeGenome_Detonator: {
-//                 DetonatorGenomeDescription detonatorDesc;
-//                 detonatorDesc._countdown = nodeTO->cellTypeData.detonator.countdown;
-//                 nodeDesc._cellType = detonatorDesc;
-//             } break;
-//             }
-//             geneDesc._nodes.emplace_back(nodeDesc);
-//         }
-// 
-//         result._genome._genes.emplace_back(geneDesc);
-//     }
-// 
-//     return result;
-// }
+
+GenomeDescription DescriptionConverterService::createGenomeDescription(TO const& to, int genomeIndex) const
+{
+    auto const& genomeTO = to.genomes[genomeIndex];
+
+    GenomeDescription result;
+    result._id = genomeTO.id;
+    result._name = char64ToString(genomeTO.name);
+    result._frontAngle = genomeTO.frontAngle;
+    result._genes.reserve(genomeTO.numGenes);
+
+    CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
+    for (int j = 0; j < genomeTO.numGenes; ++j) {
+        auto geneTO = to.genes + genomeTO.geneArrayIndex + j;
+
+        GeneDescription geneDesc;
+        geneDesc._name = char64ToString(geneTO->name);
+        geneDesc._numBranches = geneTO->numBranches;
+        geneDesc._separation = geneTO->separation;
+        geneDesc._shape = geneTO->shape;
+        geneDesc._angleAlignment = geneTO->angleAlignment;
+        geneDesc._stiffness = geneTO->stiffness;
+        geneDesc._connectionDistance = geneTO->connectionDistance;
+        geneDesc._numConcatenations = geneTO->numConcatenations;
+
+        CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
+        for (int k = 0; k < geneTO->numNodes; ++k) {
+            auto nodeTO = to.nodes + geneTO->nodeArrayIndex + k;
+            geneDesc._nodes.emplace_back(createNodeDescription(nodeTO));
+        }
+
+        result._genes.emplace_back(geneDesc);
+    }
+    return result;
+}
+
+ CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& to, int creatureIndex) const
+ {
+     CreatureDescription result;
+ 
+     auto const& creatureTO = to.creatures[creatureIndex];
+     result._id = creatureTO.id;
+     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
+     result._generation = creatureTO.generation;
+     result._lineageId = creatureTO.lineageId;
+     result._numCells = creatureTO.numCells;
+     result._frontAngleId = creatureTO.frontAngleId;
+ 
+     return result;
+ }
 
 ParticleDescription DescriptionConverterService::createParticleDescription(TO const& to, int particleIndex) const
 {
@@ -770,44 +627,21 @@ ParticleDescription DescriptionConverterService::createParticleDescription(TO co
         .color(particle.color);
 }
 
-void DescriptionConverterService::convertCreatureToTO(
-    std::vector<CreatureTO>& creatureTOs,
+void DescriptionConverterService::convertGenomeToTO(
     std::vector<GenomeTO>& genomeTOs,
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
-    std::vector<uint8_t>& heap,
-    CreatureDescription const& creatureDesc,
-    std::vector<GenomeDescription> const& genomes,
-    std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const
+    GenomeDescription const& genome,
+    std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const
 {
-    auto creatureIndex = creatureTOs.size();
-    creatureTOs.resize(creatureIndex + 1);
+    auto genomeTOIndex = genomeTOs.size();
+    genomeTOs.resize(genomeTOIndex + 1);
+    GenomeTO& genomeTO = genomeTOs.at(genomeTOIndex);
 
-    CreatureTO& creatureTO = creatureTOs.at(creatureIndex);
-    creatureTOIndexById.insert_or_assign(creatureDesc._id, creatureIndex);
-
-    // Find the genome for this creature
-    auto genomeIt = std::find_if(genomes.begin(), genomes.end(), 
-        [&creatureDesc](auto const& g) { return g._id == creatureDesc._genomeId; });
-    if (genomeIt == genomes.end()) {
-        THROW_NOT_IMPLEMENTED();  // Genome not found
-    }
-    auto const& genome = *genomeIt;
-
-    auto genomeIndex = genomeTOs.size();
-    genomeTOs.resize(genomeIndex + 1);
-    GenomeTO& genomeTO = genomeTOs.at(genomeIndex);
+    genomeTOIndexById.insert_or_assign(genome._id, genomeTOIndex);
 
     auto geneArrayStartIndex = geneTOs.size();
     geneTOs.resize(geneArrayStartIndex + genome._genes.size());
-
-    creatureTO.id = creatureDesc._id;
-    creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
-    creatureTO.generation = creatureDesc._generation;
-    creatureTO.lineageId = creatureDesc._lineageId;
-    creatureTO.frontAngleId = creatureDesc._frontAngleId;
-    creatureTO.numCells = creatureDesc._numCells;
-    creatureTO.genomeArrayIndex = genomeIndex;
 
     stringToChar64(genome._name, genomeTO.name);
     genomeTO.frontAngle = genome._frontAngle;
@@ -942,6 +776,27 @@ void DescriptionConverterService::convertCreatureToTO(
             }
         }
     }
+}
+
+void DescriptionConverterService::convertCreatureToTO(
+    std::vector<CreatureTO>& creatureTOs,
+    CreatureDescription const& creatureDesc,
+    std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById,
+    std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const
+{
+    auto creatureTOIndex = creatureTOs.size();
+    creatureTOs.resize(creatureTOIndex + 1);
+
+    CreatureTO& creatureTO = creatureTOs.at(creatureTOIndex);
+    creatureTOIndexById.insert_or_assign(creatureDesc._id, creatureTOIndex);
+
+    creatureTO.id = creatureDesc._id;
+    creatureTO.ancestorId = creatureDesc._ancestorId.value_or(VALUE_NOT_SET_UINT64);
+    creatureTO.generation = creatureDesc._generation;
+    creatureTO.lineageId = creatureDesc._lineageId;
+    creatureTO.frontAngleId = creatureDesc._frontAngleId;
+    creatureTO.numCells = creatureDesc._numCells;
+    creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 
 namespace
