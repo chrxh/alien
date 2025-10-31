@@ -110,7 +110,7 @@ public:
 
     // Simulated preview
     Description getPreviewData();
-    void setPreviewData(Description const& data);
+    void setPreviewData(Description const& description);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation);
     void calcTimestepsForPreview(int numSteps, bool detailSimulation);
     uint64_t getCurrentTimestepForPreview();

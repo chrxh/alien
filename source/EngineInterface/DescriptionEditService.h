@@ -52,7 +52,7 @@ public:
     };
     Description createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;
 
-    void duplicate(Description& data, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
+    void duplicate(Description& description, IntVector2D const& origWorldSize, IntVector2D const& worldSize) const;
 
     struct GridMultiplyParameters
     {
@@ -99,21 +99,21 @@ public:
         float distance,
         IntVector2D const& worldSize) const;
 
-    void flattenTopology(Description& data, IntVector2D const& worldSize) const;
+    void flattenTopology(Description& description, IntVector2D const& worldSize) const;
 
-    void reconnectCells(Description& data, float maxDistance) const;  // For non-creatures
+    void reconnectCells(Description& description, float maxDistance) const;  // For non-creatures
 
-    void randomizeCellColors(Description& data, std::vector<int> const& colorCodes) const;
-    void randomizeGenomeColors(Description& data, std::vector<int> const& colorCodes) const;
-    void randomizeEnergies(Description& data, float minEnergy, float maxEnergy) const;
-    void randomizeAges(Description& data, int minAge, int maxAge) const;
-    void randomizeCountdowns(Description& data, int minValue, int maxValue) const;
-    void randomizeLineageIds(Description& data) const;
+    void randomizeCellColors(Description& description, std::vector<int> const& colorCodes) const;
+    void randomizeGenomeColors(Description& description, std::vector<int> const& colorCodes) const;
+    void randomizeEnergies(Description& description, float minEnergy, float maxEnergy) const;
+    void randomizeAges(Description& description, int minAge, int maxAge) const;
+    void randomizeCountdowns(Description& description, int minValue, int maxValue) const;
+    void randomizeLineageIds(Description& description) const;
 
     uint64_t getId(ExtendedCellOrParticleDescription const& entity) const;
     RealVector2D getPos(ExtendedCellOrParticleDescription const& entity) const;
-    std::vector<ExtendedCellOrParticleDescription> getObjects(Description const& data) const;
-    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(Description const& data) const;
+    std::vector<ExtendedCellOrParticleDescription> getObjects(Description const& description) const;
+    std::vector<ExtendedCellOrParticleDescription> getCellsForCreatureRepresentatives(Description const& description) const;
 
     void setCenter(Description& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(Description const& collection) const;

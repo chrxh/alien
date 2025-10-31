@@ -19,10 +19,10 @@
 #include "SimulationData.cuh"
 
 __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color, bool includeClusters);
-__global__ void cudaChangeCell(SimulationData data, TO changeDataTO);  // changeDataTO contains only 1 cell
-__global__ void cudaChangeParticle(SimulationData data, TO changeDataTO); // changeDataTO contains only 1 particle
+__global__ void cudaChangeCell(SimulationData data, TO changeTO);  // changeTO contains only 1 cell
+__global__ void cudaChangeParticle(SimulationData data, TO changeTO); // changeTO contains only 1 particle
 
-__global__ void cudaAddGenomeAndCreature(SimulationData data, TO dataTO, Genome** newGenome, Creature** newCreature);
+__global__ void cudaAddGenomeAndCreature(SimulationData data, TO to, Genome** newGenome, Creature** newCreature);
 __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCreature, bool* result);
 
 __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClusters);

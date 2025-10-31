@@ -102,26 +102,26 @@ namespace
 
 }
 
-Description DescriptionConverterService::convertTOtoDescription(TO const& collectionTO) const
+Description DescriptionConverterService::convertTOtoDescription(TO const& to) const
 {
     Description result;
 
     // Creatures
     std::vector<GenomeDescription> genomes;
     std::unordered_map<uint64_t, uint64_t> indexByCreatureId;
-    for (int i = 0; i < *collectionTO.numCreatures; ++i) {
-        auto creature = createCreatureDescription(collectionTO, i);
+    for (int i = 0; i < *to.numCreatures; ++i) {
+        auto creature = createCreatureDescription(to, i);
         indexByCreatureId.emplace(creature._id, i);
         result._creatures.emplace_back(creature);
     }
 
     // Cells
-    for (int i = 0; i < *collectionTO.numCells; ++i) {
-        auto cell = createCellDescription(collectionTO, i);
+    for (int i = 0; i < *to.numCells; ++i) {
+        auto cell = createCellDescription(to, i);
 
-        if (collectionTO.cells[i].belongToCreature) {
-            auto creatureTOIndex = collectionTO.cells[i].creatureIndex;
-            auto creatureId = collectionTO.creatures[creatureTOIndex].id;
+        if (to.cells[i].belongToCreature) {
+            auto creatureTOIndex = to.cells[i].creatureIndex;
+            auto creatureId = to.creatures[creatureTOIndex].id;
             auto creatureIndex = indexByCreatureId.at(creatureId);
             auto& creature = result._creatures.at(creatureIndex);
             creature._cells.emplace_back(cell);
@@ -131,14 +131,14 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& collec
     }
 
     // Particles
-    for (int i = 0; i < *collectionTO.numParticles; ++i) {
-        result._particles.emplace_back(createParticleDescription(collectionTO, i));
+    for (int i = 0; i < *to.numParticles; ++i) {
+        result._particles.emplace_back(createParticleDescription(to, i));
     }
 
     return result;
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(Description const& data) const
+TO DescriptionConverterService::convertDescriptionToTO(Description const& description) const
 {
     std::vector<CreatureTO> creatureTOs;
     std::vector<GenomeTO> genomeTOs;
@@ -149,23 +149,23 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& data) 
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    for (auto const& creature : data._creatures) {
+    for (auto const& creature : description._creatures) {
         convertCreatureToTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, heap, creature, creatureTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
-    for (auto const& cell : data._cells) {
+    for (auto const& cell : description._cells) {
         convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);        
     }
-    for (auto const& creature : data._creatures) {
+    for (auto const& creature : description._creatures) {
         for (auto const& cell : creature._cells) {
             convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creature._id, creatureTOIndexById);
         }
     }
-    data.forEachCell([&](auto const& cell) {
+    description.forEachCell([&](auto const& cell) {
         setConnections(cellTOs, cell, cellIndexTOById);
     });
-    for (auto const& particle : data._particles) {
+    for (auto const& particle : description._particles) {
         addParticle(particleTOs, particle);
     }
 
@@ -216,12 +216,12 @@ DescriptionConverterService::DescriptionConverterService()
 }
 
 CellDescription DescriptionConverterService::createCellDescription(
-    TO const& collectionTO,
+    TO const& to,
     int cellIndex) const
 {
     CellDescription result(false);
 
-    auto const& cellTO = collectionTO.cells[cellIndex];
+    auto const& cellTO = to.cells[cellIndex];
     result._id = cellTO.id;
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result._vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
@@ -232,7 +232,7 @@ CellDescription DescriptionConverterService::createCellDescription(
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
         if (connectionTO.cellIndex != VALUE_NOT_SET_UINT64) {
-            connection._cellId = collectionTO.cells[connectionTO.cellIndex].id;
+            connection._cellId = to.cells[connectionTO.cellIndex].id;
         } else {
             connections.clear();
             break;
@@ -405,7 +405,7 @@ CellDescription DescriptionConverterService::createCellDescription(
     } break;
     }
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
-        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(collectionTO.heap, cellTO.neuralNetworkDataIndex);
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, cellTO.neuralNetworkDataIndex);
         result._neuralNetwork = convert(*neuralNetworkTO);
     }
 
@@ -426,11 +426,11 @@ CellDescription DescriptionConverterService::createCellDescription(
     return result;
 }
 
-CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& collectionTO, int creatureIndex) const
+CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& to, int creatureIndex) const
 {
     CreatureDescription result;
 
-    auto const& creatureTO = collectionTO.creatures[creatureIndex];
+    auto const& creatureTO = to.creatures[creatureIndex];
     result._id = creatureTO.id;
     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
@@ -438,14 +438,14 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
     result._numCells = creatureTO.numCells;
     result._frontAngleId = creatureTO.frontAngleId;
 
-    auto const& genomeTO = collectionTO.genomes[creatureTO.genomeArrayIndex];
+    auto const& genomeTO = to.genomes[creatureTO.genomeArrayIndex];
     result._genome._name = char64ToString(genomeTO.name);
     result._genome._frontAngle = genomeTO.frontAngle;
     result._genome._genes.reserve(genomeTO.numGenes);
 
-    CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *collectionTO.numGenes);
+    CHECK(genomeTO.geneArrayIndex + genomeTO.numGenes <= *to.numGenes);
     for (int i = 0; i < genomeTO.numGenes; ++i) {
-        auto geneTO = collectionTO.genes + genomeTO.geneArrayIndex + i;
+        auto geneTO = to.genes + genomeTO.geneArrayIndex + i;
 
         GeneDescription geneDesc;
         geneDesc._name = char64ToString(geneTO->name);
@@ -457,9 +457,9 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
         geneDesc._connectionDistance = geneTO->connectionDistance;
         geneDesc._numConcatenations = geneTO->numConcatenations;
 
-        CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *collectionTO.numNodes);
+        CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
         for (int j = 0; j < geneTO->numNodes; ++j) {
-            auto nodeTO = collectionTO.nodes + geneTO->nodeArrayIndex + j;
+            auto nodeTO = to.nodes + geneTO->nodeArrayIndex + j;
 
             NodeDescription nodeDesc;
             nodeDesc._referenceAngle = nodeTO->referenceAngle;
@@ -587,9 +587,9 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
     return result;
 }
 
-ParticleDescription DescriptionConverterService::createParticleDescription(TO const& collectionTO, int particleIndex) const
+ParticleDescription DescriptionConverterService::createParticleDescription(TO const& to, int particleIndex) const
 {
-    auto const& particle = collectionTO.particles[particleIndex];
+    auto const& particle = to.particles[particleIndex];
     return ParticleDescription()
         .id(particle.id)
         .pos({particle.pos.x, particle.pos.y})

@@ -15,8 +15,8 @@ class DescriptionConverterService
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DescriptionConverterService);
 
 public:
-    Description convertTOtoDescription(TO const& collectionTO) const;
-    TO convertDescriptionToTO(Description const& data) const;
+    Description convertTOtoDescription(TO const& to) const;
+    TO convertDescriptionToTO(Description const& description) const;
     TO convertDescriptionToTO(CellDescription const& cell) const;
     TO convertDescriptionToTO(ParticleDescription const& particle) const;
     TO convertDescriptionToTO(uint64_t creatureId, GenomeDescription const& genome) const;
@@ -24,9 +24,9 @@ public:
 private:
     DescriptionConverterService();
 
-    CellDescription createCellDescription(TO const& collectionTO, int cellIndex) const;
-    CreatureDescription createCreatureDescription(TO const& collectionTO, int creatureIndex) const;
-    ParticleDescription createParticleDescription(TO const& collectionTO, int particleIndex) const;
+    CellDescription createCellDescription(TO const& to, int cellIndex) const;
+    CreatureDescription createCreatureDescription(TO const& to, int creatureIndex) const;
+    ParticleDescription createParticleDescription(TO const& to, int particleIndex) const;
 
     void convertCreatureToTO(
         std::vector<CreatureTO>& creatureTOs,

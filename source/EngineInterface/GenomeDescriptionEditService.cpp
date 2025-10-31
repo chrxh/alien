@@ -200,16 +200,16 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
             if (cachedPhenotype._creatures.front()._generation == 0) {
                 seedFirst = true;  // first Creature is seed
             }
-            result.data.add(std::move(cachedPhenotype));
+            result.description.add(std::move(cachedPhenotype));
 
             auto index =
-                seedFirst ? result.data._creatures.size() - cachedPhenotype._creatures.size() : result.data._creatures.size() - cachedPhenotype._creatures.size() + 1;
-            result.seedCreatureIds.emplace_back(result.data._creatures.at(index)._id);
+                seedFirst ? result.description._creatures.size() - cachedPhenotype._creatures.size() : result.description._creatures.size() - cachedPhenotype._creatures.size() + 1;
+            result.seedCreatureIds.emplace_back(result.description._creatures.at(index)._id);
         } else {
             auto seed = createSeedForPreview(subGenome, currentPos);
-            result.data.add(std::move(seed));
+            result.description.add(std::move(seed));
 
-            result.seedCreatureIds.emplace_back(result.data._creatures.back()._id);
+            result.seedCreatureIds.emplace_back(result.description._creatures.back()._id);
         }
         currentPos.x += toFloat(PREVIEW_HEIGHT) / 2;  // Adjust position for the next sub-genome
     }

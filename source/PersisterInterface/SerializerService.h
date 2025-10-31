@@ -40,9 +40,9 @@ public:
     bool deserializeContentFromFile(Description& content, std::filesystem::path const& filename) const;
 
 private:
-    void serializeDescription(Description const& data, std::ostream& stream) const;
-    bool deserializeDescription(Description& data, std::filesystem::path const& filename) const;
-    void deserializeDescription(Description& data, std::istream& stream) const;
+    void serializeDescription(Description const& description, std::ostream& stream) const;
+    bool deserializeDescription(Description& description, std::filesystem::path const& filename) const;
+    void deserializeDescription(Description& description, std::istream& stream) const;
 
     void serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const;
     void deserializeSettings(SettingsForSerialization& settings, std::istream& stream) const;

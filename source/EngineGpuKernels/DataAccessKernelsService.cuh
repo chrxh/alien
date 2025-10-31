@@ -17,13 +17,13 @@ public:
     ~_DataAccessKernelsService();
 
     ArraySizesForTO estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data);
-    void getData(CudaSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TO const& dataTO);
-    void getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TO const& dataTO);
-    void getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TO const& dataTO);
-    void getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TO const& dataTO);
+    void getData(CudaSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TO const& to);
+    void getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TO const& to);
+    void getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TO const& to);
+    void getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TO const& to);
 
-    ArraySizesForGpu estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TO const& dataTO);
-    void addData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& dataTO, bool selectData);
+    ArraySizesForGpu estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TO const& to);
+    void addData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& to, bool selectData);
     void clearData(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:

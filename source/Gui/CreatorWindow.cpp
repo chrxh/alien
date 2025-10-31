@@ -234,17 +234,17 @@ void CreatorWindow::createCell()
                     .color(EditorModel::get().getDefaultColorCode())
                     .barrier(_barrier)
                     .sticky(_makeSticky);
-    Description data;
-    data._cells.emplace_back(cell);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    Description description;
+    description._cells.emplace_back(cell);
+    _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createParticle()
 {
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
-    Description data;
-    data._particles.emplace_back(particle);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    Description description;
+    description._particles.emplace_back(particle);
+    _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createRectangle()
@@ -253,7 +253,7 @@ void CreatorWindow::createRectangle()
         return;
     }
 
-    auto data = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+    auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
                                                   .width(_rectHorizontalCells)
                                                   .height(_rectVerticalCells)
                                                   .cellDistance(_cellDistance)
@@ -264,7 +264,7 @@ void CreatorWindow::createRectangle()
                                                   .center(getRandomPos())
                                                   .barrier(_barrier));
 
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createHexagon()
@@ -272,7 +272,7 @@ void CreatorWindow::createHexagon()
     if (_layers <= 0) {
         return;
     }
-    Description data = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
+    Description description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
                                                             .layers(_layers)
                                                             .cellDistance(_cellDistance)
                                                             .energy(_energy)
@@ -281,7 +281,7 @@ void CreatorWindow::createHexagon()
                                                             .color(EditorModel::get().getDefaultColorCode())
                                                             .center(getRandomPos())
                                                             .barrier(_barrier));
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createDisc()
@@ -290,7 +290,7 @@ void CreatorWindow::createDisc()
         return;
     }
 
-    Description data;
+    Description description;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
         float angleInc =
@@ -305,7 +305,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            data._cells.emplace_back(CellDescription()
+            description._cells.emplace_back(CellDescription()
                              .id(NumberGenerator::get().createObjectId())
                              .energy(_energy)
                              .stiffness(_stiffness)
@@ -316,9 +316,9 @@ void CreatorWindow::createDisc()
         }
     }
 
-    DescriptionEditService::get().reconnectCells(data, _cellDistance * 1.7f);
-    DescriptionEditService::get().setCenter(data, getRandomPos());
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    DescriptionEditService::get().reconnectCells(description, _cellDistance * 1.7f);
+    DescriptionEditService::get().setCenter(description, getRandomPos());
+    _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::validateAndCorrect()

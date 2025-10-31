@@ -916,9 +916,9 @@ namespace cereal
     SPLIT_SERIALIZATION(ParticleDescription)
 
     template <class Archive>
-    void serialize(Archive& ar, Description& data)
+    void serialize(Archive& ar, Description& description)
     {
-        ar(data._cells, data._particles, data._creatures);
+        ar(description._cells, description._particles, description._creatures);
     }
 }
 
@@ -1073,8 +1073,8 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
     try {
         log(Priority::Important, "save genome to " + filename.string());
         //wrap constructor cell around genome
-        Description data;
-        if (!wrapGenome(data, genome)) {
+        Description description;
+        if (!wrapGenome(description, genome)) {
             return false;
         }
 
@@ -1082,7 +1082,7 @@ bool SerializerService::serializeGenomeToFile(std::filesystem::path const& filen
         if (!stream) {
             return false;
         }
-        serializeDescription(data, stream);
+        serializeDescription(description, stream);
 
         return true;
     } catch (...) {
@@ -1094,11 +1094,11 @@ bool SerializerService::deserializeGenomeFromFile(GenomeDescription& genome, std
 {
     try {
         log(Priority::Important, "load genome from " + filename.string());
-        Description data;
-        if (!deserializeDescription(data, filename)) {
+        Description description;
+        if (!deserializeDescription(description, filename)) {
             return false;
         }
-        if (!unwrapGenome(genome, data)) {
+        if (!unwrapGenome(genome, description)) {
             return false;
         }
         return true;
@@ -1116,12 +1116,12 @@ bool SerializerService::serializeGenomeToString(std::string& output, std::vector
             return false;
         }
 
-        Description data;
-        //if (!wrapGenome(data, input)) {
+        Description description;
+        //if (!wrapGenome(description, input)) {
         //    return false;
         //}
 
-        serializeDescription(data, stream);
+        serializeDescription(description, stream);
         stream.flush();
         output = stdStream.str();
         return true;
@@ -1139,10 +1139,10 @@ bool SerializerService::deserializeGenomeFromString(std::vector<uint8_t>& output
             return false;
         }
 
-        Description data;
-        deserializeDescription(data, stream);
+        Description description;
+        deserializeDescription(description, stream);
 
-        //if (!unwrapGenome(output, data)) {
+        //if (!unwrapGenome(output, description)) {
         //    return false;
         //}
         return true;
@@ -1226,24 +1226,24 @@ bool SerializerService::deserializeContentFromFile(Description& content, std::fi
     }
 }
 
-void SerializerService::serializeDescription(Description const& data, std::ostream& stream) const
+void SerializerService::serializeDescription(Description const& description, std::ostream& stream) const
 {
     cereal::PortableBinaryOutputArchive archive(stream);
     archive(Const::ProgramVersion);
-    archive(data);
+    archive(description);
 }
 
-bool SerializerService::deserializeDescription(Description& data, std::filesystem::path const& filename) const
+bool SerializerService::deserializeDescription(Description& description, std::filesystem::path const& filename) const
 {
     zstr::ifstream stream(filename.string(), std::ios::binary);
     if (!stream) {
         return false;
     }
-    deserializeDescription(data, stream);
+    deserializeDescription(description, stream);
     return true;
 }
 
-void SerializerService::deserializeDescription(Description& data, std::istream& stream) const
+void SerializerService::deserializeDescription(Description& description, std::istream& stream) const
 {
     cereal::PortableBinaryInputArchive archive(stream);
     std::string version;
@@ -1255,7 +1255,7 @@ void SerializerService::deserializeDescription(Description& data, std::istream& 
     if (VersionParserService::get().isVersionOutdated(version)) {
         throw std::runtime_error("Version not supported.");
     }
-    archive(data);
+    archive(description);
 }
 
 void SerializerService::serializeSettings(SettingsForSerialization const& settings, std::ostream& stream) const

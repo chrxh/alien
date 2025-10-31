@@ -96,7 +96,7 @@ public:
 
     // Simulated preview
     Description getPreviewData() override;
-    void setPreviewData(Description const& data) override;
+    void setPreviewData(Description const& description) override;
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation) override;
     void calcTimestepsForPreview(int numSteps, bool detailSimulation) override;
     uint64_t getCurrentTimestepForPreview() override;
