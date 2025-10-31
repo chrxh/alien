@@ -223,18 +223,22 @@ void EditorController::processInspectorWindows()
     }
     _inspectorWindows = inspectorWindows;
     EditorModel::get().setInspectedEntities(inspectedEntities);
-
-    //update inspected entities from simulation
     if (inspectedEntities.empty()) {
         return;
     }
-    std::vector<uint64_t> entityIds;
-    for (auto const& entity : inspectedEntities) {
-        entityIds.emplace_back(DescriptionEditService::get().getId(entity));
+
+    // Get inspected entities from simulation periodically
+    static int counter = 0;
+    if (++counter == 10) {
+        std::vector<uint64_t> entityIds;
+        for (auto const& entity : inspectedEntities) {
+            entityIds.emplace_back(DescriptionEditService::get().getId(entity));
+        }
+        auto inspectedData = _simulationFacade->getInspectedSimulationData(entityIds);
+        auto newInspectedEntities = DescriptionEditService::get().getObjects(inspectedData);
+        EditorModel::get().setInspectedEntities(newInspectedEntities);
+        counter = 0;
     }
-    auto inspectedData = _simulationFacade->getInspectedSimulationData(entityIds);
-    auto newInspectedEntities = DescriptionEditService::get().getObjects(inspectedData);
-    EditorModel::get().setInspectedEntities(newInspectedEntities);
 
     inspectorWindows.clear();
     for (auto const& inspectorWindow : _inspectorWindows) {

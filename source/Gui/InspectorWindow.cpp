@@ -763,8 +763,6 @@ float _InspectorWindow::calcWindowWidth() const
 
 void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
 {
-    auto const& parameters = _simulationFacade->getSimulationParameters();
-
     cell._stiffness = std::max(0.0f, std::min(1.0f, cell._stiffness));
     cell._energy = std::max(0.0f, cell._energy);
     switch (cell.getCellType()) {

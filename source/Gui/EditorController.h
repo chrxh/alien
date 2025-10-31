@@ -46,7 +46,7 @@ private:
 
     SimulationFacade _simulationFacade;
 
-    bool _on = false;   //#TODO weg!
+    bool _on = false;
 
     std::vector<InspectorWindow> _inspectorWindows;
     Description _drawing;
