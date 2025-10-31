@@ -18,6 +18,7 @@ _EditKernelsService::_EditKernelsService()
     memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
     memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
     memoryManager.acquireMemory(1, _genomePtr);
+    memoryManager.acquireMemory(1, _creaturePtr);
     memoryManager.acquireMemory(1, _result);
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsService>();
 }
@@ -34,6 +35,7 @@ _EditKernelsService::~_EditKernelsService()
     memoryManager.freeMemory(_cudaNumEntities);
     memoryManager.freeMemory(_cudaMinCellPosYAndIndex);
     memoryManager.freeMemory(_genomePtr);
+    memoryManager.freeMemory(_creaturePtr);
     memoryManager.freeMemory(_result);
 }
 
@@ -262,8 +264,8 @@ void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, 
 bool _EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TO const& dataTO)
 {
     setValueToDevice(_result, false);
-    KERNEL_CALL_1_1(cudaAddCreature, data, dataTO, _genomePtr);
-    KERNEL_CALL(cudaSetCreature, data, _genomePtr, _result);
+    KERNEL_CALL_1_1(cudaAddGenomeAndCreature, data, dataTO, _genomePtr, _creaturePtr);
+    KERNEL_CALL(cudaChangeCellToCreature, data, _creaturePtr, _result);
     cudaDeviceSynchronize();
 
     return copyToHost(_result);

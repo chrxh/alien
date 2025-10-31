@@ -705,6 +705,7 @@ void _SimulationCudaFacade::copyDataTOtoGpu(TO const& cudaDataTO, TO const& data
 {
     copyToDevice(cudaDataTO.numCells, dataTO.numCells);
     copyToDevice(cudaDataTO.numParticles, dataTO.numParticles);
+    copyToDevice(cudaDataTO.numGenomes, dataTO.numGenomes);
     copyToDevice(cudaDataTO.numCreatures, dataTO.numCreatures);
     copyToDevice(cudaDataTO.numGenes, dataTO.numGenes);
     copyToDevice(cudaDataTO.numNodes, dataTO.numNodes);
@@ -712,6 +713,7 @@ void _SimulationCudaFacade::copyDataTOtoGpu(TO const& cudaDataTO, TO const& data
 
     copyToDevice(cudaDataTO.cells, dataTO.cells, *dataTO.numCells);
     copyToDevice(cudaDataTO.particles, dataTO.particles, *dataTO.numParticles);
+    copyToDevice(cudaDataTO.genomes, dataTO.genomes, *dataTO.numGenomes);
     copyToDevice(cudaDataTO.creatures, dataTO.creatures, *dataTO.numCreatures);
     copyToDevice(cudaDataTO.genes, dataTO.genes, *dataTO.numGenes);
     copyToDevice(cudaDataTO.nodes, dataTO.nodes, *dataTO.numNodes);
@@ -722,6 +724,7 @@ void _SimulationCudaFacade::copyDataTOtoHost(TO const& dataTO, TO const& cudaDat
 {
     copyToHost(dataTO.numCells, cudaDataTO.numCells);
     copyToHost(dataTO.numParticles, cudaDataTO.numParticles);
+    copyToHost(dataTO.numGenomes, cudaDataTO.numGenomes);
     copyToHost(dataTO.numCreatures, cudaDataTO.numCreatures);
     copyToHost(dataTO.numGenes, cudaDataTO.numGenes);
     copyToHost(dataTO.numNodes, cudaDataTO.numNodes);
@@ -729,6 +732,7 @@ void _SimulationCudaFacade::copyDataTOtoHost(TO const& dataTO, TO const& cudaDat
 
     copyToHost(dataTO.cells, cudaDataTO.cells, *dataTO.numCells);
     copyToHost(dataTO.particles, cudaDataTO.particles, *dataTO.numParticles);
+    copyToHost(dataTO.genomes, cudaDataTO.genomes, *dataTO.numGenomes);
     copyToHost(dataTO.creatures, cudaDataTO.creatures, *dataTO.numCreatures);
     copyToHost(dataTO.genes, cudaDataTO.genes, *dataTO.numGenes);
     copyToHost(dataTO.nodes, cudaDataTO.nodes, *dataTO.numNodes);

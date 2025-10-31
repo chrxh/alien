@@ -277,7 +277,7 @@ struct CreatureTO
     uint32_t lineageId;
     uint32_t numCells;
 
-    GenomeTO genome;
+    uint64_t genomeArrayIndex;
 
     // Process data
     uint32_t frontAngleId;
@@ -296,6 +296,8 @@ struct TO
 	ParticleTO* particles = nullptr;
     uint64_t* numCreatures = nullptr;
     CreatureTO* creatures = nullptr;
+    uint64_t* numGenomes = nullptr;
+    GenomeTO* genomes = nullptr;
     uint64_t* numGenes = nullptr;
     GeneTO* genes = nullptr;
     uint64_t* numNodes = nullptr;

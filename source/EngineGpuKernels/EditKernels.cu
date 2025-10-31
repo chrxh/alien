@@ -49,14 +49,15 @@ __global__ void cudaChangeParticle(SimulationData data, TO changeDataTO)
     }
 }
 
-__global__ void cudaAddCreature(SimulationData data, TO dataTO, Creature** newCreature)
+__global__ void cudaAddGenomeAndCreature(SimulationData data, TO dataTO, Genome** newGenome, Creature** newCreature)
 {
     ObjectFactory factory;
     factory.init(&data);
+    *newGenome = factory.createGenomeFromTO(dataTO, 0);
     *newCreature = factory.createCreatureFromTO(dataTO, 0);
 }
 
-__global__ void cudaSetCreature(SimulationData data, Creature** newCreature, bool* result)
+__global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCreature, bool* result)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {

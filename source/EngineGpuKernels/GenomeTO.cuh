@@ -177,4 +177,7 @@ struct GenomeTO
     uint64_t geneArrayIndex;
 
     float frontAngle;
+
+    // Temporary data
+    uint64_t genomeIndexOnGpu;
 };

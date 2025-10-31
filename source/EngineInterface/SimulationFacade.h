@@ -2,7 +2,6 @@
 
 #include "ArraySizesForGpu.h"
 #include "Definitions.h"
-#include "OverlayDescriptions.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"

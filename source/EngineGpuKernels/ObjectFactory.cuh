@@ -17,6 +17,7 @@ public:
     __inline__ __device__ void init(SimulationData* data);
     __inline__ __device__ Particle* createParticleFromTO(ParticleTO const& particleTO);
     __inline__ __device__ Creature* createCreatureFromTO(TO const& collectionTO, int creatureIndex);
+    __inline__ __device__ Genome* createGenomeFromTO(TO const& collectionTO, int genomeIndex);
     __inline__ __device__ Cell* createCellFromTO(TO const& collectionTO, int cellIndex, Cell* cellArray);
     __inline__ __device__ void changeCellFromTO(TO const& collectionTO, CellTO const& cellTO, Cell* cell);
     __inline__ __device__ void changeParticleFromTO(ParticleTO const& particleTO, Particle* particle);
@@ -69,30 +70,22 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     return particle;
 }
 
-__inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& collectionTO, int creatureIndex)
+__inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& collectionTO, int genomeIndex)
 {
-    auto& creatureTO = collectionTO.creatures[creatureIndex];
-    auto creature = _data->objects.heap.getTypedSubArray<Creature>(1);
-    creatureTO.creatureIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(creature) - _data->objects.heap.getArray());
-
-    creature->id = creatureTO.id;
-    creature->ancestorId = creatureTO.ancestorId;
-    creature->generation = creatureTO.generation;
-    creature->lineageId = creatureTO.lineageId;
-    creature->numCells = creatureTO.numCells;
-    creature->frontAngleId = creatureTO.frontAngleId;
-    creature->genome = _data->objects.heap.getTypedSubArray<Genome>(1);
+    auto& genomeTO = collectionTO.genomes[genomeIndex];
+    auto genome = _data->objects.heap.getTypedSubArray<Genome>(1);
+    genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->objects.heap.getArray());
     
-    creature->genome->frontAngle = creatureTO.genome.frontAngle;
-    creature->genome->numGenes = creatureTO.genome.numGenes;
-    for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
-        creature->genome->name[i] = creatureTO.genome.name[i];
+    genome->frontAngle = genomeTO.frontAngle;
+    genome->numGenes = genomeTO.numGenes;
+    for (int i = 0; i < sizeof(genomeTO.name); ++i) {
+        genome->name[i] = genomeTO.name[i];
     }
 
-    auto const& geneTOs = collectionTO.genes + creatureTO.genome.geneArrayIndex;
-    auto genes = _data->objects.heap.getTypedSubArray<Gene>(creatureTO.genome.numGenes);
-    creature->genome->genes = genes;
-    for (int i = 0, j = creatureTO.genome.numGenes; i < j; ++i) {
+    auto const& geneTOs = collectionTO.genes + genomeTO.geneArrayIndex;
+    auto genes = _data->objects.heap.getTypedSubArray<Gene>(genomeTO.numGenes);
+    genome->genes = genes;
+    for (int i = 0, j = genomeTO.numGenes; i < j; ++i) {
         auto const& geneTO = geneTOs[i];
         auto& gene = genes[i];
         gene.shape = geneTO.shape;
@@ -201,6 +194,25 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
             }
         }
     }
+    return genome;
+}
+
+__inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& collectionTO, int creatureIndex)
+{
+    auto& creatureTO = collectionTO.creatures[creatureIndex];
+    auto creature = _data->objects.heap.getTypedSubArray<Creature>(1);
+    creatureTO.creatureIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(creature) - _data->objects.heap.getArray());
+
+    creature->id = creatureTO.id;
+    creature->ancestorId = creatureTO.ancestorId;
+    creature->generation = creatureTO.generation;
+    creature->lineageId = creatureTO.lineageId;
+    creature->numCells = creatureTO.numCells;
+    creature->frontAngleId = creatureTO.frontAngleId;
+
+    auto const& genomeTO = collectionTO.genomes[creatureTO.genomeArrayIndex];
+    creature->genome = &_data->objects.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
+
     return creature;
 }
 

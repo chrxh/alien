@@ -7,7 +7,6 @@
 #include "EngineInterface/SettingsForSimulation.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineWorker.h"
 

@@ -13,6 +13,7 @@ struct Token;
 struct Particle;
 struct Objects;
 struct Creature;
+struct Genome;
 
 struct SimulationData;
 struct CudaGeometryBuffers;

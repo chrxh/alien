@@ -6,7 +6,6 @@
 #include "Base/Singleton.h"
 
 #include "EngineInterface/Definitions.h"
-#include "EngineInterface/OverlayDescriptions.h"
 
 #include "Definitions.h"
 
@@ -56,7 +55,6 @@ private:
 
     // Overlay
     bool _cellDetailOverlayActive = false;
-    std::optional<OverlayDescription> _overlay;
 
     RenderPipeline _renderPipeline;
 
