@@ -21,43 +21,27 @@ namespace
         }
     }
 
-    __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
+    __device__ uint64_t createGenomeTO(Genome* genome, TO& collectionTO)
     {
-        uint64_t origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
-        if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
-
-            auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
-            if (creatureTOIndex >= collectionTO.capacities.creatures) {
-                printf("Insufficient genome memory for transfer objects.\n");
-                ABORT();
-            }
-            auto& creatureTO = collectionTO.creatures[creatureTOIndex];
-            auto const& creature = cell->creature;
-            creatureTO.id = creature->id;
-            creatureTO.ancestorId = creature->ancestorId;
-            creatureTO.generation = creature->generation;
-            creatureTO.lineageId = creature->lineageId;
-            creatureTO.numCells = creature->numCells;
-            creatureTO.frontAngleId = creature->frontAngleId;
-
+        uint64_t origGenomeIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+        if (origGenomeIndex == VALUE_NOT_SET_UINT64) {
             auto genomeTOIndex = alienAtomicAdd64(collectionTO.numGenomes, static_cast<uint64_t>(1));
             if (genomeTOIndex >= collectionTO.capacities.genomes) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
             }
-            creatureTO.genomeArrayIndex = genomeTOIndex;
             auto& genomeTO = collectionTO.genomes[genomeTOIndex];
-            genomeTO.frontAngle = creature->genome->frontAngle;
-            genomeTO.numGenes = creature->genome->numGenes;
+            genomeTO.frontAngle = genome->frontAngle;
+            genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
-                genomeTO.name[i] = creature->genome->name[i];
+                genomeTO.name[i] = genome->name[i];
             }
 
-            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(creature->genome->numGenes));
+            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(genome->numGenes));
             genomeTO.geneArrayIndex = geneTOArrayStartIndex;
-            for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+            for (int i = 0, j = genome->numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
-                auto const& gene = creature->genome->genes[i];
+                auto const& gene = genome->genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.separation = gene.separation;
                 geneTO.numBranches = gene.numBranches;
@@ -166,6 +150,36 @@ namespace
                     }
                 }
             }
+
+            alienAtomicExch64(&genome->genomeIndex, genomeTOIndex);
+            return genomeTOIndex;
+        } else if (origGenomeIndex != 0) {
+            alienAtomicExch64(&genome->genomeIndex, origGenomeIndex);
+            return origGenomeIndex;
+        }
+        return VALUE_NOT_SET_UINT64;
+    }
+
+    __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
+    {
+        uint64_t origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+        if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
+
+            auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
+            if (creatureTOIndex >= collectionTO.capacities.creatures) {
+                printf("Insufficient genome memory for transfer objects.\n");
+                ABORT();
+            }
+            auto& creatureTO = collectionTO.creatures[creatureTOIndex];
+            auto const& creature = cell->creature;
+            creatureTO.id = creature->id;
+            creatureTO.ancestorId = creature->ancestorId;
+            creatureTO.generation = creature->generation;
+            creatureTO.lineageId = creature->lineageId;
+            creatureTO.numCells = creature->numCells;
+            creatureTO.frontAngleId = creature->frontAngleId;
+
+            creatureTO.genomeArrayIndex = createGenomeTO(creature->genome, collectionTO);
 
             alienAtomicExch64(&cell->creature->creatureIndex, creatureTOIndex);
         } else if (origCreatureIndex != 0) {
@@ -602,6 +616,58 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
     }
 }
 
+__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        auto pos = cell->pos;
+        data.cellMap.correctPosition(pos);
+        if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            continue;
+        }
+        if (!cell->creature) {
+            continue;
+        }
+        createGenomeTO(cell->creature->genome, collectionTO);
+    }
+}
+
+__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->creature) {
+            continue;
+        }
+
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
+            if (ids.values[i] == Const::MaxInspectedObjects_Break) {
+                break;
+            }
+            if (ids.values[i] == cell->id) {
+                found = true;
+            }
+            for (int j = 0; j < cell->numConnections; ++j) {
+                if (ids.values[i] == cell->connections[j].cell->id) {
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            continue;
+        }
+        createGenomeTO(cell->creature->genome, collectionTO);
+    }
+}
+
 // tags cell with cellTO index and tags cellTO connections with cell index
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
 {
@@ -669,6 +735,20 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO)
     auto cellPartition = calcAllThreadsPartition(*collectionTO.numCreatures);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         factory.createCreatureFromTO(collectionTO, index);
+    }
+}
+
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, TO collectionTO)
+{
+    __shared__ ObjectFactory factory;
+    if (0 == threadIdx.x) {
+        factory.init(&data);
+    }
+    __syncthreads();
+
+    auto genomePartition = calcAllThreadsPartition(*collectionTO.numGenomes);
+    for (int index = genomePartition.startIndex; index <= genomePartition.endIndex; ++index) {
+        factory.createGenomeFromTO(collectionTO, index);
     }
 }
 

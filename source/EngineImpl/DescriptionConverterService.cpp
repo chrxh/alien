@@ -660,6 +660,7 @@ void DescriptionConverterService::convertCreatureToTO(
     genomeTO.frontAngle = creatureDesc._genome._frontAngle;
     genomeTO.numGenes = toInt(creatureDesc._genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;
+    genomeTO.genomeIndexOnGpu = VALUE_NOT_SET_UINT64;
 
     for (auto const& [geneIndex, geneDesc] : creatureDesc._genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
