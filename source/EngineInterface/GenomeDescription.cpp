@@ -18,6 +18,18 @@ NeuralNetworkGenomeDescription& NeuralNetworkGenomeDescription::weight(int row, 
     return *this;
 }
 
+GenomeDescription::GenomeDescription()
+{
+    _id = NumberGenerator::get().createGenomeId();
+}
+
+GenomeDescription GenomeDescription::id(uint64_t id)
+{
+    NumberGenerator::get().adaptMaxIds({.currentGenomeId = id});
+    _id = id;
+    return *this;
+}
+
 MuscleMode MuscleGenomeDescription::getMode() const
 {
     if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {

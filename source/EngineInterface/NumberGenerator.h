@@ -20,6 +20,7 @@ public:
 
     uint64_t createObjectId();
     uint64_t createCreatureId();
+    uint64_t createGenomeId();
 
     void adaptMaxIds(Ids const& ids);
 

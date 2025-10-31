@@ -253,13 +253,16 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotyp
 
 Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const
 {
-    return Description().creatures({
+    Description result;
+    result._genomes.emplace_back(subGenome.genome);
+    result._creatures.emplace_back(
         CreatureDescription()
-            .genome(subGenome.genome)
+            .genomeId(subGenome.genome._id)
             .cells({
                 CellDescription().color(PreviewColor).stiffness(1.0f).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex)).pos(pos),
-            }),
-    });
+            })
+    );
+    return result;
 }
 
 namespace

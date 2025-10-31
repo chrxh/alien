@@ -25,7 +25,8 @@ private:
     DescriptionConverterService();
 
     CellDescription createCellDescription(TO const& to, int cellIndex) const;
-    CreatureDescription createCreatureDescription(TO const& to, int creatureIndex) const;
+    NodeDescription createNodeDescription(NodeTO const* nodeTO) const;
+    // CreatureDescription createCreatureDescription(TO const& to, int creatureIndex) const;  // No longer used - genomes are handled separately
     ParticleDescription createParticleDescription(TO const& to, int particleIndex) const;
 
     void convertCreatureToTO(
@@ -35,6 +36,7 @@ private:
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
         CreatureDescription const& creatureDesc,
+        std::vector<GenomeDescription> const& genomes,
         std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const;
     void convertCellToTO(
         std::vector<CellTO>& cellTOs,
