@@ -124,10 +124,12 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
 {
     auto nodeParameter = GetParam();
 
-    auto data = Description().creatures({
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-    });
+    auto [creature1, genome1] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    auto [creature2, genome2] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    
+    Description data;
+    data.addCreature(creature1.cells({CellDescription()}), genome1);
+    data.addCreature(creature2.cells({CellDescription()}), genome2);
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -139,10 +141,10 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 {
     auto nodeParameter = GetParam();
 
-    auto data = Description().creatures({
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-        //_descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-    });
+    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    
+    Description data;
+    data.addCreature(creature.cells({CellDescription()}), genome);
 
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
@@ -153,15 +155,14 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
-    Description data;
-    data.creatures({
-        CreatureDescription()
-            .genome(GenomeDescription().genes({
-                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
-                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
-            }))
-            .cells(hexagon._cells),
+    
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
     });
+    
+    Description data;
+    data.addCreature(CreatureDescription().cells(hexagon._cells), genome);
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
