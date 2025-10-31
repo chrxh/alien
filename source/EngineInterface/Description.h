@@ -382,7 +382,7 @@ struct Description
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome);
+    Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
 
     CollectionCache createCache() const;
     Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
