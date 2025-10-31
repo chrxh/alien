@@ -262,7 +262,6 @@ TEST_F(ConstructorTests, alreadyFinished)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
                 CellDescription().id(1).pos({100.0f, 101.0f}),
@@ -296,7 +295,6 @@ TEST_F(ConstructorTests, emptyGenome)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -330,7 +328,6 @@ TEST_F(ConstructorTests, emptyGene)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -364,7 +361,6 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -398,7 +394,6 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -432,7 +427,6 @@ TEST_F(ConstructorTests, insufficientEnergy)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -465,7 +459,6 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -567,7 +560,6 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).frontAngleId(FrontAngleId).pos({100.0f, 100.0f})}),
     GenomeDescription().genes({
                 GeneDescription().separation(true).nodes({randomNode}),
@@ -611,7 +603,6 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
     GenomeDescription()
                         .genes({
@@ -654,7 +645,6 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
     GenomeDescription().genes({
                 GeneDescription().separation(true).nodes({randomNode}),
@@ -694,7 +684,6 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f})}),
     GenomeDescription()
                         .genes({
@@ -816,7 +805,6 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({CellDescription()
                         .id(0)
                         .energy(getConstructorEnergy())
@@ -861,7 +849,6 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({CellDescription()
                         .id(0)
                         .energy(getConstructorEnergy())
@@ -1245,7 +1232,6 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
                 CellDescription().id(1).pos({101.0f, 100.0f}),
@@ -1284,7 +1270,6 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
                 CellDescription().id(1).pos({101.0f, 100.0f}),
@@ -1363,7 +1348,6 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription().id(0).pos({101.0f, 100.0f}),
                 CellDescription()
@@ -1414,7 +1398,6 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
     Description data;
     data.addCreature(CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(0)
@@ -2001,7 +1984,6 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     auto data = Description().addCreature(
         CreatureDescription()
             .id(0)
-            
             .cells({
                 CellDescription()
                     .id(1)
@@ -2069,7 +2051,6 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto data = Description().addCreature(CreatureDescription()
              .id(0)
-             
              .cells({
                  CellDescription()
                      .id(1)
@@ -2132,7 +2113,6 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 {
     auto data = Description().addCreature(CreatureDescription()
              .id(0)
-             
              .cells({
                  CellDescription()
                      .id(1)

@@ -36,6 +36,35 @@ TEST_F(DataTransferTests, singleParticle)
     EXPECT_TRUE(compare(data, actualData));
 }
 
+TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription()})
+    });
+
+    Description data;
+    data.addCreature(
+        CreatureDescription().cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).cellType(BaseDescription()),
+            CellDescription().id(2).pos({11.0f, 10.0f}).cellType(BaseDescription())
+        }),
+        genome);
+    data.addCreature(
+        CreatureDescription().cells({
+            CellDescription().id(3).pos({20.0f, 20.0f}).cellType(BaseDescription()),
+            CellDescription().id(4).pos({21.0f, 20.0f}).cellType(BaseDescription())
+        }),
+        genome);
+    data.addConnection(1, 2);
+    data.addConnection(3, 4);
+
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
+
 using CellParameter = DescriptionTestDataFactory::CellParameter;
 class DataTransferTests_AllCellTypes
     : public DataTransferTests
