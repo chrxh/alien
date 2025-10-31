@@ -126,18 +126,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToColor_success)
 TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).id(0).lineageId(5).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().lineageId(5).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).id(0).lineageId(5).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().lineageId(5).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -160,18 +158,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).lineageId(5).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().lineageId(6).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).lineageId(5).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().lineageId(6).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -191,18 +187,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).lineageId(5).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToOtherMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().lineageId(6).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).lineageId(5).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToOtherMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().lineageId(6).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -224,18 +218,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_success)
 TEST_F(ReconnectorTests, establishConnection_restrictToOtherMutants_failed)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).lineageId(5).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToOtherMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().lineageId(5).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).lineageId(5).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToOtherMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().lineageId(5).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -355,18 +347,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToFreeCells_failed)
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_success)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).numCells(1000.0f).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToLessComplexMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().numCells(999.0f).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).numCells(1000.0f).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToLessComplexMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().numCells(999.0f).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -379,18 +369,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_succes
 TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).numCells(1000.0f).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToLessComplexMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().numCells(1001.0f).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).numCells(1000.0f).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToLessComplexMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().numCells(1001.0f).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -403,18 +391,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToLessComplexMutants_failed
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_success)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).numCells(1000.0f).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().numCells(1001.0f).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).numCells(1000.0f).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().numCells(1001.0f).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -427,18 +413,16 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_succes
 TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).numCells(1000.0f).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants)),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().numCells(1000.0f).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).numCells(1000.0f).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants)),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().numCells(1000.0f).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -451,21 +435,19 @@ TEST_F(ReconnectorTests, establishConnection_restrictToMoreComplexMutants_failed
 TEST_F(ReconnectorTests, deleteConnections_success)
 {
     Description data;
-    data.creatures({
-        CreatureDescription().id(0).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .cellType(ReconnectorDescription()),
-            CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
-        CreatureDescription().lineageId(5).cells({
-            CellDescription().id(3).pos({9.0f, 10.0f}),
-        }),
-        CreatureDescription().lineageId(5).cells({
-            CellDescription().id(4).pos({9.0f, 11.0f}),
-        }),
-    });
+    data.addCreature(CreatureDescription().id(0).cells({
+        CellDescription()
+            .id(1)
+            .pos({10.0f, 10.0f})
+            .cellType(ReconnectorDescription()),
+        CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
+    }));
+    data.addCreature(CreatureDescription().lineageId(5).cells({
+        CellDescription().id(3).pos({9.0f, 10.0f}),
+    }));
+    data.addCreature(CreatureDescription().lineageId(5).cells({
+        CellDescription().id(4).pos({9.0f, 11.0f}),
+    }));
 
     data.addConnection(1, 2);
     data.addConnection(1, 3);
