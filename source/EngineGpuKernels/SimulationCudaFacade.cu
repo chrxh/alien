@@ -52,7 +52,7 @@ namespace
 {
     std::chrono::milliseconds const StatisticsUpdate(30);
     ArraySizesForGpu const PreviewCapacityGpu{10000, 10000, 10000000};
-    ArraySizesForTO const PreviewCapacityTO{1000, 1000, 10000, 10000, 10000, 10000000};
+    ArraySizesForTO const PreviewCapacityTO{1000, 1000, 1000, 10000, 10000, 10000, 10000000};
 }
 
 _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimulation const& settings)

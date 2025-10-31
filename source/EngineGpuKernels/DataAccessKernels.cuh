@@ -46,5 +46,6 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to);
 __global__ void cudaClearDataTO(TO to);
 __global__ void cudaSaveNumEntries(SimulationData data);
 __global__ void cudaClearData(SimulationData data);
+
 __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesForTO* arraySizes);
 __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arraySizes);
