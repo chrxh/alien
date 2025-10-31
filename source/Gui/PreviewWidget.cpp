@@ -91,7 +91,7 @@ void _PreviewWidget::setupPreviewData(bool useCache)
         subGenomesForPreview,
         useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<SubGenomeDescription, Description>());
 
-    _simulationFacade->setPreviewData(preview.data);
+    _simulationFacade->setPreviewData(preview.description);
     _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);
     _genomeEditData->currentPreviewId = _editData->id;
 
@@ -259,7 +259,7 @@ void _PreviewWidget::onStepBackward()
     auto lastSavepoint = _savepoints.back();
     _savepoints.pop_back();
     _simulationFacade->setCurrentTimestepForPreview(lastSavepoint.timestep);
-    _simulationFacade->setPreviewData(lastSavepoint.data);
+    _simulationFacade->setPreviewData(lastSavepoint.description);
     setSeedCreatureIds(lastSavepoint.seedCreatureIds);
 }
 

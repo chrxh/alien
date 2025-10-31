@@ -59,7 +59,7 @@ private:
     struct Savepoint
     {
         uint64_t timestep = 0;
-        Description data;
+        Description description;
         std::vector<uint64_t> seedCreatureIds;
     };
     std::vector<Savepoint> _savepoints;

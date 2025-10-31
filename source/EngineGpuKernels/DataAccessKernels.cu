@@ -6,41 +6,41 @@ namespace
 {
     template <typename T>
     __device__ void
-    copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TO& collectionTO)
+    copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TO& to)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
-            targetIndex = alienAtomicAdd64(collectionTO.heapSize, static_cast<uint64_t>(sourceSize));
-            if (targetIndex + sourceSize > collectionTO.capacities.heap) {
+            targetIndex = alienAtomicAdd64(to.heapSize, static_cast<uint64_t>(sourceSize));
+            if (targetIndex + sourceSize > to.capacities.heap) {
                 printf("Insufficient heap memory for transfer objects.\n");
                 ABORT();
             }
             for (int i = 0; i < sourceSize; ++i) {
-                collectionTO.heap[targetIndex + i] = source[i];
+                to.heap[targetIndex + i] = source[i];
             }
         }
     }
 
-    __device__ uint64_t createGenomeTO(Genome* genome, TO& collectionTO)
+    __device__ uint64_t createGenomeTO(Genome* genome, TO& to)
     {
         uint64_t origGenomeTOIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origGenomeTOIndex == VALUE_NOT_SET_UINT64) {
-            auto genomeTOIndex = alienAtomicAdd64(collectionTO.numGenomes, static_cast<uint64_t>(1));
-            if (genomeTOIndex >= collectionTO.capacities.genomes) {
+            auto genomeTOIndex = alienAtomicAdd64(to.numGenomes, static_cast<uint64_t>(1));
+            if (genomeTOIndex >= to.capacities.genomes) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
             }
-            auto& genomeTO = collectionTO.genomes[genomeTOIndex];
+            auto& genomeTO = to.genomes[genomeTOIndex];
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {
                 genomeTO.name[i] = genome->name[i];
             }
 
-            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(genome->numGenes));
+            auto geneTOArrayStartIndex = alienAtomicAdd64(to.numGenes, static_cast<uint64_t>(genome->numGenes));
             genomeTO.geneArrayIndex = geneTOArrayStartIndex;
             for (int i = 0, j = genome->numGenes; i < j; ++i) {
-                auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
+                auto& geneTO = to.genes[geneTOArrayStartIndex + i];
                 auto const& gene = genome->genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.separation = gene.separation;
@@ -53,10 +53,10 @@ namespace
                 for (int i = 0; i < sizeof(gene.name); ++i) {
                     geneTO.name[i] = gene.name[i];
                 }
-                auto nodeTOArrayStartIndex = alienAtomicAdd64(collectionTO.numNodes, static_cast<uint64_t>(gene.numNodes));
+                auto nodeTOArrayStartIndex = alienAtomicAdd64(to.numNodes, static_cast<uint64_t>(gene.numNodes));
                 geneTO.nodeArrayIndex = nodeTOArrayStartIndex;
                 for (int i = 0, j = gene.numNodes; i < j; ++i) {
-                    auto& nodeTO = collectionTO.nodes[nodeTOArrayStartIndex + i];
+                    auto& nodeTO = to.nodes[nodeTOArrayStartIndex + i];
                     auto const& node = gene.nodes[i];
                     nodeTO.referenceAngle = node.referenceAngle;
                     nodeTO.color = node.color;
@@ -160,17 +160,17 @@ namespace
         return VALUE_NOT_SET_UINT64;
     }
 
-    __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
+    __device__ void createCreatureTO(Cell* cell, TO& to)
     {
         uint64_t origCreatureTOIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
         if (origCreatureTOIndex == VALUE_NOT_SET_UINT64) {
 
-            auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
-            if (creatureTOIndex >= collectionTO.capacities.creatures) {
+            auto creatureTOIndex = alienAtomicAdd64(to.numCreatures, static_cast<uint64_t>(1));
+            if (creatureTOIndex >= to.capacities.creatures) {
                 printf("Insufficient creature memory for transfer objects.\n");
                 ABORT();
             }
-            auto& creatureTO = collectionTO.creatures[creatureTOIndex];
+            auto& creatureTO = to.creatures[creatureTOIndex];
             auto const& creature = cell->creature;
             creatureTO.id = creature->id;
             creatureTO.ancestorId = creature->ancestorId;
@@ -186,14 +186,14 @@ namespace
         }
     }
 
-    __device__ void createCellTO(Cell* cell, TO& collectionTO, uint8_t* heap)
+    __device__ void createCellTO(Cell* cell, TO& to, uint8_t* heap)
     {
-        auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, static_cast<uint64_t>(1));
-        if (cellTOIndex >= collectionTO.capacities.cells) {
+        auto cellTOIndex = alienAtomicAdd64(to.numCells, static_cast<uint64_t>(1));
+        if (cellTOIndex >= to.capacities.cells) {
             printf("Insufficient cell memory for transfer objects.\n");
             ABORT();
         }
-        auto& cellTO = collectionTO.cells[cellTOIndex];
+        auto& cellTO = to.cells[cellTOIndex];
 
         cellTO.id = cell->id;
         cellTO.belongToCreature = (cell->creature != nullptr);
@@ -244,7 +244,7 @@ namespace
                 reinterpret_cast<uint8_t*>(cell->neuralNetwork),
                 targetSize,
                 cellTO.neuralNetworkDataIndex,
-                collectionTO);
+                to);
         } else {
             cellTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
         }
@@ -343,15 +343,15 @@ namespace
         }
     }
 
-    __device__ void createParticleTO(Particle* particle, TO& collectionTO)
+    __device__ void createParticleTO(Particle* particle, TO& to)
     {
-        int particleTOIndex = alienAtomicAdd64(collectionTO.numParticles, uint64_t(1));
-        if (particleTOIndex >= collectionTO.capacities.particles) {
+        int particleTOIndex = alienAtomicAdd64(to.numParticles, uint64_t(1));
+        if (particleTOIndex >= to.capacities.particles) {
             printf("Insufficient particle memory for transfer objects.\n");
             ABORT();
         }
 
-        ParticleTO& particleTO = collectionTO.particles[particleTOIndex];
+        ParticleTO& particleTO = to.particles[particleTOIndex];
 
         particleTO.id = particle->id;
         particleTO.pos = particle->pos;
@@ -417,7 +417,7 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityI
     }
 }
 
-__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO collectionTO)
+__global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -429,7 +429,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
             cell->tempValue.as_uint64 = VALUE_NOT_SET_UINT64;
             continue;
         }
-        createCellTO(cell, collectionTO, cellArrayStart);
+        createCellTO(cell, to, cellArrayStart);
     }
 }
 
@@ -447,7 +447,7 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
     }
 }
 
-__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO collectionTO)
+__global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -474,7 +474,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
             continue;
         }
 
-        createCellTO(cell, collectionTO, heapStart);
+        createCellTO(cell, to, heapStart);
     }
 }
 
@@ -501,7 +501,7 @@ __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationD
     }
 }
 
-__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
+__global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     {
         auto const& cells = data.objects.cells;
@@ -517,8 +517,8 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
                 continue;
             }
 
-            auto cellTOIndex = alienAtomicAdd64(collectionTO.numCells, uint64_t(1));
-            auto& cellTO = collectionTO.cells[cellTOIndex];
+            auto cellTOIndex = alienAtomicAdd64(to.numCells, uint64_t(1));
+            auto& cellTO = to.cells[cellTOIndex];
 
             cellTO.id = cell->id;
             cellTO.pos = cell->pos;
@@ -538,8 +538,8 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
             if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
                 continue;
             }
-            auto particleTOIndex = alienAtomicAdd64(collectionTO.numParticles, uint64_t(1));
-            auto& particleTO = collectionTO.particles[particleTOIndex];
+            auto particleTOIndex = alienAtomicAdd64(to.numParticles, uint64_t(1));
+            auto& particleTO = to.particles[particleTOIndex];
 
             particleTO.id = particle->id;
             particleTO.pos = particle->pos;
@@ -548,7 +548,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
-__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
+__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -564,11 +564,11 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
         if (!cell->creature) {
             continue;
         }
-        createGenomeTO(cell->creature->genome, collectionTO);
+        createGenomeTO(cell->creature->genome, to);
     }
 }
 
-__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TO collectionTO)
+__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -582,11 +582,11 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
             continue;
         }
 
-        createGenomeTO(cell->creature->genome, collectionTO);
+        createGenomeTO(cell->creature->genome, to);
     }
 }
 
-__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO collectionTO)
+__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -614,11 +614,11 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
         if (!found) {
             continue;
         }
-        createGenomeTO(cell->creature->genome, collectionTO);
+        createGenomeTO(cell->creature->genome, to);
     }
 }
 
-__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
+__global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -634,11 +634,11 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
         if (!cell->creature) {
             continue;
         }
-        createCreatureTO(cell, collectionTO);
+        createCreatureTO(cell, to);
     }
 }
 
-__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO collectionTO)
+__global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -652,11 +652,11 @@ __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClu
             continue;
         }
 
-        createCreatureTO(cell, collectionTO);
+        createCreatureTO(cell, to);
     }
 }
 
-__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO collectionTO)
+__global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -684,12 +684,12 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
         if (!found) {
             continue;
         }
-        createCreatureTO(cell, collectionTO);
+        createCreatureTO(cell, to);
     }
 }
 
 // tags cell with cellTO index and tags cellTO connections with cell index
-__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
+__global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -705,16 +705,16 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
             continue;
         }
 
-        createCellTO(cell, collectionTO, heap);
+        createCellTO(cell, to, heap);
     }
 }
 
-__global__ void cudaResolveConnections(SimulationData data, TO collectionTO)
+__global__ void cudaResolveConnections(SimulationData data, TO to)
 {
-    auto const partition = calcAllThreadsPartition(*collectionTO.numCells);
+    auto const partition = calcAllThreadsPartition(*to.numCells);
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        auto& cellTO = collectionTO.cells[index];
+        auto& cellTO = to.cells[index];
 
         for (int i = 0; i < cellTO.numConnections; ++i) {
             auto const cellIndex = cellTO.connections[i].cellIndex;
@@ -739,12 +739,12 @@ __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, Sim
     }
 }
 
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO collectionTO, Cell** cellArray)
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO to, Cell** cellArray)
 {
-    *cellArray = data.objects.heap.getTypedSubArray<Cell>(*collectionTO.numCells);
+    *cellArray = data.objects.heap.getTypedSubArray<Cell>(*to.numCells);
 }
 
-__global__ void cudaSetGenomeDataFromTO(SimulationData data, TO collectionTO)
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -752,13 +752,13 @@ __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO collectionTO)
     }
     __syncthreads();
 
-    auto partition = calcAllThreadsPartition(*collectionTO.numGenomes);
+    auto partition = calcAllThreadsPartition(*to.numGenomes);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        factory.createGenomeFromTO(collectionTO, index);
+        factory.createGenomeFromTO(to, index);
     }
 }
 
-__global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO)
+__global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -766,13 +766,13 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO)
     }
     __syncthreads();
 
-    auto partition = calcAllThreadsPartition(*collectionTO.numCreatures);
+    auto partition = calcAllThreadsPartition(*to.numCreatures);
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        factory.createCreatureFromTO(collectionTO, index);
+        factory.createCreatureFromTO(to, index);
     }
 }
 
-__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO collectionTO, Cell** cellArray, bool selectNewData)
+__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Cell** cellArray, bool selectNewData)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -780,59 +780,59 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO collect
     }
     __syncthreads();
 
-    auto particlePartition = calcPartition(*collectionTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto particlePartition = calcPartition(*to.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto particle = factory.createParticleFromTO(collectionTO.particles[index]);
+        auto particle = factory.createParticleFromTO(to.particles[index]);
         if (selectNewData) {
             particle->selected = 1;
         }
     }
 
-    auto cellPartition = calcAllThreadsPartition(*collectionTO.numCells);
+    auto cellPartition = calcAllThreadsPartition(*to.numCells);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto cell = factory.createCellFromTO(collectionTO, index, *cellArray);
+        auto cell = factory.createCellFromTO(to, index, *cellArray);
         if (selectNewData) {
             cell->selected = 1;
         }
     }
 }
 
-__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO collectionTO)
+__global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
 {
     Ids maxIds;
     {
-        auto const partition = calcAllThreadsPartition(*collectionTO.numCells);
+        auto const partition = calcAllThreadsPartition(*to.numCells);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& cell = collectionTO.cells[index];
+            auto const& cell = to.cells[index];
             maxIds.currentObjectId = max(maxIds.currentObjectId, cell.id);
 
             if (cell.belongToCreature) {
-                auto const& creature = collectionTO.creatures[cell.creatureIndex];
+                auto const& creature = to.creatures[cell.creatureIndex];
                 maxIds.currentCreatureId = max(maxIds.currentCreatureId, creature.id);
             }
             //maxIds.currentLineageId = max(maxIds.currentLineageId, cell.lineageId);
         }
     }
     {
-        auto const partition = calcPartition(*collectionTO.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto const partition = calcPartition(*to.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& particle = collectionTO.particles[index];
+            auto const& particle = to.particles[index];
             maxIds.currentObjectId = max(maxIds.currentObjectId, particle.id);
         }
     }
     numberGen.adaptMaxIds(maxIds);
 }
 
-__global__ void cudaClearDataTO(TO collectionTO)
+__global__ void cudaClearDataTO(TO to)
 {
-    *collectionTO.numCells = 0;
-    *collectionTO.numParticles = 0;
-    *collectionTO.numCreatures = 0;
-    *collectionTO.numGenomes = 0;
-    *collectionTO.numGenes = 0;
-    *collectionTO.numNodes = 0;
-    *collectionTO.heapSize = 0;
+    *to.numCells = 0;
+    *to.numParticles = 0;
+    *to.numCreatures = 0;
+    *to.numGenomes = 0;
+    *to.numGenes = 0;
+    *to.numNodes = 0;
+    *to.heapSize = 0;
 }
 
 __global__ void cudaSaveNumEntries(SimulationData data)
@@ -885,24 +885,24 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
     alienAtomicAdd64(&arraySizes->heap, heapBytes);
 }
 
-__global__ void cudaEstimateCapacityNeededForGpu(TO collectionTO, ArraySizesForGpu* arraySizes)
+__global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arraySizes)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
-        arraySizes->cellArray = *collectionTO.numCells;
-        arraySizes->particleArray = *collectionTO.numParticles;
+        arraySizes->cellArray = *to.numCells;
+        arraySizes->particleArray = *to.numParticles;
         alienAtomicAdd64(
             &arraySizes->heap,
-            *collectionTO.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *collectionTO.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
-                + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
-                + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
-                + *collectionTO.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
+            *to.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *to.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
+                + *to.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *to.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
+                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
+                + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 
     {
-        auto partition = calcAllThreadsPartition(*collectionTO.numCells);
+        auto partition = calcAllThreadsPartition(*to.numCells);
         uint64_t heapBytes = 0;
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto& cellTO = collectionTO.cells[index];
+            auto& cellTO = to.cells[index];
             heapBytes += sizeof(Cell) + GpuMemoryAlignmentBytes;
             if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;

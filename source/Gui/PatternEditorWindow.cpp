@@ -374,10 +374,10 @@ bool PatternEditorWindow::isPastingPossible() const
 
 void PatternEditorWindow::onPaste()
 {
-    auto data = *_copiedSelection;
+    auto description = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
-    DescriptionEditService::get().setCenter(data, center);
-    _simulationFacade->addAndSelectSimulationData(std::move(data));
+    DescriptionEditService::get().setCenter(description, center);
+    _simulationFacade->addAndSelectSimulationData(std::move(description));
     EditorModel::get().update();
 }
 

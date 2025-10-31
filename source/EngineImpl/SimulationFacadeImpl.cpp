@@ -346,9 +346,9 @@ Description _SimulationFacadeImpl::getPreviewData()
     return _worker.getPreviewData();
 }
 
-void _SimulationFacadeImpl::setPreviewData(Description const& data)
+void _SimulationFacadeImpl::setPreviewData(Description const& description)
 {
-    _worker.setPreviewData(data);
+    _worker.setPreviewData(description);
 }
 
 void _SimulationFacadeImpl::calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation)

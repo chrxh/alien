@@ -29,7 +29,7 @@ public:
 
     struct SeedCollectionResult
     {
-        Description data; 
+        Description description; 
         std::vector<uint64_t> seedCreatureIds;
     };
     SeedCollectionResult createSeedCollectionForPreview(

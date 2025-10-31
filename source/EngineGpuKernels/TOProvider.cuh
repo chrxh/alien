@@ -14,10 +14,10 @@ public:
     TO provideDataTO(ArraySizesForTO const& requiredCapacity);
     TO provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacity);
 
-    static void destroyUnmanagedDataTO(TO const& dataTO);
+    static void destroyUnmanagedDataTO(TO const& to);
 
 private:
-    static void destroy(TO const& dataTO);
+    static void destroy(TO const& to);
 
     std::optional<TO> _to;
 };

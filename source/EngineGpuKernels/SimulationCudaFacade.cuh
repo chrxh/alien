@@ -50,16 +50,16 @@ public:
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
     TO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
-    void addAndSelectSimulationData(TO const& dataTO);
-    void setSimulationData(TO const& dataTO);
+    void addAndSelectSimulationData(TO const& to);
+    void setSimulationData(TO const& to);
     void removeSelectedObjects(bool includeClusters);
     void relaxSelectedObjects(bool includeClusters);
     void uniformVelocitiesForSelectedObjects(bool includeClusters);
     void makeSticky(bool includeClusters);
     void removeStickiness(bool includeClusters);
     void setBarrier(bool value, bool includeClusters);
-    void changeInspectedSimulationData(TO const& changeDataTO);
-    bool changeCreature(TO const& dataTO);  // dataTO only contains 1 genome
+    void changeInspectedSimulationData(TO const& changeTO);
+    bool changeCreature(TO const& to);  // to only contains 1 genome
 
     void applyForce(ApplyForceData const& applyData);
     void switchSelection(PointSelectionData const& switchData);
@@ -96,7 +96,7 @@ public:
 
     // Simulated preview
     void initSettingsPreviewData();
-    void newPreview(TO const& dataTO);
+    void newPreview(TO const& to);
     void calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation);
     void calcTimestepsForPreview(int numSteps, bool detailSimulation);
     uint64_t getCurrentTimestepForPreview();
@@ -116,8 +116,8 @@ private:
     void initCuda();
 
     void syncAndCheck();
-    void copyDataTOtoGpu(TO const& cudaDataTO, TO const& dataTO);
-    void copyDataTOtoHost(TO const& dataTO, TO const& cudaDataTO);
+    void copyDataTOtoGpu(TO const& cudaTO, TO const& to);
+    void copyDataTOtoHost(TO const& to, TO const& cudaTO);
     void automaticResizeArrays();
     void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();

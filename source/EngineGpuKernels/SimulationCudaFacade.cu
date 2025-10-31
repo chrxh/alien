@@ -184,26 +184,26 @@ TO _SimulationCudaFacade::getSimulationData(
     int2 const& rectUpperLeft,
     int2 const& rectLowerRight)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaDataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
+    _dataAccessKernels->getData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
     syncAndCheck();
 
-    auto dataTO = _collectionTOProvider->provideNewUnmanagedDataTO(cudaDataTO.capacities);
-    copyDataTOtoHost(dataTO, cudaDataTO);
+    auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
+    copyDataTOtoHost(to, cudaTO);
 
-    return dataTO;
+    return to;
 }
 
 TO _SimulationCudaFacade::getSelectedSimulationData(bool includeClusters)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getSelectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters, cudaDataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
+    _dataAccessKernels->getSelectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters, cudaTO);
     syncAndCheck();
 
-    auto dataTO = _collectionTOProvider->provideDataTO(cudaDataTO.capacities);
-    copyDataTOtoHost(dataTO, cudaDataTO);
+    auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
+    copyDataTOtoHost(to, cudaTO);
 
-    return dataTO;
+    return to;
 }
 
 TO _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint64_t> entityIds)
@@ -219,52 +219,52 @@ TO _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint64_t> entit
         ids.values[entityIds.size()] = Const::MaxInspectedObjects_Break;
     }
 
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getInspectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), ids, cudaDataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
+    _dataAccessKernels->getInspectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), ids, cudaTO);
     syncAndCheck();
 
-    auto dataTO = _collectionTOProvider->provideDataTO(cudaDataTO.capacities);
-    copyDataTOtoHost(dataTO, cudaDataTO);
+    auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
+    copyDataTOtoHost(to, cudaTO);
 
-    return dataTO;
+    return to;
 }
 
 TO _SimulationCudaFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getOverlayData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaDataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
+    _dataAccessKernels->getOverlayData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
     syncAndCheck();
 
-    auto dataTO = _collectionTOProvider->provideDataTO(cudaDataTO.capacities);
-    copyDataTOtoHost(dataTO, cudaDataTO);
+    auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
+    copyDataTOtoHost(to, cudaTO);
 
-    return dataTO;
+    return to;
 }
 
-void _SimulationCudaFacade::addAndSelectSimulationData(TO const& dataTO)
+void _SimulationCudaFacade::addAndSelectSimulationData(TO const& to)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(dataTO.capacities);
-    copyDataTOtoGpu(cudaDataTO, dataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
+    copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaDataTO);
+    auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
     _editKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
-    _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaDataTO, true);
+    _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, true);
     syncAndCheck();
     updateStatistics();
 }
 
-void _SimulationCudaFacade::setSimulationData(TO const& dataTO)
+void _SimulationCudaFacade::setSimulationData(TO const& to)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(dataTO.capacities);
-    copyDataTOtoGpu(cudaDataTO, dataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
+    copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaDataTO);
+    auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
     _dataAccessKernels->clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
-    _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaDataTO, false);
+    _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, false);
     syncAndCheck();
 
     updateStatistics();
@@ -313,12 +313,12 @@ void _SimulationCudaFacade::setBarrier(bool value, bool includeClusters)
     syncAndCheck();
 }
 
-void _SimulationCudaFacade::changeInspectedSimulationData(TO const& changeDataTO)
+void _SimulationCudaFacade::changeInspectedSimulationData(TO const& changeTO)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(changeDataTO.capacities);
-    copyDataTOtoGpu(cudaDataTO, changeDataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(changeTO.capacities);
+    copyDataTOtoGpu(cudaTO, changeTO);
 
-    _editKernels->changeSimulationData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaDataTO);
+    _editKernels->changeSimulationData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
@@ -326,12 +326,12 @@ void _SimulationCudaFacade::changeInspectedSimulationData(TO const& changeDataTO
     resizeArraysIfNecessary();
 }
 
-bool _SimulationCudaFacade::changeCreature(TO const& dataTO)
+bool _SimulationCudaFacade::changeCreature(TO const& to)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(dataTO.capacities);
-    copyDataTOtoGpu(cudaDataTO, dataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
+    copyDataTOtoGpu(cudaTO, to);
 
-    auto result = _editKernels->changeCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaDataTO);
+    auto result = _editKernels->changeCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
@@ -514,13 +514,13 @@ void _SimulationCudaFacade::initSettingsPreviewData()
     _settingsForPreview.cudaSettings.numBlocks = 16;
 }
 
-void _SimulationCudaFacade::newPreview(TO const& dataTO)
+void _SimulationCudaFacade::newPreview(TO const& to)
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(dataTO.capacities);
-    copyDataTOtoGpu(cudaDataTO, dataTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
+    copyDataTOtoGpu(cudaTO, to);
 
     _dataAccessKernels->clearData(_settings.cudaSettings, *_cudaPreviewData);
-    _dataAccessKernels->addData(_settings.cudaSettings, *_cudaPreviewData, cudaDataTO, false);
+    _dataAccessKernels->addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
     syncAndCheck();
 }
 
@@ -571,15 +571,15 @@ void _SimulationCudaFacade::setCurrentTimestepForPreview(uint64_t timestep)
 
 TO _SimulationCudaFacade::getPreviewData()
 {
-    auto cudaDataTO = _cudaTOProvider->provideDataTO(PreviewCapacityTO);
+    auto cudaTO = _cudaTOProvider->provideDataTO(PreviewCapacityTO);
     _dataAccessKernels->getData(
-        _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaDataTO);
+        _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaTO);
     syncAndCheck();
 
-    auto dataTO = _collectionTOProvider->provideNewUnmanagedDataTO(cudaDataTO.capacities);
-    copyDataTOtoHost(dataTO, cudaDataTO);
+    auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
+    copyDataTOtoHost(to, cudaTO);
 
-    return dataTO;
+    return to;
 }
 
 void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
@@ -701,42 +701,42 @@ void _SimulationCudaFacade::syncAndCheck()
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 }
 
-void _SimulationCudaFacade::copyDataTOtoGpu(TO const& cudaDataTO, TO const& dataTO)
+void _SimulationCudaFacade::copyDataTOtoGpu(TO const& cudaTO, TO const& to)
 {
-    copyToDevice(cudaDataTO.numCells, dataTO.numCells);
-    copyToDevice(cudaDataTO.numParticles, dataTO.numParticles);
-    copyToDevice(cudaDataTO.numGenomes, dataTO.numGenomes);
-    copyToDevice(cudaDataTO.numCreatures, dataTO.numCreatures);
-    copyToDevice(cudaDataTO.numGenes, dataTO.numGenes);
-    copyToDevice(cudaDataTO.numNodes, dataTO.numNodes);
-    copyToDevice(cudaDataTO.heapSize, dataTO.heapSize);
+    copyToDevice(cudaTO.numCells, to.numCells);
+    copyToDevice(cudaTO.numParticles, to.numParticles);
+    copyToDevice(cudaTO.numGenomes, to.numGenomes);
+    copyToDevice(cudaTO.numCreatures, to.numCreatures);
+    copyToDevice(cudaTO.numGenes, to.numGenes);
+    copyToDevice(cudaTO.numNodes, to.numNodes);
+    copyToDevice(cudaTO.heapSize, to.heapSize);
 
-    copyToDevice(cudaDataTO.cells, dataTO.cells, *dataTO.numCells);
-    copyToDevice(cudaDataTO.particles, dataTO.particles, *dataTO.numParticles);
-    copyToDevice(cudaDataTO.genomes, dataTO.genomes, *dataTO.numGenomes);
-    copyToDevice(cudaDataTO.creatures, dataTO.creatures, *dataTO.numCreatures);
-    copyToDevice(cudaDataTO.genes, dataTO.genes, *dataTO.numGenes);
-    copyToDevice(cudaDataTO.nodes, dataTO.nodes, *dataTO.numNodes);
-    copyToDevice(cudaDataTO.heap, dataTO.heap, *dataTO.heapSize);
+    copyToDevice(cudaTO.cells, to.cells, *to.numCells);
+    copyToDevice(cudaTO.particles, to.particles, *to.numParticles);
+    copyToDevice(cudaTO.genomes, to.genomes, *to.numGenomes);
+    copyToDevice(cudaTO.creatures, to.creatures, *to.numCreatures);
+    copyToDevice(cudaTO.genes, to.genes, *to.numGenes);
+    copyToDevice(cudaTO.nodes, to.nodes, *to.numNodes);
+    copyToDevice(cudaTO.heap, to.heap, *to.heapSize);
 }
 
-void _SimulationCudaFacade::copyDataTOtoHost(TO const& dataTO, TO const& cudaDataTO)
+void _SimulationCudaFacade::copyDataTOtoHost(TO const& to, TO const& cudaTO)
 {
-    copyToHost(dataTO.numCells, cudaDataTO.numCells);
-    copyToHost(dataTO.numParticles, cudaDataTO.numParticles);
-    copyToHost(dataTO.numGenomes, cudaDataTO.numGenomes);
-    copyToHost(dataTO.numCreatures, cudaDataTO.numCreatures);
-    copyToHost(dataTO.numGenes, cudaDataTO.numGenes);
-    copyToHost(dataTO.numNodes, cudaDataTO.numNodes);
-    copyToHost(dataTO.heapSize, cudaDataTO.heapSize);
+    copyToHost(to.numCells, cudaTO.numCells);
+    copyToHost(to.numParticles, cudaTO.numParticles);
+    copyToHost(to.numGenomes, cudaTO.numGenomes);
+    copyToHost(to.numCreatures, cudaTO.numCreatures);
+    copyToHost(to.numGenes, cudaTO.numGenes);
+    copyToHost(to.numNodes, cudaTO.numNodes);
+    copyToHost(to.heapSize, cudaTO.heapSize);
 
-    copyToHost(dataTO.cells, cudaDataTO.cells, *dataTO.numCells);
-    copyToHost(dataTO.particles, cudaDataTO.particles, *dataTO.numParticles);
-    copyToHost(dataTO.genomes, cudaDataTO.genomes, *dataTO.numGenomes);
-    copyToHost(dataTO.creatures, cudaDataTO.creatures, *dataTO.numCreatures);
-    copyToHost(dataTO.genes, cudaDataTO.genes, *dataTO.numGenes);
-    copyToHost(dataTO.nodes, cudaDataTO.nodes, *dataTO.numNodes);
-    copyToHost(dataTO.heap, cudaDataTO.heap, *dataTO.heapSize);
+    copyToHost(to.cells, cudaTO.cells, *to.numCells);
+    copyToHost(to.particles, cudaTO.particles, *to.numParticles);
+    copyToHost(to.genomes, cudaTO.genomes, *to.numGenomes);
+    copyToHost(to.creatures, cudaTO.creatures, *to.numCreatures);
+    copyToHost(to.genes, cudaTO.genes, *to.numGenes);
+    copyToHost(to.nodes, cudaTO.nodes, *to.numNodes);
+    copyToHost(to.heap, cudaTO.heap, *to.heapSize);
 }
 
 void _SimulationCudaFacade::automaticResizeArrays()

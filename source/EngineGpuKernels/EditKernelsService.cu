@@ -237,21 +237,21 @@ void _EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationD
     updateSelection(gpuSettings, data);
 }
 
-void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& changeDataTO)
+void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& changeTO)
 {
     KERNEL_CALL_1_1(cudaSaveNumEntries, data);
 
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
-    if (copyToHost(changeDataTO.numCells) == 1) {
-        KERNEL_CALL(cudaChangeCell, data, changeDataTO);
+    if (copyToHost(changeTO.numCells) == 1) {
+        KERNEL_CALL(cudaChangeCell, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
     }
-    if (copyToHost(changeDataTO.numParticles) == 1) {
-        KERNEL_CALL(cudaChangeParticle, data, changeDataTO);
+    if (copyToHost(changeTO.numParticles) == 1) {
+        KERNEL_CALL(cudaChangeParticle, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
@@ -261,10 +261,10 @@ void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, 
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
-bool _EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TO const& dataTO)
+bool _EditKernelsService::changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TO const& to)
 {
     setValueToDevice(_result, false);
-    KERNEL_CALL_1_1(cudaAddGenomeAndCreature, data, dataTO, _genomePtr, _creaturePtr);
+    KERNEL_CALL_1_1(cudaAddGenomeAndCreature, data, to, _genomePtr, _creaturePtr);
     KERNEL_CALL(cudaChangeCellToCreature, data, _creaturePtr, _result);
     cudaDeviceSynchronize();
 

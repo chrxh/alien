@@ -404,15 +404,15 @@ Description EngineWorker::getPreviewData()
     return DescriptionConverterService::get().convertTOtoDescription(preview);
 }
 
-void EngineWorker::setPreviewData(Description const& data)
+void EngineWorker::setPreviewData(Description const& description)
 {
-    if (!data.hasUniqueIds()) {
+    if (!description.hasUniqueIds()) {
         throw std::runtime_error("Cell ids are not unique.");
     }
 
     EngineWorkerGuard access(this);
 
-    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(data);
+    auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(description);
 
     _simulationCudaFacade->newPreview(dataTO);
 }

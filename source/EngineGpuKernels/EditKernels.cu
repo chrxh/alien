@@ -19,28 +19,28 @@ __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color,
     }
 }
 
-//assumes that *changeDataTO.numCells == 1
-__global__ void cudaChangeCell(SimulationData data, TO changeDataTO)
+//assumes that *changeTO.numCells == 1
+__global__ void cudaChangeCell(SimulationData data, TO changeTO)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        auto const& cellTO = changeDataTO.cells[0];
+        auto const& cellTO = changeTO.cells[0];
         if (cell->id == cellTO.id) {
             ObjectFactory entityFactory;
             entityFactory.init(&data);
-            entityFactory.changeCellFromTO(changeDataTO, cellTO, cell);
+            entityFactory.changeCellFromTO(changeTO, cellTO, cell);
         }
     }
 }
 
-//assumes that *changeDataTO.numParticles == 1
-__global__ void cudaChangeParticle(SimulationData data, TO changeDataTO)
+//assumes that *changeTO.numParticles == 1
+__global__ void cudaChangeParticle(SimulationData data, TO changeTO)
 {
     auto const partition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
-        auto const& particleTO = changeDataTO.particles[0];
+        auto const& particleTO = changeTO.particles[0];
         if (particle->id == particleTO.id) {
             ObjectFactory entityFactory;
             entityFactory.init(&data);
@@ -49,12 +49,12 @@ __global__ void cudaChangeParticle(SimulationData data, TO changeDataTO)
     }
 }
 
-__global__ void cudaAddGenomeAndCreature(SimulationData data, TO dataTO, Genome** newGenome, Creature** newCreature)
+__global__ void cudaAddGenomeAndCreature(SimulationData data, TO to, Genome** newGenome, Creature** newCreature)
 {
     ObjectFactory factory;
     factory.init(&data);
-    *newGenome = factory.createGenomeFromTO(dataTO, 0);
-    *newCreature = factory.createCreatureFromTO(dataTO, 0);
+    *newGenome = factory.createGenomeFromTO(to, 0);
+    *newCreature = factory.createCreatureFromTO(to, 0);
 }
 
 __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCreature, bool* result)

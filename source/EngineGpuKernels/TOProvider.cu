@@ -84,26 +84,26 @@ TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacit
     }
 }
 
-void _TOProvider::destroyUnmanagedDataTO(TO const& dataTO)
+void _TOProvider::destroyUnmanagedDataTO(TO const& to)
 {
-    destroy(dataTO);
+    destroy(to);
 }
 
-void _TOProvider::destroy(TO const& dataTO)
+void _TOProvider::destroy(TO const& to)
 {
-    delete dataTO.numCells;
-    delete dataTO.numParticles;
-    delete dataTO.numCreatures;
-    delete dataTO.numGenomes;
-    delete dataTO.numGenes;
-    delete dataTO.numNodes;
-    delete dataTO.heapSize;
+    delete to.numCells;
+    delete to.numParticles;
+    delete to.numCreatures;
+    delete to.numGenomes;
+    delete to.numGenes;
+    delete to.numNodes;
+    delete to.heapSize;
 
-    delete[] dataTO.cells;
-    delete[] dataTO.particles;
-    delete[] dataTO.creatures;
-    delete[] dataTO.genomes;
-    delete[] dataTO.genes;
-    delete[] dataTO.nodes;
-    delete[] dataTO.heap;
+    delete[] to.cells;
+    delete[] to.particles;
+    delete[] to.creatures;
+    delete[] to.genomes;
+    delete[] to.genes;
+    delete[] to.nodes;
+    delete[] to.heap;
 }
