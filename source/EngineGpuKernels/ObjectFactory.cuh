@@ -75,7 +75,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
     auto& genomeTO = to.genomes[genomeIndex];
     auto genome = _data->objects.heap.getTypedSubArray<Genome>(1);
     genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->objects.heap.getArray());
-    
+    genome->id = genomeTO.id;
     genome->frontAngle = genomeTO.frontAngle;
     genome->numGenes = genomeTO.numGenes;
     for (int i = 0; i < sizeof(genomeTO.name); ++i) {

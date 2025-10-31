@@ -644,6 +644,7 @@ void DescriptionConverterService::convertGenomeToTO(
     geneTOs.resize(geneArrayStartIndex + genome._genes.size());
 
     stringToChar64(genome._name, genomeTO.name);
+    genomeTO.id = genome._id;
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.numGenes = toInt(genome._genes.size());
     genomeTO.geneArrayIndex = geneArrayStartIndex;

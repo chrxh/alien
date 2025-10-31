@@ -170,6 +170,7 @@ struct Gene
 
 struct Genome
 {
+    uint64_t id;
     Char64 name;
     int numGenes;
     Gene* genes;
