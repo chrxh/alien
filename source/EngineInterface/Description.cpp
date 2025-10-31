@@ -430,7 +430,7 @@ void Description::assignNewIds()
     }
 }
 
-void Description::addCreature(CreatureDescription const& creature, GenomeDescription const& genome)
+Description& Description::addCreature(CreatureDescription const& creature, GenomeDescription const& genome)
 {
     // Add genome to genomes array if not already present
     auto genomeIt = std::find_if(_genomes.begin(), _genomes.end(), [&genome](auto const& g) { return g._id == genome._id; });
@@ -442,6 +442,8 @@ void Description::addCreature(CreatureDescription const& creature, GenomeDescrip
     auto newCreature = creature;
     newCreature._genomeId = genome._id;
     _creatures.emplace_back(newCreature);
+    
+    return *this;
 }
 
 CollectionCache Description::createCache() const

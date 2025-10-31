@@ -103,8 +103,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithLegs)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCreatureWithLegs(muscleMode, Direction::Forward);
-    Description data;
-    data.addCreature(
+    auto data = Description().addCreature(
         CreatureDescription().cells(
             {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
         genome);
@@ -202,9 +201,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCreatureWithLegs(muscleMode, direction);
-    Description data;
-
-    data.addCreature(
+    auto data = Description().addCreature(
 
         CreatureDescription().cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
 
@@ -263,8 +260,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     auto muscleMode = GetParam();
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
-    Description data;
-    data.addCreature(
+    auto data = Description().addCreature(
         CreatureDescription().cells(
             {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
         genome);
@@ -314,9 +310,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     RealVector2D refPoint{500.0f, 500.0f};
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
-    Description data;
-
-    data.addCreature(
+    auto data = Description().addCreature(
 
         CreatureDescription().cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
 

@@ -42,12 +42,8 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
 
 TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-    });
     
-    Description data;
-    data.addCreature(CreatureDescription(), genome);
+    auto data = Description().addCreature(CreatureDescription(), GenomeDescription().genes({         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),     }));
     
     auto& creature = data._creatures.front();
     for (int i = 0; i < 20; ++i) {
@@ -86,12 +82,8 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
 
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-    });
     
-    Description data;
-    data.addCreature(CreatureDescription(), genome);
+    auto data = Description().addCreature(CreatureDescription(), GenomeDescription().genes({         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),     }));
     
     auto& creature = data._creatures.front();
 
@@ -129,12 +121,8 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
 
 TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 {
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-    });
     
-    Description data;
-    data.addCreature(CreatureDescription(), genome);
+    auto data = Description().addCreature(CreatureDescription(), GenomeDescription().genes({         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),     }));
     
     auto& creature = data._creatures.front();
 

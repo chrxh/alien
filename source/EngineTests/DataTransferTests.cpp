@@ -156,13 +156,8 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
     
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
-        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
-    });
     
-    Description data;
-    data.addCreature(CreatureDescription().cells(hexagon._cells), genome);
+    auto data = Description().addCreature(CreatureDescription().cells(hexagon._cells), GenomeDescription().genes({         GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),         GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),     }));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -241,10 +236,8 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto const CreatureId = 1;
-    auto genome = GenomeDescription();
     
-    Description data;
-    data.addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), genome);
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
@@ -275,10 +268,8 @@ TEST_F(DataTransferTests, changeGenome_failed)
 {
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
-    auto genome = GenomeDescription();
     
-    Description data;
-    data.addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), genome);
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
