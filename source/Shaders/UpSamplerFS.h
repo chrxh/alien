@@ -20,8 +20,8 @@ uniform float scale;
 void main()
 {
     vec3 sum = vec3(0.0);
-    float kernel[9] = float[9](1,2,1, 2,4,2, 1,2,1);
-    float wsum = 16.0;
+    float kernel[9] = float[9](1,1,1, 1,1,1, 1,1,1);
+    float wsum = 9.0;
 
     float offset = (1.0 - 1.0 / scale) / 2;
     vec2 sourceTexCoord = texCoord / scale + vec2(offset, offset);

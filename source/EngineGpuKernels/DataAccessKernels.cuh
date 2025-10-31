@@ -14,7 +14,6 @@
 
 #include "SimulationData.cuh"
 
-//tags cell with cellTO index and tags cellTO connections with cell index
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data);
 __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data);
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data);

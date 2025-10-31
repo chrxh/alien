@@ -20,10 +20,10 @@ uniform float scale;
 void main()
 {
     vec3 color = vec3(0.0);
-    float kernel[9] = float[9](1, 2, 1,
-                               2, 4, 2,
-                               1, 2, 1);
-    float weightSum = 16.0; // sum(kernel)
+    float kernel[9] = float[9](1, 1, 1,
+                               1, 1, 1,
+                               1, 1, 1);
+    float weightSum = 9.0; // sum(kernel)
     vec2 texelSize = 1.0 / viewportSize;
 
     float targetTexSize = scale / 2;
