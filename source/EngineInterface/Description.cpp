@@ -256,6 +256,7 @@ void Description::add(Description&& other)
     _cells.insert(_cells.end(), other._cells.begin(), other._cells.end());
     _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
     _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
+    _genomes.insert(_genomes.end(), other._genomes.begin(), other._genomes.end());
 }
 
 bool Description::hasUniqueIds() const

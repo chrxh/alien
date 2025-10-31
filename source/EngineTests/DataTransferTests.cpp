@@ -198,8 +198,9 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
     auto data = Description()
                     .cells({CellDescription().id(0), CellDescription().id(1)})
-                    .particles({ParticleDescription().id(2), ParticleDescription().id(3)})
-                    .creatures({CreatureDescription().id(4).cells({CellDescription().id(5)}), CreatureDescription().id(5).cells({CellDescription().id(6)})});
+                    .particles({ParticleDescription().id(2), ParticleDescription().id(3)});
+    data.addCreature(CreatureDescription().id(4).cells({CellDescription().id(5)}), GenomeDescription());
+    data.addCreature(CreatureDescription().id(5).cells({CellDescription().id(6)}), GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSimulationData(data);
@@ -237,8 +238,9 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
     auto data = Description()
                     .cells({CellDescription().id(0), CellDescription().id(1)})
-                    .particles({ParticleDescription().id(2), ParticleDescription().id(3)})
-                    .creatures({CreatureDescription().id(4).cells({CellDescription().id(5)}), CreatureDescription().id(5).cells({CellDescription().id(6)})});
+                    .particles({ParticleDescription().id(2), ParticleDescription().id(3)});
+    data.addCreature(CreatureDescription().id(4).cells({CellDescription().id(5)}), GenomeDescription());
+    data.addCreature(CreatureDescription().id(5).cells({CellDescription().id(6)}), GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
