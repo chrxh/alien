@@ -14,7 +14,6 @@
 #include "EngineInterface/CudaSettings.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/MutationType.h"
-#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/PreviewDescription.h"
 #include "EngineInterface/SelectionShallowData.h"
 #include "EngineInterface/SettingsForSimulation.h"

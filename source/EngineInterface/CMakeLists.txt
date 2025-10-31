@@ -32,7 +32,6 @@ add_library(EngineInterface
     MutationType.h
     NumberGenerator.cpp
     NumberGenerator.h
-    OverlayDescriptions.h
     ParametersEditService.cpp
     ParametersEditService.h
     ParametersValidationService.cpp

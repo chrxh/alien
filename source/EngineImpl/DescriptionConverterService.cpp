@@ -1,5 +1,4 @@
 #include "DescriptionConverterService.h"
-#include "DescriptionConverterService.h"
 
 #include <algorithm>
 #include <cmath>
@@ -136,33 +135,6 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& collec
         result._particles.emplace_back(createParticleDescription(collectionTO, i));
     }
 
-    return result;
-}
-
-OverlayDescription DescriptionConverterService::convertTOtoOverlayDescription(TO const& collectionTO) const
-{
-    OverlayDescription result;
-    result.elements.reserve(*collectionTO.numCells + *collectionTO.numParticles);
-    for (int i = 0; i < *collectionTO.numCells; ++i) {
-        auto const& cellTO = collectionTO.cells[i];
-        OverlayElementDescription element;
-        element.id = cellTO.id;
-        element.cell = true;
-        element.pos = {cellTO.pos.x, cellTO.pos.y};
-        element.cellType = static_cast<CellType>(static_cast<unsigned int>(cellTO.cellType) % CellType_Count);
-        element.selected = cellTO.selected;
-        result.elements.emplace_back(element);
-    }
-
-    for (int i = 0; i < *collectionTO.numParticles; ++i) {
-        auto const& particleTO = collectionTO.particles[i];
-        OverlayElementDescription element;
-        element.id = particleTO.id;
-        element.cell = false;
-        element.pos = {particleTO.pos.x, particleTO.pos.y};
-        element.selected = particleTO.selected;
-        result.elements.emplace_back(element);
-    }
     return result;
 }
 

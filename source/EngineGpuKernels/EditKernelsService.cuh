@@ -50,6 +50,7 @@ private:
     float2* _cudaVelocity;
     int* _cudaNumEntities;
     unsigned long long int* _cudaMinCellPosYAndIndex;
-    Creature** _genomePtr;
+    Genome** _genomePtr;
+    Creature** _creaturePtr;
     bool* _result;
 };

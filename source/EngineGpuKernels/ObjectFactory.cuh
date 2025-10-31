@@ -73,12 +73,6 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
 __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& collectionTO, int genomeIndex)
 {
     auto& genomeTO = collectionTO.genomes[genomeIndex];
-    
-    // Check if this genome has already been created
-    if (genomeTO.genomeIndexOnGpu != VALUE_NOT_SET_UINT64) {
-        return &_data->objects.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
-    }
-
     auto genome = _data->objects.heap.getTypedSubArray<Genome>(1);
     genomeTO.genomeIndexOnGpu = static_cast<uint64_t>(reinterpret_cast<uint8_t*>(genome) - _data->objects.heap.getArray());
     
@@ -215,9 +209,10 @@ __inline__ __device__ Creature* ObjectFactory::createCreatureFromTO(TO const& co
     creature->lineageId = creatureTO.lineageId;
     creature->numCells = creatureTO.numCells;
     creature->frontAngleId = creatureTO.frontAngleId;
-    
-    creature->genome = createGenomeFromTO(collectionTO, creatureTO.genomeArrayIndex);
-    
+
+    auto const& genomeTO = collectionTO.genomes[creatureTO.genomeArrayIndex];
+    creature->genome = &_data->objects.heap.atType<Genome>(genomeTO.genomeIndexOnGpu);
+
     return creature;
 }
 

@@ -5,7 +5,6 @@
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Description.h"
-#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/TO.cuh"
 #include "EngineGpuKernels/Definitions.h"
@@ -17,7 +16,6 @@ class DescriptionConverterService
 
 public:
     Description convertTOtoDescription(TO const& collectionTO) const;
-    OverlayDescription convertTOtoOverlayDescription(TO const& collectionTO) const;
     TO convertDescriptionToTO(Description const& data) const;
     TO convertDescriptionToTO(CellDescription const& cell) const;
     TO convertDescriptionToTO(ParticleDescription const& particle) const;
