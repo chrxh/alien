@@ -109,9 +109,9 @@ TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
 {
     auto nodeParameter = GetParam();
 
-    auto data = Description().creatures({
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()})
-    });
+    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    
+    auto data = Description().addCreature(creature.cells({CellDescription()}), genome);
 
     testSerializationAndDeserialization(data);
 }

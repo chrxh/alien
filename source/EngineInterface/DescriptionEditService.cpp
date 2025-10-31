@@ -420,9 +420,14 @@ void DescriptionEditService::randomizeGenomeColors(Description& description, std
 {
     for (auto& creature : description._creatures) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& gene : creature._genome._genes) {
-            for (auto& node : gene._nodes) {
-                node._color = newColor;
+        // Find the genome for this creature
+        auto genomeIt = std::find_if(description._genomes.begin(), description._genomes.end(), 
+            [&creature](auto const& g) { return g._id == creature._genomeId; });
+        if (genomeIt != description._genomes.end()) {
+            for (auto& gene : genomeIt->_genes) {
+                for (auto& node : gene._nodes) {
+                    node._color = newColor;
+                }
             }
         }
     }
@@ -695,11 +700,19 @@ std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObject
         result.emplace_back(extCell);
     }
     for (auto const& creature : description._creatures) {
+        // Find the genome for this creature
+        std::optional<GenomeDescription> genomeOpt;
+        auto genomeIt = std::find_if(description._genomes.begin(), description._genomes.end(), 
+            [&creature](auto const& g) { return g._id == creature._genomeId; });
+        if (genomeIt != description._genomes.end()) {
+            genomeOpt = *genomeIt;
+        }
+        
         for (auto const& cell : creature._cells) {
             ExtendedCellDescription extCell;
             extCell.cell = cell;
             extCell.creatureId = creature._id;
-            extCell.genome = creature._genome;
+            extCell.genome = genomeOpt;
             result.emplace_back(extCell);
         }
     }

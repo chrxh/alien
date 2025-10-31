@@ -25,7 +25,7 @@ public:
         MuscleMode muscleMode;
     };
     NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
-    CreatureDescription createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
+    std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
 
     bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;

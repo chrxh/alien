@@ -49,10 +49,16 @@ uint64_t NumberGenerator::createCreatureId()
     return _ids.currentCreatureId++;
 }
 
+uint64_t NumberGenerator::createGenomeId()
+{
+    return _ids.currentGenomeId++;
+}
+
 void NumberGenerator::adaptMaxIds(Ids const& ids)
 {
     _ids.currentObjectId = std::max(_ids.currentObjectId, ids.currentObjectId + 1);
     _ids.currentCreatureId = std::max(_ids.currentCreatureId, ids.currentCreatureId + 1);
+    _ids.currentGenomeId = std::max(_ids.currentGenomeId, ids.currentGenomeId + 1);
     _ids.currentLineageId = std::max(_ids.currentLineageId, ids.currentLineageId + 1);
 }
 

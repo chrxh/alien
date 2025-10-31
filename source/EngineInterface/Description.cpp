@@ -239,6 +239,7 @@ void Description::clear()
     _cells.clear();
     _particles.clear();
     _creatures.clear();
+    _genomes.clear();
 }
 
 bool Description::isEmpty() const
@@ -274,6 +275,14 @@ bool Description::hasUniqueIds() const
         creatureIds.insert(creature._id);
     }
     if (creatureIds.size() != _creatures.size()) {
+        return false;
+    }
+
+    std::unordered_set<uint64_t> genomeIds;
+    for (auto const& genome : _genomes) {
+        genomeIds.insert(genome._id);
+    }
+    if (genomeIds.size() != _genomes.size()) {
         return false;
     }
 
@@ -391,10 +400,50 @@ void Description::assignNewIds()
         }
     }
 
+    // Generate new genomeIds
+    std::unordered_map<uint64_t, uint64_t> oldToNewGenomeId;
+    std::unordered_set<uint64_t> nonUniqueGenomeIds;
+    for (auto& genome : _genomes) {
+        auto newId = NumberGenerator::get().createGenomeId();
+        auto insertionResult = oldToNewGenomeId.insert({genome._id, newId});
+        if (!insertionResult.second) {
+            nonUniqueGenomeIds.insert(genome._id);
+        }
+        genome._id = newId;
+    }
+
+    // Assign new genomeIds to creatures
+    for (auto& creature : _creatures) {
+        if (nonUniqueGenomeIds.contains(creature._genomeId)) {
+            // If genome ID is not unique, we cannot reliably update it
+            // Keep the old ID (this is an error case)
+        } else {
+            if (oldToNewGenomeId.contains(creature._genomeId)) {
+                creature._genomeId = oldToNewGenomeId.at(creature._genomeId);
+            }
+        }
+    }
+
     // Assign new particle ids
     for (auto& particle : _particles) {
         particle._id = NumberGenerator::get().createObjectId();
     }
+}
+
+Description& Description::addCreature(CreatureDescription const& creature, GenomeDescription const& genome)
+{
+    // Add genome to genomes array if not already present
+    auto genomeIt = std::find_if(_genomes.begin(), _genomes.end(), [&genome](auto const& g) { return g._id == genome._id; });
+    if (genomeIt == _genomes.end()) {
+        _genomes.emplace_back(genome);
+    }
+    
+    // Add creature with genomeId set
+    auto newCreature = creature;
+    newCreature._genomeId = genome._id;
+    _creatures.emplace_back(newCreature);
+    
+    return *this;
 }
 
 CollectionCache Description::createCache() const

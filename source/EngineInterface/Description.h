@@ -339,7 +339,7 @@ struct CreatureDescription
     MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, lineageId, 0);
     MEMBER(CreatureDescription, int, numCells, 0);
-    MEMBER(CreatureDescription, GenomeDescription, genome, {});
+    MEMBER(CreatureDescription, uint64_t, genomeId, 0);
     MEMBER(CreatureDescription, std::vector<CellDescription>, cells, {});
 
     // Process data
@@ -364,6 +364,7 @@ struct Description
     MEMBER(Description, std::vector<CellDescription>, cells, {});
     MEMBER(Description, std::vector<ParticleDescription>, particles, {});
     MEMBER(Description, std::vector<CreatureDescription>, creatures, {});
+    MEMBER(Description, std::vector<GenomeDescription>, genomes, {});
 
     void forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const;
     void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
@@ -380,6 +381,8 @@ struct Description
 
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
+
+    Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome);
 
     CollectionCache createCache() const;
     Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);

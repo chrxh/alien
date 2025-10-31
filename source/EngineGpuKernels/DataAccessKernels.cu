@@ -31,6 +31,7 @@ namespace
                 ABORT();
             }
             auto& genomeTO = to.genomes[genomeTOIndex];
+            genomeTO.id = genome->id;
             genomeTO.frontAngle = genome->frontAngle;
             genomeTO.numGenes = genome->numGenes;
             for (int i = 0; i < sizeof(genomeTO.name); ++i) {

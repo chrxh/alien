@@ -223,8 +223,11 @@ struct GeneDescription
 
 struct GenomeDescription
 {
+    GenomeDescription();
     auto operator<=>(GenomeDescription const&) const = default;
 
+    uint64_t _id = 0;
+    GenomeDescription id(uint64_t id);
     MEMBER(GenomeDescription, std::string, name, "");
     MEMBER(GenomeDescription, std::vector<GeneDescription>, genes, {})
     MEMBER(GenomeDescription, float, frontAngle, 0.0f);

@@ -36,6 +36,35 @@ TEST_F(DataTransferTests, singleParticle)
     EXPECT_TRUE(compare(data, actualData));
 }
 
+TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
+        GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription()})
+    });
+
+    Description data;
+    data.addCreature(
+        CreatureDescription().cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).cellType(BaseDescription()),
+            CellDescription().id(2).pos({11.0f, 10.0f}).cellType(BaseDescription())
+        }),
+        genome);
+    data.addCreature(
+        CreatureDescription().cells({
+            CellDescription().id(3).pos({20.0f, 20.0f}).cellType(BaseDescription()),
+            CellDescription().id(4).pos({21.0f, 20.0f}).cellType(BaseDescription())
+        }),
+        genome);
+    data.addConnection(1, 2);
+    data.addConnection(3, 4);
+
+    _simulationFacade->setSimulationData(data);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(compare(data, actualData));
+}
+
 using CellParameter = DescriptionTestDataFactory::CellParameter;
 class DataTransferTests_AllCellTypes
     : public DataTransferTests
@@ -124,10 +153,12 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
 {
     auto nodeParameter = GetParam();
 
-    auto data = Description().creatures({
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-    });
+    auto [creature1, genome1] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    auto [creature2, genome2] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    
+    Description data;
+    data.addCreature(creature1.cells({CellDescription()}), genome1);
+    data.addCreature(creature2.cells({CellDescription()}), genome2);
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -139,10 +170,10 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 {
     auto nodeParameter = GetParam();
 
-    auto data = Description().creatures({
-        _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-        //_descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter).cells({CellDescription()}),
-    });
+    auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
+    
+    Description data;
+    data.addCreature(creature.cells({CellDescription()}), genome);
 
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
@@ -153,15 +184,9 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
 TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 {
     auto hexagon = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters().center({100.0f, 100.0f}).cellType(BaseDescription()));
-    Description data;
-    data.creatures({
-        CreatureDescription()
-            .genome(GenomeDescription().genes({
-                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
-                GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
-            }))
-            .cells(hexagon._cells),
-    });
+    
+    
+    auto data = Description().addCreature(CreatureDescription().cells(hexagon._cells), GenomeDescription().genes({         GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),         GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),     }));
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -240,7 +265,8 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto const CreatureId = 1;
-    auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
+    
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
@@ -257,9 +283,13 @@ TEST_F(DataTransferTests, changeGenome_successful)
     ASSERT_EQ(1, creature._cells.size());
     EXPECT_EQ(CreatureId, creature._id);
 
-    ASSERT_EQ(1, creature._genome._genes.size());
+    // Find the genome for this creature
+    auto genomeIt = std::find_if(actualData._genomes.begin(), actualData._genomes.end(),
+        [&creature](auto const& g) { return g._id == creature._genomeId; });
+    ASSERT_NE(genomeIt, actualData._genomes.end());
+    ASSERT_EQ(1, genomeIt->_genes.size());
 
-    auto gene = creature._genome._genes.front();
+    auto gene = genomeIt->_genes.front();
     EXPECT_EQ(2, gene._nodes.size());
 }
 
@@ -267,7 +297,8 @@ TEST_F(DataTransferTests, changeGenome_failed)
 {
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
-    auto data = Description().creatures({CreatureDescription().id(CreatureId).genome(GenomeDescription()).cells({CellDescription()})});
+    
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
@@ -281,12 +312,17 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto constexpr CreatureId1 = 1;
     auto constexpr CreatureId2 = 2;
     auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()})});
-    auto data = Description().creatures(
-        {CreatureDescription()
-             .id(CreatureId1)
-             .genome(genome)
-             .cells({CellDescription().id(1), CellDescription().id(2)}),
-         CreatureDescription().id(CreatureId2).genome(GenomeDescription()).cells({CellDescription().id(3)})});
+    auto genome2 = GenomeDescription();
+    
+    Description data;
+    data.addCreature(
+        CreatureDescription()
+            .id(CreatureId1)
+            .cells({CellDescription().id(1), CellDescription().id(2)}),
+        genome);
+    data.addCreature(
+        CreatureDescription().id(CreatureId2).cells({CellDescription().id(3)}),
+        genome2);
 
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -302,5 +338,9 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto cell1 = inspectedData.getCellRef(1);
     auto cell2 = inspectedData.getCellRef(2);
 
-    EXPECT_EQ(genome, creature._genome);
+    // Find the genome for this creature
+    auto genomeIt = std::find_if(inspectedData._genomes.begin(), inspectedData._genomes.end(),
+        [&creature](auto const& g) { return g._id == creature._genomeId; });
+    ASSERT_NE(genomeIt, inspectedData._genomes.end());
+    EXPECT_EQ(genome, *genomeIt);
 }

@@ -65,18 +65,12 @@ NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(Node
             SignalRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
 }
 
-CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const
+std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const
 {
     CreatureDescription defaultCreature;
     GeneDescription defaultGene;
 
-    return CreatureDescription()
-        .ancestorId(1001)
-        .lineageId(502)
-        .generation(7)
-        .numCells(25)
-        .frontAngleId(42)
-        .genome(GenomeDescription()
+    auto genome = GenomeDescription()
                     .name("Test Genome")
                     .frontAngle(270.0f)
                     .genes({
@@ -92,7 +86,17 @@ CreatureDescription DescriptionTestDataFactory::createNonDefaultCreatureDescript
                             .nodes({
                                 createNonDefaultNodeDescription(nodeParameter),
                             }),
-                    }));
+                    });
+
+    auto creature = CreatureDescription()
+        .ancestorId(1001)
+        .lineageId(502)
+        .generation(7)
+        .numCells(25)
+        .frontAngleId(42)
+        .genomeId(genome._id);
+
+    return {creature, genome};
 }
 
 bool DescriptionTestDataFactory::compare(Description left, Description right) const

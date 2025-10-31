@@ -482,6 +482,7 @@ namespace
     auto constexpr Id_Creature_LineageId = 3;
     auto constexpr Id_Creature_NumCells = 4;
     auto constexpr Id_Creature_FrontAngleId = 5;
+    auto constexpr Id_Creature_GenomeId = 6;
 
     auto constexpr Id_Cell_Id = 0;
     auto constexpr Id_Cell_Energy = 1;
@@ -894,10 +895,11 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
         loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
+        loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
         
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._genome, data._cells);
+        ar(data._cells);
     }
     SPLIT_SERIALIZATION(CreatureDescription)
 
@@ -918,7 +920,7 @@ namespace cereal
     template <class Archive>
     void serialize(Archive& ar, Description& description)
     {
-        ar(description._cells, description._particles, description._creatures);
+        ar(description._cells, description._particles, description._creatures, description._genomes);
     }
 }
 
@@ -1561,15 +1563,16 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
 bool SerializerService::wrapGenome(Description& output, GenomeDescription const& input) const
 {
     output.clear();
-    output._creatures.emplace_back(CreatureDescription().genome(input));
+    output._genomes.emplace_back(input);
+    output._creatures.emplace_back(CreatureDescription().genomeId(input._id));
     return true;
 }
 
 bool SerializerService::unwrapGenome(GenomeDescription& output, Description& input) const
 {
-    if (input._creatures.size() != 1) {
+    if (input._genomes.size() != 1) {
         return false;
     }
-    output = input._creatures.front()._genome;
+    output = input._genomes.front();
     return true;
 }
