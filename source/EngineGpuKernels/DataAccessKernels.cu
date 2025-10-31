@@ -21,35 +21,27 @@ namespace
         }
     }
 
-    __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
+    __device__ uint64_t createGenomeTO(Genome* genome, TO& collectionTO)
     {
-        uint64_t origCreatureIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
-        if (origCreatureIndex == VALUE_NOT_SET_UINT64) {
-
-            auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
-            if (creatureTOIndex >= collectionTO.capacities.creatures) {
+        uint64_t origGenomeTOIndex = alienAtomicExch64(&genome->genomeIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+        if (origGenomeTOIndex == VALUE_NOT_SET_UINT64) {
+            auto genomeTOIndex = alienAtomicAdd64(collectionTO.numGenomes, static_cast<uint64_t>(1));
+            if (genomeTOIndex >= collectionTO.capacities.genomes) {
                 printf("Insufficient genome memory for transfer objects.\n");
                 ABORT();
             }
-            auto& creatureTO = collectionTO.creatures[creatureTOIndex];
-            auto const& creature = cell->creature;
-            creatureTO.id = creature->id;
-            creatureTO.ancestorId = creature->ancestorId;
-            creatureTO.generation = creature->generation;
-            creatureTO.lineageId = creature->lineageId;
-            creatureTO.numCells = creature->numCells;
-            creatureTO.frontAngleId = creature->frontAngleId;
-            creatureTO.genome.frontAngle = creature->genome->frontAngle;
-            creatureTO.genome.numGenes = creature->genome->numGenes;
-            for (int i = 0; i < sizeof(creatureTO.genome.name); ++i) {
-                creatureTO.genome.name[i] = creature->genome->name[i];
+            auto& genomeTO = collectionTO.genomes[genomeTOIndex];
+            genomeTO.frontAngle = genome->frontAngle;
+            genomeTO.numGenes = genome->numGenes;
+            for (int i = 0; i < sizeof(genomeTO.name); ++i) {
+                genomeTO.name[i] = genome->name[i];
             }
 
-            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(creature->genome->numGenes));
-            creatureTO.genome.geneArrayIndex = geneTOArrayStartIndex;
-            for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+            auto geneTOArrayStartIndex = alienAtomicAdd64(collectionTO.numGenes, static_cast<uint64_t>(genome->numGenes));
+            genomeTO.geneArrayIndex = geneTOArrayStartIndex;
+            for (int i = 0, j = genome->numGenes; i < j; ++i) {
                 auto& geneTO = collectionTO.genes[geneTOArrayStartIndex + i];
-                auto const& gene = creature->genome->genes[i];
+                auto const& gene = genome->genes[i];
                 geneTO.shape = gene.shape;
                 geneTO.separation = gene.separation;
                 geneTO.numBranches = gene.numBranches;
@@ -159,9 +151,38 @@ namespace
                 }
             }
 
+            alienAtomicExch64(&genome->genomeIndex, genomeTOIndex);
+            return genomeTOIndex;
+        } else if (origGenomeTOIndex != 0) {
+            alienAtomicExch64(&genome->genomeIndex, origGenomeTOIndex);
+            return origGenomeTOIndex;
+        }
+        return VALUE_NOT_SET_UINT64;
+    }
+
+    __device__ void createCreatureTO(Cell* cell, TO& collectionTO)
+    {
+        uint64_t origCreatureTOIndex = alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(0));  // 0 = member is currently initialized
+        if (origCreatureTOIndex == VALUE_NOT_SET_UINT64) {
+
+            auto creatureTOIndex = alienAtomicAdd64(collectionTO.numCreatures, static_cast<uint64_t>(1));
+            if (creatureTOIndex >= collectionTO.capacities.creatures) {
+                printf("Insufficient creature memory for transfer objects.\n");
+                ABORT();
+            }
+            auto& creatureTO = collectionTO.creatures[creatureTOIndex];
+            auto const& creature = cell->creature;
+            creatureTO.id = creature->id;
+            creatureTO.ancestorId = creature->ancestorId;
+            creatureTO.generation = creature->generation;
+            creatureTO.lineageId = creature->lineageId;
+            creatureTO.numCells = creature->numCells;
+            creatureTO.frontAngleId = creature->frontAngleId;
+            creatureTO.genomeArrayIndex = creature->genome->genomeIndex;
+
             alienAtomicExch64(&cell->creature->creatureIndex, creatureTOIndex);
-        } else if (origCreatureIndex != 0) {
-            alienAtomicExch64(&cell->creature->creatureIndex, origCreatureIndex);
+        } else if (origCreatureTOIndex != 0) {
+            alienAtomicExch64(&cell->creature->creatureIndex, origCreatureTOIndex);
         }
     }
 
@@ -344,7 +365,7 @@ namespace
 /************************************************************************/
 /* Main                                                                 */
 /************************************************************************/
-__global__ void cudaPrepareCreaturesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
+__global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -358,6 +379,7 @@ __global__ void cudaPrepareCreaturesForConversionToTO(int2 rectUpperLeft, int2 r
         data.cellMap.correctPosition(pos);
         if (isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
             cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
         }
     }
 }
@@ -376,10 +398,11 @@ __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeCluste
             continue;
         }
         cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+        cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
     }
 }
 
-__global__ void cudaPrepareCreaturesForConversionToTO(InspectedEntityIds ids, SimulationData data)
+__global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -390,6 +413,7 @@ __global__ void cudaPrepareCreaturesForConversionToTO(InspectedEntityIds ids, Si
             continue;
         }
         cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+        cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
     }
 }
 
@@ -524,6 +548,76 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
 }
 
+__global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+
+        auto pos = cell->pos;
+        data.cellMap.correctPosition(pos);
+        if (!isContainedInRect(rectUpperLeft, rectLowerRight, pos)) {
+            continue;
+        }
+        if (!cell->creature) {
+            continue;
+        }
+        createGenomeTO(cell->creature->genome, collectionTO);
+    }
+}
+
+__global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if ((includeClusters && cell->selected == 0) || (!includeClusters && cell->selected != 1)) {
+            continue;
+        }
+        if (!cell->creature) {
+            continue;
+        }
+
+        createGenomeTO(cell->creature->genome, collectionTO);
+    }
+}
+
+__global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO collectionTO)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->creature) {
+            continue;
+        }
+
+        bool found = false;
+        for (int i = 0; i < Const::MaxInspectedObjects; ++i) {
+            if (ids.values[i] == Const::MaxInspectedObjects_Break) {
+                break;
+            }
+            if (ids.values[i] == cell->id) {
+                found = true;
+            }
+            for (int j = 0; j < cell->numConnections; ++j) {
+                if (ids.values[i] == cell->connections[j].cell->id) {
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            continue;
+        }
+        createGenomeTO(cell->creature->genome, collectionTO);
+    }
+}
+
 __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO collectionTO)
 {
     auto const& cells = data.objects.cells;
@@ -650,6 +744,20 @@ __global__ void cudaGetArraysBasedOnTO(SimulationData data, TO collectionTO, Cel
     *cellArray = data.objects.heap.getTypedSubArray<Cell>(*collectionTO.numCells);
 }
 
+__global__ void cudaSetGenomeDataFromTO(SimulationData data, TO collectionTO)
+{
+    __shared__ ObjectFactory factory;
+    if (0 == threadIdx.x) {
+        factory.init(&data);
+    }
+    __syncthreads();
+
+    auto partition = calcAllThreadsPartition(*collectionTO.numGenomes);
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        factory.createGenomeFromTO(collectionTO, index);
+    }
+}
+
 __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO)
 {
     __shared__ ObjectFactory factory;
@@ -658,13 +766,13 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO)
     }
     __syncthreads();
 
-    auto cellPartition = calcAllThreadsPartition(*collectionTO.numCreatures);
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+    auto partition = calcAllThreadsPartition(*collectionTO.numCreatures);
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         factory.createCreatureFromTO(collectionTO, index);
     }
 }
 
-__global__ void cudaSetDataFromTO(SimulationData data, TO collectionTO, Cell** cellArray, bool selectNewData)
+__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO collectionTO, Cell** cellArray, bool selectNewData)
 {
     __shared__ ObjectFactory factory;
     if (0 == threadIdx.x) {
@@ -721,6 +829,7 @@ __global__ void cudaClearDataTO(TO collectionTO)
     *collectionTO.numCells = 0;
     *collectionTO.numParticles = 0;
     *collectionTO.numCreatures = 0;
+    *collectionTO.numGenomes = 0;
     *collectionTO.numGenes = 0;
     *collectionTO.numNodes = 0;
     *collectionTO.heapSize = 0;
@@ -750,6 +859,7 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
 
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
     uint64_t heapBytes = 0;
+    uint64_t numCreatures = 0;
     uint64_t numGenomes = 0;
     uint64_t numGenes = 0;
     uint64_t numNodes = 0;
@@ -759,6 +869,7 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
         if (cell->creature) {
+            ++numCreatures;
             ++numGenomes;
             auto const& creature = cell->creature;
             numGenes += creature->genome->numGenes;
@@ -767,7 +878,8 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             }
         }
     }
-    alienAtomicAdd64(&arraySizes->creatures, numGenomes);
+    alienAtomicAdd64(&arraySizes->creatures, numCreatures);
+    alienAtomicAdd64(&arraySizes->genomes, numGenomes);
     alienAtomicAdd64(&arraySizes->genes, numGenes);
     alienAtomicAdd64(&arraySizes->nodes, numNodes);
     alienAtomicAdd64(&arraySizes->heap, heapBytes);
@@ -781,7 +893,8 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO collectionTO, ArraySizesForG
         alienAtomicAdd64(
             &arraySizes->heap,
             *collectionTO.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *collectionTO.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
-                + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
+                + *collectionTO.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *collectionTO.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
+                + *collectionTO.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
                 + *collectionTO.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 

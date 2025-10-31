@@ -5,7 +5,6 @@
 #include "Base/Singleton.h"
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Description.h"
-#include "EngineInterface/OverlayDescriptions.h"
 #include "EngineInterface/SimulationParameters.h"
 #include "EngineGpuKernels/TO.cuh"
 #include "EngineGpuKernels/Definitions.h"
@@ -17,7 +16,6 @@ class DescriptionConverterService
 
 public:
     Description convertTOtoDescription(TO const& collectionTO) const;
-    OverlayDescription convertTOtoOverlayDescription(TO const& collectionTO) const;
     TO convertDescriptionToTO(Description const& data) const;
     TO convertDescriptionToTO(CellDescription const& cell) const;
     TO convertDescriptionToTO(ParticleDescription const& particle) const;
@@ -31,7 +29,8 @@ private:
     ParticleDescription createParticleDescription(TO const& collectionTO, int particleIndex) const;
 
     void convertCreatureToTO(
-        std::vector<CreatureTO>& genomeTOs,
+        std::vector<CreatureTO>& creatureTOs,
+        std::vector<GenomeTO>& genomeTOs,
         std::vector<GeneTO>& geneTOs,
         std::vector<NodeTO>& nodeTOs,
         std::vector<uint8_t>& heap,
@@ -49,7 +48,8 @@ private:
 	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
     TO provideDataTO(
-        std::vector<CreatureTO> const& genomeTOs,
+        std::vector<CreatureTO> const& creatureTOs,
+        std::vector<GenomeTO> const& genomeTOs,
         std::vector<GeneTO> const& geneTOs,
         std::vector<NodeTO> const& nodeTOs,
         std::vector<CellTO> const& cellTOs,

@@ -33,6 +33,7 @@ TO _TOProvider::provideDataTO(ArraySizesForTO const& requiredCapacity)
             checkAndExtendCapacity(_to->cells, *_to->numCells, _to->capacities.cells, requiredCapacity.cells);
             checkAndExtendCapacity(_to->particles, *_to->numParticles, _to->capacities.particles, requiredCapacity.particles);
             checkAndExtendCapacity(_to->creatures, *_to->numCreatures, _to->capacities.creatures, requiredCapacity.creatures);
+            checkAndExtendCapacity(_to->genomes, *_to->numGenomes, _to->capacities.genomes, requiredCapacity.genomes);
             checkAndExtendCapacity(_to->genes, *_to->numGenes, _to->capacities.genes, requiredCapacity.genes);
             checkAndExtendCapacity(_to->nodes, *_to->numNodes, _to->capacities.nodes, requiredCapacity.nodes);
             checkAndExtendCapacity(_to->heap, *_to->heapSize, _to->capacities.heap, requiredCapacity.heap);
@@ -55,6 +56,7 @@ TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacit
         result.numCells = new uint64_t;
         result.numParticles = new uint64_t;
         result.numCreatures = new uint64_t;
+        result.numGenomes = new uint64_t;
         result.numGenes = new uint64_t;
         result.numNodes = new uint64_t;
         result.heapSize = new uint64_t;
@@ -62,6 +64,7 @@ TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacit
         *result.numCells = 0;
         *result.numParticles = 0;
         *result.numCreatures = 0;
+        *result.numGenomes = 0;
         *result.numGenes = 0;
         *result.numNodes = 0;
         *result.heapSize = 0;
@@ -69,6 +72,7 @@ TO _TOProvider::provideNewUnmanagedDataTO(ArraySizesForTO const& requiredCapacit
         result.cells = new CellTO[requiredCapacity.cells];
         result.particles = new ParticleTO[requiredCapacity.particles];
         result.creatures = new CreatureTO[requiredCapacity.creatures];
+        result.genomes = new GenomeTO[requiredCapacity.genomes];
         result.genes = new GeneTO[requiredCapacity.genes];
         result.nodes = new NodeTO[requiredCapacity.nodes];
         result.heap = new uint8_t[requiredCapacity.heap];
@@ -90,6 +94,7 @@ void _TOProvider::destroy(TO const& dataTO)
     delete dataTO.numCells;
     delete dataTO.numParticles;
     delete dataTO.numCreatures;
+    delete dataTO.numGenomes;
     delete dataTO.numGenes;
     delete dataTO.numNodes;
     delete dataTO.heapSize;
@@ -97,6 +102,7 @@ void _TOProvider::destroy(TO const& dataTO)
     delete[] dataTO.cells;
     delete[] dataTO.particles;
     delete[] dataTO.creatures;
+    delete[] dataTO.genomes;
     delete[] dataTO.genes;
     delete[] dataTO.nodes;
     delete[] dataTO.heap;
