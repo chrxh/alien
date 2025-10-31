@@ -38,9 +38,11 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
 __global__ void cudaResolveConnections(SimulationData data, TO collectionTO);
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access);
 __global__ void cudaGetArraysBasedOnTO(SimulationData data, TO collectionTO, Cell** cellArray);
+
 __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO collectionTO);
 __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO collectionTO);
 __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO collectionTO, Cell** cellArray, bool selectNewData);
+
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO collectionTO);
 __global__ void cudaClearDataTO(TO collectionTO);
 __global__ void cudaSaveNumEntries(SimulationData data);
