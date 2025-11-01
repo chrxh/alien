@@ -756,3 +756,357 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
     auto resultingCells = GenomeDescriptionInfoService::get().getNumberOfResultingCells(subGenome);
     EXPECT_LE(resultingCells, PREVIEW_MAX_CELLS);
 }
+
+TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_emptySubGenomes)
+{
+    std::vector<SubGenomeDescription> subGenomes;
+    std::unordered_map<SubGenomeDescription, Description> cache;
+    
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    
+    EXPECT_EQ(0, result.description._creatures.size());
+    EXPECT_EQ(0, result.seedCreatureIds.size());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleSubGenome_noCache)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    
+    SubGenomeDescription subGenome{genome, 0, false};
+    std::vector<SubGenomeDescription> subGenomes = {subGenome};
+    std::unordered_map<SubGenomeDescription, Description> cache;
+    
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    
+    // Should have 1 seed creature
+    ASSERT_EQ(1, result.description._creatures.size());
+    ASSERT_EQ(1, result.seedCreatureIds.size());
+    
+    // Check creature properties
+    auto const& creature = result.description._creatures.at(0);
+    EXPECT_EQ(0, creature._generation);
+    EXPECT_EQ(1, creature._cells.size());
+    EXPECT_EQ(result.seedCreatureIds.at(0), creature._id);
+    
+    // Check cell position
+    auto const& cell = creature._cells.at(0);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell._pos.x);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell._pos.y);
+    
+    // Check genome reference
+    EXPECT_EQ(creature._genomeId, result.description._genomes.at(0)._id);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleSubGenome_withCache)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    
+    SubGenomeDescription subGenome{genome, 0, false};
+    
+    // Create cached phenotype with seed (generation 0) and offspring (generation 1)
+    Description cachedPhenotype;
+    cachedPhenotype._genomes.emplace_back(genome);
+    cachedPhenotype._creatures.emplace_back(
+        CreatureDescription()
+            .generation(0)
+            .genomeId(genome._id)
+            .cells({CellDescription().pos(RealVector2D{0, 0})})
+    );
+    cachedPhenotype._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome._id)
+            .ancestorId(cachedPhenotype._creatures.at(0)._id)
+            .cells({CellDescription().pos(RealVector2D{1, 1})})
+    );
+    
+    std::vector<SubGenomeDescription> subGenomes = {subGenome};
+    std::unordered_map<SubGenomeDescription, Description> cache;
+    cache[subGenome] = cachedPhenotype;
+    
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    
+    // Should have both seed and offspring from cache
+    ASSERT_EQ(2, result.description._creatures.size());
+    ASSERT_EQ(1, result.seedCreatureIds.size());
+    
+    // Check that seed creature ID points to generation 0 creature
+    auto seedCreatureId = result.seedCreatureIds.at(0);
+    auto const& seedCreature = result.description._creatures.at(0);
+    EXPECT_EQ(0, seedCreature._generation);
+    EXPECT_EQ(seedCreatureId, seedCreature._id);
+    
+    // Check that generation 1 creature exists
+    auto const& offspringCreature = result.description._creatures.at(1);
+    EXPECT_EQ(1, offspringCreature._generation);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipleSubGenomes_noCache)
+{
+    auto genome1 = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto genome2 = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    
+    SubGenomeDescription subGenome1{genome1, 0, false};
+    SubGenomeDescription subGenome2{genome2, 0, false};
+    std::vector<SubGenomeDescription> subGenomes = {subGenome1, subGenome2};
+    std::unordered_map<SubGenomeDescription, Description> cache;
+    
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    
+    // Should have 2 seed creatures
+    ASSERT_EQ(2, result.description._creatures.size());
+    ASSERT_EQ(2, result.seedCreatureIds.size());
+    
+    // Check positions are different (offset by PREVIEW_HEIGHT / 2)
+    auto const& cell1 = result.description._creatures.at(0)._cells.at(0);
+    auto const& cell2 = result.description._creatures.at(1)._cells.at(0);
+    
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell1._pos.x);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell1._pos.y);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT), cell2._pos.x);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell2._pos.y);
+    
+    // Check seed IDs correspond to correct creatures
+    EXPECT_EQ(result.seedCreatureIds.at(0), result.description._creatures.at(0)._id);
+    EXPECT_EQ(result.seedCreatureIds.at(1), result.description._creatures.at(1)._id);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipleSubGenomes_mixedCache)
+{
+    auto genome1 = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto genome2 = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    
+    SubGenomeDescription subGenome1{genome1, 0, false};
+    SubGenomeDescription subGenome2{genome2, 0, false};
+    
+    // Create cached phenotype only for first subGenome
+    Description cachedPhenotype;
+    cachedPhenotype._genomes.emplace_back(genome1);
+    cachedPhenotype._creatures.emplace_back(
+        CreatureDescription()
+            .generation(0)
+            .genomeId(genome1._id)
+            .cells({CellDescription().pos(RealVector2D{0, 0})})
+    );
+    
+    std::vector<SubGenomeDescription> subGenomes = {subGenome1, subGenome2};
+    std::unordered_map<SubGenomeDescription, Description> cache;
+    cache[subGenome1] = cachedPhenotype;
+    
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    
+    // Should have 2 creatures: 1 from cache, 1 newly created seed
+    ASSERT_EQ(2, result.description._creatures.size());
+    ASSERT_EQ(2, result.seedCreatureIds.size());
+    
+    // Both should be generation 0 (seeds)
+    EXPECT_EQ(0, result.description._creatures.at(0)._generation);
+    EXPECT_EQ(0, result.description._creatures.at(1)._generation);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
+{
+    Description preview;
+    std::vector<uint64_t> seedCreatureIds;
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), seedCreatureIds);
+    
+    EXPECT_EQ(0, result.size());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSeed_noOffspring)
+{
+    // Create preview with a single seed creature (generation 0)
+    Description preview;
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    preview._genomes.emplace_back(genome);
+    
+    auto seedCreature = CreatureDescription()
+        .generation(0)
+        .genomeId(genome._id)
+        .cells({CellDescription().pos(RealVector2D{0, 0})});
+    auto seedId = seedCreature._id;
+    preview._creatures.emplace_back(std::move(seedCreature));
+    
+    std::vector<uint64_t> seedCreatureIds = {seedId};
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), seedCreatureIds);
+    
+    // Should have 1 phenotype
+    ASSERT_EQ(1, result.size());
+    
+    // Should contain the seed creature
+    ASSERT_EQ(1, result.at(0)._creatures.size());
+    EXPECT_EQ(0, result.at(0)._creatures.at(0)._generation);
+    EXPECT_EQ(seedId, result.at(0)._creatures.at(0)._id);
+    
+    // Should have the genome
+    ASSERT_EQ(1, result.at(0)._genomes.size());
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSeed_withOffspring)
+{
+    // Create preview with seed and its offspring
+    Description preview;
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    preview._genomes.emplace_back(genome);
+    
+    auto seedCreature = CreatureDescription()
+        .generation(0)
+        .genomeId(genome._id)
+        .cells({CellDescription().pos(RealVector2D{0, 0})});
+    auto seedId = seedCreature._id;
+    preview._creatures.emplace_back(std::move(seedCreature));
+    
+    // Add offspring (generation 1)
+    preview._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome._id)
+            .ancestorId(seedId)
+            .cells({CellDescription().pos(RealVector2D{1, 1})})
+    );
+    preview._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome._id)
+            .ancestorId(seedId)
+            .cells({CellDescription().pos(RealVector2D{2, 2})})
+    );
+    
+    std::vector<uint64_t> seedCreatureIds = {seedId};
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), seedCreatureIds);
+    
+    // Should have 1 phenotype
+    ASSERT_EQ(1, result.size());
+    
+    // Should contain seed + 2 offspring = 3 creatures
+    ASSERT_EQ(3, result.at(0)._creatures.size());
+    
+    // Check that seed is included
+    EXPECT_EQ(0, result.at(0)._creatures.at(0)._generation);
+    EXPECT_EQ(seedId, result.at(0)._creatures.at(0)._id);
+    
+    // Check offspring
+    EXPECT_EQ(1, result.at(0)._creatures.at(1)._generation);
+    EXPECT_EQ(seedId, result.at(0)._creatures.at(1)._ancestorId);
+    EXPECT_EQ(1, result.at(0)._creatures.at(2)._generation);
+    EXPECT_EQ(seedId, result.at(0)._creatures.at(2)._ancestorId);
+}
+
+TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_withOffspring)
+{
+    // Create preview with multiple seeds and their offspring
+    Description preview;
+    auto genome1 = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+        }),
+    });
+    auto genome2 = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    preview._genomes.emplace_back(genome1);
+    preview._genomes.emplace_back(genome2);
+    
+    // Seed 1
+    auto seed1 = CreatureDescription()
+        .generation(0)
+        .genomeId(genome1._id)
+        .cells({CellDescription().pos(RealVector2D{0, 0})});
+    auto seed1Id = seed1._id;
+    preview._creatures.emplace_back(std::move(seed1));
+    
+    // Offspring of seed 1
+    preview._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome1._id)
+            .ancestorId(seed1Id)
+            .cells({CellDescription().pos(RealVector2D{1, 1})})
+    );
+    
+    // Seed 2
+    auto seed2 = CreatureDescription()
+        .generation(0)
+        .genomeId(genome2._id)
+        .cells({CellDescription().pos(RealVector2D{10, 10})});
+    auto seed2Id = seed2._id;
+    preview._creatures.emplace_back(std::move(seed2));
+    
+    // Offspring of seed 2
+    preview._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome2._id)
+            .ancestorId(seed2Id)
+            .cells({CellDescription().pos(RealVector2D{11, 11})})
+    );
+    preview._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome2._id)
+            .ancestorId(seed2Id)
+            .cells({CellDescription().pos(RealVector2D{12, 12})})
+    );
+    
+    std::vector<uint64_t> seedCreatureIds = {seed1Id, seed2Id};
+    
+    auto result = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(preview), seedCreatureIds);
+    
+    // Should have 2 phenotypes
+    ASSERT_EQ(2, result.size());
+    
+    // Phenotype 1: seed1 + 1 offspring = 2 creatures
+    ASSERT_EQ(2, result.at(0)._creatures.size());
+    EXPECT_EQ(0, result.at(0)._creatures.at(0)._generation);
+    EXPECT_EQ(seed1Id, result.at(0)._creatures.at(0)._id);
+    EXPECT_EQ(1, result.at(0)._creatures.at(1)._generation);
+    
+    // Phenotype 2: seed2 + 2 offspring = 3 creatures
+    ASSERT_EQ(3, result.at(1)._creatures.size());
+    EXPECT_EQ(0, result.at(1)._creatures.at(0)._generation);
+    EXPECT_EQ(seed2Id, result.at(1)._creatures.at(0)._id);
+    EXPECT_EQ(1, result.at(1)._creatures.at(1)._generation);
+    EXPECT_EQ(1, result.at(1)._creatures.at(2)._generation);
+}
