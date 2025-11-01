@@ -5,13 +5,13 @@
 #include "EngineInterface/Description.h"
 #include "EngineInterface/GenomeDescription.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
-class DetonatorTests : public IntegrationTestFramework
+class DetonatorTests : public TestFramework
 {
 public:
     DetonatorTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {
         _parameters.innerFriction.value = 0;
         _parameters.friction.baseValue = 0;

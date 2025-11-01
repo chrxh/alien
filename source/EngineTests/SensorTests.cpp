@@ -4,13 +4,13 @@
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
-class SensorTests : public IntegrationTestFramework
+class SensorTests : public TestFramework
 {
 public:
     SensorTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {}
 
     ~SensorTests() = default;

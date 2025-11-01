@@ -1,4 +1,4 @@
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
 #include <boost/range/combine.hpp>
 
@@ -9,7 +9,7 @@
 
 #include "EngineImpl/SimulationFacadeImpl.h"
 
-IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
+TestFramework::TestFramework(IntVector2D const& universeSize)
 {
     _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
     SimulationParameters parameters;
@@ -20,12 +20,12 @@ IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSi
     _parameters = _simulationFacade->getSimulationParameters();
 }
 
-IntegrationTestFramework::~IntegrationTestFramework()
+TestFramework::~TestFramework()
 {
     _simulationFacade->closeSimulation();
 }
 
-double IntegrationTestFramework::getEnergy(Description const& data) const
+double TestFramework::getEnergy(Description const& data) const
 {
     double result = 0;
     for (auto const& cell : data._cells) {
@@ -42,12 +42,12 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
     return result;
 }
 
-bool IntegrationTestFramework::approxCompare(double expected, double actual, float precision) const
+bool TestFramework::approxCompare(double expected, double actual, float precision) const
 {
     return approxCompare(toFloat(expected), toFloat(actual));
 }
 
-bool IntegrationTestFramework::approxCompare(float expected, float actual, float precision) const
+bool TestFramework::approxCompare(float expected, float actual, float precision) const
 {
     auto absNorm = std::abs(expected) + std::abs(actual);
     if (absNorm < precision) {
@@ -56,12 +56,12 @@ bool IntegrationTestFramework::approxCompare(float expected, float actual, float
     return std::abs(expected - actual) / absNorm < precision;
 }
 
-bool IntegrationTestFramework::approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
+bool TestFramework::approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
 {
     return approxCompare(expected.x, actual.x) && approxCompare(expected.y, actual.y);
 }
 
-bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
+bool TestFramework::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
 {
     if (expected.size() != actual.size()) {
         return false;
@@ -74,22 +74,22 @@ bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected,
     return true;
 }
 
-bool IntegrationTestFramework::approxCompareAngles(float expected, float actual, float precision) const
+bool TestFramework::approxCompareAngles(float expected, float actual, float precision) const
 {
     return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
 }
 
-bool IntegrationTestFramework::compare(Description left, Description right) const
+bool TestFramework::compare(Description left, Description right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }
 
-bool IntegrationTestFramework::compare(CellDescription left, CellDescription right) const
+bool TestFramework::compare(CellDescription left, CellDescription right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }
 
-bool IntegrationTestFramework::compare(ParticleDescription left, ParticleDescription right) const
+bool TestFramework::compare(ParticleDescription left, ParticleDescription right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);
 }

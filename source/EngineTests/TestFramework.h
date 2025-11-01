@@ -21,11 +21,11 @@ namespace std
     };
 }
 
-class IntegrationTestFramework : public ::testing::Test
+class TestFramework : public ::testing::Test
 {
 public:
-    IntegrationTestFramework(IntVector2D const& universeSize = IntVector2D{1000, 1000});
-    virtual ~IntegrationTestFramework();
+    TestFramework(IntVector2D const& universeSize = IntVector2D{1000, 1000});
+    virtual ~TestFramework();
 
 protected:
     double getEnergy(Description const& data) const;

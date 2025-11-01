@@ -4,7 +4,7 @@ PUBLIC
     GenomeDescriptionInfoServiceTests.cpp
     ParametersEditServiceTests.cpp
     PreviewDescriptionConverterServiceTests.cpp
-    TestHelper.h
+    TestFramework.h
     Testsuite.cpp)
 
 target_link_libraries(EngineInterfaceTests Base)

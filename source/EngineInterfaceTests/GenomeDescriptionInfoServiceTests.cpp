@@ -5,7 +5,9 @@
 #include "EngineInterface/GenomeDescriptionInfoService.h"
 #include "EngineInterface/GenomeDescription.h"
 
-class GenomeDescriptionInfoServiceTests : public ::testing::Test
+#include "TestFramework.h"
+
+class GenomeDescriptionInfoServiceTests : public TestFramework
 {
 public:
     GenomeDescriptionInfoServiceTests()

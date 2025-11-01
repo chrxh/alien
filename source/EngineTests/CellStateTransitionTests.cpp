@@ -5,15 +5,15 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
 class CellStateTransitionTests
-    : public IntegrationTestFramework
+    : public TestFramework
     , public testing::WithParamInterface<CellDeathConsquences>
 {
 public:
     CellStateTransitionTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {
         _parameters.innerFriction.value = 0;
         _parameters.friction.baseValue = 0;

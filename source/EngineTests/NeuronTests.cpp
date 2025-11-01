@@ -6,13 +6,13 @@
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
-class NeuronTests : public IntegrationTestFramework
+class NeuronTests : public TestFramework
 {
 public:
     NeuronTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {}
 
     ~NeuronTests() = default;

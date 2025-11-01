@@ -4,9 +4,9 @@
 //#include "EngineInterface/Description.h"
 //#include "EngineInterface/GenomeDescriptionConverterService.h"
 //#include "EngineInterface/SimulationFacade.h"
-//#include "IntegrationTestFramework.h"
+//#include "TestFramework.h"
 //
-//class DefenderTests : public IntegrationTestFramework
+//class DefenderTests : public TestFramework
 //{
 //public:
 //    static SimulationParameters getParameters()
@@ -25,7 +25,7 @@
 //        return result;
 //    }
 //    DefenderTests()
-//        : IntegrationTestFramework(getParameters())
+//        : TestFramework(getParameters())
 //    {}
 //
 //    ~DefenderTests() = default;

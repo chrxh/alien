@@ -3,13 +3,13 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
-class GeneratorTests : public IntegrationTestFramework
+class GeneratorTests : public TestFramework
 {
 public:
     GeneratorTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {}
 
     ~GeneratorTests() = default;

@@ -4,13 +4,13 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
-class CellConnectionTests : public IntegrationTestFramework
+class CellConnectionTests : public TestFramework
 {
 public:
     CellConnectionTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {}
 
     ~CellConnectionTests() = default;

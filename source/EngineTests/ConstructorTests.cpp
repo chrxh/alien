@@ -10,13 +10,13 @@
 
 #include "EngineTestData/DescriptionTestDataFactory.h"
 
-#include "IntegrationTestFramework.h"
+#include "TestFramework.h"
 
-class ConstructorTests : public IntegrationTestFramework
+class ConstructorTests : public TestFramework
 {
 public:
     ConstructorTests()
-        : IntegrationTestFramework()
+        : TestFramework()
     {
         _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
     }
