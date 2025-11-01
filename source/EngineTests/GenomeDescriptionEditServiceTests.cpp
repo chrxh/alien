@@ -851,6 +851,57 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     EXPECT_EQ(1, offspringCreature._generation);
 }
 
+TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleSubGenome_withCache_offspringFirst)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).nodes({
+            NodeDescription(),
+            NodeDescription(),
+        }),
+    });
+    
+    SubGenomeDescription subGenome{genome, 0, false};
+    
+    // Create cached phenotype with offspring (generation 1) first, then seed (generation 0)
+    Description cachedPhenotype;
+    cachedPhenotype._genomes.emplace_back(genome);
+    
+    auto seedCreatureTemp = CreatureDescription()
+        .generation(0)
+        .genomeId(genome._id)
+        .cells({CellDescription().pos(RealVector2D{0, 0})});
+    auto seedId = seedCreatureTemp._id;
+    
+    // Add offspring first
+    cachedPhenotype._creatures.emplace_back(
+        CreatureDescription()
+            .generation(1)
+            .genomeId(genome._id)
+            .ancestorId(seedId)
+            .cells({CellDescription().pos(RealVector2D{1, 1})})
+    );
+    // Add seed second
+    cachedPhenotype._creatures.emplace_back(std::move(seedCreatureTemp));
+    
+    std::vector<SubGenomeDescription> subGenomes = {subGenome};
+    std::unordered_map<SubGenomeDescription, Description> cache;
+    cache[subGenome] = cachedPhenotype;
+    
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    
+    // Should have both offspring and seed from cache
+    ASSERT_EQ(2, result.description._creatures.size());
+    ASSERT_EQ(1, result.seedCreatureIds.size());
+    
+    // Check that seed creature ID points to the generation 0 creature (which is at index 1 in result)
+    auto seedCreatureId = result.seedCreatureIds.at(0);
+    auto const& offspringCreature = result.description._creatures.at(0);
+    auto const& seedCreature = result.description._creatures.at(1);
+    EXPECT_EQ(1, offspringCreature._generation);
+    EXPECT_EQ(0, seedCreature._generation);
+    EXPECT_EQ(seedCreatureId, seedCreature._id);
+}
+
 TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipleSubGenomes_noCache)
 {
     auto genome1 = GenomeDescription().genes({
