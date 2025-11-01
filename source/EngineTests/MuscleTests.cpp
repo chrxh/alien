@@ -6,7 +6,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
 enum class DetailedPreview
 {
@@ -14,11 +14,11 @@ enum class DetailedPreview
     Yes
 };
 
-class MuscleTests : public TestFramework
+class MuscleTests : public IntegrationTestFramework
 {
 public:
     MuscleTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {}
 
     ~MuscleTests() = default;

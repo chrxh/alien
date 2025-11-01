@@ -6,13 +6,13 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/StatisticsRawData.h"
 
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class StatisticsTests : public TestFramework
+class StatisticsTests : public IntegrationTestFramework
 {
 public:
     StatisticsTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {}
 
     ~StatisticsTests() = default;

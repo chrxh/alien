@@ -5,9 +5,9 @@
 //#include "EngineInterface/SimulationFacade.h"
 //#include "EngineInterface/GenomeDescriptionConverterService.h"
 //
-//#include "TestFramework.h"
+//#include "IntegrationTestFramework.h"
 //
-//class InjectorTests : public TestFramework
+//class InjectorTests : public IntegrationTestFramework
 //{
 //public:
 //    static SimulationParameters getParameters()
@@ -25,7 +25,7 @@
 //        return result;
 //    }
 //    InjectorTests()
-//        : TestFramework(getParameters())
+//        : IntegrationTestFramework(getParameters())
 //    {}
 //
 //    ~InjectorTests() = default;

@@ -9,14 +9,14 @@
 
 #include "EngineTestData/DescriptionTestDataFactory.h"
 
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
 
-class DataTransferTests : public TestFramework
+class DataTransferTests : public IntegrationTestFramework
 {
 public:
     DataTransferTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {
         _descriptionTestDataFactory = &DescriptionTestDataFactory::get();
     }

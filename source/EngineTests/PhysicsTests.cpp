@@ -5,13 +5,13 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class PhysicsTests : public TestFramework
+class PhysicsTests : public IntegrationTestFramework
 {
 public:
     PhysicsTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {
         _parameters.friction.baseValue = 0.1f;
         _simulationFacade->setSimulationParameters(_parameters);

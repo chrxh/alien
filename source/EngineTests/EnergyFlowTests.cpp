@@ -5,13 +5,13 @@
 #include "EngineInterface/SimulationFacade.h"
 #include "EngineInterface/GenomeDescription.h"
 
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class EnergyFlowTests : public TestFramework
+class EnergyFlowTests : public IntegrationTestFramework
 {
 public:
     EnergyFlowTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {}
 
     ~EnergyFlowTests() = default;

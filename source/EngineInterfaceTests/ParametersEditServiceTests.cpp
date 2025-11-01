@@ -9,9 +9,7 @@
 #include "EngineInterface/Description.h"
 #include "EngineInterface/LocationHelper.h"
 
-#include "TestFramework.h"
-
-class ParametersEditServiceTests : public TestFramework
+class ParametersEditServiceTests : public ::testing::Test
 {
 protected:
     SimulationParameters createTestData(std::vector<LocationType> const& locationTypes)

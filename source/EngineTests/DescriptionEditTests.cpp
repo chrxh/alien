@@ -8,14 +8,14 @@
 #include "EngineInterface/Description.h"
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
 class DescriptionEditTests 
-    : public TestFramework
+    : public IntegrationTestFramework
 {
 public:
     DescriptionEditTests()
-        : TestFramework({100, 100})
+        : IntegrationTestFramework({100, 100})
     {}
     virtual ~DescriptionEditTests() = default;
 

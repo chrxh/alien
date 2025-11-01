@@ -5,15 +5,15 @@
 #include "Base/Definitions.h"
 #include "Base/Math.h"
 
-class TestFramework : public ::testing::Test
+class TestDataFactory
 {
 public:
-    bool approxCompare(double expected, double actual, float precision = 0.001f) const
+    static bool approxCompare(double expected, double actual, float precision = 0.001f)
     {
         return approxCompare(toFloat(expected), toFloat(actual), precision);
     }
 
-    bool approxCompare(float expected, float actual, float precision = 0.001f) const
+    static bool approxCompare(float expected, float actual, float precision = 0.001f)
     {
         auto absNorm = std::abs(expected) + std::abs(actual);
         if (absNorm < precision) {
@@ -22,12 +22,12 @@ public:
         return std::abs(expected - actual) / absNorm < precision;
     }
 
-    bool approxCompare(RealVector2D const& expected, RealVector2D const& actual, float precision = 0.001f) const
+    static bool approxCompare(RealVector2D const& expected, RealVector2D const& actual, float precision = 0.001f)
     {
         return approxCompare(expected.x, actual.x, precision) && approxCompare(expected.y, actual.y, precision);
     }
 
-    bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual, float precision = 0.001f) const
+    static bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual, float precision = 0.001f)
     {
         if (expected.size() != actual.size()) {
             return false;
@@ -40,7 +40,7 @@ public:
         return true;
     }
 
-    bool approxCompareAngles(float expected, float actual, float precision = 0.001f) const
+    static bool approxCompareAngles(float expected, float actual, float precision = 0.001f)
     {
         return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
     }

@@ -3,13 +3,13 @@
 #include "EngineInterface/Description.h"
 #include "EngineInterface/GenomeDescription.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class ReconnectorTests : public TestFramework
+class ReconnectorTests : public IntegrationTestFramework
 {
 public:
     ReconnectorTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {
         _parameters.innerFriction.value = 0;
         _parameters.friction.baseValue = 0;

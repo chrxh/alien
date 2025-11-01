@@ -14,8 +14,8 @@ PUBLIC
     GarbageCollectorTests.cpp
     GeneratorTests.cpp
     InjectorTests.cpp
-    TestFramework.cpp
-    TestFramework.h
+    IntegrationTestFramework.cpp
+    IntegrationTestFramework.h
     MuscleTests.cpp
     NeuronTests.cpp
     PhysicsTests.cpp

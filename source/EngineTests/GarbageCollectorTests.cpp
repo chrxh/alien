@@ -4,13 +4,13 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class GarbageCollectorTests : public TestFramework
+class GarbageCollectorTests : public IntegrationTestFramework
 {
 public:
     GarbageCollectorTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {}
 
     ~GarbageCollectorTests() = default;

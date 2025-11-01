@@ -9,9 +9,7 @@
 #include "EngineInterface/GenomeDescription.h"
 #include "EngineInterface/EngineConstants.h"
 
-#include "TestFramework.h"
-
-class GenomeDescriptionEditServiceTests : public TestFramework
+class GenomeDescriptionEditServiceTests : public ::testing::Test
 {
 public:
     virtual ~GenomeDescriptionEditServiceTests() = default;

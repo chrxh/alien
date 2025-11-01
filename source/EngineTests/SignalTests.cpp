@@ -3,13 +3,13 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class SignalTests : public TestFramework
+class SignalTests : public IntegrationTestFramework
 {
 public:
     SignalTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {}
 
     ~SignalTests() = default;

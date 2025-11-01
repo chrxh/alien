@@ -10,7 +10,7 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/SimulationFacade.h"
 
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
 enum class Direction
 {
@@ -18,11 +18,11 @@ enum class Direction
     Backward
 };
 
-class CreatureTests : public TestFramework
+class CreatureTests : public IntegrationTestFramework
 {
 public:
     CreatureTests()
-        : TestFramework({1000, 1000})
+        : IntegrationTestFramework({1000, 1000})
     {
         _parameters.friction.baseValue = 0.01f;
         _simulationFacade->setSimulationParameters(_parameters);

@@ -8,13 +8,13 @@
 
 #include "EngineTestData/DescriptionTestDataFactory.h"
 
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 
-class FrontAngleUpdateTests : public TestFramework
+class FrontAngleUpdateTests : public IntegrationTestFramework
 {
 public:
     FrontAngleUpdateTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {
     }
 

@@ -3,14 +3,14 @@
 #include "EngineInterface/DescriptionEditService.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationFacade.h"
-#include "TestFramework.h"
+#include "IntegrationTestFramework.h"
 #include "EngineInterface/GenomeDescription.h"
 
-class DepotTests : public TestFramework
+class DepotTests : public IntegrationTestFramework
 {
 public:
     DepotTests()
-        : TestFramework()
+        : IntegrationTestFramework()
     {
         _parameters.transmitterEnergyDistributionSameCreature.value = true;
         _parameters.innerFriction.value = 0;
