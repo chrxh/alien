@@ -10,7 +10,7 @@ class Cache
 public:
     void insertOrAssign(Key const& key, Value const& value);
 
-    std::optional<Value> find(Key const& key);
+    std::optional<Value> find(Key const& key) const;
 
 private:
     std::unordered_map<Key, Value> _cacheMap;
@@ -37,7 +37,7 @@ void Cache<Key, Value, MaxEntries>::insertOrAssign(Key const& key, Value const& 
 }
 
 template <typename Key, typename Value, int MaxEntries>
-std::optional<Value> Cache<Key, Value, MaxEntries>::find(Key const& key)
+std::optional<Value> Cache<Key, Value, MaxEntries>::find(Key const& key) const
 {
     auto findResult = _cacheMap.find(key);
     if (findResult != _cacheMap.end()) {
