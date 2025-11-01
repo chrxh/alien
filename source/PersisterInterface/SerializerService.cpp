@@ -130,8 +130,9 @@ namespace cereal
 /************************************************************************/
 namespace
 {
-    auto constexpr Id_Genome_Name = 0;
-    auto constexpr Id_Genome_FrontAngle = 1;
+    auto constexpr Id_Genome_Id = 0;
+    auto constexpr Id_Genome_Name = 1;
+    auto constexpr Id_Genome_FrontAngle = 2;
 
     auto constexpr Id_Gene_Name = 0;
     auto constexpr Id_Gene_Shape = 1;
@@ -456,6 +457,7 @@ namespace cereal
     {
         GenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Genome_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
