@@ -42,43 +42,6 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
     return result;
 }
 
-bool IntegrationTestFramework::approxCompare(double expected, double actual, float precision) const
-{
-    return approxCompare(toFloat(expected), toFloat(actual));
-}
-
-bool IntegrationTestFramework::approxCompare(float expected, float actual, float precision) const
-{
-    auto absNorm = std::abs(expected) + std::abs(actual);
-    if (absNorm < precision) {
-        return true;
-    }
-    return std::abs(expected - actual) / absNorm < precision;
-}
-
-bool IntegrationTestFramework::approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
-{
-    return approxCompare(expected.x, actual.x) && approxCompare(expected.y, actual.y);
-}
-
-bool IntegrationTestFramework::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
-{
-    if (expected.size() != actual.size()) {
-        return false;
-    }
-    for (auto const& [expectedElement, actualElement] : boost::combine(expected, actual)) {
-        if (!approxCompare(expectedElement, actualElement)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool IntegrationTestFramework::approxCompareAngles(float expected, float actual, float precision) const
-{
-    return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
-}
-
 bool IntegrationTestFramework::compare(Description left, Description right) const
 {
     return DescriptionTestDataFactory::get().compare(left, right);

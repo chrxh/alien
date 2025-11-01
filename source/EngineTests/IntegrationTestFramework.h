@@ -6,6 +6,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationParameters.h"
+#include "EngineTestData/TestHelper.h"
 
 namespace std
 {
@@ -30,11 +31,30 @@ public:
 protected:
     double getEnergy(Description const& data) const;
 
-    bool approxCompare(double expected, double actual, float precision = 0.001f) const;
-    bool approxCompare(float expected, float actual, float precision = 0.001f) const;
-    bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const;
-    bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const;
-    bool approxCompareAngles(float expected, float actual, float precision = 0.001f) const;
+    bool approxCompare(double expected, double actual, float precision = 0.001f) const
+    {
+        return TestHelper::approxCompare(expected, actual, precision);
+    }
+
+    bool approxCompare(float expected, float actual, float precision = 0.001f) const
+    {
+        return TestHelper::approxCompare(expected, actual, precision);
+    }
+
+    bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
+    {
+        return TestHelper::approxCompare(expected, actual);
+    }
+
+    bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
+    {
+        return TestHelper::approxCompare(expected, actual);
+    }
+
+    bool approxCompareAngles(float expected, float actual, float precision = 0.001f) const
+    {
+        return TestHelper::approxCompareAngles(expected, actual, precision);
+    }
 
     bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;

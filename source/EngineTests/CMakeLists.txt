@@ -13,16 +13,12 @@ PUBLIC
     FrontAngleUpdateTests.cpp
     GarbageCollectorTests.cpp
     GeneratorTests.cpp
-    GenomeDescriptionEditServiceTests.cpp
-    GenomeDescriptionInfoServiceTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     MuscleTests.cpp
     NeuronTests.cpp
-    ParametersEditServiceTests.cpp
     PhysicsTests.cpp
-    PreviewDescriptionConverterServiceTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
     SignalTests.cpp
