@@ -2,6 +2,7 @@
 add_library(EngineTestData
     DescriptionTestDataFactory.cpp
     DescriptionTestDataFactory.h
+    TestHelper.cpp
     TestHelper.h)
 
 target_link_libraries(EngineTestData Base)
