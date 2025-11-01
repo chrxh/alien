@@ -1,4 +1,5 @@
 #include "DescriptionTestDataFactory.h"
+#include "TestHelper.h"
 
 #include <algorithm>
 
@@ -101,35 +102,17 @@ std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::cr
 
 bool DescriptionTestDataFactory::compare(Description left, Description right) const
 {
-    std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(left._particles.begin(), left._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._genomes.begin(), right._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    for (auto& creature : left._creatures) {
-        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    }
-    for (auto& creature : right._creatures) {
-        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    }
-    return left == right;
+    return TestHelper::compare(left, right);
 }
 
 bool DescriptionTestDataFactory::compare(CellDescription left, CellDescription right) const
 {
-    left._id = 0;
-    right._id = 0;
-    return left == right;
+    return TestHelper::compare(left, right);
 }
 
 bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescription right) const
 {
-    left._id = 0;
-    right._id = 0;
-    return left == right;
+    return TestHelper::compare(left, right);
 }
 
 CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const

@@ -6,7 +6,7 @@
 #include "EngineInterface/Definitions.h"
 #include "EngineInterface/Description.h"
 #include "EngineInterface/SimulationParameters.h"
-#include "EngineTestData/TestDataFactory.h"
+#include "EngineTestData/TestHelper.h"
 
 namespace std
 {
@@ -33,27 +33,27 @@ protected:
 
     bool approxCompare(double expected, double actual, float precision = 0.001f) const
     {
-        return TestDataFactory::approxCompare(expected, actual, precision);
+        return TestHelper::approxCompare(expected, actual, precision);
     }
 
     bool approxCompare(float expected, float actual, float precision = 0.001f) const
     {
-        return TestDataFactory::approxCompare(expected, actual, precision);
+        return TestHelper::approxCompare(expected, actual, precision);
     }
 
     bool approxCompare(RealVector2D const& expected, RealVector2D const& actual) const
     {
-        return TestDataFactory::approxCompare(expected, actual);
+        return TestHelper::approxCompare(expected, actual);
     }
 
     bool approxCompare(std::vector<float> const& expected, std::vector<float> const& actual) const
     {
-        return TestDataFactory::approxCompare(expected, actual);
+        return TestHelper::approxCompare(expected, actual);
     }
 
     bool approxCompareAngles(float expected, float actual, float precision = 0.001f) const
     {
-        return TestDataFactory::approxCompareAngles(expected, actual, precision);
+        return TestHelper::approxCompareAngles(expected, actual, precision);
     }
 
     bool compare(Description left, Description right) const;

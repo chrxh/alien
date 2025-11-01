@@ -11,7 +11,7 @@
 
 #include "EngineInterface/SpaceCalculator.h"
 
-#include "EngineTestData/TestDataFactory.h"
+#include "EngineTestData/TestHelper.h"
 
 class PreviewDescriptionConverterServiceTests : public ::testing::Test
 {
@@ -41,12 +41,12 @@ public:
         for (auto const& expectedConnection : expectedConnections) {
             auto found = false;
             for (auto const& connection : preview._connections) {
-                if (TestDataFactory::TestDataFactory::approxCompare(expectedConnection.cell1, connection._cell1) && TestDataFactory::TestDataFactory::approxCompare(expectedConnection.cell2, connection._cell2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell1) && TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell2)
                         && expectedConnection.arrowToCell1 == connection._arrowToCell1 && expectedConnection.arrowToCell2 == connection._arrowToCell2) {
                     found = true;
                     break;
                 }
-                if (TestDataFactory::TestDataFactory::approxCompare(expectedConnection.cell2, connection._cell1) && TestDataFactory::TestDataFactory::approxCompare(expectedConnection.cell1, connection._cell2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell1) && TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell2)
                     && expectedConnection.arrowToCell2 == connection._arrowToCell1 && expectedConnection.arrowToCell1 == connection._arrowToCell2) {
                     found = true;
                     break;
@@ -95,8 +95,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell2_pos, cell2._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}});
 }
 
@@ -127,8 +127,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell2_pos, cell2._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}});
 }
 
@@ -157,8 +157,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell2_pos, cell2._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}});
 }
 
@@ -232,9 +232,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     auto expectedCell1_pos = RealVector2D{oneThird, oneThird*2};
     auto expectedCell2_pos = RealVector2D{oneThird, -oneThird};
     auto expectedCell3_pos = RealVector2D{-oneThird * 2, -oneThird};
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell2_pos, cell2._pos));
-    EXPECT_TRUE(TestDataFactory::approxCompare(expectedCell3_pos, cell3._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell3_pos, cell3._pos));
     checkConnections(result.description, {{cell1._pos, cell2._pos}, {cell2._pos, cell3._pos}, {cell3._pos, cell1._pos}});
 }
 
@@ -280,7 +280,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
     };
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestDataFactory::approxCompare(expectedPosition, actualPosition));
+        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
     }
 }
 
@@ -326,7 +326,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
     };
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestDataFactory::approxCompare(expectedPosition, actualPosition));
+        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
     }
 }
 
@@ -369,7 +369,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
         {3.375f, -0.125f}, {2.375f, -0.125f}, {1.375f, -0.125f}, {0.375f, -0.125f}, {-0.625f, -0.125}, {-1.625f, -0.125}, {-2.625f, -0.125f}, {-2.625f, 0.875f}};
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestDataFactory::approxCompare(expectedPosition, actualPosition));
+        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
     }
 }
 
@@ -419,7 +419,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
     };
     ASSERT_EQ(expectedPositions.size(), actualPositions.size());
     for (auto const& [expectedPosition, actualPosition] : boost::combine(expectedPositions, actualPositions)) {
-        EXPECT_TRUE(TestDataFactory::approxCompare(expectedPosition, actualPosition));
+        EXPECT_TRUE(TestHelper::approxCompare(expectedPosition, actualPosition));
     }
 }
 
