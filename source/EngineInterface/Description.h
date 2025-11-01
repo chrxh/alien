@@ -346,7 +346,7 @@ struct CreatureDescription
     MEMBER(CreatureDescription, int, frontAngleId, 0);
 };
 
-struct _CollectionCache
+struct _DescriptionCache
 {
     struct Index
     {
@@ -354,8 +354,9 @@ struct _CollectionCache
         int cellIndex;
     };
     std::unordered_map<uint64_t, Index> cellIdToIndex;
+    std::unordered_map<uint64_t, uint64_t> genomeIdToIndex;
 };
-using CollectionCache = std::shared_ptr<_CollectionCache>;
+using DescriptionCache = std::shared_ptr<_DescriptionCache>;
 
 struct Description
 {
@@ -384,15 +385,20 @@ struct Description
 
     Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
 
-    CollectionCache createCache() const;
-    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache = nullptr);
-    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache = nullptr);
-    CellDescription const& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr) const;
-    CellDescription& getCellRef(uint64_t const& cellId, CollectionCache const& cache = nullptr);
+    DescriptionCache createCache() const;
+    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache = nullptr);
+    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, DescriptionCache const& cache = nullptr);
+
+    CellDescription const& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr) const;
+    CellDescription& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr);
+    CellDescription& getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex);
+
     CellDescription& getOtherCellRef(uint64_t id);
     CellDescription& getOtherCellRef(std::set<uint64_t> const& ids);
     std::vector<CellDescription> getOtherCells(std::set<uint64_t> const& ids) const;
-    CellDescription& getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex);
+
+    GenomeDescription const& getGenomeRef(uint64_t const& genomeId, DescriptionCache const& cache = nullptr) const;
+
     bool hasConnection(uint64_t id, uint64_t otherId) const;
     bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     ConnectionDescription getConnection(uint64_t id, uint64_t otherId) const;
@@ -401,7 +407,7 @@ struct Description
     CreatureDescription& getOtherCreatureRef(uint64_t id);
 
 private:
-    _CollectionCache::Index getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const;
+    _DescriptionCache::Index getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
 };
 
 struct ExtendedCellDescription

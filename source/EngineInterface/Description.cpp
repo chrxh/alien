@@ -391,7 +391,7 @@ void Description::assignNewIds()
     // Assign new creatureIds
     for (auto& creature : _creatures) {
         if (creature._ancestorId.has_value()) {
-            if(nonUniqueCreatureIds.contains(creature._ancestorId.value())) {
+            if (nonUniqueCreatureIds.contains(creature._ancestorId.value())) {
                 creature._ancestorId.reset();
             } else {
                 if (oldToNewCreatureId.contains(creature._ancestorId.value())) {
@@ -415,14 +415,9 @@ void Description::assignNewIds()
 
     // Assign new genomeIds to creatures
     for (auto& creature : _creatures) {
-        if (nonUniqueGenomeIds.contains(creature._genomeId)) {
-            // If genome ID is not unique, we cannot reliably update it
-            // Keep the old ID (this is an error case)
-        } else {
-            if (oldToNewGenomeId.contains(creature._genomeId)) {
-                creature._genomeId = oldToNewGenomeId.at(creature._genomeId);
-            }
-        }
+        CHECK(!nonUniqueGenomeIds.contains(creature._genomeId));
+        CHECK(oldToNewGenomeId.contains(creature._genomeId));
+        creature._genomeId = oldToNewGenomeId.at(creature._genomeId);
     }
 
     // Assign new particle ids
@@ -447,28 +442,31 @@ Description& Description::addCreature(CreatureDescription const& creature, Genom
     return *this;
 }
 
-CollectionCache Description::createCache() const
+DescriptionCache Description::createCache() const
 {
-    CollectionCache result = std::make_shared<_CollectionCache>();
+    DescriptionCache result = std::make_shared<_DescriptionCache>();
     for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
         for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
-            result->cellIdToIndex.emplace(cell._id, _CollectionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)});
+            result->cellIdToIndex.emplace(cell._id, _DescriptionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)});
         }
     }
     for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
-        result->cellIdToIndex.emplace(cell._id, _CollectionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)});
+        result->cellIdToIndex.emplace(cell._id, _DescriptionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)});
+    }
+    for (auto const& [genomeIndex, genome] : _genomes | boost::adaptors::indexed(0)) {
+        result->genomeIdToIndex.emplace(genome._id, genomeIndex);
     }
     return result;
 }
 
-Description& Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, CollectionCache const& cache)
+Description& Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache)
 {
     auto& cell2 = getCellRef(cellId2, cache);
     return addConnection(cellId1, cellId2, cell2._pos, cache);
 }
 
 Description&
-Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, CollectionCache const& cache)
+Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, DescriptionCache const& cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
@@ -557,7 +555,7 @@ Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, Rea
     return *this;
 }
 
-CellDescription const& Description::getCellRef(uint64_t const& cellId, CollectionCache const& cache) const
+CellDescription const& Description::getCellRef(uint64_t const& cellId, DescriptionCache const& cache) const
 {
     if (cache != nullptr) {
         auto index = getCellIndex(cellId, cache);
@@ -583,7 +581,7 @@ CellDescription const& Description::getCellRef(uint64_t const& cellId, Collectio
     }
 }
 
-CellDescription& Description::getCellRef(uint64_t const& cellId, CollectionCache const& cache)
+CellDescription& Description::getCellRef(uint64_t const& cellId, DescriptionCache const& cache)
 {
     if (cache != nullptr) {
         auto index = getCellIndex(cellId, cache);
@@ -657,6 +655,21 @@ std::vector<CellDescription> Description::getOtherCells(std::set<uint64_t> const
     return result;
 }
 
+GenomeDescription const& Description::getGenomeRef(uint64_t const& genomeId, DescriptionCache const& cache) const
+{
+    if (cache != nullptr) {
+        auto index = cache->genomeIdToIndex.at(genomeId);
+        return _genomes.at(index);
+    } else {
+        for (auto& genome: _genomes) {
+            if (genome._id == genomeId) {
+                return genome;
+            }
+        }
+        CHECK(false);
+    }
+}
+
 CellDescription& Description::getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex)
 {
     if (!creatureIndex.has_value()) {
@@ -723,9 +736,9 @@ CreatureDescription& Description::getOtherCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-_CollectionCache::Index Description::getCellIndex(uint64_t const& cellId, CollectionCache const& cache) const
+_DescriptionCache::Index Description::getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const
 {
-    _CollectionCache::Index result;
+    _DescriptionCache::Index result;
     auto findResult = cache->cellIdToIndex.find(cellId);
     if (findResult != cache->cellIdToIndex.end()) {
         result = findResult->second;
@@ -733,7 +746,7 @@ _CollectionCache::Index Description::getCellIndex(uint64_t const& cellId, Collec
         auto found = false;
         for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
             for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
-                result = _CollectionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)};
+                result = _DescriptionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)};
                 found = true;
                 break;
             }
@@ -742,7 +755,7 @@ _CollectionCache::Index Description::getCellIndex(uint64_t const& cellId, Collec
             }
         }
         for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
-            result = _CollectionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)};
+            result = _DescriptionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)};
             found = true;
             break;
         }

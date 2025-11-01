@@ -223,16 +223,25 @@ std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPrev
     for (auto const& [index, creatureId] : seedCreatureIds | boost::adaptors::indexed(0)) {
         creatureIdToIndex.insert_or_assign(creatureId, toInt(index));
     }
-
+    auto cache = preview.createCache();
     std::vector<Description> result(seedCreatureIds.size());
     for (auto& creature : preview._creatures) {
         if (creature._generation == 0) {
-            auto subGenomeIndex = creatureIdToIndex.at(creature._id);
-            result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
+            auto genomeIndex = cache->genomeIdToIndex.at(creature._genomeId);
+            auto const& genome = preview._genomes.at(genomeIndex);
+
+            auto index = creatureIdToIndex.at(creature._id);
+            result.at(index)._creatures.emplace_back(std::move(creature));
+            result.at(index)._genomes.emplace_back(genome);
         } else {
             CHECK(creature._generation == 1);
-            auto subGenomeIndex = creatureIdToIndex.at(creature._ancestorId.value());
-            result.at(subGenomeIndex)._creatures.emplace_back(std::move(creature));
+            auto genomeIndex = cache->genomeIdToIndex.at(creature._genomeId);
+            auto const& genome = preview._genomes.at(genomeIndex);
+
+            auto index = creatureIdToIndex.at(creature._ancestorId.value());
+            result.at(index)._creatures.emplace_back(std::move(creature));
+
+            // Genome already added from the seed creature (should be the same since no mutations in preview)
         }
     }
     return result;
