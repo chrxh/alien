@@ -840,15 +840,27 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     ASSERT_EQ(2, result.description._creatures.size());
     ASSERT_EQ(1, result.seedCreatureIds.size());
     
-    // Check that seed creature ID points to generation 0 creature
+    // Check that both generation 0 and generation 1 creatures exist in the result
     auto seedCreatureId = result.seedCreatureIds.at(0);
-    auto const& seedCreature = result.description._creatures.at(0);
-    EXPECT_EQ(0, seedCreature._generation);
-    EXPECT_EQ(seedCreatureId, seedCreature._id);
+    bool foundGen0 = false;
+    bool foundGen1 = false;
+    uint64_t resultGenomeId = 0;
+    for (auto const& creature : result.description._creatures) {
+        if (creature._generation == 0 && creature._id == seedCreatureId) {
+            foundGen0 = true;
+            resultGenomeId = creature._genomeId;
+        } else if (creature._generation == 1) {
+            foundGen1 = true;
+            // Both creatures should reference the same genome
+            EXPECT_EQ(resultGenomeId, creature._genomeId);
+        }
+    }
+    EXPECT_TRUE(foundGen0);
+    EXPECT_TRUE(foundGen1);
     
-    // Check that generation 1 creature exists
-    auto const& offspringCreature = result.description._creatures.at(1);
-    EXPECT_EQ(1, offspringCreature._generation);
+    // Verify the genome is in the result
+    ASSERT_EQ(1, result.description._genomes.size());
+    EXPECT_EQ(resultGenomeId, result.description._genomes.at(0)._id);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleSubGenome_withCache_offspringFirst)
@@ -893,7 +905,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     ASSERT_EQ(2, result.description._creatures.size());
     ASSERT_EQ(1, result.seedCreatureIds.size());
     
-    // Check that seed creature ID points to the generation 0 creature (which is at index 1 in result)
+    // Check that seed creature id points to the generation 0 creature (which is at index 1 in result)
     auto seedCreatureId = result.seedCreatureIds.at(0);
     auto const& offspringCreature = result.description._creatures.at(0);
     auto const& seedCreature = result.description._creatures.at(1);
@@ -936,7 +948,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
     EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT), cell2._pos.x);
     EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell2._pos.y);
     
-    // Check seed IDs correspond to correct creatures
+    // Check seed ids correspond to correct creatures
     EXPECT_EQ(result.seedCreatureIds.at(0), result.description._creatures.at(0)._id);
     EXPECT_EQ(result.seedCreatureIds.at(1), result.description._creatures.at(1)._id);
 }
@@ -981,6 +993,33 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
     // Both should be generation 0 (seeds)
     EXPECT_EQ(0, result.description._creatures.at(0)._generation);
     EXPECT_EQ(0, result.description._creatures.at(1)._generation);
+    
+    // Check that there are 2 genomes in the result
+    ASSERT_EQ(2, result.description._genomes.size());
+    
+    // Check that each creature references a genome in the result
+    for (auto const& creature : result.description._creatures) {
+        bool foundGenome = false;
+        for (auto const& genome : result.description._genomes) {
+            if (creature._genomeId == genome._id) {
+                foundGenome = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(foundGenome);
+    }
+    
+    // Both seed creature ids should be in the result
+    for (auto const& seedId : result.seedCreatureIds) {
+        bool foundSeed = false;
+        for (auto const& creature : result.description._creatures) {
+            if (creature._id == seedId) {
+                foundSeed = true;
+                break;
+            }
+        }
+        EXPECT_TRUE(foundSeed);
+    }
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
@@ -1025,6 +1064,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     
     // Should have the genome
     ASSERT_EQ(1, result.at(0)._genomes.size());
+    EXPECT_EQ(genome._id, result.at(0)._genomes.at(0)._id);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSeed_withOffspring)
@@ -1053,13 +1093,6 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
             .ancestorId(seedId)
             .cells({CellDescription().pos(RealVector2D{1, 1})})
     );
-    preview._creatures.emplace_back(
-        CreatureDescription()
-            .generation(1)
-            .genomeId(genome._id)
-            .ancestorId(seedId)
-            .cells({CellDescription().pos(RealVector2D{2, 2})})
-    );
     
     std::vector<uint64_t> seedCreatureIds = {seedId};
     
@@ -1068,8 +1101,8 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     // Should have 1 phenotype
     ASSERT_EQ(1, result.size());
     
-    // Should contain seed + 2 offspring = 3 creatures
-    ASSERT_EQ(3, result.at(0)._creatures.size());
+    // Should contain seed + 1 offspring = 2 creatures
+    ASSERT_EQ(2, result.at(0)._creatures.size());
     
     // Check that seed is included
     EXPECT_EQ(0, result.at(0)._creatures.at(0)._generation);
@@ -1078,8 +1111,10 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     // Check offspring
     EXPECT_EQ(1, result.at(0)._creatures.at(1)._generation);
     EXPECT_EQ(seedId, result.at(0)._creatures.at(1)._ancestorId);
-    EXPECT_EQ(1, result.at(0)._creatures.at(2)._generation);
-    EXPECT_EQ(seedId, result.at(0)._creatures.at(2)._ancestorId);
+    
+    // Check that appropriate genome is contained in the result
+    ASSERT_EQ(1, result.at(0)._genomes.size());
+    EXPECT_EQ(genome._id, result.at(0)._genomes.at(0)._id);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_withOffspring)
@@ -1133,13 +1168,6 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
             .ancestorId(seed2Id)
             .cells({CellDescription().pos(RealVector2D{11, 11})})
     );
-    preview._creatures.emplace_back(
-        CreatureDescription()
-            .generation(1)
-            .genomeId(genome2._id)
-            .ancestorId(seed2Id)
-            .cells({CellDescription().pos(RealVector2D{12, 12})})
-    );
     
     std::vector<uint64_t> seedCreatureIds = {seed1Id, seed2Id};
     
@@ -1154,10 +1182,15 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     EXPECT_EQ(seed1Id, result.at(0)._creatures.at(0)._id);
     EXPECT_EQ(1, result.at(0)._creatures.at(1)._generation);
     
-    // Phenotype 2: seed2 + 2 offspring = 3 creatures
-    ASSERT_EQ(3, result.at(1)._creatures.size());
+    // Phenotype 2: seed2 + 1 offspring = 2 creatures
+    ASSERT_EQ(2, result.at(1)._creatures.size());
     EXPECT_EQ(0, result.at(1)._creatures.at(0)._generation);
     EXPECT_EQ(seed2Id, result.at(1)._creatures.at(0)._id);
     EXPECT_EQ(1, result.at(1)._creatures.at(1)._generation);
-    EXPECT_EQ(1, result.at(1)._creatures.at(2)._generation);
+    
+    // Check that appropriate genomes are contained in result
+    ASSERT_EQ(1, result.at(0)._genomes.size());
+    EXPECT_EQ(genome1._id, result.at(0)._genomes.at(0)._id);
+    ASSERT_EQ(1, result.at(1)._genomes.size());
+    EXPECT_EQ(genome2._id, result.at(1)._genomes.at(0)._id);
 }
