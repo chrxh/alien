@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/SettingsForSimulation.h"
+#include <EngineInterface/SettingsForSimulation.h>
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
@@ -23,4 +23,3 @@ private:
 
     GarbageCollectorKernelsService _garbageCollector;
 };
-

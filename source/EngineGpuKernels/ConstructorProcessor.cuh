@@ -1,15 +1,15 @@
 #pragma once
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
+#include "CellConnectionProcessor.cuh"
+#include "ConstructorHelper.cuh"
+#include "CudaShapeGenerator.cuh"
+#include "Genome.cuh"
+#include "MuscleProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationCudaFacade.cuh"
 #include "SimulationStatistics.cuh"
-#include "CellConnectionProcessor.cuh"
-#include "CudaShapeGenerator.cuh"
-#include "ConstructorHelper.cuh"
-#include "Genome.cuh"
-#include "MuscleProcessor.cuh"
 
 class ConstructorProcessor
 {
@@ -37,21 +37,24 @@ private:
         float angle;
         float energy;
         int numAdditionalConnections;  // -1 = none
-        int requiredNodeId1;    // -1 = none
-        int requiredNodeId2;    // -1 = none
+        int requiredNodeId1;           // -1 = none
+        int requiredNodeId2;           // -1 = none
     };
-//
-//    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-//
+    //
+    //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    //
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell, bool isPreview);
     __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Cell* cell);
     __inline__ __device__ static ConstructionData createConstructionData(Cell* cell);
 
-    __inline__ __device__ static Cell* tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell*
+    tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static Cell* getLastConstructedCellOnBranch(Cell* hostCell);
-    __inline__ __device__ static Cell* startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
-    __inline__ __device__ static Cell* continueConstructionOnBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell*
+    startConstructionOnNewBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
+    __inline__ __device__ static Cell*
+    continueConstructionOnBranch(SimulationData& data, SimulationStatistics& statistics, Cell* hostCell, ConstructionData const& constructionData);
 
     __inline__ __device__ static void getCellsToConnect(
         Cell* result[],
@@ -192,7 +195,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 }
             }
         }
-    } 
+    }
 }
 
 __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Cell* cell)
@@ -247,7 +250,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.isFirstNodeOfFirstConcatenation = isFirstNode && isFirstConcatenation;
     result.isLastNode = ConstructorHelper::isLastNode(constructor, *genome);
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, *genome);
-    
+
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
     result.angle = result.node->referenceAngle;
@@ -347,9 +350,9 @@ __inline__ __device__ Cell* ConstructorProcessor::getLastConstructedCellOnBranch
 }
 
 __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
-    SimulationData& data, 
-    SimulationStatistics& statistics, 
-    Cell* hostCell, 
+    SimulationData& data,
+    SimulationStatistics& statistics,
+    Cell* hostCell,
     ConstructionData const& constructionData)
 {
     auto& constructor = hostCell->cellTypeData.constructor;
@@ -474,7 +477,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
             origAngleFromPreviousOnLastConstructedCell = constructionData.lastConstructionCell->connections[i].angleFromPrevious;
         }
     }
-     
+
     // Move connection between lastConstructionCell and hostCell to a connection between lastConstructionCell and newCell
     for (int i = 0; i < lastCell->numConnections; ++i) {
         auto& connection = lastCell->connections[i];
@@ -500,13 +503,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
             distance += cudaSimulationParameters.constructorAdditionalOffspringDistance;
         }
 
-        if (!CellConnectionProcessor::tryAddConnections(
-                data,
-                newCell,
-                hostCell,
-                0,
-                origAngleFromPreviousOnHostCell,
-                distance)) {
+        if (!CellConnectionProcessor::tryAddConnections(data, newCell, hostCell, 0, origAngleFromPreviousOnHostCell, distance)) {
             CellConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
             hostCell->cellState = CellState_Dying;
             for (int i = 0; i < hostCell->numConnections; ++i) {
@@ -538,7 +535,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
             if (otherCell->tryLock()) {
                 if (newCell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
                     if (CellConnectionProcessor::tryAddConnections(data, newCell, otherCell, 0, 0, desiredDistance, constructionData.gene->angleAlignment)) {
-                        ++numConnectedCells; 
+                        ++numConnectedCells;
                     }
                 }
                 otherCell->releaseLock();
@@ -645,8 +642,8 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
             hostCell->detached,
             [&](Cell* const& otherCell) {
                 if (otherCell == constructionData.lastConstructionCell || otherCell == hostCell
-                    || (otherCell->cellState != CellState_Constructing && otherCell->activationTime == 0)
-                    || otherCell->creature != constructionData.creature || otherCell->parentNodeIndex != hostCell->nodeIndex) {
+                    || (otherCell->cellState != CellState_Constructing && otherCell->activationTime == 0) || otherCell->creature != constructionData.creature
+                    || otherCell->parentNodeIndex != hostCell->nodeIndex) {
                     return false;
                 }
 
@@ -727,8 +724,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
     }
 }
 
-__inline__ __device__ Cell*
-ConstructorProcessor::constructCellIntern(
+__inline__ __device__ Cell* ConstructorProcessor::constructCellIntern(
     SimulationData& data,
     SimulationStatistics& statistics,
     uint64_t& cellIndex,
@@ -743,7 +739,14 @@ ConstructorProcessor::constructCellIntern(
     ObjectFactory factory;
     factory.init(&data);
     Cell* result = factory.createCellFromNode(
-        cellIndex, constructionData.creature, constructor.geneIndex, constructor.currentNodeIndex, hostCell->nodeIndex, posOfNewCell, hostCell->vel, constructionData.energy);
+        cellIndex,
+        constructionData.creature,
+        constructor.geneIndex,
+        constructor.currentNodeIndex,
+        hostCell->nodeIndex,
+        posOfNewCell,
+        hostCell->vel,
+        constructionData.energy);
     result->frontAngleId = hostCell->frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
@@ -818,8 +821,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         }
     }
 
-    auto externalEnergyConditionalInflowFactor =
-        [&] {
+    auto externalEnergyConditionalInflowFactor = [&] {
         if (!cudaSimulationParameters.externalEnergyControlToggle.value) {
             return 0.0f;
         }

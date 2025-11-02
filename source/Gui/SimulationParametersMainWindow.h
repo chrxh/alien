@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParameters.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/SimulationParameters.h>
 
 #include "AlienWindow.h"
-#include "SimulationParametersBaseWidget.h"
 #include "LayerColorPalette.h"
+#include "SimulationParametersBaseWidget.h"
 
 class SimulationParametersMainWindow : public AlienWindow<SimulationFacade>
 {

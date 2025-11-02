@@ -1,10 +1,10 @@
 #include <optional>
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
-#include "EngineInterface/StatisticsRawData.h"
-#include "EngineInterface/SettingsForSimulation.h"
-#include "EngineInterface/SimulationParametersUpdateConfig.h"
+#include <EngineInterface/SettingsForSimulation.h>
+#include <EngineInterface/SimulationParametersUpdateConfig.h>
+#include <EngineInterface/StatisticsRawData.h>
 
 #include "Definitions.cuh"
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "DensityMap.cuh"
 #include "ActiveRadiationSources.cuh"
+#include "DensityMap.cuh"
 
 struct PreprocessedSimulationData
 {

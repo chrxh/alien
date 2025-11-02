@@ -1,12 +1,13 @@
 #pragma once
 
 #include <vector>
+
 #include <boost/property_tree/json_parser.hpp>
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
-#include "UserTO.h"
 #include "Definitions.h"
+#include "UserTO.h"
 
 class NetworkResourceParserService
 {

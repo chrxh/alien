@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Base/Definitions.h"
-#include "Base/Singleton.h"
+#include <Base/Definitions.h>
+#include <Base/Singleton.h>
 
 #include "Description.h"
 
@@ -92,12 +92,7 @@ public:
         bool& overlappingCheckSuccessful) const;
 
     using Occupancy = std::unordered_map<IntVector2D, std::vector<RealVector2D>>;
-    void addIfSpaceAvailable(
-        Description& result,
-        Occupancy& cellOccupancy,
-        Description const& toAdd,
-        float distance,
-        IntVector2D const& worldSize) const;
+    void addIfSpaceAvailable(Description& result, Occupancy& cellOccupancy, Description const& toAdd, float distance, IntVector2D const& worldSize) const;
 
     void flattenTopology(Description& description, IntVector2D const& worldSize) const;
 
@@ -126,9 +121,5 @@ public:
     void removeCellIf(Description& collection, std::function<bool(CellDescription const&)> const& predicate) const;
 
 private:
-    bool isCellPresent(
-        Occupancy const& cellPosBySlot,
-        SpaceCalculator const& spaceCalculator,
-        RealVector2D const& posToCheck,
-        float distance) const;
+    bool isCellPresent(Occupancy const& cellPosBySlot, SpaceCalculator const& spaceCalculator, RealVector2D const& posToCheck, float distance) const;
 };

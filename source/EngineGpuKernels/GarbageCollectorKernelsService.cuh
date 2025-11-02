@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "EngineInterface/CudaSettings.h"
+#include <EngineInterface/CudaSettings.h>
 
-#include "Definitions.cuh"
-#include "Macros.cuh"
 #include "Base.cuh"
+#include "Definitions.cuh"
 #include "GarbageCollectorKernels.cuh"
+#include "Macros.cuh"
 
 class _GarbageCollectorKernelsService
 {

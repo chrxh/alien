@@ -1,7 +1,6 @@
-﻿#include "EditKernelsService.cuh"
-
-#include "DataAccessKernels.cuh"
+﻿#include "DataAccessKernels.cuh"
 #include "EditKernels.cuh"
+#include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
 #include "SimulationKernels.cuh"
 
@@ -163,7 +162,7 @@ void _EditKernelsService::removeSelectedObjects(CudaSettings const& gpuSettings,
 
     KERNEL_CALL(cudaRemoveSelectedEntities, data, includeClusters);
     cudaDeviceSynchronize();
-    
+
     _garbageCollector->cleanupAfterDataManipulation(gpuSettings, data);
 }
 
@@ -215,7 +214,7 @@ void _EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationD
         cudaDeviceSynchronize();
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all affecting connections may be removed at first => repeat
 
-        cudaDeviceSynchronize();
+    cudaDeviceSynchronize();
 
     counter = 10;
     do {
@@ -248,13 +247,11 @@ void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, 
         KERNEL_CALL(cudaChangeCell, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-
     }
     if (copyToHost(changeTO.numParticles) == 1) {
         KERNEL_CALL(cudaChangeParticle, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
-
     }
     cudaDeviceSynchronize();
 

@@ -2,8 +2,9 @@
 
 #include <thread>
 
-#include "PersisterInterface/PersisterFacade.h"
-#include "EngineInterface/Definitions.h"
+#include <EngineInterface/Definitions.h>
+
+#include <PersisterInterface/PersisterFacade.h>
 
 #include "Definitions.h"
 #include "PersisterWorker.h"
@@ -68,7 +69,7 @@ public:
 private:
     static auto constexpr MaxWorkerThreads = 4;
 
-    template<typename Request, typename RequestData>
+    template <typename Request, typename RequestData>
     PersisterRequestId scheduleRequest(SenderInfo const& senderInfo, RequestData const& data);
 
     template <typename RequestResult, typename ResultData>

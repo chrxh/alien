@@ -1,18 +1,17 @@
 #pragma once
 
+#include <EngineInterface/InspectedEntityIds.h>
+
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/InspectedEntityIds.h"
-
-#include "TO.cuh"
 #include "Base.cuh"
+#include "EditKernels.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
-#include "GarbageCollectorKernels.cuh"
-#include "EditKernels.cuh"
-
 #include "SimulationData.cuh"
+#include "TO.cuh"
 
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data);
 __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data);

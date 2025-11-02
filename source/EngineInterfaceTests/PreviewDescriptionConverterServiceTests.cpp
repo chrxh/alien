@@ -1,17 +1,16 @@
-#include <gtest/gtest.h>
-
-#include "Base/Definitions.h"
-#include "Base/Math.h"
-
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/PreviewDescriptionConverterService.h"
-
 #include <boost/range/combine.hpp>
 
-#include "EngineInterface/SpaceCalculator.h"
+#include <gtest/gtest.h>
 
-#include "EngineTestData/TestHelper.h"
+#include <Base/Definitions.h>
+#include <Base/Math.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/PreviewDescriptionConverterService.h>
+#include <EngineInterface/SpaceCalculator.h>
+
+#include <EngineTestData/TestHelper.h>
 
 class PreviewDescriptionConverterServiceTests : public ::testing::Test
 {
@@ -41,12 +40,14 @@ public:
         for (auto const& expectedConnection : expectedConnections) {
             auto found = false;
             for (auto const& connection : preview._connections) {
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell1) && TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell2)
-                        && expectedConnection.arrowToCell1 == connection._arrowToCell1 && expectedConnection.arrowToCell2 == connection._arrowToCell2) {
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell2)
+                    && expectedConnection.arrowToCell1 == connection._arrowToCell1 && expectedConnection.arrowToCell2 == connection._arrowToCell2) {
                     found = true;
                     break;
                 }
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell1) && TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell2)
                     && expectedConnection.arrowToCell2 == connection._arrowToCell1 && expectedConnection.arrowToCell1 == connection._arrowToCell2) {
                     found = true;
                     break;
@@ -144,7 +145,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
         }),
     });
     input.addConnection(1, 2);
-    
+
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
     ASSERT_EQ(2, result.description._cells.size());
@@ -169,8 +170,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({
-            NodeDescription().color(2).signalRestriction(
-                SignalRestrictionGenomeDescription().active(true).baseAngle(BaseAngle).openingAngle(OpeningAngle)),
+            NodeDescription().color(2).signalRestriction(SignalRestrictionGenomeDescription().active(true).baseAngle(BaseAngle).openingAngle(OpeningAngle)),
             NodeDescription().color(3),
         }),
     });
@@ -229,7 +229,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
     EXPECT_EQ(4, cell3._color);
 
     auto oneThird = 0.333333f;
-    auto expectedCell1_pos = RealVector2D{oneThird, oneThird*2};
+    auto expectedCell1_pos = RealVector2D{oneThird, oneThird * 2};
     auto expectedCell2_pos = RealVector2D{oneThird, -oneThird};
     auto expectedCell3_pos = RealVector2D{-oneThird * 2, -oneThird};
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));

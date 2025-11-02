@@ -1,11 +1,11 @@
 #include "TestHelper.h"
 
-bool TestHelper::approxCompare(double expected, double actual, float precision/* = 0.001f*/)
+bool TestHelper::approxCompare(double expected, double actual, float precision /* = 0.001f*/)
 {
     return approxCompare(toFloat(expected), toFloat(actual), precision);
 }
 
-bool TestHelper::approxCompare(float expected, float actual, float precision/* = 0.001f*/)
+bool TestHelper::approxCompare(float expected, float actual, float precision /* = 0.001f*/)
 {
     auto absNorm = std::abs(expected) + std::abs(actual);
     if (absNorm < precision) {
@@ -14,12 +14,12 @@ bool TestHelper::approxCompare(float expected, float actual, float precision/* =
     return std::abs(expected - actual) / absNorm < precision;
 }
 
-bool TestHelper::approxCompare(RealVector2D const& expected, RealVector2D const& actual, float precision/* = 0.001f*/)
+bool TestHelper::approxCompare(RealVector2D const& expected, RealVector2D const& actual, float precision /* = 0.001f*/)
 {
     return approxCompare(expected.x, actual.x, precision) && approxCompare(expected.y, actual.y, precision);
 }
 
-bool TestHelper::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual, float precision/* = 0.001f*/)
+bool TestHelper::approxCompare(std::vector<float> const& expected, std::vector<float> const& actual, float precision /* = 0.001f*/)
 {
     if (expected.size() != actual.size()) {
         return false;
@@ -32,7 +32,7 @@ bool TestHelper::approxCompare(std::vector<float> const& expected, std::vector<f
     return true;
 }
 
-bool TestHelper::approxCompareAngles(float expected, float actual, float precision/* = 0.001f*/)
+bool TestHelper::approxCompareAngles(float expected, float actual, float precision /* = 0.001f*/)
 {
     return approxCompare(Math::getNormalizedAngle(expected - actual, -180.0f), 0.0f, precision);
 }

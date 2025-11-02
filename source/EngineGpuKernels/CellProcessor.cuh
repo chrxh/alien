@@ -1,20 +1,20 @@
 ﻿#pragma once
 
+#include <EngineInterface/CellTypeConstants.h>
+
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "EngineInterface/CellTypeConstants.h"
-
-#include "TO.cuh"
 #include "Base.cuh"
-#include "ObjectFactory.cuh"
-#include "Map.cuh"
-#include "Physics.cuh"
 #include "CellConnectionProcessor.cuh"
-#include "MuscleProcessor.cuh"
 #include "ConstructorHelper.cuh"
-#include "RadiationProcessor.cuh"
+#include "Map.cuh"
+#include "MuscleProcessor.cuh"
+#include "ObjectFactory.cuh"
 #include "ParameterCalculator.cuh"
+#include "Physics.cuh"
+#include "RadiationProcessor.cuh"
+#include "TO.cuh"
 
 class CellProcessor
 {
@@ -254,7 +254,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                     }
                 }
 
-                float2 r{0,0};
+                float2 r{0, 0};
                 if (closestBarrierCell->numConnections <= 1) {
                     r = data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos);
                 } else {
@@ -283,8 +283,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
 
             cell->pos += cellPosDelta;
-            cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value
-                + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
+            cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             cell->shared2.x = density;
         }
         __syncthreads();
@@ -298,70 +297,66 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        data.cellMap.executeForEach(
-            cell->pos, cudaSimulationParameters.maxCollisionDistance.value, cell->detached, [&](auto const& otherCell) {
-                if (otherCell == cell) {
-                    return;
+        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.maxCollisionDistance.value, cell->detached, [&](auto const& otherCell) {
+            if (otherCell == cell) {
+                return;
+            }
+
+            auto posDelta = cell->pos - otherCell->pos;
+            data.cellMap.correctDirection(posDelta);
+
+            auto distance = Math::length(posDelta);
+
+            //overlap correction
+            if (!cell->barrier) {
+                if (distance < cudaSimulationParameters.minCellDistance.value) {
+                    cell->pos += posDelta * cudaSimulationParameters.minCellDistance.value / 5;
+                }
+            }
+
+            bool alreadyConnected = false;
+            for (int i = 0; i < cell->numConnections; ++i) {
+                auto const& connectedCell = cell->connections[i].cell;
+                if (connectedCell == otherCell) {
+                    alreadyConnected = true;
+                    break;
+                }
+            }
+
+            if (!alreadyConnected) {
+
+                //collision algorithm
+                auto velDelta = cell->vel - otherCell->vel;
+                auto isApproaching = Math::dot(posDelta, velDelta) < 0;
+                auto barrierFactor = cell->barrier ? 2 : 1;
+
+                if (Math::length(cell->vel) > 0.5f && isApproaching) {
+                    auto distanceSquared = distance * distance + 0.25f;
+                    auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
+                    atomicAdd(&cell->shared1.x, force.x);
+                    atomicAdd(&cell->shared1.y, force.y);
+                    atomicAdd(&otherCell->shared1.x, -force.x);
+                    atomicAdd(&otherCell->shared1.y, -force.y);
+                } else {
+                    auto force = Math::getNormalized(posDelta) * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
+                        * cudaSimulationParameters.repulsionStrength.value * barrierFactor;
+                    atomicAdd(&cell->shared1.x, force.x);
+                    atomicAdd(&cell->shared1.y, force.y);
+                    atomicAdd(&otherCell->shared1.x, -force.x);
+                    atomicAdd(&otherCell->shared1.y, -force.y);
                 }
 
-                auto posDelta = cell->pos - otherCell->pos;
-                data.cellMap.correctDirection(posDelta);
+                //fusion
+                auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
+                auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
-                auto distance = Math::length(posDelta);
-
-                //overlap correction
-                if (!cell->barrier) {
-                    if (distance < cudaSimulationParameters.minCellDistance.value) {
-                        cell->pos += posDelta * cudaSimulationParameters.minCellDistance.value / 5;
-                    }
+                if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS && (cell->sticky || otherCell->sticky)
+                    && Math::length(velDelta) >= cellFusionVelocity && isApproaching && cell->energy <= cellMaxBindingEnergy
+                    && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier && !otherCell->barrier) {
+                    CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                 }
-
-                bool alreadyConnected = false;
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto const& connectedCell = cell->connections[i].cell;
-                    if (connectedCell == otherCell) {
-                        alreadyConnected = true;
-                        break;
-                    }
-                }
-
-                if (!alreadyConnected) {
-
-                    //collision algorithm
-                    auto velDelta = cell->vel - otherCell->vel;
-                    auto isApproaching = Math::dot(posDelta, velDelta) < 0;
-                    auto barrierFactor = cell->barrier ? 2 : 1;
-
-                    if (Math::length(cell->vel) > 0.5f && isApproaching) {
-                        auto distanceSquared = distance * distance + 0.25f;
-                        auto force = posDelta * Math::dot(velDelta, posDelta) / (-2 * distanceSquared) * barrierFactor;
-                        atomicAdd(&cell->shared1.x, force.x);
-                        atomicAdd(&cell->shared1.y, force.y);
-                        atomicAdd(&otherCell->shared1.x, -force.x);
-                        atomicAdd(&otherCell->shared1.y, -force.y);
-                    } else {
-                        auto force = Math::getNormalized(posDelta)
-                            * (cudaSimulationParameters.maxCollisionDistance.value - Math::length(posDelta))
-                            * cudaSimulationParameters.repulsionStrength.value * barrierFactor;
-                        atomicAdd(&cell->shared1.x, force.x);
-                        atomicAdd(&cell->shared1.y, force.y);
-                        atomicAdd(&otherCell->shared1.x, -force.x);
-                        atomicAdd(&otherCell->shared1.y, -force.y);
-                    }
-
-                    //fusion
-                    auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
-                    auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
-
-                    if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
-                        && (cell->sticky || otherCell->sticky)
-                        && Math::length(velDelta) >= cellFusionVelocity
-                        && isApproaching && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy && !cell->barrier
-                        && !otherCell->barrier) {
-                        CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
-                    }
-                }
-            });
+            }
+        });
     }
 }
 
@@ -388,8 +383,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
 __inline__ __device__ void CellProcessor::applyForces(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto const partition =
-        calcAllThreadsPartition(cells.getNumEntries());
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -509,8 +503,7 @@ __inline__ __device__ void CellProcessor::checkConnections(SimulationData& data)
 __inline__ __device__ void CellProcessor::verletPositionUpdate(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto const partition =
-        calcAllThreadsPartition(cells.getNumEntries());
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -587,7 +580,7 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
 
         bool isSameCreatureNeighborDetaching = false;
         bool isOtherCreatureNeighborDetaching = false;
-        bool isSameCreatureNeighborReviving= false;
+        bool isSameCreatureNeighborReviving = false;
         bool isNeighborActivating = false;
         //int activatingCellConnection = -1;
         for (int i = 0; i < cell->numConnections; ++i) {
@@ -698,12 +691,10 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_calcFutureValue(Simul
                         continue;
                     }
                     if (otherCell->frontAngleId == cell->creature->frontAngleId) {
-                        auto frontAngle_otherCell_cell = Math::getNormalizedAngle(
-                            otherCell->frontAngle + getInitialAngelSpan(otherCell, cell, otherCell->connections[0].cell),
-                            -180.0f);
+                        auto frontAngle_otherCell_cell =
+                            Math::getNormalizedAngle(otherCell->frontAngle + getInitialAngelSpan(otherCell, cell, otherCell->connections[0].cell), -180.0f);
                         auto frontAngle_cell_otherCell = Math::getNormalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
-                        auto frontAngle_cell_connection0 =
-                            Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(cell, 0, i), -180.0f);
+                        auto frontAngle_cell_connection0 = Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(cell, 0, i), -180.0f);
                         cell->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
 
                         update = true;
@@ -746,8 +737,7 @@ __inline__ __device__ void CellProcessor::frontAngleUpdate_applyFutureValue(Simu
 __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto const partition =
-        calcAllThreadsPartition(cells.getNumEntries());
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     auto const innerFriction = cudaSimulationParameters.innerFriction.value;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -780,8 +770,7 @@ __inline__ __device__ void CellProcessor::applyInnerFriction(SimulationData& dat
 __inline__ __device__ void CellProcessor::applyFriction(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto const partition =
-        calcAllThreadsPartition(cells.getNumEntries());
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -798,8 +787,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 {
     auto& cells = data.objects.cells;
 
-    auto partition =
-        calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
         if (cell->barrier) {
@@ -842,8 +830,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
 __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition =
-        calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -981,8 +968,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
     }
 }
 
-__device__ __inline__ float
-CellProcessor::getInitialAngelSpan(Cell* cell, int connectionIndex1, int connectionIndex2)
+__device__ __inline__ float CellProcessor::getInitialAngelSpan(Cell* cell, int connectionIndex1, int connectionIndex2)
 {
     if ((connectionIndex1 - connectionIndex2 + cell->numConnections) % cell->numConnections == 0) {
         return 0;
@@ -998,8 +984,7 @@ CellProcessor::getInitialAngelSpan(Cell* cell, int connectionIndex1, int connect
     return Math::getNormalizedAngle(result, -180.0f);
 }
 
-__device__ __inline__ float
-CellProcessor::getInitialAngelSpan(Cell* cell, Cell* connectedCell1, Cell* connectedCell2)
+__device__ __inline__ float CellProcessor::getInitialAngelSpan(Cell* cell, Cell* connectedCell1, Cell* connectedCell2)
 {
     auto connectionIndex1 = -1;
     auto connectionIndex2 = -1;

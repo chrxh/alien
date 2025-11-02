@@ -1,12 +1,12 @@
 #include "SimulationParametersLayerWidget.h"
 
-#include "EngineInterface/LocationHelper.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/ParametersValidationService.h"
+#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/ParametersValidationService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "SpecificationGuiService.h"
 #include "SimulationInteractionController.h"
+#include "SpecificationGuiService.h"
 
 void _SimulationParameterLayerWidget::init(SimulationFacade const& simulationFacade, int orderNumber)
 {

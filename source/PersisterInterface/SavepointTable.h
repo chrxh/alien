@@ -52,4 +52,3 @@ private:
     int _sequenceNumber = 0;
     std::deque<SavepointEntry> _entries;
 };
-

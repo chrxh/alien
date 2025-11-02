@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "EngineInterface/GeometryBuffers.h"
+#include <EngineInterface/GeometryBuffers.h>
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"

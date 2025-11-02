@@ -2,8 +2,10 @@
 
 #include <string>
 
-#include "EngineInterface/GenomeDescription.h"
-#include "Network/Definitions.h"
+#include <Network/Definitions.h>
+
+#include <EngineInterface/GenomeDescription.h>
+
 #include "DownloadCache.h"
 
 struct UploadNetworkResourceRequestData

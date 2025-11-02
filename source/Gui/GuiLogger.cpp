@@ -1,6 +1,6 @@
 #include "GuiLogger.h"
 
-#include "Base/LoggingService.h"
+#include <Base/LoggingService.h>
 
 _GuiLogger::_GuiLogger()
 {

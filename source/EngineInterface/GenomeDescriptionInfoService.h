@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <set>
+#include <vector>
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
 #include "GenomeDescription.h"
 #include "SimulationParameters.h"
@@ -24,7 +24,8 @@ public:
     std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDescription const& genome) const;
 
 private:
-    std::vector<GeneIndicesForSubGenome> getGeneIndicesForSubGenomes(GenomeDescription const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex) const;
+    std::vector<GeneIndicesForSubGenome>
+    getGeneIndicesForSubGenomes(GenomeDescription const& genome, std::set<int> const& nonInspectedGeneIndices, int startGeneIndex) const;
 
     struct ReferencedGenes
     {

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Base/Singleton.h"
-
-#include "Definitions.h"
-
 #include <cstdint>
 
 #include <imgui.h>
+
+#include <Base/Singleton.h>
+
+#include "Definitions.h"
 
 namespace Const
 {
@@ -125,7 +125,7 @@ class StyleRepository
 {
     MAKE_SINGLETON(StyleRepository);
 
-public :
+public:
     void setup();
 
     ImFont* getIconFont() const;

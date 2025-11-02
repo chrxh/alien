@@ -1,24 +1,26 @@
 #include "SimulationParametersMainWindow.h"
 
-#include <ImFileDialog.h>
-
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/StringHelper.h"
-#include "EngineInterface/LocationHelper.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/ParametersEditService.h"
-#include "PersisterInterface/SerializerService.h"
+#include <Base/StringHelper.h>
 
+#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/ParametersEditService.h>
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/SerializerService.h>
+
+#include "AlienGui.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "LocationController.h"
 #include "OverlayController.h"
-#include "SimulationParametersSourceWidget.h"
 #include "SimulationParametersLayerWidget.h"
-#include "AlienGui.h"
+#include "SimulationParametersSourceWidget.h"
 #include "SpecificationGuiService.h"
 #include "Viewport.h"
+
+#include <ImFileDialog.h>
 
 namespace
 {
@@ -127,16 +129,15 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_PASTE)
-                                      .secondText(ICON_FA_UNDO)
-                                      .secondTextOffset(RealVector2D{32.0f, 28.0f})
-                                      .secondTextScale(0.3f)
-                                      .tooltip("Replace reference values by values from the clipboard. This is useful to see the diff between the current "
-                                               "parameters and those from the clipboard.")
-                                      .disabled(!_copiedParameters))) {
+                                    .text(ICON_FA_PASTE)
+                                    .secondText(ICON_FA_UNDO)
+                                    .secondTextOffset(RealVector2D{32.0f, 28.0f})
+                                    .secondTextScale(0.3f)
+                                    .tooltip("Replace reference values by values from the clipboard. This is useful to see the diff between the current "
+                                             "parameters and those from the clipboard.")
+                                    .disabled(!_copiedParameters))) {
         auto parameters = _simulationFacade->getSimulationParameters();
-        if (_copiedParameters->numLayers == parameters.numLayers
-            && _copiedParameters->numSources == parameters.numSources) {
+        if (_copiedParameters->numLayers == parameters.numLayers && _copiedParameters->numSources == parameters.numSources) {
             _simulationFacade->setOriginalSimulationParameters(*_copiedParameters);
             printOverlayMessage("Reference simulation parameters replaced");
         } else {
@@ -160,10 +161,10 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_PLUS)
-                                      .secondText(ICON_FA_CLONE)
-                                      .disabled(_selectedOrderNumber == 0)
-                                      .tooltip("Clone selected layer/radiation source"))) {
+                                    .text(ICON_FA_PLUS)
+                                    .secondText(ICON_FA_CLONE)
+                                    .disabled(_selectedOrderNumber == 0)
+                                    .tooltip("Clone selected layer/radiation source"))) {
         onCloneLocation();
     }
 
@@ -178,17 +179,17 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_CHEVRON_UP)
-                                      .disabled(_selectedOrderNumber <= 1)
-                                      .tooltip("Move selected layer/radiation source upward"))) {
+                                    .text(ICON_FA_CHEVRON_UP)
+                                    .disabled(_selectedOrderNumber <= 1)
+                                    .tooltip("Move selected layer/radiation source upward"))) {
         onDecreaseOrderNumber();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_CHEVRON_DOWN)
-                                      .tooltip("Move selected layer/radiation source downward")
-                                      .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0))) {
+                                    .text(ICON_FA_CHEVRON_DOWN)
+                                    .tooltip("Move selected layer/radiation source downward")
+                                    .disabled(_selectedOrderNumber >= _locations.size() - 1 || _selectedOrderNumber == 0))) {
         onIncreaseOrderNumber();
     }
 
@@ -197,8 +198,8 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
-                                      .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
-                                      .tooltip("Open parameters for selected layer/radiation source in a new window"))) {
+                                    .text(ICON_FA_EXTERNAL_LINK_SQUARE_ALT)
+                                    .tooltip("Open parameters for selected layer/radiation source in a new window"))) {
         onOpenInLocationWindow();
     }
 
@@ -209,8 +210,8 @@ void SimulationParametersMainWindow::processMasterWidget()
 {
     if (ImGui::BeginChild("##master", {0, getMasterWidgetHeight()})) {
 
-        if (_masterWidgetOpen = AlienGui::BeginTreeNode(
-                AlienGui::TreeNodeParameters().name("Overview").rank(AlienGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
+        if (_masterWidgetOpen =
+                AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Overview").rank(AlienGui::TreeNodeRank::High).defaultOpen(_masterWidgetOpen))) {
             ImGui::Spacing();
             if (ImGui::BeginChild("##master2", {0, -ImGui::GetStyle().FramePadding.y})) {
                 processLocationTable();
@@ -234,9 +235,9 @@ void SimulationParametersMainWindow::processDetailWidget()
     if (ImGui::BeginChild("##detail", {0, height})) {
         auto title = _filter.empty() ? "Parameters" : "Parameters (filtered)";
         if (_detailWidgetOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters()
-                                                              .name((std::string(title) + "###parameters").c_str())
-                                                              .rank(AlienGui::TreeNodeRank::High)
-                                                              .defaultOpen(_detailWidgetOpen))) {
+                                                            .name((std::string(title) + "###parameters").c_str())
+                                                            .rank(AlienGui::TreeNodeRank::High)
+                                                            .defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
             AlienGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
@@ -632,8 +633,8 @@ void SimulationParametersMainWindow::updateLocations()
     auto pinnedString = radiationStrength.pinned.contains(0) ? ICON_FA_THUMBTACK " " : " ";
     _locations.at(0) = Location{"Base", LocationType::Base, "-", pinnedString + StringHelper::format(radiationStrength.values.front() * 100 + 0.05f, 1) + "%"};
     for (int i = 0; i < parameters.numLayers; ++i) {
-        auto position =
-            "(" + StringHelper::format(parameters.layerPosition.layerValues[i].x, 0) + ", " + StringHelper::format(parameters.layerPosition.layerValues[i].y, 0) + ")";
+        auto position = "(" + StringHelper::format(parameters.layerPosition.layerValues[i].x, 0) + ", "
+            + StringHelper::format(parameters.layerPosition.layerValues[i].y, 0) + ")";
         _locations.at(parameters.layerOrderNumbers[i]) = Location{
             .name = parameters.layerName.layerValues[i],
             .type = LocationType::Layer,
@@ -644,8 +645,7 @@ void SimulationParametersMainWindow::updateLocations()
         auto position = "(" + StringHelper::format(parameters.sourcePosition.sourceValues[i].x, 0) + ", "
             + StringHelper::format(parameters.sourcePosition.sourceValues[i].y, 0) + ")";
         auto pinnedString = radiationStrength.pinned.contains(i + 1) ? ICON_FA_THUMBTACK " " : " ";
-        _locations.at(parameters.sourceOrderNumbers[i]) =
-            Location{
+        _locations.at(parameters.sourceOrderNumbers[i]) = Location{
             parameters.sourceName.sourceValues[i],
             LocationType::Source,
             position,
@@ -703,4 +703,3 @@ float SimulationParametersMainWindow::getDetailWidgetHeight() const
 {
     return _detailWidgetOpen ? std::max(scale(MasterMinHeight), ImGui::GetContentRegionAvail().y - getExpertWidgetRefHeight() + scale(4.0f)) : scale(25.0f);
 }
-

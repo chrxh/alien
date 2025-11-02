@@ -1,21 +1,21 @@
 #pragma once
 
-#include "PersisterInterface/DeleteNetworkResourceRequestData.h"
-#include "PersisterInterface/DownloadNetworkResourceRequestData.h"
-#include "PersisterInterface/EditNetworkResourceRequestData.h"
-#include "PersisterInterface/GetNetworkResourcesRequestData.h"
-#include "PersisterInterface/GetPeakSimulationRequestData.h"
-#include "PersisterInterface/GetUserNamesForReactionRequestData.h"
-#include "PersisterInterface/LoginRequestData.h"
-#include "PersisterInterface/MoveNetworkResourceRequestData.h"
-#include "PersisterInterface/ReadSimulationRequestData.h"
-#include "PersisterInterface/PersisterRequestId.h"
-#include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
-#include "PersisterInterface/SaveDeserializedSimulationRequestData.h"
-#include "PersisterInterface/SaveSimulationRequestData.h"
-#include "PersisterInterface/SenderInfo.h"
-#include "PersisterInterface/ToggleReactionNetworkResourceRequestData.h"
-#include "PersisterInterface/UploadNetworkResourceRequestData.h"
+#include <PersisterInterface/DeleteNetworkResourceRequestData.h>
+#include <PersisterInterface/DownloadNetworkResourceRequestData.h>
+#include <PersisterInterface/EditNetworkResourceRequestData.h>
+#include <PersisterInterface/GetNetworkResourcesRequestData.h>
+#include <PersisterInterface/GetPeakSimulationRequestData.h>
+#include <PersisterInterface/GetUserNamesForReactionRequestData.h>
+#include <PersisterInterface/LoginRequestData.h>
+#include <PersisterInterface/MoveNetworkResourceRequestData.h>
+#include <PersisterInterface/PersisterRequestId.h>
+#include <PersisterInterface/ReadSimulationRequestData.h>
+#include <PersisterInterface/ReplaceNetworkResourceRequestData.h>
+#include <PersisterInterface/SaveDeserializedSimulationRequestData.h>
+#include <PersisterInterface/SaveSimulationRequestData.h>
+#include <PersisterInterface/SenderInfo.h>
+#include <PersisterInterface/ToggleReactionNetworkResourceRequestData.h>
+#include <PersisterInterface/UploadNetworkResourceRequestData.h>
 
 class _PersisterRequest
 {
@@ -26,7 +26,8 @@ public:
 protected:
     _PersisterRequest(PersisterRequestId const& requestId, SenderInfo const& senderInfo)
         : _requestId(requestId)
-        , _senderInfo(senderInfo) {}
+        , _senderInfo(senderInfo)
+    {}
 
     virtual ~_PersisterRequest() = default;
 
@@ -55,7 +56,7 @@ private:
     Data_t _data;
 };
 
-template<typename Data_t>
+template <typename Data_t>
 using ConcreteRequest = std::shared_ptr<_ConcreteRequest<Data_t>>;
 
 using _SaveSimulationRequest = _ConcreteRequest<SaveSimulationRequestData>;

@@ -19,7 +19,7 @@ FloatColorRGB LayerColorPalette::getColor(int index) const
     return _palette[index % IM_ARRAYSIZE(_palette)];
 }
 
-auto LayerColorPalette::getReference()-> Palette&
+auto LayerColorPalette::getReference() -> Palette&
 {
     return _palette;
 }

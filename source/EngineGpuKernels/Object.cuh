@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
 
 #include "Base.cuh"
 #include "Genome.cuh"
@@ -77,9 +77,9 @@ struct Constructor
     uint16_t currentConcatenation;
     uint8_t currentBranch;
 
-     // Temp data
+    // Temp data
     bool isReady;
-    Creature* offspring;    // Must be reset if separated construction is finished
+    Creature* offspring;  // Must be reset if separated construction is finished
 };
 
 struct Sensor
@@ -103,8 +103,7 @@ struct Generator
 };
 
 struct Attacker
-{
-};
+{};
 
 struct Injector
 {
@@ -115,12 +114,12 @@ struct Injector
 struct AutoBending
 {
     // Fixed data
-    float maxAngleDeviation; // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle; // May be invalid
-    bool forward;  // Current direction
+    float initialAngle;  // May be invalid
+    bool forward;        // Current direction
     float activation;
     uint8_t activationCountdown;
     bool impulseAlreadyApplied;
@@ -129,11 +128,11 @@ struct AutoBending
 struct ManualBending
 {
     // Fixed data
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle; // May be invalid
+    float initialAngle;  // May be invalid
     float lastAngleDelta;
     bool impulseAlreadyApplied;
 };
@@ -141,11 +140,11 @@ struct ManualBending
 struct AngleBending
 {
     // Fixed data
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;         // Between 0 and 1
     float attractionRepulsionRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle; // May be invalid
+    float initialAngle;  // May be invalid
 };
 
 struct AutoCrawling
@@ -167,7 +166,7 @@ struct ManualCrawling
 {
     // Fixed data
     float maxDistanceDeviation;  // Between 0 and 1
-    float forwardBackwardRatio;     // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
     float initialDistance;  // May be invalid
@@ -358,7 +357,7 @@ struct Cell
         return connections[index].distance;
 
         CUDA_CHECK(false);
-        return tempValue.as_uint32_float.floatPart; // Return some dummy in order to prevent compile error
+        return tempValue.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 
     __device__ __inline__ int getConnectionIndex(Cell* connectedCell)
@@ -410,7 +409,8 @@ struct Cell
 
     __device__ __inline__ void getLock()
     {
-        while (1 == atomicExch(&locked, 1)) {}
+        while (1 == atomicExch(&locked, 1)) {
+        }
     }
 
     __device__ __inline__ bool tryLock()
@@ -429,11 +429,8 @@ struct Cell
     }
 };
 
-template<>
+template <>
 struct HashFunctor<Cell*>
 {
-    __device__ __inline__ int operator()(Cell* const& cell)
-    {
-        return abs(static_cast<int>(cell->id));
-    }
+    __device__ __inline__ int operator()(Cell* const& cell) { return abs(static_cast<int>(cell->id)); }
 };

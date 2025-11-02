@@ -2,7 +2,7 @@
 
 namespace
 {
-    auto constexpr TimeInterval = 5000; //in millisec
+    auto constexpr TimeInterval = 5000;  //in millisec
 
     uint64_t sum(ColorVector<uint64_t> const& valueByColor)
     {

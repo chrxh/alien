@@ -1,8 +1,10 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
-#include "PersisterInterface/Definitions.h"
-#include "Network/Definitions.h"
+#include <Network/Definitions.h>
+
+#include <EngineInterface/Definitions.h>
+
+#include <PersisterInterface/Definitions.h>
 
 #include "Definitions.h"
 

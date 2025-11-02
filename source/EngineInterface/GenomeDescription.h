@@ -1,15 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
-#include <optional>
-#include <variant>
 #include <limits>
+#include <optional>
 #include <string>
+#include <variant>
+#include <vector>
 
-#include "Base/Definitions.h"
-#include "EngineConstants.h"
+#include <Base/Definitions.h>
+
 #include "CellTypeConstants.h"
+#include "EngineConstants.h"
 
 struct MakeGenomeCopy;
 struct BaseGenomeDescription;
@@ -67,7 +68,11 @@ struct GeneratorGenomeDescription
 
     MEMBER(GeneratorGenomeDescription, int, autoTriggerInterval, 100);  // 0 = no triggering, > 0 = auto trigger
     MEMBER(GeneratorGenomeDescription, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
-    MEMBER(GeneratorGenomeDescription, int, alternationInterval, 20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(
+        GeneratorGenomeDescription,
+        int,
+        alternationInterval,
+        20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
 struct AttackerGenomeDescription
@@ -87,7 +92,7 @@ struct AutoBendingGenomeDescription
 {
     auto operator<=>(AutoBendingGenomeDescription const&) const = default;
 
-    MEMBER(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(AutoBendingGenomeDescription, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
     MEMBER(AutoBendingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
@@ -95,7 +100,7 @@ struct ManualBendingGenomeDescription
 {
     auto operator<=>(ManualBendingGenomeDescription const&) const = default;
 
-    MEMBER(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(ManualBendingGenomeDescription, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
     MEMBER(ManualBendingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
@@ -103,7 +108,7 @@ struct AngleBendingGenomeDescription
 {
     auto operator<=>(AngleBendingGenomeDescription const&) const = default;
 
-    MEMBER(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);  // Between 0 and 1
+    MEMBER(AngleBendingGenomeDescription, float, maxAngleDeviation, 0.2f);         // Between 0 and 1
     MEMBER(AngleBendingGenomeDescription, float, attractionRepulsionRatio, 0.8f);  // Between 0 and 1
 };
 
@@ -112,7 +117,7 @@ struct AutoCrawlingGenomeDescription
     auto operator<=>(AutoCrawlingGenomeDescription const&) const = default;
 
     MEMBER(AutoCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(AutoCrawlingGenomeDescription, float, forwardBackwardRatio, 0.8f);     // Between 0 and 1
+    MEMBER(AutoCrawlingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
 struct ManualCrawlingGenomeDescription
@@ -120,7 +125,7 @@ struct ManualCrawlingGenomeDescription
     auto operator<=>(ManualCrawlingGenomeDescription const&) const = default;
 
     MEMBER(ManualCrawlingGenomeDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingGenomeDescription, float, forwardBackwardRatio, 0.8f);     // Between 0 and 1
+    MEMBER(ManualCrawlingGenomeDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 };
 
 struct DirectMovementGenomeDescription
@@ -212,7 +217,7 @@ struct GeneDescription
     MEMBER(GeneDescription, std::vector<NodeDescription>, nodes, {});
     MEMBER(GeneDescription, ConstructorShape, shape, ConstructorShape_Custom);
     MEMBER(GeneDescription, bool, separation, false);
-    MEMBER(GeneDescription, int, numBranches, 1);   // For separation = false
+    MEMBER(GeneDescription, int, numBranches, 1);        // For separation = false
     MEMBER(GeneDescription, int, numConcatenations, 1);  // std::numeric_limits<int>::max() for infinite concatenations
     MEMBER(GeneDescription, ConstructorAngleAlignment, angleAlignment, ConstructorAngleAlignment_60);
     MEMBER(GeneDescription, float, stiffness, 1.0f);

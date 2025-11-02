@@ -2,12 +2,13 @@
 
 #include <chrono>
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/StatisticsRawData.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/StatisticsRawData.h>
+
 #include "AlienWindow.h"
+#include "Definitions.h"
 #include "HistogramLiveStatistics.h"
 #include "TableLiveStatistics.h"
 #include "TimelineLiveStatistics.h"
@@ -119,11 +120,10 @@ private:
     std::map<int, std::vector<double>> _cachedTimelines;
     std::unordered_set<int> _collapsedPlotIndices;
 
-    float _timeHorizonForLiveStatistics = 10.0f;  //in seconds
+    float _timeHorizonForLiveStatistics = 10.0f;       //in seconds
     float _timeHorizonForLongtermStatistics = 100.0f;  //in percent
     std::optional<std::chrono::steady_clock::time_point> _lastTimepoint;
     TimelineLiveStatistics _timelineLiveStatistics;
     HistogramLiveStatistics _histogramLiveStatistics;
     TableLiveStatistics _tableLiveStatistics;
 };
-

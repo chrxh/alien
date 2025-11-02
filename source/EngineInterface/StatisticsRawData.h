@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/Colors.h"
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/EngineConstants.h>
 
 struct TimestepStatistics
 {

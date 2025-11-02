@@ -1,16 +1,15 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/NumberGenerator.h"
-#include "Network/NetworkResourceRawTO.h"
-#include "Network/NetworkResourceService.h"
+#include <Network/NetworkResourceRawTO.h>
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkResourceTreeTO.h>
 
-#include "Network/NetworkResourceTreeTO.h"
+#include <EngineInterface/NumberGenerator.h>
 
 class NetworkResourceServiceTests : public ::testing::Test
 {
 public:
-    NetworkResourceServiceTests()
-    {}
+    NetworkResourceServiceTests() {}
     ~NetworkResourceServiceTests() = default;
 };
 

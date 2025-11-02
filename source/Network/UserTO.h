@@ -25,4 +25,3 @@ public:
         return 0;
     }
 };
-

@@ -16,7 +16,7 @@ void ParametersValidationService::validateAndCorrect(ValidationConfig const& con
     }
 }
 
-namespace 
+namespace
 {
     int getArraySize(ColorDependence colorDependence)
     {

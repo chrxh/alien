@@ -2,11 +2,12 @@
 
 #include <imgui.h>
 
-#include "Base/Definitions.h"
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Definitions.h>
+
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
@@ -126,8 +127,7 @@ void MassOperationsDialog::processIntern()
 
 MassOperationsDialog::MassOperationsDialog()
     : AlienDialog("Mass operations")
-{
-}
+{}
 
 void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, bool& check)
 {
@@ -236,7 +236,7 @@ void MassOperationsDialog::validateAndCorrect()
     if (_minEnergy > _maxEnergy) {
         _maxEnergy = _minEnergy;
     }
-    if (_minCountdown> _maxCountdown) {
+    if (_minCountdown > _maxCountdown) {
         _maxCountdown = _minCountdown;
     }
 }

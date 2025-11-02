@@ -1,27 +1,30 @@
 #include "StatisticsWindow.h"
 
-#include <fstream>
 #include <cmath>
+#include <fstream>
 
 #include <boost/algorithm/string.hpp>
 
-#include <ImFileDialog.h>
 #include <imgui.h>
-#include <implot.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/GlobalSettings.h"
-#include "Base/StringHelper.h"
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/StatisticsHistory.h"
-#include "PersisterInterface/SerializerService.h"
+#include <Base/GlobalSettings.h>
+#include <Base/StringHelper.h>
 
-#include "StyleRepository.h"
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/StatisticsHistory.h>
+
+#include <PersisterInterface/SerializerService.h>
+
 #include "AlienGui.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "StyleRepository.h"
+
+#include <ImFileDialog.h>
+#include <implot.h>
 
 namespace
 {
@@ -50,7 +53,7 @@ void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
     _plotType = GlobalSettings::get().getValue("windows.statistics.plot type", _plotType);
     _plotScale = GlobalSettings::get().getValue("windows.statistics.plot scale", _plotScale);
     auto collapsedPlotIndexJoinedString = GlobalSettings::get().getValue("windows.statistics.collapsed plot indices", std::string());
-    
+
     if (!collapsedPlotIndexJoinedString.empty()) {
         std::vector<std::string> collapsedPlotIndexStrings;
         boost::split(collapsedPlotIndexStrings, collapsedPlotIndexJoinedString, boost::is_any_of(" "));
@@ -62,8 +65,7 @@ void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
 
 StatisticsWindow::StatisticsWindow()
     : AlienWindow("Statistics", "windows.statistics", false)
-{
-}
+{}
 
 void StatisticsWindow::shutdownIntern()
 {
@@ -124,20 +126,14 @@ void StatisticsWindow::processTimelinesTab()
 {
     ImGui::Spacing();
 
-    AlienGui::Switcher(
-        AlienGui::SwitcherParameters()
-            .name("Mode")
-            .textWidth(RightColumnWidth)
-            .values(
-                {"Real-time plots", "Entire history plots"}),
-        _plotMode);
+    AlienGui::Switcher(AlienGui::SwitcherParameters().name("Mode").textWidth(RightColumnWidth).values({"Real-time plots", "Entire history plots"}), _plotMode);
 
     AlienGui::Switcher(
         AlienGui::SwitcherParameters()
             .name("Plot type")
             .textWidth(RightColumnWidth)
             .values(
-            {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
+                {"Accumulate values for all colors", "Break down by color", "Color #0", "Color #1", "Color #2", "Color #3", "Color #4", "Color #5", "Color #6"}),
         _plotType);
 
     if (ImGui::BeginChild("##plots", ImVec2(0, 0), false)) {
@@ -263,8 +259,7 @@ void StatisticsWindow::processSettings()
         AlienGui::MovableHorizontalSeparator(AlienGui::MovableHorizontalSeparatorParameters().additive(false), _settingsHeight);
     }
 
-    _settingsOpen =
-        AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
+    _settingsOpen = AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name("Settings").rank(AlienGui::TreeNodeRank::High).defaultOpen(_settingsOpen));
     if (_settingsOpen) {
         if (ImGui::BeginChild("##addons", {scale(0), 0})) {
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - scale(RightColumnWidth));
@@ -285,8 +280,7 @@ void StatisticsWindow::processSettings()
             }
 
             AlienGui::SliderFloat(
-                AlienGui::SliderFloatParameters().name("Plot height").min(MinPlotHeight).max(1000.0f).format("%.0f").textWidth(RightColumnWidth),
-                &_plotHeight);
+                AlienGui::SliderFloatParameters().name("Plot height").min(MinPlotHeight).max(1000.0f).format("%.0f").textWidth(RightColumnWidth), &_plotHeight);
             AlienGui::Switcher(AlienGui::SwitcherParameters().name("Scale").textWidth(RightColumnWidth).values({"Linear", "Logarithmic"}), _plotScale);
         }
         ImGui::EndChild();
@@ -508,7 +502,8 @@ void StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valu
     auto const& dataPointCollectionHistory = _timelineLiveStatistics.getDataPointCollectionHistory();
     auto count = _plotMode == 0 ? toInt(dataPointCollectionHistory.size()) : toInt(longtermStatistics->size());
     auto startTime = _plotMode == 0 ? dataPointCollectionHistory.back().time - toDouble(_timeHorizonForLiveStatistics)
-        : longtermStatistics->back().time - (longtermStatistics->back().time - longtermStatistics->front().time) * toDouble(_timeHorizonForLongtermStatistics) / 100;
+                                    : longtermStatistics->back().time
+            - (longtermStatistics->back().time - longtermStatistics->front().time) * toDouble(_timeHorizonForLongtermStatistics) / 100;
     auto endTime = _plotMode == 0 ? dataPointCollectionHistory.back().time : longtermStatistics->back().time;
     auto values = _plotMode == 0 ? &(dataPointCollectionHistory[0].*valuesPtr) : &((*longtermStatistics)[0].*valuesPtr);
     auto timePoints = _plotMode == 0 ? &dataPointCollectionHistory[0].time : &(*longtermStatistics)[0].time;
@@ -531,8 +526,9 @@ void StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valu
 void StatisticsWindow::processBackground()
 {
     auto timepoint = std::chrono::steady_clock::now();
-    auto duration = _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
-    if(!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
+    auto duration =
+        _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
+    if (!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
         _lastTimepoint = timepoint;
         auto rawStatistics = _simulationFacade->getStatisticsRawData();
         _histogramLiveStatistics.update(rawStatistics.histogram);
@@ -591,7 +587,13 @@ void StatisticsWindow::plotSumColorsIntern(
         auto color = ImPlot::GetColormapColor((row % 21) <= 10 ? (row % 21) : 20 - (row % 21));
         if (ImGui::GetStyle().Alpha == 1.0f) {
             ImPlot::Annotation(
-                endTime, endValue, ImPlot::GetLastItemColor(), ImVec2(-10.0f, 15.0f), true, "%s", StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
+                endTime,
+                endValue,
+                ImPlot::GetLastItemColor(),
+                ImVec2(-10.0f, 15.0f),
+                true,
+                "%s",
+                StringHelper::format(toFloat(endValue), fracPartDecimals).c_str());
         }
         if (count > 0) {
             ImPlot::PushStyleColor(ImPlotCol_Line, color);
@@ -734,12 +736,8 @@ void StatisticsWindow::setPlotScale()
     if (_plotScale == PlotScale_Logarithmic) {
         ImPlot::SetupAxisScale(
             ImAxis_Y1,
-            [](double value, void* user_data) {
-                return log(value * 1000 + 1.0) / log(2.0);
-            },
-            [](double value, void* user_data) {
-                return (pow(2.0f, value) - 1.0) / 1000;
-            });
+            [](double value, void* user_data) { return log(value * 1000 + 1.0) / log(2.0); },
+            [](double value, void* user_data) { return (pow(2.0f, value) - 1.0) / 1000; });
         return;
     }
     THROW_NOT_IMPLEMENTED();
@@ -769,7 +767,6 @@ namespace
         char buffer[100];
         std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", tm);
         return std::string(buffer);
-
     }
 }
 
@@ -789,8 +786,7 @@ void StatisticsWindow::drawValuesAtMouseCursor(
     mousePos.x = std::max(startTime, std::min(endTime, mousePos.x));
     mousePos.y = dataPoints[0];
 
-    auto dateTimeString =
-        [&] {
+    auto dateTimeString = [&] {
         if (systemClock == nullptr) {
             for (int i = 1; i < count; ++i) {
                 if (timePoints[i * stride] > mousePos.x) {
@@ -839,7 +835,7 @@ void StatisticsWindow::drawValuesAtMouseCursor(
             StringHelper::format(mousePos.x, 0).c_str(),
             StringHelper::format(mousePos.y, fracPartDecimals).c_str());
     }
-    ImPlot::PlotText(label, mousePos.x, upperBound,  {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
+    ImPlot::PlotText(label, mousePos.x, upperBound, {leftSideFactor * (scale(5.0f) + ImGui::CalcTextSize(label).x / 2), scale(28.0f)});
 }
 
 void StatisticsWindow::validateAndCorrect()

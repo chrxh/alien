@@ -4,11 +4,11 @@
 
 #include <gtest/gtest.h>
 
-#include "Base/Math.h"
+#include <Base/Math.h>
 
-#include "EngineInterface/Description.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -203,7 +203,8 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
     auto genome = createGenomeForCreatureWithLegs(muscleMode, direction);
     auto data = Description().addCreature(
 
-        CreatureDescription().cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
+        CreatureDescription().cells(
+            {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
 
         genome);
 
@@ -243,7 +244,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithLegs)
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        auto movedRefPoint =  refPoint + movementDirection * 30.0f;
+        auto movedRefPoint = refPoint + movementDirection * 30.0f;
         EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
     }
 }
@@ -301,8 +302,7 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(MuscleMode_AutoCrawling, Direction::Forward, 180.0f),
         std::make_tuple(MuscleMode_ManualCrawling, Direction::Forward, 180.0f),
         std::make_tuple(MuscleMode_AutoCrawling, Direction::Backward, 180.0f),
-        std::make_tuple(MuscleMode_ManualCrawling, Direction::Backward, 180.0f)
-    ));
+        std::make_tuple(MuscleMode_ManualCrawling, Direction::Backward, 180.0f)));
 
 TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCrawlingCreature)
 {
@@ -312,7 +312,8 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Description().addCreature(
 
-        CreatureDescription().cells({CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
+        CreatureDescription().cells(
+            {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
 
         genome);
 
@@ -340,7 +341,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         }
         if (abs(frontAngle) > 90.0f) {
             movementDirection = -movementDirection;
-       }
+        }
     }
 
     _simulationFacade->calcTimesteps(4000);

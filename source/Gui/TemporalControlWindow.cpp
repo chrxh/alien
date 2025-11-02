@@ -4,16 +4,17 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/Definitions.h"
-#include "Base/StringHelper.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SpaceCalculator.h"
+#include <Base/Definitions.h>
+#include <Base/StringHelper.h>
 
-#include "StyleRepository.h"
-#include "StatisticsWindow.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/SpaceCalculator.h>
+
 #include "AlienGui.h"
 #include "DelayedExecutionController.h"
 #include "OverlayController.h"
+#include "StatisticsWindow.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -32,8 +33,7 @@ void TemporalControlWindow::onSnapshot()
 
 TemporalControlWindow::TemporalControlWindow()
     : AlienWindow("Temporal control", "windows.temporal control", true)
-{
-}
+{}
 
 void TemporalControlWindow::processIntern()
 {
@@ -127,7 +127,8 @@ void TemporalControlWindow::processTpsRestriction()
     ImGui::BeginDisabled(!syncSimulationWithRendering);
     ImGui::SameLine(scale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
     auto syncSimulationWithRenderingRatio = _simulationFacade->getSyncSimulationWithRenderingRatio();
-    if (AlienGui::SliderInt(AlienGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("%d TPS : FPS"), &syncSimulationWithRenderingRatio)) {
+    if (AlienGui::SliderInt(
+            AlienGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("%d TPS : FPS"), &syncSimulationWithRenderingRatio)) {
         _simulationFacade->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
     }
     ImGui::EndDisabled();
@@ -191,7 +192,7 @@ void TemporalControlWindow::processCreateFlashbackButton()
     AlienGui::Tooltip("Creating in-memory flashback: It saves the content of the current world to the memory.");
     if (result) {
         delayedExecution([this] { onSnapshot(); });
-        
+
         printOverlayMessage("Creating flashback ...", true);
     }
 }
@@ -200,8 +201,9 @@ void TemporalControlWindow::processLoadFlashbackButton()
 {
     ImGui::BeginDisabled(!_snapshot);
     auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO));
-    AlienGui::Tooltip("Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
-                        "(such as the position of moving layers) will be restored as well.");
+    AlienGui::Tooltip(
+        "Loading in-memory flashback: It loads the saved world from the memory. Static simulation parameters will not be changed. Non-static parameters "
+        "(such as the position of moving layers) will be restored as well.");
     if (result) {
         delayedExecution([this] { applySnapshot(*_snapshot); });
         _simulationFacade->removeSelection();
@@ -267,8 +269,7 @@ void TemporalControlWindow::restorePosition(
     RealVector2D const& origPosition,
     RealVector2D const& origVelocity)
 {
-    if (std::abs(velocity.x) > NEAR_ZERO || std::abs(velocity.y) > NEAR_ZERO || std::abs(origVelocity.x) > NEAR_ZERO
-        || std::abs(origVelocity.y) > NEAR_ZERO) {
+    if (std::abs(velocity.x) > NEAR_ZERO || std::abs(velocity.y) > NEAR_ZERO || std::abs(origVelocity.x) > NEAR_ZERO || std::abs(origVelocity.y) > NEAR_ZERO) {
         position = origPosition;
     }
 }

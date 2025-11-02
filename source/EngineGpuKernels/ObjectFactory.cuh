@@ -1,15 +1,15 @@
 #pragma once
 
-#include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
 
 #include "Base.cuh"
 #include "ConstantMemory.cuh"
-#include "TO.cuh"
 #include "Map.cuh"
 #include "Object.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
+#include "TO.cuh"
 
 class ObjectFactory
 {
@@ -34,7 +34,7 @@ public:
     __inline__ __device__ Node* createEmptyNodes(int numNodes);
 
 private:
-    template<typename T>
+    template <typename T>
     __inline__ __device__ void copyDataToHeap(T sourceSize, uint64_t sourceIndex, uint8_t* heap, T& targetSize, uint8_t*& target);
     __inline__ __device__ void copyDataToHeap(uint64_t size, uint64_t sourceIndex, uint8_t* source, uint8_t*& target);
 
@@ -57,7 +57,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticleFromTO(ParticleTO c
     Particle** particlePointer = _data->objects.particles.getNewElement();
     Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
-    
+
     particle->id = particleTO.id;
     particle->pos = particleTO.pos;
     _map.correctPosition(particle->pos);
@@ -162,11 +162,13 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     break;
                 case MuscleMode_ManualBending:
                     node.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation = nodeTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-                    node.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio = nodeTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
+                    node.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio =
+                        nodeTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
                     break;
                 case MuscleMode_AngleBending:
                     node.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = nodeTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                    node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio = nodeTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
+                    node.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
+                        nodeTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                     break;
                 case MuscleMode_AutoCrawling:
                     node.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = nodeTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
@@ -175,7 +177,8 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 case MuscleMode_ManualCrawling:
                     node.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
                         nodeTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-                    node.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio = nodeTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
+                    node.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio =
+                        nodeTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
                     break;
                 case MuscleMode_DirectMovement:
                     break;
@@ -284,8 +287,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->cellType = cellTO.cellType;
 
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
-        copyDataToHeap(
-            sizeof(NeuralNetworkTO), cellTO.neuralNetworkDataIndex, to.heap, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
+        copyDataToHeap(sizeof(NeuralNetworkTO), cellTO.neuralNetworkDataIndex, to.heap, reinterpret_cast<uint8_t*&>(cell->neuralNetwork));
     } else {
         cell->neuralNetwork = nullptr;
     }
@@ -346,7 +348,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied = cellTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
             cell->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-            cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio = cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
+            cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
+                cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
             cell->cellTypeData.muscle.modeData.angleBending.initialAngle = cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle;
         } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
             cell->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
@@ -407,8 +410,7 @@ __inline__ __device__ void ObjectFactory::copyDataToHeap(uint64_t size, uint64_t
     }
 }
 
-__inline__ __device__ Particle*
-ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
+__inline__ __device__ Particle* ObjectFactory::createParticle(float energy, float2 const& pos, float2 const& vel, int color)
 {
     Particle** particlePointer = _data->objects.particles.getNewElement();
     Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
@@ -462,7 +464,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->geneIndex = 0;
     cell->cellType = CellType_Free;
     cell->neuralNetwork = nullptr;
-    
+
     return cell;
 }
 
@@ -505,8 +507,15 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    return cell;
 //}
 
-__inline__ __device__ Cell*
-ObjectFactory::createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, int parentNodeIndex, float2 pos, float2 vel, float energy)
+__inline__ __device__ Cell* ObjectFactory::createCellFromNode(
+    uint64_t& cellIndex,
+    Creature* creature,
+    int geneIndex,
+    int nodeIndex,
+    int parentNodeIndex,
+    float2 pos,
+    float2 vel,
+    float energy)
 {
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];

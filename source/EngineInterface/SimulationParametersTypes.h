@@ -1,7 +1,7 @@
 #pragma once
 
 #include <limits>
- 
+
 #include "Colors.h"
 
 template <typename T>

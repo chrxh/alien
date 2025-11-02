@@ -1,10 +1,10 @@
+#include "NumberGenerator.h"
+
+#include <random>
 #include <sstream>
 #include <thread>
-#include <random>
 
-#include "Base/Definitions.h"
-
-#include "NumberGenerator.h"
+#include <Base/Definitions.h>
 
 NumberGenerator::NumberGenerator()
 {
@@ -20,12 +20,12 @@ NumberGenerator::NumberGenerator()
 
 uint32_t NumberGenerator::getRandomInt()
 {
-	return getNumberFromArray();
+    return getNumberFromArray();
 }
 
 uint32_t NumberGenerator::getRandomInt(uint32_t range)
 {
-	return getNumberFromArray() % range;
+    return getNumberFromArray() % range;
 }
 
 uint32_t NumberGenerator::getRandomInt(uint32_t min, uint32_t max)
@@ -36,7 +36,7 @@ uint32_t NumberGenerator::getRandomInt(uint32_t min, uint32_t max)
 
 uint32_t NumberGenerator::getLargeRandomInt(uint32_t range)
 {
-	return getNumberFromArray() % (range + 1);
+    return getNumberFromArray() % (range + 1);
 }
 
 uint64_t NumberGenerator::createObjectId()
@@ -64,7 +64,7 @@ void NumberGenerator::adaptMaxIds(Ids const& ids)
 
 double NumberGenerator::getRandomDouble(double min, double max)
 {
-	return getLargeRandomInt(static_cast<int>((max - min) * 1000)) / 1000.0 + min;
+    return getLargeRandomInt(static_cast<int>((max - min) * 1000)) / 1000.0 + min;
 }
 
 float NumberGenerator::getRandomFloat(float min, float max)
@@ -79,6 +79,6 @@ double NumberGenerator::getRandomDouble()
 
 uint32_t NumberGenerator::getNumberFromArray()
 {
-	_currentRandomNumberIndex = (_currentRandomNumberIndex + 1) % _arrayOfRandomNumbers.size();
-	return _arrayOfRandomNumbers[_currentRandomNumberIndex];
+    _currentRandomNumberIndex = (_currentRandomNumberIndex + 1) % _arrayOfRandomNumbers.size();
+    return _arrayOfRandomNumbers[_currentRandomNumberIndex];
 }

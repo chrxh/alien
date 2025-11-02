@@ -1,7 +1,7 @@
 #include "SimulationFacadeImpl.h"
 
-#include "EngineInterface/Description.h"
-#include "EngineInterface/GeometryBuffers.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/GeometryBuffers.h>
 
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
@@ -256,11 +256,7 @@ void _SimulationFacadeImpl::setGpuSettings_async(CudaSettings const& gpuSettings
     _worker.setGpuSettings_async(gpuSettings);
 }
 
-void _SimulationFacadeImpl::applyForce_async(
-    RealVector2D const& start,
-    RealVector2D const& end,
-    RealVector2D const& force,
-    float radius)
+void _SimulationFacadeImpl::applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius)
 {
     _worker.applyForce_async(start, end, force, radius);
 }

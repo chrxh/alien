@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GenomeDescription.h"
-
 #include <functional>
 #include <variant>
+
+#include "GenomeDescription.h"
 
 namespace std
 {

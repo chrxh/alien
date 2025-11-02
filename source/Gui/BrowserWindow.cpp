@@ -13,28 +13,28 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/GlobalSettings.h"
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
-#include "Base/StringHelper.h"
-#include "Base/VersionParserService.h"
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
+#include <Base/VersionParserService.h>
 
-#include "EngineInterface/SimulationFacade.h"
+#include <Network/NetworkResourceParserService.h>
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkResourceTreeTO.h>
+#include <Network/NetworkService.h>
 
-#include "PersisterInterface/SerializerService.h"
-#include "PersisterInterface/TaskProcessor.h"
+#include <EngineInterface/SimulationFacade.h>
 
-#include "Network/NetworkResourceParserService.h"
-#include "Network/NetworkResourceService.h"
-#include "Network/NetworkResourceTreeTO.h"
-#include "Network/NetworkService.h"
+#include <PersisterInterface/SerializerService.h>
+#include <PersisterInterface/TaskProcessor.h>
 
 #include "AlienGui.h"
-#include "GenomeEditorWindow.h"
 #include "DelayedExecutionController.h"
 #include "EditSimulationDialog.h"
 #include "EditorController.h"
 #include "GenericMessageDialog.h"
+#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
 #include "LoginDialog.h"
@@ -96,7 +96,7 @@ void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacad
     }
     for (int i = 1; i <= numEmojis; ++i) {
         auto reactionName = "emoji" + std::to_string(i) + ".png";
-        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::ImagesPath/ std::filesystem::path(reactionName)));
+        _emojis.emplace_back(OpenGLHelper::loadTexture(Const::ImagesPath / std::filesystem::path(reactionName)));
     }
     for (NetworkResourceType resourceType = 0; resourceType < NetworkResourceType_Count; ++resourceType) {
         for (WorkspaceType workspaceType = 0; workspaceType < WorkspaceType_Count; ++workspaceType) {

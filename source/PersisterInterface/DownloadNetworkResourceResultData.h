@@ -2,8 +2,11 @@
 
 #include <string>
 
-#include "PersisterInterface/DeserializedSimulation.h"
-#include "EngineInterface/GenomeDescription.h"
+#include <Network/Definitions.h>
+
+#include <EngineInterface/GenomeDescription.h>
+
+#include <PersisterInterface/DeserializedSimulation.h>
 
 struct DownloadNetworkResourceResultData
 {

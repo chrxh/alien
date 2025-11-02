@@ -5,18 +5,20 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/LoggingService.h"
-#include "Base/StringHelper.h"
-#include "Base/UnlockGuard.h"
-#include "PersisterInterface/SerializerService.h"
-#include "PersisterInterface/PersisterRequestResult.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkService.h"
+#include <Base/LoggingService.h>
+#include <Base/StringHelper.h>
+#include <Base/UnlockGuard.h>
+
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/PersisterRequestResult.h>
+#include <PersisterInterface/SerializerService.h>
 
 _PersisterWorker::_PersisterWorker(SimulationFacade const& simulationFacade)
     : _simulationFacade(simulationFacade)
-{
-}
+{}
 
 void _PersisterWorker::runThreadLoop()
 {
@@ -54,10 +56,12 @@ std::optional<PersisterRequestState> _PersisterWorker::getRequestState(Persister
     if (std::ranges::find_if(_openRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _openRequests.end()) {
         return PersisterRequestState::InQueue;
     }
-    if (std::ranges::find_if(_inProgressRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; }) != _inProgressRequests.end()) {
+    if (std::ranges::find_if(_inProgressRequests, [&](PersisterRequest const& request) { return request->getRequestId() == id; })
+        != _inProgressRequests.end()) {
         return PersisterRequestState::InProgress;
     }
-    if (std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& request) { return request->getRequestId() == id; }) != _finishedRequests.end()) {
+    if (std::ranges::find_if(_finishedRequests, [&](PersisterRequestResult const& request) { return request->getRequestId() == id; })
+        != _finishedRequests.end()) {
         return PersisterRequestState::Finished;
     }
     if (std::ranges::find_if(_requestErrors, [&](PersisterRequestError const& request) { return request->getRequestId() == id; }) != _requestErrors.end()) {
@@ -274,9 +278,7 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
             request->getRequestId(), ReadSimulationResultData{std::filesystem::path(requestData.filename).filename(), deserializedData});
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(),
-            request->getSenderInfo().senderId,
-            PersisterErrorInfo{"Failed to load simulation."});
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to load simulation."});
     }
 }
 
@@ -289,10 +291,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     LoginErrorCode errorCode;
     if (!NetworkService::get().login(errorCode, requestData.userName, requestData.password, requestData.userInfo)) {
         if (errorCode != LoginErrorCode_UnknownUser) {
-            return std::make_shared<_PersisterRequestError>(
-                request->getRequestId(),
-                request->getSenderInfo().senderId,
-                PersisterErrorInfo{"Login failed."});
+            return std::make_shared<_PersisterRequestError>(request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Login failed."});
         }
         if (errorCode == LoginErrorCode_UnknownUser) {
             return std::make_shared<_LoginRequestResult>(request->getRequestId(), LoginResultData{.unknownUser = true});
@@ -320,9 +319,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
 
     if (!success) {
         return std::make_shared<_PersisterRequestError>(
-            request->getRequestId(),
-            request->getSenderInfo().senderId,
-            PersisterErrorInfo{"Failed to retrieve browser data. Please try again."});
+            request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"Failed to retrieve browser data. Please try again."});
     }
 
     return std::make_shared<_GetNetworkResourcesRequestResult>(request->getRequestId(), data);
@@ -423,9 +420,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         SerializedSimulation serializedSim;
         if (!SerializerService::get().serializeSimulationToStrings(serializedSim, deserializedSim)) {
             return std::make_shared<_PersisterRequestError>(
-                request->getRequestId(),
-                request->getSenderInfo().senderId,
-                PersisterErrorInfo{"The simulation could not be serialized for uploading."});
+                request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The simulation could not be serialized for uploading."});
         }
         mainData = serializedSim.mainData;
         settings = serializedSim.auxiliaryData;
@@ -485,7 +480,7 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     auto const& requestData = request->getData();
 
     auto resourceType = std::holds_alternative<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data) ? NetworkResourceType_Simulation
-                                                                                                                   : NetworkResourceType_Genome;
+                                                                                                                    : NetworkResourceType_Genome;
     std::string mainData;
     std::string settings;
     std::string statistics;

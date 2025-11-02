@@ -1,16 +1,18 @@
 #include "NetworkTransferController.h"
 
-#include "Base/VersionParserService.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "PersisterInterface/TaskProcessor.h"
+#include <Base/VersionParserService.h>
 
-#include "GenericMessageDialog.h"
-#include "TemporalControlWindow.h"
-#include "Viewport.h"
-#include "EditorController.h"
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/TaskProcessor.h>
+
 #include "BrowserWindow.h"
+#include "EditorController.h"
+#include "GenericMessageDialog.h"
 #include "GenomeEditorWindow.h"
 #include "OverlayController.h"
+#include "TemporalControlWindow.h"
+#include "Viewport.h"
 
 void NetworkTransferController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
@@ -142,8 +144,7 @@ void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& req
 
     _editProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleEditNetworkResource(
-                SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+            return _persisterFacade->scheduleEditNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
             _persisterFacade->fetchEditNetworkResourcesData(requestId);

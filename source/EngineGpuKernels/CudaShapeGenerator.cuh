@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
 #include "Base.cuh"
 
@@ -343,8 +343,7 @@ __inline__ __device__ ShapeGeneratorResult CudaShapeGenerator::generateNextConst
         result.numAdditionalConnections = 2;
         result.requiredNodeId1 = 6;
         result.requiredNodeId2 = 7;
-    }
-    else {
+    } else {
         result.angle = 0.0f;
         result.numAdditionalConnections = 0;
         result.requiredNodeId1 = -1;

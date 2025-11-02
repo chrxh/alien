@@ -1,7 +1,6 @@
-#include "TestKernels.cuh"
-
 #include "CellConnectionProcessor.cuh"
 #include "SimulationData.cuh"
+#include "TestKernels.cuh"
 
 __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType)
 {
@@ -134,4 +133,3 @@ __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
     //    }
     //}
 }
-

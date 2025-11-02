@@ -1,11 +1,10 @@
 #pragma once
 
-#include <cuda_runtime_api.h>
-#include <cuda_runtime.h>
-
-#include "TO.cuh"
-#include "SimulationData.cuh"
 #include "CudaGeometryBuffers.cuh"
+#include "SimulationData.cuh"
+#include "TO.cuh"
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft);
 __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData);

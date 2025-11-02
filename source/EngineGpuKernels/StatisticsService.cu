@@ -1,10 +1,9 @@
-#include "StatisticsService.cuh"
-
-#include "EngineInterface/StatisticsConverterService.h"
+#include <EngineInterface/StatisticsConverterService.h>
 
 #include "Base.cuh"
+#include "StatisticsService.cuh"
 
-namespace 
+namespace
 {
     auto constexpr MaxSamples = 1000;
 }
@@ -82,7 +81,7 @@ void StatisticsService::resetTime(StatisticsHistory& history, uint64_t timestep)
     } else {
         _longtermTimestepDelta = DefaultTimeStepDelta;
     }
-    
+
     std::vector<DataPointCollection> newData;
     newData.reserve(data.size());
     for (size_t i = 0; i < data.size(); ++i) {

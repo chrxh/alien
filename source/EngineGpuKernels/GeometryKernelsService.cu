@@ -1,9 +1,8 @@
-﻿#include "GeometryKernelsService.cuh"
-
-#include "EngineInterface/SettingsForSimulation.h"
+﻿#include <EngineInterface/SettingsForSimulation.h>
 
 #include "CudaGeometryBuffers.cuh"
 #include "GeometryKernels.cuh"
+#include "GeometryKernelsService.cuh"
 
 _GeometryKernelsService::_GeometryKernelsService()
 {
@@ -41,7 +40,7 @@ void _GeometryKernelsService::restorePositions(SettingsForSimulation const& sett
 {
     auto const& gpuSettings = settings.cudaSettings;
 
-    KERNEL_CALL(cudaCorrectPositionsForRendering, data, float2{0,0});
+    KERNEL_CALL(cudaCorrectPositionsForRendering, data, float2{0, 0});
 }
 
 NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
@@ -57,7 +56,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
     cudaDeviceSynchronize();
     result.selectedObjects = copyToHost(_numSelectedObjects);
-    
+
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
     cudaDeviceSynchronize();
@@ -110,14 +109,16 @@ void _GeometryKernelsService::extractObjectData(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.energyParticleBuffer));
     EnergyParticleVertexData* mappedEnergyParticleBuffer;
     size_t energyParticleBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedEnergyParticleBuffer), &energyParticleBufferSize, renderingData.energyParticleBuffer));
     KERNEL_CALL(cudaExtractEnergyParticleData, data, mappedEnergyParticleBuffer);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.energyParticleBuffer));
 
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.locationBuffer));
     LocationVertexData* mappedLocationBuffer;
     size_t locationBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLocationBuffer), &locationBufferSize, renderingData.locationBuffer));
+    CHECK_FOR_CUDA_ERROR(
+        cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLocationBuffer), &locationBufferSize, renderingData.locationBuffer));
     setValueToDevice(_numLocations, static_cast<uint64_t>(0));
     KERNEL_CALL_1_1(cudaExtractLocationData, data, mappedLocationBuffer, _numLocations, visibleTopLeft);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
@@ -125,7 +126,8 @@ void _GeometryKernelsService::extractObjectData(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedObjectBuffer));
     SelectedObjectVertexData* mappedSelectedObjectBuffer;
     size_t selectedObjectBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, mappedSelectedObjectBuffer, _numSelectedObjects);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedObjectBuffer));
@@ -133,7 +135,8 @@ void _GeometryKernelsService::extractObjectData(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.lineIndexBuffer));
     unsigned int* mappedLineIndexBuffer;
     size_t lineIndexBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
+    CHECK_FOR_CUDA_ERROR(
+        cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedLineIndexBuffer), &lineIndexBufferSize, renderingData.lineIndexBuffer));
     setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractLineIndices, data, mappedLineIndexBuffer, _numLineIndices);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.lineIndexBuffer));
@@ -141,7 +144,8 @@ void _GeometryKernelsService::extractObjectData(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.triangleIndexBuffer));
     unsigned int* mappedTriangleIndexBuffer;
     size_t triangleIndexBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedTriangleIndexBuffer), &triangleIndexBufferSize, renderingData.triangleIndexBuffer));
     setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractTriangleIndices, data, mappedTriangleIndexBuffer, _numTriangleIndices);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.triangleIndexBuffer));
@@ -149,7 +153,8 @@ void _GeometryKernelsService::extractObjectData(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedConnectionBuffer));
     ConnectionArrowVertexData* mappedSelectedConnectionBuffer;
     size_t selectedConnectionBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedSelectedConnectionBuffer), &selectedConnectionBufferSize, renderingData.selectedConnectionBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedSelectedConnectionBuffer), &selectedConnectionBufferSize, renderingData.selectedConnectionBuffer));
     setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedConnectionData, data, mappedSelectedConnectionBuffer, _numSelectedConnectionVertices);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.selectedConnectionBuffer));
@@ -157,15 +162,17 @@ void _GeometryKernelsService::extractObjectData(
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.attackEventBuffer));
     AttackEventVertexData* mappedAttackEventBuffer;
     size_t attackEventBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedAttackEventBuffer), &attackEventBufferSize, renderingData.attackEventBuffer));
+    CHECK_FOR_CUDA_ERROR(
+        cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedAttackEventBuffer), &attackEventBufferSize, renderingData.attackEventBuffer));
     setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractAttackEventData, data, mappedAttackEventBuffer, _numAttackEventVertices);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.attackEventBuffer));
-    
+
     CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.detonationEventBuffer));
     DetonationEventVertexData* mappedDetonationEventBuffer;
     size_t detonationEventBufferSize;
-    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(reinterpret_cast<void**>(&mappedDetonationEventBuffer), &detonationEventBufferSize, renderingData.detonationEventBuffer));
+    CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
+        reinterpret_cast<void**>(&mappedDetonationEventBuffer), &detonationEventBufferSize, renderingData.detonationEventBuffer));
     setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));

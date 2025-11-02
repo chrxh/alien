@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescription.h"
+#include <EngineInterface/GenomeDescription.h>
 
 #include "Definitions.h"
 
@@ -20,7 +20,8 @@ private:
         int outputNeuronIndex = 0;
     };
 
-    void processNetwork(SelectionData& selectionData, std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
+    void
+    processNetwork(SelectionData& selectionData, std::vector<float>& weights, std::vector<float>& biases, std::vector<ActivationFunction>& activationFunctions);
     void processEditWidgets(
         SelectionData& selectionData,
         std::vector<float>& weights,

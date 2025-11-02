@@ -1,5 +1,5 @@
 #pragma once
-#include "Network/NetworkService.h"
+#include <Network/NetworkService.h>
 
 struct LoginRequestData
 {

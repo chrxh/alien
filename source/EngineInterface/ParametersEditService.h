@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
+
 #include "SimulationParameters.h"
 #include "SimulationParametersSpecification.h"
 
@@ -21,7 +22,7 @@ class ParametersEditService
     MAKE_SINGLETON(ParametersEditService);
 
 public:
-    NewByOldOrderNumber insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
+    NewByOldOrderNumber insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const;   // Create location at orderNumber + 1
     NewByOldOrderNumber insertDefaultSource(SimulationParameters& parameters, int orderNumber) const;  // Create location at orderNumber + 1
     NewByOldOrderNumber cloneLocation(SimulationParameters& parameters, int orderNumber) const;        // Create location at orderNumber + 1
     NewByOldOrderNumber deleteLocation(SimulationParameters& parameters, int orderNumber) const;

@@ -9,13 +9,13 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "EngineInterface/GenomeDescriptionEditService.h"
-#include "EngineInterface/GenomeDescriptionInfoService.h"
+#include <EngineInterface/GenomeDescriptionEditService.h>
+#include <EngineInterface/GenomeDescriptionInfoService.h>
 
 #include "AlienGui.h"
+#include "GenericMessageDialog.h"
 #include "GenomeTabEditData.h"
 #include "GenomeTabLayoutData.h"
-#include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 
 namespace
@@ -77,8 +77,7 @@ void _GenomeEditorWidget::processHeaderData()
         auto numCellsString = numCells != -1 ? std::to_string(numCells) : std::string("Infinity");
         AlienGui::InputText(AlienGui::InputTextParameters().name("Resulting cells").readOnly(true).textWidth(rightColumnWidth), numCellsString);
 
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Front angle").format("%.1f").textWidth(rightColumnWidth), _editData->genome._frontAngle);
     }
     ImGui::EndChild();
 }

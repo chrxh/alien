@@ -2,8 +2,8 @@
 
 #include <ranges>
 
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/range/adaptor/indexed.hpp>
 
 #include "NetworkResourceRawTO.h"
@@ -160,9 +160,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
                             break;
                         }
                     }
-
                 }
-
             }
 
             //calc symbols before position numEqualFolders - 1
@@ -223,7 +221,7 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
 
     //collapse items
     std::unordered_set<std::string> collapsedFolderStrings;
-    for(auto const& folderNames : collapsedFolderNames) {
+    for (auto const& folderNames : collapsedFolderNames) {
         collapsedFolderStrings.insert(boost::join(folderNames, FolderSeparator));
     }
 
@@ -257,7 +255,9 @@ std::vector<NetworkResourceTreeTO> NetworkResourceService::createTreeTOs(
     return result;
 }
 
-std::vector<NetworkResourceRawTO> NetworkResourceService::getMatchingRawTOs(NetworkResourceTreeTO const& treeTO, std::vector<NetworkResourceRawTO> const& rawTOs)
+std::vector<NetworkResourceRawTO> NetworkResourceService::getMatchingRawTOs(
+    NetworkResourceTreeTO const& treeTO,
+    std::vector<NetworkResourceRawTO> const& rawTOs)
 {
     if (treeTO->isLeaf()) {
         return {treeTO->getLeaf().rawTO};

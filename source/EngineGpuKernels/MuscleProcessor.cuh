@@ -1,10 +1,10 @@
 #pragma once
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
 #include "Object.cuh"
-#include "SimulationData.cuh"
 #include "SignalProcessor.cuh"
+#include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
 class MuscleProcessor
@@ -14,7 +14,7 @@ public:
 
     __inline__ __device__ static float getInitialAngleFromPrevious(Cell* cell, int connectionIndex);  // Return the angleFromPrevious without muscle distortions
     __inline__ __device__ static void restoreInitialAngleFromPrevious(Cell* muscleCell, Cell* affectedCell, int connectionIndex);
-    
+
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
@@ -235,8 +235,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         // Apply impulse
         if (!bending.impulseAlreadyApplied) {
             angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
-            if ((angleDelta < 0 && angleFromPrevious < bending.initialAngle)
-                || (angleDelta > 0 && angleFromPrevious > bending.initialAngle)) {
+            if ((angleDelta < 0 && angleFromPrevious < bending.initialAngle) || (angleDelta > 0 && angleFromPrevious > bending.initialAngle)) {
                 bending.impulseAlreadyApplied = true;
 
                 auto direction = calcAverageDirection(data, cell);
@@ -340,8 +339,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         // Apply impulse
         if (!bending.impulseAlreadyApplied) {
             angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
-            if ((angleDelta < 0 && angleFromPrevious < bending.initialAngle)
-                || (angleDelta > 0 && angleFromPrevious > bending.initialAngle)) {
+            if ((angleDelta < 0 && angleFromPrevious < bending.initialAngle) || (angleDelta > 0 && angleFromPrevious > bending.initialAngle)) {
                 bending.impulseAlreadyApplied = true;
 
                 auto direction = calcAverageDirection(data, cell);
@@ -373,7 +371,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     auto& bending = muscle.modeData.angleBending;
 
     if (cell->numConnections != 1 && cell->numConnections != 2) {
-        return;                                                                                                                     
+        return;
     }
     if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
@@ -624,7 +622,8 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
     }
 }
 
-__inline__ __device__ void MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Cell* muscleCell, Cell* affectedCell, int connectionIndex)
+__inline__ __device__ void
+MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Cell* muscleCell, Cell* affectedCell, int connectionIndex)
 {
     if (initialAngle != VALUE_NOT_SET_FLOAT) {
         auto& angle = affectedCell->connections[connectionIndex].angleFromPrevious;

@@ -2,11 +2,11 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "Base/JsonParser.h"
-#include "Base/Singleton.h"
+#include <Base/JsonParser.h>
+#include <Base/Singleton.h>
 
-#include "SettingsForSerialization.h"
 #include "Definitions.h"
+#include "SettingsForSerialization.h"
 
 class SettingsParserService
 {

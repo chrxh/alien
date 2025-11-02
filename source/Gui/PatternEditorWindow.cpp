@@ -1,24 +1,27 @@
 #include "PatternEditorWindow.h"
 
-#include <ImFileDialog.h>
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/GlobalSettings.h"
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/GlobalSettings.h>
 
-#include "EditorModel.h"
-#include "StyleRepository.h"
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/SerializerService.h>
+
 #include "AlienGui.h"
 #include "EditorController.h"
+#include "EditorModel.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "StyleRepository.h"
 #include "Viewport.h"
-#include "PersisterInterface/SerializerService.h"
+
+#include <ImFileDialog.h>
 
 namespace
 {
@@ -110,11 +113,7 @@ void PatternEditorWindow::processIntern()
     ImGui::EndDisabled();
     AlienGui::Tooltip("Inspect principal genome");
 
-    if (ImGui::BeginChild(
-        "##",
-        ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)),
-        false,
-        ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - scale(50.0f)), false, ImGuiWindowFlags_HorizontalScrollbar)) {
 
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         AlienGui::Group(AlienGui::GroupParameters().text("Center position and velocity"));
@@ -123,41 +122,19 @@ void PatternEditorWindow::processIntern()
 
         auto centerPosX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosX : selectionData.centerPosX;
         auto origCenterPosX = centerPosX;
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Position X")
-                .textWidth(RightColumnWidth)
-                .format("%.3f"),
-            centerPosX);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").textWidth(RightColumnWidth).format("%.3f"), centerPosX);
 
         auto centerPosY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterPosY : selectionData.centerPosY;
         auto origCenterPosY = centerPosY;
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Position Y")
-                .textWidth(RightColumnWidth)
-                .format("%.3f"),
-            centerPosY);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position Y").textWidth(RightColumnWidth).format("%.3f"), centerPosY);
 
         auto centerVelX = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelX : selectionData.centerVelX;
         auto origCenterVelX = centerVelX;
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Velocity X")
-                .textWidth(RightColumnWidth)
-                .step(0.1f)
-                .format("%.3f"),
-            centerVelX);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity X").textWidth(RightColumnWidth).step(0.1f).format("%.3f"), centerVelX);
 
         auto centerVelY = EditorModel::get().isRolloutToClusters() ? selectionData.clusterCenterVelY : selectionData.centerVelY;
         auto origCenterVelY = centerVelY;
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Velocity Y")
-                .textWidth(RightColumnWidth)
-                .step(0.1f)
-                .format("%.3f"),
-            centerVelY);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Velocity Y").textWidth(RightColumnWidth).step(0.1f).format("%.3f"), centerVelY);
 
         AlienGui::Group(AlienGui::GroupParameters().text("Center rotation"));
         auto origAngle = _angle;
@@ -172,13 +149,7 @@ void PatternEditorWindow::processIntern()
             _angle);
 
         auto origAngularVel = _angularVel;
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Angular velocity")
-                .textWidth(RightColumnWidth)
-                .step(0.01f)
-                .format("%.2f"),
-            _angularVel);
+        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angular velocity").textWidth(RightColumnWidth).step(0.01f).format("%.2f"), _angularVel);
 
         if (centerPosX != origCenterPosX || centerPosY != origCenterPosY) {
             ShallowUpdateSelectionData updateData;
@@ -304,8 +275,9 @@ void PatternEditorWindow::processIntern()
     }
     ImGui::SameLine();
     AlienGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
-                           "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells and the neighboring cells are recalculated when the positions are changed.\n"
-                           "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
+                         "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells "
+                         "and the neighboring cells are recalculated when the positions are changed.\n"
+                         "If you hold down the SHIFT key, this toggle button is temporarily turned off.");
 }
 
 bool PatternEditorWindow::isShown()
@@ -315,36 +287,34 @@ bool PatternEditorWindow::isShown()
 
 void PatternEditorWindow::onOpenPattern()
 {
-    GenericFileDialog::get().showOpenFileDialog(
-        "Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
-            auto firstFilename = ifd::FileDialog::Instance().GetResult();
-            auto firstFilenameCopy = firstFilename;
-            _startingPath = firstFilenameCopy.remove_filename().string();
-            Description content;
-            if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
-                auto center = Viewport::get().getCenterInWorldPos();
-                DescriptionEditService::get().setCenter(content, center);
-                _simulationFacade->addAndSelectSimulationData(Description(content));
-                EditorModel::get().update();
-            } else {
-                GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
-            }
-        });
+    GenericFileDialog::get().showOpenFileDialog("Open pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
+        Description content;
+        if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
+            auto center = Viewport::get().getCenterInWorldPos();
+            DescriptionEditService::get().setCenter(content, center);
+            _simulationFacade->addAndSelectSimulationData(Description(content));
+            EditorModel::get().update();
+        } else {
+            GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
+        }
+    });
 }
 
 void PatternEditorWindow::onSavePattern()
 {
-    GenericFileDialog::get().showSaveFileDialog(
-        "Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
-            auto firstFilename = ifd::FileDialog::Instance().GetResult();
-            auto firstFilenameCopy = firstFilename;
-            _startingPath = firstFilenameCopy.remove_filename().string();
+    GenericFileDialog::get().showSaveFileDialog("Save pattern", "Pattern file (*.sim){.sim},.*", _startingPath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _startingPath = firstFilenameCopy.remove_filename().string();
 
-            auto content = _simulationFacade->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
-            if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
-                GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
-            }
-        });
+        auto content = _simulationFacade->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
+        if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
+            GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
+        }
+    });
 }
 
 bool PatternEditorWindow::isObjectInspectionPossible() const
@@ -426,7 +396,7 @@ bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)
 
 bool PatternEditorWindow::hasSelectionChanged(SelectionShallowData const& selection) const
 {
-    if(!_lastSelection) {
+    if (!_lastSelection) {
         return false;
     }
     return _lastSelection->numCells != selection.numCells || _lastSelection->numParticles != selection.numParticles;

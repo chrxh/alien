@@ -3,12 +3,12 @@
 #include <filesystem>
 #include <variant>
 
-#include "Base/MathTypes.h"
+#include <Base/MathTypes.h>
 
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParameters.h"
+#include <Shaders/ShaderSources.h>
 
-#include "Shaders/ShaderSources.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/SimulationParameters.h>
 
 #include "Definitions.h"
 

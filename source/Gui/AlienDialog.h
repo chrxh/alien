@@ -3,14 +3,14 @@
 #include <imgui.h>
 
 #include "Definitions.h"
+#include "DelayedExecutionController.h"
 #include "MainLoopEntity.h"
 #include "MainLoopEntityController.h"
-#include "WindowController.h"
-#include "DelayedExecutionController.h"
 #include "StyleRepository.h"
+#include "WindowController.h"
 
 template <typename... Dependencies>
-    class AlienDialog : public MainLoopEntity<Dependencies...>
+class AlienDialog : public MainLoopEntity<Dependencies...>
 {
 public:
     AlienDialog(std::string const& title);
@@ -47,25 +47,25 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 AlienDialog<Dependencies...>::AlienDialog(std::string const& title)
     : _title(title)
 {}
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienDialog<Dependencies...>::init(Dependencies... dependencies)
 {
     initIntern(dependencies...);
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienDialog<Dependencies...>::open()
 {
     _state = DialogState::JustOpened;
     openIntern();
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienDialog<Dependencies...>::close()
 {
     delayedExecution([this] {
@@ -74,13 +74,13 @@ void AlienDialog<Dependencies...>::close()
     });
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienDialog<Dependencies...>::changeTitle(std::string const& title)
 {
     _title = title;
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienDialog<Dependencies...>::process()
 {
     if (_state == DialogState::Closed) {
@@ -116,7 +116,7 @@ void AlienDialog<Dependencies...>::process()
     style.WindowMinSize = origWindowMinSize;
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienDialog<Dependencies...>::shutdown()
 {
     shutdownIntern();

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "EngineInterface/CudaSettings.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
+#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -28,7 +28,7 @@ public:
     void setBarrier(CudaSettings const& gpuSettings, SimulationData const& data, bool value, bool includeClusters);
     void reconnect(CudaSettings const& gpuSettings, SimulationData const& data);
     void changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& changeTO);
-    bool changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TO const& to);   // to only contains 1 genome
+    bool changeCreature(CudaSettings const& gpuSettings, SimulationData const& data, TO const& to);  // to only contains 1 genome
     void colorSelectedCells(CudaSettings const& gpuSettings, SimulationData const& data, unsigned char color, bool includeClusters);
     void setDetached(CudaSettings const& gpuSettings, SimulationData const& data, bool value);
 

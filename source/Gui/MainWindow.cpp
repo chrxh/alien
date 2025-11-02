@@ -11,71 +11,74 @@
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-#include "ImFileDialog.h"
-#include "implot.h"
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/Resources.h"
-#include "Base/Exceptions.h"
-#include "PersisterInterface/PersisterFacade.h"
-#include "PersisterInterface/SerializerService.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkService.h"
+#include <Base/Exceptions.h>
+#include <Base/Resources.h>
 
-#include "SimulationInteractionController.h"
-#include "SimulationView.h"
-#include "StyleRepository.h"
-#include "TemporalControlWindow.h"
-#include "SpatialControlWindow.h"
-#include "StatisticsWindow.h"
-#include "GpuSettingsDialog.h"
-#include "Viewport.h"
-#include "NewSimulationDialog.h"
-#include "MainLoopController.h"
-#include "AlienGui.h"
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/PersisterFacade.h>
+#include <PersisterInterface/SerializerService.h>
+
 #include "AboutDialog.h"
-#include "MassOperationsDialog.h"
-#include "LogWindow.h"
-#include "GuiLogger.h"
-#include "UiController.h"
-#include "GettingStartedWindow.h"
-#include "DisplaySettingsDialog.h"
-#include "EditorController.h"
-#include "SelectionWindow.h"
-#include "PatternEditorWindow.h"
-#include "WindowController.h"
-#include "CreatorWindow.h"
-#include "MultiplierWindow.h"
-#include "GenericMessageDialog.h"
-#include "FpsController.h"
-#include "BrowserWindow.h"
-#include "LoginDialog.h"
-#include "UploadSimulationDialog.h"
-#include "EditSimulationDialog.h"
-#include "CreateUserDialog.h"
 #include "ActivateUserDialog.h"
+#include "AlienGui.h"
+#include "AutosaveWindow.h"
+#include "BrowserWindow.h"
+#include "CreateUserDialog.h"
+#include "CreatorWindow.h"
 #include "DelayedExecutionController.h"
 #include "DeleteUserDialog.h"
-#include "NetworkSettingsDialog.h"
-#include "ResetPasswordDialog.h"
-#include "NewPasswordDialog.h"
-#include "ImageToPatternDialog.h"
-#include "GenericFileDialog.h"
+#include "DisplaySettingsDialog.h"
+#include "EditSimulationDialog.h"
+#include "EditorController.h"
 #include "ExitDialog.h"
-#include "AutosaveWindow.h"
 #include "FileTransferController.h"
+#include "FpsController.h"
+#include "GenericFileDialog.h"
+#include "GenericMessageDialog.h"
+#include "GettingStartedWindow.h"
+#include "GpuSettingsDialog.h"
+#include "GuiLogger.h"
+#include "ImFileDialog.h"
+#include "ImageToPatternDialog.h"
 #include "LocationController.h"
+#include "LogWindow.h"
 #include "LoginController.h"
-#include "NetworkTransferController.h"
+#include "LoginDialog.h"
+#include "MainLoopController.h"
 #include "MainLoopEntityController.h"
+#include "MassOperationsDialog.h"
+#include "MultiplierWindow.h"
+#include "NetworkSettingsDialog.h"
+#include "NetworkTransferController.h"
+#include "NewPasswordDialog.h"
+#include "NewSimulationDialog.h"
 #include "OverlayController.h"
+#include "PatternEditorWindow.h"
+#include "ResetPasswordDialog.h"
+#include "SelectionWindow.h"
+#include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
+#include "SimulationView.h"
+#include "SpatialControlWindow.h"
+#include "StatisticsWindow.h"
+#include "StyleRepository.h"
+#include "TemporalControlWindow.h"
+#include "UiController.h"
+#include "UploadSimulationDialog.h"
+#include "Viewport.h"
+#include "WindowController.h"
+#include "implot.h"
 
 namespace
 {
@@ -144,7 +147,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     AboutDialog::get().setup();
     CreateUserDialog::get().setup();
     DeleteUserDialog::get().setup();
-    DisplaySettingsDialog::get().setup(); 
+    DisplaySettingsDialog::get().setup();
     NetworkSettingsDialog::get().setup();
     NewPasswordDialog::get().setup(_simulationFacade);
     ResetPasswordDialog::get().setup();
@@ -161,8 +164,7 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
 
 void _MainWindow::mainLoop()
 {
-    while (!MainLoopController::get().shouldClose())
-    {
+    while (!MainLoopController::get().shouldClose()) {
         MainLoopController::get().process();
     }
 }

@@ -1,19 +1,20 @@
 #pragma once
 
 #include <cassert>
-#include <vector>
+#include <sstream>
 #include <string>
+#include <vector>
+
+#include <Base/Exceptions.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+
+#include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
-#include <sstream>
 
-#include "Base/Exceptions.h"
-#include "Base/GlobalSettings.h"
-#include "Base/LoggingService.h"
-
-template< typename T >
-void checkAndThrowError(T result, char const *const func, const char *const file, int const line)
+template <typename T>
+void checkAndThrowError(T result, char const* const func, const char* const file, int const line)
 {
     if (result) {
         DEVICE_RESET
@@ -38,10 +39,10 @@ void checkAndThrowError(T result, char const *const func, const char *const file
             break;
         default: {
             stream << "CUDA error.";
+        } break;
         }
-            break;
-        }
-        stream << std::endl << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
+        stream << std::endl
+               << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
                << "\"";
         auto text = stream.str();
         log(Priority::Important, text);
@@ -56,8 +57,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
 
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 
-#define CHECK_FOR_CUDA_ERROR(val) \
-    checkAndThrowError( (val), #val, __FILENAME__, __LINE__ )
+#define CHECK_FOR_CUDA_ERROR(val) checkAndThrowError((val), #val, __FILENAME__, __LINE__)
 
 #define ABORT() assert(false);
 
@@ -77,8 +77,7 @@ void checkAndThrowError(T result, char const *const func, const char *const file
     if (GlobalSettings::get().isDebugMode()) { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
         CHECK_FOR_CUDA_ERROR(cudaDeviceSynchronize()); \
-    } \
-    else { \
+    } else { \
         func<<<gpuSettings.numBlocks, 8>>>(__VA_ARGS__); \
     }
 

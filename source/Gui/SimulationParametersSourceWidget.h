@@ -2,9 +2,10 @@
 
 #include <string>
 
-#include "EngineInterface/Definitions.h"
-#include "LocationWidget.h"
+#include <EngineInterface/Definitions.h>
+
 #include "LayerColorPalette.h"
+#include "LocationWidget.h"
 
 class _SimulationParametersSourceWidgets : public _LocationWidget
 {

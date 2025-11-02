@@ -57,11 +57,11 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
 
         //for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         //    auto& cell = cells.at(index);
-            //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
-            //    auto variance = toDouble(cell->numCells) - averageNumCells;
-            //    variance = variance * variance / numReplicators;
-            //    statistics.addToNumCellsVariance(cell->color, variance);
-            //}
+        //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
+        //    auto variance = toDouble(cell->numCells) - averageNumCells;
+        //    variance = variance * variance / numReplicators;
+        //    statistics.addToNumCellsVariance(cell->color, variance);
+        //}
         //}
     }
 }

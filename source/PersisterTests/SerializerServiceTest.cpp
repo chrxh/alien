@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "EngineTestData/DescriptionTestDataFactory.h"
+#include <EngineTestData/DescriptionTestDataFactory.h>
 
-#include "PersisterInterface/SerializerService.h"
+#include <PersisterInterface/SerializerService.h>
 
 
 class SerializerServiceTests : public ::testing::Test
@@ -110,7 +110,7 @@ TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
     auto nodeParameter = GetParam();
 
     auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
-    
+
     auto data = Description().addCreature(creature.cells({CellDescription()}), genome);
 
     testSerializationAndDeserialization(data);

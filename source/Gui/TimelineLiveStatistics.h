@@ -1,12 +1,12 @@
 #pragma once
 
 #include <chrono>
-#include <vector>
 #include <optional>
+#include <vector>
 
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/StatisticsRawData.h"
-#include "EngineInterface/DataPointCollection.h"
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/DataPointCollection.h>
+#include <EngineInterface/StatisticsRawData.h>
 
 class TimelineLiveStatistics
 {

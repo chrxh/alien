@@ -1,6 +1,5 @@
-﻿#include "StatisticsKernelsService.cuh"
-
-#include "StatisticsKernels.cuh"
+﻿#include "StatisticsKernels.cuh"
+#include "StatisticsKernelsService.cuh"
 
 void _StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics)
 {

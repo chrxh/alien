@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "Base/Math.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Math.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -53,21 +54,20 @@ INSTANTIATE_TEST_SUITE_P(
         Angles{-30.0f, 240.0f, 90.0f},
         Angles{-30.0f, 270.0f, 90.0f},
         Angles{-30.0f, 359.0f, 90.0f},
-        
+
         Angles{-30.0f, 1.0f, 180.0f},
         Angles{-30.0f, 30.0f, 180.0f},
         Angles{-30.0f, 120.0f, 180.0f},
         Angles{-30.0f, 180.0f, 180.0f},
-        Angles{-30.0f, 270.0f, 180.0f}, 
+        Angles{-30.0f, 270.0f, 180.0f},
         Angles{-30.0f, 359.0f, 180.0f},
 
-        Angles{-30.0f, 1.0f, 270.0f},  
-        Angles{-30.0f, 30.0f, 270.0f}, 
+        Angles{-30.0f, 1.0f, 270.0f},
+        Angles{-30.0f, 30.0f, 270.0f},
         Angles{-30.0f, 120.0f, 270.0f},
         Angles{-30.0f, 180.0f, 270.0f},
         Angles{-30.0f, 270.0f, 270.0f},
-        Angles{-30.0f, 359.0f, 270.0f} 
-    ));
+        Angles{-30.0f, 359.0f, 270.0f}));
 
 TEST_P(PhysicsTests_TwoAngles, angularForces)
 {

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -476,17 +476,17 @@ TEST_F(SensorTests, scanForSameMutants_notFound_otherLineageId)
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }));
         data.addCreature(CreatureDescription()
-            .lineageId(otherMutantId)
-            .cells({
-                DescriptionEditService::get()
-                    .createRect(DescriptionEditService::CreateRectParameters()
-                                    .center({10.0f, 100.0f})
-                                    .width(16)
-                                    .height(16)
-                                    .cellDistance(0.5f)
-                                    .cellType(BaseDescription()))
-                    ._cells,
-            }));
+                             .lineageId(otherMutantId)
+                             .cells({
+                                 DescriptionEditService::get()
+                                     .createRect(DescriptionEditService::CreateRectParameters()
+                                                     .center({10.0f, 100.0f})
+                                                     .width(16)
+                                                     .height(16)
+                                                     .cellDistance(0.5f)
+                                                     .cellType(BaseDescription()))
+                                     ._cells,
+                             }));
         data.addConnection(1, 2);
 
         _simulationFacade->clear();
@@ -670,17 +670,17 @@ TEST_F(SensorTests, scanForLessComplexMutants_found)
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }));
         data.addCreature(CreatureDescription()
-            .numCells(toFloat(otherNumCells))
-            .cells({
-                DescriptionEditService::get()
-                    .createRect(DescriptionEditService::CreateRectParameters()
-                                    .center({10.0f, 100.0f})
-                                    .width(16)
-                                    .height(16)
-                                    .cellDistance(0.5f)
-                                    .cellType(BaseDescription()))
-                    ._cells,
-            }));
+                             .numCells(toFloat(otherNumCells))
+                             .cells({
+                                 DescriptionEditService::get()
+                                     .createRect(DescriptionEditService::CreateRectParameters()
+                                                     .center({10.0f, 100.0f})
+                                                     .width(16)
+                                                     .height(16)
+                                                     .cellDistance(0.5f)
+                                                     .cellType(BaseDescription()))
+                                     ._cells,
+                             }));
         data.addConnection(1, 2);
 
         _simulationFacade->clear();
@@ -709,17 +709,17 @@ TEST_F(SensorTests, scanForLessComplexMutants_notFound_otherMoreComplex)
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }));
         data.addCreature(CreatureDescription()
-            .numCells(toFloat(otherNumCells) + 0.01f)
-            .cells({
-                DescriptionEditService::get()
-                    .createRect(DescriptionEditService::CreateRectParameters()
-                                    .center({10.0f, 100.0f})
-                                    .width(16)
-                                    .height(16)
-                                    .cellDistance(0.5f)
-                                    .cellType(BaseDescription()))
-                    ._cells,
-            }));
+                             .numCells(toFloat(otherNumCells) + 0.01f)
+                             .cells({
+                                 DescriptionEditService::get()
+                                     .createRect(DescriptionEditService::CreateRectParameters()
+                                                     .center({10.0f, 100.0f})
+                                                     .width(16)
+                                                     .height(16)
+                                                     .cellDistance(0.5f)
+                                                     .cellType(BaseDescription()))
+                                     ._cells,
+                             }));
         data.addConnection(1, 2);
 
         _simulationFacade->clear();
@@ -795,17 +795,17 @@ TEST_F(SensorTests, scanForMoreComplexMutants_found)
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }));
         data.addCreature(CreatureDescription()
-            .numCells(toFloat(otherNumCells))
-            .cells({
-                DescriptionEditService::get()
-                    .createRect(DescriptionEditService::CreateRectParameters()
-                                    .center({10.0f, 100.0f})
-                                    .width(16)
-                                    .height(16)
-                                    .cellDistance(0.5f)
-                                    .cellType(BaseDescription()))
-                    ._cells,
-            }));
+                             .numCells(toFloat(otherNumCells))
+                             .cells({
+                                 DescriptionEditService::get()
+                                     .createRect(DescriptionEditService::CreateRectParameters()
+                                                     .center({10.0f, 100.0f})
+                                                     .width(16)
+                                                     .height(16)
+                                                     .cellDistance(0.5f)
+                                                     .cellType(BaseDescription()))
+                                     ._cells,
+                             }));
         data.addConnection(1, 2);
 
         _simulationFacade->clear();
@@ -833,17 +833,17 @@ TEST_F(SensorTests, scanForMoreComplexMutants_notFound_otherLessComplex)
             CellDescription().id(2).pos({101.0f, 100.0f}),
         }));
         data.addCreature(CreatureDescription()
-            .numCells(toFloat(otherNumCells))
-            .cells({
-                DescriptionEditService::get()
-                    .createRect(DescriptionEditService::CreateRectParameters()
-                                    .center({10.0f, 100.0f})
-                                    .width(16)
-                                    .height(16)
-                                    .cellDistance(0.5f)
-                                    .cellType(BaseDescription()))
-                    ._cells,
-            }));
+                             .numCells(toFloat(otherNumCells))
+                             .cells({
+                                 DescriptionEditService::get()
+                                     .createRect(DescriptionEditService::CreateRectParameters()
+                                                     .center({10.0f, 100.0f})
+                                                     .width(16)
+                                                     .height(16)
+                                                     .cellDistance(0.5f)
+                                                     .cellType(BaseDescription()))
+                                     ._cells,
+                             }));
         data.addConnection(1, 2);
 
 

@@ -1,9 +1,11 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
-#include "Definitions.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/Definitions.h>
+
 #include "AlienWindow.h"
-#include "Base/Singleton.h"
+#include "Definitions.h"
 
 class SelectionWindow : public AlienWindow<>
 {

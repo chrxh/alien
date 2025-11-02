@@ -2,12 +2,13 @@
 
 #include <algorithm>
 
-#include <GLFW/glfw3.h>
+#include <Base/Math.h>
 
-#include "Base/Math.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/SimulationFacade.h>
 
 #include "WindowController.h"
+
+#include <GLFW/glfw3.h>
 
 void Viewport::setup(SimulationFacade const& simulationFacade)
 {
@@ -68,8 +69,7 @@ void Viewport::setZoomSensitivity(float value)
 
 void Viewport::moveCenter(RealVector2D const& startWorldPosition, IntVector2D const& endViewPos)
 {
-    RealVector2D deltaViewPos{
-        toFloat(endViewPos.x) - toFloat(_viewSize.x) / 2.0f, toFloat(endViewPos.y) - toFloat(_viewSize.y) / 2.0f};
+    RealVector2D deltaViewPos{toFloat(endViewPos.x) - toFloat(_viewSize.x) / 2.0f, toFloat(endViewPos.y) - toFloat(_viewSize.y) / 2.0f};
     auto deltaWorldPos = deltaViewPos / _zoomFactor;
     _centerInWorldPos = startWorldPosition - deltaWorldPos;
 }

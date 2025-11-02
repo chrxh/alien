@@ -6,11 +6,11 @@
 
 #include <imgui.h>
 
-#include "Base/GlobalSettings.h"
-#include "Base/Resources.h"
+#include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
 
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SpaceCalculator.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/SpaceCalculator.h>
 
 #include "AlienGui.h"
 #include "RenderPipeline.h"
@@ -230,10 +230,8 @@ void SimulationView::setupRenderPipeline()
             // Render block: Render energy particles
             RenderBlock{
                 RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::EnergyParticle)
-                                                          .addUniform("ballSize", 10.0f)
-                                                          .addUniform("onBackground", true)),
+                    _EnergyParticleRenderStep::create(
+                        StepParameters().shader(ShaderSources::EnergyParticle).addUniform("ballSize", 10.0f).addUniform("onBackground", true)),
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::ModuloCopy).uniformFunc(moduloUniformFunc)),
                 }),
             },
@@ -248,10 +246,8 @@ void SimulationView::setupRenderPipeline()
                     _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::DownSampler).addUniform("scale", 0.5f)),
                 }),
                 RenderSequence().steps({
-                    _EnergyParticleRenderStep::create(StepParameters()
-                                                          .shader(ShaderSources::EnergyParticle)
-                                                          .addUniform("ballSize", 0.2f)
-                                                          .addUniform("onBackground", false)),
+                    _EnergyParticleRenderStep::create(
+                        StepParameters().shader(ShaderSources::EnergyParticle).addUniform("ballSize", 0.2f).addUniform("onBackground", false)),
                 }),
             },
 
@@ -307,10 +303,10 @@ void SimulationView::setupRenderPipeline()
             RenderBlock{
                 RenderSequence().steps({
                     _PostProcessingRenderStep::create(StepParameters()
-                        .shader(ShaderSources::MergeAdditive)
-                        .addUniform("colorFactor1", 1.0f)
-                        .addUniform("colorFactor2", 0.6f)
-                        .addUniform("colorFactor3", 1.5f)),
+                                                          .shader(ShaderSources::MergeAdditive)
+                                                          .addUniform("colorFactor1", 1.0f)
+                                                          .addUniform("colorFactor2", 0.6f)
+                                                          .addUniform("colorFactor3", 1.5f)),
                 }),
             },
 
@@ -350,12 +346,12 @@ void SimulationView::setupRenderPipeline()
                 RenderSequence()
                     .repetitions(blurRepetitionsFunc)
                     .steps({
-                    _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                    _PostProcessingRenderStep::create(
-                        StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
-                }),
+                        _PostProcessingRenderStep::create(StepParameters().shader(ShaderSources::UpSampler).addUniform("scale", 2.0f)),
+                        _PostProcessingRenderStep::create(
+                            StepParameters().shader(ShaderSources::BlurHorizontal).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
+                        _PostProcessingRenderStep::create(
+                            StepParameters().shader(ShaderSources::BlurVertical).addUniform("strength", 0.12f / 8).addUniform("zoomDependent", true)),
+                    }),
                 RenderSequence().steps({
                     _ForwardRenderStep::create(StepParameters().previousTargetSelection(1)),
                 })},

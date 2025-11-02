@@ -2,7 +2,8 @@
 
 #include <chrono>
 
-#include "EngineInterface/StatisticsRawData.h"
+#include <EngineInterface/StatisticsRawData.h>
+
 #include "Definitions.h"
 
 class TableLiveStatistics

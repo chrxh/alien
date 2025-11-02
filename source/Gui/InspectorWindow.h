@@ -1,7 +1,8 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/Description.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/Description.h>
+
 #include "Definitions.h"
 
 struct MemoryEditor;

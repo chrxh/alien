@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Base/Singleton.h"
+#include <vector>
+
+#include <Base/Singleton.h>
 
 #include "Ids.h"
 
@@ -9,8 +11,7 @@ class NumberGenerator
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NumberGenerator);
 
 public:
-
-	uint32_t getRandomInt();
+    uint32_t getRandomInt();
     uint32_t getRandomInt(uint32_t range);
     uint32_t getRandomInt(uint32_t min, uint32_t max);
     double getRandomDouble();
@@ -29,9 +30,8 @@ private:
 
     uint32_t getNumberFromArray();
 
-	int _currentRandomNumberIndex = 0;
-	std::vector<uint32_t> _arrayOfRandomNumbers;
+    int _currentRandomNumberIndex = 0;
+    std::vector<uint32_t> _arrayOfRandomNumbers;
 
     Ids _ids;
 };
-

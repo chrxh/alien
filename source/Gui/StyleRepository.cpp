@@ -2,22 +2,22 @@
 
 #include <stdexcept>
 
-#include <ImFileDialog.h>
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
 #include <imgui.h>
 #include <imgui_freetype.h>
-#include <implot.h>
 
-#include "Fonts/DroidSans.h"
-#include "Fonts/DroidSansBold.h"
-#include "Fonts/Cousine-Regular.h"
-#include "Fonts/AlienIconFont.h"
-#include "Fonts/FontAwesomeSolid.h"
 #include <Fonts/IconsFontAwesome5.h>
-#include "Fonts/Reef.h"
 
 #include "WindowController.h"
+
+#include "Fonts/AlienIconFont.h"
+#include "Fonts/Cousine-Regular.h"
+#include "Fonts/DroidSans.h"
+#include "Fonts/DroidSansBold.h"
+#include "Fonts/FontAwesomeSolid.h"
+#include "Fonts/Reef.h"
+#include <GLFW/glfw3.h>  // Will drag system OpenGL headers
+#include <ImFileDialog.h>
+#include <implot.h>
 
 void StyleRepository::setup()
 {

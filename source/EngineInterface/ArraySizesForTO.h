@@ -12,5 +12,5 @@ struct ArraySizesForTO
     uint64_t particles = 0;
     uint64_t heap = 0;
 
-	bool operator==(ArraySizesForTO const& other) const = default;
+    bool operator==(ArraySizesForTO const& other) const = default;
 };

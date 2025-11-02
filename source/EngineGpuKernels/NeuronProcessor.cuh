@@ -2,16 +2,14 @@
 
 #include "sm_60_atomic_functions.h"
 
-#include "SimulationData.cuh"
 #include "SignalProcessor.cuh"
+#include "SimulationData.cuh"
 
 class NeuronProcessor
 {
 public:
     // needs to be called with MAX_CHANNELS * MAX_CHANNELS threads
-    __inline__ __device__ static void process(
-        SimulationData& data,
-        SimulationStatistics& statistics);
+    __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
@@ -69,7 +67,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
                 applyActivationFunction(cell->neuralNetwork->activationFunctions[threadIdx.x], sumInput[threadIdx.x])));  // truncate value to avoid overflow
     }
     __syncthreads();
-    
+
 
     if (0 == threadIdx.x) {
         cell->signal = signal;

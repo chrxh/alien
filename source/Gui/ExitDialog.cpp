@@ -1,6 +1,7 @@
+#include "ExitDialog.h"
+
 #include <imgui.h>
 
-#include "ExitDialog.h"
 #include "AlienGui.h"
 #include "MainLoopController.h"
 

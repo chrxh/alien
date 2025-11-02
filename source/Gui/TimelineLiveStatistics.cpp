@@ -1,11 +1,13 @@
 #include "TimelineLiveStatistics.h"
 
 #include <cmath>
+
 #include <imgui.h>
 
-#include "Base/Definitions.h"
-#include "EngineInterface/StatisticsRawData.h"
-#include "EngineInterface/StatisticsConverterService.h"
+#include <Base/Definitions.h>
+
+#include <EngineInterface/StatisticsConverterService.h>
+#include <EngineInterface/StatisticsRawData.h>
 
 std::vector<DataPointCollection> const& TimelineLiveStatistics::getDataPointCollectionHistory() const
 {
@@ -17,7 +19,8 @@ void TimelineLiveStatistics::update(TimelineStatistics const& data, uint64_t tim
     truncate();
 
     auto timepoint = std::chrono::steady_clock::now();
-    auto duration = _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
+    auto duration =
+        _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
 
     _timeSinceSimStart += toDouble(duration) / 1000;
 

@@ -1,6 +1,6 @@
 #include "LocationHelper.h"
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
 LocationType LocationHelper::getLocationType(int orderNumber, SimulationParameters const& parameters)
 {

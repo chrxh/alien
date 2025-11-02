@@ -1,9 +1,9 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
+#include <EngineInterface/Definitions.h>
 
-#include "LocationWidget.h"
 #include "LayerColorPalette.h"
+#include "LocationWidget.h"
 
 class _SimulationParameterLayerWidget : public _LocationWidget
 {

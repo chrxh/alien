@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "EngineInterface/ArraySizesForTO.h"
+#include <EngineInterface/ArraySizesForTO.h>
 
 #include "TO.cuh"
 
@@ -19,4 +19,3 @@ private:
 
     std::optional<TO> _to;
 };
-

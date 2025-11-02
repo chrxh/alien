@@ -1,12 +1,14 @@
 #include "DescriptionEditService.h"
 
 #include <cmath>
+
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-#include "Base/Math.h"
-#include "Base/Physics.h"
-#include "EngineInterface/NumberGenerator.h"
+#include <Base/Math.h>
+#include <Base/Physics.h>
+
+#include <EngineInterface/NumberGenerator.h>
 
 #include "GenomeDescription.h"
 #include "SpaceCalculator.h"
@@ -17,13 +19,13 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
     for (int i = 0; i < parameters._width; ++i) {
         for (int j = 0; j < parameters._height; ++j) {
             result._cells.emplace_back(CellDescription()
-                               .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
-                               .energy(parameters._energy)
-                               .stiffness(parameters._stiffness)
-                               .color(parameters._color)
-                               .barrier(parameters._barrier)
-                               .sticky(parameters._sticky)
-                               .cellType(parameters._cellType));
+                                           .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
+                                           .energy(parameters._energy)
+                                           .stiffness(parameters._stiffness)
+                                           .color(parameters._color)
+                                           .barrier(parameters._barrier)
+                                           .sticky(parameters._sticky)
+                                           .cellType(parameters._cellType));
         }
     }
     reconnectCells(result, parameters._cellDistance * 1.1f);
@@ -40,24 +42,24 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
 
             //create cell: upper layer
             result._cells.emplace_back(CellDescription()
-                               .cellType(StructureCellDescription())
-                               .energy(parameters._energy)
-                               .stiffness(parameters._stiffness)
-                               .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
-                               .color(parameters._color)
-                               .barrier(parameters._barrier)
-                               .sticky(parameters._sticky)
-                               .cellType(parameters._cellType));
+                                           .cellType(StructureCellDescription())
+                                           .energy(parameters._energy)
+                                           .stiffness(parameters._stiffness)
+                                           .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
+                                           .color(parameters._color)
+                                           .barrier(parameters._barrier)
+                                           .sticky(parameters._sticky)
+                                           .cellType(parameters._cellType));
 
             //create cell: under layer (except for 0-layer)
             if (j > 0) {
                 result._cells.emplace_back(CellDescription()
-                                   .cellType(StructureCellDescription())
-                                   .energy(parameters._energy)
-                                   .stiffness(parameters._stiffness)
-                                   .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
-                                   .color(parameters._color)
-                                   .barrier(parameters._barrier));
+                                               .cellType(StructureCellDescription())
+                                               .energy(parameters._energy)
+                                               .stiffness(parameters._stiffness)
+                                               .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
+                                               .color(parameters._color)
+                                               .barrier(parameters._barrier));
             }
         }
     }
@@ -74,13 +76,13 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
 
     if (parameters._radius <= 1 + NEAR_ZERO) {
         result._cells.emplace_back(CellDescription()
-                           .cellType(StructureCellDescription())
-                           .pos(parameters._center)
-                           .energy(parameters._energy)
-                           .stiffness(parameters._stiffness)
-                           .color(parameters._color)
-                           .barrier(parameters._barrier)
-                           .sticky(parameters._sticky));
+                                       .cellType(StructureCellDescription())
+                                       .pos(parameters._center)
+                                       .energy(parameters._energy)
+                                       .stiffness(parameters._stiffness)
+                                       .color(parameters._color)
+                                       .barrier(parameters._barrier)
+                                       .sticky(parameters._sticky));
         return result;
     }
 
@@ -98,14 +100,13 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                 continue;
             }
             result._cells.emplace_back(CellDescription()
-                               .cellType(StructureCellDescription())
-                               .energy(parameters._energy)
-                               .stiffness(parameters._stiffness)
-                               .pos({parameters._center.x + dxMod, parameters._center.y + dy})
-                               .color(parameters._color)
-                               .barrier(parameters._barrier)
-                               .sticky(parameters._sticky));
-
+                                           .cellType(StructureCellDescription())
+                                           .energy(parameters._energy)
+                                           .stiffness(parameters._stiffness)
+                                           .pos({parameters._center.x + dxMod, parameters._center.y + dy})
+                                           .color(parameters._color)
+                                           .barrier(parameters._barrier)
+                                           .sticky(parameters._sticky));
         }
     }
     return result;
@@ -117,7 +118,7 @@ namespace
     {
         CHECK(!creature._cells.empty());
         auto refCell = creature._cells.front();
-        for (auto & cell : creature._cells) {
+        for (auto& cell : creature._cells) {
             auto topologyCorrection = spaceCalc.getCorrectionIncrement(refCell._pos, cell._pos);
             cell._pos = cell._pos + topologyCorrection;
         }
@@ -166,24 +167,24 @@ void DescriptionEditService::duplicate(Description& description, IntVector2D con
                 auto origPos = calcCenter(creature);
                 RealVector2D newPos = {origPos.x + incX, origPos.y + incY};
                 //if (newPos.x < size.x && newPos.y < size.y) {
-                    for (auto& cell : creature._cells) {
-                        cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
-                    }
-                    result._creatures.emplace_back(creature);
+                for (auto& cell : creature._cells) {
+                    cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
+                }
+                result._creatures.emplace_back(creature);
                 //}
             }
             for (auto cell : clone._cells) {
                 RealVector2D newPos = {cell._pos.x + incX, cell._pos.y + incY};
                 cell._pos = RealVector2D{cell._pos.x + incX, cell._pos.y + incY};
                 //if (newPos.x < size.x && newPos.y < size.y) {
-                    result._cells.emplace_back(cell);
+                result._cells.emplace_back(cell);
                 //}
             }
             for (auto particle : clone._particles) {
                 auto origPos = particle._pos;
                 particle._pos = RealVector2D{origPos.x + incX, origPos.y + incY};
                 //if (particle._pos.x < size.x && particle._pos.y < size.y) {
-                    result._particles.emplace_back(particle);
+                result._particles.emplace_back(particle);
                 //}
             }
         }
@@ -283,7 +284,8 @@ Description DescriptionEditService::randomMultiply(
             copy = input;
             shift(copy, {toFloat(numberGen.getRandomDouble(0, toInt(worldSize.x))), toFloat(numberGen.getRandomDouble(0, toInt(worldSize.y)))});
             rotate(copy, toInt(numberGen.getRandomDouble(parameters._minAngle, parameters._maxAngle)));
-            accelerate(copy,
+            accelerate(
+                copy,
                 {toFloat(numberGen.getRandomDouble(parameters._minVelX, parameters._maxVelX)),
                  toFloat(numberGen.getRandomDouble(parameters._minVelY, parameters._maxVelY))},
                 toFloat(numberGen.getRandomDouble(parameters._minAngularVel, parameters._maxAngularVel)));
@@ -421,8 +423,8 @@ void DescriptionEditService::randomizeGenomeColors(Description& description, std
     for (auto& creature : description._creatures) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
         // Find the genome for this creature
-        auto genomeIt = std::find_if(description._genomes.begin(), description._genomes.end(), 
-            [&creature](auto const& g) { return g._id == creature._genomeId; });
+        auto genomeIt =
+            std::find_if(description._genomes.begin(), description._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
         if (genomeIt != description._genomes.end()) {
             for (auto& gene : genomeIt->_genes) {
                 for (auto& node : gene._nodes) {
@@ -702,12 +704,12 @@ std::vector<ExtendedCellOrParticleDescription> DescriptionEditService::getObject
     for (auto const& creature : description._creatures) {
         // Find the genome for this creature
         std::optional<GenomeDescription> genomeOpt;
-        auto genomeIt = std::find_if(description._genomes.begin(), description._genomes.end(), 
-            [&creature](auto const& g) { return g._id == creature._genomeId; });
+        auto genomeIt =
+            std::find_if(description._genomes.begin(), description._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
         if (genomeIt != description._genomes.end()) {
             genomeOpt = *genomeIt;
         }
-        
+
         for (auto const& cell : creature._cells) {
             ExtendedCellDescription extCell;
             extCell.cell = cell;

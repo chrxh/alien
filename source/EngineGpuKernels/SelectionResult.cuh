@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "EngineInterface/SelectionShallowData.h"
+#include <EngineInterface/SelectionShallowData.h>
+
 #include "Definitions.cuh"
 #include "Object.cuh"
 
@@ -13,16 +14,12 @@ public:
         CHECK_FOR_CUDA_ERROR(cudaMemset(_selectionShallowData, 0, sizeof(SelectionShallowData)));
     }
 
-    __host__ void free()
-    {
-        CudaMemoryManager::getInstance().freeMemory(_selectionShallowData);
-    }
+    __host__ void free() { CudaMemoryManager::getInstance().freeMemory(_selectionShallowData); }
 
     __host__ SelectionShallowData getSelectionShallowData()
     {
         SelectionShallowData result;
-        CHECK_FOR_CUDA_ERROR(
-            cudaMemcpy(&result, _selectionShallowData, sizeof(SelectionShallowData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(&result, _selectionShallowData, sizeof(SelectionShallowData), cudaMemcpyDeviceToHost));
 
         return result;
     }

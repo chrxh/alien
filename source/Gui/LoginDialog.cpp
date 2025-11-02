@@ -2,19 +2,21 @@
 
 #include <imgui.h>
 
-#include "Base/GlobalSettings.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkService.h"
+#include <Base/GlobalSettings.h>
 
-#include "AlienGui.h"
-#include "GenericMessageDialog.h"
-#include "CreateUserDialog.h"
-#include "BrowserWindow.h"
-#include "ResetPasswordDialog.h"
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
 #include "ActivateUserDialog.h"
-#include "StyleRepository.h"
+#include "AlienGui.h"
+#include "BrowserWindow.h"
+#include "CreateUserDialog.h"
+#include "GenericMessageDialog.h"
 #include "HelpStrings.h"
 #include "LoginController.h"
+#include "ResetPasswordDialog.h"
+#include "StyleRepository.h"
 
 void LoginDialog::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
 {
@@ -44,7 +46,7 @@ void LoginDialog::processIntern()
     AlienGui::InputText(AlienGui::InputTextParameters().hint("User name").textWidth(0), userName);
     loginController.setUserName(userName);
 
-    auto password= loginController.getPassword();
+    auto password = loginController.getPassword();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Password").password(true).textWidth(0), password);
     loginController.setPassword(password);
 

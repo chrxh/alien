@@ -2,10 +2,11 @@
 
 #include <ranges>
 
-#include "Base/Resources.h"
-#include "EngineInterface/SimulationParametersSpecification.h"
-#include "EngineInterface/SpecificationEvaluationService.h"
-#include "EngineInterface/ParametersValidationService.h"
+#include <Base/Resources.h>
+
+#include <EngineInterface/ParametersValidationService.h>
+#include <EngineInterface/SimulationParametersSpecification.h>
+#include <EngineInterface/SpecificationEvaluationService.h>
 
 #include "ParameterParser.h"
 
@@ -133,7 +134,8 @@ namespace
         }
     }
 
-    void encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, std::string const& nodeBase, ParserTask parserTask)
+    void
+    encodeDecodeSimulationParameters(boost::property_tree::ptree& tree, SimulationParameters& parameters, std::string const& nodeBase, ParserTask parserTask)
     {
         auto& evaluationService = SpecificationEvaluationService::get();
 

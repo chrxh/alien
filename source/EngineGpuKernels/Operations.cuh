@@ -3,7 +3,8 @@
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-struct AddConnectionPairOperation {
+struct AddConnectionPairOperation
+{
     bool addTokens;
     Cell* cell;
     Cell* otherCell;
@@ -36,7 +37,7 @@ struct StructuralOperation
     };
     Type type;
     StructureOperationData data;
-    int nextOperationIndex; //linked list, = -1 end
+    int nextOperationIndex;  //linked list, = -1 end
 };
 
 struct CellTypeOperation

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
-#include "Object.cuh"
-#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "ConstructorHelper.cuh"
+#include "Object.cuh"
+#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 

@@ -4,8 +4,8 @@
 #include "sm_60_atomic_functions.h"
 
 #include "Base.cuh"
-#include "Map.cuh"
 #include "ConstantMemory.cuh"
+#include "Map.cuh"
 #include "ObjectFactory.cuh"
 #include "ParameterCalculator.cuh"
 
@@ -75,8 +75,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particles.at(particleIndex);
         auto otherParticle = data.particleMap.get(particle->pos);
-        if (otherParticle && otherParticle != particle
-            && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
+        if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
 
             SystemDoubleLock lock;
             lock.init(&particle->locked, &otherParticle->locked);
@@ -122,18 +121,18 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
                             energyToTransfer *=
                                 max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[cell->color]);
 
-                            auto radiationAbsorptionLowVelocityPenalty =
-                                ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, cell->pos, cell->color);
+                            auto radiationAbsorptionLowVelocityPenalty = ParameterCalculator::calcParameter(
+                                cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, cell->pos, cell->color);
                             energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(cell->vel), 10.0f);
-                            energyToTransfer *=
-                                powf(toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[cell->color]);
+                            energyToTransfer *= powf(
+                                toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[cell->color]);
 
                             //auto radiationAbsorptionLowNumCellsPenalty = ParameterCalculator::calcParameter(
                             //    cudaSimulationParameters.radiationAbsorptionLowNumCellsPenalty, data, cell->pos, cell->color);
                             //energyToTransfer *= 1.0f - radiationAbsorptionLowNumCellsPenalty / powf(1.0f + cell->numCells, 0.1f);
                         }
 
-                        if (particle->energy < 0.01f/* && energyToTransfer > 0.1f*/) {
+                        if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
                         cell->energy += energyToTransfer;
@@ -197,7 +196,7 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
     auto const partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particles.at(particleIndex)) {
-            
+
             if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 ObjectFactory factory;
                 factory.init(&data);
@@ -340,8 +339,7 @@ __inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationDa
         }
     }
 
-    auto particleEnergy =
-        energy * (1.0f - externalEnergyBackflowFactor);
+    auto particleEnergy = energy * (1.0f - externalEnergyBackflowFactor);
     if (particleEnergy > NEAR_ZERO) {
         ObjectFactory factory;
         factory.init(&data);

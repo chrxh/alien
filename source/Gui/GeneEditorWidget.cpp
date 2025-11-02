@@ -4,9 +4,9 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/StringHelper.h"
+#include <Base/StringHelper.h>
 
-#include "EngineInterface/GenomeDescriptionEditService.h"
+#include <EngineInterface/GenomeDescriptionEditService.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
@@ -72,7 +72,7 @@ void _GeneEditorWidget::processHeaderData()
     if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto& gene = _editData->getSelectedGeneRef();
 
-        _editData->updateGeometry(gene._shape); // Do it every time in order to avoid check for changes
+        _editData->updateGeometry(gene._shape);  // Do it every time in order to avoid check for changes
 
         // Gene name
         AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
@@ -105,13 +105,9 @@ void _GeneEditorWidget::processHeaderData()
         // Number of branches
         AlienGui::BeginIndent();
         if (!gene._separation) {
-            auto numBranches = gene._numBranches - 1;   // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
+            auto numBranches = gene._numBranches - 1;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
             AlienGui::Combo(
-                AlienGui::ComboParameters()
-                    .name("Number of branches")
-                    .values({"1", "2", "3", "4", "5", "6"})
-                    .textWidth(rightColumnWidth),
-                numBranches);
+                AlienGui::ComboParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
             gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
         } else {
             std::string text = "-";
@@ -124,8 +120,7 @@ void _GeneEditorWidget::processHeaderData()
 
         // Connection distance
         AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth),
-            gene._connectionDistance);
+            AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
 
         // Stiffness
         AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);

@@ -1,7 +1,6 @@
-﻿#include "SimulationData.cuh"
-
-#include "ConstantMemory.cuh"
+﻿#include "ConstantMemory.cuh"
 #include "GarbageCollectorKernels.cuh"
+#include "SimulationData.cuh"
 
 void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
 {
@@ -16,7 +15,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
 
     CudaMemoryManager::getInstance().acquireMemory<double>(1, externalEnergy);
     CHECK_FOR_CUDA_ERROR(cudaMemset(externalEnergy, 0, sizeof(double)));
- 
+
     processMemory.init();
     primaryNumberGen.init(40312357);   //some array size for random numbers (~ 40 MB)
     secondaryNumberGen.init(1536941);  //some array size for random numbers (~ 1.5 MB)
@@ -32,7 +31,7 @@ namespace
     void calcArraySizes(uint64_t& cellArraySizeResult, uint64_t& particleArraySizeResult, uint64_t desiredCellArraySize, uint64_t desiredParticleArraySize)
     {
         auto max = std::max(desiredCellArraySize, desiredParticleArraySize);
-        cellArraySizeResult =  desiredCellArraySize * 7 / 10 + max * 3 / 10;
+        cellArraySizeResult = desiredCellArraySize * 7 / 10 + max * 3 / 10;
         particleArraySizeResult = desiredParticleArraySize * 7 / 10 + max * 3 / 10;
     }
 }
@@ -41,8 +40,7 @@ bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArray, sizeDelta.particleArray);
-    return objects.cells.shouldResize_host(cellArraySizeResult)
-        || objects.particles.shouldResize_host(particleArraySizeResult)
+    return objects.cells.shouldResize_host(cellArraySizeResult) || objects.particles.shouldResize_host(particleArraySizeResult)
         || objects.heap.shouldResize_host(sizeDelta.heap);
 }
 

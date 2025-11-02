@@ -4,14 +4,17 @@
 
 #include <imgui.h>
 
-#include "Base/Hashes.h"
-#include "Base/Cache.h"
-#include "EngineInterface/Definitions.h"
-#include "Network/NetworkResourceTreeTO.h"
-#include "Network/NetworkResourceRawTO.h"
-#include "Network/UserTO.h"
-#include "PersisterInterface/SerializerService.h"
-#include "PersisterInterface/PersisterFacade.h"
+#include <Base/Cache.h>
+#include <Base/Hashes.h>
+
+#include <Network/NetworkResourceRawTO.h>
+#include <Network/NetworkResourceTreeTO.h>
+#include <Network/UserTO.h>
+
+#include <EngineInterface/Definitions.h>
+
+#include <PersisterInterface/PersisterFacade.h>
+#include <PersisterInterface/SerializerService.h>
 
 #include "AlienWindow.h"
 #include "Definitions.h"
@@ -22,7 +25,6 @@ class BrowserWindow : public AlienWindow<SimulationFacade, PersisterFacade>
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 
 public:
-
     void onRefresh();
     WorkspaceType getCurrentWorkspaceType() const;
 
@@ -62,7 +64,9 @@ private:
     void processSimulationList();
     void processGenomeList();
 
-    bool processResourceNameField(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
+    bool processResourceNameField(
+        NetworkResourceTreeTO const& treeTO,
+        std::set<std::vector<std::string>>& collapsedFolderNames);  //return true if folder symbol clicked
     void processDescriptionField(NetworkResourceTreeTO const& treeTO);
     void processReactionList(NetworkResourceTreeTO const& treeTO);
     void processTimestampField(NetworkResourceTreeTO const& treeTO);
@@ -74,7 +78,9 @@ private:
     void processSizeField(NetworkResourceTreeTO const& treeTO, bool kbyte);
     void processVersionField(NetworkResourceTreeTO const& treeTO);
 
-    bool processFolderTreeSymbols(NetworkResourceTreeTO const& treeTO, std::set<std::vector<std::string>>& collapsedFolderNames);   //return true if folder symbol clicked
+    bool processFolderTreeSymbols(
+        NetworkResourceTreeTO const& treeTO,
+        std::set<std::vector<std::string>>& collapsedFolderNames);  //return true if folder symbol clicked
     void processEmojiWindow();
     void processEmojiButton(int emojiType);
 

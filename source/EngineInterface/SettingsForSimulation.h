@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SimulationParameters.h"
 #include "CudaSettings.h"
+#include "SimulationParameters.h"
 
 struct SettingsForSimulation
 {

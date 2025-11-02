@@ -1,18 +1,19 @@
 #pragma once
 
 #include <imgui.h>
+
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/GlobalSettings.h"
+#include <Base/GlobalSettings.h>
 
 #include "Definitions.h"
-#include "StyleRepository.h"
 #include "MainLoopEntity.h"
 #include "MainLoopEntityController.h"
-#include "WindowController.h"
+#include "StyleRepository.h"
 #include "Viewport.h"
+#include "WindowController.h"
 
-template<typename ...Dependencies>
+template <typename... Dependencies>
 class AlienWindow : public MainLoopEntity<Dependencies...>
 {
 public:
@@ -76,7 +77,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 AlienWindow<Dependencies...>::AlienWindow(
     std::string const& title,
     std::string const& settingsNode,
@@ -88,17 +89,16 @@ AlienWindow<Dependencies...>::AlienWindow(
     , _defaultOn(defaultOn)
     , _isMaximizable(maximizable)
     , _minSize(minSize)
-{
-}
+{}
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::init(Dependencies... dependencies)
 {
     _on = GlobalSettings::get().getValue(_settingsNode + ".active", _defaultOn);
     initIntern(dependencies...);
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::process()
 {
     processBackground();
@@ -141,13 +141,13 @@ void AlienWindow<Dependencies...>::process()
     ImGui::PopID();
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 bool AlienWindow<Dependencies...>::isOn() const
 {
     return _on;
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::setOn(bool value)
 {
     _on = value;
@@ -156,14 +156,14 @@ void AlienWindow<Dependencies...>::setOn(bool value)
     }
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::shutdown()
 {
     shutdownIntern();
     GlobalSettings::get().setValue(_settingsNode + ".active", _on);
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow()
 {
     if (_state == WindowState::Maximized) {
@@ -188,7 +188,7 @@ ImGuiWindowFlags AlienWindow<Dependencies...>::returnFlagsAndConfigureNextWindow
     }
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::processTitlebar()
 {
     drawTitlebarBackground();
@@ -203,7 +203,7 @@ void AlienWindow<Dependencies...>::processTitlebar()
     ImGui::SetCursorScreenPos({windowPos.x + framePadding.x * 2, windowPos.y + titlebarHeight + framePadding.y * 2});
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::drawTitlebarBackground()
 {
     auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
@@ -220,7 +220,7 @@ void AlienWindow<Dependencies...>::drawTitlebarBackground()
         ImDrawFlags_RoundCornersTopLeft | ImDrawFlags_RoundCornersTopRight);
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::drawTitle()
 {
     auto windowPos = ImGui::GetWindowPos();
@@ -229,7 +229,7 @@ void AlienWindow<Dependencies...>::drawTitle()
     ImGui::TextUnformatted(_title.c_str());
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::processCollapseButton()
 {
     auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();
@@ -286,7 +286,7 @@ void AlienWindow<Dependencies...>::processCollapseButton()
     }
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::processMaximizeButton()
 {
     if (!_isMaximizable) {
@@ -343,7 +343,7 @@ void AlienWindow<Dependencies...>::processMaximizeButton()
     }
 }
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void AlienWindow<Dependencies...>::processCloseButton()
 {
     auto titlebarHeight = ImGui::GetTextLineHeightWithSpacing();

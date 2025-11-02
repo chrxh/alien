@@ -1,8 +1,8 @@
 #include "StringHelper.h"
 
 #include <algorithm>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 std::string StringHelper::format(uint64_t n, char separator)
 {
@@ -42,7 +42,7 @@ std::string StringHelper::format(float v, int fracPartDecimals)
 
 namespace
 {
-    template<typename Time_t>
+    template <typename Time_t>
     std::string formatIntern(Time_t duration)
     {
         auto months = std::chrono::duration_cast<std::chrono::months>(duration);

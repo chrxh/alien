@@ -3,7 +3,7 @@
 #include <chrono>
 #include <string>
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
 class StringHelper
 {

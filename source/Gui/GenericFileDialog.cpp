@@ -1,9 +1,9 @@
 #include "GenericFileDialog.h"
 
-#include <ImFileDialog.h>
-
 #include "MainLoopEntityController.h"
 #include "WindowController.h"
+
+#include <ImFileDialog.h>
 
 void GenericFileDialog::showOpenFileDialog(
     std::string const& title,

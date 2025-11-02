@@ -1,32 +1,34 @@
 #include "SerializerService.h"
 
+#include <filesystem>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
-#include <filesystem>
 
-#include <optional>
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/types/optional.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/list.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/unordered_map.hpp>
-#include <cereal/types/vector.hpp>
-#include <cereal/types/variant.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/range/adaptors.hpp>
-#include <zstr.hpp>
 
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
-#include "Base/VersionParserService.h"
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/list.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/optional.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
+#include <cereal/types/variant.hpp>
+#include <cereal/types/vector.hpp>
 
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/GenomeDescription.h"
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
+#include <Base/VersionParserService.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationParameters.h>
 
 #include "SettingsParserService.h"
+
+#include <zstr.hpp>
 
 #define SPLIT_SERIALIZATION(Classname) \
     template <class Archive> \
@@ -240,11 +242,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_ConstructorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_ConstructorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(
-            task,
-            auxiliaries,
-            Id_ConstructorGenome_ConstructionActivationTime,
-            data._constructionActivationTime,
-            defaultObject._constructionActivationTime);
+            task, auxiliaries, Id_ConstructorGenome_ConstructionActivationTime, data._constructionActivationTime, defaultObject._constructionActivationTime);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ConstructionAngle, data._constructionAngle, defaultObject._constructionAngle);
         loadSave(task, auxiliaries, Id_ConstructorGenome_ProvideEnergy, data._provideEnergy, defaultObject._provideEnergy);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -324,7 +322,12 @@ namespace cereal
         AngleBendingGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleModeGenome_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
+        loadSave(
+            task,
+            auxiliaries,
+            Id_MuscleModeGenome_AngleBending_AttractionRepulsionRatio,
+            data._attractionRepulsionRatio,
+            defaultObject._attractionRepulsionRatio);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(AngleBendingGenomeDescription)
@@ -421,12 +424,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         loadSave(task, auxiliaries, Id_Node_Color, data._color, defaultObject._color);
-        loadSave(
-            task,
-            auxiliaries,
-            Id_Node_NumAdditionalConnections,
-            data._numAdditionalConnections,
-            defaultObject._numAdditionalConnections);
+        loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._neuralNetwork, data._cellType, data._signalRestriction);
@@ -763,7 +761,8 @@ namespace cereal
         AngleBendingDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_MaxAngleDeviation, data._maxAngleDeviation, defaultObject._maxAngleDeviation);
-        loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
+        loadSave(
+            task, auxiliaries, Id_MuscleMode_AngleBending_AttractionRepulsionRatio, data._attractionRepulsionRatio, defaultObject._attractionRepulsionRatio);
         loadSave(task, auxiliaries, Id_MuscleMode_AngleBending_InitialAngle, data._initialAngle, defaultObject._initialAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -898,7 +897,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
-        
+
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._cells);
@@ -1292,7 +1291,7 @@ namespace
     {
         std::stringstream ss;
         ss << std::fixed << std::setprecision(9) << value;
-        return ss.str();        
+        return ss.str();
     }
 
     struct ColumnDescription
@@ -1499,14 +1498,13 @@ void SerializerService::serializeStatistics(StatisticsHistoryData const& statist
     };
 
     int index = 0;
-    for (auto const& [colName, colorDependent]: ColumnDescriptions) {
+    for (auto const& [colName, colorDependent] : ColumnDescriptions) {
         if (index != 0) {
             stream << ", ";
         }
         if (!colorDependent) {
             stream << colName;
-        }
-        else {
+        } else {
             writeLabelAllColors(colName);
         }
         ++index;
@@ -1535,7 +1533,7 @@ void SerializerService::deserializeStatistics(StatisticsHistoryData& statistics,
     boost::split(colNames, header, boost::is_any_of(","));
 
     std::vector<ParsedColumnInfo> colInfos;
-        for (auto const& colName : colNames) {
+    for (auto const& colName : colNames) {
         auto principalPart = getPrincipalPart(colName);
 
         if (colInfos.empty()) {

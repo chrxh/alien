@@ -2,8 +2,8 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "Base/Math.h"
-#include "Base/Physics.h"
+#include <Base/Math.h>
+#include <Base/Physics.h>
 
 #include "NumberGenerator.h"
 
@@ -46,9 +46,7 @@ MuscleMode MuscleDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
-InjectorDescription::InjectorDescription()
-{
-}
+InjectorDescription::InjectorDescription() {}
 
 CellDescription::CellDescription(bool createIds)
 {
@@ -309,7 +307,7 @@ void Description::assignNewIds()
     // Create (index, cellId) vector sorted by cell id
     std::vector<std::pair<IndexKey, uint64_t>> indexToNewCellId;
     forEachCell([&indexToNewCellId](std::optional<uint64_t> const& creatureIndex, uint64_t cellIndex, CellDescription const& cell) {
-       indexToNewCellId.emplace_back(IndexKey{.creatureIndex = creatureIndex, .cellIndex = cellIndex}, 0);
+        indexToNewCellId.emplace_back(IndexKey{.creatureIndex = creatureIndex, .cellIndex = cellIndex}, 0);
     });
     std::sort(indexToNewCellId.begin(), indexToNewCellId.end(), [this](auto const& lhs, auto const& rhs) {
         return getCellRef(lhs.first.creatureIndex, lhs.first.cellIndex)._id < getCellRef(rhs.first.creatureIndex, rhs.first.cellIndex)._id;
@@ -339,7 +337,6 @@ void Description::assignNewIds()
 
     // Helper for finding new cellId (uses original cellIds)
     auto findNewCellId = [&](std::optional<uint64_t> creatureIndex, uint64_t cellId) {
-
         // Look in cells for given creature
         auto it = indexIdToNewCellId.find(IndexIdKey{.creatureIndex = creatureIndex, .cellId = cellId});
         if (it != indexIdToNewCellId.end()) {
@@ -433,12 +430,12 @@ Description& Description::addCreature(CreatureDescription const& creature, Genom
     if (genomeIt == _genomes.end()) {
         _genomes.emplace_back(genome);
     }
-    
+
     // Add creature with genomeId set
     auto newCreature = creature;
     newCreature._genomeId = genome._id;
     _creatures.emplace_back(newCreature);
-    
+
     return *this;
 }
 
@@ -465,8 +462,7 @@ Description& Description::addConnection(uint64_t const& cellId1, uint64_t const&
     return addConnection(cellId1, cellId2, cell2._pos, cache);
 }
 
-Description&
-Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, DescriptionCache const& cache)
+Description& Description::addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, DescriptionCache const& cache)
 {
     auto& cell1 = getCellRef(cellId1, cache);
     auto& cell2 = getCellRef(cellId2, cache);
@@ -594,9 +590,9 @@ CellDescription& Description::getCellRef(uint64_t const& cellId, DescriptionCach
         for (auto& cell : _cells) {
             if (cell._id == cellId) {
                 return cell;
-            }            
+            }
         }
-        for (auto& creature: _creatures) {
+        for (auto& creature : _creatures) {
             for (auto& cell : creature._cells) {
                 if (cell._id == cellId) {
                     return cell;
@@ -661,7 +657,7 @@ GenomeDescription const& Description::getGenomeRef(uint64_t const& genomeId, Des
         auto index = cache->genomeIdToIndex.at(genomeId);
         return _genomes.at(index);
     } else {
-        for (auto& genome: _genomes) {
+        for (auto& genome : _genomes) {
             if (genome._id == genomeId) {
                 return genome;
             }

@@ -1,19 +1,19 @@
 #include "GenomeTabWidget.h"
-#include "GenomeTabWidget.h"
 
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/StringHelper.h"
+#include <Base/StringHelper.h>
 
-#include "EngineInterface/GenomeDescriptionValidationService.h"
+#include <EngineInterface/GenomeDescriptionValidationService.h>
 
 #include "AlienGui.h"
-#include "GenomeTabEditData.h"
-#include "GenomeTabLayoutData.h"
 #include "GeneEditorWidget.h"
 #include "GenomeEditorWidget.h"
+#include "GenomeTabEditData.h"
+#include "GenomeTabLayoutData.h"
+#include "GenomeTabWidget.h"
 #include "NodeEditorWidget.h"
 #include "PreviewWidget.h"
 #include "StyleRepository.h"
@@ -34,8 +34,8 @@ GenomeTabWidget _GenomeTabWidget::createCreatureTab(
     GenomeDescription const& genome,
     GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(
-        simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
+    return GenomeTabWidget(
+        new _GenomeTabWidget(simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -216,7 +216,7 @@ void _GenomeTabWidget::doLayout()
         _layoutData->neuralNetEditorHeight = height / 4;
         _layoutData->initialized = true;
         _origLayoutData = _layoutData->clone();
-       
+
         return;
     }
 

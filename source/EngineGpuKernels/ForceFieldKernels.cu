@@ -1,16 +1,15 @@
-﻿#include "ForceFieldKernels.cuh"
-
-#include "EngineInterface/SimulationParameters.h"
+﻿#include <EngineInterface/SimulationParameters.h>
 
 #include "ConstantMemory.cuh"
+#include "ForceFieldKernels.cuh"
 #include "ParameterCalculator.cuh"
 
 namespace
 {
     __device__ float getHeight(BaseMap const& map, float2 const& pos, int const& index)
     {
-        auto dist =
-            map.getDistance(pos, float2{cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y});
+        auto dist = map.getDistance(
+            pos, float2{cudaSimulationParameters.layerPosition.layerValues[index].x, cudaSimulationParameters.layerPosition.layerValues[index].y});
         if (Orientation_Clockwise == cudaSimulationParameters.layerRadialForceFieldOrientation.layerValues[index]) {
             return sqrtf(dist) * cudaSimulationParameters.layerRadialForceFieldStrength.layerValues[index];
         } else {
@@ -26,8 +25,7 @@ namespace
             auto downValue = getHeight(map, pos + float2{0, 1}, index);
             auto rightValue = getHeight(map, pos + float2{1, 0}, index);
             float2 result{rightValue - baseValue, downValue - baseValue};
-            result = Math::rotateClockwise(
-                result, 90.0f + cudaSimulationParameters.layerRadialForceFieldDriftAngle.layerValues[index]);
+            result = Math::rotateClockwise(result, 90.0f + cudaSimulationParameters.layerRadialForceFieldDriftAngle.layerValues[index]);
             return result;
         }
         case ForceField_Central: {
@@ -43,7 +41,6 @@ namespace
         default:
             return {0, 0};
         }
-
     }
 
 }

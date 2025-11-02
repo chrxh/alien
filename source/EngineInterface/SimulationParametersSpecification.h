@@ -1,16 +1,16 @@
 #pragma once
 
+#include <memory>
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
-#include <optional>
-#include <memory>
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
+#include "Colors.h"
 #include "Definitions.h"
 #include "SimulationParametersTypes.h"
-#include "Colors.h"
 
 struct SimulationParameters;
 
@@ -42,7 +42,8 @@ using _IntEnableableLayerMember = EnableableLayerParameter<int> SimulationParame
 using IntEnableableLayerMember = std::shared_ptr<_IntEnableableLayerMember>;
 using _IntSourceMember = SourceParameter<int> SimulationParameters::*;
 using IntSourceMember = std::shared_ptr<_IntSourceMember>;
-using IntMemberVariant = std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntLayerMember, IntSourceMember>;
+using IntMemberVariant =
+    std::variant<std::monostate, IntMember, IntEnableableMember, ColorVectorIntMember, ColorMatrixIntMember, IntLayerMember, IntSourceMember>;
 using AlternativeMemberVariant = std::variant<std::monostate, IntMember, IntLayerMember, IntEnableableLayerMember, IntSourceMember>;
 
 using _FloatMember = BaseParameter<float> SimulationParameters::*;
@@ -60,13 +61,13 @@ using ColorVectorFloatBaseLayerMember = std::shared_ptr<_ColorVectorFloatBaseLay
 using _ColorMatrixFloatBaseLayerMember = BaseLayerParameter<ColorMatrix<float>> SimulationParameters::*;
 using ColorMatrixFloatBaseLayerMember = std::shared_ptr<_ColorMatrixFloatBaseLayerMember>;
 using _FloatLayerMember = LayerParameter<float> SimulationParameters::*;
-using FloatLayerMember = std::shared_ptr<_FloatLayerMember >;
+using FloatLayerMember = std::shared_ptr<_FloatLayerMember>;
 using _FloatSourceMember = SourceParameter<float> SimulationParameters::*;
 using FloatSourceMember = std::shared_ptr<_FloatSourceMember>;
 using _FloatEnableableSourceMember = EnableableSourceParameter<float> SimulationParameters::*;
-using FloatEnableableSourceMember = std::shared_ptr<_FloatEnableableSourceMember >;
+using FloatEnableableSourceMember = std::shared_ptr<_FloatEnableableSourceMember>;
 using _FloatPinnableSourceMember = PinnableSourceParameter<float> SimulationParameters::*;
-using FloatPinnableSourceMember = std::shared_ptr<_FloatPinnableSourceMember >;
+using FloatPinnableSourceMember = std::shared_ptr<_FloatPinnableSourceMember>;
 using FloatMemberVariant = std::variant<
     std::monostate,
     FloatMember,

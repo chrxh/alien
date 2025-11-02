@@ -1,8 +1,9 @@
 #pragma once
 
+#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/MutationType.h>
+
 #include "Definitions.cuh"
-#include "EngineInterface/CudaSettings.h"
-#include "EngineInterface/MutationType.h"
 
 class _TestKernelsService
 {

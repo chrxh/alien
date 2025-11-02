@@ -1,13 +1,14 @@
 #include "LastSessionBrowserData.h"
 
-#include "Base/GlobalSettings.h"
-#include "Network/NetworkResourceRawTO.h"
+#include <Base/GlobalSettings.h>
+
+#include <Network/NetworkResourceRawTO.h>
 
 void LastSessionBrowserData::load(std::unordered_set<NetworkResourceRawTO> const& rawTOs)
 {
     auto currentIdentifiers = convertToIdentifiers(rawTOs);
-    auto lastIdentifiers = GlobalSettings::get().getValue(
-        "windows.browser.last session.simulation ids", std::vector(currentIdentifiers.begin(), currentIdentifiers.end()));
+    auto lastIdentifiers =
+        GlobalSettings::get().getValue("windows.browser.last session.simulation ids", std::vector(currentIdentifiers.begin(), currentIdentifiers.end()));
     _identifiers = std::unordered_set(lastIdentifiers.begin(), lastIdentifiers.end());
 }
 

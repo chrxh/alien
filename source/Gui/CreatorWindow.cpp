@@ -1,26 +1,28 @@
 #include "CreatorWindow.h"
 
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
 
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
-#include "Fonts/AlienIconFont.h"
 
-#include "Base/Math.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Math.h>
 
-#include "StyleRepository.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienGui.h"
 #include "EditorController.h"
-#include "Viewport.h"
 #include "EditorModel.h"
 #include "HelpStrings.h"
 #include "SimulationInteractionController.h"
+#include "StyleRepository.h"
+#include "Viewport.h"
+
+#include "Fonts/AlienIconFont.h"
 
 namespace
 {
@@ -92,7 +94,7 @@ void CreatorWindow::processIntern()
                 AlienGui::SliderFloatParameters().name("Stiffness").max(1.0f).min(0.0f).textWidth(RightColumnWidth).tooltip(Const::CellStiffnessTooltip),
                 &_stiffness);
         }
-        
+
         if (_mode == CreationMode_CreateRectangle) {
             AlienGui::InputInt(
                 AlienGui::InputIntParameters().name("Horizontal cells").textWidth(RightColumnWidth).tooltip(Const::CreatorRectangleWidthTooltip),
@@ -102,8 +104,7 @@ void CreatorWindow::processIntern()
                 _rectVerticalCells);
         }
         if (_mode == CreationMode_CreateHexagon) {
-            AlienGui::InputInt(
-                AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Layers").textWidth(RightColumnWidth).tooltip(Const::CreatorHexagonLayersTooltip), _layers);
         }
         if (_mode == CreationMode_CreateDisc) {
             AlienGui::InputFloat(
@@ -183,18 +184,19 @@ void CreatorWindow::onDrawing()
             pos.y = toFloat(toInt(pos.y));
         }
         return DescriptionEditService::get().createUnconnectedCircle(DescriptionEditService::CreateUnconnectedCircleParameters()
-                                                              .center(pos)
-                                                              .radius(EditorModel::get().getPencilWidth())
-                                                              .energy(_energy)
-                                                              .stiffness(_stiffness)
-                                                              .sticky(_makeSticky)
-                                                              .cellDistance(1.0f)
-                                                              .color(EditorModel::get().getDefaultColorCode())
-                                                              .barrier(_barrier));
+                                                                         .center(pos)
+                                                                         .radius(EditorModel::get().getPencilWidth())
+                                                                         .energy(_energy)
+                                                                         .stiffness(_stiffness)
+                                                                         .sticky(_makeSticky)
+                                                                         .cellDistance(1.0f)
+                                                                         .color(EditorModel::get().getDefaultColorCode())
+                                                                         .barrier(_barrier));
     };
 
     if (_drawingDescription.isEmpty()) {
-        DescriptionEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
+        DescriptionEditService::get().addIfSpaceAvailable(
+            _drawingDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -254,15 +256,15 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
-                                                  .width(_rectHorizontalCells)
-                                                  .height(_rectVerticalCells)
-                                                  .cellDistance(_cellDistance)
-                                                  .energy(_energy)
-                                                  .stiffness(_stiffness)
-                                                  .sticky(_makeSticky)
-                                                  .color(EditorModel::get().getDefaultColorCode())
-                                                  .center(getRandomPos())
-                                                  .barrier(_barrier));
+                                                                    .width(_rectHorizontalCells)
+                                                                    .height(_rectVerticalCells)
+                                                                    .cellDistance(_cellDistance)
+                                                                    .energy(_energy)
+                                                                    .stiffness(_stiffness)
+                                                                    .sticky(_makeSticky)
+                                                                    .color(EditorModel::get().getDefaultColorCode())
+                                                                    .center(getRandomPos())
+                                                                    .barrier(_barrier));
 
     _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
@@ -273,14 +275,14 @@ void CreatorWindow::createHexagon()
         return;
     }
     Description description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
-                                                            .layers(_layers)
-                                                            .cellDistance(_cellDistance)
-                                                            .energy(_energy)
-                                                            .stiffness(_stiffness)
-                                                            .sticky(_makeSticky)
-                                                            .color(EditorModel::get().getDefaultColorCode())
-                                                            .center(getRandomPos())
-                                                            .barrier(_barrier));
+                                                                          .layers(_layers)
+                                                                          .cellDistance(_cellDistance)
+                                                                          .energy(_energy)
+                                                                          .stiffness(_stiffness)
+                                                                          .sticky(_makeSticky)
+                                                                          .color(EditorModel::get().getDefaultColorCode())
+                                                                          .center(getRandomPos())
+                                                                          .barrier(_barrier));
     _simulationFacade->addAndSelectSimulationData(std::move(description));
 }
 
@@ -293,26 +295,25 @@ void CreatorWindow::createDisc()
     Description description;
     auto constexpr SmallValue = 0.01f;
     for (float radius = _innerRadius; radius - SmallValue <= _outerRadius; radius += _cellDistance) {
-        float angleInc =
-            [&] {
-                if (radius > SmallValue) {
-                    auto result = asinf(_cellDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
-                    return 360.0f / floorf(360.0f / result);
-                }
-                return 360.0f;
-            }();
+        float angleInc = [&] {
+            if (radius > SmallValue) {
+                auto result = asinf(_cellDistance / (2 * radius)) * 2 * toFloat(Const::RadToDeg);
+                return 360.0f / floorf(360.0f / result);
+            }
+            return 360.0f;
+        }();
         std::unordered_set<uint64_t> cellIds;
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
             description._cells.emplace_back(CellDescription()
-                             .id(NumberGenerator::get().createObjectId())
-                             .energy(_energy)
-                             .stiffness(_stiffness)
-                             .sticky(_makeSticky)
-                             .pos(relPos)
-                             .color(EditorModel::get().getDefaultColorCode())
-                             .barrier(_barrier));
+                                                .id(NumberGenerator::get().createObjectId())
+                                                .energy(_energy)
+                                                .stiffness(_stiffness)
+                                                .sticky(_makeSticky)
+                                                .pos(relPos)
+                                                .color(EditorModel::get().getDefaultColorCode())
+                                                .barrier(_barrier));
         }
     }
 

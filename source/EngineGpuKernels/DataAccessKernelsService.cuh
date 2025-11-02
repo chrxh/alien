@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "EngineInterface/ArraySizesForTO.h"
-#include "EngineInterface/ArraySizesForGpu.h"
-#include "EngineInterface/CudaSettings.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/InspectedEntityIds.h"
+#include <EngineInterface/ArraySizesForGpu.h>
+#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/InspectedEntityIds.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -35,4 +35,3 @@ private:
     ArraySizesForGpu* _arraySizesGPU;
     ArraySizesForTO* _arraySizesTO;
 };
-

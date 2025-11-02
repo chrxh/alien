@@ -2,9 +2,9 @@
 
 #include <cstdint>
 
-#include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/SimulationParametersTypes.h"
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/SimulationParametersTypes.h>
 
 struct NeuralNetworkGenomeTO
 {
@@ -57,32 +57,32 @@ struct InjectorGenomeTO
 
 struct AutoBendingGenomeTO
 {
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualBendingGenomeTO
 {
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct AngleBendingGenomeTO
 {
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;         // Between 0 and 1
     float attractionRepulsionRatio;  // Between 0 and 1
 };
 
 struct AutoCrawlingGenomeTO
 {
     float maxDistanceDeviation;  // Between 0 and 1
-    float forwardBackwardRatio;     // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualCrawlingGenomeTO
 {
     float maxDistanceDeviation;  // Between 0 and 1
-    float forwardBackwardRatio;     // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct DirectMovementGenomeTO
@@ -160,7 +160,7 @@ struct GeneTO
     Char64 name;
     ConstructorShape shape;
     bool separation;
-    uint8_t numBranches;    // For separation = false
+    uint8_t numBranches;  // For separation = false
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     float connectionDistance;

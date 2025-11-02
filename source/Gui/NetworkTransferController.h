@@ -1,16 +1,17 @@
 #pragma once
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
-#include "EngineInterface/Definitions.h"
-#include "PersisterInterface/Definitions.h"
-#include "PersisterInterface/PersisterRequestId.h"
-#include "PersisterInterface/DownloadNetworkResourceRequestData.h"
-#include "PersisterInterface/UploadNetworkResourceRequestData.h"
-#include "PersisterInterface/ReplaceNetworkResourceRequestData.h"
-#include "PersisterInterface/DeleteNetworkResourceRequestData.h"
-#include "PersisterInterface/PersisterFacade.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/Definitions.h>
+#include <PersisterInterface/DeleteNetworkResourceRequestData.h>
+#include <PersisterInterface/DownloadNetworkResourceRequestData.h>
+#include <PersisterInterface/PersisterFacade.h>
+#include <PersisterInterface/PersisterRequestId.h>
+#include <PersisterInterface/ReplaceNetworkResourceRequestData.h>
+#include <PersisterInterface/UploadNetworkResourceRequestData.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"

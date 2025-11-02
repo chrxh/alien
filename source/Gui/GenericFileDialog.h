@@ -1,16 +1,19 @@
 #pragma once
 
-#include <functional>
 #include <filesystem>
+#include <functional>
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/Definitions.h>
+
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
 class GenericFileDialog : public MainLoopEntity<>
 {
     MAKE_SINGLETON(GenericFileDialog);
+
 public:
     void showOpenFileDialog(
         std::string const& title,

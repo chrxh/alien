@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/Definitions.h>
+
 #include "AlienDialog.h"
+#include "Definitions.h"
 
 class DisplaySettingsDialog : public AlienDialog<>
 {

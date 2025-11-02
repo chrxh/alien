@@ -2,8 +2,9 @@
 
 #include <ranges>
 
-#include "Base/Definitions.h"
-#include "Base/StringHelper.h"
+#include <Base/Definitions.h>
+#include <Base/StringHelper.h>
+
 #include "SpecificationEvaluationService.h"
 
 NewByOldOrderNumber ParametersEditService::insertDefaultLayer(SimulationParameters& parameters, int orderNumber) const
@@ -145,7 +146,7 @@ NewByOldOrderNumber ParametersEditService::deleteLocation(SimulationParameters& 
         }
         --parameters.numLayers;
     } else {
-        for (int i = startIndex; i < parameters.numSources- 1; ++i) {
+        for (int i = startIndex; i < parameters.numSources - 1; ++i) {
             auto targetOrderNumber = parameters.sourceOrderNumbers[i];
             auto sourceOrderNumber = parameters.sourceOrderNumbers[i + 1];
             copyLocation(parameters, targetOrderNumber, parameters, sourceOrderNumber);
@@ -359,8 +360,7 @@ auto ParametersEditService::calcRadiationStrengthsForAddingSource(RadiationStren
     return result;
 }
 
-auto ParametersEditService::calcRadiationStrengthsForDeletingLayer(
-    RadiationStrengths const& strengths, int deleteIndex) const -> RadiationStrengths
+auto ParametersEditService::calcRadiationStrengthsForDeletingLayer(RadiationStrengths const& strengths, int deleteIndex) const -> RadiationStrengths
 {
     auto existsUnpinned = false;
     auto sumRemainingUnpinnedStrengths = 0.0f;

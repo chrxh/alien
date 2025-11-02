@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescription.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class GenomeEditorWindow : public AlienWindow<SimulationFacade>
 {
@@ -39,7 +40,7 @@ private:
 
     SimulationFacade _simulationFacade;
 
-    GenomeWindowEditData _genomeEditData; 
+    GenomeWindowEditData _genomeEditData;
     std::vector<GenomeTabWidget> _tabs;
     int _selectedTabIndex = 0;
     int _sequenceNumberForCreatedGenomes = 0;

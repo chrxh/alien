@@ -2,9 +2,9 @@
 
 #include <filesystem>
 
-#include "Base/Exceptions.h"
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
+#include <Base/Exceptions.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 void StartupCheckService::check(SimulationFacade const& simulationFacade)
 {

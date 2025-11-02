@@ -1,7 +1,8 @@
 #include "DescriptionTestDataFactory.h"
-#include "TestHelper.h"
 
 #include <algorithm>
+
+#include "TestHelper.h"
 
 CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(CellParameter cellParameter) const
 {
@@ -26,7 +27,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .cellType(cellTypeDesc);
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
-        NeuralNetworkDescription defaultNn; 
+        NeuralNetworkDescription defaultNn;
         NeuralNetworkDescription nn;
         nn.weight(2, 1, 0.7f);
         nn._biases.at(1) = -0.4f;
@@ -39,12 +40,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
 ParticleDescription DescriptionTestDataFactory::createNonDefaultParticleDescription() const
 {
     ParticleDescription defaultParticle;
-    return ParticleDescription()
-        .id(1)
-        .pos({0.3f, 0.9f})
-        .vel({-0.6f, 0.2f})
-        .energy(75.0f)
-        .color(5);
+    return ParticleDescription().id(1).pos({0.3f, 0.9f}).vel({-0.6f, 0.2f}).energy(75.0f).color(5);
 }
 
 NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(NodeParameter nodeParameter) const
@@ -62,8 +58,7 @@ NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(Node
         .color(4)
         .numAdditionalConnections(3)
         .referenceAngle(90.0f)
-        .signalRestriction(
-            SignalRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
+        .signalRestriction(SignalRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
 }
 
 std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const
@@ -72,30 +67,24 @@ std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::cr
     GeneDescription defaultGene;
 
     auto genome = GenomeDescription()
-                    .name("Test Genome")
-                    .frontAngle(270.0f)
-                    .genes({
-                        GeneDescription()
-                            .name("Test Gene")
-                            .shape(ConstructorShape_Hexagon)
-                            .numBranches(4)
-                            .separation(true)
-                            .numConcatenations(6)
-                            .angleAlignment(ConstructorAngleAlignment_180)
-                            .stiffness(0.75f)
-                            .connectionDistance(0.8f)
-                            .nodes({
-                                createNonDefaultNodeDescription(nodeParameter),
-                            }),
-                    });
+                      .name("Test Genome")
+                      .frontAngle(270.0f)
+                      .genes({
+                          GeneDescription()
+                              .name("Test Gene")
+                              .shape(ConstructorShape_Hexagon)
+                              .numBranches(4)
+                              .separation(true)
+                              .numConcatenations(6)
+                              .angleAlignment(ConstructorAngleAlignment_180)
+                              .stiffness(0.75f)
+                              .connectionDistance(0.8f)
+                              .nodes({
+                                  createNonDefaultNodeDescription(nodeParameter),
+                              }),
+                      });
 
-    auto creature = CreatureDescription()
-        .ancestorId(1001)
-        .lineageId(502)
-        .generation(7)
-        .numCells(25)
-        .frontAngleId(42)
-        .genomeId(genome._id);
+    auto creature = CreatureDescription().ancestorId(1001).lineageId(502).generation(7).numCells(25).frontAngleId(42).genomeId(genome._id);
 
     return {creature, genome};
 }
@@ -142,18 +131,10 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             .currentConcatenation(2);
     }
     case CellType_Sensor:
-        return SensorDescription()
-            .autoTriggerInterval(80)
-            .restrictToColor(2)
-            .minRange(10)
-            .maxRange(50)
-            .minDensity(0.3f)
-            .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
+        return SensorDescription().autoTriggerInterval(80).restrictToColor(2).minRange(10).maxRange(50).minDensity(0.3f).restrictToCreatures(
+            SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellType_Generator: {
-        return GeneratorDescription()
-            .autoTriggerInterval(60)
-            .alternationInterval(3)
-            .numPulses(5);
+        return GeneratorDescription().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
     }
     case CellType_Attacker:
         return AttackerDescription();
@@ -173,18 +154,12 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
                                  .impulseAlreadyApplied(true);
         } break;
         case MuscleMode_ManualBending:
-            muscleModeDesc = ManualBendingDescription()
-                                 .maxAngleDeviation(0.5f)
-                                 .forwardBackwardRatio(0.3f)
-                                 .initialAngle(225.0f)
-                                 .lastAngleDelta(0.8f)
-                                 .impulseAlreadyApplied(true);
+            muscleModeDesc =
+                ManualBendingDescription().maxAngleDeviation(0.5f).forwardBackwardRatio(0.3f).initialAngle(225.0f).lastAngleDelta(0.8f).impulseAlreadyApplied(
+                    true);
             break;
         case MuscleMode_AngleBending:
-            muscleModeDesc = AngleBendingDescription()
-                                 .maxAngleDeviation(0.7f)
-                                 .attractionRepulsionRatio(0.6f)
-                                 .initialAngle(315.0f);
+            muscleModeDesc = AngleBendingDescription().maxAngleDeviation(0.7f).attractionRepulsionRatio(0.6f).initialAngle(315.0f);
             break;
         case MuscleMode_AutoCrawling: {
             AutoCrawlingDescription defaultCrawling;
@@ -218,9 +193,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Defender:
         return DefenderDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellType_Reconnector:
-        return ReconnectorDescription()
-            .restrictToColor(1)
-            .restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
+        return ReconnectorDescription().restrictToColor(1).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
     default:
@@ -244,18 +217,10 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             .provideEnergy(ProvideEnergy_FreeGeneration)
             .constructionAngle(30.0f);
     case CellTypeGenome_Sensor:
-        return SensorGenomeDescription()
-            .autoTriggerInterval(70)
-            .restrictToColor(6)
-            .minRange(5)
-            .maxRange(30)
-            .minDensity(0.25f)
-            .restrictToCreatures(SensorRestrictToCreatures_RestrictToLessComplexMutants);
+        return SensorGenomeDescription().autoTriggerInterval(70).restrictToColor(6).minRange(5).maxRange(30).minDensity(0.25f).restrictToCreatures(
+            SensorRestrictToCreatures_RestrictToLessComplexMutants);
     case CellTypeGenome_Generator:
-        return GeneratorGenomeDescription()
-            .autoTriggerInterval(55)
-            .pulseType(GeneratorPulseType_Alternation)
-            .alternationInterval(4);
+        return GeneratorGenomeDescription().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
     case CellTypeGenome_Attacker:
         return AttackerGenomeDescription();
     case CellTypeGenome_Injector:
@@ -289,9 +254,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Defender:
         return DefenderGenomeDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellTypeGenome_Reconnector:
-        return ReconnectorGenomeDescription()
-            .restrictToColor(4)
-            .restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
+        return ReconnectorGenomeDescription().restrictToColor(4).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellTypeGenome_Detonator: {
         return DetonatorGenomeDescription().countdown(45);
     }

@@ -1,12 +1,12 @@
 #pragma once
 
 #include <atomic>
+#include <condition_variable>
 #include <deque>
 #include <mutex>
-#include <condition_variable>
 
-#include "PersisterInterface/PersisterRequestState.h"
-#include "PersisterInterface/PersisterRequestResult.h"
+#include <PersisterInterface/PersisterRequestResult.h>
+#include <PersisterInterface/PersisterRequestState.h>
 
 #include "Definitions.h"
 #include "PersisterRequest.h"
@@ -25,8 +25,8 @@ public:
     std::optional<PersisterRequestState> getRequestState(PersisterRequestId const& id) const;
 
     void addRequest(PersisterRequest const& job);
-    PersisterRequestResult fetchRequestResult(PersisterRequestId const& id);   
-    PersisterRequestError fetchJobError(PersisterRequestId const& id);   
+    PersisterRequestResult fetchRequestResult(PersisterRequestId const& id);
+    PersisterRequestError fetchJobError(PersisterRequestId const& id);
 
     std::vector<PersisterErrorInfo> fetchAllErrorInfos(SenderId const& senderId);
 

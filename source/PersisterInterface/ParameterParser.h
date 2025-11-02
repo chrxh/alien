@@ -2,14 +2,14 @@
 
 #include <chrono>
 
-#include "Base/JsonParser.h"
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/SimulationParameters.h"
+#include <Base/JsonParser.h>
+
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/SimulationParameters.h>
 
 class ParameterParser
 {
 public:
-
     //return true if value does not exist in tree
     template <typename T>
     static bool encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task);
@@ -88,7 +88,7 @@ namespace detail
     }
 
     template <>
-    inline  bool encodeDecodeImpl(
+    inline bool encodeDecodeImpl(
         boost::property_tree::ptree& tree,
         std::chrono::milliseconds& parameter,
         std::chrono::milliseconds const& defaultValue,

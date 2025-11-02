@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class LogWindow : public AlienWindow<GuiLogger>
 {

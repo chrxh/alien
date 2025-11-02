@@ -1,21 +1,17 @@
 #pragma once
 
-template<typename T>
+template <typename T>
 struct HashFunctor
-{
-};
+{};
 
 
-template<typename T>
+template <typename T>
 struct HashFunctor<T*>
 {
-    __device__ __inline__ int operator()(T* const& element)  const
-    {
-        return abs(static_cast<int>(reinterpret_cast<std::uintptr_t>(element)) * 17);
-    }
+    __device__ __inline__ int operator()(T* const& element) const { return abs(static_cast<int>(reinterpret_cast<std::uintptr_t>(element)) * 17); }
 };
 
-template<>
+template <>
 struct HashFunctor<int2>
 {
     __device__ __inline__ int operator()(int2 const& value) const
@@ -26,7 +22,7 @@ struct HashFunctor<int2>
     }
 };
 
-template<typename T, typename Hash = HashFunctor<T>>
+template <typename T, typename Hash = HashFunctor<T>>
 class HashSet
 {
 public:
@@ -65,8 +61,7 @@ public:
         for (int i = 0; i < _size; ++i, index = (++index) % _size) {
             if (_data[index] == element) {
                 return true;
-            }
-            else if (nullptr == _data[index]) {
+            } else if (nullptr == _data[index]) {
                 return false;
             }
         }
@@ -78,4 +73,3 @@ private:
     int _size;
     Hash _hash;
 };
-

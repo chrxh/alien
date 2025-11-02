@@ -2,8 +2,9 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkService.h"
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
 #include "BrowserWindow.h"
@@ -65,7 +66,8 @@ void NewPasswordDialog::onNewPassword()
         result |= NetworkService::get().login(errorCode, _userName, _newPassword, _userInfo);
     }
     if (!result) {
-        GenericMessageDialog::get().information("Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
+        GenericMessageDialog::get().information(
+            "Error", "An error occurred on the server. Your entered code may be incorrect.\nPlease try to reset the password again.");
         return;
     }
     GenericMessageDialog::get().information("Information", "The password has been successfully set.\nYou are logged in.");

@@ -2,13 +2,14 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/SimulationFacade.h"
-#include "Network/NetworkService.h"
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "GenericMessageDialog.h"
 #include "BrowserWindow.h"
 #include "CreateUserDialog.h"
+#include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 
 void ActivateUserDialog::initIntern(SimulationFacade simulationFacade)

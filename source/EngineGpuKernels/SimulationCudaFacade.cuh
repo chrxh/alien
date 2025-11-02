@@ -2,28 +2,27 @@
 
 #include <cstdint>
 #include <mutex>
-#include <vector>
 #include <optional>
+#include <vector>
 
 #if defined(_WIN32)
 #include <windows.h>
 #endif
 
-#include <vector_types.h>
-
-#include "EngineInterface/MutationType.h"
-#include "EngineInterface/ArraySizesForGpu.h"
-#include "EngineInterface/ArraySizesForTO.h"
-#include "EngineInterface/SettingsForSimulation.h"
-#include "EngineInterface/SelectionShallowData.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/SimulationParametersUpdateConfig.h"
-#include "EngineInterface/StatisticsRawData.h"
-#include "EngineInterface/StatisticsHistory.h"
-#include "EngineInterface/Definitions.h"
+#include <EngineInterface/ArraySizesForGpu.h>
+#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/MutationType.h>
+#include <EngineInterface/SelectionShallowData.h>
+#include <EngineInterface/SettingsForSimulation.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
+#include <EngineInterface/SimulationParametersUpdateConfig.h>
+#include <EngineInterface/StatisticsHistory.h>
+#include <EngineInterface/StatisticsRawData.h>
 
 #include "Definitions.cuh"
 #include "TO.cuh"
+#include <vector_types.h>
 
 struct cudaGraphicsResource;
 
@@ -135,7 +134,7 @@ private:
     SettingsForSimulation _settingsForPreview;
 
     mutable std::mutex _mutexForSimulationData;
-    std::shared_ptr<SimulationData> _cudaSimulationData;    // std::shared_ptr to prevent include in header
+    std::shared_ptr<SimulationData> _cudaSimulationData;  // std::shared_ptr to prevent include in header
     std::shared_ptr<SimulationData> _cudaPreviewData;
     std::shared_ptr<CudaGeometryBuffers> _cudaGeometryBuffers;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;

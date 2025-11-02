@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/Description.h"
-#include "EngineInterface/GenomeDescription.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
 class ReconnectorTests : public IntegrationTestFramework
@@ -30,7 +31,7 @@ TEST_F(ReconnectorTests, establishConnection_noRestriction_nothingFound)
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     };
     data.addConnection(1, 2);
-    
+
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
@@ -127,10 +128,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_success)
 {
     Description data;
     data.addCreature(CreatureDescription().id(0).id(0).lineageId(5).cells({
-        CellDescription()
-            .id(1)
-            .pos({10.0f, 10.0f})
-            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }));
     data.addCreature(CreatureDescription().lineageId(5).cells({
@@ -159,10 +157,7 @@ TEST_F(ReconnectorTests, establishConnection_restrictToSameMutants_failed)
 {
     Description data;
     data.addCreature(CreatureDescription().id(0).lineageId(5).cells({
-        CellDescription()
-            .id(1)
-            .pos({10.0f, 10.0f})
-            .cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(ReconnectorDescription().restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToSameMutants)),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     }));
     data.addCreature(CreatureDescription().lineageId(6).cells({
@@ -436,10 +431,7 @@ TEST_F(ReconnectorTests, deleteConnections_success)
 {
     Description data;
     data.addCreature(CreatureDescription().id(0).cells({
-        CellDescription()
-            .id(1)
-            .pos({10.0f, 10.0f})
-            .cellType(ReconnectorDescription()),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(ReconnectorDescription()),
         CellDescription().id(2).pos({11.0f, 10.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
     }));
     data.addCreature(CreatureDescription().lineageId(5).cells({

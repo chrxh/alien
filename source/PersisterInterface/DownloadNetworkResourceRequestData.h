@@ -2,10 +2,13 @@
 
 #include <string>
 
+#include <Base/Cache.h>
+
+#include <Network/Definitions.h>
+
+#include <PersisterInterface/DeserializedSimulation.h>
+
 #include "DownloadCache.h"
-#include "Base/Cache.h"
-#include "PersisterInterface/DeserializedSimulation.h"
-#include "Network/Definitions.h"
 
 struct DownloadNetworkResourceRequestData
 {

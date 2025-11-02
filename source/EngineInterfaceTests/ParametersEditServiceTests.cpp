@@ -2,12 +2,13 @@
 
 #include <gtest/gtest.h>
 
-#include "Base/Definitions.h"
-#include "Base/StringHelper.h"
-#include "EngineInterface/ParametersEditService.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/LocationHelper.h"
+#include <Base/Definitions.h>
+#include <Base/StringHelper.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/ParametersEditService.h>
 
 class ParametersEditServiceTests : public ::testing::Test
 {
@@ -108,7 +109,7 @@ protected:
 
         if (locationType == LocationType::Layer) {
             EXPECT_EQ(defaultParameters.layerCoreRadius.layerValues[0], parameters.layerCoreRadius.layerValues[insertedArrayIndex]);
-            
+
             Char64 layerName;
             StringHelper::copy(layerName, sizeof(Char64), LocationHelper::generateLayerName(origParameters));
             EXPECT_TRUE(StringHelper::compare(layerName, sizeof(Char64), parameters.layerName.layerValues[insertedArrayIndex]));

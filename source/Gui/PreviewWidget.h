@@ -2,28 +2,22 @@
 
 #include <chrono>
 
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/GenomeDescription.h"
-#include "EngineInterface/GenomeDescriptionEditService.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/Description.h>
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDescriptionEditService.h>
 
 #include "Definitions.h"
 
 class _PreviewWidget
 {
 public:
-    static PreviewWidget create(
-        SimulationFacade const& simulationFacade,
-        GenomeWindowEditData const& genomeEditData,
-        GenomeTabEditData const& editData);
+    static PreviewWidget create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void process();
 
 private:
-    _PreviewWidget(
-        SimulationFacade const& simulationFacade,
-        GenomeWindowEditData const& genomeEditData,
-        GenomeTabEditData const& editData);
+    _PreviewWidget(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void createSubGenomesForPreview();
     void setupPreviewData(bool useCache = true);

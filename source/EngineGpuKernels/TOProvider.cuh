@@ -2,8 +2,9 @@
 
 #include <optional>
 
-#include "EngineInterface/ArraySizesForTO.h"
-#include "EngineGpuKernels/TO.cuh"
+#include <EngineInterface/ArraySizesForTO.h>
+
+#include <EngineGpuKernels/TO.cuh>
 
 class _TOProvider
 {
@@ -21,4 +22,3 @@ private:
 
     std::optional<TO> _to;
 };
-

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
 #include "Base.cuh"
 
@@ -14,7 +14,6 @@ namespace Const
 class Math
 {
 public:
-
     using Matrix = float[2][2];
 
     __inline__ __device__ static void rotationMatrix(float angle, Matrix& rotMatrix);
@@ -42,7 +41,8 @@ public:
     __inline__ __device__ static float calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary = 0);
     __inline__ __device__ static float alignAngle(float angle, ConstructorAngleAlignment alignment);
     __inline__ __device__ static float alignAngleOnBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
-    __inline__ __device__ static bool crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
+    __inline__ __device__ static bool
+    crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
     __inline__ __device__ static float modulo(float value, float size);
     __inline__ __device__ static float3 cross(float2 const& a, float2 const& b);
     __inline__ __device__ static float2 crossReduced(float3 const& a, float2 const& b);
@@ -50,7 +50,7 @@ public:
 
 __inline__ __device__ __host__ float2 operator+(float2 const& p, float2 const& q)
 {
-    return{ p.x + q.x, p.y + q.y };
+    return {p.x + q.x, p.y + q.y};
 }
 
 __inline__ __device__ __host__ float3 operator+(float3 const& p, float3 const& q)
@@ -60,22 +60,22 @@ __inline__ __device__ __host__ float3 operator+(float3 const& p, float3 const& q
 
 __inline__ __device__ __host__ float2 operator-(float2 const& p, float2 const& q)
 {
-    return{ p.x - q.x, p.y - q.y };
+    return {p.x - q.x, p.y - q.y};
 }
 
 __inline__ __device__ __host__ float2 operator-(float2 const& p, int2 const& q)
 {
-    return{ p.x - q.x, p.y - q.y };
+    return {p.x - q.x, p.y - q.y};
 }
 
 __inline__ __device__ __host__ int2 operator-(int2 const& p, int2 const& q)
 {
-    return{ p.x - q.x, p.y - q.y };
+    return {p.x - q.x, p.y - q.y};
 }
 
 __inline__ __device__ __host__ float2 operator*(float2 const& p, float m)
 {
-    return{ p.x * m, p.y * m };
+    return {p.x * m, p.y * m};
 }
 
 __inline__ __device__ __host__ float3 operator*(float3 const& p, float m)
@@ -85,7 +85,7 @@ __inline__ __device__ __host__ float3 operator*(float3 const& p, float m)
 
 __inline__ __device__ __host__ float2 operator/(float2 const& p, float m)
 {
-    return{ p.x / m, p.y / m };
+    return {p.x / m, p.y / m};
 }
 
 __inline__ __device__ __host__ float3 operator/(float3 const& p, float m)
@@ -143,10 +143,10 @@ __inline__ __device__ __host__ void operator-=(float2& p, float2 const& q)
 __inline__ __device__ float2 Math::unitVectorOfAngle(float angle)
 {
     angle *= Const::DEG_TO_RAD;
-    return{ sinf(angle), -cosf(angle) };
+    return {sinf(angle), -cosf(angle)};
 }
 
-__inline__ __device__ float Math::angleOfVector(float2 const & v)
+__inline__ __device__ float Math::angleOfVector(float2 const& v)
 {
     if (length(v) < NEAR_ZERO) {
         return 0;
@@ -157,8 +157,7 @@ __inline__ __device__ float Math::angleOfVector(float2 const & v)
     float angleSin = asinf(normalizedVy) * Const::RAD_TO_DEG;
     if (v.x >= 0.0f) {
         return 90.0f - angleSin;
-    }
-    else {
+    } else {
         return angleSin + 270.0f;
     }
 }
@@ -170,7 +169,7 @@ __inline__ __device__ void Math::rotateQuarterClockwise(float2& v)
     v.y = temp;
 }
 
-__device__ __inline__ void Math::rotateQuarterCounterClockwise(float2 &v)
+__device__ __inline__ void Math::rotateQuarterCounterClockwise(float2& v)
 {
     float temp = v.x;
     v.x = v.y;
@@ -179,8 +178,8 @@ __device__ __inline__ void Math::rotateQuarterCounterClockwise(float2 &v)
 
 __inline__ __device__ void Math::rotationMatrix(float angle, Matrix& rotMatrix)
 {
-    float sinAngle = __sinf(angle*Const::DEG_TO_RAD);
-    float cosAngle = __cosf(angle*Const::DEG_TO_RAD);
+    float sinAngle = __sinf(angle * Const::DEG_TO_RAD);
+    float cosAngle = __cosf(angle * Const::DEG_TO_RAD);
     rotMatrix[0][0] = cosAngle;
     rotMatrix[0][1] = -sinAngle;
     rotMatrix[1][0] = sinAngle;
@@ -189,17 +188,17 @@ __inline__ __device__ void Math::rotationMatrix(float angle, Matrix& rotMatrix)
 
 __inline__ __device__ void Math::inverseRotationMatrix(float angle, Matrix& rotMatrix)
 {
-    float sinAngle = __sinf(angle*Const::DEG_TO_RAD);
-    float cosAngle = __cosf(angle*Const::DEG_TO_RAD);
+    float sinAngle = __sinf(angle * Const::DEG_TO_RAD);
+    float cosAngle = __cosf(angle * Const::DEG_TO_RAD);
     rotMatrix[0][0] = cosAngle;
     rotMatrix[0][1] = sinAngle;
     rotMatrix[1][0] = -sinAngle;
     rotMatrix[1][1] = cosAngle;
 }
 
-__inline__ __device__ float2 Math::applyMatrix(float2 const & vec, Matrix const & matrix)
+__inline__ __device__ float2 Math::applyMatrix(float2 const& vec, Matrix const& matrix)
 {
-    return{ vec.x * matrix[0][0] + vec.y * matrix[0][1],  vec.x * matrix[1][0] + vec.y * matrix[1][1] };
+    return {vec.x * matrix[0][0] + vec.y * matrix[0][1], vec.x * matrix[1][0] + vec.y * matrix[1][1]};
 }
 
 __inline__ __device__ bool Math::isInBetweenModulo(float value1, float value2, float candidate, float size)
@@ -256,14 +255,13 @@ __inline__ __device__ bool Math::isAngleStrictInBetween(float angle1, float angl
     return isAngleInBetween(angle1, angle2, angleBetweenCandidate);
 }
 
-__device__ __inline__ void Math::normalize(float2 &vec)
+__device__ __inline__ void Math::normalize(float2& vec)
 {
-    float length = sqrt(vec.x*vec.x + vec.y*vec.y);
+    float length = sqrt(vec.x * vec.x + vec.y * vec.y);
     if (length > NEAR_ZERO) {
-        vec = { vec.x / length, vec.y / length };
-    }
-    else {
-        vec = { 1.0f, 0.0f };
+        vec = {vec.x / length, vec.y / length};
+    } else {
+        vec = {1.0f, 0.0f};
     }
 }
 
@@ -285,7 +283,7 @@ __device__ __inline__ float Math::getNormalizedAngle(float angle, float base)
     return angle;
 }
 
-__device__ __inline__ float Math::dot(float2 const &p, float2 const &q)
+__device__ __inline__ float Math::dot(float2 const& p, float2 const& q)
 {
     return p.x * q.x + p.y * q.y;
 }
@@ -295,12 +293,13 @@ __inline__ __device__ float2 Math::crossProdProjected(float3 const& p, float3 co
     return {p.y * q.z - p.z * q.y, p.z * q.x - p.x * q.z};
 }
 
-__device__ __inline__ float Math::length(float2 const & v)
+__device__ __inline__ float Math::length(float2 const& v)
 {
     return sqrt(v.x * v.x + v.y * v.y);
 }
 
-__device__ __inline__ float Math::length(float3 const& v) {
+__device__ __inline__ float Math::length(float3 const& v)
+{
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
@@ -309,17 +308,17 @@ __device__ __inline__ float Math::lengthMax(float2 const& v)
     return max(abs(v.x), abs(v.y));
 }
 
-__device__ __inline__ float Math::length(int2 const & v)
+__device__ __inline__ float Math::length(int2 const& v)
 {
     return sqrt(static_cast<float>(v.x * v.x + v.y * v.y));
 }
 
-__device__ __inline__ float Math::lengthSquared(float2 const & v)
+__device__ __inline__ float Math::lengthSquared(float2 const& v)
 {
     return v.x * v.x + v.y * v.y;
 }
 
-__inline__ __device__ float2 Math::rotateClockwise(float2 const & v, float angle)
+__inline__ __device__ float2 Math::rotateClockwise(float2 const& v, float angle)
 {
     Matrix rotMatrix;
     rotationMatrix(angle, rotMatrix);
@@ -338,8 +337,7 @@ __inline__ __device__ float Math::subtractAngle(float angleMinuend, float angleS
     return angleDiff;
 }
 
-__inline__ __device__ float
-Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary)
+__inline__ __device__ float Math::calcDistanceToLineSegment(float2 const& startSegment, float2 const& endSegment, float2 const& pos, float boundary)
 {
     auto const relPos = pos - startSegment;
     auto segmentDirection = endSegment - startSegment;
@@ -392,7 +390,8 @@ __inline__ __device__ float Math::alignAngleOnBoundaries(float angle, float maxA
 __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd)
 {
     if ((segmentStart.x == otherSegmentStart.x && segmentStart.y == otherSegmentStart.y)
-        || (segmentStart.x == otherSegmentEnd.x && segmentStart.y == otherSegmentEnd.y) || (segmentEnd.x == otherSegmentStart.x && segmentEnd.y == otherSegmentStart.y)
+        || (segmentStart.x == otherSegmentEnd.x && segmentStart.y == otherSegmentEnd.y)
+        || (segmentEnd.x == otherSegmentStart.x && segmentEnd.y == otherSegmentStart.y)
         || (segmentEnd.x == otherSegmentEnd.x && segmentEnd.y == otherSegmentEnd.y)) {
         return false;
     }
@@ -430,7 +429,7 @@ __inline__ __device__ float Math::modulo(float value, float size)
 
 __inline__ __device__ float3 Math::cross(float2 const& a, float2 const& b)
 {
-    return { 0.0f, 0.0f, a.x*b.y - a.y * b.x};
+    return {0.0f, 0.0f, a.x * b.y - a.y * b.x};
 }
 
 __device__ __inline__ float2 Math::crossReduced(float3 const& a, float2 const& b)

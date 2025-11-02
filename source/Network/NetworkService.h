@@ -2,11 +2,12 @@
 
 #include <chrono>
 
-#include "Base/Cache.h"
+#include <Base/Cache.h>
+#include <Base/Singleton.h>
+
+#include "Definitions.h"
 #include "NetworkResourceRawTO.h"
 #include "UserTO.h"
-#include "Definitions.h"
-#include "Base/Singleton.h"
 
 using LoginErrorCode = int;
 enum LoginErrorCode_
@@ -69,7 +70,7 @@ public:
         std::string const& settings,
         std::string const& statistics);
     bool downloadResource(std::string& mainData, std::string& auxiliaryData, std::string& statistics, std::string const& simId);
-        void incDownloadCounter(std::string const& simId);
+    void incDownloadCounter(std::string const& simId);
     bool editResource(std::string const& simId, std::string const& newName, std::string const& newDescription);
     bool moveResource(std::string const& simId, WorkspaceType targetWorkspace);
     bool deleteResource(std::string const& simId);

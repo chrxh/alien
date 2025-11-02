@@ -1,7 +1,7 @@
 #pragma once
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 #include "Definitions.h"
 
@@ -28,12 +28,7 @@ private:
  */
 
 template <typename T>
-bool JsonParser::encodeDecode(
-    boost::property_tree::ptree& tree,
-    T& value,
-    T const& defaultValue,
-    std::string const& node,
-    ParserTask task)
+bool JsonParser::encodeDecode(boost::property_tree::ptree& tree, T& value, T const& defaultValue, std::string const& node, ParserTask task)
 {
     if (ParserTask::Encode == task) {
         std::string stringValue = [&] {

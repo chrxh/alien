@@ -16,10 +16,7 @@ public:
         std::filesystem::path const& fragmentPath,
         std::filesystem::path const& geometryPath = std::filesystem::path());
 
-    static Shader createFromSource(
-        std::string_view vertexSource,
-        std::string_view fragmentSource,
-        std::string_view geometrySource = "");
+    static Shader createFromSource(std::string_view vertexSource, std::string_view fragmentSource, std::string_view geometrySource = "");
 
     void use();
     void setBool(std::string const& name, bool value) const;
@@ -29,15 +26,9 @@ public:
     void setVec3(std::string const& name, FloatColorRGB const& value) const;
 
 private:
-    _Shader(
-        std::filesystem::path const& vertexPath,
-        std::filesystem::path const& fragmentPath,
-        std::filesystem::path const& geometryPath);
+    _Shader(std::filesystem::path const& vertexPath, std::filesystem::path const& fragmentPath, std::filesystem::path const& geometryPath);
 
-    _Shader(
-        std::string_view vertexSource,
-        std::string_view fragmentSource,
-        std::string_view geometrySource);
+    _Shader(std::string_view vertexSource, std::string_view fragmentSource, std::string_view geometrySource);
 
     void checkCompileErrors(GLuint shader, std::string type, std::string const& identifier);
 

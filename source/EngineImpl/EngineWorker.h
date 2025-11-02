@@ -8,22 +8,22 @@
 #include <windows.h>
 #endif
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
-#include "EngineInterface/ArraySizesForGpu.h"
-#include "EngineInterface/CudaSettings.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/MutationType.h"
-#include "EngineInterface/PreviewDescription.h"
-#include "EngineInterface/SelectionShallowData.h"
-#include "EngineInterface/SettingsForSimulation.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/SimulationParametersUpdateConfig.h"
-#include "EngineInterface/StatisticsHistory.h"
-#include "EngineInterface/StatisticsRawData.h"
+#include <EngineInterface/ArraySizesForGpu.h>
+#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/MutationType.h>
+#include <EngineInterface/PreviewDescription.h>
+#include <EngineInterface/SelectionShallowData.h>
+#include <EngineInterface/SettingsForSimulation.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
+#include <EngineInterface/SimulationParameters.h>
+#include <EngineInterface/SimulationParametersUpdateConfig.h>
+#include <EngineInterface/StatisticsHistory.h>
+#include <EngineInterface/StatisticsRawData.h>
 
-#include "EngineGpuKernels/Definitions.h"
+#include <EngineGpuKernels/Definitions.h>
 
 #include "Definitions.h"
 

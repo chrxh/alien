@@ -2,12 +2,15 @@
 
 #include <unordered_map>
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineGpuKernels/TO.cuh"
-#include "EngineGpuKernels/Definitions.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/Description.h>
+#include <EngineInterface/SimulationParameters.h>
+
+#include <EngineGpuKernels/Definitions.h>
+#include <EngineGpuKernels/TO.cuh>
+
 #include "Definitions.h"
 
 class DescriptionConverterService
@@ -51,7 +54,7 @@ private:
         std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const;
     void addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const;
 
-	void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
+    void setConnections(std::vector<CellTO>& cellTOs, CellDescription const& cellToAdd, std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const;
 
     TO provideDataTO(
         std::vector<CreatureTO> const& creatureTOs,

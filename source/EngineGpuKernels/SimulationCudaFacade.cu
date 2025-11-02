@@ -1,52 +1,50 @@
-#include "SimulationCudaFacade.cuh"
-
 #include <functional>
 #include <iostream>
 #include <list>
 
-#include <cuda_runtime.h>
 #include <GL/gl.h>
-#include <cuda_gl_interop.h>
 
-#include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
+#include <Base/Exceptions.h>
+#include <Base/LoggingService.h>
+#include <Base/Macros.h>
 
-#include "Base/Exceptions.h"
-#include "Base/LoggingService.h"
-#include "Base/Macros.h"
+#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/Ids.h>
+#include <EngineInterface/InspectedEntityIds.h>
+#include <EngineInterface/SimulationParameters.h>
+#include <EngineInterface/SpaceCalculator.h>
 
-#include "EngineInterface/InspectedEntityIds.h"
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/CudaSettings.h"
-#include "EngineInterface/SpaceCalculator.h"
-#include "EngineInterface/Ids.h"
-
-#include "DataAccessKernels.cuh"
-#include "TO.cuh"
 #include "Base.cuh"
-#include "GarbageCollectorKernels.cuh"
 #include "ConstantMemory.cuh"
+#include "CudaGeometryBuffers.cuh"
 #include "CudaMemoryManager.cuh"
-#include "SimulationStatistics.cuh"
-#include "Objects.cuh"
-#include "Map.cuh"
-#include "StatisticsKernels.cuh"
+#include "CudaTOProvider.cuh"
+#include "DataAccessKernels.cuh"
+#include "DataAccessKernelsService.cuh"
 #include "EditKernels.cuh"
+#include "EditKernelsService.cuh"
+#include "GarbageCollectorKernels.cuh"
 #include "GeometryKernels.cuh"
+#include "GeometryKernelsService.cuh"
+#include "Map.cuh"
+#include "MaxAgeBalancer.cuh"
+#include "Objects.cuh"
+#include "SelectionResult.cuh"
+#include "SimulationCudaFacade.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernelsService.cuh"
-#include "DataAccessKernelsService.cuh"
-#include "GeometryKernelsService.cuh"
-#include "EditKernelsService.cuh"
-#include "StatisticsKernelsService.cuh"
-#include "SelectionResult.cuh"
-#include "CudaGeometryBuffers.cuh"
 #include "SimulationParametersUpdateService.cuh"
-#include "TestKernelsService.cuh"
+#include "SimulationStatistics.cuh"
+#include "StatisticsKernels.cuh"
+#include "StatisticsKernelsService.cuh"
 #include "StatisticsService.cuh"
-#include "MaxAgeBalancer.cuh"
-#include "CudaTOProvider.cuh"
+#include "TO.cuh"
 #include "TOProvider.cuh"
+#include "TestKernelsService.cuh"
+#include <cuda/helper_cuda.h>
+#include <cuda_gl_interop.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 namespace
 {
@@ -180,9 +178,7 @@ void _SimulationCudaFacade::applyCataclysm(int power)
     }
 }
 
-TO _SimulationCudaFacade::getSimulationData(
-    int2 const& rectUpperLeft,
-    int2 const& rectLowerRight)
+TO _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
     _dataAccessKernels->getData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
@@ -364,7 +360,7 @@ void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
     _editKernels->setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
 }
 
- SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
+SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
     _editKernels->getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
     syncAndCheck();
@@ -526,8 +522,8 @@ void _SimulationCudaFacade::newPreview(TO const& to)
 
 void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds const& duration, bool detailSimulation)
 {
-    CHECK_FOR_CUDA_ERROR(cudaMemcpyToSymbol(
-        cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
+    CHECK_FOR_CUDA_ERROR(
+        cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
     auto startTimepoint = std::chrono::steady_clock::now();
     do {
@@ -644,7 +640,7 @@ void _SimulationCudaFacade::initCuda()
         throw std::runtime_error("CUDA device could not be initialized.");
     }
 
-    cudaGetLastError(); //reset error code
+    cudaGetLastError();  //reset error code
 
     log(Priority::Important, "device " + std::to_string(_gpuInfo.deviceNumber) + " selected");
 }
@@ -788,8 +784,8 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
 {
     std::lock_guard lock(_mutexForSimulationParameters);
     if (_newSimulationParameters) {
-        _settings.simulationParameters =
-            SimulationParametersUpdateService::get().integrateChanges(_settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
+        _settings.simulationParameters = SimulationParametersUpdateService::get().integrateChanges(
+            _settings.simulationParameters, *_newSimulationParameters, _simulationParametersUpdateConfig);
         CHECK_FOR_CUDA_ERROR(
             cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
         _newSimulationParameters.reset();

@@ -1,20 +1,20 @@
 #pragma once
 
-#include "PersisterInterface/ReadSimulationResultData.h"
-#include "PersisterInterface/PersisterRequestId.h"
-#include "PersisterInterface/SaveSimulationResultData.h"
-#include "PersisterInterface/LoginResultData.h"
-#include "PersisterInterface/GetNetworkResourcesResultData.h"
-#include "PersisterInterface/DownloadNetworkResourceResultData.h"
-#include "PersisterInterface/UploadNetworkResourceResultData.h"
-#include "PersisterInterface/ReplaceNetworkResourceResultData.h"
-#include "PersisterInterface/GetUserNamesForReactionResultData.h"
-#include "PersisterInterface/DeleteNetworkResourceResultData.h"
-#include "PersisterInterface/EditNetworkResourceResultData.h"
-#include "PersisterInterface/MoveNetworkResourceResultData.h"
-#include "PersisterInterface/ToggleReactionNetworkResourceResultData.h"
-#include "PersisterInterface/GetPeakSimulationResultData.h"
-#include "PersisterInterface/SaveDeserializedSimulationResultData.h"
+#include <PersisterInterface/DeleteNetworkResourceResultData.h>
+#include <PersisterInterface/DownloadNetworkResourceResultData.h>
+#include <PersisterInterface/EditNetworkResourceResultData.h>
+#include <PersisterInterface/GetNetworkResourcesResultData.h>
+#include <PersisterInterface/GetPeakSimulationResultData.h>
+#include <PersisterInterface/GetUserNamesForReactionResultData.h>
+#include <PersisterInterface/LoginResultData.h>
+#include <PersisterInterface/MoveNetworkResourceResultData.h>
+#include <PersisterInterface/PersisterRequestId.h>
+#include <PersisterInterface/ReadSimulationResultData.h>
+#include <PersisterInterface/ReplaceNetworkResourceResultData.h>
+#include <PersisterInterface/SaveDeserializedSimulationResultData.h>
+#include <PersisterInterface/SaveSimulationResultData.h>
+#include <PersisterInterface/ToggleReactionNetworkResourceResultData.h>
+#include <PersisterInterface/UploadNetworkResourceResultData.h>
 
 class _PersisterRequestResult
 {
@@ -22,7 +22,9 @@ public:
     PersisterRequestId const& getRequestId() const { return _requestId; }
 
 protected:
-    _PersisterRequestResult(PersisterRequestId const& requestId) : _requestId(requestId) {}
+    _PersisterRequestResult(PersisterRequestId const& requestId)
+        : _requestId(requestId)
+    {}
     virtual ~_PersisterRequestResult() = default;
 
     PersisterRequestId _requestId;

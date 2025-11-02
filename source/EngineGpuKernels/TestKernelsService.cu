@@ -1,7 +1,6 @@
-#include "TestKernelsService.cuh"
-
 #include "Macros.cuh"
 #include "TestKernels.cuh"
+#include "TestKernelsService.cuh"
 
 _TestKernelsService::_TestKernelsService()
 {

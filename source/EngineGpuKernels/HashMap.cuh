@@ -1,7 +1,7 @@
 #pragma once
 
-#include "HashSet.cuh"
 #include "Array.cuh"
+#include "HashSet.cuh"
 
 template <typename Key, typename Value, typename Hash = HashFunctor<Key>>
 class HashMap
@@ -59,7 +59,7 @@ public:
     __device__ __inline__ bool contains(Key const& key) const
     {
         int index = _hash(key) % _size;
-        for (int i = 0; i < 10; ++i, index = (++index) % _size) {   //workaround: 10 is set to avoid too long runtime
+        for (int i = 0; i < 10; ++i, index = (++index) % _size) {  //workaround: 10 is set to avoid too long runtime
             auto& entry = _entries[index];
             entry.getLock(2);
             if (0 == entry.getFree()) {
@@ -108,42 +108,22 @@ private:
             _free = value;
             return origValue;
         }
-        __device__ __inline__ int getFree()
-        {
-            return _free;
-        }
+        __device__ __inline__ int getFree() { return _free; }
 
-        __device__ __inline__ void setValue(Value const& value)
-        {
-            _value = value;
-        }
-        __device__ __inline__ Value getValue()
-        {
-            return _value;
-        }
+        __device__ __inline__ void setValue(Value const& value) { _value = value; }
+        __device__ __inline__ Value getValue() { return _value; }
 
-        __device__ __inline__ void setKey(Key const& value)
-        {
-            _key = value;
-        }
-        __device__ __inline__ Key getKey()
-        {
-            return _key;
-        }
+        __device__ __inline__ void setKey(Key const& value) { _key = value; }
+        __device__ __inline__ Key getKey() { return _key; }
 
-        __device__ __inline__ void initLock()
-        {
-            atomicExch_block(&_locked, 0);
-        }
+        __device__ __inline__ void initLock() { atomicExch_block(&_locked, 0); }
 
-        __device__ __inline__ bool tryLock()
-        {
-            return 0 == atomicExch_block(&_locked, 1);
-        }
+        __device__ __inline__ bool tryLock() { return 0 == atomicExch_block(&_locked, 1); }
 
         __device__ __inline__ void getLock(int parameter)
         {
-            while (1 == atomicExch_block(&_locked, 1)) {}
+            while (1 == atomicExch_block(&_locked, 1)) {
+            }
             __threadfence_block();
         }
 
@@ -154,8 +134,8 @@ private:
         }
 
     private:
-        int _free;   //0 = free, 1 = used
-        int _locked;	//0 = unlocked, 1 = locked
+        int _free;    //0 = free, 1 = used
+        int _locked;  //0 = unlocked, 1 = locked
         Value _value;
         Key _key;
     };

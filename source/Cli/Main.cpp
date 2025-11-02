@@ -1,15 +1,17 @@
 #include <algorithm>
 #include <iostream>
 
-#include "CLI/CLI.hpp"
+#include <Base/FileLogger.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
-#include "Base/GlobalSettings.h"
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
-#include "Base/StringHelper.h"
-#include "Base/FileLogger.h"
-#include "PersisterInterface/SerializerService.h"
-#include "EngineImpl/SimulationFacadeImpl.h"
+#include <EngineImpl/SimulationFacadeImpl.h>
+
+#include <PersisterInterface/SerializerService.h>
+
+#include "CLI/CLI.hpp"
 
 int main(int argc, char** argv)
 {
@@ -58,10 +60,10 @@ int main(int argc, char** argv)
         simulationFacade->calcTimesteps(timesteps);
 
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTimepoint).count();
-        auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f; 
+        auto tps = ms != 0 ? 1000.0f * toFloat(timesteps) / toFloat(ms) : 0.0f;
         std::cout << "Simulation finished: " << StringHelper::format(timesteps) << " time steps, " << StringHelper::format(ms) << " ms, "
                   << StringHelper::format(tps, 1) << " TPS" << std::endl;
-        
+
 
         //write output simulation file
         std::cout << "Writing output" << std::endl;

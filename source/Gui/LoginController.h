@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "PersisterInterface/PersisterFacade.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/PersisterFacade.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
@@ -10,6 +12,7 @@
 class LoginController : public MainLoopEntity<SimulationFacade, PersisterFacade>
 {
     MAKE_SINGLETON(LoginController);
+
 public:
     void onLogin();
 
@@ -34,7 +37,7 @@ private:
     void process() override;
     void shutdown() override;
 
-    SimulationFacade _simulationFacade; 
+    SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
 
     TaskProcessor _taskProcessor;

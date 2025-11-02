@@ -9,7 +9,8 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
         if (auto& cell = cells.at(index)) {
 
             if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                || reinterpret_cast<uint64_t>(cell) + sizeof(Cell) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
+                || reinterpret_cast<uint64_t>(cell) + sizeof(Cell)
+                    >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
                 printf("wrong cell pointer at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
@@ -147,4 +148,3 @@ __global__ void DEBUG_checkCellsAndParticles(SimulationData data, float* sumEner
 //    }
 //    delete sumEnergy;
 //}
-

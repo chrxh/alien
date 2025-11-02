@@ -2,12 +2,13 @@
 
 #include <boost/range/combine.hpp>
 
-#include "Base/Math.h"
-#include "EngineInterface/SimulationParameters.h"
+#include <Base/Math.h>
 
-#include "EngineTestData/DescriptionTestDataFactory.h"
+#include <EngineInterface/SimulationParameters.h>
 
-#include "EngineImpl/SimulationFacadeImpl.h"
+#include <EngineTestData/DescriptionTestDataFactory.h>
+
+#include <EngineImpl/SimulationFacadeImpl.h>
 
 IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
 {

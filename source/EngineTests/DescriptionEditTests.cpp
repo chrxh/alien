@@ -4,14 +4,15 @@
 
 #include <gtest/gtest.h>
 
-#include "Base/Definitions.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Definitions.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
-class DescriptionEditTests 
-    : public IntegrationTestFramework
+class DescriptionEditTests : public IntegrationTestFramework
 {
 public:
     DescriptionEditTests()
@@ -367,7 +368,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     for (auto const& cell : data._cells) {
         if (cell.getCellType() == CellType_Constructor) {
             constructor = cell;
-        } 
+        }
         if (cell.getCellType() == CellType_Base) {
             base = cell;
         }
@@ -629,7 +630,6 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
         EXPECT_TRUE(approxCompare(toFloat(i), cell._pos.x - refCell._pos.x));
         EXPECT_TRUE(approxCompare(toFloat(i), cell._pos.y - refCell._pos.y));
     }
-
 }
 
 TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)

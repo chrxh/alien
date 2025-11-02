@@ -2,13 +2,14 @@
 
 #include <chrono>
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationParameters.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/Description.h>
+#include <EngineInterface/SimulationParameters.h>
+
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class TemporalControlWindow : public AlienWindow<SimulationFacade>
 {
@@ -47,7 +48,7 @@ private:
 
     void restorePosition(RealVector2D& position, RealVector2D const& velocity, RealVector2D const& origPosition, RealVector2D const& origVelocity);
 
-    SimulationFacade _simulationFacade; 
+    SimulationFacade _simulationFacade;
 
     std::optional<Snapshot> _snapshot;
 
@@ -58,4 +59,3 @@ private:
 
     std::optional<int> _sessionId;
 };
-

@@ -1,24 +1,28 @@
 #include "EditorController.h"
 
 #include <memory>
-#include <imgui.h>
-#include <GLFW/glfw3.h>
 
-#include "Base/Math.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/InspectedEntityIds.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "Viewport.h"
-#include "StyleRepository.h"
-#include "EditorModel.h"
-#include "SelectionWindow.h"
-#include "PatternEditorWindow.h"
+#include <imgui.h>
+
+#include <Base/Math.h>
+
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/InspectedEntityIds.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "CreatorWindow.h"
-#include "GenomeEditorWindow.h"
-#include "MultiplierWindow.h"
+#include "EditorModel.h"
 #include "GenericMessageDialog.h"
-#include "OverlayController.h"
+#include "GenomeEditorWindow.h"
 #include "MainLoopEntityController.h"
+#include "MultiplierWindow.h"
+#include "OverlayController.h"
+#include "PatternEditorWindow.h"
+#include "SelectionWindow.h"
+#include "StyleRepository.h"
+#include "Viewport.h"
+
+#include <GLFW/glfw3.h>
 
 void EditorController::init(SimulationFacade simulationFacade)
 {
@@ -71,11 +75,10 @@ void EditorController::onCloseAllInspectorWindows()
 void EditorController::onInspectSelectedObjects()
 {
     Description selectedData = _simulationFacade->getSelectedSimulationData(false);
-    if(!onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false)) {
+    if (!onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false)) {
         showMessage(
             "Inspection not possible",
-            "Too many objects are selected for inspection. A maximum of " + std::to_string(Const::MaxInspectedObjects)
-                + " objects are allowed.");
+            "Too many objects are selected for inspection. A maximum of " + std::to_string(Const::MaxInspectedObjects) + " objects are allowed.");
     }
 }
 
@@ -164,8 +167,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
-        _inspectorWindows.emplace_back(
-            std::make_shared<_InspectorWindow>(_simulationFacade, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
+        _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(_simulationFacade, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
     return true;
 }
@@ -262,9 +264,7 @@ void EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifie
     EditorModel::get().update();
 }
 
-void EditorController::onMoveSelectedObjects(
-    RealVector2D const& viewPos,
-    RealVector2D const& prevWorldPos)
+void EditorController::onMoveSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
 {
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});

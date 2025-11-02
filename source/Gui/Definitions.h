@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
 class _MainWindow;
 using MainWindow = std::shared_ptr<_MainWindow>;

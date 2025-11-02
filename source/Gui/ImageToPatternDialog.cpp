@@ -1,21 +1,25 @@
 #include "ImageToPatternDialog.h"
 
 #include <boost/range/adaptor/indexed.hpp>
-#include <stb_image.h>
-#include <imgui.h>
-#include <ImFileDialog.h>
 
-#include "Base/Definitions.h"
-#include "Base/GlobalSettings.h"
-#include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/Colors.h"
+#include <stb_image.h>
+
+#include <imgui.h>
+
+#include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
+
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
-#include "Viewport.h"
 #include "GenericFileDialog.h"
+#include "Viewport.h"
+
+#include <ImFileDialog.h>
 
 
 void ImageToPatternDialog::init(SimulationFacade simulationFacade)
@@ -38,12 +42,12 @@ namespace
 {
     void getMatchedCellColor(ImColor const& color, int& matchedCellColor, float& matchedCellIntensity)
     {
-        using Color = std::array<float,3>;
+        using Color = std::array<float, 3>;
         static std::vector<Color> cellColors;
         auto toHsv = [](uint32_t color) {
             float h, s, v;
             AlienGui::ConvertRGBtoHSV(color, h, s, v);
-            return Color{h, s, v}; 
+            return Color{h, s, v};
         };
         if (cellColors.empty()) {
             cellColors.emplace_back(toHsv(Const::IndividualCellColor1));
@@ -79,9 +83,7 @@ namespace
 
 void ImageToPatternDialog::show()
 {
-    GenericFileDialog::get().showOpenFileDialog(
-        "Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
-
+    GenericFileDialog::get().showOpenFileDialog("Open image", "Image (*.png){.png},.*", _startingPath, [&](std::filesystem::path const& path) {
         auto firstFilename = ifd::FileDialog::Instance().GetResult();
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
@@ -102,12 +104,12 @@ void ImageToPatternDialog::show()
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
                     dataDesc._cells.emplace_back(CellDescription()
-                                         .id(NumberGenerator::get().createObjectId())
-                                         .cellType(StructureCellDescription())
-                                         .energy(matchedCellIntensity * 200)
-                                         .pos({toFloat(x) + xOffset, toFloat(y)})
-                                         .color(matchedCellColor)
-                                         .barrier(false));
+                                                     .id(NumberGenerator::get().createObjectId())
+                                                     .cellType(StructureCellDescription())
+                                                     .energy(matchedCellIntensity * 200)
+                                                     .pos({toFloat(x) + xOffset, toFloat(y)})
+                                                     .color(matchedCellColor)
+                                                     .barrier(false));
                 }
             }
         }

@@ -1,19 +1,21 @@
 #include "SimulationInteractionController.h"
 
-#include <imgui.h>
 #include <cmath>
 
-#include "Base/Resources.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <imgui.h>
 
-#include "OpenGLHelper.h"
+#include <Base/Resources.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include "AlienGui.h"
+#include "CreatorWindow.h"
 #include "EditorController.h"
+#include "EditorModel.h"
+#include "OpenGLHelper.h"
+#include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "AlienGui.h"
-#include "EditorModel.h"
-#include "SimulationView.h"
-#include "CreatorWindow.h"
 
 namespace
 {
