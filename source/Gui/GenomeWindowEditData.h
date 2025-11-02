@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineInterface/GenomeDescription.h"
+#include "EngineInterface/GenomeDescriptionEditService.h"
 
 #include "Definitions.h"
 
