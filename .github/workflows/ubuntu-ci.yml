@@ -58,3 +58,10 @@ jobs:
 
     - name: Build
       run: cmake --build build
+      
+    - name: Run Tests (non-CUDA)
+      run: |
+        cd build
+        ./EngineInterfaceTests
+        ./NetworkTests
+        ./PersisterTests

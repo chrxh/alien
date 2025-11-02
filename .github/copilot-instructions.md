@@ -37,11 +37,12 @@ cmake --build build --config Release -j8
 cd build
 
 # Fast tests (no GPU required)
-./NetworkTests      # 4 tests, <1 second
-./PersisterTests    # 35 tests, ~1.4 seconds
+./EngineInterfaceTests  # 129 tests, <1 second
+./NetworkTests          # 4 tests, <1 second
+./PersisterTests        # 35 tests, ~1.4 seconds
 
 # GPU tests (requires NVIDIA GPU with compute capability 6.0+)
-./EngineTests       # 534 tests, requires CUDA GPU - will fail in CI environment
+./EngineTests           # Requires CUDA GPU - will fail in CI environment
 ```
 
 ### Run the Applications
@@ -61,16 +62,17 @@ cd build
 ## Validation
 
 ### Build Validation
-- **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `NetworkTests`, `PersisterTests`
+- **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `EngineInterfaceTests`, `NetworkTests`, `PersisterTests`
 - **Build time**: 3-4 minutes on 8-core system with `-j8` parallelization
 - **Clean configuration**: ~6 seconds
 - **No build errors or warnings** when following the exact commands above
 
 ### Test Validation  
+- **EngineInterfaceTests**: 129 tests pass in <1 second (no GPU required)
 - **NetworkTests**: 4 tests pass in <1 second (no GPU required)
 - **PersisterTests**: 35 tests pass in ~1.4 seconds (no GPU required)
-- **EngineTests**: 534 tests fail without NVIDIA GPU (expected limitation)
-- Always run `./NetworkTests && ./PersisterTests` to verify your changes don't break core functionality
+- **EngineTests**: Requires NVIDIA GPU - will fail in CI environment without compatible GPU
+- Always run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests` to verify your changes don't break core functionality
 
 ### Application Validation
 - **CLI works**: `./cli --help` shows usage information
@@ -89,7 +91,7 @@ clang-format --style=file:source/_clang-format -i path/to/modified/files.cpp
 cmake --build build --config Release -j8
 
 # 3. Run core tests (required - these must pass)
-cd build && ./NetworkTests && ./PersisterTests
+cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests
 
 # 4. Test CLI functionality
 ./cli --help
@@ -126,7 +128,8 @@ find source -name "*.cpp" -o -name "*.h" | xargs clang-format --style=file:sourc
   - `source/EngineGpuKernels/`: CUDA kernels for simulation
   - `source/EngineImpl/`: CPU-side engine implementation
   - `source/EngineInterface/`: Abstract simulation APIs
-  - `source/EngineTests/`: Integration test suite (534 tests)
+  - `source/EngineInterfaceTests/`: Unit tests for EngineInterface (no GPU required)
+  - `source/EngineTests/`: Integration tests requiring CUDA GPU
   - `source/Gui/`: ImGui-based user interface
   - `source/Network/`: HTTP client for cloud features
   - `source/PersisterImpl/`: File I/O and serialization
@@ -172,7 +175,7 @@ The engine follows a layered architecture:
 - **Test naming**: `*Tests.cpp` files, descriptive test method names
 - **Test types**: Unit tests (preferred), integration tests, performance tests
 - **GPU tests**: Require NVIDIA hardware, will fail in CI without GPU
-- **Always run**: `./NetworkTests && ./PersisterTests` to verify core functionality
+- **Always run**: `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests` to verify core functionality
 
 ### Performance & Debugging
 - **CUDA debugging**: Use `cuda-gdb` or Nsight Compute for kernel debugging
