@@ -87,9 +87,10 @@ void _PreviewWidget::setupPreviewData(bool useCache)
     for (auto const& creatureWidget : _creatureWidgets) {
         subGenomesForPreview.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }
+    
     auto preview = genomeEditService.createSeedCollectionForPreview(
         subGenomesForPreview,
-        useCache ? _genomeEditData->genotypeToPhenotypeCache : std::unordered_map<SubGenomeDescription, Description>());
+        useCache ? std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>>(_genomeEditData->genotypeToPhenotypeCache) : std::nullopt);
 
     _simulationFacade->setPreviewData(preview.description);
     _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);
@@ -136,7 +137,7 @@ void _PreviewWidget::processCreaturePreviews()
     auto subGenomesForPreview = getSubGenomes();
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), seedCreatureIds);
     for (auto const& [subGenome, phenotype] : boost::combine(subGenomesForPreview, phenotypes)) {
-        _genomeEditData->genotypeToPhenotypeCache.insert_or_assign(subGenome, phenotype);
+        _genomeEditData->genotypeToPhenotypeCache.insertOrAssign(subGenome, phenotype);
     }
 
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {

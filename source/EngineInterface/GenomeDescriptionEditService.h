@@ -2,6 +2,10 @@
 
 #include <vector>
 
+#include <optional>
+#include <functional>
+
+#include "Base/Cache.h"
 #include "Base/Singleton.h"
 
 #include "Description.h"
@@ -9,6 +13,8 @@
 #include "SimulationParameters.h"
 
 using GeneIndicesForSubGenome = std::vector<int>;
+using GenotypeToPhenotypeCache = Cache<SubGenomeDescription, Description, 100000>;
+
 class GenomeDescriptionEditService
 {
     MAKE_SINGLETON(GenomeDescriptionEditService);
@@ -32,9 +38,11 @@ public:
         Description description; 
         std::vector<uint64_t> seedCreatureIds;
     };
+    
     SeedCollectionResult createSeedCollectionForPreview(
         std::vector<SubGenomeDescription> const& subGenomes,
-        std::unordered_map<SubGenomeDescription, Description> const& cache) const;
+        std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache = std::nullopt) const;
+        
     std::vector<Description> extractPhenotypesFromPreview(Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
     void removeSeedFromPhenotype(Description& phenotype) const;
 

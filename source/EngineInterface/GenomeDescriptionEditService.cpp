@@ -182,7 +182,7 @@ std::vector<SubGenomeDescription> GenomeDescriptionEditService::createSubGenomes
 
 auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     std::vector<SubGenomeDescription> const& subGenomes,
-    std::unordered_map<SubGenomeDescription, Description> const& cache) const -> SeedCollectionResult
+    std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache) const -> SeedCollectionResult
 {
     auto const& editService = DescriptionEditService::get();
 
@@ -190,9 +190,15 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
 
     SeedCollectionResult result;
     for (auto const& subGenome : subGenomes) {
-        auto findResult = cache.find(subGenome);
-        if (findResult != cache.end()) {
-            auto cachedPhenotype = findResult->second;
+        std::optional<Description> cachedValue;
+        
+        // Try to get from cache if provided
+        if (cache.has_value()) {
+            cachedValue = cache.value().get().find(subGenome);
+        }
+        
+        if (cachedValue.has_value()) {
+            auto cachedPhenotype = cachedValue.value();
             editService.setCenter(cachedPhenotype, currentPos);
 
             CHECK(cachedPhenotype._creatures.size() <= 2);

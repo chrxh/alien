@@ -242,6 +242,5 @@ struct SubGenomeDescription
     bool operator==(const SubGenomeDescription&) const = default;
 };
 
-
 // Include hash specializations
 #include "GenomeDescriptionHash.h"
