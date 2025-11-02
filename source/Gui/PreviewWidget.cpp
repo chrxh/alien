@@ -90,7 +90,7 @@ void _PreviewWidget::setupPreviewData(bool useCache)
     
     auto preview = genomeEditService.createSeedCollectionForPreview(
         subGenomesForPreview,
-        _genomeEditData->genotypeToPhenotypeCache);
+        useCache ? std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>>(_genomeEditData->genotypeToPhenotypeCache) : std::nullopt);
 
     _simulationFacade->setPreviewData(preview.description);
     _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);

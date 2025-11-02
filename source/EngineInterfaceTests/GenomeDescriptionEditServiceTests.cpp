@@ -760,9 +760,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_trimming_re
 TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_emptySubGenomes)
 {
     std::vector<SubGenomeDescription> subGenomes;
-    std::unordered_map<SubGenomeDescription, Description> cache;
     
-    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, std::nullopt);
     
     EXPECT_EQ(0, result.description._creatures.size());
     EXPECT_EQ(0, result.seedCreatureIds.size());
@@ -779,9 +778,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     
     SubGenomeDescription subGenome{genome, 0, false};
     std::vector<SubGenomeDescription> subGenomes = {subGenome};
-    std::unordered_map<SubGenomeDescription, Description> cache;
     
-    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, std::nullopt);
     
     // Should have 1 seed creature
     ASSERT_EQ(1, result.description._creatures.size());
@@ -831,8 +829,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     );
     
     std::vector<SubGenomeDescription> subGenomes = {subGenome};
-    std::unordered_map<SubGenomeDescription, Description> cache;
-    cache[subGenome] = cachedPhenotype;
+    GenotypeToPhenotypeCache cache;
+    cache.insertOrAssign(subGenome, cachedPhenotype);
     
     auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
     
@@ -896,8 +894,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     cachedPhenotype._creatures.emplace_back(std::move(seedCreatureTemp));
     
     std::vector<SubGenomeDescription> subGenomes = {subGenome};
-    std::unordered_map<SubGenomeDescription, Description> cache;
-    cache[subGenome] = cachedPhenotype;
+    GenotypeToPhenotypeCache cache;
+    cache.insertOrAssign(subGenome, cachedPhenotype);
     
     auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
     
@@ -931,9 +929,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
     SubGenomeDescription subGenome1{genome1, 0, false};
     SubGenomeDescription subGenome2{genome2, 0, false};
     std::vector<SubGenomeDescription> subGenomes = {subGenome1, subGenome2};
-    std::unordered_map<SubGenomeDescription, Description> cache;
     
-    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
+    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, std::nullopt);
     
     // Should have 2 seed creatures
     ASSERT_EQ(2, result.description._creatures.size());
@@ -981,8 +978,8 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
     );
     
     std::vector<SubGenomeDescription> subGenomes = {subGenome1, subGenome2};
-    std::unordered_map<SubGenomeDescription, Description> cache;
-    cache[subGenome1] = cachedPhenotype;
+    GenotypeToPhenotypeCache cache;
+    cache.insertOrAssign(subGenome1, cachedPhenotype);
     
     auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
     

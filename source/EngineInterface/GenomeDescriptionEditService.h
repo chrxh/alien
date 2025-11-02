@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <optional>
+#include <functional>
 
 #include "Base/Singleton.h"
 
@@ -35,7 +37,7 @@ public:
     
     SeedCollectionResult createSeedCollectionForPreview(
         std::vector<SubGenomeDescription> const& subGenomes,
-        GenotypeToPhenotypeCache const& cache) const;
+        std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache = std::nullopt) const;
         
     std::vector<Description> extractPhenotypesFromPreview(Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
     void removeSeedFromPhenotype(Description& phenotype) const;
