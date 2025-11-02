@@ -242,6 +242,12 @@ struct SubGenomeDescription
     bool operator==(const SubGenomeDescription&) const = default;
 };
 
+// Forward declare Description for cache alias
+struct Description;
+
+// Type alias for genotype to phenotype cache
+#include "Base/Cache.h"
+using GenotypeToPhenotypeCache = Cache<SubGenomeDescription, Description, 100000>;
 
 // Include hash specializations
 #include "GenomeDescriptionHash.h"

@@ -88,17 +88,9 @@ void _PreviewWidget::setupPreviewData(bool useCache)
         subGenomesForPreview.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }
     
-    GenomeDescriptionEditService::SeedCollectionResult preview;
-    if (useCache) {
-        preview = genomeEditService.createSeedCollectionForPreview(
-            subGenomesForPreview,
-            _genomeEditData->genotypeToPhenotypeCache);
-    } else {
-        std::unordered_map<SubGenomeDescription, Description> emptyCache;
-        preview = genomeEditService.createSeedCollectionForPreview(
-            subGenomesForPreview,
-            emptyCache);
-    }
+    auto preview = genomeEditService.createSeedCollectionForPreview(
+        subGenomesForPreview,
+        _genomeEditData->genotypeToPhenotypeCache);
 
     _simulationFacade->setPreviewData(preview.description);
     _simulationFacade->setCurrentTimestepForPreview(_currentTimestep);
