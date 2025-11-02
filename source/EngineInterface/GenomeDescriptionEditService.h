@@ -1,9 +1,11 @@
 #pragma once
 
 #include <vector>
+
 #include <optional>
 #include <functional>
 
+#include "Base/Cache.h"
 #include "Base/Singleton.h"
 
 #include "Description.h"
@@ -11,6 +13,8 @@
 #include "SimulationParameters.h"
 
 using GeneIndicesForSubGenome = std::vector<int>;
+using GenotypeToPhenotypeCache = Cache<SubGenomeDescription, Description, 100000>;
+
 class GenomeDescriptionEditService
 {
     MAKE_SINGLETON(GenomeDescriptionEditService);
