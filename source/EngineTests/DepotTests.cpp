@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
-#include "EngineInterface/GenomeDescription.h"
 
 class DepotTests : public IntegrationTestFramework
 {
@@ -186,7 +187,7 @@ public:
 //TEST_F(DepotTests, distributeOnlyToActiveConstructors)
 //{
 //    //auto genome = GenomeDescription().header(GenomeHeaderDescription().numBranches(1));
-//    
+//
 //    Description data;
 //    data.cells() = {
 //        CellDescription()

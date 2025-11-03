@@ -1,8 +1,8 @@
 #pragma once
 
-#include <tuple>
 #include <bit>
 #include <functional>
+#include <tuple>
 
 namespace std
 {
@@ -12,4 +12,3 @@ namespace std
         size_t operator()(pair<A, B> const& p) const { return std::rotl(hash<A>{}(p.first), 1) ^ hash<B>{}(p.second); }
     };
 }
-

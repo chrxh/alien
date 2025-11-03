@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/SimulationParametersSpecification.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/SimulationParametersSpecification.h>
 
 #include "LocationWidget.h"
 

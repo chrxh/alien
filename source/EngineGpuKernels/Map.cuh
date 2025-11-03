@@ -2,10 +2,10 @@
 
 #include "cuda_runtime_api.h"
 
-#include "Base.cuh"
-#include "Object.cuh"
-#include "Math.cuh"
 #include "Array.cuh"
+#include "Base.cuh"
+#include "Math.cuh"
+#include "Object.cuh"
 
 class BaseMap
 {
@@ -136,10 +136,7 @@ public:
         return _map[posInt.x + posInt.y * _size.x];
     }
 
-    __device__ __inline__ Cell* getFirst(int2 const& pos) const
-    {
-        return _map[pos.x + pos.y * _size.x];
-    }
+    __device__ __inline__ Cell* getFirst(int2 const& pos) const { return _map[pos.x + pos.y * _size.x]; }
 
     template <typename MatchFunc>
     __device__ __inline__ void getMatchingCells(Cell* cells[], int arraySize, int& numCells, float2 const& pos, float radius, int detached, MatchFunc matchFunc)
@@ -197,8 +194,7 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition =
-            calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto partition = calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;

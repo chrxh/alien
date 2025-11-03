@@ -26,8 +26,7 @@ public:
 
         if (origEndListEntry) {
             origEndListEntry->nextListEntry = newEntry;
-        }
-        else {
+        } else {
             _startListEntry = newEntry;
         }
     }
@@ -44,13 +43,11 @@ public:
         return result;
     }
 
-    __device__ __inline__ int getSize() const
-    {
-        return _numElements;
-    }
+    __device__ __inline__ int getSize() const { return _numElements; }
 
 private:
-    struct ListEntry {
+    struct ListEntry
+    {
         Value value;
         ListEntry* nextListEntry;
     };

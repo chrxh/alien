@@ -6,4 +6,3 @@ struct CudaSettings
 
     bool operator==(CudaSettings const& other) const = default;
 };
-

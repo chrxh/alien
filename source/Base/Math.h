@@ -27,8 +27,9 @@ public:
     static float getNormalizedAngle(float angle, float base);
     static float dot(RealVector2D const& p, RealVector2D const& q);
 
-    
-    static bool isCrossing(RealVector2D const& segmentStart, RealVector2D const& segmentEnd, RealVector2D const& otherSegmentStart, RealVector2D const& otherSegmentEnd);
+
+    static bool
+    isCrossing(RealVector2D const& segmentStart, RealVector2D const& segmentEnd, RealVector2D const& otherSegmentStart, RealVector2D const& otherSegmentEnd);
     static float modulo(float value, float size);
 
     static float sigmoid(float x);

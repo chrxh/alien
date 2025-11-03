@@ -6,25 +6,22 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/StringHelper.h"
+#include <Base/StringHelper.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/GenomeDescriptionEditService.h"
-#include "EngineInterface/GenomeDescriptionInfoService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GenomeDescriptionEditService.h>
+#include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
+#include "CreaturePreviewWidget.h"
 #include "GenomeTabEditData.h"
 #include "GenomeWindowEditData.h"
-#include "CreaturePreviewWidget.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
 
-PreviewWidget _PreviewWidget::create(
-    SimulationFacade const& simulationFacade,
-    GenomeWindowEditData const& genomeEditData,
-    GenomeTabEditData const& editData)
+PreviewWidget _PreviewWidget::create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
     return PreviewWidget(new _PreviewWidget(simulationFacade, genomeEditData, editData));
 }
@@ -48,15 +45,11 @@ void _PreviewWidget::process()
     _genomeFromPreviousFrame = _editData->genome;
 }
 
-_PreviewWidget::_PreviewWidget(
-    SimulationFacade const& simulationFacade,
-    GenomeWindowEditData const& genomeEditData,
-    GenomeTabEditData const& editData)
+_PreviewWidget::_PreviewWidget(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
     : _simulationFacade(simulationFacade)
     , _genomeEditData(genomeEditData)
     , _editData(editData)
-{
-}
+{}
 
 void _PreviewWidget::createSubGenomesForPreview()
 {
@@ -87,7 +80,7 @@ void _PreviewWidget::setupPreviewData(bool useCache)
     for (auto const& creatureWidget : _creatureWidgets) {
         subGenomesForPreview.emplace_back(creatureWidget->getGenomeWithStartIndex());
     }
-    
+
     auto preview = genomeEditService.createSeedCollectionForPreview(
         subGenomesForPreview,
         useCache ? std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>>(_genomeEditData->genotypeToPhenotypeCache) : std::nullopt);
@@ -306,4 +299,3 @@ std::vector<SubGenomeDescription> _PreviewWidget::getSubGenomes() const
     }
     return result;
 }
-

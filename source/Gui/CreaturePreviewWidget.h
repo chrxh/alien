@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescriptionEditService.h"
-#include "EngineInterface/PreviewDescription.h"
+#include <EngineInterface/GenomeDescriptionEditService.h>
+#include <EngineInterface/PreviewDescription.h>
 
 #include "Definitions.h"
 
@@ -25,10 +25,7 @@ public:
     void resetVisualFrontAngle();
 
 private:
-    _CreaturePreviewWidget(
-        GenomeTabEditData const& editData,
-        GeneIndicesForSubGenome const& geneIndices,
-        SubGenomeDescription const& genomeWithStartIndex);
+    _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex);
 
     void processNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);

@@ -63,53 +63,89 @@ IncludeCategories:
   - Regex: '^[^<"].*\.h"$'
     Priority: 0
 
-  # C/C++ standard library headers (e.g. <vector>, <string>)
-  - Regex: '^<(algorithm|string|vector|map|set|ranges|unordered_map|unordered_set|memory|utility|tuple|array|iterator|limits|type_traits|cstddef|cstdint|cmath|cassert|iostream|fstream|sstream|iomanip|chrono|thread|mutex|atomic|condition_variable)>$'
+  # C/C++ standard library headers
+  - Regex: '^<(algorithm|array|atomic|bit|cassert|chrono|cmath|condition_variable|cstddef|cstdint|cstdlib|cstring|ctime|deque|exception|filesystem|fstream|functional|initializer_list|iomanip|iostream|iterator|limits|list|map|memory|mutex|optional|ostream|random|ranges|set|sstream|stdexcept|string|string_view|thread|tuple|type_traits|unordered_map|unordered_set|utility|variant|vector)>$'
     Priority: 1
 
   # Boost headers
   - Regex: '^<boost/.*>$'
     Priority: 100
 
-  # Boost headers
+  # gtest headers
   - Regex: '^<gtest/.*>$'
     Priority: 101
 
-  # ImGui main header
-  - Regex: '^<imgui\.h>$'
+  # CUDA headers
+  - Regex: '^<cuda.*>$'
+    Priority: 102
+
+  # OpenGL headers
+  - Regex: '^<(GL/.*|glad/.*|glm/.*|stb_image\.h)>$'
     Priority: 103
+
+  # Cereal serialization headers
+  - Regex: '^<cereal/.*>$'
+    Priority: 104
+
+  # ImGui headers
+  - Regex: '^<imgui.*\.h>$'
+    Priority: 105
 
   # Fonts module includes
   - Regex: '^<Fonts/.*>$'
-    Priority: 104
+    Priority: 106
 
   # Base module includes
-  - Regex: '^"Base/.*"$'
+  - Regex: '^<Base/.*>$'
     Priority: 200
 
-  # Engine interface includes
-  - Regex: '^"EngineInterface/.*"$'
+  # Network module includes
+  - Regex: '^<Network/.*>$'
     Priority: 201
 
-  # Engine interface includes
-  - Regex: '^"EngineTestData/.*"$'
+  # NetworkTests module includes
+  - Regex: '^<NetworkTests/.*>$'
     Priority: 202
 
-  # Engine implementation includes
-  - Regex: '^"EngineImpl/.*"$'
+  # Shader module includes
+  - Regex: '^<Shaders/.*>$'
     Priority: 203
 
-  # Persister interface includes
-  - Regex: '^"PersisterInterface/.*"$'
+  # Engine interface includes
+  - Regex: '^<EngineInterface/.*>$'
     Priority: 204
 
-  # Persister implementation includes
-  - Regex: '^"PersisterImpl/.*"$'
+  # Engine test data includes
+  - Regex: '^<EngineTestData/.*>$'
     Priority: 205
 
-  # Network module includes
-  - Regex: '^"Network/.*"$'
+  # Engine interface tests includes
+  - Regex: '^<EngineInterfaceTests/.*>$'
     Priority: 206
+
+  # Engine implementation includes
+  - Regex: '^<EngineImpl/.*>$'
+    Priority: 207
+
+  # Engine GPU kernels includes
+  - Regex: '^<EngineGpuKernels/.*>$'
+    Priority: 208
+
+  # Engine tests includes
+  - Regex: '^<EngineTests/.*>$'
+    Priority: 209
+
+  # Persister interface includes
+  - Regex: '^<PersisterInterface/.*>$'
+    Priority: 210
+
+  # Persister implementation includes
+  - Regex: '^<PersisterImpl/.*>$'
+    Priority: 211
+
+  # GUI module includes
+  - Regex: '^<Gui/.*>$'
+    Priority: 212
 
   # All other local project includes without path (from current directory)
   - Regex: '^"[a-zA-Z0-9_]+\.h"$'

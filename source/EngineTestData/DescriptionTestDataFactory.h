@@ -2,9 +2,10 @@
 
 #include <vector>
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/GenomeDescription.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/GenomeDescription.h>
 
 class DescriptionTestDataFactory
 {

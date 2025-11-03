@@ -1,10 +1,10 @@
 #pragma once
 
-#include <unordered_map>
 #include <list>
 #include <optional>
+#include <unordered_map>
 
-template<typename Key, typename Value, int MaxEntries>
+template <typename Key, typename Value, int MaxEntries>
 class Cache
 {
 public:

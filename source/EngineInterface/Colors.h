@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "EngineConstants.h"
+
+#include <stdint.h>
 
 namespace Const
 {

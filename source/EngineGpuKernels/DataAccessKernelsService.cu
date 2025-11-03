@@ -1,9 +1,8 @@
-﻿#include "DataAccessKernelsService.cuh"
-
-#include "DataAccessKernels.cuh"
-#include "GarbageCollectorKernelsService.cuh"
-#include "EditKernelsService.cuh"
+﻿#include "DataAccessKernels.cuh"
+#include "DataAccessKernelsService.cuh"
 #include "DebugKernels.cuh"
+#include "EditKernelsService.cuh"
+#include "GarbageCollectorKernelsService.cuh"
 
 _DataAccessKernelsService::_DataAccessKernelsService()
 {
@@ -47,11 +46,7 @@ void _DataAccessKernelsService::getData(
     KERNEL_CALL(cudaGetParticleData, rectUpperLeft, rectLowerRight, data, to);
 }
 
-void _DataAccessKernelsService::getSelectedData(
-    CudaSettings const& gpuSettings,
-    SimulationData const& data,
-    bool includeClusters,
-    TO const& to)
+void _DataAccessKernelsService::getSelectedData(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters, TO const& to)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
     KERNEL_CALL(cudaPrepareSelectedCreaturesForConversionToTO, includeClusters, data);
@@ -62,11 +57,7 @@ void _DataAccessKernelsService::getSelectedData(
     KERNEL_CALL(cudaGetSelectedParticleData, data, to);
 }
 
-void _DataAccessKernelsService::getInspectedData(
-    CudaSettings const& gpuSettings,
-    SimulationData const& data,
-    InspectedEntityIds entityIds,
-    TO const& to)
+void _DataAccessKernelsService::getInspectedData(CudaSettings const& gpuSettings, SimulationData const& data, InspectedEntityIds entityIds, TO const& to)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
     KERNEL_CALL(cudaPrepareCreaturesAndGenomesForConversionToTO, entityIds, data);

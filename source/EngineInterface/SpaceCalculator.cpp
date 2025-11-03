@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "Base/Math.h"
+#include <Base/Math.h>
 
 SpaceCalculator::SpaceCalculator(IntVector2D const& worldSize)
     : _worldSize(worldSize)

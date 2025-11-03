@@ -1,7 +1,8 @@
 #include <optional>
 
-#include "Base/Singleton.h"
-#include "EngineInterface/StatisticsHistory.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/StatisticsHistory.h>
 
 #include "Definitions.cuh"
 

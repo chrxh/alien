@@ -1,7 +1,8 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescription.h"
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/GenomeDescription.h>
 
 #include "AlienDialog.h"
 
@@ -24,4 +25,3 @@ private:
     int _targetColor = 0;
     bool _restrictToSelectedGene = true;
 };
-

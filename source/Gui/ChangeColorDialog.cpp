@@ -46,7 +46,7 @@ void ChangeColorDialog::processIntern()
     ImGui::Checkbox("##restrictToSelectedGene", &_restrictToSelectedGene);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
     AlienGui::Text("Restrict to selected gene");
-    
+
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();
 

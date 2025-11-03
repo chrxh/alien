@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/CudaSettings.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/CudaSettings.h>
+#include <EngineInterface/Definitions.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

@@ -1,10 +1,10 @@
 #include "LoggingService.h"
 
-#include <iostream>
-#include <iomanip>
-#include <ctime>
-#include <sstream>
 #include <algorithm>
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 void LoggingService::log(Priority priority, std::string const& message)
 {

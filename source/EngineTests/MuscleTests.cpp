@@ -2,10 +2,12 @@
 
 #include <gtest/gtest.h>
 
-#include "Base/Math.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Math.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
 enum class DetailedPreview
@@ -82,7 +84,7 @@ TEST_F(MuscleTests, noFrontAngle)
 
     ASSERT_EQ(3, actualData._cells.size());
     EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
-}    
+}
 
 
 enum class Side
@@ -108,8 +110,7 @@ enum class Channel1
 class MuscleTests_AutoBending
     : public MuscleTests
     , public testing::WithParamInterface<std::tuple<Side, Channel0, Channel1>>
-{
-};
+{};
 
 INSTANTIATE_TEST_SUITE_P(
     MuscleTests_AutoBending,
@@ -285,8 +286,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
 class MuscleTests_ManualBending
     : public MuscleTests
     , public testing::WithParamInterface<std::tuple<Side, Channel0, DetailedPreview>>
-{
-};
+{};
 
 INSTANTIATE_TEST_SUITE_P(
     MuscleTests_ManualBending,
@@ -621,13 +621,7 @@ class MuscleTests_AutoCrawling
     , public testing::WithParamInterface<Channel0>
 {};
 
-INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_AutoCrawling,
-    MuscleTests_AutoCrawling,
-    ::testing::Values(
-        Channel0::Positive,
-        Channel0::Negative,
-        Channel0::Zero));
+INSTANTIATE_TEST_SUITE_P(MuscleTests_AutoCrawling, MuscleTests_AutoCrawling, ::testing::Values(Channel0::Positive, Channel0::Negative, Channel0::Zero));
 
 TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
 {
@@ -760,10 +754,7 @@ class MuscleTests_ManualCrawling
     , public testing::WithParamInterface<Channel0>
 {};
 
-INSTANTIATE_TEST_SUITE_P(
-    MuscleTests_ManualCrawling,
-    MuscleTests_ManualCrawling,
-    ::testing::Values(Channel0::Positive, Channel0::Negative, Channel0::Zero));
+INSTANTIATE_TEST_SUITE_P(MuscleTests_ManualCrawling, MuscleTests_ManualCrawling, ::testing::Values(Channel0::Positive, Channel0::Negative, Channel0::Zero));
 
 TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
 {

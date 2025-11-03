@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "PersisterInterface/PersisterErrorInfo.h"
+#include <Base/Singleton.h>
 
+#include <EngineInterface/Definitions.h>
+
+#include <PersisterInterface/PersisterErrorInfo.h>
+
+#include "AlienDialog.h"
 #include "Definitions.h"
 #include "MainLoopEntity.h"
-#include "AlienDialog.h"
 
 class GenericMessageDialog : public AlienDialog<>
 {
@@ -30,7 +32,8 @@ private:
 
     enum class DialogType
     {
-        Information, YesNo
+        Information,
+        YesNo
     };
     DialogType _dialogType = DialogType::Information;
     std::string _title;

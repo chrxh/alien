@@ -1,10 +1,10 @@
 #pragma once
 
-#include "EngineInterface/CudaSettings.h"
+#include <EngineInterface/CudaSettings.h>
 
+#include "Array.cuh"
 #include "Base.cuh"
 #include "Definitions.cuh"
-#include "Array.cuh"
 
 struct Objects
 {
@@ -18,4 +18,3 @@ struct Objects
 
     __device__ void saveNumEntries();
 };
-

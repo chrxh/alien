@@ -1,9 +1,8 @@
-#include "TOProvider.cuh"
-
 #include <stdexcept>
 
-_TOProvider::_TOProvider()
-{}
+#include "TOProvider.cuh"
+
+_TOProvider::_TOProvider() {}
 
 _TOProvider::~_TOProvider()
 {

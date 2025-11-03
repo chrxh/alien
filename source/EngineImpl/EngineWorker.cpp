@@ -2,16 +2,16 @@
 
 #include <chrono>
 
-#include "Base/ExitScopeGuard.h"
+#include <Base/ExitScopeGuard.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/GeometryBuffers.h"
-#include "EngineInterface/Ids.h"
-#include "EngineInterface/NumberGenerator.h"
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/Ids.h>
+#include <EngineInterface/NumberGenerator.h>
 
-#include "EngineGpuKernels/TOProvider.cuh"
-#include "EngineGpuKernels/TO.cuh"
-#include "EngineGpuKernels/SimulationCudaFacade.cuh"
+#include <EngineGpuKernels/SimulationCudaFacade.cuh>
+#include <EngineGpuKernels/TO.cuh>
+#include <EngineGpuKernels/TOProvider.cuh>
 
 #include "DescriptionConverterService.h"
 
@@ -280,11 +280,7 @@ void EngineWorker::setGpuSettings_async(CudaSettings const& gpuSettings)
     _updateGpuSettingsJob = gpuSettings;
 }
 
-void EngineWorker::applyForce_async(
-    RealVector2D const& start,
-    RealVector2D const& end,
-    RealVector2D const& force,
-    float radius)
+void EngineWorker::applyForce_async(RealVector2D const& start, RealVector2D const& end, RealVector2D const& force, float radius)
 {
     std::unique_lock<std::mutex> uniqueLock(_mutexForAsyncJobs);
     _applyForceJobs.emplace_back(ApplyForceJob{start, end, force, radius});
@@ -365,7 +361,7 @@ void EngineWorker::runThreadLoop()
                 measureTPS();
                 slowdownTPS();
             }
-            
+
             processJobs();
 
             if (_accessState == 1) {
@@ -596,7 +592,6 @@ EngineWorkerGuard::EngineWorkerGuard(EngineWorker* worker, std::optional<std::ch
             }
         }
     }
-
 }
 
 EngineWorkerGuard::~EngineWorkerGuard()

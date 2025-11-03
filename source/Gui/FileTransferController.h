@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "PersisterInterface/PersisterFacade.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/PersisterFacade.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"

@@ -5,5 +5,5 @@
 struct ReadSimulationRequestData
 {
     std::filesystem::path filename;
-    bool initSimulation = false;    // Works only during startup
+    bool initSimulation = false;  // Works only during startup
 };

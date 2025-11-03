@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Array.cuh"
 #include "Base.cuh"
 #include "CudaMemoryManager.cuh"
-#include "Array.cuh"
 #include "Object.cuh"
 
 class DensityMap
@@ -228,4 +228,3 @@ private:
     uint64_t* _moreNumCellsDensityMap1;
     uint64_t* _moreNumCellsDensityMap2;
 };
-

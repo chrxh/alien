@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"
@@ -10,7 +10,6 @@ class DelayedExecutionController : public MainLoopEntity<>
     MAKE_SINGLETON(DelayedExecutionController);
 
 public:
-
     void executeLater(std::function<void(void)> const& execFunc);
 
 private:

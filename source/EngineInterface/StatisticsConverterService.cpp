@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
 namespace
 {
@@ -30,7 +30,7 @@ namespace
         return result;
     }
 
-    template<typename T>
+    template <typename T>
     DataPoint getDataPointByAveraging(ColorVector<T> const& summedValue, ColorVector<int> const& numSelfReplicators)
     {
         DataPoint result;
@@ -112,10 +112,9 @@ DataPointCollection StatisticsConverterService::convert(
     }
     result.numCreatedCells =
         getDataPointForProcessProperty(data.accumulated.numCreatedCells, lastDataValue.accumulated.numCreatedCells, numNonFreeCells, deltaTimesteps);
-    result.numAttacks =
-        getDataPointForProcessProperty(data.accumulated.numAttacks, lastDataValue.accumulated.numAttacks, numNonFreeCells, deltaTimesteps);
-    result.numMuscleActivities = getDataPointForProcessProperty(
-        data.accumulated.numMuscleActivities, lastDataValue.accumulated.numMuscleActivities, numNonFreeCells, deltaTimesteps);
+    result.numAttacks = getDataPointForProcessProperty(data.accumulated.numAttacks, lastDataValue.accumulated.numAttacks, numNonFreeCells, deltaTimesteps);
+    result.numMuscleActivities =
+        getDataPointForProcessProperty(data.accumulated.numMuscleActivities, lastDataValue.accumulated.numMuscleActivities, numNonFreeCells, deltaTimesteps);
     result.numDefenderActivities = getDataPointForProcessProperty(
         data.accumulated.numDefenderActivities, lastDataValue.accumulated.numDefenderActivities, numNonFreeCells, deltaTimesteps);
     result.numTransmitterActivities = getDataPointForProcessProperty(
@@ -126,12 +125,12 @@ DataPointCollection StatisticsConverterService::convert(
         data.accumulated.numCompletedInjections, lastDataValue.accumulated.numCompletedInjections, numNonFreeCells, deltaTimesteps);
     result.numGeneratorPulses =
         getDataPointForProcessProperty(data.accumulated.numGeneratorPulses, lastDataValue.accumulated.numGeneratorPulses, numNonFreeCells, deltaTimesteps);
-    result.numNeuronActivities = getDataPointForProcessProperty(
-        data.accumulated.numNeuronActivities, lastDataValue.accumulated.numNeuronActivities, numNonFreeCells, deltaTimesteps);
-    result.numSensorActivities = getDataPointForProcessProperty(
-        data.accumulated.numSensorActivities, lastDataValue.accumulated.numSensorActivities, numNonFreeCells, deltaTimesteps);
-    result.numSensorMatches = getDataPointForProcessProperty(
-        data.accumulated.numSensorMatches, lastDataValue.accumulated.numSensorMatches, numNonFreeCells, deltaTimesteps);
+    result.numNeuronActivities =
+        getDataPointForProcessProperty(data.accumulated.numNeuronActivities, lastDataValue.accumulated.numNeuronActivities, numNonFreeCells, deltaTimesteps);
+    result.numSensorActivities =
+        getDataPointForProcessProperty(data.accumulated.numSensorActivities, lastDataValue.accumulated.numSensorActivities, numNonFreeCells, deltaTimesteps);
+    result.numSensorMatches =
+        getDataPointForProcessProperty(data.accumulated.numSensorMatches, lastDataValue.accumulated.numSensorMatches, numNonFreeCells, deltaTimesteps);
     result.numReconnectorCreated = getDataPointForProcessProperty(
         data.accumulated.numReconnectorCreated, lastDataValue.accumulated.numReconnectorCreated, numNonFreeCells, deltaTimesteps);
     result.numReconnectorRemoved = getDataPointForProcessProperty(

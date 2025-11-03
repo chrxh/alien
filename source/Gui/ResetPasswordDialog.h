@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Network/NetworkService.h"
+#include <Network/NetworkService.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"

@@ -1,31 +1,29 @@
 #pragma once
 
-#include "Definitions.cuh"
-
-#include "Base.cuh"
 #include "Array.cuh"
+#include "Base.cuh"
+#include "Definitions.cuh"
 #include "List.cuh"
 
 class MapSectionCollector
 {
 public:
-    __host__ __inline__ void
-    init(int2 const& universeSize, int sectionSize)
+    __host__ __inline__ void init(int2 const& universeSize, int sectionSize)
     {
-        _numSections = { universeSize.x / sectionSize, universeSize.y / sectionSize };
+        _numSections = {universeSize.x / sectionSize, universeSize.y / sectionSize};
         _sectionSize = sectionSize;
-/*
+        /*
         _clusterListBySectionIndex.init(_numSections.x *_numSections.y);
 */
     }
 
     __host__ __inline__ void free()
     {
-/*
+        /*
         _clusterListBySectionIndex.free();
 */
     }
-/*
+    /*
 
     __device__ __inline__ void reset_system()
     {
@@ -88,13 +86,12 @@ private:
     __device__ __inline__ int2 getSection(float2 const& pos)
     {
         auto const intPos = toInt2(pos);
-        auto section = int2{ intPos.x / _sectionSize, intPos.y / _sectionSize };
+        auto section = int2{intPos.x / _sectionSize, intPos.y / _sectionSize};
         correctSection(section);
         return section;
-
     }
 
-/*
+    /*
     __device__ __inline__ List<Cluster*> const& getClusters(int2 section)
     {
         correctSection(section);
@@ -111,5 +108,5 @@ private:
 private:
     int2 _numSections;
     int _sectionSize;
-//    Array<List<Cluster*>> _clusterListBySectionIndex;
+    //    Array<List<Cluster*>> _clusterListBySectionIndex;
 };

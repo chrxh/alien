@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Base/Singleton.h"
+#include <Base/Singleton.h>
 
-#include "EngineInterface/Description.h"
-#include "EngineInterface/PreviewDescription.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/PreviewDescription.h>
 
 struct ConversionResult
 {

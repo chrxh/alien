@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Base.cuh"
-#include "Definitions.cuh"
-#include "SimulationData.cuh"
 #include "ConstantMemory.cuh"
-#include "ParameterCalculator.cuh"
+#include "Definitions.cuh"
 #include "ObjectFactory.cuh"
+#include "ParameterCalculator.cuh"
 #include "RadiationProcessor.cuh"
+#include "SimulationData.cuh"
 
 class CellConnectionProcessor
 {
@@ -31,7 +31,8 @@ public:
     __inline__ __device__ static void deleteConnections(Cell* cell1, Cell* cell2);
     __inline__ __device__ static void deleteConnectionOneWay(Cell* cell1, Cell* cell2);
 
-    __inline__ __device__ static bool existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
+    __inline__ __device__ static bool
+    existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
     __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Cell* cell1, float2 otherCellPos);
     __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Cell* cell, float angle, ConstructorAngleAlignment angleAlignment);
     __inline__ __device__ static bool isConnectedConnected(Cell* cell, Cell* otherCell);
@@ -62,8 +63,7 @@ private:
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
-__inline__ __device__ void
-CellConnectionProcessor::scheduleAddConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::scheduleAddConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::AddConnectionPair;
@@ -100,8 +100,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDeleteAllConnections
     }
 }
 
-__inline__ __device__ void
-CellConnectionProcessor::scheduleDeleteConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::scheduleDeleteConnectionPair(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     StructuralOperation operation1;
     operation1.type = StructuralOperation::Type::DelConnection;
@@ -141,10 +140,7 @@ __inline__ __device__ void CellConnectionProcessor::processAddOperations(Simulat
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::AddConnectionPair == operation.type) {
-            lockAndtryAddConnections(
-                data,
-                operation.data.addConnection.cell,
-                operation.data.addConnection.otherCell);
+            lockAndtryAddConnections(data, operation.data.addConnection.cell, operation.data.addConnection.otherCell);
         }
     }
 }
@@ -246,15 +242,13 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnections(
     return true;
 }
 
-__inline__ __device__ void
-CellConnectionProcessor::deleteConnections(Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::deleteConnections(Cell* cell1, Cell* cell2)
 {
     deleteConnectionOneWay(cell1, cell2);
     deleteConnectionOneWay(cell2, cell1);
 }
 
-__inline__ __device__ void
-CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
+__inline__ __device__ void CellConnectionProcessor::lockAndtryAddConnections(SimulationData& data, Cell* cell1, Cell* cell2)
 {
     SystemDoubleLock lock;
     lock.init(&cell1->locked, &cell2->locked);
@@ -624,4 +618,3 @@ __inline__ __device__ void CellConnectionProcessor::scheduleOperationOnCell(Simu
         origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
     }
 }
-

@@ -1,28 +1,27 @@
 #pragma once
 
+#include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
+
+#include "GenomeTO.cuh"
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-#include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/ArraySizesForTO.h"
-
-#include "GenomeTO.cuh"
-
 struct ParticleTO
 {
-	uint64_t id;
-	float energy;
-	float2 pos;
-	float2 vel;
+    uint64_t id;
+    float energy;
+    float2 pos;
+    float2 vel;
     uint8_t color;
 
-	uint8_t selected;
+    uint8_t selected;
 };
 
 struct ConnectionTO
 {
-    uint64_t cellIndex; // May be invalid
+    uint64_t cellIndex;  // May be invalid
 
     float distance;
     float angleFromPrevious;
@@ -36,8 +35,7 @@ struct NeuralNetworkTO
 };
 
 struct BaseTO
-{
-};
+{};
 
 struct DepotTO
 {
@@ -83,8 +81,7 @@ struct GeneratorTO
 };
 
 struct AttackerTO
-{
-};
+{};
 
 struct InjectorTO
 {
@@ -95,12 +92,12 @@ struct InjectorTO
 struct AutoBendingTO
 {
     // Fixed data
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
     float initialAngle;  // May be invalid
-    bool forward;  // Current direction
+    bool forward;        // Current direction
     float activation;
     uint8_t activationCountdown;
     bool impulseAlreadyApplied;
@@ -109,11 +106,11 @@ struct AutoBendingTO
 struct ManualBendingTO
 {
     // Fixed data
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle; // May be invalid
+    float initialAngle;  // May be invalid
     float lastAngleDelta;
     bool impulseAlreadyApplied;
 };
@@ -121,11 +118,11 @@ struct ManualBendingTO
 struct AngleBendingTO
 {
     // Fixed data
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;         // Between 0 and 1
     float attractionRepulsionRatio;  // Between 0 and 1
 
     // Process data
-    float initialAngle; // May be invalid
+    float initialAngle;  // May be invalid
 };
 
 struct AutoCrawlingTO
@@ -232,7 +229,7 @@ struct CellTO
     ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
-	float energy;
+    float energy;
     float stiffness;
     uint8_t color;
     uint8_t numConnections;
@@ -290,10 +287,10 @@ struct TO
 {
     ArraySizesForTO capacities;
 
-	uint64_t* numCells = nullptr;
-	CellTO* cells = nullptr;
+    uint64_t* numCells = nullptr;
+    CellTO* cells = nullptr;
     uint64_t* numParticles = nullptr;
-	ParticleTO* particles = nullptr;
+    ParticleTO* particles = nullptr;
     uint64_t* numCreatures = nullptr;
     CreatureTO* creatures = nullptr;
     uint64_t* numGenomes = nullptr;
@@ -305,6 +302,5 @@ struct TO
     uint64_t* heapSize = nullptr;
     uint8_t* heap = nullptr;
 
-	bool operator==(TO const& other) const = default;
+    bool operator==(TO const& other) const = default;
 };
-

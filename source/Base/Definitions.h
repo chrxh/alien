@@ -1,21 +1,21 @@
 #pragma once
 
 #include <array>
-#include <map>
-#include <set>
+#include <cstdint>
+#include <initializer_list>
 #include <list>
+#include <map>
+#include <memory>
+#include <optional>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <optional>
-#include <memory>
-#include <initializer_list>
-#include <cstdint>
 
 #include "Exceptions.h"
-#include "MathTypes.h"
 #include "Macros.h"
+#include "MathTypes.h"
 
 using std::int32_t;
 using std::int64_t;
@@ -39,7 +39,7 @@ inline double toDouble(T const& value)
     return static_cast<double>(value);
 }
 
-template<typename T>
+template <typename T>
 inline int toInt(T const& value)
 {
     return static_cast<int>(value);
@@ -62,4 +62,3 @@ inline uint32_t toUInt32(T const& value)
 {
     return static_cast<uint32_t>(value);
 }
-

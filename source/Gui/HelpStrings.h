@@ -5,7 +5,7 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
 namespace Const
 {
@@ -14,7 +14,8 @@ namespace Const
         "GeForce 10 series).\n\n2) You have the latest NVIDIA graphics driver installed.\n\n3) The name of the "
         "installation directory (including the parent directories) should not contain non-English characters. If this is not fulfilled, "
         "please re-install ALIEN to a suitable directory. Do not move the files manually. If you use Windows, make also sure that you install ALIEN with a "
-        "Windows user that contains no non-English characters. If this is not the case, a new Windows user could be created to solve this problem.\n\n4) ALIEN needs "
+        "Windows user that contains no non-English characters. If this is not the case, a new Windows user could be created to solve this problem.\n\n4) ALIEN "
+        "needs "
         "write access to its own "
         "directory. This should normally be the case.\n\n5) If you have multiple graphics cards, please check that your primary monitor is "
         "connected to the CUDA-powered card. ALIEN uses the same graphics card for computation as well as rendering and chooses the one "
@@ -48,7 +49,8 @@ namespace Const
     std::string const SensorTooltip =
         "Sensor cells scan their environment for concentrations of cells of a certain color and provide distance and angle to the "
         "closest match.\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: abs(value) > threshold activates sensor\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: "
-        "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the last match\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #2: distance "
+        "0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #1: density of the last match\n\n" ICON_FA_CHEVRON_RIGHT
+        " Output channel #2: distance "
         "of the last match (0 = far away, 1 = close)\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #3: angle of the last match";
 
     std::string const GeneratorTooltip =
@@ -83,12 +85,13 @@ namespace Const
         "cells or extends the injection duration for injector cells.";
 
     std::string const ReconnectorTooltip =
-        "A reconnector cell can make or break a cell connection to an other cell (with a different creature id) with a specified color. \n\n" ICON_FA_CHEVRON_RIGHT
-        " Input channel #0: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT
-        " Output channel #0: 0 (no connection created/removed) or 1 (connection created/removed)";
+        "A reconnector cell can make or break a cell connection to an other cell (with a different creature id) with a specified color. "
+        "\n\n" ICON_FA_CHEVRON_RIGHT " Input channel #0: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers "
+        "destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT " Output channel #0: 0 (no connection created/removed) or 1 (connection created/removed)";
 
-    std::string const DetonatorTooltip = "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then its counter "
-                                         "is decreasing after each executing until it reaches 0. After that the detonator cell will explode and the surrounding cells are highly accelerated.";
+    std::string const DetonatorTooltip =
+        "A detonator cell will be activated if it receives an input on channel #0 with abs(value) > threshold. Then its counter "
+        "is decreasing after each executing until it reaches 0. After that the detonator cell will explode and the surrounding cells are highly accelerated.";
 
     std::string const CellTypeTooltip =
         "Cells can possess a specific function that enables them to, for example, perceive their environment, process information, or "
@@ -198,14 +201,14 @@ namespace Const
     std::string const GenomeSensorScanColorTooltip = "Restricts the sensor so that it only scans cells with a certain color.";
 
     std::string const SensorRestrictToCreaturesTooltip =
-        "The following options can be used to only detect cells with certain properties:\n\n"
-        ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
+        "The following options can be used to only detect cells with certain properties:\n\n" ICON_FA_CHEVRON_RIGHT
+        " None: No further restriction.\n\n" ICON_FA_CHEVRON_RIGHT " Same mutants: Cells that have a related genome.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Other mutants: Cells that have a significantly different genome.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free "
+        "food).\n\n" ICON_FA_CHEVRON_RIGHT " Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n" ICON_FA_CHEVRON_RIGHT
+        " Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the "
+        "'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n" ICON_FA_CHEVRON_RIGHT
+        " More complex mutants: Cells that have a more complex genome.\n\n";
 
     std::string const GenomeSensorMinDensityTooltip =
         "The minimum density to search for a cell concentration of a specific color. This value ranges between 0 and 1. It controls the "
@@ -254,19 +257,19 @@ namespace Const
     std::string const GenomeReconnectorRestrictToColorTooltip = "Specifies the color of the cells where connections are to be established or destroyed.";
 
     std::string const ReconnectorRestrictToCreaturesTooltip =
-        "The following options can be used to only bind to cells with certain properties:\n\n"
-        ICON_FA_CHEVRON_RIGHT" None: No further restriction.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Same mutants: Cells that have a related genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Other mutants: Cells that have a significantly different genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free food).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n"
-        ICON_FA_CHEVRON_RIGHT" Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the 'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n"
-        ICON_FA_CHEVRON_RIGHT" More complex mutants: Cells that have a more complex genome.\n\n";
+        "The following options can be used to only bind to cells with certain properties:\n\n" ICON_FA_CHEVRON_RIGHT
+        " None: No further restriction.\n\n" ICON_FA_CHEVRON_RIGHT " Same mutants: Cells that have a related genome.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Other mutants: Cells that have a significantly different genome.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Free cells: Cells that were not created by reproduction but by the conversion of energy particles (they could serve as free "
+        "food).\n\n" ICON_FA_CHEVRON_RIGHT " Handcrafted constructs: Cells that were created in the editor (e.g. walls).\n\n" ICON_FA_CHEVRON_RIGHT
+        " Less complex mutants: Cells that have a less complex genome. The complexity calculation can be customized in the simulation parameters under the "
+        "'Genome complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.\n\n" ICON_FA_CHEVRON_RIGHT
+        " More complex mutants: Cells that have a more complex genome.\n\n";
 
-    std::string const DetonatorStateTooltip =
-        ICON_FA_CHEVRON_RIGHT " Ready: The detonator cell waits for input on channel #0. If abs(value) > threshold, the detonator will be activated.\n\n"
-        ICON_FA_CHEVRON_RIGHT " Activated: The countdown is decreased until 0 each time the detonator is executed. If the countdown is 0, the detonator will explode.\n\n"
-        ICON_FA_CHEVRON_RIGHT " Exploded: The detonator is already exploded.";
+    std::string const DetonatorStateTooltip = ICON_FA_CHEVRON_RIGHT
+        " Ready: The detonator cell waits for input on channel #0. If abs(value) > threshold, the detonator will be activated.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Activated: The countdown is decreased until 0 each time the detonator is executed. If the countdown is 0, the detonator will "
+        "explode.\n\n" ICON_FA_CHEVRON_RIGHT " Exploded: The detonator is already exploded.";
 
     std::string const GenomeDetonatorCountdownTooltip = "The countdown specifies the cycles (in 6 time steps) until the detonator will explode.";
 
@@ -323,9 +326,9 @@ namespace Const
 
     std::string const CellMaxConnectionTooltip = "The maximum number of bonds a cell can form with other cells.";
 
-    std::string const CellIndestructibleTooltip =
-        "When a cell is set as indestructible wall, it becomes immortal, resistant to external forces, but still capable of linear movement. Furthermore, unconnected "
-        "normal cells and energy particles bounce off from indestructible ones.";
+    std::string const CellIndestructibleTooltip = "When a cell is set as indestructible wall, it becomes immortal, resistant to external forces, but still "
+                                                  "capable of linear movement. Furthermore, unconnected "
+                                                  "normal cells and energy particles bounce off from indestructible ones.";
 
     std::string const CellReferenceDistanceTooltip =
         "The reference distance defines the distance at which no forces act between two connected cells. If the actual distance is greater than the reference "
@@ -347,18 +350,21 @@ namespace Const
     std::string const CellLineageIdTooltip =
         "The mutation id is a value to distinguish mutants. After most mutations (except neural network and cell properties) the mutation id changes. A few "
         "values have a special meaning:\n\n" ICON_FA_CHEVRON_RIGHT " 0: This value is used for handcrafted cells. This refers to cells that have been "
-        "artificially created by the user.\n\n" ICON_FA_CHEVRON_RIGHT " 1: This value is used for free cells. Free cells are cells that have not been created by a "
+        "artificially created by the user.\n\n" ICON_FA_CHEVRON_RIGHT
+        " 1: This value is used for free cells. Free cells are cells that have not been created by a "
         "self-replication process, but by transformation from an energy particle.";
     std::string const NumCellsTooltip =
         "This value denotes the complexity of the creature's genome. The calculation can be customized in the simulation parameters under the 'Genome "
         "complexity measurement' expert settings. By default, it is the number of encoded cells in the genome.";
 
     std::string const CellCellStateTooltip =
-        "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once the cell network "
+        "Cells can exist in various states. When a cell network of the organism is being constructed, its cells are in the 'Under construction' state. Once "
+        "the cell network "
         "is completed, the cells briefly enter the 'Activating' state before transitioning to the 'Ready' state shortly after. If a cell "
         "network is in the process of dying, its cells are in the 'Dying' state.\n\n"
         "In case that the parameter 'Cell death consequences' is set to 'Detached creature parts die': A cell is in 'Detached' state when it is separated from "
-        "its organism where the constructor cell for self-replication is located. However, if a non-dying cell for self-replication is still present, a detached cell will "
+        "its organism where the constructor cell for self-replication is located. However, if a non-dying cell for self-replication is still present, a "
+        "detached cell will "
         "transition into the 'Reviving' state and then into 'Ready' state shortly after.";
 
     inline std::string getCellTypeTooltip(CellType cellType)
@@ -403,9 +409,8 @@ namespace Const
     std::string const GenomeCurrentBranchTooltip = "This number specifies the current branch on which the construction process takes place. Each branch is "
                                                    "connected to the constructor cell and consists of repetitions of the encoded cell network.";
 
-    std::string const GenomeCurrentConcatenationTooltip =
-        "The cell network encoded in the genome can be repeatedly built by specifying a number of "
-        "repetitions. This value indicates the index of the current repetition.";
+    std::string const GenomeCurrentConcatenationTooltip = "The cell network encoded in the genome can be repeatedly built by specifying a number of "
+                                                          "repetitions. This value indicates the index of the current repetition.";
 
     std::string const GenomeCurrentCellTooltip = "The sequence number of the cell in the genome that will be constructed next.";
 
@@ -419,28 +424,36 @@ namespace Const
     std::string const CellSensorTargetCreatureIdTooltip = "The id of the last creature that has been scanned.";
 
     std::string const NeuronInputTooltipByChannel[8] = {
-        "The following cell functions write their output to channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Constructor: 0 (could not "
+        "The following cell functions write their output to channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Constructor: 0 (could not "
         "constructor next cell, e.g. no energy, required connection check failed, completeness check failed), 1 (next cell construction "
-        "successful)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: 0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: a value which is proportional to the gained "
+        "successful)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: 0 (no match) or 1 (match)\n\n" ICON_FA_CHEVRON_RIGHT
+        " Attacker: a value which is proportional to the gained "
         "energy\n\n" ICON_FA_CHEVRON_RIGHT " Injector: 0 (no cells found) or 1 (injection in process or completed)\n\n" ICON_FA_CHEVRON_RIGHT
         " Reconnector: 0 (no connection created/removed) or 1 (connection created/removed)",
-        "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: density of the last match",
-        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: distance of the last match (0 = far away, 1 = close)",
-        "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: angle of the last match",
+        "The following cell functions write their output to channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Sensor: density of the last match",
+        "The following cell functions write their output to channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Sensor: distance of the last match (0 = far away, 1 = close)",
+        "The following cell functions write their output to channel #3:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Sensor: angle of the last match",
         "The following cell functions write their output to channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions write their output to channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
-        "The following cell functions write their output to channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: 1 if a cell is attacked by an other attacker cell" 
-    };
+        "The following cell functions write their output to channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Attacker: 1 if a cell is attacked by an other attacker cell"};
 
     std::string const NeuronOutputTooltipByChannel[8] = {
-        "The following cell functions obtain their input from channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Constructor: abs(value) > "
+        "The following cell functions obtain their input from channel #0:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Constructor: abs(value) > "
         "threshold activates constructor (only necessary in 'Manual' mode)\n\n" ICON_FA_CHEVRON_RIGHT " Sensor: abs(value) > threshold activates "
         "sensor\n\n" ICON_FA_CHEVRON_RIGHT " Attacker: abs(value) > threshold activates attacker\n\n" ICON_FA_CHEVRON_RIGHT " Injector: abs(value) > threshold "
-        "activates injector\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
-        "the opposite action.\n\n" ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond to a cell in the vicinity, value < -threshold triggers destruction of a bond\n\n"
-        ICON_FA_CHEVRON_RIGHT " Detonator: abs(value) > threshold activates detonator",
-        "The following cell functions obtain their input from channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT " Muscle: This channel is "
+        "activates injector\n\n" ICON_FA_CHEVRON_RIGHT
+        " Muscle: The strength of the movement, bending or expansion/contraction. A negative sign corresponds to "
+        "the opposite action.\n\n" ICON_FA_CHEVRON_RIGHT " Reconnector: value > threshold triggers creation of a bond to a cell in the vicinity, value < "
+        "-threshold triggers destruction of a bond\n\n" ICON_FA_CHEVRON_RIGHT " Detonator: abs(value) > threshold activates detonator",
+        "The following cell functions obtain their input from channel #1:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron\n\n" ICON_FA_CHEVRON_RIGHT
+        " Muscle: This channel is "
         "solely utilized for acceleration due to bending. If the sign of channel #1 differs from the sign of channel #0, no acceleration will be obtained "
         "during the bending process.",
         "The following cell functions obtain their input from channel #2:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
@@ -451,8 +464,7 @@ namespace Const
         "The following cell functions obtain their input from channel #4:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #5:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
         "The following cell functions obtain their input from channel #6:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron",
-        "The following cell functions obtain their input from channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron"
-    };
+        "The following cell functions obtain their input from channel #7:\n\n" ICON_FA_CHEVRON_RIGHT " Neuron"};
 
     std::string const CreatorPencilRadiusTooltip = "The radius of the pencil in number of cells.";
 
@@ -477,7 +489,8 @@ namespace Const
 
     std::string const LoginSecurityInformationTooltip =
         "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
-        "value in the database. If the toggle 'Remember' is activated, the password will be stored in the Windows registry under the path 'HKEY_CURRENT_USER\\SOFTWARE\\alien' "
+        "value in the database. If the toggle 'Remember' is activated, the password will be stored in the Windows registry under the path "
+        "'HKEY_CURRENT_USER\\SOFTWARE\\alien' "
         "or, in the case of other OS, in 'settings.json' on your local machine.";
 
     std::string const LoginRememberTooltip = "If the toggle 'Remember' is activated, the password will be stored in the Windows registry under the path "
@@ -486,14 +499,14 @@ namespace Const
 
     std::string const LoginShareGpuInfoTooltip1 =
         "If this option is enabled, other users will be able to see in the browser window that you have the following graphics card: ";
-    std::string const LoginShareGpuInfoTooltip2 =
-        "As a result, you will be able to see the GPU information of other registered users who have shared it.";
+    std::string const LoginShareGpuInfoTooltip2 = "As a result, you will be able to see the GPU information of other registered users who have shared it.";
 
     std::string const BrowserWorkspaceTooltip =
         "There are three different workspaces where you can find and possibly upload simulations and genomes:\n\n" ICON_FA_CHEVRON_RIGHT " alien-project: This "
         "workspace contains simulations that come along with the released versions. They cover a wide range and exploit different "
         "features.\n\n" ICON_FA_CHEVRON_RIGHT " Public: All logged-in users can share their simulations and genomes with the public. The files stored here are "
-        "visible to all users.\n\n" ICON_FA_CHEVRON_RIGHT " Private: Each user account has its own private space. The simulations and genomes are only visible to "
+        "visible to all users.\n\n" ICON_FA_CHEVRON_RIGHT
+        " Private: Each user account has its own private space. The simulations and genomes are only visible to "
         "the logged-in user.";
 
     std::string const ParameterRadiationAbsorptionLowNumCellsPenaltyTooltip =

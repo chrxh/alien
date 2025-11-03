@@ -1,7 +1,7 @@
 #include "GlobalSettings.h"
 
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 #include <boost/property_tree/json_parser.hpp>
 
@@ -9,8 +9,8 @@
 #include "WinReg/WinReg.hpp"
 #endif
 
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include "JsonParser.h"
 

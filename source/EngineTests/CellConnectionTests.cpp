@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
 class CellConnectionTests : public IntegrationTestFramework

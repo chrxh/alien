@@ -1,12 +1,13 @@
 #pragma once
 
 
+#include <EngineInterface/CellTypeConstants.h>
+
 #include "CellConnectionProcessor.cuh"
-#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
-#include "EngineInterface/CellTypeConstants.h"
 #include "Object.cuh"
 #include "RadiationProcessor.cuh"
+#include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
 
@@ -48,25 +49,25 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             detonator.countdown = 0;
             statistics.incNumDetonations(cell->color);
             data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.detonatorRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
-                    if (otherCell == cell) {
-                        return;
+                if (otherCell == cell) {
+                    return;
+                }
+                if (otherCell->barrier) {
+                    return;
+                }
+                auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
+                auto lengthSquared = Math::lengthSquared(delta);
+                if (lengthSquared > NEAR_ZERO) {
+                    auto force = delta / lengthSquared * cudaSimulationParameters.detonatorRadius.value[cell->color] * 2;
+                    otherCell->vel += force;
+                }
+                if (otherCell->cellType == CellType_Detonator && otherCell->cellTypeData.detonator.state != DetonatorState_Exploded) {
+                    if (data.primaryNumberGen.random() < cudaSimulationParameters.detonatorChainExplosionProbability.value[cell->color]) {
+                        otherCell->cellTypeData.detonator.state = DetonatorState_Activated;
+                        otherCell->cellTypeData.detonator.countdown = 1;
                     }
-                    if (otherCell->barrier) {
-                        return;
-                    }
-                    auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
-                    auto lengthSquared = Math::lengthSquared(delta);
-                    if (lengthSquared > NEAR_ZERO) {
-                        auto force = delta / lengthSquared * cudaSimulationParameters.detonatorRadius.value[cell->color] * 2;
-                        otherCell->vel += force;
-                    }
-                    if (otherCell->cellType == CellType_Detonator && otherCell->cellTypeData.detonator.state != DetonatorState_Exploded) {
-                        if (data.primaryNumberGen.random() < cudaSimulationParameters.detonatorChainExplosionProbability.value[cell->color]) {
-                            otherCell->cellTypeData.detonator.state = DetonatorState_Activated;
-                            otherCell->cellTypeData.detonator.countdown = 1;
-                        }
-                    }
-                });
+                }
+            });
             detonator.state = DetonatorState_Exploded;
         }
     }

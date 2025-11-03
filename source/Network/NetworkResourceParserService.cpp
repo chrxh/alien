@@ -10,7 +10,7 @@ std::vector<NetworkResourceRawTO> NetworkResourceParserService::decodeRemoteSimu
         entry->id = subTree.get<std::string>("id");
         entry->userName = subTree.get<std::string>("userName");
         entry->resourceName = subTree.get<std::string>("simulationName");
-        entry->description= subTree.get<std::string>("description");
+        entry->description = subTree.get<std::string>("description");
         entry->width = subTree.get<int>("width");
         entry->height = subTree.get<int>("height");
         entry->particles = subTree.get<int>("particles");

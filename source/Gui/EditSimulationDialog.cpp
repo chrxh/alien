@@ -2,18 +2,18 @@
 
 #include <imgui.h>
 
-#include "Network/NetworkService.h"
-#include "Network/NetworkResourceService.h"
-#include "Network/NetworkValidationService.h"
+#include <Network/NetworkResourceService.h>
+#include <Network/NetworkService.h>
+#include <Network/NetworkValidationService.h>
 
 #include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "DelayedExecutionController.h"
-#include "HelpStrings.h"
-#include "StyleRepository.h"
 #include "GenericMessageDialog.h"
+#include "HelpStrings.h"
 #include "NetworkTransferController.h"
 #include "OverlayController.h"
+#include "StyleRepository.h"
 
 void EditSimulationDialog::openForLeaf(NetworkResourceTreeTO const& treeTO)
 {
@@ -32,7 +32,7 @@ void EditSimulationDialog::openForFolder(NetworkResourceTreeTO const& treeTO, st
     AlienDialog::open();
     _treeTO = treeTO;
     _rawTOs = rawTOs;
-    
+
     _newName = NetworkResourceService::get().concatenateFolderName(treeTO->folderNames, false);
     _origFolderName = _newName;
 }
@@ -61,10 +61,7 @@ void EditSimulationDialog::processForLeaf()
 
     ImGui::PushID("description");
     AlienGui::InputTextMultiline(
-        AlienGui::InputTextMultilineParameters()
-            .hint("Description (optional)")
-            .textWidth(0)
-            .height(ImGui::GetContentRegionAvail().y - scale(50.0f)),
+        AlienGui::InputTextMultilineParameters().hint("Description (optional)").textWidth(0).height(ImGui::GetContentRegionAvail().y - scale(50.0f)),
         _newDescription);
     ImGui::PopID();
 
@@ -107,7 +104,7 @@ void EditSimulationDialog::processForFolder()
                 auto nameWithoutOldFolder = rawTO->resourceName.substr(_origFolderName.size() + 1);
                 auto newName = NetworkResourceService::get().concatenateFolderName({_newName, nameWithoutOldFolder}, false);
                 requestData.entries.emplace_back(rawTO->id, newName, rawTO->description);
-            }            
+            }
             NetworkTransferController::get().onEdit(requestData);
             close();
         } else {

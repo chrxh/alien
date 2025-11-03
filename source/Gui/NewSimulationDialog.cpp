@@ -2,13 +2,14 @@
 
 #include <imgui.h>
 
-#include "Base/GlobalSettings.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/GlobalSettings.h>
 
-#include "Viewport.h"
-#include "TemporalControlWindow.h"
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienGui.h"
 #include "StyleRepository.h"
+#include "TemporalControlWindow.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -19,8 +20,7 @@ namespace
 void NewSimulationDialog::initIntern(SimulationFacade simulationFacade)
 {
     _simulationFacade = simulationFacade;
-    _adoptSimulationParameters =
-            GlobalSettings::get().getValue("dialogs.new simulation.adopt simulation parameters", true);
+    _adoptSimulationParameters = GlobalSettings::get().getValue("dialogs.new simulation.adopt simulation parameters", true);
 }
 
 void NewSimulationDialog::shutdownIntern()

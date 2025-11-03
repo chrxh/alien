@@ -1,11 +1,13 @@
 #pragma once
 
-#include <gtest/gtest.h>
 #include <algorithm>
 
-#include "Base/Definitions.h"
-#include "Base/Math.h"
-#include "EngineInterface/Description.h"
+#include <gtest/gtest.h>
+
+#include <Base/Definitions.h>
+#include <Base/Math.h>
+
+#include <EngineInterface/Description.h>
 
 class TestHelper
 {
@@ -20,4 +22,3 @@ public:
     static bool compare(CellDescription left, CellDescription right);
     static bool compare(ParticleDescription left, ParticleDescription right);
 };
-

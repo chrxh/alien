@@ -28,7 +28,7 @@ protected:
 /* Implementation                                                       */
 /************************************************************************/
 
-template <typename ... Dependencies>
+template <typename... Dependencies>
 void MainLoopEntity<Dependencies...>::setup(Dependencies... dependencies)
 {
     init(dependencies...);

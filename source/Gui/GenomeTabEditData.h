@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescription.h"
-#include "EngineInterface/ShapeGenerator.h"
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/ShapeGenerator.h>
 
 #include "Definitions.h"
 

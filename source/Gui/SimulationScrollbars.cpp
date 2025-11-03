@@ -7,7 +7,7 @@
 
 #include "StyleRepository.h"
 
-namespace 
+namespace
 {
     auto const ScrollbarThickness = 17.0f;
 }
@@ -135,7 +135,8 @@ void _SimulationScrollbars::processEvents(
     }
 }
 
-RealRect _SimulationScrollbars::calcSliderbarRect(RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect, Orientation orientation) const
+RealRect
+_SimulationScrollbars::calcSliderbarRect(RealRect const& worldRect, RealRect const& visibleWorldRect, RealRect const& viewRect, Orientation orientation) const
 {
     auto size2d = viewRect.bottomRight - viewRect.topLeft;
     auto worldSize = Orientation::Horizontal == orientation ? worldRect.bottomRight.x - worldRect.topLeft.x : worldRect.bottomRight.y - worldRect.topLeft.y;
@@ -143,14 +144,16 @@ RealRect _SimulationScrollbars::calcSliderbarRect(RealRect const& worldRect, Rea
 
     auto startWorldPos =
         Orientation::Horizontal == orientation ? visibleWorldRect.topLeft.x - worldRect.topLeft.x : visibleWorldRect.topLeft.y - worldRect.topLeft.y;
-    auto endWorldPos = Orientation::Horizontal == orientation ? visibleWorldRect.bottomRight.x - worldRect.topLeft.x : visibleWorldRect.bottomRight.y - worldRect.topLeft.y;
+    auto endWorldPos =
+        Orientation::Horizontal == orientation ? visibleWorldRect.bottomRight.x - worldRect.topLeft.x : visibleWorldRect.bottomRight.y - worldRect.topLeft.y;
 
     auto sliderBarStartPos = std::min(std::max(startWorldPos / worldSize * size, 0.0f), size);
     auto sliderBarEndPos = std::min(std::max(endWorldPos / worldSize * size, 0.0f), size);
     if (sliderBarEndPos < sliderBarStartPos) {
         sliderBarEndPos = sliderBarStartPos;
     }
-    auto sliderBarPos = Orientation::Horizontal == orientation ? ImVec2{scale(4) + sliderBarStartPos, scale(4)} : ImVec2{scale(4), scale(4) + sliderBarStartPos};
+    auto sliderBarPos =
+        Orientation::Horizontal == orientation ? ImVec2{scale(4) + sliderBarStartPos, scale(4)} : ImVec2{scale(4), scale(4) + sliderBarStartPos};
     auto sliderBarSize = Orientation::Horizontal == orientation ? ImVec2{sliderBarEndPos - sliderBarStartPos - scale(8), scale(10)}
                                                                 : ImVec2{scale(10), sliderBarEndPos - sliderBarStartPos - scale(8)};
 

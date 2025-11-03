@@ -2,9 +2,9 @@
 
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -79,7 +79,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     nn.weight(5, 3, -1.5f);
 
     Description data;
-    data._cells = { 
+    data._cells = {
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
         CellDescription().id(2).pos({0, 1}).signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f}),
     };
@@ -90,7 +90,8 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getCellRef(1)._signal->_channels));
+    EXPECT_TRUE(
+        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getCellRef(1)._signal->_channels));
 }
 
 TEST_P(NeuronTests_AllActivationFunctions, bias)
@@ -107,7 +108,7 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
     nn._biases = {0, 0, 1, 0, 0, 0, 0, -1};
 
     Description data;
-    data._cells = { 
+    data._cells = {
         CellDescription().id(1).pos({0, 0}).neuralNetwork(nn),
         CellDescription().id(2).pos({0, 1}).signalAndState({0, 0, 0, 0, 0, 0, 0, 0}),
     };

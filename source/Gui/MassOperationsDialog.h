@@ -1,10 +1,11 @@
 #pragma once
 
-#include "AlienDialog.h"
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/EngineConstants.h"
+#include <Base/Singleton.h>
 
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/EngineConstants.h>
+
+#include "AlienDialog.h"
 #include "Definitions.h"
 
 class MassOperationsDialog : public AlienDialog<SimulationFacade>

@@ -1,14 +1,16 @@
 #include "AutosaveWindow.h"
 
+#include <filesystem>
+
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/GlobalSettings.h"
-#include "Base/Resources.h"
-#include "Base/StringHelper.h"
+#include <Base/GlobalSettings.h>
+#include <Base/Resources.h>
+#include <Base/StringHelper.h>
 
-#include "PersisterInterface/SavepointTableService.h"
-#include "PersisterInterface/SerializerService.h"
-#include "PersisterInterface/TaskProcessor.h"
+#include <PersisterInterface/SavepointTableService.h>
+#include <PersisterInterface/SerializerService.h>
+#include <PersisterInterface/TaskProcessor.h>
 
 #include "AlienGui.h"
 #include "FileTransferController.h"
@@ -16,8 +18,6 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-
-#include <filesystem>
 
 namespace
 {

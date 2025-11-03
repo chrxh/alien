@@ -1,16 +1,17 @@
 
-#include <gtest/gtest.h>
 #include <algorithm>
 
-#include "EngineInterface/GenomeDescriptionInfoService.h"
-#include "EngineInterface/GenomeDescription.h"
+#include <gtest/gtest.h>
+
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/GenomeDescriptionInfoService.h>
 
 class GenomeDescriptionInfoServiceTests : public ::testing::Test
 {
 public:
     GenomeDescriptionInfoServiceTests()
-        : _genomeDescriptionInfoService(_genomeDescriptionInfoService) {
-    }
+        : _genomeDescriptionInfoService(_genomeDescriptionInfoService)
+    {}
 
     virtual ~GenomeDescriptionInfoServiceTests() = default;
 

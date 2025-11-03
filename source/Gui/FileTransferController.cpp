@@ -1,14 +1,16 @@
 #include "FileTransferController.h"
 
-#include <ImFileDialog.h>
+#include <EngineInterface/SimulationFacade.h>
 
-#include "EngineInterface/SimulationFacade.h"
-#include "PersisterInterface/TaskProcessor.h"
+#include <PersisterInterface/TaskProcessor.h>
+
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
 #include "OverlayController.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
+
+#include <ImFileDialog.h>
 
 void FileTransferController::onOpenSimulationDialog()
 {
@@ -17,8 +19,7 @@ void FileTransferController::onOpenSimulationDialog()
             auto filenameCopy = filename;
             _referencePath = filenameCopy.remove_filename().string();
             onOpenSimulation(filename);
-
-    });
+        });
 }
 
 void FileTransferController::onOpenSimulation(std::filesystem::path const& filename)
@@ -72,21 +73,20 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
 
 void FileTransferController::onSaveSimulationDialog()
 {
-    GenericFileDialog::get().showSaveFileDialog(
-        "Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
-            auto firstFilename = ifd::FileDialog::Instance().GetResult();
-            auto firstFilenameCopy = firstFilename;
-            _referencePath = firstFilenameCopy.remove_filename().string();
-            printOverlayMessage("Saving ...");
-            _saveSimulationProcessor->executeTask(
-                [&, firstFilename = firstFilename](auto const& senderId) {
-                    auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};
-                    auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-                    return _persisterFacade->scheduleSaveSimulation(senderInfo, readData);
-                },
-                [](auto const&) { },
-                [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
-        });
+    GenericFileDialog::get().showSaveFileDialog("Save simulation", "Simulation file (*.sim){.sim},.*", _referencePath, [&](std::filesystem::path const& path) {
+        auto firstFilename = ifd::FileDialog::Instance().GetResult();
+        auto firstFilenameCopy = firstFilename;
+        _referencePath = firstFilenameCopy.remove_filename().string();
+        printOverlayMessage("Saving ...");
+        _saveSimulationProcessor->executeTask(
+            [&, firstFilename = firstFilename](auto const& senderId) {
+                auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};
+                auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
+                return _persisterFacade->scheduleSaveSimulation(senderInfo, readData);
+            },
+            [](auto const&) {},
+            [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
+    });
 }
 
 void FileTransferController::init(PersisterFacade persisterFacade, SimulationFacade simulationFacade)

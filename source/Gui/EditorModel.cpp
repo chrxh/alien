@@ -1,7 +1,7 @@
 #include "EditorModel.h"
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 void EditorModel::setup(SimulationFacade const& simulationFacade)
 {
@@ -22,8 +22,7 @@ void EditorModel::update()
 
 bool EditorModel::isSelectionEmpty() const
 {
-    return 0 == _selectionShallowData.numCells && 0 == _selectionShallowData.numClusterCells
-        && 0 == _selectionShallowData.numParticles;
+    return 0 == _selectionShallowData.numCells && 0 == _selectionShallowData.numClusterCells && 0 == _selectionShallowData.numParticles;
 }
 
 bool EditorModel::isCellSelectionEmpty() const

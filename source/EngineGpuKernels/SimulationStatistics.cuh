@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInterface/StatisticsRawData.h"
+#include <EngineInterface/StatisticsRawData.h>
 
 #include "Base.cuh"
 #include "Definitions.cuh"
@@ -8,7 +8,6 @@
 class SimulationStatistics
 {
 public:
-
     __host__ void init()
     {
         CudaMemoryManager::getInstance().acquireMemory<StatisticsRawData>(1, _data);
@@ -140,4 +139,3 @@ private:
     };
     MutantStatistics* _mutantToMutantStatisticsMap;
 };
-

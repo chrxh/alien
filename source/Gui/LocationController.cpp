@@ -1,11 +1,11 @@
 #include "LocationController.h"
 
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/LocationHelper.h"
+#include <EngineInterface/LocationHelper.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "SimulationParametersBaseWidget.h"
-#include "SimulationParametersSourceWidget.h"
 #include "SimulationParametersLayerWidget.h"
+#include "SimulationParametersSourceWidget.h"
 
 void LocationController::addLocationWindow(int orderNumber, RealVector2D const& initialPos)
 {
@@ -67,7 +67,7 @@ void LocationController::process()
     std::vector<LocationWindow> newlocationWindows;
     newlocationWindows.reserve(_locationWindows.size());
 
-    for (auto& locationWindow: _locationWindows) {
+    for (auto& locationWindow : _locationWindows) {
         locationWindow.process();
         if (locationWindow.isOn()) {
             newlocationWindows.emplace_back(std::move(locationWindow));

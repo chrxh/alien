@@ -12,7 +12,7 @@ int GenomeDescriptionInfoService::getNumberOfNodes(GenomeDescription const& geno
     return result;
 }
 
-namespace 
+namespace
 {
     int countNodes(GenomeDescription const& genome, int geneIndex, std::vector<int>& lastGenes)
     {
@@ -135,7 +135,7 @@ auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(GenomeDescription
     std::vector<GeneIndicesForSubGenome> result;
     while (!nonInspectedGeneIndices.empty()) {
         auto startGeneIndex = *nonInspectedGeneIndices.begin();
-        
+
         auto genesForPart = getGeneIndicesForSubGenomes(genome, nonInspectedGeneIndices, startGeneIndex);
         for (auto const& geneIndices : genesForPart) {
             for (auto const& geneIndex : geneIndices) {
@@ -151,8 +151,7 @@ auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(GenomeDescription
 auto GenomeDescriptionInfoService::getGeneIndicesForSubGenomes(
     GenomeDescription const& genome,
     std::set<int> const& nonInspectedGeneIndices,
-    int startGeneIndex) const
-    -> std::vector<GeneIndicesForSubGenome>
+    int startGeneIndex) const -> std::vector<GeneIndicesForSubGenome>
 {
     CHECK(!genome._genes.empty());
     CHECK(startGeneIndex >= 0 && startGeneIndex < genome._genes.size());
@@ -199,7 +198,7 @@ auto GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(Gen
     ReferencedGenes result;
     std::set<int> alreadyInspectedGeneIndices;
     std::set<int> toInspectedGeneIndices = {startGeneIndex};
-    
+
     do {
         alreadyInspectedGeneIndices.insert(toInspectedGeneIndices.begin(), toInspectedGeneIndices.end());
 
@@ -218,7 +217,7 @@ auto GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(Gen
             alreadyInspectedGeneIndices.begin(),
             alreadyInspectedGeneIndices.end(),
             std::inserter(toInspectedGeneIndices, toInspectedGeneIndices.begin()));
-        
+
         // Separate new genes into separating and non-separating
         std::set<int> newNonSeparatingGenes;
         for (auto const& geneIndex : toInspectedGeneIndices) {
@@ -233,7 +232,7 @@ auto GenomeDescriptionInfoService::getReferencedGenesInNonSeparatingGeneHull(Gen
                 }
             }
         }
-        
+
         // Only add non-separating genes to continue traversal
         toInspectedGeneIndices = newNonSeparatingGenes;
     } while (!toInspectedGeneIndices.empty());

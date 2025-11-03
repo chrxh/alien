@@ -1,15 +1,18 @@
 #include "LoginController.h"
 
-#include "Base/GlobalSettings.h"
-#include "Network/NetworkService.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "PersisterInterface/LoginRequestData.h"
-#include "PersisterInterface/SenderInfo.h"
-#include "PersisterInterface/TaskProcessor.h"
+#include <Base/GlobalSettings.h>
 
-#include "GenericMessageDialog.h"
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/LoginRequestData.h>
+#include <PersisterInterface/SenderInfo.h>
+#include <PersisterInterface/TaskProcessor.h>
+
 #include "ActivateUserDialog.h"
 #include "BrowserWindow.h"
+#include "GenericMessageDialog.h"
 #include "MainLoopEntityController.h"
 
 void LoginController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
@@ -27,7 +30,7 @@ void LoginController::init(SimulationFacade simulationFacade, PersisterFacade pe
         _password = settings.getValue("dialogs.login.password", std::string());
         onLogin();
     }
-}    
+}
 
 void LoginController::shutdown()
 {

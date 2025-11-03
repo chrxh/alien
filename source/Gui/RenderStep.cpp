@@ -1,8 +1,9 @@
 #include "RenderStep.h"
 
-#include "Base/Math.h"
-#include "EngineInterface/GeometryBuffers.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Math.h>
+
+#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "RenderPipeline.h"
 #include "Shader.h"
@@ -12,7 +13,7 @@
 
 namespace
 {
-    auto constexpr ZoomFactorForCellDetails = 25.0f;    // Cell type strings and arrows
+    auto constexpr ZoomFactorForCellDetails = 25.0f;  // Cell type strings and arrows
 }
 
 TextureTarget _TextureTarget::create()
@@ -458,18 +459,18 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
         for (int py = toInt(posY); py < toInt(posY) + rowHeight - 2; ++py) {
             for (int px = 3; px < toInt(textSizes.at(i).x) + 7; ++px) {
                 int idx = (py * textureWidth + px) * 4;
-                pixels[idx + 0] = 255;   // R
-                pixels[idx + 1] = 255;   // G
-                pixels[idx + 2] = 255;   // B
-                pixels[idx + 3] = 20;  // A
+                pixels[idx + 0] = 255;  // R
+                pixels[idx + 1] = 255;  // G
+                pixels[idx + 2] = 255;  // B
+                pixels[idx + 3] = 20;   // A
             }
         }
         for (int py = toInt(posY) + 1; py < toInt(posY) + rowHeight - 4; ++py) {
             for (int px = 4; px < toInt(textSizes.at(i).x) + 6; ++px) {
                 int idx = (py * textureWidth + px) * 4;
-                pixels[idx + 0] = 0;  // R
-                pixels[idx + 1] = 0;  // G
-                pixels[idx + 2] = 0;  // B
+                pixels[idx + 0] = 0;   // R
+                pixels[idx + 1] = 0;   // G
+                pixels[idx + 2] = 0;   // B
                 pixels[idx + 3] = 20;  // A
             }
         }
@@ -509,9 +510,9 @@ void _CellTypeOverlayRenderStep::createCellTypeTextureAtlas()
 
                         if (alpha > 0) {
                             // Write to our texture buffer (white text with alpha from font)
-                            pixels[idx + 0] = 255;    // R
-                            pixels[idx + 1] = 255;    // G
-                            pixels[idx + 2] = 255;    // B
+                            pixels[idx + 0] = 255;                           // R
+                            pixels[idx + 1] = 255;                           // G
+                            pixels[idx + 2] = 255;                           // B
                             pixels[idx + 3] = toInt(toFloat(alpha) * 0.5f);  // A
                         }
                     }

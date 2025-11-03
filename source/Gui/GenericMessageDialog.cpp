@@ -4,11 +4,11 @@
 
 #include <imgui.h>
 
-#include "Base/LoggingService.h"
+#include <Base/LoggingService.h>
 
 #include "AlienGui.h"
-#include "WindowController.h"
 #include "StyleRepository.h"
+#include "WindowController.h"
 
 void GenericMessageDialog::processIntern()
 {
@@ -55,8 +55,7 @@ void GenericMessageDialog::yesNo(std::string const& title, std::string const& me
 
 GenericMessageDialog::GenericMessageDialog()
     : AlienDialog("Message")
-{
-}
+{}
 
 void GenericMessageDialog::processInformation()
 {

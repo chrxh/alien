@@ -1,6 +1,5 @@
-#include "CudaTOProvider.cuh"
-
 #include "CudaMemoryManager.cuh"
+#include "CudaTOProvider.cuh"
 
 _CudaTOProvider::_CudaTOProvider() {}
 

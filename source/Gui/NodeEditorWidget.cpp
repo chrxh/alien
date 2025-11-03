@@ -121,15 +121,13 @@ void _NodeEditorWidget::processNodeAttributes()
         // Previous nodes connections
         if (nodeIndex != 0) {
             auto numAdditionalConnections = node._numAdditionalConnections + 1;
-            if (AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numAdditionalConnections)) {
+            if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numAdditionalConnections)) {
                 gene._shape = ConstructorShape_Custom;
             }
             node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
         }
 
-        AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name("Signal restriction").textWidth(rightColumnWidth), node._signalRestriction._active);
+        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Signal restriction").textWidth(rightColumnWidth), node._signalRestriction._active);
 
         AlienGui::BeginIndent();
 

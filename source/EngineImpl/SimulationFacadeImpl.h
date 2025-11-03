@@ -1,16 +1,16 @@
 #pragma once
 
-#include <thread>
 #include <chrono>
+#include <thread>
 
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/SettingsForSimulation.h"
-#include "EngineInterface/SelectionShallowData.h"
-#include "EngineInterface/ShallowUpdateSelectionData.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineWorker.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/SelectionShallowData.h>
+#include <EngineInterface/SettingsForSimulation.h>
+#include <EngineInterface/ShallowUpdateSelectionData.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
+#include "EngineWorker.h"
 
 class _SimulationFacadeImpl : public _SimulationFacade
 {

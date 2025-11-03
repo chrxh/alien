@@ -1,12 +1,11 @@
-﻿#include "DataAccessKernels.cuh"
+﻿#include <Base/Macros.h>
 
-#include "Base/Macros.h"
+#include "DataAccessKernels.cuh"
 
 namespace
 {
     template <typename T>
-    __device__ void
-    copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TO& to)
+    __device__ void copyDataToHeap(T sourceSize, uint8_t* source, T& targetSize, uint64_t& targetIndex, TO& to)
     {
         targetSize = sourceSize;
         if (sourceSize > 0) {
@@ -109,7 +108,8 @@ namespace
                         switch (nodeTO.cellTypeData.muscle.mode) {
                         case MuscleMode_AutoBending:
                             nodeTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation = node.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-                            nodeTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio = node.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
+                            nodeTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio =
+                                node.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
                             break;
                         case MuscleMode_ManualBending:
                             nodeTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation =
@@ -240,12 +240,7 @@ namespace
 
         if (cell->neuralNetwork != nullptr) {
             int targetSize;  //not used
-            copyDataToHeap<int>(
-                sizeof(NeuralNetwork),
-                reinterpret_cast<uint8_t*>(cell->neuralNetwork),
-                targetSize,
-                cellTO.neuralNetworkDataIndex,
-                to);
+            copyDataToHeap<int>(sizeof(NeuralNetwork), reinterpret_cast<uint8_t*>(cell->neuralNetwork), targetSize, cellTO.neuralNetworkDataIndex, to);
         } else {
             cellTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
         }
@@ -305,7 +300,8 @@ namespace
                     cell->cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
                 cellTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation = cell->cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-                cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio = cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
+                cellTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio =
+                    cell->cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
                 cellTO.cellTypeData.muscle.modeData.angleBending.initialAngle = cell->cellTypeData.muscle.modeData.angleBending.initialAngle;
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
                 cellTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation = cell->cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
@@ -319,7 +315,8 @@ namespace
             } else if (cellTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
                 cellTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation =
                     cell->cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-                cellTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio = cell->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
+                cellTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio =
+                    cell->cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
                 cellTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance = cell->cellTypeData.muscle.modeData.manualCrawling.initialDistance;
                 cellTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance = cell->cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
                 cellTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta = cell->cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
@@ -893,10 +890,9 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
         arraySizes->particleArray = *to.numParticles;
         alienAtomicAdd64(
             &arraySizes->heap,
-            *to.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *to.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes) 
+            *to.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *to.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes)
                 + *to.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *to.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
-                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes)
-                + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
+                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes) + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 
     {

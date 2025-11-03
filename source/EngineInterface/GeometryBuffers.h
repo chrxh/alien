@@ -35,13 +35,13 @@ struct EnergyParticleVertexData
 
 struct LocationVertexData
 {
-    float pos[2];       // x, y position
-    float color[3];     // r, g, b color
-    int shapeType;      // 0 = circular, 1 = rectangular
-    float dimension1;   // radius for circular, width for rectangular
-    float dimension2;   // unused for circular, height for rectangular
-    float fadeoutRadius; // fadeout radius for the location
-    float opacity;      // opacity/transparency of the location
+    float pos[2];         // x, y position
+    float color[3];       // r, g, b color
+    int shapeType;        // 0 = circular, 1 = rectangular
+    float dimension1;     // radius for circular, width for rectangular
+    float dimension2;     // unused for circular, height for rectangular
+    float fadeoutRadius;  // fadeout radius for the location
+    float opacity;        // opacity/transparency of the location
 };
 
 struct SelectedObjectVertexData
@@ -67,8 +67,8 @@ struct AttackEventVertexData
 
 struct DetonationEventVertexData
 {
-    float pos[2];    // x, y position
-    float radius;    // circle radius
+    float pos[2];  // x, y position
+    float radius;  // circle radius
 };
 
 class _GeometryBuffers

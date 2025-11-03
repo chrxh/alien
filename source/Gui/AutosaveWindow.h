@@ -2,11 +2,11 @@
 
 #include <deque>
 
-#include "PersisterInterface/PersisterFacade.h"
-#include "PersisterInterface/SavepointTable.h"
+#include <PersisterInterface/PersisterFacade.h>
+#include <PersisterInterface/SavepointTable.h>
 
-#include "Definitions.h"
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class AutosaveWindow : public AlienWindow<SimulationFacade, PersisterFacade>
 {
@@ -46,7 +46,7 @@ private:
     std::string getSavepointFilename() const;
     void validateAndCorrect();
 
-    SimulationFacade _simulationFacade; 
+    SimulationFacade _simulationFacade;
     PersisterFacade _persisterFacade;
 
     bool _settingsOpen = false;

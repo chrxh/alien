@@ -1,10 +1,10 @@
 #pragma once
 
-#include "TO.cuh"
 #include "Base.cuh"
 #include "Map.cuh"
 #include "ObjectFactory.cuh"
 #include "ParameterCalculator.cuh"
+#include "TO.cuh"
 
 class SignalProcessor
 {
@@ -39,12 +39,11 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
             } else if (cell->cellState != CellState_Constructing && cell->cellState != CellState_Activating && cell->activationTime == 0) {
                 data.cellTypeOperations[cell->cellType].tryAddEntry(CellTypeOperation{cell});
             }
-
         }
     }
 }
 
-__inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& data)
+__inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
     auto partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -74,10 +73,8 @@ __inline__ __device__  void SignalProcessor::calcFutureSignals(SimulationData& d
                 float signalAngleRestrictionStart = 0;
                 float signalAngleRestrictionEnd = 0;
                 if (connectedCell->signalRestriction.active) {
-                    signalAngleRestrictionStart =
-                        180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
-                    signalAngleRestrictionEnd =
-                        180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
+                    signalAngleRestrictionStart = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
+                    signalAngleRestrictionEnd = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
                 }
 
                 float connectionAngle = 0;
@@ -153,8 +150,7 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
         } else {
             return (data.timestep + cell->creature->id) % triggerInterval == 0;
         }
-    }
-    else {
+    } else {
         return data.timestep % triggerInterval == 0;
     }
 }

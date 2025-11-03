@@ -1,6 +1,5 @@
-﻿#include "GarbageCollectorKernelsService.cuh"
-
-#include "DebugKernels.cuh"
+﻿#include "DebugKernels.cuh"
+#include "GarbageCollectorKernelsService.cuh"
 
 _GarbageCollectorKernelsService::_GarbageCollectorKernelsService()
 {

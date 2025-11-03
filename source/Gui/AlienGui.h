@@ -5,11 +5,12 @@
 
 #include <imgui.h>
 
-#include "Base/Definitions.h"
-#include "EngineInterface/EngineConstants.h"
-#include "EngineInterface/PreviewDescription.h"
-#include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/SimulationParametersTypes.h"
+#include <Base/Definitions.h>
+
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/PreviewDescription.h>
+#include <EngineInterface/SimulationParametersTypes.h>
 
 #include "Definitions.h"
 
@@ -275,7 +276,7 @@ public:
     };
     static bool ToggleButton(ToggleButtonParameters const& parameters, bool& value);
 
-    struct SelectableButtonParameters 
+    struct SelectableButtonParameters
     {
         MEMBER(SelectableButtonParameters, std::string, name, "");
         MEMBER(SelectableButtonParameters, std::optional<std::string>, tooltip, std::nullopt);
@@ -449,12 +450,11 @@ public:
     static void RotateEnd(float angle, ImDrawList* drawList);
 
 private:
-
     template <typename Parameter, typename T>
     static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned);
 
 
-    template<typename T>
+    template <typename T>
     struct BasicInputColorMatrixParameters
     {
         MEMBER(BasicInputColorMatrixParameters, std::string, name, "");

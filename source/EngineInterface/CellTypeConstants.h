@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 using namespace std::string_literals;
 

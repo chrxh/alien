@@ -1,10 +1,11 @@
 #include "GettingStartedWindow.h"
 
 #include <imgui.h>
+
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "StyleRepository.h"
 #include "AlienGui.h"
+#include "StyleRepository.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -60,7 +61,7 @@ void GettingStartedWindow::processIntern()
             "Simulations can be conveniently downloaded and uploaded from/to the connected server (alien-project.org by default). "
             "In order to upload own simulations to the server or rate other simulations, you need to register a new user, which can be accomplished in "
             "the login dialog.");
-            
+
         ImGui::Text("For the beginning, however, you can use the example already loaded. Initially, it is advisable to become acquainted with the "
                     "windows for temporal and spatial controls. The handling should be intuitive and requires no deeper knowledge.");
         drawItemText("In the temporal control window, a simulation can be started or paused. The execution speed "
@@ -96,9 +97,8 @@ void GettingStartedWindow::processIntern()
             "plant-like organisms may have a higher absorption rate for radiation particles, so they can get their energy from that.");
 
         drawHeading2("Important");
-        ImGui::Text(
-            "On older graphics cards or when using a high resolution (e.g. 4K), it is recommended to reduce the rendered frames per second, "
-            "as this significantly increases the simulation speed (time steps per second). This adjustment can be made in the display settings.");
+        ImGui::Text("On older graphics cards or when using a high resolution (e.g. 4K), it is recommended to reduce the rendered frames per second, "
+                    "as this significantly increases the simulation speed (time steps per second). This adjustment can be made in the display settings.");
 
         /**
          * EXAMPLES
@@ -117,7 +117,8 @@ void GettingStartedWindow::processIntern()
 
         drawHeading2("Evolution simulations");
         drawParagraph("By attaching higher-level functions to particle networks, complex multi-cellular organisms can be modeled. They can evolve over time as "
-                      "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-reproducing agents. Different "
+                      "they are subject to mutations. The following examples consist of homogeneous as well as changing worlds populated by self-reproducing "
+                      "agents. Different "
                       "selection pressures control evolution.");
         drawItemText("Deep Down Below/Selected Results");
         drawItemText("Primordial Ocean/Selected Results");
@@ -153,9 +154,8 @@ void GettingStartedWindow::processIntern()
 
         ImGui::Spacing();
         drawHeading2("Cell");
-        ImGui::Text(
-            "Cells are the basic building blocks that make up everything. They can be connected to each others, possibly attached to the background "
-            "(to model barriers), possess special functions and transport signals. Additionally, cells have various physical properties, including");
+        ImGui::Text("Cells are the basic building blocks that make up everything. They can be connected to each others, possibly attached to the background "
+                    "(to model barriers), possess special functions and transport signals. Additionally, cells have various physical properties, including");
         drawItemText("Position in space");
         drawItemText("Velocity");
         drawItemText("Internal energy (may be interpreted as its temperature)");
@@ -174,8 +174,9 @@ void GettingStartedWindow::processIntern()
         drawHeading2("Cell function");
         ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are "
                     "implemented:");
-        drawItemText("Neuron: It equips the cell with a small network of 8 neurons. It processes input gained from the signals of connected cells and provides an "
-                     "output signal to other connected cells.");
+        drawItemText(
+            "Neuron: It equips the cell with a small network of 8 neurons. It processes input gained from the signals of connected cells and provides an "
+            "output signal to other connected cells.");
         drawItemText(
             "Transmitter: It distributes energy to other constructors, transmitters or surrounding cells. In particular, it can be used to power active "
             "constructors. No signal is required for triggering.");
@@ -189,8 +190,7 @@ void GettingStartedWindow::processIntern()
         drawItemText("Muscle: When a muscle cell is activated, it can produce either a movement, a bending or a change in length of the cell connection.");
         drawItemText("Sensor: If activated, it performs a long-range scan for the concentration of cells with a certain color.");
         drawItemText("Reconnector: Has the ability to dynamically create or destroy connections to other cells with a specified color.");
-        drawItemText(
-            "Detonator: A cell which can explode by a signal. It generates a large amount of kinetic energy for the objects in its surroundings.");
+        drawItemText("Detonator: A cell which can explode by a signal. It generates a large amount of kinetic energy for the objects in its surroundings.");
 
         ImGui::Spacing();
         drawHeading2("Signals");
@@ -198,26 +198,27 @@ void GettingStartedWindow::processIntern()
             "Cells can produce signals comprising of 8 values, primarily utilized for controlling cell functions and sometimes referred to as channel #0 "
             "to channel #7. The states are refreshed periodically, specifically when the cell functions are executed. To be more precise, each cell function "
             "is executed at regular time intervals (every 6 time steps). The 'execution order number' specifies the exact time offset within those intervals.");
-        drawParagraph("The process for updating the values of a signal is as follows: Firstly, the values of all input signals (i.e. "
-                    "signals from connected cells which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
-                    "the cell function, which may potentially alter the values. Subsequently, the outcome is used to generate an output signal.");
+        drawParagraph(
+            "The process for updating the values of a signal is as follows: Firstly, the values of all input signals (i.e. "
+            "signals from connected cells which matches with the input execution number) are summed up. The resulted sum is then employed as input for "
+            "the cell function, which may potentially alter the values. Subsequently, the outcome is used to generate an output signal.");
 
         ImGui::Spacing();
         drawHeading2("Cell color");
         drawParagraph("In addition to cell functions, a color can be used to perform additional user-defined customization of cells. For this purpose, most "
-                    "simulation parameters can be adjusted separately for each color, if desired. As a result, cells of different colors may have individual "
-                    "properties.");
+                      "simulation parameters can be adjusted separately for each color, if desired. As a result, cells of different colors may have individual "
+                      "properties.");
 
         ImGui::Spacing();
         drawHeading2("Cell network");
         drawParagraph("A cell network is a connected graph consisting of cells and cell connections. Two cells in a network are therefore "
-                    "connected to each other directly or via other cells. A cell network physically represents a particular body.");
+                      "connected to each other directly or via other cells. A cell network physically represents a particular body.");
 
         ImGui::Spacing();
         drawHeading2("Genome");
         drawParagraph("The blueprints for entire cell networks can be stored in genomes. These genomes are translated into real cell networks by constructor "
-              "cells and, if necessary, copied to their offspring. Furthermore, injector cells are able to inject their own genome into other "
-              "constructor cells, which allows to model virus behaviors.");
+                      "cells and, if necessary, copied to their offspring. Furthermore, injector cells are able to inject their own genome into other "
+                      "constructor cells, which allows to model virus behaviors.");
         drawParagraph("A genome in ALIEN may describe several cell networks, which are hierarchically structured und possibly connected when constructed. More "
                       "precisely, it means that there is a top-level blueprint describing a certain network. If there are further constructor cells "
                       "within this network, they can also contain further genomes, which in turn describe other cell networks and so on.");
@@ -238,7 +239,8 @@ void GettingStartedWindow::processIntern()
         drawHeading1("Simulation parameters");
         drawParagraph(
             "All parameters relevant to the simulation can be adjusted here. By default, the parameters are set uniformly for the entire world. However, it is "
-            "also possible to allow certain parameters to vary locally in special layers. To do this, you can create a new tab in the simulation parameter window by clicking on "
+            "also possible to allow certain parameters to vary locally in special layers. To do this, you can create a new tab in the simulation parameter "
+            "window by clicking on "
             "the '+' button. It adds a spatially (fuzzy) delimited area where the global parameters can be overwritten. This layer is also visible by a "
             "different color.");
         drawParagraph("Regardless of this, many parameters can also be set depending on the cell color. For this purpose click the '+' button beside the "
@@ -254,7 +256,7 @@ void GettingStartedWindow::processIntern()
             "switch the cell coloring to the mutation id.");
         drawHeading2("Physics");
         drawParagraph("Basic physical properties can be modified in these settings. This includes adjusting the radiation intensity, various thresholds, and "
-                     "the motion algorithm. Changes can have significant effects on performance and, in the worst case, may lead to program crashes.");
+                      "the motion algorithm. Changes can have significant effects on performance and, in the worst case, may lead to program crashes.");
         drawHeading2("Radiation sources");
         drawParagraph("Optionally, you can define radiation sources by opening the corresponding editor. Typically, all cells lose energy over time by "
                       "emitting particles. These energy particles travel through space and can be absorbed by other cells under certain conditions. When no "
@@ -329,13 +331,14 @@ void GettingStartedWindow::processIntern()
         drawHeading2("How does a simple self-replicating organism work?");
         drawParagraph("In general, an organism in ALIEN consists of a network of cells where the cells work together by communicating with each other through "
                       "signals.");
-        drawParagraph(
-            "A simple creature first needs a constructor cell that contains its genome and is responsible for self-replication. The constructor cell "
-            "is automatically triggered and generates (as soon as enough energy is available) the cell network of the offspring built cell by cell as described in "
-            "its genome. The genome for the offspring is also copied and placed into the constructor cell of the offspring.");
+        drawParagraph("A simple creature first needs a constructor cell that contains its genome and is responsible for self-replication. The constructor cell "
+                      "is automatically triggered and generates (as soon as enough energy is available) the cell network of the offspring built cell by cell "
+                      "as described in "
+                      "its genome. The genome for the offspring is also copied and placed into the constructor cell of the offspring.");
         drawParagraph(
             "Self-replication requires energy, which must be obtained in some way. On the one hand, energy can be acquired by the absorption of "
-            "energy particles flying around. This can be the main source of energy for plant-like species. On the other hand, there is the possibility to utilize "
+            "energy particles flying around. This can be the main source of energy for plant-like species. On the other hand, there is the possibility to "
+            "utilize "
             "attacker cells. They can attack cells from other organisms by stealing energy from them. If an attacker cell is part of the creature, it must be "
             "explicitly triggered by a signal. This signal may come, for example, from another cell equipped with a neural network. The energy "
             "obtained by an attacker cell is distributed to nearby constructor or transmitter cells.");
@@ -362,21 +365,24 @@ void GettingStartedWindow::processIntern()
         drawHeading2("For how long should I run a simulation to see evolutionary changes?");
         drawParagraph(
             "This depends on many factors: On the size of the simulated world, on the mutation rates, on various selection pressures that can be influenced "
-            "by the simulation parameters and on the self-replication duration. Usually one should wait for several dozen generations, which may correspond to hundreds of thousands or million time steps."
-            "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute depending on the hardware. With more complex "
+            "by the simulation parameters and on the self-replication duration. Usually one should wait for several dozen generations, which may correspond to "
+            "hundreds of thousands or million time steps."
+            "In small worlds with smaller organisms and high mutation rates, evolutionary changes can sometimes be observed every minute depending on the "
+            "hardware. With more complex "
             "simulations, you should rather expect a few hours.");
 
         drawHeading2("How can I add energy to a simulation?");
-        drawParagraph("Adding energy to a simulation can increase the available resources and thus the population. There is a convenient way to directly feed "
-                      "all constructor cells with additional energy. This can be achieved by enabling the 'External energy control' expert settings in the simulation "
-                      "parameter window. Next, set the amount of energy to be added (for instance, 1M could sustain 10K cells if each cell has 100 energy "
-                      "units). The external energy is not added instantly but at a rate that can be specified under 'inflow'.");
+        drawParagraph(
+            "Adding energy to a simulation can increase the available resources and thus the population. There is a convenient way to directly feed "
+            "all constructor cells with additional energy. This can be achieved by enabling the 'External energy control' expert settings in the simulation "
+            "parameter window. Next, set the amount of energy to be added (for instance, 1M could sustain 10K cells if each cell has 100 energy "
+            "units). The external energy is not added instantly but at a rate that can be specified under 'inflow'.");
 
         drawHeading2("How can I create a cell signal in the first place?");
         drawParagraph("To activate most cell functions, an input from a connected cell in the form of a signal is required. The simplest methods "
                       "to generate a signal are as follows:");
         drawItemText("The most direct approach involves using a generator cell that generates an signal at regular time intervals. The advantage here is that "
-            "you can precisely configure the length of the time intervals.");
+                     "you can precisely configure the length of the time intervals.");
         drawItemText("Signals can also be generated within a neuron cell using bias values.");
         drawParagraph("Additionally, other cells such as constructor cells provide an output signal as soon as they are triggered (automatically).");
 
@@ -482,4 +488,3 @@ void GettingStartedWindow::drawParagraph(std::string const& text)
 {
     AlienGui::Text(text);
 }
- 

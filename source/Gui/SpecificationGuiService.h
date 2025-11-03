@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/SimulationParametersSpecification.h"
+#include <Base/Singleton.h>
+
+#include <EngineInterface/SimulationParametersSpecification.h>
 
 class SpecificationGuiService
 {

@@ -3,11 +3,11 @@
 #include "cuda_runtime_api.h"
 #include "sm_60_atomic_functions.h"
 
-#include "TO.cuh"
 #include "Base.cuh"
 #include "CellConnectionProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationStatistics.cuh"
+#include "TO.cuh"
 
 class GeneratorProcessor
 {
@@ -40,9 +40,8 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
             }
             ++generator.numPulses;
             if (generator.alternationInterval > 0 && generator.numPulses == generator.alternationInterval * 2) {
-                generator.numPulses = 0;  
+                generator.numPulses = 0;
             }
         }
-
     }
 }

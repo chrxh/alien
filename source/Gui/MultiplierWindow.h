@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SelectionShallowData.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SelectionShallowData.h>
+
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 using MultiplierMode = int;
 enum MultiplierMode_

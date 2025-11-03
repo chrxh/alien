@@ -30,4 +30,3 @@ public:
     };
     VersionParts getVersionParts(std::string const& versionString);
 };
-

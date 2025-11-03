@@ -1,11 +1,10 @@
-﻿#include "SimulationKernelsService.cuh"
+﻿#include <EngineInterface/SpaceCalculator.h>
 
-#include "EngineInterface/SpaceCalculator.h"
-
-#include "SimulationKernels.cuh"
+#include "DebugKernels.cuh"
 #include "ForceFieldKernels.cuh"
 #include "GarbageCollectorKernelsService.cuh"
-#include "DebugKernels.cuh"
+#include "SimulationKernels.cuh"
+#include "SimulationKernelsService.cuh"
 #include "SimulationStatistics.cuh"
 
 _SimulationKernelsService::_SimulationKernelsService()
@@ -13,7 +12,7 @@ _SimulationKernelsService::_SimulationKernelsService()
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsService>();
 }
 
-namespace 
+namespace
 {
     int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters)
     {

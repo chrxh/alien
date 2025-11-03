@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Network/Definitions.h"
-#include "PersisterInterface/PersisterFacade.h"
+#include <Network/Definitions.h>
+
+#include <PersisterInterface/PersisterFacade.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -17,5 +18,5 @@ private:
     void processIntern() override;
 
     SimulationFacade _simulationFacade;
-    PersisterFacade _persisterFacade; 
+    PersisterFacade _persisterFacade;
 };

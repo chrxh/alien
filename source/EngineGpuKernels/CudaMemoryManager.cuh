@@ -2,10 +2,9 @@
 
 #include <map>
 
-#include <cuda/helper_cuda.h>
-
 #include "Base.cuh"
 #include "Macros.cuh"
+#include <cuda/helper_cuda.h>
 
 class CudaMemoryManager
 {
@@ -17,22 +16,19 @@ public:
     }
 
     CudaMemoryManager(CudaMemoryManager const&) = delete;
-    void operator= (CudaMemoryManager const&) = delete;
+    void operator=(CudaMemoryManager const&) = delete;
 
-    void reset()
-    {
-        _bytes = 0;
-    }
+    void reset() { _bytes = 0; }
 
-    template<typename T>
+    template <typename T>
     void acquireMemory(uint64_t arraySize, T*& result)
     {
-        CHECK_FOR_CUDA_ERROR(cudaMalloc(&result, sizeof(T)*arraySize));
-        _bytes += sizeof(T)*arraySize;
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&result, sizeof(T) * arraySize));
+        _bytes += sizeof(T) * arraySize;
         _pointerToSizeMap.emplace(reinterpret_cast<void*>(result), arraySize);
     }
 
-    template<typename T>
+    template <typename T>
     void freeMemory(T*& memory)
     {
         if (!memory) {
@@ -46,10 +42,7 @@ public:
         }
     }
 
-    uint64_t getSizeOfAcquiredMemory() const
-    {
-        return _bytes;
-    }
+    uint64_t getSizeOfAcquiredMemory() const { return _bytes; }
 
 private:
     CudaMemoryManager() {}

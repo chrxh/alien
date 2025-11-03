@@ -1,16 +1,16 @@
 #pragma once
 
 #include "ArraySizesForGpu.h"
+#include "DataPointCollection.h"
 #include "Definitions.h"
+#include "MutationType.h"
+#include "PreviewDescription.h"
 #include "SelectionShallowData.h"
 #include "SettingsForSimulation.h"
 #include "ShallowUpdateSelectionData.h"
 #include "SimulationFacade.h"
-#include "MutationType.h"
-#include "DataPointCollection.h"
-#include "PreviewDescription.h"
-#include "StatisticsHistory.h"
 #include "SimulationParametersUpdateConfig.h"
+#include "StatisticsHistory.h"
 
 class _SimulationFacade
 {

@@ -4,22 +4,23 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/StringHelper.h"
+#include <Base/StringHelper.h>
 
-#include "EngineInterface/GenomeDescriptionInfoService.h"
+#include <EngineInterface/GenomeDescriptionInfoService.h>
 
-#include "PersisterInterface/SerializerService.h"
+#include <PersisterInterface/SerializerService.h>
 
 #include "AlienGui.h"
 #include "ChangeColorDialog.h"
-#include "GenomeWindowEditData.h"
-#include "GenomeTabLayoutData.h"
-#include "GenomeTabWidget.h"
 #include "EditorController.h"
 #include "EditorModel.h"
 #include "GenericFileDialog.h"
 #include "GenericMessageDialog.h"
+#include "GenomeTabLayoutData.h"
+#include "GenomeTabWidget.h"
+#include "GenomeWindowEditData.h"
 #include "OverlayController.h"
+
 #include <ImFileDialog.h>
 
 void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
@@ -58,8 +59,7 @@ GenomeDescription GenomeEditorWindow::getCurrentCreature() const
 
 GenomeEditorWindow::GenomeEditorWindow()
     : AlienWindow("Genome editor", "windows.genome editor", false, true, {500.0f, 300.0f})
-{
-}
+{}
 
 void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
 {
@@ -257,19 +257,18 @@ void GenomeEditorWindow::onCreateSeed()
 
     auto parameter = _simulationFacade->getSimulationParameters();
     auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
-    
+
     Description seed;
     seed.addCreature(
-        CreatureDescription()
-            .cells({
-                CellDescription()
-                    .pos(pos)
-                    .stiffness(1.0f)
-                    .color(EditorModel::get().getDefaultColorCode())
-                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)),
-            }),
+        CreatureDescription().cells({
+            CellDescription()
+                .pos(pos)
+                .stiffness(1.0f)
+                .color(EditorModel::get().getDefaultColorCode())
+                .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)),
+        }),
         genome);
-    
+
     _simulationFacade->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();
 

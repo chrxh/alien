@@ -2,7 +2,8 @@
 
 #include <fstream>
 
-#include "Base/LoggingService.h"
+#include <Base/LoggingService.h>
+
 #include "Definitions.h"
 
 class _FileLogger : public LoggingCallBack

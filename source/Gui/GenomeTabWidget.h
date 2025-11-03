@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/GenomeDescription.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
 #include "GenomeTabLayoutData.h"
@@ -53,7 +53,7 @@ private:
 
     _GenomeTabWidget(
         SimulationFacade const& simulationFacade,
-        GenomeWindowEditData const& genomeEditData, 
+        GenomeWindowEditData const& genomeEditData,
         GenomeDescription const& genome,
         SpecificEditData const& specificEditData,
         GenomeTabLayoutData const& layoutData = nullptr);

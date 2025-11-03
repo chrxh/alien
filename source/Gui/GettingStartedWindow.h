@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/Definitions.h>
+
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class GettingStartedWindow : public AlienWindow<>
 {
@@ -25,5 +26,3 @@ private:
 
     bool _showAfterStartup = true;
 };
-
-

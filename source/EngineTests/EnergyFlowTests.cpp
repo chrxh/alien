@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/GenomeDescription.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
 
@@ -42,9 +42,13 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
 
 TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
 {
-    
-    auto data = Description().addCreature(CreatureDescription(), GenomeDescription().genes({         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),     }));
-    
+
+    auto data = Description().addCreature(
+        CreatureDescription(),
+        GenomeDescription().genes({
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+        }));
+
     auto& creature = data._creatures.front();
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
@@ -82,9 +86,13 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
 
-    
-    auto data = Description().addCreature(CreatureDescription(), GenomeDescription().genes({         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),     }));
-    
+
+    auto data = Description().addCreature(
+        CreatureDescription(),
+        GenomeDescription().genes({
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+        }));
+
     auto& creature = data._creatures.front();
 
     for (int j = 0; j < 2; ++j) {
@@ -121,9 +129,13 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
 
 TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
 {
-    
-    auto data = Description().addCreature(CreatureDescription(), GenomeDescription().genes({         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),     }));
-    
+
+    auto data = Description().addCreature(
+        CreatureDescription(),
+        GenomeDescription().genes({
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+        }));
+
     auto& creature = data._creatures.front();
 
     for (int i = 0; i < 20; ++i) {
@@ -176,7 +188,7 @@ TEST_F(EnergyFlowTests, energyFlowsBranches)
     {
         auto actualData = _simulationFacade->getSimulationData();
         for (auto const& cell : actualData._cells) {
-            EXPECT_TRUE(cell._energy > 540.0f / 4  - 5.0f);
+            EXPECT_TRUE(cell._energy > 540.0f / 4 - 5.0f);
             EXPECT_TRUE(cell._energy < 540.0f / 4 + 5.0f);
         }
     }
@@ -190,18 +202,18 @@ TEST_F(EnergyFlowTests, energyFlowsNotToConstructorUnderConstruction)
     Description data;
     data.addCreature(
         CreatureDescription().cells({CellDescription()
-                                        .id(1)
-                                        .pos({100.0f, 100.0f})
-                                        .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-                                        .energy(normalCellEnergy * 10)}),
+                                         .id(1)
+                                         .pos({100.0f, 100.0f})
+                                         .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                         .energy(normalCellEnergy * 10)}),
         genome);
     data.addCreature(
         CreatureDescription().cells({CellDescription()
-                                        .id(2)
-                                        .cellState(CellState_Constructing)
-                                        .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
-                                        .cellType(ConstructorDescription().currentNodeIndex(1))
-                                        .energy(normalCellEnergy)}),
+                                         .id(2)
+                                         .cellState(CellState_Constructing)
+                                         .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
+                                         .cellType(ConstructorDescription().currentNodeIndex(1))
+                                         .energy(normalCellEnergy)}),
         genome);
     data.addConnection(1, 2);
 
@@ -227,17 +239,17 @@ TEST_F(EnergyFlowTests, energyFlowsEquallyToActiveConstructors)
     Description data;
     data.addCreature(
         CreatureDescription().cells({CellDescription()
-                                        .id(1)
-                                        .pos({100.0f, 100.0f})
-                                        .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-                                        .energy(normalCellEnergy * 10)}),
+                                         .id(1)
+                                         .pos({100.0f, 100.0f})
+                                         .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                         .energy(normalCellEnergy * 10)}),
         genome);
     data.addCreature(
         CreatureDescription().cells({CellDescription()
-                                        .id(2)
-                                        .pos({101.0f, 100.0f})
-                                        .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-                                        .energy(normalCellEnergy)}),
+                                         .id(2)
+                                         .pos({101.0f, 100.0f})
+                                         .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                         .energy(normalCellEnergy)}),
         genome);
     data.addConnection(1, 2);
 

@@ -2,18 +2,18 @@
 
 #include <atomic>
 
-#include "EngineInterface/ArraySizesForGpu.h"
-#include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/CudaSettings.h"
+#include <EngineInterface/ArraySizesForGpu.h>
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/CudaSettings.h>
 
 #include "Base.cuh"
 #include "CudaNumberGenerator.cuh"
-#include "PreprocessedSimulationData.cuh"
 #include "Definitions.cuh"
-#include "Objects.cuh"
 #include "Map.cuh"
+#include "Objects.cuh"
 #include "Operations.cuh"
+#include "PreprocessedSimulationData.cuh"
 
 struct SimulationData
 {
@@ -38,7 +38,8 @@ struct SimulationData
 
     // Number generators
     CudaNumberGenerator primaryNumberGen;
-    CudaNumberGenerator secondaryNumberGen;  // Secondary random number generator used in combination with the primary generator for evaluating very low probabilities
+    CudaNumberGenerator
+        secondaryNumberGen;  // Secondary random number generator used in combination with the primary generator for evaluating very low probabilities
 
     void init(int2 const& worldSize, uint64_t timestep);
     bool shouldResize(ArraySizesForGpu const& sizeDelta);

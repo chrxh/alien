@@ -33,7 +33,8 @@ ValueRef<bool> SpecificationEvaluationService::getRef(BoolMemberVariant const& m
 
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixBoolMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
+        return ValueRef{
+            .value = reinterpret_cast<bool*>((parameters.**std::get<ColorMatrixBoolMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
     }
 
     return {};
@@ -63,7 +64,8 @@ ValueRef<int> SpecificationEvaluationService::getRef(IntMemberVariant const& mem
 
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixIntMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
+        return ValueRef{
+            .value = reinterpret_cast<int*>((parameters.**std::get<ColorMatrixIntMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
     }
     return {};
 }
@@ -88,12 +90,11 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
         }
         }
     } else if (locationType == LocationType::Base && std::holds_alternative<FloatPinMember>(member)) {
-        return ValueRef<float>{
-            .pinned = &(parameters.**std::get<FloatPinMember>(member)).pinned};
+        return ValueRef<float>{.pinned = &(parameters.**std::get<FloatPinMember>(member)).pinned};
     } else if (locationType == LocationType::Layer && std::holds_alternative<FloatLayerMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<FloatLayerMember>(member)).layerValues[index]};
-    } else if (locationType == LocationType::Source &&  std::holds_alternative<FloatSourceMember>(member)) {
+    } else if (locationType == LocationType::Source && std::holds_alternative<FloatSourceMember>(member)) {
         auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
         return ValueRef{.value = &(parameters.**std::get<FloatSourceMember>(member)).sourceValues[index]};
     } else if (locationType == LocationType::Source && std::holds_alternative<FloatEnableableSourceMember>(member)) {
@@ -109,14 +110,15 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
             .pinned = &(parameters.**std::get<FloatPinnableSourceMember>(member)).sourceValues[index].pinned,
         };
     }
-    
+
     // Color vector
     else if (locationType == LocationType::Base && std::holds_alternative<ColorVectorFloatMember>(member)) {
         return ValueRef{.value = (parameters.**std::get<ColorVectorFloatMember>(member)).value, .colorDependence = ColorDependence::ColorVector};
     } else if (locationType != LocationType::Source && std::holds_alternative<ColorVectorFloatBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
-            return ValueRef{.value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue, .colorDependence = ColorDependence::ColorVector};
+            return ValueRef{
+                .value = (parameters.**std::get<ColorVectorFloatBaseLayerMember>(member)).baseValue, .colorDependence = ColorDependence::ColorVector};
         case LocationType::Layer: {
             auto index = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
             return ValueRef{
@@ -130,7 +132,8 @@ ValueRef<float> SpecificationEvaluationService::getRef(FloatMemberVariant const&
 
     // Color matrix
     else if (locationType == LocationType::Base && std::holds_alternative<ColorMatrixFloatMember>(member)) {
-        return ValueRef{.value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
+        return ValueRef{
+            .value = reinterpret_cast<float*>((parameters.**std::get<ColorMatrixFloatMember>(member)).value), .colorDependence = ColorDependence::ColorMatrix};
     } else if (locationType != LocationType::Source && std::holds_alternative<ColorMatrixFloatBaseLayerMember>(member)) {
         switch (LocationHelper::getLocationType(orderNumber, parameters)) {
         case LocationType::Base:
@@ -183,8 +186,7 @@ ValueRef<Char64> SpecificationEvaluationService::getRef(Char64MemberVariant cons
     return {};
 }
 
-ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int orderNumber)
-    const
+ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
@@ -206,8 +208,8 @@ ValueRef<int> SpecificationEvaluationService::getRef(AlternativeMemberVariant co
     return {};
 }
 
-ValueRef<FloatColorRGB>
-SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
+ValueRef<FloatColorRGB> SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member, SimulationParameters& parameters, int orderNumber)
+    const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
@@ -227,7 +229,8 @@ SpecificationEvaluationService::getRef(FloatColorRGBMemberVariant const& member,
     return {};
 }
 
-ValueRef<ColorTransitionRule> SpecificationEvaluationService::getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
+ValueRef<ColorTransitionRule>
+SpecificationEvaluationService::getRef(ColorTransitionRulesMemberVariant const& member, SimulationParameters& parameters, int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
@@ -317,8 +320,7 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
             if (std::holds_alternative<ColorVectorFloatBaseLayerMember>(floatSpec._member)
-                || std::holds_alternative<ColorMatrixFloatBaseLayerMember>(floatSpec._member)
-                || std::holds_alternative<FloatLayerMember>(floatSpec._member)) {
+                || std::holds_alternative<ColorMatrixFloatBaseLayerMember>(floatSpec._member) || std::holds_alternative<FloatLayerMember>(floatSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
@@ -333,8 +335,7 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             }
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
             auto const& alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
-            if (std::holds_alternative<IntLayerMember>(alternativeSpec._member)
-                || std::holds_alternative<IntEnableableLayerMember>(alternativeSpec._member)) {
+            if (std::holds_alternative<IntLayerMember>(alternativeSpec._member) || std::holds_alternative<IntEnableableLayerMember>(alternativeSpec._member)) {
                 return true;
             }
         } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
@@ -357,8 +358,7 @@ bool SpecificationEvaluationService::isVisible(ParameterSpec const& parameterSpe
             }
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
             auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
-            if (std::holds_alternative<FloatSourceMember>(floatSpec._member)
-                || std::holds_alternative<FloatEnableableSourceMember>(floatSpec._member)
+            if (std::holds_alternative<FloatSourceMember>(floatSpec._member) || std::holds_alternative<FloatEnableableSourceMember>(floatSpec._member)
                 || std::holds_alternative<FloatPinnableSourceMember>(floatSpec._member)) {
                 return true;
             }

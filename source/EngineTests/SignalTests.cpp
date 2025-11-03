@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
 class SignalTests : public IntegrationTestFramework
@@ -86,7 +87,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     data._cells = {
         CellDescription().id(1).pos({0, 0}).signalAndState(signal),
     };
-    
+
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
@@ -182,14 +183,14 @@ TEST_F(SignalTests, forkSignals)
 
 enum class AngleRange
 {
-    Start, End
+    Start,
+    End
 };
 
 class SignalTests_BothSides
     : public SignalTests
     , public testing::WithParamInterface<AngleRange>
-{
-};
+{};
 
 INSTANTIATE_TEST_SUITE_P(SignalTests_BothSides, SignalTests_BothSides, ::testing::Values(AngleRange::Start, AngleRange::End));
 

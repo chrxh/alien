@@ -297,7 +297,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                               .name("Viscosity")
                                               .reference(FloatSpec().member(&SimulationParameters::viscosityStrength).min(0.0f).max(0.3f))
                                               .description("This parameter be used to control the strength of the viscosity. Larger values lead to a smoother "
-                                                       "movement."),
+                                                           "movement."),
                                       }},
                                      {"Collision-based solver",
                                       {
@@ -325,7 +325,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Rigidity")
                         .reference(FloatSpec().member(&SimulationParameters::rigidity).min(0.0f).max(1.0f).format("%.2f"))
-                        .description("Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
+                        .description(
+                            "Controls the rigidity of connected cells. A higher value will cause connected cells to move more uniformly as a rigid body."),
                 }),
             ParameterGroupSpec()
                 .name("Physics: Thresholds")
@@ -365,7 +366,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .infinity(true)
                                 .format("%.0f"))
                         .description("Maximum energy of a cell at which it can contain bonds to adjacent cells. If the energy of a cell exceeds this "
-                                 "value, all bonds will be destroyed."),
+                                     "value, all bonds will be destroyed."),
                 }),
             ParameterGroupSpec()
                 .name("Radiation")
@@ -429,7 +430,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Energy to cell transformation")
                         .reference(BoolSpec().member(&SimulationParameters::particleTransformationAllowed))
-                        .description("If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
+                        .description(
+                            "If activated, an energy particle will transform into a cell if the energy of the particle exceeds the normal energy value."),
                     ParameterSpec()
                         .name("Radiation angle")
                         .reference(FloatSpec().member(&SimulationParameters::sourceRadiationAngle).min(-180.0f).max(180.0f).format("%.1f")),
@@ -461,19 +463,20 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Decay rate of dying cells")
                         .reference(FloatSpec().member(&SimulationParameters::cellDeathProbability).min(1e-6f).max(1e-1f).format("%.6f").logarithmic(true))
-                        .description("The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
-                                 "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
-                                 " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
+                        .description(
+                            "The probability per time step with which a cell will disintegrate (i.e. transform into an energy particle) when it is in the "
+                            "state 'Dying'. This can occur when one of the following conditions is satisfied:\n\n" ICON_FA_CHEVRON_RIGHT
+                            " The cell has too low energy.\n\n" ICON_FA_CHEVRON_RIGHT " The cell has exceeded its maximum age."),
                     ParameterSpec()
                         .name("Cell death consequences")
                         .reference(AlternativeSpec()
                                        .member(&SimulationParameters::cellDeathConsequences)
                                        .alternatives({{"None", {}}, {"Entire creature dies", {}}, {"Detached creature parts die", {}}}))
                         .description("Here one can define what happens to the organism when one of its cells is in the 'Dying' state.\n\n" ICON_FA_CHEVRON_RIGHT
-                                 " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT
-                                 " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
-                                 " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
-                                 "constructor cell for self-replication die."),
+                                     " None: Only the cell dies.\n\n" ICON_FA_CHEVRON_RIGHT
+                                     " Entire creature dies: All the cells of the organism will also die.\n\n" ICON_FA_CHEVRON_RIGHT
+                                     " Detached creature parts die: Only the parts of the organism that are no longer connected to a "
+                                     "constructor cell for self-replication die."),
                 }),
             ParameterGroupSpec()
                 .name("Genome copy mutations")
@@ -481,9 +484,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Neural nets")
                         .reference(FloatSpec().member(&SimulationParameters::copyMutationNeuronData).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description("This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded "
-                                 "in the "
-                                 "genome."),
+                        .description(
+                            "This type of mutation can change the weights, biases and activation functions of neural networks of each neuron cell encoded "
+                            "in the "
+                            "genome."),
                     ParameterSpec()
                         .name("Cell properties")
                         .reference(FloatSpec().member(&SimulationParameters::copyMutationCellProperties).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
@@ -530,7 +534,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Duplication")
                         .reference(FloatSpec().member(&SimulationParameters::copyMutationDuplication).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description("This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
+                        .description(
+                            "This type of mutation copies a block of cell descriptions from the genome at a random position to a new random position."),
                     ParameterSpec()
                         .name("Individual cell color")
                         .reference(FloatSpec().member(&SimulationParameters::copyMutationCellColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
@@ -540,7 +545,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Sub-genome color")
                         .reference(FloatSpec().member(&SimulationParameters::copyMutationSubgenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
-                        .description("This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
+                        .description(
+                            "This type of mutation alters the color of all cell descriptions in a sub-genome by using the specified color transitions."),
                     ParameterSpec()
                         .name("Genome color")
                         .reference(FloatSpec().member(&SimulationParameters::copyMutationGenomeColor).min(0.0f).max(1.0f).format("%.7f").logarithmic(true))
@@ -548,18 +554,19 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Color transitions")
                         .reference(BoolSpec().member(&SimulationParameters::copyMutationColorTransitions))
-                        .description("The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
-                                 "color."),
+                        .description(
+                            "The color transitions are used for color mutations. The row index indicates the source color and the column index the target "
+                            "color."),
                     ParameterSpec()
                         .name("Prevent genome depth increase")
                         .reference(BoolSpec().member(&SimulationParameters::copyMutationPreventDepthIncrease))
                         .description("A genome has a tree-like structure because it can contain sub-genomes. If this flag is activated, the mutations will "
-                                 "not increase the depth of the genome structure."),
+                                     "not increase the depth of the genome structure."),
                     ParameterSpec()
                         .name("Mutate self-replication")
                         .reference(BoolSpec().member(&SimulationParameters::copyMutationSelfReplication))
                         .description("If activated, a mutation can also alter self-replication capabilities in the genome by changing a constructor cell to "
-                                 "something else or vice versa."),
+                                     "something else or vice versa."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Attacker")
@@ -580,8 +587,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Attack strength")
                         .reference(FloatSpec().member(&SimulationParameters::attackerStrength).min(0.0f).max(0.5f).logarithmic(true))
-                        .description("Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
-                                 "influenced by other factors adjustable within the attacker's simulation parameters."),
+                        .description(
+                            "Indicates the portion of energy through which a successfully attacked cell is weakened. However, this energy portion can be "
+                            "influenced by other factors adjustable within the attacker's simulation parameters."),
                     ParameterSpec()
                         .name("Attack radius")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(3.0f))
@@ -615,7 +623,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Anti-attacker strength")
                         .reference(FloatSpec().member(&SimulationParameters::defenderAntiAttackerStrength).min(0.0f).max(5.0f))
-                        .description("If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
+                        .description(
+                            "If an attacked cell is connected to defender cells or itself a defender cell the attack strength is reduced by this factor."),
                     ParameterSpec()
                         .name("Anti-injector strength")
                         .reference(FloatSpec().member(&SimulationParameters::defenderAntiInjectorStrength).min(0.0f).max(5.0f))
@@ -658,7 +667,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Bending acceleration")
                         .reference(FloatSpec().member(&SimulationParameters::muscleBendingAcceleration).min(0.0f).max(10.0f).logarithmic(true))
                         .description("The maximum value by which a muscle cell can modify its velocity during a bending action. This parameter applies "
-                                 "only to muscle cells which are in bending mode."),
+                                     "only to muscle cells which are in bending mode."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Sensor")
@@ -704,7 +713,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Chain explosion probability")
                         .reference(FloatSpec().member(&SimulationParameters::detonatorChainExplosionProbability).min(0.0f).max(1.0f))
-                        .description("The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
+                        .description(
+                            "The probability that the explosion of one detonator will trigger the explosion of other detonators within the blast radius."),
                 }),
             ParameterGroupSpec()
                 .name("Advanced energy absorption control")
@@ -759,8 +769,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Geometry deviation protection")
                         .reference(FloatSpec().member(&SimulationParameters::attackerGeometryDeviationProtection).min(0.0f).max(5.0f))
-                        .description("The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
-                                 "match the attacking cell."),
+                        .description(
+                            "The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
+                            "match the attacking cell."),
                     ParameterSpec()
                         .name("Connections mismatch protection")
                         .reference(FloatSpec().member(&SimulationParameters::attackerConnectionsMismatchProtection).min(0.0f).max(1.0f))
@@ -774,8 +785,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Maximum inactive cell age")
                         .reference(
                             FloatSpec().member(&SimulationParameters::maxAgeForInactiveCells).min(1.0f).max(1e7f).format("%.0f").logarithmic(true).infinity(true))
-                        .description("Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
-                                 "are in state 'Under construction' are not affected by this option."),
+                        .description(
+                            "Here, you can set the maximum age for a cell whose function or those of its neighbors have not been triggered. Cells which "
+                            "are in state 'Under construction' are not affected by this option."),
                     ParameterSpec()
                         .name("Maximum free cell age")
                         .reference(IntSpec().member(&SimulationParameters::freeCellMaxAge).min(1).max(1e7).logarithmic(true).infinity(true))
@@ -792,7 +804,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Maximum age balancing")
                         .reference(IntSpec().member(&SimulationParameters::maxCellAgeBalancerInterval).min(1e3).max(1e6).logarithmic(true))
                         .description("Adjusts the maximum age at regular intervals. It increases the maximum age for the cell color where the fewest "
-                                 "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
+                                     "replicators exist. Conversely, the maximum age is decreased for the cell color with the most replicators."),
                 }),
             ParameterGroupSpec()
                 .name("Cell color transition rules")
@@ -802,8 +814,8 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Target color and duration")
                         .reference(ColorTransitionRulesSpec().member(&SimulationParameters::colorTransitionRules))
                         .description("Rules can be defined that describe how the colors of cells will change over time. For this purpose, a subsequent "
-                                 "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
-                                 "corresponding color are kept."),
+                                     "color can be defined for each cell color. In addition, durations must be specified that define how many time steps the "
+                                     "corresponding color are kept."),
                 }),
             ParameterGroupSpec()
                 .name("Cell glow")
@@ -825,8 +837,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Minimum size")
                         .reference(IntSpec().member(&SimulationParameters::cellCopyMutationDeletionMinSize).min(0).max(1000).logarithmic(true))
-                        .description("The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The "
-                                 "default is 0."),
+                        .description(
+                            "The minimum size of genomes (on the basis of the coded cells) is determined here that can result from delete mutations. The "
+                            "default is 0."),
                 }),
             ParameterGroupSpec()
                 .name("Customize neuron mutations")
@@ -835,11 +848,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Affected weights")
                         .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataWeight).min(0.0f).max(1.0f).format("%.3f"))
-                        .description("The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
+                        .description(
+                            "The proportion of weights in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
                     ParameterSpec()
                         .name("Affected biases")
                         .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataBias).min(0.0f).max(1.0f).format("%.3f"))
-                        .description("The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
+                        .description(
+                            "The proportion of biases in the neuronal network of a cell that are changed within a neuron mutation. The default is 0.2."),
                     ParameterSpec()
                         .name("Affected activation functions")
                         .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataActivationFunction).min(0.0f).max(1.0f).format("%.3f"))
@@ -849,21 +864,24 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Reinforcement factor")
                         .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataReinforcement).min(1.0f).max(2.0f).format("%.3f"))
-                        .description("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
-                                 "offset. "
-                                 "The factor that is used for reinforcement is defined here. The default is 1.05."),
+                        .description(
+                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
+                            "offset. "
+                            "The factor that is used for reinforcement is defined here. The default is 1.05."),
                     ParameterSpec()
                         .name("Damping factor")
                         .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataDamping).min(1.0f).max(2.0f).format("%.3f"))
-                        .description("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
-                                 "offset. "
-                                 "The factor that is used for weakening is defined here. The default is 1.05."),
+                        .description(
+                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
+                            "offset. "
+                            "The factor that is used for weakening is defined here. The default is 1.05."),
                     ParameterSpec()
                         .name("Offset")
                         .reference(FloatSpec().member(&SimulationParameters::cellCopyMutationNeuronDataOffset).min(0.0f).max(1.0f).format("%.3f"))
-                        .description("If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
-                                 "offset. "
-                                 "The value that is used for the offset is defined here. The default is 0.05."),
+                        .description(
+                            "If a weight or bias of the neural network is adjusted by a mutation, it can either be reinforced, weakened or shifted by an "
+                            "offset. "
+                            "The value that is used for the offset is defined here. The default is 0.05."),
                 }),
             ParameterGroupSpec()
                 .name("External energy control")
@@ -874,16 +892,17 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .reference(
                             FloatSpec().member(&SimulationParameters::externalEnergy).min(0.0f).max(100000000.0f).format("%.0f").logarithmic(true).infinity(true))
                         .description("This parameter can be used to set the amount of energy of an external energy pool. This type of energy can then be "
-                                 "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can "
-                                 "result in a "
-                                 "massive production of cells and slow down or even crash the simulation."),
+                                     "transferred to all constructor cells at a certain rate (see inflow settings).\n\nWarning: Too much external energy can "
+                                     "result in a "
+                                     "massive production of cells and slow down or even crash the simulation."),
                     ParameterSpec()
                         .name("Inflow")
                         .reference(FloatSpec().member(&SimulationParameters::externalEnergyInflowFactor).min(0.0f).max(1.0f).format("%.5f").logarithmic(true))
-                        .description("Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
-                                 "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external "
-                                 "energy "
-                                 "source."),
+                        .description(
+                            "Here one can specify the fraction of energy transferred to constructor cells.\n\nFor example, a value of 0.05 means that "
+                            "each time a constructor cell tries to build a new cell, 5% of the required energy is transferred for free from the external "
+                            "energy "
+                            "source."),
                     ParameterSpec()
                         .name("Conditional inflow")
                         .reference(
@@ -897,13 +916,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Inflow only for non-replicators")
                         .reference(BoolSpec().member(&SimulationParameters::externalEnergyInflowOnlyForNonSelfReplicators))
                         .description("If activated, external energy can only be transferred to constructor cells that are not self-replicators. "
-                                 "This option can be used to foster the evolution of additional body parts."),
+                                     "This option can be used to foster the evolution of additional body parts."),
                     ParameterSpec()
                         .name("Backflow")
                         .reference(FloatSpec().member(&SimulationParameters::externalEnergyBackflowFactor).min(0.0f).max(1.0f))
                         .description("The proportion of energy that flows back from the simulation to the external energy pool. Each time a cell loses energy "
-                                 "or dies a fraction of its energy will be taken. The remaining "
-                                 "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
+                                     "or dies a fraction of its energy will be taken. The remaining "
+                                     "fraction of the energy stays in the simulation and will be used to create a new energy particle."),
                     ParameterSpec()
                         .name("Backflow limit")
                         .reference(
@@ -915,7 +934,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                                 .logarithmic(true)
                                 .infinity(true))
                         .description("Energy from the simulation can only flow back into the external energy pool as long as the amount of external energy is "
-                                 "below this value."),
+                                     "below this value."),
                 }),
         });
     }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <variant>
 #include <optional>
 #include <string>
 #include <unordered_set>
+#include <variant>
 
-#include "Base/Macros.h"
-#include "Base/MathTypes.h"
+#include <Base/Macros.h>
+#include <Base/MathTypes.h>
 
 #include "Definitions.h"
 #include "GenomeDescription.h"
@@ -91,9 +91,13 @@ struct GeneratorDescription
     auto operator<=>(GeneratorDescription const&) const = default;
 
     // Fixed data
-    MEMBER(GeneratorDescription, int, autoTriggerInterval, 100);   // Must be >= 3
+    MEMBER(GeneratorDescription, int, autoTriggerInterval, 100);  // Must be >= 3
     MEMBER(GeneratorDescription, GeneratorPulseType, pulseType, GeneratorPulseType_Positive);
-    MEMBER(GeneratorDescription, int, alternationInterval, 20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
+    MEMBER(
+        GeneratorDescription,
+        int,
+        alternationInterval,
+        20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 
     // Process data
     MEMBER(GeneratorDescription, int, numPulses, 0);
@@ -118,12 +122,12 @@ struct AutoBendingDescription
     auto operator<=>(AutoBendingDescription const&) const = default;
 
     // Fixed data
-    MEMBER(AutoBendingDescription, float, maxAngleDeviation, 0.2f);    // Between 0 and 1
+    MEMBER(AutoBendingDescription, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
     MEMBER(AutoBendingDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 
     // Process data
     MEMBER(AutoBendingDescription, std::optional<float>, initialAngle, std::nullopt);
-    MEMBER(AutoBendingDescription, bool, forward, true);    // Current direction
+    MEMBER(AutoBendingDescription, bool, forward, true);  // Current direction
     MEMBER(AutoBendingDescription, float, activation, 0);
     MEMBER(AutoBendingDescription, int, activationCountdown, 0);
     MEMBER(AutoBendingDescription, bool, impulseAlreadyApplied, false);
@@ -134,8 +138,8 @@ struct ManualBendingDescription
     auto operator<=>(ManualBendingDescription const&) const = default;
 
     // Fixed data
-    MEMBER(ManualBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
-    MEMBER(ManualBendingDescription, float, forwardBackwardRatio, 0.8f);   // Between 0 and 1
+    MEMBER(ManualBendingDescription, float, maxAngleDeviation, 0.2f);     // Between 0 and 1
+    MEMBER(ManualBendingDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 
     // Process data
     MEMBER(ManualBendingDescription, std::optional<float>, initialAngle, std::nullopt);
@@ -148,7 +152,7 @@ struct AngleBendingDescription
     auto operator<=>(AngleBendingDescription const&) const = default;
 
     // Fixed data
-    MEMBER(AngleBendingDescription, float, maxAngleDeviation, 0.2f);   // Between 0 and 1
+    MEMBER(AngleBendingDescription, float, maxAngleDeviation, 0.2f);         // Between 0 and 1
     MEMBER(AngleBendingDescription, float, attractionRepulsionRatio, 0.8f);  // Between 0 and 1
 
     // Process data
@@ -160,13 +164,13 @@ struct AutoCrawlingDescription
     auto operator<=>(AutoCrawlingDescription const&) const = default;
 
     // Fixed data
-    MEMBER(AutoCrawlingDescription, float, maxDistanceDeviation, 0.8f); // Between 0 and 1
-    MEMBER(AutoCrawlingDescription, float, forwardBackwardRatio, 0.8f);    // Between 0 and 1
+    MEMBER(AutoCrawlingDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
+    MEMBER(AutoCrawlingDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 
     // Process data
     MEMBER(AutoCrawlingDescription, std::optional<float>, initialDistance, std::nullopt);
     MEMBER(AutoCrawlingDescription, float, lastActualDistance, 0.0f);
-    MEMBER(AutoCrawlingDescription, bool, forward, true);               // Current direction
+    MEMBER(AutoCrawlingDescription, bool, forward, true);  // Current direction
     MEMBER(AutoCrawlingDescription, float, activation, 0.0f);
     MEMBER(AutoCrawlingDescription, int, activationCountdown, 0);
     MEMBER(AutoCrawlingDescription, bool, impulseAlreadyApplied, false);
@@ -178,7 +182,7 @@ struct ManualCrawlingDescription
 
     // Fixed data
     MEMBER(ManualCrawlingDescription, float, maxDistanceDeviation, 0.8f);  // Between 0 and 1
-    MEMBER(ManualCrawlingDescription, float, forwardBackwardRatio, 0.8f);   // Between 0 and 1
+    MEMBER(ManualCrawlingDescription, float, forwardBackwardRatio, 0.8f);  // Between 0 and 1
 
     // Process data
     MEMBER(ManualCrawlingDescription, std::optional<float>, initialDistance, std::nullopt);
@@ -282,7 +286,11 @@ struct CellDescription
     MEMBER(CellDescription, float, energy, 100.0f);
     MEMBER(CellDescription, float, stiffness, 1.0f);
     MEMBER(CellDescription, int, color, 0);
-    MEMBER(CellDescription, std::optional<float>, frontAngle, std::nullopt); // Angle between [cell, cell->connection[0]] and front direction in reference configuration
+    MEMBER(
+        CellDescription,
+        std::optional<float>,
+        frontAngle,
+        std::nullopt);  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
     MEMBER(CellDescription, bool, barrier, false);
     MEMBER(CellDescription, bool, sticky, false);
     MEMBER(CellDescription, int, age, 0);
@@ -371,7 +379,7 @@ struct Description
     void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
     // First parameter of lambda is creature index, second parameter is cell index
     void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const;
-    void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc);  
+    void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc);
 
     size_t getNumCells() const;
 

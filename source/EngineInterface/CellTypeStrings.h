@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
 
 using namespace std::string_literals;

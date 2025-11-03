@@ -1,13 +1,12 @@
 #pragma once
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <cuda/helper_cuda.h>
-
-#include "CudaMemoryManager.cuh"
-#include "Util.cuh"
 #include "Base.cuh"
 #include "Constants.cuh"
+#include "CudaMemoryManager.cuh"
+#include "Util.cuh"
+#include <cuda/helper_cuda.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 namespace Const
 {
@@ -168,10 +167,7 @@ public:
 
     __device__ __inline__ uint64_t decNumEntriesAndReturnOrigSize() { return alienAtomicAdd64(_numEntries, uint64_t(-1)); }
 
-    __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const
-    {
-        return getNumEntries() + arraySizeInc > getCapacity() * Const::ArrayFillPercentage;
-    }
+    __device__ __inline__ bool shouldResize(uint64_t arraySizeInc) const { return getNumEntries() + arraySizeInc > getCapacity() * Const::ArrayFillPercentage; }
 };
 
 class Heap : public Array<uint8_t>
@@ -261,7 +257,7 @@ public:
     __device__ __inline__ T const& at(int index) const { return (*_data)[index]; }
 
     //returns index if successful, otherwise -1
-    __device__ __inline__ int tryAddEntry(T const& entry)   
+    __device__ __inline__ int tryAddEntry(T const& entry)
     {
         auto index = atomicAdd(_numEntries, 1);
         if (index < *_size) {

@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "Base/Math.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/GenomeDescription.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Math.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
 class DetonatorTests : public IntegrationTestFramework
@@ -94,14 +96,8 @@ TEST_F(DetonatorTests, chainExplosion)
 {
     Description data;
     data._cells = {
-        CellDescription()
-            .id(1)
-            .pos({10.0f, 10.0f})
-            .cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
-        CellDescription()
-            .id(2)
-            .pos({12.0f, 10.0f})
-            .cellType(DetonatorDescription().state(DetonatorState_Ready).countdown(10)),
+        CellDescription().id(1).pos({10.0f, 10.0f}).cellType(DetonatorDescription().state(DetonatorState_Activated).countdown(10)),
+        CellDescription().id(2).pos({12.0f, 10.0f}).cellType(DetonatorDescription().state(DetonatorState_Ready).countdown(10)),
     };
 
     _simulationFacade->setSimulationData(data);

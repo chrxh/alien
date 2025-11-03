@@ -1,14 +1,14 @@
 #include "LogWindow.h"
 
-#include <imgui.h>
-
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "Base/GlobalSettings.h"
+#include <imgui.h>
 
-#include "StyleRepository.h"
-#include "GuiLogger.h"
+#include <Base/GlobalSettings.h>
+
 #include "AlienGui.h"
+#include "GuiLogger.h"
+#include "StyleRepository.h"
 
 void LogWindow::initIntern(GuiLogger logger)
 {
@@ -28,8 +28,7 @@ void LogWindow::shutdownIntern()
 void LogWindow::processIntern()
 {
     auto& styleRepository = StyleRepository::get();
-    if (ImGui::BeginChild(
-            "##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
+    if (ImGui::BeginChild("##", ImVec2(0, ImGui::GetContentRegionAvail().y - styleRepository.scale(40.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
         ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
         ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
 

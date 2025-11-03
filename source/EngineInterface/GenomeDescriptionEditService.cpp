@@ -8,7 +8,7 @@
 #include "DescriptionEditService.h"
 #include "GenomeDescriptionInfoService.h"
 
-namespace 
+namespace
 {
     auto constexpr PreviewColor = 0;
 }
@@ -191,12 +191,12 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     SeedCollectionResult result;
     for (auto const& subGenome : subGenomes) {
         std::optional<Description> cachedValue;
-        
+
         // Try to get from cache if provided
         if (cache.has_value()) {
             cachedValue = cache.value().get().find(subGenome);
         }
-        
+
         if (cachedValue.has_value()) {
             auto cachedPhenotype = cachedValue.value();
             editService.setCenter(cachedPhenotype, currentPos);
@@ -208,8 +208,8 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
             }
             result.description.add(std::move(cachedPhenotype));
 
-            auto index =
-                seedFirst ? result.description._creatures.size() - cachedPhenotype._creatures.size() : result.description._creatures.size() - cachedPhenotype._creatures.size() + 1;
+            auto index = seedFirst ? result.description._creatures.size() - cachedPhenotype._creatures.size()
+                                   : result.description._creatures.size() - cachedPhenotype._creatures.size() + 1;
             result.seedCreatureIds.emplace_back(result.description._creatures.at(index)._id);
         } else {
             auto seed = createSeedForPreview(subGenome, currentPos);
@@ -222,8 +222,7 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     return result;
 }
 
-std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPreview(
-    Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const
+std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPreview(Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const
 {
     std::unordered_map<uint64_t, int> creatureIdToIndex;
     for (auto const& [index, creatureId] : seedCreatureIds | boost::adaptors::indexed(0)) {
@@ -270,13 +269,15 @@ Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescript
 {
     Description result;
     result._genomes.emplace_back(subGenome.genome);
-    result._creatures.emplace_back(
-        CreatureDescription()
-            .genomeId(subGenome.genome._id)
-            .cells({
-                CellDescription().color(PreviewColor).stiffness(1.0f).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex)).pos(pos),
-            })
-    );
+    result._creatures.emplace_back(CreatureDescription()
+                                       .genomeId(subGenome.genome._id)
+                                       .cells({
+                                           CellDescription()
+                                               .color(PreviewColor)
+                                               .stiffness(1.0f)
+                                               .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))
+                                               .pos(pos),
+                                       }));
     return result;
 }
 

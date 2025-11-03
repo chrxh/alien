@@ -3,12 +3,12 @@
 #include <optional>
 #include <vector>
 
-#include <boost/range/adaptors.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/range/adaptor/sliced.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/range/adaptors.hpp>
 
-#include "Base/Resources.h"
+#include <Base/Resources.h>
 
 bool VersionParserService::isVersionValid(std::string const& otherVersionString)
 {

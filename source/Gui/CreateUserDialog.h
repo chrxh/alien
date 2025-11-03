@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "Network/NetworkService.h"
+#include <Base/Singleton.h>
+
+#include <Network/NetworkService.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -14,6 +15,7 @@ public:
     void open(std::string const& userName, std::string const& password, UserInfo const& userInfo);
 
     void onCreateUser();
+
 private:
     CreateUserDialog();
 

@@ -1,7 +1,6 @@
 ﻿#include "GeometryKernels.cuh"
-
-#include "SignalProcessor.cuh"
 #include "ParameterCalculator.cuh"
+#include "SignalProcessor.cuh"
 
 namespace
 {
@@ -42,7 +41,8 @@ __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 vis
 
 namespace
 {
-    __device__ __inline__ uint32_t getCellColor(int colorCode) {
+    __device__ __inline__ uint32_t getCellColor(int colorCode)
+    {
         uint32_t result;
         switch (calcMod(colorCode, MAX_COLORS)) {
         case 0: {
@@ -123,7 +123,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
         auto const& pos = cell->pos;
 
         auto const& cellColor = getCellColor(cell->color);
-        
+
         auto luminance = (cell->energy + 00.0f) / 300.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
         auto white = luminance / 10.0f;
         if (cell->selected == 1) {
@@ -143,7 +143,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
-        auto zOffset = cell->creature != nullptr ? toFloat(cell->creature->id % 1000) / 2000: 0.0f;
+        auto zOffset = cell->creature != nullptr ? toFloat(cell->creature->id % 1000) / 2000 : 0.0f;
 
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
@@ -270,10 +270,10 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
         // Write energy particle data
         energyParticleData[index].pos[0] = pos.x;
         energyParticleData[index].pos[1] = pos.y;
-        energyParticleData[index].pos[2] = 0.0f;  // Energy particles don't need z-position for lighting
+        energyParticleData[index].pos[2] = 0.0f;                 // Energy particles don't need z-position for lighting
         energyParticleData[index].color[0] = intensity * 0.25f;  // Red component
         energyParticleData[index].color[1] = intensity * 0.25f;  // Green component
-        energyParticleData[index].color[2] = intensity * 1.0f;  // Blue component (reduced for yellow tint)
+        energyParticleData[index].color[2] = intensity * 1.0f;   // Blue component (reduced for yellow tint)
     }
 }
 
@@ -318,7 +318,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                 locationData[*numLocations].color[1] = color.g;
                 locationData[*numLocations].color[2] = color.b;
                 locationData[*numLocations].shapeType = shapeType;  // 0 = circular, 1 = rectangular
-                if (shapeType == 0) {  // Circular
+                if (shapeType == 0) {                               // Circular
                     locationData[*numLocations].dimension1 = radius;
                     locationData[*numLocations].dimension2 = 0.0f;
                 } else {  // Rectangular
@@ -353,8 +353,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
             {static_cast<float>(worldSize.x), 0.0f},
             {-static_cast<float>(worldSize.x), 0.0f},
             {0.0f, static_cast<float>(worldSize.y)},
-            {0.0f, -static_cast<float>(worldSize.y)}
-        };
+            {0.0f, -static_cast<float>(worldSize.y)}};
 
         for (int j = 0; j < 5; ++j) {
             if (locationData != nullptr) {
@@ -364,7 +363,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
                 locationData[*numLocations].color[1] = color.y;
                 locationData[*numLocations].color[2] = color.z;
                 locationData[*numLocations].shapeType = shapeType;  // 0 = circular, 1 = rectangular
-                if (shapeType == 0) {  // Circular
+                if (shapeType == 0) {                               // Circular
                     locationData[*numLocations].dimension1 = radius;
                     locationData[*numLocations].dimension2 = 0.0f;
                     locationData[*numLocations].fadeoutRadius = radius / 5.0f;
@@ -381,13 +380,12 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void
-cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
+__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
 {
     // Process selected cells
     auto const& cells = data.objects.cells;
     auto numCells = cells.getNumEntries();
-    
+
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numCells; index += blockDim.x * gridDim.x) {
         auto const& cell = cells.at(index);
         if (cell->selected == 1) {
@@ -395,7 +393,7 @@ cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* sel
             if (selectedObjectData != nullptr) {
                 selectedObjectData[outputIndex].pos[0] = cell->pos.x;
                 selectedObjectData[outputIndex].pos[1] = cell->pos.y;
-                
+
                 // Calculate signal angle restrictions for this cell
                 // The 180° offset converts from connection-relative to absolute angles in world space
                 if (cell->signalRestriction.active && cell->numConnections > 0) {
@@ -406,7 +404,7 @@ cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* sel
                     auto signalAngleRestrictionEnd = connectionAngle + 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
                     signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
                     signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
-                    
+
                     selectedObjectData[outputIndex].hasSignalRestriction = 1;
                     selectedObjectData[outputIndex].startAngle = signalAngleRestrictionStart;
                     selectedObjectData[outputIndex].endAngle = signalAngleRestrictionEnd;
@@ -418,11 +416,11 @@ cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* sel
             }
         }
     }
-    
+
     // Process selected energy particles
     auto const& particles = data.objects.particles;
     auto numParticles = particles.getNumEntries();
-    
+
     for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < numParticles; index += blockDim.x * gridDim.x) {
         auto const& particle = particles.at(index);
         if (particle->selected == 1) {
@@ -438,10 +436,7 @@ cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* sel
     }
 }
 
-__global__ void cudaExtractSelectedConnectionData(
-    SimulationData data,
-    ConnectionArrowVertexData* connectionArrowData,
-    uint64_t* numConnectionArrowVertices)
+__global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
@@ -450,44 +445,44 @@ __global__ void cudaExtractSelectedConnectionData(
         if (cell->selected == 0) {
             continue;
         }
-        
+
         // Calculate signal angle restrictions for this cell
         auto signalAngleRestrictionStart = 180.0f + cell->signalRestriction.baseAngle - cell->signalRestriction.openingAngle / 2;
         auto signalAngleRestrictionEnd = 180.0f + cell->signalRestriction.baseAngle + cell->signalRestriction.openingAngle / 2;
         signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
         signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
-        
+
         auto summedAngle = 0.0f;
-        
+
         // Process each connection from this cell
         for (int i = 0; i < cell->numConnections; ++i) {
             if (i > 0) {
                 summedAngle += cell->connections[i].angleFromPrevious;
             }
-            
+
             auto connectedCell = cell->connections[i].cell;
-            
+
             // Only add each connection once (from lower id to higher id to avoid duplicates)
             if (cell->id >= connectedCell->id) {
                 continue;
             }
-            
+
             // Check if this connection should be drawn
             if (Math::length(cell->pos - connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[cell->color]) {
                 continue;
             }
-            
+
             // Determine if signal can flow from cell1 to cell2
-            bool arrowToCell2 = !cell->signalRestriction.active 
-                || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
-            
+            bool arrowToCell2 =
+                !cell->signalRestriction.active || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+
             // Determine if signal can flow from cell2 to cell1
             // Need to calculate the reverse angle from connectedCell's perspective
             auto signalAngleRestrictionStart2 = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
             auto signalAngleRestrictionEnd2 = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
             signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
             signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
-            
+
             // Find the angle of this connection from connectedCell's perspective
             auto summedAngle2 = 0.0f;
             bool arrowToCell1 = false;
@@ -496,23 +491,23 @@ __global__ void cudaExtractSelectedConnectionData(
                     summedAngle2 += connectedCell->connections[j].angleFromPrevious;
                 }
                 if (connectedCell->connections[j].cell->id == cell->id) {
-                    arrowToCell1 = !connectedCell->signalRestriction.active 
+                    arrowToCell1 = !connectedCell->signalRestriction.active
                         || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
                     break;
                 }
             }
-            
+
             // Get cell colors
             auto cellColor = getCellColor(cell->color);
             auto connectedCellColor = getCellColor(connectedCell->color);
-            
+
             // Encode arrow direction in flags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
             int arrowFlags = (arrowToCell1 ? 1 : 0) | (arrowToCell2 ? 2 : 0);
-            
+
             // Add connection arrow data (2 vertices for the line)
             uint64_t vertexIndex = alienAtomicAdd64(numConnectionArrowVertices, uint64_t(2));
             if (connectionArrowData != nullptr) {
-               
+
                 // First vertex (cell1)
                 connectionArrowData[vertexIndex].pos[0] = cell->pos.x;
                 connectionArrowData[vertexIndex].pos[1] = cell->pos.y;
@@ -520,7 +515,7 @@ __global__ void cudaExtractSelectedConnectionData(
                 connectionArrowData[vertexIndex].color[1] = toFloat((cellColor >> 8) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].color[2] = toFloat((cellColor >> 0) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex].arrowFlags = arrowFlags;
-                
+
                 // Second vertex (cell2)
                 connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
                 connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
@@ -538,10 +533,10 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        
+
         // Only process cells that have been attacked and have attackVisualization enabled
         if (cell->eventCounter > 0 && cell->event == CellEvent_Attacked) {
-            
+
             // Check if the attacker position is close enough to draw
             if (Math::length(cell->eventPos - cell->pos) < 10.0f) {
                 // Add attack event line data (2 vertices for the line: from attacker to attacked)
@@ -549,14 +544,14 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
                 if (attackEventData != nullptr) {
                     // Red color for attacked event
                     float redColor[3] = {0.5f, 0.0f, 0.0f};
-                    
+
                     // First vertex (attacker position - from eventPos)
                     attackEventData[vertexIndex].pos[0] = cell->eventPos.x;
                     attackEventData[vertexIndex].pos[1] = cell->eventPos.y;
                     attackEventData[vertexIndex].color[0] = redColor[0];
                     attackEventData[vertexIndex].color[1] = redColor[1];
                     attackEventData[vertexIndex].color[2] = redColor[2];
-                    
+
                     // Second vertex (attacked cell position)
                     attackEventData[vertexIndex + 1].pos[0] = cell->pos.x;
                     attackEventData[vertexIndex + 1].pos[1] = cell->pos.y;
@@ -568,24 +563,23 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         }
     }
 }
-__global__ void
-cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices)
+__global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices)
 {
     auto const& partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
-        
+
         // Only process cells that have detonation event
         if (cell->eventCounter > 0 && cell->event == CellEvent_Detonation) {
-            
+
             // Add detonation event point data (1 vertex for the circle center)
             uint64_t vertexIndex = alienAtomicAdd64(numDetonationEventVertices, uint64_t(1));
             if (detonationEventData != nullptr) {
                 // Position of the detonation
                 detonationEventData[vertexIndex].pos[0] = cell->pos.x;
                 detonationEventData[vertexIndex].pos[1] = cell->pos.y;
-                
+
                 // Radius proportional to eventCounter
                 // Scale the radius based on eventCounter (make it visible)
                 detonationEventData[vertexIndex].radius = toFloat(cell->eventCounter * cell->eventCounter) / 3.0f;

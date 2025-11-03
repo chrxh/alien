@@ -1,6 +1,7 @@
 #pragma once
 
-#include "EngineInterface/StatisticsRawData.h"
+#include <EngineInterface/StatisticsRawData.h>
+
 #include "Definitions.h"
 
 class HistogramLiveStatistics

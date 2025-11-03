@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Base/Definitions.h"
-#include "Base/Singleton.h"
+#include <Base/Definitions.h>
+#include <Base/Singleton.h>
 
 #include "Definitions.h"
 #include "MainLoopEntity.h"

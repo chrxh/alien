@@ -2,22 +2,19 @@
 
 #include <vector>
 
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-
-#include <cuda/helper_cuda.h>
-
-#include "EngineInterface/Ids.h"
+#include <EngineInterface/Ids.h>
 
 #include "Array.cuh"
-#include "CudaMemoryManager.cuh"
 #include "Base.cuh"
+#include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
+#include <cuda/helper_cuda.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 class CudaNumberGenerator
 {
 public:
-
     // Methods for host
     __host__ void init(int size)
     {

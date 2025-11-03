@@ -1,8 +1,7 @@
-#include "MaxAgeBalancer.cuh"
-
 #include <vector>
 
 #include "Base.cuh"
+#include "MaxAgeBalancer.cuh"
 
 namespace
 {

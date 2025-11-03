@@ -1,6 +1,5 @@
-﻿#include "Objects.cuh"
-
-#include "Object.cuh"
+﻿#include "Object.cuh"
+#include "Objects.cuh"
 
 void Objects::init()
 {

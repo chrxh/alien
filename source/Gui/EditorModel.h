@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Base/Definitions.h"
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/SelectionShallowData.h"
+#include <Base/Definitions.h>
+#include <Base/Singleton.h>
+
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/SelectionShallowData.h>
 
 #include "Definitions.h"
 #include "InspectorWindow.h"

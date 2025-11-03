@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineInterface/GeometryBuffers.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"
 #include "RenderStep.h"
@@ -31,7 +31,6 @@ struct RenderSequence
         }
     }
     std::variant<int, RepetitionFunc> _repetitions = 1;
-
 };
 
 // Contains RenderSequences that are independent
@@ -53,8 +52,7 @@ private:
 
     void forEachStep(
         std::function<TextureTarget()> const& getTextureTarget,
-        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target)> const&
-            executeStep);
+        std::function<void(RenderStep& step, std::vector<unsigned int> const& textures, RenderTarget const& target)> const& executeStep);
 
     struct TargetInfo
     {
@@ -76,9 +74,8 @@ private:
 
     SimulationFacade _simulationFacade;
     RenderBlocks _blocks;
-    
+
     GeometryBuffers _geometryBuffers;
     std::vector<TextureTarget> _textureTargets;
     std::optional<IntVector2D> _textureSize;
 };
-

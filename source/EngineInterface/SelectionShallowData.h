@@ -23,10 +23,9 @@ struct SelectionShallowData
 
     bool operator==(SelectionShallowData const& other) const
     {
-        return numCells == other.numCells && numClusterCells == other.numClusterCells
-            && numParticles == other.numParticles && centerPosX == other.centerPosX && centerPosY == other.centerPosY
-            && centerVelX == other.centerVelX && centerVelY == other.centerVelY && clusterCenterPosX == other.clusterCenterPosX
-            && clusterCenterPosY == other.clusterCenterPosY && clusterCenterVelX == other.clusterCenterVelX
+        return numCells == other.numCells && numClusterCells == other.numClusterCells && numParticles == other.numParticles && centerPosX == other.centerPosX
+            && centerPosY == other.centerPosY && centerVelX == other.centerVelX && centerVelY == other.centerVelY
+            && clusterCenterPosX == other.clusterCenterPosX && clusterCenterPosY == other.clusterCenterPosY && clusterCenterVelX == other.clusterCenterVelX
             && clusterCenterVelY == other.clusterCenterVelY;
     }
     bool operator!=(SelectionShallowData const& other) const { return !(*this == other); }

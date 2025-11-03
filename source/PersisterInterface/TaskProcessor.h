@@ -3,9 +3,9 @@
 #include <functional>
 #include <vector>
 
+#include "Definitions.h"
 #include "PersisterFacade.h"
 #include "PersisterRequestId.h"
-#include "Definitions.h"
 
 class _TaskProcessor
 {

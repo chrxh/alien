@@ -1,15 +1,15 @@
 #pragma once
 
 
-#include "EngineInterface/CellTypeConstants.h"
+#include <EngineInterface/CellTypeConstants.h>
 
-#include "Object.cuh"
-#include "SignalProcessor.cuh"
 #include "ConstantMemory.cuh"
-#include "SimulationData.cuh"
+#include "Object.cuh"
 #include "ParameterCalculator.cuh"
-#include "SimulationStatistics.cuh"
 #include "RadiationProcessor.cuh"
+#include "SignalProcessor.cuh"
+#include "SimulationData.cuh"
+#include "SimulationStatistics.cuh"
 
 class AttackerProcessor
 {
@@ -256,7 +256,7 @@ __inline__ __device__ bool AttackerProcessor::isHomogene(Cell* cell)
         }
         for (int j = 0; j < otherCell->numConnections; ++j) {
             auto otherOtherCell = otherCell->connections[j].cell;
-            if (color != otherOtherCell->color ) {
+            if (color != otherOtherCell->color) {
                 return false;
             }
         }

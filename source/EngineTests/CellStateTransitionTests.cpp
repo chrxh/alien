@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "Base/Math.h"
-#include "EngineInterface/NumberGenerator.h"
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/Description.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Math.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/SimulationFacade.h>
+
 #include "IntegrationTestFramework.h"
 
 class CellStateTransitionTests
@@ -103,14 +105,13 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(true).nodes({NodeDescription()}),
     });
-    
+
     Description data;
     data.addCreature(
-        CreatureDescription()
-            .cells({
-                CellDescription().id(1).cellType(ConstructorDescription().geneIndex(0)).pos({10.0f, 10.0f}).cellState(CellState_Ready),
-                CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
-            }),
+        CreatureDescription().cells({
+            CellDescription().id(1).cellType(ConstructorDescription().geneIndex(0)).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+            CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
+        }),
         genome);
     data.addConnection(1, 2);
 
@@ -136,12 +137,8 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature(
-        CreatureDescription().cells({CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready)}),
-        GenomeDescription());
-    data.addCreature(
-        CreatureDescription().cells({CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}),
-        GenomeDescription());
+    data.addCreature(CreatureDescription().cells({CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready)}), GenomeDescription());
+    data.addCreature(CreatureDescription().cells({CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}), GenomeDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);

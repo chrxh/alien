@@ -3,30 +3,31 @@
 #include "cuda_runtime_api.h"
 
 #include "ConstantMemory.cuh"
-#include "Util.cuh"
-#include "Math.cuh"
 #include "Map.cuh"
+#include "Math.cuh"
 #include "SimulationData.cuh"
+#include "Util.cuh"
 
 class ParameterCalculator
 {
 public:
     __device__ __inline__ static float calcParameter(BaseLayerParameter<float> const& parameter, SimulationData const& data, float2 const& worldPos);
-    __device__ __inline__ static float calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color);
-    __device__ __inline__ static float calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
-    __device__ __inline__ static float2 calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
+    __device__ __inline__ static float
+    calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color);
+    __device__ __inline__ static float
+    calcParameter(BaseLayerParameter<ColorMatrix<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color1, int color2);
+    __device__ __inline__ static float2
+    calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos);
     __device__ __inline__ static FloatColorRGB calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos);
 
     //return -1 for base
     template <typename T>
-    __device__ __inline__ static int
-    getFirstMatchingLayerOrBase(SimulationData const& data, float2 const& worldPos, BaseLayerParameter<T> const& parameter);
+    __device__ __inline__ static int getFirstMatchingLayerOrBase(SimulationData const& data, float2 const& worldPos, BaseLayerParameter<T> const& parameter);
 
     __device__ __inline__ static bool isCoveredByLayers(SimulationData const& data, float2 const& worldPos, LayerParameter<bool> const& enabledParameter);
 
 
 private:
-
     __device__ __inline__ static float calcWeight(float2 const& delta, int const& index);
     __device__ __inline__ static float calcWeightForCircularLayer(float2 const& delta, int const& index);
     __device__ __inline__ static float calcWeightForRectLayer(float2 const& delta, int const& index);
@@ -51,7 +52,8 @@ __device__ __inline__ float ParameterCalculator::calcParameter(BaseLayerParamete
     return result;
 }
 
-__device__ __inline__ float ParameterCalculator::calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color)
+__device__ __inline__ float
+ParameterCalculator::calcParameter(BaseLayerParameter<ColorVector<float>> const& parameter, SimulationData const& data, float2 const& worldPos, int color)
 {
     auto result = parameter.baseValue[color];
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
@@ -84,7 +86,8 @@ __device__ __inline__ float ParameterCalculator::calcParameter(
     return result;
 }
 
-__device__ __inline__ float2 ParameterCalculator::calcParameter(float2 const& baseValue, float2(& layerValues)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos)
+__device__ __inline__ float2
+ParameterCalculator::calcParameter(float2 const& baseValue, float2 (&layerValues)[MAX_LAYERS], SimulationData const& data, float2 const& worldPos)
 {
     auto result = baseValue;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
@@ -96,7 +99,8 @@ __device__ __inline__ float2 ParameterCalculator::calcParameter(float2 const& ba
     return result;
 }
 
-__device__ __inline__ FloatColorRGB ParameterCalculator::calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos)
+__device__ __inline__ FloatColorRGB
+ParameterCalculator::calcParameter(BaseLayerParameter<FloatColorRGB> const& parameter, BaseMap const& map, float2 const& worldPos)
 {
     auto result = parameter.baseValue;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
@@ -112,7 +116,7 @@ __device__ __inline__ FloatColorRGB ParameterCalculator::calcParameter(BaseLayer
     return result;
 }
 
-template<typename T>
+template <typename T>
 __device__ __inline__ int
 ParameterCalculator::getFirstMatchingLayerOrBase(SimulationData const& data, float2 const& worldPos, BaseLayerParameter<T> const& parameter)
 {
@@ -129,7 +133,8 @@ ParameterCalculator::getFirstMatchingLayerOrBase(SimulationData const& data, flo
     return -1;
 }
 
-__device__ __inline__ bool ParameterCalculator::isCoveredByLayers(SimulationData const& data, float2 const& worldPos, LayerParameter<bool> const& enabledParameter)
+__device__ __inline__ bool
+ParameterCalculator::isCoveredByLayers(SimulationData const& data, float2 const& worldPos, LayerParameter<bool> const& enabledParameter)
 {
     auto const& map = data.cellMap;
     for (int i = 0; i < cudaSimulationParameters.numLayers; ++i) {
@@ -170,10 +175,10 @@ __device__ __inline__ float ParameterCalculator::calcWeightForRectLayer(float2 c
         float2 distanceFromRect = {
             max(0.0f, abs(delta.x) - cudaSimulationParameters.layerCoreRect.layerValues[index].x / 2),
             max(0.0f, abs(delta.y) - cudaSimulationParameters.layerCoreRect.layerValues[index].y / 2)};
-        return
-            min(1.0f,
-                1.0f - cudaSimulationParameters.layerOpacity.layerValues[index]
-                    + Math::length(distanceFromRect) / (cudaSimulationParameters.layerFadeoutRadius.layerValues[index] + 1));
+        return min(
+            1.0f,
+            1.0f - cudaSimulationParameters.layerOpacity.layerValues[index]
+                + Math::length(distanceFromRect) / (cudaSimulationParameters.layerFadeoutRadius.layerValues[index] + 1));
     } else {
         return 1.0f - cudaSimulationParameters.layerOpacity.layerValues[index];
     }

@@ -2,14 +2,15 @@
 
 #include <sstream>
 
-#include <GLFW/glfw3.h>
 #include <imgui.h>
 
-#include "Base/LoggingService.h"
+#include <Base/LoggingService.h>
 
 #include "AlienGui.h"
-#include "WindowController.h"
 #include "StyleRepository.h"
+#include "WindowController.h"
+
+#include <GLFW/glfw3.h>
 
 namespace
 {
@@ -101,8 +102,8 @@ namespace
 {
     bool operator==(GLFWvidmode const& m1, GLFWvidmode const& m2)
     {
-        return m1.width == m2.width && m1.height == m2.height && m1.redBits == m2.redBits
-            && m1.greenBits == m2.greenBits && m1.blueBits == m2.blueBits && m1.refreshRate == m2.refreshRate;
+        return m1.width == m2.width && m1.height == m2.height && m1.redBits == m2.redBits && m1.greenBits == m2.greenBits && m1.blueBits == m2.blueBits
+            && m1.refreshRate == m2.refreshRate;
     }
 }
 

@@ -1,7 +1,7 @@
 #include "FileLogger.h"
 
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include "Definitions.h"
 

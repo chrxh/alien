@@ -7,12 +7,12 @@
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
 
-#include "Base/Exceptions.h"
+#include <Base/Exceptions.h>
 
-#include "EngineInterface/Description.h"
-#include "EngineInterface/NumberGenerator.h"
+#include <EngineInterface/Description.h>
+#include <EngineInterface/NumberGenerator.h>
 
-#include "EngineGpuKernels/TOProvider.cuh"
+#include <EngineGpuKernels/TOProvider.cuh>
 
 
 namespace
@@ -25,9 +25,9 @@ namespace
 
     void stringToChar64(std::string const& source, Char64& target)
     {
-        size_t length = std::min(source.length(), size_t(63)); // Leave space for null terminator
+        size_t length = std::min(source.length(), size_t(63));  // Leave space for null terminator
         std::memcpy(target, source.c_str(), length);
-        target[length] = '\0'; // Ensure null termination
+        target[length] = '\0';  // Ensure null termination
         // Clear remaining bytes
         for (size_t i = length + 1; i < 64; ++i) {
             target[i] = '\0';
@@ -169,16 +169,14 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     for (auto const& cell : description._cells) {
-        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);        
+        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);
     }
     for (auto const& creature : description._creatures) {
         for (auto const& cell : creature._cells) {
             convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creature._id, creatureTOIndexById);
         }
     }
-    description.forEachCell([&](auto const& cell) {
-        setConnections(cellTOs, cell, cellIndexTOById);
-    });
+    description.forEachCell([&](auto const& cell) { setConnections(cellTOs, cell, cellIndexTOById); });
     for (auto const& particle : description._particles) {
         addParticle(particleTOs, particle);
     }
@@ -233,9 +231,7 @@ DescriptionConverterService::DescriptionConverterService()
     _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
-CellDescription DescriptionConverterService::createCellDescription(
-    TO const& to,
-    int cellIndex) const
+CellDescription DescriptionConverterService::createCellDescription(TO const& to, int cellIndex) const
 {
     CellDescription result(false);
 
@@ -300,9 +296,9 @@ CellDescription DescriptionConverterService::createCellDescription(
         constructor._constructionAngle = cellTO.cellTypeData.constructor.constructionAngle;
         constructor._provideEnergy = cellTO.cellTypeData.constructor.provideEnergy;
         constructor._geneIndex = cellTO.cellTypeData.constructor.geneIndex;
-        constructor._lastConstructedCellId = 
-            cellTO.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64 ? 
-            std::make_optional(cellTO.cellTypeData.constructor.lastConstructedCellId) : std::nullopt;
+        constructor._lastConstructedCellId = cellTO.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
+            ? std::make_optional(cellTO.cellTypeData.constructor.lastConstructedCellId)
+            : std::nullopt;
         constructor._currentNodeIndex = cellTO.cellTypeData.constructor.currentNodeIndex;
         constructor._currentConcatenation = cellTO.cellTypeData.constructor.currentConcatenation;
         constructor._currentBranch = cellTO.cellTypeData.constructor.currentBranch;
@@ -469,9 +465,8 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Constructor: {
         ConstructorGenomeDescription constructorDesc;
-        constructorDesc._autoTriggerInterval = nodeTO->cellTypeData.constructor.autoTriggerInterval > 0
-            ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval)
-            : std::nullopt;
+        constructorDesc._autoTriggerInterval =
+            nodeTO->cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
         constructorDesc._geneIndex = nodeTO->cellTypeData.constructor.geneIndex;
         constructorDesc._constructionActivationTime = nodeTO->cellTypeData.constructor.constructionActivationTime;
         constructorDesc._constructionAngle = nodeTO->cellTypeData.constructor.constructionAngle;
@@ -601,20 +596,20 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
     return result;
 }
 
- CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& to, int creatureIndex) const
- {
-     CreatureDescription result;
- 
-     auto const& creatureTO = to.creatures[creatureIndex];
-     result._id = creatureTO.id;
-     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
-     result._generation = creatureTO.generation;
-     result._lineageId = creatureTO.lineageId;
-     result._numCells = creatureTO.numCells;
-     result._frontAngleId = creatureTO.frontAngleId;
- 
-     return result;
- }
+CreatureDescription DescriptionConverterService::createCreatureDescription(TO const& to, int creatureIndex) const
+{
+    CreatureDescription result;
+
+    auto const& creatureTO = to.creatures[creatureIndex];
+    result._id = creatureTO.id;
+    result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
+    result._generation = creatureTO.generation;
+    result._lineageId = creatureTO.lineageId;
+    result._numCells = creatureTO.numCells;
+    result._frontAngleId = creatureTO.frontAngleId;
+
+    return result;
+}
 
 ParticleDescription DescriptionConverterService::createParticleDescription(TO const& to, int particleIndex) const
 {

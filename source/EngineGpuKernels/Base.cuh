@@ -2,15 +2,15 @@
 
 #include <vector>
 
-#include "EngineInterface/CudaSettings.h"
+#include <EngineInterface/CudaSettings.h>
 
 #include "CudaMemoryManager.cuh"
 #include "Definitions.cuh"
 #include "HashSet.cuh"
-#include "Util.cuh"
 #include "Macros.cuh"
+#include "Util.cuh"
 
-template<typename T>
+template <typename T>
 __device__ __host__ inline float toFloat(T value)
 {
     return static_cast<float>(value);
@@ -49,17 +49,15 @@ __device__ __inline__ PartitionData calcPartition(uint64_t numEntities, uint64_t
     int remainder = numEntities % numIndices;
 
     int length = index < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
-    result.startIndex = index < remainder
-        ? (entitiesByDivisions + 1) * index
-        : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (index - remainder);
+    result.startIndex =
+        index < remainder ? (entitiesByDivisions + 1) * index : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (index - remainder);
     result.endIndex = result.startIndex + length - 1;
     return result;
 }
 
 __device__ __inline__ PartitionData calcAllThreadsPartition(uint64_t numEntities)
 {
-    return calcPartition(
-        numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    return calcPartition(numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }
 
 __device__ __inline__ PartitionData calcBlockPartition(uint64_t numEntities)
@@ -86,32 +84,26 @@ __host__ __device__ __inline__ int floorInt(float v)
     return result;
 }
 
-__host__ __device__ __inline__ bool
-isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
+__host__ __device__ __inline__ bool isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, float2 const& pos)
 {
-    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x
-        && pos.y >= rectUpperLeft.y && pos.y <= rectLowerRight.y;
+    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x && pos.y >= rectUpperLeft.y && pos.y <= rectLowerRight.y;
 }
 
-__host__ __device__ __inline__ bool
-isContainedInRect(float2 const& rectUpperLeft, float2 const& rectLowerRight, float2 const& pos)
+__host__ __device__ __inline__ bool isContainedInRect(float2 const& rectUpperLeft, float2 const& rectLowerRight, float2 const& pos)
 {
-    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x && pos.y >= rectUpperLeft.y
-        && pos.y <= rectLowerRight.y;
+    return pos.x >= rectUpperLeft.x && pos.x <= rectLowerRight.x && pos.y >= rectUpperLeft.y && pos.y <= rectLowerRight.y;
 }
 
-__host__ __device__ __inline__ bool
-isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int boundary = 0)
+__host__ __device__ __inline__ bool isContainedInRect(int2 const& rectUpperLeft, int2 const& rectLowerRight, int2 const& pos, int boundary = 0)
 {
-    return pos.x >= rectUpperLeft.x + boundary && pos.x <= rectLowerRight.x - boundary
-        && pos.y >= rectUpperLeft.y + boundary && pos.y <= rectLowerRight.y - boundary;
+    return pos.x >= rectUpperLeft.x + boundary && pos.x <= rectLowerRight.x - boundary && pos.y >= rectUpperLeft.y + boundary
+        && pos.y <= rectLowerRight.y - boundary;
 }
 
 template <typename T>
 __device__ __inline__ T alienAtomicRead(T* const& address)
 {
     return atomicAdd(address, 0);
-        
 }
 
 // CUDA headers use "unsigned long long" for 64bit types, which
@@ -227,7 +219,7 @@ public:
         _lockState2 = atomicExch(_lock2, 1);
         if (0 != _lockState1 || 0 != _lockState2) {
             releaseLock();
-             return false;
+            return false;
         }
         __threadfence();
         return true;
@@ -289,7 +281,7 @@ __device__ __inline__ int calcMod(char value, int count)
     return static_cast<unsigned char>(value) % count;
 }
 
-template<typename Container, typename LessFunc>
+template <typename Container, typename LessFunc>
 __device__ __inline__ void bubbleSort(Container& container, int size, LessFunc lessFunc)
 {
     bool newRound = true;
@@ -297,7 +289,7 @@ __device__ __inline__ void bubbleSort(Container& container, int size, LessFunc l
         if (newRound) {
             newRound = false;
             for (int j = 0; j <= i - 1; ++j) {
-                if (lessFunc(container[j + 1],container[j])) {
+                if (lessFunc(container[j + 1], container[j])) {
                     auto temp = container[j];
                     container[j] = container[j + 1];
                     container[j + 1] = temp;

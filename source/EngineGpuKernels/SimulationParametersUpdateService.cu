@@ -1,13 +1,12 @@
-#include "SimulationParametersUpdateService.cuh"
-
 #include <vector>
 
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/SpaceCalculator.h"
+#include <EngineInterface/SimulationParameters.h>
+#include <EngineInterface/SpaceCalculator.h>
 
 #include "Base.cuh"
-#include "SimulationData.cuh"
 #include "MaxAgeBalancer.cuh"
+#include "SimulationData.cuh"
+#include "SimulationParametersUpdateService.cuh"
 
 SimulationParameters SimulationParametersUpdateService::integrateChanges(
     SimulationParameters const& currentParameters,

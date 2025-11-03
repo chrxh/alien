@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Base/Singleton.h"
-#include "EngineInterface/Definitions.h"
-#include "EngineInterface/Description.h"
+#include <Base/Singleton.h>
 
-#include "Definitions.h"
+#include <EngineInterface/Definitions.h>
+#include <EngineInterface/Description.h>
+
 #include "AlienWindow.h"
+#include "Definitions.h"
 
 class SpatialControlWindow : public AlienWindow<SimulationFacade>
 {

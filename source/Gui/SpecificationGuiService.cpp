@@ -5,13 +5,13 @@
 
 #include <boost/range/adaptors.hpp>
 
-#include "EngineInterface/SimulationFacade.h"
-#include "EngineInterface/SimulationParametersTypes.h"
-#include "EngineInterface/SimulationParameters.h"
-#include "EngineInterface/SpecificationEvaluationService.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <EngineInterface/SimulationParameters.h>
+#include <EngineInterface/SimulationParametersTypes.h>
+#include <EngineInterface/SpecificationEvaluationService.h>
 
-#include "SimulationInteractionController.h"
 #include "AlienGui.h"
+#include "SimulationInteractionController.h"
 #include "StyleRepository.h"
 
 namespace
@@ -63,7 +63,8 @@ void SpecificationGuiService::createWidgetsForExpertToggles(SimulationParameters
                 AlienGui::CheckboxParameters()
                     .name(groupSpec._name)
                     .textWidth(scaleInverse(rightColumnWidth))
-                    .defaultValue(*origExpertToggleValue).tooltip(groupSpec._description),
+                    .defaultValue(*origExpertToggleValue)
+                    .tooltip(groupSpec._description),
                 *expertToggleValue);
         }
     }
@@ -154,7 +155,6 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
                 .defaultValue(*origRef.value)
                 .tooltip(parameterSpec._description),
             *ref.value);
-
     }
 }
 
@@ -240,8 +240,9 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue)))
                 .disabledValue(
-                    disabledValue != nullptr ? std::make_optional(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(disabledValue)))
-                                         : std::optional<std::vector<std::vector<float>>>()),
+                    disabledValue != nullptr
+                        ? std::make_optional(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(disabledValue)))
+                        : std::optional<std::vector<std::vector<float>>>()),
             *reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(value),
             enabledValue);
 
@@ -272,8 +273,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .colorDependence(valueType == ColorDependence::ColorVector)
                     .tooltip(parameterSpec._description),
                 value,
-            enabledValue,
-            pinnedValue)) {
+                enabledValue,
+                pinnedValue)) {
 
             if (floatSpec._getterSetter.has_value()) {
                 auto [getter, setter] = floatSpec._getterSetter.value();
@@ -407,7 +408,7 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     auto [value, disabledValue, enabledValue, pinnedValue, valueType] = evaluationService.getRef(colorPickerSpec._member, parameters, orderNumber);
     auto [origValue, origDisabledValue, origEnabledValue, origPinnedValue, origValueType] =
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
-   
+
     AlienGui::ColorButtonWithPicker(
         AlienGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
 }

@@ -7,8 +7,8 @@
 
 #include <imgui.h>
 
-#include "EngineInterface/DescriptionEditService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienGui.h"
 #include "EditorModel.h"
@@ -198,8 +198,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
             }
 
             if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                AlienGui::Checkbox(
-                    AlienGui::CheckboxParameters().name("Signal restriction").textWidth(BaseTabTextWidth), cell._signalRestriction._active);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Signal restriction").textWidth(BaseTabTextWidth), cell._signalRestriction._active);
                 if (cell._signalRestriction._active) {
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
@@ -520,7 +519,6 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
 }
 
 
-
 void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
 {
     if (ImGui::TreeNodeEx("Properties###_generator", TreeNodeFlags)) {
@@ -580,11 +578,7 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
                 .tooltip(Const::GenomeConstructorOffspringActivationTime),
             constructor._constructionActivationTime);
         AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Construction angle")
-                .textWidth(CellTypeTextWidth)
-                .format("%.1f")
-                .tooltip("Angle for construction direction"),
+            AlienGui::InputFloatParameters().name("Construction angle").textWidth(CellTypeTextWidth).format("%.1f").tooltip("Angle for construction direction"),
             constructor._constructionAngle);
         ImGui::TreePop();
     }

@@ -2,24 +2,24 @@
 
 #include <cmath>
 
-#include <boost/range/adaptor/sliced.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/sliced.hpp>
 
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/Math.h"
-#include "Base/StringHelper.h"
+#include <Base/Math.h>
+#include <Base/StringHelper.h>
 
-#include "EngineInterface/Colors.h"
-#include "EngineInterface/PreviewDescriptionConverterService.h"
-#include "EngineInterface/SpaceCalculator.h"
+#include <EngineInterface/Colors.h>
+#include <EngineInterface/PreviewDescriptionConverterService.h>
+#include <EngineInterface/SpaceCalculator.h>
 
 #include "AlienGui.h"
 #include "GenomeTabEditData.h"
-#include "StyleRepository.h"
 #include "SimulationScrollbars.h"
+#include "StyleRepository.h"
 
 namespace
 {
@@ -27,10 +27,8 @@ namespace
     auto constexpr ZoomLevelForConnections = 8.0f;
 }
 
-CreaturePreviewWidget _CreaturePreviewWidget::create(
-    GenomeTabEditData const& editData,
-    GeneIndicesForSubGenome const& geneIndices,
-    SubGenomeDescription const& genomeWithStartIndex)
+CreaturePreviewWidget
+_CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex)
 {
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
@@ -57,7 +55,7 @@ void _CreaturePreviewWidget::process(Description&& phenotype, float width)
 
         RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
         RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
-        
+
         RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
         RealRect visibleWorldRect{
             mapViewToWorldPosition(windowPos, windowSize, windowPos),
@@ -192,7 +190,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
         drawList->AddText(nullptr, textSize, {textPos.x - textSize + 0.5f, textPos.y - textSize / 2 + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
         AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
-
     }
 
     // Draw selected gene
@@ -218,7 +215,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.4f, ImColor::HSV(0, 0, 1, 0.7f));
             } else {
                 drawList->AddCircle({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * 0.4f), ImColor::HSV(h, s * 0.8f, v * 1.2f));
-            } 
+            }
         }
         if (_selectedCellId.has_value() && _selectedCellId.value() == cell._id) {
             if (_zoom > ZoomLevelForLabels) {
@@ -300,18 +297,12 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
                 auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
                 drawList->AddLine(
-                    {arrowPartStart1.x, arrowPartStart1.y},
-                    {connectionStartPos.x, connectionStartPos.y},
-                    Const::GenomePreviewConnectionColor,
-                    LineThickness);
+                    {arrowPartStart1.x, arrowPartStart1.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
                 auto arrowPartDirection2 = RealVector2D{-direction.x - direction.y, direction.x - direction.y};
                 auto arrowPartStart2 = connectionStartPos + arrowPartDirection2 * cellSize / 8;
                 drawList->AddLine(
-                    {arrowPartStart2.x, arrowPartStart2.y},
-                    {connectionStartPos.x, connectionStartPos.y},
-                    Const::GenomePreviewConnectionColor,
-                    LineThickness);
+                    {arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
 
             if (connection._arrowToCell2) {
@@ -412,8 +403,7 @@ RealVector2D _CreaturePreviewWidget::mapViewToWorldPosition(RealVector2D const& 
     auto scaleFactor = scale(_zoom);
     return {
         (viewPos.x - viewStartPos.x - viewSize.x / 2) / scaleFactor + _worldCenter.x,
-        (viewPos.y - viewStartPos.y - viewSize.y / 2) / scaleFactor + _worldCenter.y
-    };
+        (viewPos.y - viewStartPos.y - viewSize.y / 2) / scaleFactor + _worldCenter.y};
 }
 
 void _CreaturePreviewWidget::moveCenter(

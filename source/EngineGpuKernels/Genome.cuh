@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "EngineInterface/CellTypeConstants.h"
-#include "EngineInterface/SimulationParametersTypes.h"
+#include <EngineInterface/CellTypeConstants.h>
+#include <EngineInterface/SimulationParametersTypes.h>
 
 struct NeuralNetworkGenome
 {
@@ -56,32 +56,32 @@ struct InjectorGenome
 
 struct AutoBendingGenome
 {
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualBendingGenome
 {
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;     // Between 0 and 1
     float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct AngleBendingGenome
 {
-    float maxAngleDeviation;  // Between 0 and 1
+    float maxAngleDeviation;         // Between 0 and 1
     float attractionRepulsionRatio;  // Between 0 and 1
 };
 
 struct AutoCrawlingGenome
 {
     float maxDistanceDeviation;  // Between 0 and 1
-    float forwardBackwardRatio;     // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct ManualCrawlingGenome
 {
     float maxDistanceDeviation;  // Between 0 and 1
-    float forwardBackwardRatio;     // Between 0 and 1
+    float forwardBackwardRatio;  // Between 0 and 1
 };
 
 struct DirectMovementGenome
@@ -158,7 +158,7 @@ struct Gene
     Char64 name;
     ConstructorShape shape;
     bool separation;
-    uint8_t numBranches;    // For separation = false
+    uint8_t numBranches;  // For separation = false
     ConstructorAngleAlignment angleAlignment;
     float stiffness;
     float connectionDistance;

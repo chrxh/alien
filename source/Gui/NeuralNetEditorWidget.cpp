@@ -2,9 +2,9 @@
 
 #include <imgui.h>
 
-#include "Base/Math.h"
+#include <Base/Math.h>
 
-#include "EngineInterface/NumberGenerator.h"
+#include <EngineInterface/NumberGenerator.h>
 
 #include "AlienGui.h"
 #include "HelpStrings.h"
@@ -109,7 +109,6 @@ void _NeuralNetEditorWidget::processNetwork(
                     calcColor(weights[j * MAX_CHANNELS + i]),
                     thickness);
             }
-
         }
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             auto outputPos = calcOutputPos(i);
@@ -209,7 +208,8 @@ void _NeuralNetEditorWidget::processEditWidgets(
     if (ImGui::BeginChild("EditWidgets", ImVec2(0, 0))) {
 
         int activationFunction = activationFunctions.at(selectionData.outputNeuronIndex);
-        AlienGui::Combo(AlienGui::ComboParameters().name("ActFn").values(Const::ActivationFunctionStrings).textWidth(WidgetTextColumnWidth), activationFunction);
+        AlienGui::Combo(
+            AlienGui::ComboParameters().name("ActFn").values(Const::ActivationFunctionStrings).textWidth(WidgetTextColumnWidth), activationFunction);
         activationFunctions.at(selectionData.outputNeuronIndex) = static_cast<ActivationFunction>(activationFunction);
 
         AlienGui::InputFloat(

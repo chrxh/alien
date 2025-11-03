@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Network/NetworkService.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Network/NetworkService.h>
+
+#include <EngineInterface/SimulationFacade.h>
 
 #include "AlienDialog.h"
 #include "Definitions.h"
@@ -20,7 +21,7 @@ private:
     void processIntern() override;
     void onActivateUser();
 
-    SimulationFacade _simulationFacade; 
+    SimulationFacade _simulationFacade;
 
     std::string _userName;
     std::string _password;

@@ -1,13 +1,14 @@
-#include <imgui.h>
+#include "OverlayController.h"
+
 #include <cmath>
 
-#include "AlienGui.h"
-#include "OverlayController.h"
+#include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/Math.h"
+#include <Base/Math.h>
 
+#include "AlienGui.h"
 #include "MainLoopEntityController.h"
 #include "StyleRepository.h"
 #include "UiController.h"
@@ -61,9 +62,7 @@ void OverlayController::setOn(bool value)
     _on = value;
 }
 
-void OverlayController::activateProgressAnimation(bool value)
-{
-}
+void OverlayController::activateProgressAnimation(bool value) {}
 
 void OverlayController::processProgressAnimation()
 {
@@ -94,7 +93,7 @@ void OverlayController::processProgressAnimation()
             ImVec2{center.x, center.y - height * 5},
             ImVec2{center.x - width, center.y + height},
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
-            ImColor::HSV(0.66f, 1.0f, 0.1f,0.0f),
+            ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 0.0f),
             ImColor::HSV(0.66f, 1.0f, 0.1f, 1.0f * alpha));
         drawList->AddRectFilledMultiColor(
@@ -123,7 +122,7 @@ void OverlayController::processProgressAnimation()
             auto amplitude1 = sinf(toFloat(i) * 10.0f / toFloat(N) - duration / 700.0f /** (1.0f + 0.3f * sinf(std::min(5000.0f, duration) / 1000))*/);
             auto amplitude2 = sinf(toFloat(i) * 14.0f / toFloat(N) - duration / 100.0f /** (1.0f + 0.3f * cosf(std::min(5000.0f, duration) / 1000))*/);
             //auto hue = toFloat((i * 1000 / N + toInt(duration)) % 3000) / 4500.0f;
-            //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue; 
+            //hue = hue < 0.33f ? 0.66f + hue : 0.66f + 0.66f - hue;
             auto y1 = center.y + height / 2 - amplitude1 * height;
             auto y2 = center.y + height / 2 - amplitude2 * height;
             drawList->AddRectFilled(

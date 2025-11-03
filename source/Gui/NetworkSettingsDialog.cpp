@@ -2,7 +2,7 @@
 
 #include <imgui.h>
 
-#include "Network/NetworkService.h"
+#include <Network/NetworkService.h>
 
 #include "AlienGui.h"
 #include "BrowserWindow.h"

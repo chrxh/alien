@@ -1,8 +1,9 @@
 #include "PersisterFacadeImpl.h"
 
-#include "EngineInterface/SimulationFacade.h"
-#include "PersisterInterface/DeserializedSimulation.h"
-#include "PersisterInterface/PersisterRequestResult.h"
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/DeserializedSimulation.h>
+#include <PersisterInterface/PersisterRequestResult.h>
 
 _PersisterFacadeImpl::~_PersisterFacadeImpl()
 {
@@ -170,7 +171,9 @@ MoveNetworkResourceResultData _PersisterFacadeImpl::fetchMoveNetworkResourcesDat
     return fetchData<_MoveNetworkResourceRequestResult, MoveNetworkResourceResultData>(id);
 }
 
-PersisterRequestId _PersisterFacadeImpl::scheduleToggleReactionNetworkResource(SenderInfo const& senderInfo, ToggleReactionNetworkResourceRequestData const& data)
+PersisterRequestId _PersisterFacadeImpl::scheduleToggleReactionNetworkResource(
+    SenderInfo const& senderInfo,
+    ToggleReactionNetworkResourceRequestData const& data)
 {
     return scheduleRequest<_ToggleReactionNetworkResourceRequest>(senderInfo, data);
 }

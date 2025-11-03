@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-#include "Base/Definitions.h"
+#include <Base/Definitions.h>
 
 GeometryBuffers _GeometryBuffers::create()
 {

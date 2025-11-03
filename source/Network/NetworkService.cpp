@@ -1,18 +1,19 @@
 #include "NetworkService.h"
 
 #include <ranges>
+
 #include <boost/property_tree/json_parser.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <boost/range/adaptor/indexed.hpp>
 
-#include <cpp-httplib/httplib.h>
-
-#include "Base/GlobalSettings.h"
-#include "Base/LoggingService.h"
-#include "Base/Resources.h"
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
 #include "NetworkResourceParserService.h"
+
+#include <cpp-httplib/httplib.h>
 
 namespace
 {
@@ -48,7 +49,7 @@ namespace
         log(Priority::Important, "network: an error occurred");
     }
 
-    template<typename T>
+    template <typename T>
     T parseValueFromKey(std::string const& jsonString, std::string const& key)
     {
         std::stringstream stream(jsonString);
@@ -573,7 +574,7 @@ bool NetworkService::downloadResource(std::string& mainData, std::string& auxili
             httplib::Params params;
             params.emplace("id", simId);
             {
-                
+
                 for (int chunkIndex = 0; chunkIndex < 6; ++chunkIndex) {
                     auto paramsClone = params;
                     paramsClone.emplace("chunkIndex", std::to_string(chunkIndex));
@@ -612,9 +613,8 @@ void NetworkService::incDownloadCounter(std::string const& simId)
         httplib::Params params;
         params.emplace("id", simId);
         executeRequest([&] { return client.Get("/alien-server/incdownloadcount.php", params, {}); });
-    }
-    catch(...) {
-       //do nothing 
+    } catch (...) {
+        //do nothing
     }
 }
 

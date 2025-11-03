@@ -1,18 +1,21 @@
-#include <iostream>
 #include <cstring>
+#include <iostream>
 
-#include "Base/GlobalSettings.h"
-#include "Base/LoggingService.h"
-#include "Base/FileLogger.h"
-#include "Base/Exceptions.h"
-#include "Base/Resources.h"
-#include "PersisterInterface/SerializerService.h"
-#include "EngineImpl/SimulationFacadeImpl.h"
-#include "PersisterImpl/PersisterFacadeImpl.h"
+#include <Base/Exceptions.h>
+#include <Base/FileLogger.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
-#include "MainWindow.h"
+#include <EngineImpl/SimulationFacadeImpl.h>
+
+#include <PersisterInterface/SerializerService.h>
+
+#include <PersisterImpl/PersisterFacadeImpl.h>
+
 #include "GuiLogger.h"
 #include "HelpStrings.h"
+#include "MainWindow.h"
 #include "StartupCheckService.h"
 
 namespace
@@ -53,18 +56,9 @@ int main(int argc, char** argv)
     } catch (InitialCheckException const& e) {
         std::cerr << "Initial checks failed: " << std::endl << e.what() << std::endl;
     } catch (std::exception const& e) {
-        std::cerr << "An uncaught exception occurred: "
-                  << e.what()
-                  << std::endl
-                  << std::endl
-                  << Const::GeneralInformation
-                  << std::endl;
+        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl << std::endl << Const::GeneralInformation << std::endl;
     } catch (...) {
-        std::cerr << "An unknown exception occurred."
-                  << std::endl
-                  << std::endl
-                  << Const::GeneralInformation
-                  << std::endl;
+        std::cerr << "An unknown exception occurred." << std::endl << std::endl << Const::GeneralInformation << std::endl;
     }
     return 0;
 }

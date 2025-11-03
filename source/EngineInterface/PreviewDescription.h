@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "Base/Definitions.h"
-#include "Base/Macros.h"
+#include <Base/Definitions.h>
+#include <Base/Macros.h>
 
 #include "CellTypeConstants.h"
 
@@ -26,7 +26,7 @@ struct SignalPreviewDescription
 struct CellPreviewDescription
 {
     auto operator<=>(CellPreviewDescription const&) const = default;
-    
+
     MEMBER(CellPreviewDescription, uint64_t, id, 0);
     MEMBER(CellPreviewDescription, RealVector2D, pos, {});
     MEMBER(CellPreviewDescription, int, color, 0);
@@ -41,7 +41,7 @@ struct CellPreviewDescription
 struct ConnectionPreviewDescription
 {
     auto operator<=>(ConnectionPreviewDescription const&) const = default;
-    
+
     MEMBER(ConnectionPreviewDescription, RealVector2D, cell1, {});
     MEMBER(ConnectionPreviewDescription, RealVector2D, cell2, {});
     MEMBER(ConnectionPreviewDescription, bool, arrowToCell1, false);
@@ -51,7 +51,7 @@ struct ConnectionPreviewDescription
 struct PreviewDescription
 {
     auto operator<=>(PreviewDescription const&) const = default;
-    
+
     MEMBER(PreviewDescription, std::vector<CellPreviewDescription>, cells, {});
     MEMBER(PreviewDescription, std::vector<ConnectionPreviewDescription>, connections, {});
 };

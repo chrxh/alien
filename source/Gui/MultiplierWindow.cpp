@@ -3,14 +3,16 @@
 #include <imgui.h>
 
 #include <Fonts/IconsFontAwesome5.h>
-#include "Fonts/AlienIconFont.h"
 
-#include "EngineInterface/SimulationFacade.h"
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienGui.h"
+#include "EditorController.h"
 #include "EditorModel.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
-#include "EditorController.h"
+
+#include "Fonts/AlienIconFont.h"
 
 namespace
 {
@@ -53,7 +55,7 @@ void MultiplierWindow::processIntern()
     }
     ImGui::EndChild();
 
-        AlienGui::Separator();
+    AlienGui::Separator();
     ImGui::BeginDisabled(
         EditorModel::get().isSelectionEmpty()
         || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(EditorModel::get().getSelectionShallowData())));
@@ -81,10 +83,10 @@ bool MultiplierWindow::isShown()
 
 void MultiplierWindow::processGridPanel()
 {
-    AlienGui::InputInt(AlienGui::InputIntParameters().name(ICON_FA_ARROW_RIGHT " Number of copies").textWidth(RightColumnWidth), _gridParameters._horizontalNumber);
+    AlienGui::InputInt(
+        AlienGui::InputIntParameters().name(ICON_FA_ARROW_RIGHT " Number of copies").textWidth(RightColumnWidth), _gridParameters._horizontalNumber);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name(ICON_FA_ARROW_RIGHT " Distance").textWidth(RightColumnWidth).format("%.1f"),
-        _gridParameters._horizontalDistance);
+        AlienGui::InputFloatParameters().name(ICON_FA_ARROW_RIGHT " Distance").textWidth(RightColumnWidth).format("%.1f"), _gridParameters._horizontalDistance);
     AlienGui::InputFloat(
         AlienGui::InputFloatParameters().name(ICON_FA_ARROW_RIGHT " Angle increment").textWidth(RightColumnWidth).format("%.1f"),
         _gridParameters._horizontalAngleInc);
@@ -98,10 +100,10 @@ void MultiplierWindow::processGridPanel()
         AlienGui::InputFloatParameters().name(ICON_FA_ARROW_RIGHT " Angular velocity increment").textWidth(RightColumnWidth).format("%.1f").step(0.1f),
         _gridParameters._horizontalAngularVelInc);
     AlienGui::Separator();
-    AlienGui::InputInt(AlienGui::InputIntParameters().name(ICON_FA_ARROW_DOWN " Number of copies").textWidth(RightColumnWidth), _gridParameters._verticalNumber);
+    AlienGui::InputInt(
+        AlienGui::InputIntParameters().name(ICON_FA_ARROW_DOWN " Number of copies").textWidth(RightColumnWidth), _gridParameters._verticalNumber);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name(ICON_FA_ARROW_DOWN " Distance").textWidth(RightColumnWidth).format("%.1f"),
-        _gridParameters._verticalDistance);
+        AlienGui::InputFloatParameters().name(ICON_FA_ARROW_DOWN " Distance").textWidth(RightColumnWidth).format("%.1f"), _gridParameters._verticalDistance);
     AlienGui::InputFloat(
         AlienGui::InputFloatParameters().name(ICON_FA_ARROW_DOWN " Angle increment").textWidth(RightColumnWidth).format("%.1f"),
         _gridParameters._verticalAngleInc);
@@ -118,8 +120,7 @@ void MultiplierWindow::processGridPanel()
 
 void MultiplierWindow::processRandomPanel()
 {
-    AlienGui::InputInt(
-        AlienGui::InputIntParameters().name("Number of copies").textWidth(RightColumnWidth), _randomParameters._number);
+    AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of copies").textWidth(RightColumnWidth), _randomParameters._number);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min angle").textWidth(RightColumnWidth).format("%.1f"), _randomParameters._minAngle);
     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max angle").textWidth(RightColumnWidth).format("%.1f"), _randomParameters._maxAngle);
     AlienGui::InputFloat(
@@ -131,11 +132,9 @@ void MultiplierWindow::processRandomPanel()
     AlienGui::InputFloat(
         AlienGui::InputFloatParameters().name("Max velocity Y").textWidth(RightColumnWidth).format("%.2f").step(0.05f), _randomParameters._maxVelY);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Min angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f),
-        _randomParameters._minAngularVel);
+        AlienGui::InputFloatParameters().name("Min angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f), _randomParameters._minAngularVel);
     AlienGui::InputFloat(
-        AlienGui::InputFloatParameters().name("Max angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f),
-        _randomParameters._maxAngularVel);
+        AlienGui::InputFloatParameters().name("Max angular velocity").textWidth(RightColumnWidth).format("%.1f").step(0.1f), _randomParameters._maxAngularVel);
     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Overlapping check").textWidth(RightColumnWidth), _randomParameters._overlappingCheck);
 }
 
@@ -183,4 +182,3 @@ void MultiplierWindow::onUndo()
     _simulationFacade->addAndSelectSimulationData(Description(_origSelection));
     _selectionDataAfterMultiplication = std::nullopt;
 }
-

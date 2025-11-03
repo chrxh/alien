@@ -1,9 +1,9 @@
 #include "Shader.h"
 
-#include <string>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 Shader _Shader::create(std::filesystem::path const& vertexPath, std::filesystem::path const& fragmentPath, std::filesystem::path const& geometryPath)
 {
@@ -151,16 +151,13 @@ _Shader::_Shader(
     }
 }
 
-_Shader::_Shader(
-    std::string_view vertexSource,
-    std::string_view fragmentSource,
-    std::string_view geometrySource)
+_Shader::_Shader(std::string_view vertexSource, std::string_view fragmentSource, std::string_view geometrySource)
 {
     // Convert string_view to C strings
     std::string vertexCode(vertexSource);
     std::string fragmentCode(fragmentSource);
     std::string geometryCode(geometrySource);
-    
+
     char const* vShaderCode = vertexCode.c_str();
     char const* fShaderCode = fragmentCode.c_str();
 
@@ -189,7 +186,7 @@ _Shader::_Shader(
         glCompileShader(geometry);
         checkCompileErrors(geometry, "GEOMETRY", "embedded_geometry_shader");
     }
-    
+
     // Shader Program
     _id = glCreateProgram();
     glAttachShader(_id, vertex);

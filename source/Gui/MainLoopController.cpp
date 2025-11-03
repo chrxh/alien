@@ -3,57 +3,61 @@
 #include <thread>
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/Definitions.h"
-#include "Base/GlobalSettings.h"
-#include "Base/Resources.h"
-#include "Base/LoggingService.h"
-#include "PersisterInterface/SerializerService.h"
-#include "PersisterInterface/PersisterFacade.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/Definitions.h>
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
+#include <Base/Resources.h>
 
-#include "OpenGLHelper.h"
-#include "Viewport.h"
-#include "StyleRepository.h"
-#include "TemporalControlWindow.h"
-#include "GenericMessageDialog.h"
-#include "OverlayController.h"
-#include "SimulationView.h"
-#include "FpsController.h"
-#include "GettingStartedWindow.h"
-#include "GpuSettingsDialog.h"
-#include "ImageToPatternDialog.h"
-#include "LoginDialog.h"
-#include "LogWindow.h"
-#include "MassOperationsDialog.h"
-#include "MultiplierWindow.h"
-#include "NetworkSettingsDialog.h"
-#include "NewSimulationDialog.h"
-#include "PatternEditorWindow.h"
-#include "SelectionWindow.h"
-#include "SimulationInteractionController.h"
-#include "SpatialControlWindow.h"
-#include "StatisticsWindow.h"
-#include "UiController.h"
-#include "UploadSimulationDialog.h"
+#include <EngineInterface/SimulationFacade.h>
+
+#include <PersisterInterface/PersisterFacade.h>
+#include <PersisterInterface/SerializerService.h>
+
 #include "AboutDialog.h"
 #include "AlienGui.h"
 #include "AutosaveWindow.h"
 #include "BrowserWindow.h"
 #include "CreatorWindow.h"
-#include "GenomeEditorWindow.h"
 #include "DeleteUserDialog.h"
 #include "DisplaySettingsDialog.h"
 #include "EditorController.h"
 #include "ExitDialog.h"
 #include "FileTransferController.h"
+#include "FpsController.h"
+#include "GenericMessageDialog.h"
+#include "GenomeEditorWindow.h"
+#include "GettingStartedWindow.h"
+#include "GpuSettingsDialog.h"
+#include "ImageToPatternDialog.h"
+#include "LogWindow.h"
+#include "LoginDialog.h"
+#include "MassOperationsDialog.h"
+#include "MultiplierWindow.h"
+#include "NetworkSettingsDialog.h"
+#include "NewSimulationDialog.h"
+#include "OpenGLHelper.h"
+#include "OverlayController.h"
+#include "PatternEditorWindow.h"
+#include "SelectionWindow.h"
+#include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
+#include "SimulationView.h"
+#include "SpatialControlWindow.h"
+#include "StatisticsWindow.h"
+#include "StyleRepository.h"
+#include "TemporalControlWindow.h"
+#include "UiController.h"
+#include "UploadSimulationDialog.h"
+#include "Viewport.h"
+
+#include <GLFW/glfw3.h>
 
 namespace
 {
@@ -278,8 +282,8 @@ void MainLoopController::drawLoadingScreen()
     auto imageScale = scale(1.0f);
     ImGui::SetNextWindowSize(ImVec2(_logo.width * imageScale + 10.0f, _logo.height * imageScale + 10.0f));
 
-    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
+    ImGuiWindowFlags windowFlags = 0 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar
+        | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
     ImGui::Begin("##startup", NULL, windowFlags);
     ImGui::Image((void*)(intptr_t)_logo.textureId, ImVec2(_logo.width * imageScale, _logo.height * imageScale));
     ImGui::End();
@@ -299,12 +303,7 @@ void MainLoopController::drawLoadingScreen()
         versionString.c_str());
 
     if (GlobalSettings::get().isDebugMode()) {
-        drawList->AddText(
-            styleRep.getReefMediumFont(),
-            scale(24.0f),
-            {center.x - scale(24.0f),  bottom - scale(100)},
-            textColor,
-            "DEBUG");
+        drawList->AddText(styleRep.getReefMediumFont(), scale(24.0f), {center.x - scale(24.0f), bottom - scale(100)}, textColor, "DEBUG");
     }
 }
 
@@ -361,12 +360,7 @@ void MainLoopController::processMenubar()
         LoginDialog::get().open();
     });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Logout")
-            .keyAlt(true)
-            .key(ImGuiKey_T)
-            .closeMenuWhenItemClicked(false)
-            .disabled(!NetworkService::get().isLoggedIn()),
+        AlienGui::MenuItemParameters().name("Logout").keyAlt(true).key(ImGuiKey_T).closeMenuWhenItemClicked(false).disabled(!NetworkService::get().isLoggedIn()),
         [&] {
             NetworkService::get().logout();
             BrowserWindow::get().onRefresh();
@@ -374,9 +368,9 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Upload simulation").keyAlt(true).key(ImGuiKey_D).disabled(!NetworkService::get().isLoggedIn()),
         [&] { UploadSimulationDialog::get().open(NetworkResourceType_Simulation); });
-    AlienGui::MenuItem(
-        AlienGui::MenuItemParameters().name("Upload genome").keyAlt(true).key(ImGuiKey_Q).disabled(!NetworkService::get().isLoggedIn()),
-        [&] { UploadSimulationDialog::get().open(NetworkResourceType_Genome); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Upload genome").keyAlt(true).key(ImGuiKey_Q).disabled(!NetworkService::get().isLoggedIn()), [&] {
+        UploadSimulationDialog::get().open(NetworkResourceType_Genome);
+    });
     AlienGui::MenuSeparator();
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Delete user").keyAlt(true).key(ImGuiKey_J).disabled(!NetworkService::get().isLoggedIn()), [&] {
         DeleteUserDialog::get().open();
@@ -401,12 +395,7 @@ void MainLoopController::processMenubar()
             .closeMenuWhenItemClicked(false),
         [&] { SpatialControlWindow::get().setOn(!SpatialControlWindow::get().isOn()); });
     AlienGui::MenuItem(
-        AlienGui::MenuItemParameters()
-            .name("Statistics")
-            .keyAlt(true)
-            .key(ImGuiKey_3)
-            .selected(StatisticsWindow::get().isOn())
-            .closeMenuWhenItemClicked(false),
+        AlienGui::MenuItemParameters().name("Statistics").keyAlt(true).key(ImGuiKey_3).selected(StatisticsWindow::get().isOn()).closeMenuWhenItemClicked(false),
         [&] { StatisticsWindow::get().setOn(!StatisticsWindow::get().isOn()); });
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters()

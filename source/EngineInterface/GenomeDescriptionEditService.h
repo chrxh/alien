@@ -1,12 +1,11 @@
 #pragma once
 
+#include <functional>
+#include <optional>
 #include <vector>
 
-#include <optional>
-#include <functional>
-
-#include "Base/Cache.h"
-#include "Base/Singleton.h"
+#include <Base/Cache.h>
+#include <Base/Singleton.h>
 
 #include "Description.h"
 #include "GenomeDescription.h"
@@ -35,14 +34,14 @@ public:
 
     struct SeedCollectionResult
     {
-        Description description; 
+        Description description;
         std::vector<uint64_t> seedCreatureIds;
     };
-    
+
     SeedCollectionResult createSeedCollectionForPreview(
         std::vector<SubGenomeDescription> const& subGenomes,
         std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>> cache = std::nullopt) const;
-        
+
     std::vector<Description> extractPhenotypesFromPreview(Description&& preview, std::vector<uint64_t> const& seedCreatureIds) const;
     void removeSeedFromPhenotype(Description& phenotype) const;
 

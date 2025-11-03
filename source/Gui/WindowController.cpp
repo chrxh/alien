@@ -1,14 +1,15 @@
 #include "WindowController.h"
 
 #include <sstream>
-#include <GLFW/glfw3.h>
 
 #include <boost/algorithm/string.hpp>
 
-#include "Base/GlobalSettings.h"
-#include "Base/LoggingService.h"
+#include <Base/GlobalSettings.h>
+#include <Base/LoggingService.h>
 
 #include "MainLoopEntityController.h"
+
+#include <GLFW/glfw3.h>
 
 namespace
 {
@@ -100,7 +101,6 @@ void WindowController::shutdown()
     settings.setValue("settings.display.window height", _sizeInWindowedMode.y);
     settings.setValue("settings.display.fps", _fps);
     settings.setValue("settings.display.content scale factor", _contentScaleFactor);
-
 }
 
 auto WindowController::getWindowData() -> WindowData
@@ -159,33 +159,17 @@ void WindowController::setMode(std::string const& mode)
 
     GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 
-    if(mode == WindowedMode) {
+    if (mode == WindowedMode) {
         log(Priority::Important, "set windowed mode");
         GLFWvidmode const* desktopVideoMode = glfwGetVideoMode(primaryMonitor);
-        glfwSetWindowMonitor(
-            _windowData.window,
-            nullptr,
-            0,
-            0,
-            _sizeInWindowedMode.x,
-            _sizeInWindowedMode.y,
-            desktopVideoMode->refreshRate);
-    } else if(mode == DesktopMode) {
-        log(
-            Priority::Important, "set full screen mode with " + createLogString(*_desktopVideoMode));
-        glfwSetWindowMonitor(
-            _windowData.window,
-            primaryMonitor,
-            0,
-            0,
-            _desktopVideoMode->width,
-            _desktopVideoMode->height,
-            _desktopVideoMode->refreshRate);
+        glfwSetWindowMonitor(_windowData.window, nullptr, 0, 0, _sizeInWindowedMode.x, _sizeInWindowedMode.y, desktopVideoMode->refreshRate);
+    } else if (mode == DesktopMode) {
+        log(Priority::Important, "set full screen mode with " + createLogString(*_desktopVideoMode));
+        glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, _desktopVideoMode->width, _desktopVideoMode->height, _desktopVideoMode->refreshRate);
     } else {
         auto userMode = convert(mode);
         log(Priority::Important, "set full screen mode with " + createLogString(userMode));
-        glfwSetWindowMonitor(
-            _windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
+        glfwSetWindowMonitor(_windowData.window, primaryMonitor, 0, 0, userMode.width, userMode.height, userMode.refreshRate);
     }
     _mode = mode;
 }

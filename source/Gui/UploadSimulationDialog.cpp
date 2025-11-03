@@ -2,21 +2,23 @@
 
 #include <imgui.h>
 
-#include "Base/GlobalSettings.h"
-#include "PersisterInterface/SerializerService.h"
-#include "Network/NetworkService.h"
-#include "Network/NetworkValidationService.h"
+#include <Base/GlobalSettings.h>
+
+#include <Network/NetworkService.h>
+#include <Network/NetworkValidationService.h>
+
+#include <PersisterInterface/SerializerService.h>
 
 #include "AlienGui.h"
-#include "GenericMessageDialog.h"
-#include "StyleRepository.h"
 #include "BrowserWindow.h"
-#include "GenomeEditorWindow.h"
 #include "EditorController.h"
-#include "Viewport.h"
+#include "GenericMessageDialog.h"
+#include "GenomeEditorWindow.h"
 #include "HelpStrings.h"
 #include "LoginDialog.h"
 #include "NetworkTransferController.h"
+#include "StyleRepository.h"
+#include "Viewport.h"
 
 namespace
 {
@@ -90,7 +92,7 @@ void UploadSimulationDialog::processIntern()
 
     AlienGui::Separator();
 
-    AlienGui::InputText(AlienGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType)  + " name").textWidth(0), _resourceName);
+    AlienGui::InputText(AlienGui::InputTextParameters().hint(BrowserDataTypeToUpperString.at(_resourceType) + " name").textWidth(0), _resourceName);
 
     AlienGui::Separator();
 
@@ -115,7 +117,8 @@ void UploadSimulationDialog::processIntern()
 
     ImGui::BeginDisabled(_resourceName.empty());
     if (AlienGui::Button("OK")) {
-        if (NetworkValidationService::get().isStringValidForDatabase(_resourceName) && NetworkValidationService::get().isStringValidForDatabase(_resourceDescription)) {
+        if (NetworkValidationService::get().isStringValidForDatabase(_resourceName)
+            && NetworkValidationService::get().isStringValidForDatabase(_resourceDescription)) {
             close();
             onUpload();
         } else {

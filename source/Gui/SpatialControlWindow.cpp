@@ -4,14 +4,15 @@
 
 #include <Fonts/IconsFontAwesome5.h>
 
-#include "Base/GlobalSettings.h"
-#include "Base/StringHelper.h"
-#include "EngineInterface/SimulationFacade.h"
+#include <Base/GlobalSettings.h>
+#include <Base/StringHelper.h>
 
-#include "StyleRepository.h"
-#include "Viewport.h"
+#include <EngineInterface/SimulationFacade.h>
+
 #include "AlienGui.h"
 #include "ResizeWorldDialog.h"
+#include "StyleRepository.h"
+#include "Viewport.h"
 
 void SpatialControlWindow::initIntern(SimulationFacade simulationFacade)
 {
@@ -56,8 +57,7 @@ void SpatialControlWindow::processIntern()
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         auto worldSize = _simulationFacade->getWorldSize();
-        ImGui::TextUnformatted(
-            (StringHelper::format(worldSize.x) + " x " + StringHelper::format(worldSize.y)).c_str());
+        ImGui::TextUnformatted((StringHelper::format(worldSize.x) + " x " + StringHelper::format(worldSize.y)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 
@@ -72,8 +72,7 @@ void SpatialControlWindow::processIntern()
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
         auto centerPos = Viewport::get().getCenterInWorldPos();
-        ImGui::TextUnformatted(
-            (StringHelper::format(centerPos.x, 1) + ", " + StringHelper::format(centerPos.y, 1)).c_str());
+        ImGui::TextUnformatted((StringHelper::format(centerPos.x, 1) + ", " + StringHelper::format(centerPos.y, 1)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
 

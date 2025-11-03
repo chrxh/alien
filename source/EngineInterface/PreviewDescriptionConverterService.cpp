@@ -2,9 +2,9 @@
 
 #include <set>
 
-#include "Base/Math.h"
+#include <Base/Math.h>
 
-#include "EngineInterface/DescriptionEditService.h"
+#include <EngineInterface/DescriptionEditService.h>
 
 #include "SpaceCalculator.h"
 
@@ -81,7 +81,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     if (secondCell.has_value()) {
         auto angle = Math::angleOfVector(secondCell->_pos - firstCell._pos);
         //if (!result.visualFrontAngle.has_value()) {
-            result.visualFrontAngle = angle;
+        result.visualFrontAngle = angle;
         //} else {
         //    result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 3.0f;
         //    result.visualFrontAngle.value() = Math::normalizedAngle(result.visualFrontAngle.value(), 0.0);
@@ -149,7 +149,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             }
         }
     });
-    
+
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
     phenotype.forEachCell([&](CellDescription const& cell) {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Object.cuh"
-#include "SimulationData.cuh"
 #include "SignalProcessor.cuh"
+#include "SimulationData.cuh"
 
 class SensorProcessor
 {
@@ -125,8 +125,7 @@ __inline__ __device__ uint32_t SensorProcessor::getCellDensity(
     return result;
 }
 
-__inline__ __device__ void
-SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     __shared__ uint32_t minDensity;
     __shared__ uint8_t restrictToColor;
@@ -145,12 +144,7 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
         restrictToCreatures = cell->cellTypeData.sensor.restrictToCreatures;
         lookupResult = 0xffffffffffffffff;
 
-        data.cellMap.getMatchingCells(
-            nearCreatureCells, 9 * 9,
-            numNearCreatureCells,
-            cell->pos,
-            4.0f,
-            cell->detached, [&](Cell* const& otherCell) {
+        data.cellMap.getMatchingCells(nearCreatureCells, 9 * 9, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
             return cell->isSameCreature(otherCell);
         });
     }
@@ -213,8 +207,8 @@ SensorProcessor::searchNeighborhood(SimulationData& data, SimulationStatistics& 
             auto scanPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
             flagDetectedCells(data, cell, scanPos);
 
-            cell->signal.channels[Channels::SensorFoundResult] = 1;                //something found
-            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                          //angle: between -1.0 and 1.0
+            cell->signal.channels[Channels::SensorFoundResult] = 1;                                      //something found
+            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                            //angle: between -1.0 and 1.0
             cell->signal.channels[Channels::SensorDensity] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
 
             cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
@@ -247,7 +241,8 @@ __inline__ __device__ void SensorProcessor::flagDetectedCells(SimulationData& da
             if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                 continue;
             }
-            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants || restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
+            if (restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants
+                || restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
                 || restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
                 || restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
                 if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
