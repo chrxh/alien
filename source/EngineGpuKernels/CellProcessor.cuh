@@ -13,7 +13,7 @@
 #include "ObjectFactory.cuh"
 #include "ParameterCalculator.cuh"
 #include "Physics.cuh"
-#include "RadiationProcessor.cuh"
+#include "EnergyParticleProcessor.cuh"
 #include "TO.cuh"
 
 class CellProcessor
@@ -819,7 +819,7 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
                     if (energyLoss > cellEnergy - 1) {
                         energyLoss = cellEnergy - 1;
                     }
-                    RadiationProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, energyLoss);
+                    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, energyLoss);
                     cell->energy -= energyLoss;
                 }
             }

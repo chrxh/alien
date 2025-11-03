@@ -9,7 +9,7 @@
 #include "ObjectFactory.cuh"
 #include "ParameterCalculator.cuh"
 
-class RadiationProcessor
+class EnergyParticleProcessor
 {
 public:
     __inline__ __device__ static void updateMap(SimulationData& data);
@@ -31,7 +31,7 @@ private:
 /* Implementation                                                       */
 /************************************************************************/
 
-__inline__ __device__ void RadiationProcessor::updateMap(SimulationData& data)
+__inline__ __device__ void EnergyParticleProcessor::updateMap(SimulationData& data)
 {
     auto partition = calcPartition(data.objects.particles.getNumOrigEntries(), blockIdx.x, gridDim.x);
 
@@ -39,7 +39,7 @@ __inline__ __device__ void RadiationProcessor::updateMap(SimulationData& data)
     data.particleMap.set_block(partition.numElements(), particlePointers);
 }
 
-__inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData& data)
+__inline__ __device__ void EnergyParticleProcessor::calcActiveSources(SimulationData& data)
 {
     if (threadIdx.x == 0 && blockIdx.x == 0) {
         int activeSourceIndex = 0;
@@ -57,7 +57,7 @@ __inline__ __device__ void RadiationProcessor::calcActiveSources(SimulationData&
     }
 }
 
-__inline__ __device__ void RadiationProcessor::movement(SimulationData& data)
+__inline__ __device__ void EnergyParticleProcessor::movement(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
 
@@ -68,7 +68,7 @@ __inline__ __device__ void RadiationProcessor::movement(SimulationData& data)
     }
 }
 
-__inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
+__inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
 
@@ -154,7 +154,7 @@ __inline__ __device__ void RadiationProcessor::collision(SimulationData& data)
     }
 }
 
-__inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
+__inline__ __device__ void EnergyParticleProcessor::splitting(SimulationData& data)
 {
     auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
 
@@ -188,7 +188,7 @@ __inline__ __device__ void RadiationProcessor::splitting(SimulationData& data)
     }
 }
 
-__inline__ __device__ void RadiationProcessor::transformation(SimulationData& data)
+__inline__ __device__ void EnergyParticleProcessor::transformation(SimulationData& data)
 {
     if (!cudaSimulationParameters.particleTransformationAllowed.value) {
         return;
@@ -209,7 +209,7 @@ __inline__ __device__ void RadiationProcessor::transformation(SimulationData& da
     }
 }
 
-__inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, Cell* cell, float energy)
+__inline__ __device__ void EnergyParticleProcessor::radiate(SimulationData& data, Cell* cell, float energy)
 {
     auto const cellEnergy = atomicAdd(&cell->energy, 0);
 
@@ -227,10 +227,10 @@ __inline__ __device__ void RadiationProcessor::radiate(SimulationData& data, Cel
     float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
     data.cellMap.correctPosition(particlePos);
 
-    RadiationProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
+    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
 }
 
-__inline__ __device__ void RadiationProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)
+__inline__ __device__ void EnergyParticleProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)
 {
     auto numActiveSources = data.preprocessedSimulationData.activeRadiationSources.getNumActiveSources();
     if (numActiveSources > 0) {

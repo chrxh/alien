@@ -5,7 +5,7 @@
 #include "Definitions.cuh"
 #include "ObjectFactory.cuh"
 #include "ParameterCalculator.cuh"
-#include "RadiationProcessor.cuh"
+#include "EnergyParticleProcessor.cuh"
 #include "SimulationData.cuh"
 
 class CellConnectionProcessor
@@ -157,7 +157,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
             Cell* empty = nullptr;
             auto origCell = alienAtomicExch(&data.objects.cells.at(cellIndex), empty);
             if (origCell) {
-                RadiationProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
+                EnergyParticleProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->energy);
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;

@@ -6,7 +6,7 @@
 #include "CellConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "Object.cuh"
-#include "RadiationProcessor.cuh"
+#include "EnergyParticleProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
