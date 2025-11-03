@@ -563,7 +563,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(newCell._isFrontAngleRefCell);
+    EXPECT_TRUE(newCell._headCell);
     EXPECT_EQ(FrontAngleId, newCell._frontAngleId);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(compare(newCell, randomNode));
@@ -604,7 +604,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(newCell._isFrontAngleRefCell);
+    EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
     EXPECT_TRUE(compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -643,7 +643,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(newCell._isFrontAngleRefCell);
+    EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
     EXPECT_TRUE(compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -813,7 +813,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef(0);
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_TRUE(newCell._isFrontAngleRefCell);
+    EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
 
     ASSERT_TRUE(actualData.hasConnection(hostCell._id, newCell._id));
@@ -1112,7 +1112,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0, 1});
     EXPECT_EQ(CellState_Activating, newCell._cellState);
-    EXPECT_FALSE(newCell._isFrontAngleRefCell);
+    EXPECT_FALSE(newCell._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(0.0f, 1.0f), newCell._pos));
 
@@ -1983,7 +1983,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     auto newCell = actualData.getOtherCellRef({0, 1, 2, 3, 4});
 
     EXPECT_EQ(CellState_Constructing, newCell._cellState);
-    EXPECT_FALSE(newCell._isFrontAngleRefCell);
+    EXPECT_FALSE(newCell._headCell);
     EXPECT_TRUE(actualData.hasConnection(prevCell, newCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, hostCell));
     EXPECT_TRUE(actualData.hasConnection(newCell, prevPrevPrevCell));

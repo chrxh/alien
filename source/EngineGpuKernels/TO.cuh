@@ -249,7 +249,7 @@ struct CellTO
     // Process data
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
-    bool isFrontAngleRefCell;
+    bool headCell;
 
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)

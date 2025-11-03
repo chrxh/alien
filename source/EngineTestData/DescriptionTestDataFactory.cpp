@@ -20,7 +20,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .geneIndex(42)
                       .nodeIndex(13)
                       .frontAngleId(13)
-                      .isFrontAngleRefCell(true)
+                      .headCell(true)
                       .parentNodeIndex(14)
                       .signalAndState({1, 0, 0.6f, 0, 0, 0, 0, 0})
                       .signalRestriction(SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))

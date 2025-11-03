@@ -64,7 +64,7 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
             .frontAngleId(InitialFrontAngleId)
 
             .cells({
-                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
                 CellDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
             }),
         GenomeDescription().frontAngle(45.0f));
@@ -97,7 +97,7 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
             .frontAngleId(InitialFrontAngleId + 1)
 
             .cells({
-                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
                 CellDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
                 CellDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
                 CellDescription().id(4).pos({9.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
@@ -151,7 +151,7 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
             .frontAngleId(InitialFrontAngleId + 1)
 
             .cells({
-                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).frontAngle(7.0f).isFrontAngleRefCell(true),
+                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).frontAngle(7.0f).headCell(true),
                 CellDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).frontAngle(42.0f),
                 CellDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId).frontAngle(23.0f),
             }),
@@ -187,7 +187,7 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
             .frontAngleId(InitialFrontAngleId + 1)
 
             .cells({
-                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
                 CellDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
             }),
         GenomeDescription().frontAngle(FrontAngle));
@@ -254,7 +254,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
             .frontAngleId(InitialFrontAngleId + 1)
 
             .cells({
-                CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
                 CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
                 CellDescription().id(3).pos({9.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
                 CellDescription().id(4).pos({9.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
@@ -310,7 +310,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
             .cells({
                 CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
                 CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
-                CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
             }),
         GenomeDescription().frontAngle(FrontAngle));
     data.addConnection(1, 2);
@@ -358,7 +358,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
             .frontAngleId(InitialFrontAngleId + 1)
 
             .cells({
-                CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).isFrontAngleRefCell(true),
+                CellDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
                 CellDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
                 CellDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
             }),

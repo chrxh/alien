@@ -403,7 +403,7 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
         }
     }
     if ((constructionData.isSeparation || constructor.geneIndex == 0) && constructionData.isFirstNodeOfFirstConcatenation && constructor.currentBranch == 0) {
-        newCell->isFrontAngleRefCell = true;
+        newCell->headCell = true;
     }
     activateNewCellOnLastNode(newCell, hostCell, constructionData);
 

@@ -313,7 +313,7 @@ struct CellDescription
 
     // Process data
     MEMBER(CellDescription, int, frontAngleId, 0);
-    MEMBER(CellDescription, bool, isFrontAngleRefCell, false);
+    MEMBER(CellDescription, bool, headCell, false);
 
     CellType getCellType() const;
     CellDescription& signalAndState(std::vector<float> const& value);

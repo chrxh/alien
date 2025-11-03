@@ -272,7 +272,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->parentNodeIndex = cellTO.parentNodeIndex;
     cell->geneIndex = cellTO.geneIndex;
     cell->frontAngleId = cellTO.frontAngleId;
-    cell->isFrontAngleRefCell = cellTO.isFrontAngleRefCell;
+    cell->headCell = cellTO.headCell;
 
     cell->signalRestriction.active = cellTO.signalRestriction.active;
     cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
@@ -446,7 +446,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->color = 0;
     cell->frontAngle = VALUE_NOT_SET_FLOAT;
     cell->frontAngleId = 0;
-    cell->isFrontAngleRefCell = false;
+    cell->headCell = false;
     cell->barrier = false;
     cell->sticky = false;
     cell->age = 0;
@@ -541,7 +541,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     cell->geneIndex = geneIndex;
     cell->numConnections = 0;
     cell->frontAngleId = 0;
-    cell->isFrontAngleRefCell = false;
+    cell->headCell = false;
 
     cell->neuralNetwork = _data->objects.heap.getTypedSubArray<NeuralNetwork>(1);
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {

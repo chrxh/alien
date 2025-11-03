@@ -228,7 +228,7 @@ namespace
         cellTO.parentNodeIndex = cell->parentNodeIndex;
         cellTO.geneIndex = cell->geneIndex;
         cellTO.frontAngleId = cell->frontAngleId;
-        cellTO.isFrontAngleRefCell = cell->isFrontAngleRefCell;
+        cellTO.headCell = cell->headCell;
 
         cell->tempValue.as_uint64 = cellTOIndex;
         for (int i = 0; i < cell->numConnections; ++i) {

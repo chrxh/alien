@@ -878,7 +878,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
-        loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._isFrontAngleRefCell, defaultObject._isFrontAngleRefCell);
+        loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);

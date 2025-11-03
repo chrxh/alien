@@ -268,7 +268,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     result._parentNodeIndex = cellTO.parentNodeIndex;
     result._geneIndex = cellTO.geneIndex;
     result._frontAngleId = cellTO.frontAngleId;
-    result._isFrontAngleRefCell = cellTO.isFrontAngleRefCell;
+    result._headCell = cellTO.headCell;
 
     switch (cellTO.cellType) {
     case CellType_Structure: {
@@ -838,7 +838,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.geneIndex = cellDesc._geneIndex;
     cellTO.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
     cellTO.frontAngleId = cellDesc._frontAngleId;
-    cellTO.isFrontAngleRefCell = cellDesc._isFrontAngleRefCell;
+    cellTO.headCell = cellDesc._headCell;
 
     auto cellType = cellDesc.getCellType();
     if (cellDesc._neuralNetwork.has_value()) {
