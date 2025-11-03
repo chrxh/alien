@@ -75,21 +75,25 @@ IncludeCategories:
   - Regex: '^<gtest/.*>$'
     Priority: 101
 
+  # CUDA headers
+  - Regex: '^<cuda.*>$'
+    Priority: 102
+
   # OpenGL headers
   - Regex: '^<(GL/.*|glad/.*|glm/.*|stb_image\.h)>$'
-    Priority: 102
+    Priority: 103
 
   # Cereal serialization headers
   - Regex: '^<cereal/.*>$'
-    Priority: 103
+    Priority: 104
 
   # ImGui headers
   - Regex: '^<imgui.*\.h>$'
-    Priority: 104
+    Priority: 105
 
   # Fonts module includes
   - Regex: '^<Fonts/.*>$'
-    Priority: 105
+    Priority: 106
 
   # Base module includes
   - Regex: '^<Base/.*>$'

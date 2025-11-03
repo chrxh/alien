@@ -2,7 +2,8 @@
 #include <iostream>
 #include <list>
 
-#include <GL/gl.h>
+#include <cuda/helper_cuda.h>
+#include <cuda_runtime.h>
 
 #include <Base/Exceptions.h>
 #include <Base/LoggingService.h>
@@ -41,10 +42,6 @@
 #include "TO.cuh"
 #include "TOProvider.cuh"
 #include "TestKernelsService.cuh"
-#include <cuda/helper_cuda.h>
-#include <cuda_gl_interop.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 
 namespace
 {
