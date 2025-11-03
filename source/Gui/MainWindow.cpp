@@ -224,7 +224,7 @@ void _MainWindow::initGlfwAndOpenGL()
     WindowController::get().setup();
     auto windowData = WindowController::get().getWindowData();
     glfwSetFramebufferSizeCallback(windowData.window, framebufferSizeCallback);
-    glfwSwapInterval(1);  //enable vsync
+    //glfwSwapInterval(1);  //enable vsync
     ImGui::CreateContext();
     ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(windowData.window, true);  //setup Platform/Renderer back-ends

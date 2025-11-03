@@ -12,5 +12,5 @@ void FpsController::processForceFps(int fps)
             }
         }
     }
-    _lastCallTimepoint = callTimepoint;
+    _lastCallTimepoint = std::chrono::steady_clock::now();
 }
