@@ -97,7 +97,7 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     }
 }
 
-TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
+TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
@@ -109,7 +109,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
     Description data;
     data.addCreature(
         CreatureDescription().cells({
-            CellDescription().id(1).cellType(ConstructorDescription().geneIndex(0)).pos({10.0f, 10.0f}).cellState(CellState_Ready),
+            CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true),
             CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
         }),
         genome);
@@ -131,13 +131,47 @@ TEST_P(CellStateTransitionTests, ready_detaching_onSelfReplicator)
     }
 }
 
+TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
+{
+    _parameters.cellDeathConsequences.value = GetParam();
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription()}),
+    });
+
+    Description data;
+    data.addCreature(
+        CreatureDescription().cells({
+            CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(false),
+            CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
+        }),
+        genome);
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    if (GetParam() == CellDeathConsquences_None) {
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getCellRef(2)._cellState);
+    } else if (GetParam() == CellDeathConsquences_CreatureDies) {
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
+    } else if (GetParam() == CellDeathConsquences_DetachedPartsDie) {
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(1)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getCellRef(2)._cellState);
+    }
+}
+
 TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
 {
     _parameters.cellDeathConsequences.value = GetParam();
     _simulationFacade->setSimulationParameters(_parameters);
 
     Description data;
-    data.addCreature(CreatureDescription().cells({CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready)}), GenomeDescription());
+    data.addCreature(CreatureDescription().cells({CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true)}), GenomeDescription());
     data.addCreature(CreatureDescription().cells({CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}), GenomeDescription());
     data.addConnection(1, 2);
 
