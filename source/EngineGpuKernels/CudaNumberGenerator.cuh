@@ -22,7 +22,7 @@ public:
 
         CudaMemoryManager::getInstance().acquireMemory(1, _currentRandomNumberIndex);
         CudaMemoryManager::getInstance().acquireMemory(size, _array);
-        CudaMemoryManager::getInstance().acquireMemory(size, _ids);
+        CudaMemoryManager::getInstance().acquireMemory(1, _ids);
 
         CHECK_FOR_CUDA_ERROR(cudaMemset(_currentRandomNumberIndex, 0, sizeof(uint32_t)));
         std::vector<int> randomNumbers(size);

@@ -24,7 +24,8 @@ _DataAccessKernelsService::~_DataAccessKernelsService()
 ArraySizesForTO _DataAccessKernelsService::estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     setValueToDevice(_arraySizesTO, ArraySizesForTO{});
-    KERNEL_CALL(cudaEstimateCapacityNeededForTO, data, _arraySizesTO);
+    KERNEL_CALL(cudaEstimateCapacityNeededForTO_step1, data);
+    KERNEL_CALL(cudaEstimateCapacityNeededForTO_step2, data, _arraySizesTO);
     cudaDeviceSynchronize();
 
     return copyToHost(_arraySizesTO);

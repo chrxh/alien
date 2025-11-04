@@ -845,7 +845,20 @@ __global__ void cudaClearData(SimulationData data)
     data.objects.heap.reset();
 }
 
-__global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesForTO* arraySizes)
+__global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data)
+{
+    auto const& cells = data.objects.cells;
+    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (cell->creature) {
+            cell->creature->creatureIndex = VALUE_NOT_SET_UINT64;
+            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+        }
+    }
+}
+
+__global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, ArraySizesForTO* arraySizes)
 {
     auto const& cells = data.objects.cells;
     auto const& particles = data.objects.particles;
@@ -867,12 +880,16 @@ __global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesF
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
         if (cell->creature) {
-            ++numCreatures;
-            ++numGenomes;
             auto const& creature = cell->creature;
-            numGenes += creature->genome->numGenes;
-            for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
-                numNodes += creature->genome->genes[i].numNodes;
+            if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
+                ++numCreatures;
+                if (alienAtomicExch64(&creature->genome->genomeIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
+                    ++numGenomes;
+                    numGenes += creature->genome->numGenes;
+                    for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
+                        numNodes += creature->genome->genes[i].numNodes;
+                    }
+                }
             }
         }
     }

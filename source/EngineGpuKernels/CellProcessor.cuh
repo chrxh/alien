@@ -177,23 +177,23 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
             auto posDelta = cell->pos - otherCell->pos;
             data.cellMap.correctDirection(posDelta);
-            auto scaledDistance = Math::length(posDelta);
-            auto origDistance = scaledDistance;
+            auto adaptedDistance = Math::length(posDelta);
+            auto origDistance = adaptedDistance;
             if (cell->isSameCreature(otherCell) && (cell->numConnections < 3 || otherCell->numConnections < 3)) {
-                scaledDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
+                adaptedDistance *= 2.0f;  // Reduce range of cell repulsion within creature by scaling distance
             }
 
-            if (otherCell->barrier && scaledDistance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
+            if (otherCell->barrier && adaptedDistance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
                 auto index = atomicAdd(&numBarrierCells, 1);
                 if (index < MaxBarrierCellsForCollision) {
                     barrierCells[index] = otherCell;
                 }
             }
 
-            if (!otherCell->barrier && scaledDistance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
+            if (!otherCell->barrier && adaptedDistance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
 
                 // Calc density
-                atomicAdd_block(&density, calcKernel(scaledDistance / smoothingLength) / (smoothingLength * smoothingLength));
+                atomicAdd_block(&density, calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength));
 
                 if (cell != otherCell) {
 
@@ -218,14 +218,14 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                         auto const& otherCellPressure = otherCell->density;  // Optimization: using the density from last time step
                         auto factor = cellPressure / (cell->density * cell->density) + otherCellPressure / (otherCell->density * otherCell->density);
 
-                        if (scaledDistance > NEAR_ZERO) {
-                            float kernel_d = calcKernel_d(scaledDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
+                        if (adaptedDistance > NEAR_ZERO) {
+                            float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
-                            auto F_pressureDelta = posDelta / (-scaledDistance) * factor * kernel_d;
+                            auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d;
                             atomicAdd_block(&F_pressure.x, F_pressureDelta.x);
                             atomicAdd_block(&F_pressure.y, F_pressureDelta.y);
 
-                            auto F_viscosityDelta = velDelta / otherCell->density * scaledDistance * kernel_d / (scaledDistance * scaledDistance + 0.25f);
+                            auto F_viscosityDelta = velDelta / otherCell->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
                             atomicAdd_block(&F_viscosity.x, F_viscosityDelta.x);
                             atomicAdd_block(&F_viscosity.y, F_viscosityDelta.y);
                         }

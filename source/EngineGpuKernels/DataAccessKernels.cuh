@@ -46,5 +46,6 @@ __global__ void cudaClearDataTO(TO to);
 __global__ void cudaSaveNumEntries(SimulationData data);
 __global__ void cudaClearData(SimulationData data);
 
-__global__ void cudaEstimateCapacityNeededForTO(SimulationData data, ArraySizesForTO* arraySizes);
+__global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data);
+__global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, ArraySizesForTO* arraySizes);
 __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arraySizes);
