@@ -384,6 +384,11 @@ __inline__ __device__ Cell* ConstructorProcessor::startConstructionOnNewBranch(
         if (connectedCell->cellType == CellType_Muscle && connectedCell->cellTypeData.muscle.isBendingMuscle()) {
             connectedCell->frontAngle = VALUE_NOT_SET_FLOAT;
             MuscleProcessor::restoreInitialAngleFromPrevious(connectedCell, hostCell, i);
+
+            // Update newCell position and direction for corrected angle
+            anglesForNewConnection = CellConnectionProcessor::calcLargestGapReferenceAndActualAngle(data, hostCell, constructionData.angle);
+            newCellDirection = Math::unitVectorOfAngle(anglesForNewConnection.actualAngle);
+            newCellPos = hostCell->pos + newCellDirection;
         }
     }
 

@@ -55,7 +55,7 @@ private:
     std::vector<Snapshot> _history;
 
     bool _slowDown = false;
-    int _tpsRestriction = 30;
+    int _tpsRestriction = 100;
 
     std::optional<int> _sessionId;
 };
