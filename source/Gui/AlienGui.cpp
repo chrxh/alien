@@ -2072,7 +2072,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
             }
             sliderValue = minValue;
         } else {
-            format = applyFormatToValue(value[color], parameters._format, parameters._infinity);
+            format = applyFormatToValue(value[color], parameters._format, parameters._infinity, true);
             sliderValue = value[color];
             sliderValueColor = color;
         }
