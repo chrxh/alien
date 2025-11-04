@@ -6,7 +6,7 @@
 #include "ConstantMemory.cuh"
 #include "Object.cuh"
 #include "ParameterCalculator.cuh"
-#include "RadiationProcessor.cuh"
+#include "EnergyParticleProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
@@ -176,7 +176,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         // Radiation
         auto cellTypeWeaponEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);
         if (cellTypeWeaponEnergyCost > 0) {
-            RadiationProcessor::radiate(data, cell, cellTypeWeaponEnergyCost);
+            EnergyParticleProcessor::radiate(data, cell, cellTypeWeaponEnergyCost);
         }
 
         // Output

@@ -34,6 +34,7 @@ add_library(EngineGpuKernels
     EditKernels.cuh
     EditKernelsService.cu
     EditKernelsService.cuh
+    EnergyParticleProcessor.cuh
     ForceFieldKernels.cu
     ForceFieldKernels.cuh
     GarbageCollectorKernels.cu
@@ -67,7 +68,6 @@ add_library(EngineGpuKernels
     ParameterCalculator.cuh
     Physics.cuh
     PreprocessedSimulationData.cuh
-    RadiationProcessor.cuh
     ReconnectorProcessor.cuh
     SelectionResult.cuh
     SensorProcessor.cuh

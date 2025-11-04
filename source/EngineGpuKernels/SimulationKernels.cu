@@ -1,4 +1,4 @@
-﻿#include "AttackerProcessor.cuh"
+#include "AttackerProcessor.cuh"
 #include "CellProcessor.cuh"
 #include "ClusterProcessor.cuh"
 #include "ConstructorProcessor.cuh"
@@ -9,7 +9,7 @@
 #include "InjectorProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "NeuronProcessor.cuh"
-#include "RadiationProcessor.cuh"
+#include "EnergyParticleProcessor.cuh"
 #include "ReconnectorProcessor.cuh"
 #include "SensorProcessor.cuh"
 #include "SignalProcessor.cuh"
@@ -38,13 +38,13 @@ __global__ void cudaNextTimestep_prepare(SimulationData data)
 __global__ void cudaNextTimestep_physics_init(SimulationData data)
 {
     CellProcessor::init(data);
-    RadiationProcessor::calcActiveSources(data);
+    EnergyParticleProcessor::calcActiveSources(data);
 }
 
 __global__ void cudaNextTimestep_physics_fillMaps(SimulationData data)
 {
     CellProcessor::updateMap(data);
-    CellProcessor::radiation(data);  //do not use RadiationProcessor in this calcKernel
+    CellProcessor::radiation(data);  //do not use EnergyParticleProcessor in this calcKernel
     CellProcessor::clearDensityMap(data);
 }
 
@@ -53,7 +53,7 @@ __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
     CellProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
 
-    RadiationProcessor::updateMap(data);
+    EnergyParticleProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data)
@@ -61,7 +61,7 @@ __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data
     CellProcessor::calcCollisions_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
 
-    RadiationProcessor::updateMap(data);
+    EnergyParticleProcessor::updateMap(data);
 }
 
 __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
@@ -69,8 +69,8 @@ __global__ void cudaNextTimestep_physics_applyForces(SimulationData data)
     CellProcessor::checkForces(data);
     CellProcessor::applyForces(data);
 
-    RadiationProcessor::movement(data);
-    RadiationProcessor::collision(data);
+    EnergyParticleProcessor::movement(data);
+    EnergyParticleProcessor::collision(data);
 }
 
 __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData data)
@@ -78,7 +78,7 @@ __global__ void cudaNextTimestep_physics_verletPositionUpdate(SimulationData dat
     CellProcessor::verletPositionUpdate(data);
     CellProcessor::checkConnections(data);
 
-    RadiationProcessor::splitting(data);
+    EnergyParticleProcessor::splitting(data);
 }
 
 __global__ void cudaNextTimestep_physics_calcConnectionForces(SimulationData data, bool considerAngles)
@@ -209,7 +209,7 @@ __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData da
 
 __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data)
 {
-    RadiationProcessor::transformation(data);
+    EnergyParticleProcessor::transformation(data);
 }
 
 __global__ void cudaInitClusterData(SimulationData data)

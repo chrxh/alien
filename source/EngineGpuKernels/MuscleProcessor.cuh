@@ -643,7 +643,7 @@ __inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Cell* 
 {
     auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost.value[cell->color];
     if (cellTypeMuscleEnergyCost > 0) {
-        RadiationProcessor::radiate(data, cell, cellTypeMuscleEnergyCost);
+        EnergyParticleProcessor::radiate(data, cell, cellTypeMuscleEnergyCost);
     }
 }
 

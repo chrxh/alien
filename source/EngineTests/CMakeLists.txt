@@ -10,6 +10,7 @@ PUBLIC
     DescriptionEditTests.cpp
     DetonatorTests.cpp
     EnergyFlowTests.cpp
+    EnergyParticleTests.cpp
     FrontAngleUpdateTests.cpp
     GarbageCollectorTests.cpp
     GeneratorTests.cpp
