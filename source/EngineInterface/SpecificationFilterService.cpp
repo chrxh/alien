@@ -24,7 +24,7 @@ ParametersSpec SpecificationFilterService::filter(ParametersSpec const& spec, Pa
 
             for (auto const& parameterSpec : groupSpec._parameters) {
                 auto filteredParam = filterParameterSpec(parameterSpec, filter);
-                if (filteredParam._visible || matchesFilter(filteredParam._name, filter)) {
+                if (filteredParam._visible) {
                     filteredGroup._parameters.push_back(filteredParam);
                 }
             }
@@ -99,7 +99,7 @@ std::vector<ParameterSpec> SpecificationFilterService::filterAlternativeSpecs(st
 
     for (auto const& spec : specs) {
         auto filteredSpec = filterParameterSpec(spec, filter);
-        if (filteredSpec._visible || matchesFilter(filteredSpec._name, filter)) {
+        if (filteredSpec._visible) {
             result.push_back(filteredSpec);
         }
     }
