@@ -56,6 +56,8 @@ add_library(EngineInterface
     SpaceCalculator.h
     SpecificationEvaluationService.cpp
     SpecificationEvaluationService.h
+    SpecificationFilterService.cpp
+    SpecificationFilterService.h
     StatisticsConverterService.cpp
     StatisticsConverterService.h
     StatisticsHistory.cpp
