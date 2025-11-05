@@ -2431,7 +2431,7 @@ AlienGui::DynamicTableLayout::DynamicTableLayout(float columnWidth)
 
 bool AlienGui::DynamicTableLayout::begin()
 {
-    auto result = ImGui::BeginTable("##", _numColumns, ImGuiTableFlags_None);
+    auto result = ImGui::BeginTable("##", _numColumns, ImGuiTableFlags_BordersInnerV);
     if (result) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -2448,8 +2448,8 @@ void AlienGui::DynamicTableLayout::next()
     auto currentCol = (++_elementNumber) % _numColumns;
     if (currentCol > 0) {
         ImGui::TableSetColumnIndex(currentCol);
-        AlienGui::VerticalSeparator();
-        ImGui::SameLine();
+        //AlienGui::VerticalSeparator(ImGui::GetContentRegionAvail().y);
+        //ImGui::SameLine();
     } else {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);

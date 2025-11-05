@@ -30,23 +30,30 @@ void SpecificationGuiService::createWidgetsForParameters(
     auto const& parametersSpecs = SimulationParameters::getSpec();
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
-    for (auto const& groupSpec : parametersSpecs._groups) {
-        if (!evaluationService.isVisible(groupSpec, locationType)) {
-            continue;
+    AlienGui::DynamicTableLayout table(ColumnWidth);
+    if (table.begin()) {
+        for (auto const& groupSpec : parametersSpecs._groups) {
+            if (!evaluationService.isVisible(groupSpec, locationType)) {
+                continue;
+            }
+            auto isExpertSettings = groupSpec._expertToggle != nullptr;
+            auto isGroupVisibleActive = true;
+            auto name = groupSpec._name;
+            if (isExpertSettings) {
+                isGroupVisibleActive = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
+                name = "Expert settings: " + name;
+            }
+            ImGui::PushID(name.c_str());
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
+                createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber);
+            }
+            ImGui::PopID();
+            AlienGui::EndTreeNode();
+            if (isGroupVisibleActive) {
+                table.next();
+            }
         }
-        auto isExpertSettings = groupSpec._expertToggle != nullptr;
-        auto isGroupVisibleActive = true;
-        auto name = groupSpec._name;
-        if (isExpertSettings) {
-            isGroupVisibleActive = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
-            name = "Expert settings: " + name;
-        }
-        ImGui::PushID(name.c_str());
-        if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
-            createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber);
-        }
-        ImGui::PopID();
-        AlienGui::EndTreeNode();
+        table.end();
     }
 }
 
@@ -97,36 +104,31 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
     int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
-    AlienGui::DynamicTableLayout table(ColumnWidth);
-    if (table.begin()) {
-        for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
-            if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
-                continue;
-            }
-            ImGui::PushID(toInt(index));
-
-            if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
-                createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-            } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-                createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-            } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-                createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
-            } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-                createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
-            } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
-                createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-            } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
-                createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
-            } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
-                createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-            } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
-                createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-            }
-
-            ImGui::PopID();
-            table.next();
+    for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
+        if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
+            continue;
         }
-        table.end();
+        ImGui::PushID(toInt(index));
+
+        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
+            createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+        } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
+            createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+        } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
+            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+        } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
+            createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
+            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
+            createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+        } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
+            createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+        }
+
+        ImGui::PopID();
     }
 }
 
