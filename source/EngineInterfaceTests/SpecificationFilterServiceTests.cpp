@@ -217,7 +217,7 @@ TEST_F(SpecificationFilterServiceTests, filter_alternativeSpec_matchingNestedPar
     EXPECT_TRUE(result._groups[0]._parameters[0]._visible);
 }
 
-TEST_F(SpecificationFilterServiceTests, filter_caseInsensitiveSubstring)
+TEST_F(SpecificationFilterServiceTests, filter_substringMatch)
 {
     // Create a simple spec
     ParametersSpec spec;
