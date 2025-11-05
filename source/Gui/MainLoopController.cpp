@@ -436,7 +436,7 @@ void MainLoopController::processMenubar()
         AlienGui::MenuItemParameters()
             .name("Creator")
             .keyAlt(true)
-            .key(ImGuiKey_R)
+            .key(ImGuiKey_G)
             .selected(CreatorWindow::get().isOn())
             .disabled(!SimulationInteractionController::get().isEditMode())
             .closeMenuWhenItemClicked(false),
@@ -544,7 +544,7 @@ void MainLoopController::processMenubar()
 
     AlienGui::BeginMenu(" " ICON_FA_TOOLS "  Tools ", _toolsMenuOpened);
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Mass operations").keyAlt(true).key(ImGuiKey_H), [&] { MassOperationsDialog::get().open(); });
-    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true).key(ImGuiKey_G), [&] { ImageToPatternDialog::get().show(); });
+    AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Image converter").keyAlt(true), [&] { ImageToPatternDialog::get().show(); });
     AlienGui::EndMenu();
 
     AlienGui::BeginMenu(" " ICON_FA_COG "  Settings ", _settingsMenuOpened, false);

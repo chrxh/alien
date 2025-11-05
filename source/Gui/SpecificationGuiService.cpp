@@ -16,7 +16,8 @@
 
 namespace
 {
-    auto constexpr RightColumnWidth = 285.0f;
+    auto constexpr ColumnWidth = 400.0f;
+    auto constexpr TextColumnWidth = 285.0f;
 }
 
 void SpecificationGuiService::createWidgetsForParameters(
@@ -96,32 +97,36 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
     int orderNumber) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
+    AlienGui::DynamicTableLayout table(ColumnWidth);
+    if (table.begin()) {
+        for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
+            if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
+                continue;
+            }
+            ImGui::PushID(toInt(index));
 
-    for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
-        if (!SpecificationEvaluationService::get().isVisible(parameterSpec, locationType)) {
-            continue;
+            if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
+                createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
+                createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
+                createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+            } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
+                createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+            } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
+                createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
+                createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+            } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
+                createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
+                createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            }
+
+            ImGui::PopID();
+            table.next();
         }
-        ImGui::PushID(toInt(index));
-
-        if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
-            createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-        } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-            createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-        } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
-        } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
-        } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
-            createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-        } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
-            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
-        } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
-            createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-        } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
-            createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
-        }
-
-        ImGui::PopID();
+        table.end();
     }
 }
 
@@ -142,7 +147,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
         AlienGui::CheckboxColorMatrix(
             AlienGui::CheckboxColorMatrixParameters()
                 .name(parameterSpec._name)
-                .textWidth(RightColumnWidth)
+                .textWidth(TextColumnWidth)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
                 .tooltip(parameterSpec._description),
             *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
@@ -151,7 +156,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
         AlienGui::Checkbox(
             AlienGui::CheckboxParameters()
                 .name(parameterSpec._name)
-                .textWidth(RightColumnWidth)
+                .textWidth(TextColumnWidth)
                 .defaultValue(*origRef.value)
                 .tooltip(parameterSpec._description),
             *ref.value);
@@ -179,7 +184,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .max(intSpec._min)
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
-                .textWidth(RightColumnWidth)
+                .textWidth(TextColumnWidth)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
             *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value));
@@ -188,7 +193,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
         AlienGui::SliderInt(
             AlienGui::SliderIntParameters()
                 .name(parameterSpec._name)
-                .textWidth(RightColumnWidth)
+                .textWidth(TextColumnWidth)
                 .min(intSpec._min)
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
@@ -236,7 +241,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .max(max)
                 .logarithmic(floatSpec._logarithmic)
                 .format(floatSpec._format)
-                .textWidth(RightColumnWidth)
+                .textWidth(TextColumnWidth)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue)))
                 .disabledValue(
@@ -260,7 +265,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
         if (AlienGui::SliderFloat(
                 AlienGui::SliderFloatParameters()
                     .name(parameterSpec._name)
-                    .textWidth(RightColumnWidth)
+                    .textWidth(TextColumnWidth)
                     .min(min)
                     .max(max)
                     .logarithmic(floatSpec._logarithmic)
@@ -315,7 +320,7 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     AlienGui::SliderFloat2(
         AlienGui::SliderFloat2Parameters()
             .name(parameterSpec._name)
-            .textWidth(RightColumnWidth)
+            .textWidth(TextColumnWidth)
             .min(min)
             .max(max)
             .defaultValue(*origValue)
@@ -343,7 +348,7 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
         evaluationService.getRef(char64Spec._member, origParameters, orderNumber);
 
     AlienGui::InputText(
-        AlienGui::InputTextParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._description),
+        AlienGui::InputTextParameters().name(parameterSpec._name).textWidth(TextColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._description),
         *value,
         sizeof(Char64) / sizeof(char));
 }
@@ -371,7 +376,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     AlienGui::Switcher(
         AlienGui::SwitcherParameters()
             .name(parameterSpec._name)
-            .textWidth(RightColumnWidth)
+            .textWidth(TextColumnWidth)
             .defaultValue(*origValue)
             .values(values)
             .readOnly(!enabled)
@@ -410,7 +415,7 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     AlienGui::ColorButtonWithPicker(
-        AlienGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(RightColumnWidth).defaultValue(*origValue), *value);
+        AlienGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(TextColumnWidth).defaultValue(*origValue), *value);
 }
 
 void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
@@ -430,7 +435,7 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     for (int color = 0; color < MAX_COLORS; ++color) {
         ImGui::PushID(color);
         auto widgetParameters = AlienGui::InputColorTransitionParameters()
-                                    .textWidth(RightColumnWidth)
+                                    .textWidth(TextColumnWidth)
                                     .color(color)
                                     .defaultTargetColor(origValue[color].targetColor)
                                     .defaultTransitionAge(origValue[color].duration)
