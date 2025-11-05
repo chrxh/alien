@@ -16,13 +16,13 @@ void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFac
     _simulationFacade = simulationFacade;
 }
 
-void _SimulationParametersBaseWidget::process()
+void _SimulationParametersBaseWidget::process(ParametersFilter const& filter)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, 0);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, 0, filter);
 
     if (parameters != lastParameters) {
         ParametersValidationService::get().validateAndCorrect({_simulationFacade->getWorldSize()}, parameters);

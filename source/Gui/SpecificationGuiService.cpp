@@ -24,7 +24,8 @@ void SpecificationGuiService::createWidgetsForParameters(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();

@@ -34,6 +34,7 @@ add_library(EngineInterface
     NumberGenerator.h
     ParametersEditService.cpp
     ParametersEditService.h
+    ParametersFilter.h
     ParametersValidationService.cpp
     ParametersValidationService.h
     PreviewDescription.cpp

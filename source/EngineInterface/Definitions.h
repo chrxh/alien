@@ -40,8 +40,6 @@ class ShapeGeneratorResult;
 
 class StatisticsHistory;
 
-class SimulationParametersService;
-
 struct PreviewDescription;
 
 struct ConversionResult;
@@ -54,3 +52,5 @@ using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 struct NumRenderObjects;
 struct CellVertexData;
 struct EnergyParticleVertexData;
+
+struct ParametersFilter;

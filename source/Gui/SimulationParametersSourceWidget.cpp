@@ -15,7 +15,7 @@ void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulation
     _orderNumber = orderNumber;
 }
 
-void _SimulationParametersSourceWidgets::process()
+void _SimulationParametersSourceWidgets::process(ParametersFilter const& filter)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -26,7 +26,7 @@ void _SimulationParametersSourceWidgets::process()
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 
     ImGui::PushID("Source");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber, filter);
     ImGui::PopID();
 
     if (parameters != lastParameters) {

@@ -4,6 +4,8 @@
 
 #include <EngineInterface/SimulationParametersSpecification.h>
 
+#include "Definitions.h"
+
 class SpecificationGuiService
 {
     MAKE_SINGLETON(SpecificationGuiService);
@@ -13,7 +15,8 @@ public:
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
         SimulationFacade const& simulationFacade,
-        int orderNumber) const;
+        int orderNumber,
+        ParametersFilter const& filter) const;
 
     void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 

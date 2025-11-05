@@ -14,7 +14,7 @@ void _SimulationParameterLayerWidget::init(SimulationFacade const& simulationFac
     _orderNumber = orderNumber;
 }
 
-void _SimulationParameterLayerWidget::process()
+void _SimulationParameterLayerWidget::process(ParametersFilter const& filter)
 {
     auto parameters = _simulationFacade->getSimulationParameters();
     auto origParameters = _simulationFacade->getOriginalSimulationParameters();
@@ -24,7 +24,7 @@ void _SimulationParameterLayerWidget::process()
     _layerName = std::string(parameters.layerName.layerValues[layerIndex]);
 
     ImGui::PushID("Layer");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber, filter);
     ImGui::PopID();
 
     if (parameters != lastParameters) {
