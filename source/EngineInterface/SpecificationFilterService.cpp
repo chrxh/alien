@@ -48,40 +48,64 @@ bool SpecificationFilterService::matchesFilter(std::string const& name, Paramete
     return name.find(*filter.containedText) != std::string::npos;
 }
 
+bool SpecificationFilterService::anyParameterMatchesRecursively(ParameterSpec const& spec, ParametersFilter const& filter) const
+{
+    // Check if this parameter's name matches
+    if (matchesFilter(spec._name, filter)) {
+        return true;
+    }
+
+    // If it contains an AlternativeSpec, check nested parameters
+    if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
+        auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
+        for (auto const& [_, alternativeParams] : alternativeSpec._alternatives) {
+            for (auto const& param : alternativeParams) {
+                if (anyParameterMatchesRecursively(param, filter)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 ParameterSpec SpecificationFilterService::filterParameterSpec(ParameterSpec const& spec, ParametersFilter const& filter) const
 {
     ParameterSpec result = spec;
 
-    // Check if this parameter contains an AlternativeSpec
-    if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
-        auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
-        AlternativeSpec filteredAlternativeSpec;
-        filteredAlternativeSpec._member = alternativeSpec._member;
-
-        // Filter each alternative's parameters
-        for (auto const& [alternativeName, alternativeParams] : alternativeSpec._alternatives) {
-            auto filteredParams = filterAlternativeSpecs(alternativeParams, filter);
-            // Only add alternatives that have visible parameters
-            if (!filteredParams.empty()) {
-                filteredAlternativeSpec._alternatives.push_back({alternativeName, filteredParams});
-            }
-        }
-
-        result._reference = filteredAlternativeSpec;
-    }
-
     // If the parameter name matches, keep it visible
     if (matchesFilter(spec._name, filter)) {
         result._visible = true;
-    } else {
-        // Check if any nested parameters (in alternatives) match
-        bool hasMatchingNested = false;
-        if (std::holds_alternative<AlternativeSpec>(result._reference)) {
-            auto const& filteredAlternativeSpec = std::get<AlternativeSpec>(result._reference);
-            // If we have any alternatives with parameters, then some nested parameter matched
-            hasMatchingNested = !filteredAlternativeSpec._alternatives.empty();
+        return result;
+    }
+
+    // Check if this parameter contains an AlternativeSpec
+    if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
+        auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
+
+        // Check if any parameter in any alternative matches the filter
+        bool anyParameterMatches = false;
+        for (auto const& [_, alternativeParams] : alternativeSpec._alternatives) {
+            for (auto const& param : alternativeParams) {
+                if (anyParameterMatchesRecursively(param, filter)) {
+                    anyParameterMatches = true;
+                    break;
+                }
+            }
+            if (anyParameterMatches) {
+                break;
+            }
         }
-        result._visible = hasMatchingNested;
+
+        // If any parameter matches, include the entire AlternativeSpec unchanged
+        if (anyParameterMatches) {
+            result._visible = true;
+        } else {
+            result._visible = false;
+        }
+    } else {
+        result._visible = false;
     }
 
     return result;

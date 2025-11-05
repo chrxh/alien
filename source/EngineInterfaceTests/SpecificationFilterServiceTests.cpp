@@ -215,6 +215,20 @@ TEST_F(SpecificationFilterServiceTests, filter_alternativeSpec_matchingNestedPar
     ASSERT_EQ(1, result._groups[0]._parameters.size());
     EXPECT_EQ("ModeSelection", result._groups[0]._parameters[0]._name);
     EXPECT_TRUE(result._groups[0]._parameters[0]._visible);
+
+    // The entire AlternativeSpec should be included with ALL alternatives
+    ASSERT_TRUE(std::holds_alternative<AlternativeSpec>(result._groups[0]._parameters[0]._reference));
+    auto const& resultAltSpec = std::get<AlternativeSpec>(result._groups[0]._parameters[0]._reference);
+    ASSERT_EQ(2, resultAltSpec._alternatives.size());
+
+    // Both alternatives should be present
+    EXPECT_EQ("Mode1", resultAltSpec._alternatives[0].first);
+    ASSERT_EQ(1, resultAltSpec._alternatives[0].second.size());
+    EXPECT_EQ("EnergyMode", resultAltSpec._alternatives[0].second[0]._name);
+
+    EXPECT_EQ("Mode2", resultAltSpec._alternatives[1].first);
+    ASSERT_EQ(1, resultAltSpec._alternatives[1].second.size());
+    EXPECT_EQ("SpeedMode", resultAltSpec._alternatives[1].second[0]._name);
 }
 
 TEST_F(SpecificationFilterServiceTests, filter_substringMatch)

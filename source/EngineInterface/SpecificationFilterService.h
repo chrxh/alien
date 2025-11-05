@@ -14,6 +14,7 @@ public:
 
 private:
     bool matchesFilter(std::string const& name, ParametersFilter const& filter) const;
+    bool anyParameterMatchesRecursively(ParameterSpec const& spec, ParametersFilter const& filter) const;
     ParameterSpec filterParameterSpec(ParameterSpec const& spec, ParametersFilter const& filter) const;
     std::vector<ParameterSpec> filterAlternativeSpecs(std::vector<ParameterSpec> const& specs, ParametersFilter const& filter) const;
 };
