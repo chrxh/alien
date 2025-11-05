@@ -256,6 +256,58 @@ TEST_F(SpecificationFilterServiceTests, filter_substringMatch)
     EXPECT_EQ("cell_max_energy", result._groups[0]._parameters[0]._name);
 }
 
+TEST_F(SpecificationFilterServiceTests, filter_caseInsensitiveMatch)
+{
+    // Create a spec with mixed case names
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "TestGroup";
+
+    ParameterSpec param1;
+    param1._name = "MaxEnergyValue";
+    param1._reference = FloatSpec();
+    group._parameters.push_back(param1);
+
+    ParameterSpec param2;
+    param2._name = "CELL_SPEED";
+    param2._reference = FloatSpec();
+    group._parameters.push_back(param2);
+
+    ParameterSpec param3;
+    param3._name = "minTemperature";
+    param3._reference = FloatSpec();
+    group._parameters.push_back(param3);
+
+    spec._groups.push_back(group);
+
+    // Filter for "energy" (lowercase) should match "MaxEnergyValue"
+    ParametersFilter filter1;
+    filter1.containedText = "energy";
+    auto result1 = _service.filter(spec, filter1);
+
+    ASSERT_EQ(1, result1._groups.size());
+    ASSERT_EQ(1, result1._groups[0]._parameters.size());
+    EXPECT_EQ("MaxEnergyValue", result1._groups[0]._parameters[0]._name);
+
+    // Filter for "SPEED" (uppercase) should match "CELL_SPEED"
+    ParametersFilter filter2;
+    filter2.containedText = "SPEED";
+    auto result2 = _service.filter(spec, filter2);
+
+    ASSERT_EQ(1, result2._groups.size());
+    ASSERT_EQ(1, result2._groups[0]._parameters.size());
+    EXPECT_EQ("CELL_SPEED", result2._groups[0]._parameters[0]._name);
+
+    // Filter for "TeMp" (mixed case) should match "minTemperature"
+    ParametersFilter filter3;
+    filter3.containedText = "TeMp";
+    auto result3 = _service.filter(spec, filter3);
+
+    ASSERT_EQ(1, result3._groups.size());
+    ASSERT_EQ(1, result3._groups[0]._parameters.size());
+    EXPECT_EQ("minTemperature", result3._groups[0]._parameters[0]._name);
+}
+
 TEST_F(SpecificationFilterServiceTests, filter_preservesGroupMetadata)
 {
     // Create a spec with group metadata

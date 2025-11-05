@@ -45,7 +45,13 @@ bool SpecificationFilterService::matchesFilter(std::string const& name, Paramete
         return true;
     }
 
-    return name.find(*filter.containedText) != std::string::npos;
+    // Convert both strings to lowercase for case-insensitive comparison
+    auto lowerName = name;
+    auto lowerFilter = *filter.containedText;
+    std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::transform(lowerFilter.begin(), lowerFilter.end(), lowerFilter.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    return lowerName.find(lowerFilter) != std::string::npos;
 }
 
 bool SpecificationFilterService::anyParameterMatchesRecursively(ParameterSpec const& spec, ParametersFilter const& filter) const
