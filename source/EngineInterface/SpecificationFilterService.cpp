@@ -76,19 +76,10 @@ ParameterSpec SpecificationFilterService::filterParameterSpec(ParameterSpec cons
     } else {
         // Check if any nested parameters (in alternatives) match
         bool hasMatchingNested = false;
-        if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
-            auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
-            for (auto const& [_, alternativeParams] : alternativeSpec._alternatives) {
-                for (auto const& param : alternativeParams) {
-                    if (matchesFilter(param._name, filter)) {
-                        hasMatchingNested = true;
-                        break;
-                    }
-                }
-                if (hasMatchingNested) {
-                    break;
-                }
-            }
+        if (std::holds_alternative<AlternativeSpec>(result._reference)) {
+            auto const& filteredAlternativeSpec = std::get<AlternativeSpec>(result._reference);
+            // If we have any alternatives with parameters, then some nested parameter matched
+            hasMatchingNested = !filteredAlternativeSpec._alternatives.empty();
         }
         result._visible = hasMatchingNested;
     }
