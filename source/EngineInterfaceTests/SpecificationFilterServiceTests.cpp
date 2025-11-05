@@ -38,17 +38,17 @@ TEST_F(SpecificationFilterServiceTests, filter_noMatchingParameters)
     ParametersSpec spec;
     ParameterGroupSpec group;
     group._name = "TestGroup";
-    
+
     ParameterSpec param1;
     param1._name = "FirstParameter";
     param1._reference = FloatSpec();
     group._parameters.push_back(param1);
-    
+
     ParameterSpec param2;
     param2._name = "SecondParameter";
     param2._reference = IntSpec();
     group._parameters.push_back(param2);
-    
+
     spec._groups.push_back(group);
 
     // Filter with text that doesn't match any parameter
@@ -66,17 +66,17 @@ TEST_F(SpecificationFilterServiceTests, filter_matchingParameterName)
     ParametersSpec spec;
     ParameterGroupSpec group;
     group._name = "TestGroup";
-    
+
     ParameterSpec param1;
     param1._name = "EnergyParameter";
     param1._reference = FloatSpec();
     group._parameters.push_back(param1);
-    
+
     ParameterSpec param2;
     param2._name = "SpeedParameter";
     param2._reference = FloatSpec();
     group._parameters.push_back(param2);
-    
+
     spec._groups.push_back(group);
 
     // Filter for "Energy"
@@ -97,17 +97,17 @@ TEST_F(SpecificationFilterServiceTests, filter_matchingGroupName_includesAllPara
     ParametersSpec spec;
     ParameterGroupSpec group;
     group._name = "EnergySettings";
-    
+
     ParameterSpec param1;
     param1._name = "MinValue";
     param1._reference = FloatSpec();
     group._parameters.push_back(param1);
-    
+
     ParameterSpec param2;
     param2._name = "MaxValue";
     param2._reference = FloatSpec();
     group._parameters.push_back(param2);
-    
+
     spec._groups.push_back(group);
 
     // Filter for "Energy" which matches the group name
@@ -127,7 +127,7 @@ TEST_F(SpecificationFilterServiceTests, filter_multipleGroups_mixedMatching)
 {
     // Create a spec with multiple groups
     ParametersSpec spec;
-    
+
     // First group - name matches
     ParameterGroupSpec group1;
     group1._name = "EnergyGroup";
@@ -136,7 +136,7 @@ TEST_F(SpecificationFilterServiceTests, filter_multipleGroups_mixedMatching)
     param1._reference = FloatSpec();
     group1._parameters.push_back(param1);
     spec._groups.push_back(group1);
-    
+
     // Second group - parameter matches
     ParameterGroupSpec group2;
     group2._name = "SpeedGroup";
@@ -149,7 +149,7 @@ TEST_F(SpecificationFilterServiceTests, filter_multipleGroups_mixedMatching)
     param3._reference = FloatSpec();
     group2._parameters.push_back(param3);
     spec._groups.push_back(group2);
-    
+
     // Third group - no match
     ParameterGroupSpec group3;
     group3._name = "SizeGroup";
@@ -166,11 +166,11 @@ TEST_F(SpecificationFilterServiceTests, filter_multipleGroups_mixedMatching)
 
     // Should have two groups
     ASSERT_EQ(2, result._groups.size());
-    
+
     // First group should have all parameters (group name matched)
     EXPECT_EQ("EnergyGroup", result._groups[0]._name);
     EXPECT_EQ(1, result._groups[0]._parameters.size());
-    
+
     // Second group should have only matching parameter
     EXPECT_EQ("SpeedGroup", result._groups[1]._name);
     EXPECT_EQ(1, result._groups[1]._parameters.size());
@@ -183,24 +183,24 @@ TEST_F(SpecificationFilterServiceTests, filter_alternativeSpec_matchingNestedPar
     ParametersSpec spec;
     ParameterGroupSpec group;
     group._name = "TestGroup";
-    
+
     ParameterSpec param;
     param._name = "ModeSelection";
-    
+
     AlternativeSpec altSpec;
-    
+
     // First alternative with matching parameter
     ParameterSpec altParam1;
     altParam1._name = "EnergyMode";
     altParam1._reference = FloatSpec();
     altSpec._alternatives.push_back({"Mode1", {altParam1}});
-    
+
     // Second alternative without matching parameter
     ParameterSpec altParam2;
     altParam2._name = "SpeedMode";
     altParam2._reference = FloatSpec();
     altSpec._alternatives.push_back({"Mode2", {altParam2}});
-    
+
     param._reference = altSpec;
     group._parameters.push_back(param);
     spec._groups.push_back(group);
@@ -223,12 +223,12 @@ TEST_F(SpecificationFilterServiceTests, filter_caseInsensitiveSubstring)
     ParametersSpec spec;
     ParameterGroupSpec group;
     group._name = "TestGroup";
-    
+
     ParameterSpec param;
     param._name = "cell_max_energy";
     param._reference = FloatSpec();
     group._parameters.push_back(param);
-    
+
     spec._groups.push_back(group);
 
     // Filter for substring
@@ -249,12 +249,12 @@ TEST_F(SpecificationFilterServiceTests, filter_preservesGroupMetadata)
     ParameterGroupSpec group;
     group._name = "EnergyGroup";
     group._description = "Energy related settings";
-    
+
     ParameterSpec param;
     param._name = "MaxEnergy";
     param._reference = FloatSpec();
     group._parameters.push_back(param);
-    
+
     spec._groups.push_back(group);
 
     // Filter that matches group name
@@ -274,22 +274,22 @@ TEST_F(SpecificationFilterServiceTests, filter_multipleMatchingParameters)
     ParametersSpec spec;
     ParameterGroupSpec group;
     group._name = "TestGroup";
-    
+
     ParameterSpec param1;
     param1._name = "cell_min_energy";
     param1._reference = FloatSpec();
     group._parameters.push_back(param1);
-    
+
     ParameterSpec param2;
     param2._name = "cell_max_energy";
     param2._reference = FloatSpec();
     group._parameters.push_back(param2);
-    
+
     ParameterSpec param3;
     param3._name = "cell_velocity";
     param3._reference = FloatSpec();
     group._parameters.push_back(param3);
-    
+
     spec._groups.push_back(group);
 
     // Filter for "energy"
@@ -302,4 +302,122 @@ TEST_F(SpecificationFilterServiceTests, filter_multipleMatchingParameters)
     ASSERT_EQ(2, result._groups[0]._parameters.size());
     EXPECT_EQ("cell_min_energy", result._groups[0]._parameters[0]._name);
     EXPECT_EQ("cell_max_energy", result._groups[0]._parameters[1]._name);
+}
+
+TEST_F(SpecificationFilterServiceTests, filter_emptySpec)
+{
+    // Create an empty spec
+    ParametersSpec spec;
+
+    // Filter with any text
+    ParametersFilter filter;
+    filter.containedText = "Energy";
+    auto result = _service.filter(spec, filter);
+
+    // Should return empty spec
+    EXPECT_EQ(0, result._groups.size());
+}
+
+TEST_F(SpecificationFilterServiceTests, filter_groupWithNoParameters)
+{
+    // Create a spec with a group that has no parameters
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "EmptyGroup";
+    spec._groups.push_back(group);
+
+    // Filter with any text
+    ParametersFilter filter;
+    filter.containedText = "Empty";
+    auto result = _service.filter(spec, filter);
+
+    // Should return the group even if it has no parameters (group name matches)
+    ASSERT_EQ(1, result._groups.size());
+    EXPECT_EQ("EmptyGroup", result._groups[0]._name);
+    EXPECT_EQ(0, result._groups[0]._parameters.size());
+}
+
+TEST_F(SpecificationFilterServiceTests, filter_nestedAlternatives_noMatch)
+{
+    // Create a spec with AlternativeSpec where nothing matches
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "TestGroup";
+
+    ParameterSpec param;
+    param._name = "ModeSelection";
+
+    AlternativeSpec altSpec;
+
+    ParameterSpec altParam1;
+    altParam1._name = "SpeedMode";
+    altParam1._reference = FloatSpec();
+    altSpec._alternatives.push_back({"Mode1", {altParam1}});
+
+    ParameterSpec altParam2;
+    altParam2._name = "VelocityMode";
+    altParam2._reference = FloatSpec();
+    altSpec._alternatives.push_back({"Mode2", {altParam2}});
+
+    param._reference = altSpec;
+    group._parameters.push_back(param);
+    spec._groups.push_back(group);
+
+    // Filter for "Energy" which doesn't match anything
+    ParametersFilter filter;
+    filter.containedText = "Energy";
+    auto result = _service.filter(spec, filter);
+
+    // Should have no groups
+    EXPECT_EQ(0, result._groups.size());
+}
+
+TEST_F(SpecificationFilterServiceTests, filter_partialMatch)
+{
+    // Create a spec
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "TestGroup";
+
+    ParameterSpec param;
+    param._name = "cell_max_energy_distribution";
+    param._reference = FloatSpec();
+    group._parameters.push_back(param);
+
+    spec._groups.push_back(group);
+
+    // Filter for partial substring
+    ParametersFilter filter;
+    filter.containedText = "max_energy";
+    auto result = _service.filter(spec, filter);
+
+    // Should match
+    ASSERT_EQ(1, result._groups.size());
+    ASSERT_EQ(1, result._groups[0]._parameters.size());
+    EXPECT_EQ("cell_max_energy_distribution", result._groups[0]._parameters[0]._name);
+}
+
+TEST_F(SpecificationFilterServiceTests, filter_specialCharacters)
+{
+    // Create a spec with special characters in names
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "Test_Group-1";
+
+    ParameterSpec param;
+    param._name = "param_with-dash_and.dot";
+    param._reference = FloatSpec();
+    group._parameters.push_back(param);
+
+    spec._groups.push_back(group);
+
+    // Filter for part with special characters
+    ParametersFilter filter;
+    filter.containedText = "dash_and";
+    auto result = _service.filter(spec, filter);
+
+    // Should match
+    ASSERT_EQ(1, result._groups.size());
+    ASSERT_EQ(1, result._groups[0]._parameters.size());
+    EXPECT_EQ("param_with-dash_and.dot", result._groups[0]._parameters[0]._name);
 }
