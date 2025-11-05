@@ -61,7 +61,10 @@ ParameterSpec SpecificationFilterService::filterParameterSpec(ParameterSpec cons
         // Filter each alternative's parameters
         for (auto const& [alternativeName, alternativeParams] : alternativeSpec._alternatives) {
             auto filteredParams = filterAlternativeSpecs(alternativeParams, filter);
-            filteredAlternativeSpec._alternatives.push_back({alternativeName, filteredParams});
+            // Only add alternatives that have visible parameters
+            if (!filteredParams.empty()) {
+                filteredAlternativeSpec._alternatives.push_back({alternativeName, filteredParams});
+            }
         }
 
         result._reference = filteredAlternativeSpec;
