@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <Base/StringHelper.h>
+
 ParametersSpec SpecificationFilterService::filter(ParametersSpec const& spec, ParametersFilter const& filter) const
 {
     if (!filter.containedText.has_value() || filter.containedText->empty()) {
@@ -45,13 +47,7 @@ bool SpecificationFilterService::matchesFilter(std::string const& name, Paramete
         return true;
     }
 
-    // Convert both strings to lowercase for case-insensitive comparison
-    auto lowerName = name;
-    auto lowerFilter = *filter.containedText;
-    std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(), [](unsigned char c) { return std::tolower(c); });
-    std::transform(lowerFilter.begin(), lowerFilter.end(), lowerFilter.begin(), [](unsigned char c) { return std::tolower(c); });
-
-    return lowerName.find(lowerFilter) != std::string::npos;
+    return StringHelper::containsCaseInsensitive(name, *filter.containedText);
 }
 
 bool SpecificationFilterService::anyParameterMatchesRecursively(ParameterSpec const& spec, ParametersFilter const& filter) const

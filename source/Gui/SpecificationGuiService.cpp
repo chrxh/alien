@@ -17,7 +17,7 @@
 
 namespace
 {
-    auto constexpr ColumnWidth = 400.0f;
+    auto constexpr ColumnWidth = 500.0f;
     auto constexpr TextColumnWidth = 285.0f;
 }
 

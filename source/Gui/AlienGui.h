@@ -14,12 +14,6 @@
 
 #include "Definitions.h"
 
-struct FilterStackElement
-{
-    std::string text;
-    bool alreadyMatched = false;
-};
-
 struct TreeNodeStackElement
 {
     float treeNodeStartCursorPosY = 0;
@@ -375,9 +369,6 @@ public:
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();
 
-    static void SetFilterText(std::string const& value);
-    static void ResetFilterText();
-
     struct ButtonParameters
     {
         MEMBER(ButtonParameters, std::string, buttonText, "");
@@ -478,10 +469,6 @@ private:
     static bool RevertButton(std::string const& id);
 
 private:
-    static bool isFilterActive();
-    static bool matchWithFilter(std::string const& text);
-
-    static std::vector<FilterStackElement> _filterStack;
     static std::vector<TreeNodeStackElement> _treeNodeStack;
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
 
