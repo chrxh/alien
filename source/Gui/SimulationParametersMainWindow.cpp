@@ -239,22 +239,23 @@ void SimulationParametersMainWindow::processDetailWidget()
                                                             .rank(AlienGui::TreeNodeRank::High)
                                                             .defaultOpen(_detailWidgetOpen))) {
             ImGui::Spacing();
-            AlienGui::SetFilterText(_filter);
+            //AlienGui::SetFilterText(_filter);
             if (ImGui::BeginChild(
                     "##detail2", {0, -ImGui::GetStyle().FramePadding.y - scale(33.0f)}, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar)) {
                 auto type = _locations.at(_selectedOrderNumber).type;
+                ParametersFilter filter{.containedText = _filter};
                 if (type == LocationType::Base) {
-                    _baseWidgets->process();
+                    _baseWidgets->process(filter);
                 } else if (type == LocationType::Layer) {
                     _layerWidgets->setOrderNumber(_selectedOrderNumber);
-                    _layerWidgets->process();
+                    _layerWidgets->process(filter);
                 } else if (type == LocationType::Source) {
                     _sourceWidgets->setOrderNumber(_selectedOrderNumber);
-                    _sourceWidgets->process();
+                    _sourceWidgets->process(filter);
                 }
             }
             ImGui::EndChild();
-            AlienGui::ResetFilterText();
+            //AlienGui::ResetFilterText();
 
             ImGui::Spacing();
             AlienGui::InputFilter(AlienGui::InputFilterParameters().width(250.0f), _filter);

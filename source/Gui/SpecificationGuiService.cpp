@@ -9,6 +9,7 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 #include <EngineInterface/SpecificationEvaluationService.h>
+#include <EngineInterface/SpecificationFilterService.h>
 
 #include "AlienGui.h"
 #include "SimulationInteractionController.h"
@@ -16,7 +17,7 @@
 
 namespace
 {
-    auto constexpr ColumnWidth = 400.0f;
+    auto constexpr ColumnWidth = 500.0f;
     auto constexpr TextColumnWidth = 285.0f;
 }
 
@@ -29,11 +30,12 @@ void SpecificationGuiService::createWidgetsForParameters(
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();
+    auto filteredParametersSpecs = SpecificationFilterService::get().filter(parametersSpecs, filter);
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     AlienGui::DynamicTableLayout table(ColumnWidth);
     if (table.begin()) {
-        for (auto const& groupSpec : parametersSpecs._groups) {
+        for (auto const& groupSpec : filteredParametersSpecs._groups) {
             if (!evaluationService.isVisible(groupSpec, locationType)) {
                 continue;
             }
@@ -157,11 +159,7 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
 
     } else {
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters()
-                .name(parameterSpec._name)
-                .textWidth(TextColumnWidth)
-                .defaultValue(*origRef.value)
-                .tooltip(parameterSpec._description),
+            AlienGui::CheckboxParameters().name(parameterSpec._name).textWidth(TextColumnWidth).defaultValue(*origRef.value).tooltip(parameterSpec._description),
             *ref.value);
     }
 }
