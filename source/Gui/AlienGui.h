@@ -286,11 +286,8 @@ public:
     static void Text(TextParameters const& parameters);
     static void Text(std::string const& text);
     static void BoldText(TextParameters const& parameters);
-    static void BoldText(std::string const& text);
     static void MonospaceText(TextParameters const& parameters);
-    static void MonospaceText(std::string const& text);
     static void DecentText(TextParameters const& parameters);
-    static void DecentText(std::string const& text);
 
     static void BeginMenuBar();
     static void BeginMenu(std::string const& text, bool& toggled, float focus = true);

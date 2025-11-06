@@ -466,7 +466,7 @@ void GettingStartedWindow::drawHeading1(std::string const& text)
 {
     AlienGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::HeadlineColor);
-    AlienGui::BoldText(text);
+    AlienGui::BoldText(AlienGui::TextParameters().text(text));
     ImGui::PopStyleColor();
     AlienGui::Separator();
 }
@@ -474,7 +474,7 @@ void GettingStartedWindow::drawHeading1(std::string const& text)
 void GettingStartedWindow::drawHeading2(std::string const& text)
 {
     ImGui::Spacing();
-    AlienGui::BoldText(text);
+    AlienGui::BoldText(AlienGui::TextParameters().text(text));
 }
 
 void GettingStartedWindow::drawItemText(std::string const& text)

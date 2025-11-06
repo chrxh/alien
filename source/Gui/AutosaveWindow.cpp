@@ -218,7 +218,7 @@ void AutosaveWindow::processTable()
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
-                    AlienGui::DecentText(" (" + entry->peakType + ")");
+                    AlienGui::DecentText(AlienGui::TextParameters().text(" (" + entry->peakType + ")"));
                 }
 
                 ImGui::PopID();
