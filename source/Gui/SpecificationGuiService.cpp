@@ -47,7 +47,11 @@ void SpecificationGuiService::createWidgetsForParameters(
                 name = "Expert settings: " + name;
             }
             ImGui::PushID(name.c_str());
-            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
+            if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters()
+                                            .name(name)
+                                            .visible(isGroupVisibleActive)
+                                            .blinkWhenActivated(isExpertSettings)
+                                            .highlightedSubString(filter.containedText))) {
                 createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber, filter);
             }
             ImGui::PopID();

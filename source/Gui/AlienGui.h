@@ -388,6 +388,7 @@ public:
         MEMBER(TreeNodeParameters, bool, defaultOpen, true);
         MEMBER(TreeNodeParameters, bool, visible, true);
         MEMBER(TreeNodeParameters, bool, blinkWhenActivated, false);
+        MEMBER(TreeNodeParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
     static void EndTreeNode();

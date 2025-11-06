@@ -1442,7 +1442,36 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     //    treeNodeOpenFlags |= ImGuiTreeNodeFlags_Bullet;
     //}
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+    
+    
+    
+    auto refPos = ImGui::GetCursorScreenPos();
+    refPos.x += scale(28.0f);
+    
     bool result = ImGui::TreeNodeEx(parameters._name.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
+
+    if (parameters._highlightedSubString.has_value()) {
+        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(parameters._name, parameters._highlightedSubString.value());
+        if (!match.empty()) {
+            auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str()).x;
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+        }
+    }
+
+
+
+
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
 
