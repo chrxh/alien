@@ -135,7 +135,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
     if (GetParam() == CellsOnCreature::No) {
         data._cells = {CellDescription().id(0), CellDescription().id(1)};
     } else {
-        data._creatures = {CreatureDescription().cells({CellDescription().id(0), CellDescription().id(1)})};
+        data.addCreature(CreatureDescription().cells({CellDescription().id(0), CellDescription().id(1)}));
     }
 
     // Perform action
@@ -155,7 +155,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
         if (GetParam() == CellsOnCreature::No) {
             return Description().cells({CellDescription().id(0), CellDescription().id(0)});
         } else {
-            return Description().creatures({CreatureDescription().cells({CellDescription().id(0), CellDescription().id(0)})});
+            return Description().addCreature(CreatureDescription().cells({CellDescription().id(0), CellDescription().id(0)}));
         }
     };
     auto data = createCollection();
@@ -184,7 +184,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
             creature._cells.emplace_back(CellDescription().id(i).age(i));
         }
         std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
-        data._creatures.emplace_back(creature);
+        data.addCreature(creature);
     }
 
     // Perform action
@@ -248,15 +248,14 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
 TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
-    auto data = Description().creatures({
-        CreatureDescription().cells({
-            CellDescription().id(0).connections({ConnectionDescription().cellId(2)}),
-            CellDescription().id(1),
-        }),
-        CreatureDescription().cells({
-            CellDescription().id(2).connections({ConnectionDescription().cellId(0)}),
-        }),
-    });
+    auto data = Description()
+                    .addCreature(CreatureDescription().cells({
+                        CellDescription().id(0).connections({ConnectionDescription().cellId(2)}),
+                        CellDescription().id(1),
+                    }))
+                    .addCreature(CreatureDescription().cells({
+                        CellDescription().id(2).connections({ConnectionDescription().cellId(0)}),
+                    }));
 
     // Perform action
     data.assignNewIds();
@@ -308,11 +307,9 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
                         CellDescription().id(0).connections({ConnectionDescription().cellId(3)}),
                         CellDescription().id(1),
                     })
-                    .creatures({
-                        CreatureDescription().cells({
-                            CellDescription().id(2).connections({ConnectionDescription().cellId(4)}),
-                        }),
-                    });
+                    .addCreature(CreatureDescription().cells({
+                        CellDescription().id(2).connections({ConnectionDescription().cellId(4)}),
+                    }));
     // Perform action
     data.assignNewIds();
 
@@ -448,10 +445,9 @@ TEST_F(DescriptionEditTests, assignNewIds_sameParticleIds)
 TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 {
     // Create test data
-    auto data = Description().creatures({
-        CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}),
-        CreatureDescription().id(1).cells({CellDescription().id(0), CellDescription().id(0)}),
-    });
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}))
+                    .addCreature(CreatureDescription().id(1).cells({CellDescription().id(0), CellDescription().id(0)}));
 
     // Perform action
     data.assignNewIds();
@@ -474,10 +470,9 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 {
     // Create test data
-    auto data = Description().creatures({
-        CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}),
-        CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}),
-    });
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}))
+                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}));
 
     // Perform action
     data.assignNewIds();
@@ -500,10 +495,9 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
-    auto data = Description().creatures({
-        CreatureDescription().id(2).cells({CellDescription()}),
-        CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}),
-    });
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -532,10 +526,9 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
-    auto data = Description().creatures({
-        CreatureDescription().id(2).cells({CellDescription()}),
-        CreatureDescription().id(3).ancestorId(1).cells({CellDescription()}),
-    });
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(1).cells({CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -564,11 +557,10 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
 {
     // Create test data
-    auto data = Description().creatures({
-        CreatureDescription().id(2).cells({CellDescription()}),
-        CreatureDescription().id(2).cells({CellDescription()}),
-        CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}),
-    });
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}));
 
     // Perform action
     data.assignNewIds();
