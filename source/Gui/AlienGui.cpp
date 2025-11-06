@@ -109,7 +109,7 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
     //text
     if (!parameters._name.empty()) {
         ImGui::SameLine();
-        AlienGui::Text(parameters._name.c_str());
+        AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
     }
 
     //tooltip
@@ -134,7 +134,7 @@ void AlienGui::SliderInputFloat(SliderInputFloatParameters const& parameters, fl
     ImGui::SetNextItemWidth(inputWidth);
     ImGui::InputFloat(("##input" + parameters._name).c_str(), &value, 0, 0, parameters._format.c_str());
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 }
 
 bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* enabled)
@@ -241,7 +241,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     if (enabled) {
         ImGui::EndDisabled();
     }
-    AlienGui::Text(parameters._name);
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -290,7 +290,7 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
@@ -324,7 +324,7 @@ void AlienGui::InputFloat2(InputFloat2Parameters const& parameters, float& value
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
@@ -452,7 +452,7 @@ bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, in
     }
     if (!parameters._name.empty()) {
         ImGui::SameLine();
-        AlienGui::Text(parameters._name.c_str());
+        AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
     }
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -503,7 +503,7 @@ void AlienGui::InputTextMultiline(InputTextMultilineParameters const& parameters
         {ImGui::GetContentRegionAvail().x - textWidth, height},
         ImGuiInputTextFlags_Multiline);
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     text = std::string(buffer);
 }
@@ -566,7 +566,7 @@ bool AlienGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
     }
 
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -644,7 +644,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enable
     }
 
     ImGui::SameLine();
-    AlienGui::Text(parameters._name);
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -706,7 +706,7 @@ bool AlienGui::ComboColor(ComboColorParameters const& parameters, int& value, bo
     if (enabled) {
         ImGui::EndDisabled();
     }
-    AlienGui::Text(parameters._name);
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -728,7 +728,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
     ImGui::SameLine();
 
     //combo for target color
-    AlienGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
+    AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_LONG_ARROW_ALT_RIGHT));
     ImGui::SameLine();
     ImGui::PushID("color");
     AlienGui::ComboColor(AlienGui::ComboColorParameters().width(70.0f).textWidth(0), targetColor);
@@ -767,7 +767,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -831,7 +831,7 @@ bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -1159,7 +1159,7 @@ void AlienGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& para
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -1458,7 +1458,7 @@ bool AlienGui::Button(ButtonParameters const& parameters)
         ImGui::EndDisabled();
         ImGui::SameLine();
     }
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -1530,7 +1530,7 @@ void AlienGui::StatusBar(std::vector<std::string> const& textItems)
     AlienGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
     //ImGui::PushStyleColor(ImGuiCol_Text, Const::StatusBarTextColor.Value);
-    AlienGui::Text(text);
+    AlienGui::Text(AlienGui::TextParameters().text(text));
     ImGui::PopStyleColor();
 }
 
@@ -1609,7 +1609,7 @@ bool AlienGui::ToggleButton(ToggleButtonParameters const& parameters, bool& valu
     drawList->AddCircleFilled(ImVec2(p.x + radius + (value ? 1 : 0) * (width - radius * 2.0f), p.y + radius), radius - 2.5f, IM_COL32(255, 255, 255, 255));
 
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -2081,7 +2081,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 if (parameters._readOnly) {
                     ImGui::EndDisabled();
                 }
-                AlienGui::Text(parameters._name);
+                AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
                 if (parameters._readOnly) {
                     ImGui::BeginDisabled();
                 }
@@ -2270,7 +2270,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     }
 
     ImGui::SameLine();
-    AlienGui::Text(parameters._name.c_str());
+    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);

@@ -69,11 +69,11 @@ void UploadSimulationDialog::processIntern()
 {
     auto resourceTypeString = BrowserDataTypeToLowerString.at(_resourceType);
     if (ImGui::BeginChild("##header", ImVec2(0, scale(52.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-        AlienGui::Text("Data privacy policy");
+        AlienGui::Text(AlienGui::TextParameters().text("Data privacy policy"));
         AlienGui::HelpMarker(
             "The " + resourceTypeString + " file, name and description are stored on the server. It cannot be guaranteed that the data will not be deleted.");
 
-        AlienGui::Text("How to use or create folders?");
+        AlienGui::Text(AlienGui::TextParameters().text("How to use or create folders?"));
         AlienGui::HelpMarker(
             "If you want to upload the " + resourceTypeString
             + " to a folder, you can use the `/`-notation. The folder will be created automatically if it does not exist.\nFor instance, naming a simulation "
@@ -84,8 +84,8 @@ void UploadSimulationDialog::processIntern()
 
     if (!_folder.empty()) {
         if (ImGui::BeginChild("##folder info", ImVec2(0, scale(85.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
-            AlienGui::Text("The following folder has been selected in the browser\nand will used for the upload:\n\n");
-            AlienGui::BoldText(_folder);
+            AlienGui::Text(AlienGui::TextParameters().text("The following folder has been selected in the browser\nand will used for the upload:\n\n"));
+            AlienGui::BoldText(AlienGui::TextParameters().text(_folder));
         }
         ImGui::EndChild();
     }

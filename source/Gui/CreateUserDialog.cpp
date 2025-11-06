@@ -25,15 +25,15 @@ void CreateUserDialog::open(std::string const& userName, std::string const& pass
 
 void CreateUserDialog::processIntern()
 {
-    AlienGui::Text("Security information");
+    AlienGui::Text(AlienGui::TextParameters().text("Security information"));
     AlienGui::HelpMarker("The data transfer to the server is encrypted via https. On the server side, the email address is not stored in cleartext, but "
                          "as a SHA-256 hash value in the database.");
-    AlienGui::Text("Data privacy policy");
+    AlienGui::Text(AlienGui::TextParameters().text("Data privacy policy"));
     AlienGui::HelpMarker("The entered e-mail address will not be passed on to third parties and is used only for the following two reasons: 1) To send "
                          "the confirmation code. "
                          "2) A SHA-256 hash value of the email address is stored on the server to verify that it is not yet in use.");
     AlienGui::Separator();
-    AlienGui::Text("Please enter your email address to receive the\nconfirmation code for the new user.");
+    AlienGui::Text(AlienGui::TextParameters().text("Please enter your email address to receive the\nconfirmation code for the new user."));
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Email").textWidth(0), _email);
 

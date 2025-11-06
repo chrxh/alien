@@ -141,7 +141,7 @@ void AutosaveWindow::processHeader() {}
 void AutosaveWindow::processTable()
 {
     if (!_savepointTable.has_value()) {
-        AlienGui::Text("Error: Savepoint files could not be read or created in the specified directory.");
+        AlienGui::Text(AlienGui::TextParameters().text("Error: Savepoint files could not be read or created in the specified directory."));
         return;
     }
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
@@ -169,11 +169,11 @@ void AutosaveWindow::processTable()
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_InQueue) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-                    AlienGui::Text("In queue");
+                    AlienGui::Text(AlienGui::TextParameters().text("In queue"));
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_InProgress) {
                     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-                    AlienGui::Text("In progress");
+                    AlienGui::Text(AlienGui::TextParameters().text("In progress"));
                     ImGui::PopStyleColor();
                 } else if (entry->state == SavepointState_Persisted) {
                     auto triggerLoadSavepoint = AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_DOWNLOAD));
@@ -183,9 +183,9 @@ void AutosaveWindow::processTable()
                     }
 
                     ImGui::SameLine();
-                    AlienGui::Text(entry->name);
+                    AlienGui::Text(AlienGui::TextParameters().text(entry->name));
                 } else if (entry->state == SavepointState_Error) {
-                    AlienGui::Text("Error");
+                    AlienGui::Text(AlienGui::TextParameters().text("Error"));
                 }
                 ImGui::SameLine();
                 ImGui::Dummy({0, scale(22.0f)});
@@ -203,22 +203,22 @@ void AutosaveWindow::processTable()
                 // timestamp
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienGui::Text(entry->timestamp);
+                    AlienGui::Text(AlienGui::TextParameters().text(entry->timestamp));
                 }
 
                 // timestep
                 ImGui::TableNextColumn();
                 if (entry->state == SavepointState_Persisted) {
-                    AlienGui::Text(StringHelper::format(entry->timestep));
+                    AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(entry->timestep)));
                 }
 
                 // peak
                 ImGui::TableNextColumn();
-                AlienGui::Text(entry->peak);
+                AlienGui::Text(AlienGui::TextParameters().text(entry->peak));
 
                 if (!entry->peakType.empty()) {
                     ImGui::SameLine();
-                    AlienGui::DecentText(" (" + entry->peakType + ")");
+                    AlienGui::DecentText(AlienGui::TextParameters().text(" (" + entry->peakType + ")"));
                 }
 
                 ImGui::PopID();

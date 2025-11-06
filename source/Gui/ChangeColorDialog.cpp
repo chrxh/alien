@@ -33,7 +33,7 @@ void ChangeColorDialog::processIntern()
         ImGui::PopID();
 
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text(ICON_FA_LONG_ARROW_ALT_RIGHT);
+        AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_LONG_ARROW_ALT_RIGHT));
 
         ImGui::TableSetColumnIndex(2);
         ImGui::PushID("target color");
@@ -45,7 +45,7 @@ void ChangeColorDialog::processIntern()
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));
     ImGui::Checkbox("##restrictToSelectedGene", &_restrictToSelectedGene);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text("Restrict to selected gene");
+    AlienGui::Text(AlienGui::TextParameters().text("Restrict to selected gene"));
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();

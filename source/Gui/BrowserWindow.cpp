@@ -766,7 +766,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
         processDownloadButton(leaf);
         ImGui::SameLine();
         if (_currentWorkspace.workspaceType == WorkspaceType_Private && leaf.rawTO->workspaceType == WorkspaceType_Public) {
-            AlienGui::Text(ICON_FA_SHARE_ALT);
+            AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_SHARE_ALT));
             AlienGui::Tooltip("Visible in the public workspace");
         }
         ImGui::SameLine();
@@ -777,7 +777,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
             font->Scale *= 0.65f;
             ImGui::PushFont(font);
             ImGui::PushStyleColor(ImGuiCol_Text, Const::BrowserResourceNewTextColor.Value);
-            AlienGui::Text("NEW");
+            AlienGui::Text(AlienGui::TextParameters().text("NEW"));
             ImGui::PopStyleColor();
             font->Scale = origSize;
             ImGui::PopFont();
@@ -800,7 +800,7 @@ bool BrowserWindow::processResourceNameField(NetworkResourceTreeTO const& treeTO
                 return folder.numLeafs == 1 ? "genome" : "genomes";
             }
         }();
-        AlienGui::Text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")");
+        AlienGui::Text(AlienGui::TextParameters().text("(" + std::to_string(folder.numLeafs) + " " + resourceTypeString + ")"));
         ImGui::PopStyleColor();
     }
     return result;
@@ -852,7 +852,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
             auto numLikes = leaf.rawTO->numLikesByEmojiType.at(emojiType);
 
             ImGui::SameLine();
-            AlienGui::Text(std::to_string(numLikes));
+            AlienGui::Text(AlienGui::TextParameters().text(std::to_string(numLikes)));
             if (emojiType < _emojis.size()) {
                 ImGui::SameLine();
                 auto const& emoji = _emojis.at(emojiType);
@@ -891,7 +891,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
         auto pos = ImGui::GetCursorScreenPos();
         ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
         ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
-        AlienGui::Text("(" + std::to_string(folder.numReactions) + ")");
+        AlienGui::Text(AlienGui::TextParameters().text("(" + std::to_string(folder.numReactions) + ")"));
         ImGui::PopStyleColor();
     }
 }
@@ -900,7 +900,7 @@ void BrowserWindow::processTimestampField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(leaf.rawTO->timestamp);
+        AlienGui::Text(AlienGui::TextParameters().text(leaf.rawTO->timestamp));
     }
 }
 
@@ -916,7 +916,7 @@ void BrowserWindow::processNumDownloadsField(NetworkResourceTreeTO const& treeTO
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(std::to_string(leaf.rawTO->numDownloads));
+        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(leaf.rawTO->numDownloads)));
     }
 }
 
@@ -924,7 +924,7 @@ void BrowserWindow::processWidthField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(std::to_string(leaf.rawTO->width));
+        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(leaf.rawTO->width)));
     }
 }
 
@@ -932,7 +932,7 @@ void BrowserWindow::processHeightField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(std::to_string(leaf.rawTO->height));
+        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(leaf.rawTO->height)));
     }
 }
 
@@ -941,9 +941,9 @@ void BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, 
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
         if (kobjects) {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+            AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(leaf.rawTO->particles / 1000) + " K"));
         } else {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->particles));
+            AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(leaf.rawTO->particles)));
         }
     }
 }
@@ -953,9 +953,9 @@ void BrowserWindow::processSizeField(NetworkResourceTreeTO const& treeTO, bool k
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
         if (kbyte) {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->contentSize / 1024) + " KB");
+            AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(leaf.rawTO->contentSize / 1024) + " KB"));
         } else {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->contentSize) + " Bytes");
+            AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(leaf.rawTO->contentSize) + " Bytes"));
         }
     }
 }
@@ -964,7 +964,7 @@ void BrowserWindow::processVersionField(NetworkResourceTreeTO const& treeTO)
 {
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
-        AlienGui::Text(leaf.rawTO->version);
+        AlienGui::Text(AlienGui::TextParameters().text(leaf.rawTO->version));
     }
 }
 
@@ -1145,7 +1145,7 @@ void BrowserWindow::processShortenedText(std::string const& text, bool bold)
     if (bold) {
         ImGui::PushFont(styleRepository.getSmallBoldFont());
     }
-    AlienGui::Text(substrings.at(0));
+    AlienGui::Text(AlienGui::TextParameters().text(substrings.at(0)));
     if (bold) {
         ImGui::PopFont();
     }

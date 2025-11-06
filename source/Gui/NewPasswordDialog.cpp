@@ -30,14 +30,14 @@ NewPasswordDialog::NewPasswordDialog()
 
 void NewPasswordDialog::processIntern()
 {
-    AlienGui::Text("Security information");
+    AlienGui::Text(AlienGui::TextParameters().text("Security information"));
     AlienGui::HelpMarker(
         "The data transfer to the server is encrypted via https. On the server side, the password is not stored in cleartext, but as a salted SHA-256 hash "
         "value in the database.");
 
     AlienGui::Separator();
 
-    AlienGui::Text("Please enter a new password and the confirmation code\nsent to your email address.");
+    AlienGui::Text(AlienGui::TextParameters().text("Please enter a new password and the confirmation code\nsent to your email address."));
     AlienGui::Separator();
     AlienGui::InputText(AlienGui::InputTextParameters().hint("New password").password(true).textWidth(0), _newPassword);
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Code (case sensitive)").textWidth(0), _confirmationCode);

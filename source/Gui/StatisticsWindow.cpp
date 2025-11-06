@@ -234,17 +234,17 @@ void StatisticsWindow::processTablesTab()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedCellsPerSecond()));
+        AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(_tableLiveStatistics.getCreatedCellsPerSecond())));
 
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Created cells / sec");
+        AlienGui::Text(AlienGui::TextParameters().text("Created cells / sec"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        AlienGui::Text(StringHelper::format(_tableLiveStatistics.getCreatedReplicatorsPerSecond()));
+        AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(_tableLiveStatistics.getCreatedReplicatorsPerSecond())));
 
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Created self-replicators / sec");
+        AlienGui::Text(AlienGui::TextParameters().text("Created self-replicators / sec"));
 
         ImGui::EndTable();
     }
@@ -304,31 +304,31 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numCells);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Cells");
+        AlienGui::Text(AlienGui::TextParameters().text("Cells"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numParticles);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Energy particles");
+        AlienGui::Text(AlienGui::TextParameters().text("Energy particles"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::totalEnergy);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Contained energy");
+        AlienGui::Text(AlienGui::TextParameters().text("Contained energy"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numSelfReplicators);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Self-replicators");
+        AlienGui::Text(AlienGui::TextParameters().text("Self-replicators"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numColonies);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Diversity");
+        AlienGui::Text(AlienGui::TextParameters().text("Diversity"));
         ImGui::SameLine();
         AlienGui::HelpMarker("The number of colonies is displayed. A colony is a set of at least 20 same mutants.");
 
@@ -336,7 +336,7 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageGenomeCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Num genotype\ncells average");
+        AlienGui::Text(AlienGui::TextParameters().text("Num genotype\ncells average"));
         ImGui::SameLine();
         AlienGui::HelpMarker("The average number of encoded cells in the genomes is displayed.");
 
@@ -344,31 +344,31 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::averageNumCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Genome complexity\naverage");
+        AlienGui::Text(AlienGui::TextParameters().text("Genome complexity\naverage"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::varianceNumCells, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Genome complexity\nvariance");
+        AlienGui::Text(AlienGui::TextParameters().text("Genome complexity\nvariance"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::maxNumCellsOfColonies, 2);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Genome complexity\nmaximum");
+        AlienGui::Text(AlienGui::TextParameters().text("Genome complexity\nmaximum"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numViruses);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Viruses");
+        AlienGui::Text(AlienGui::TextParameters().text("Viruses"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numFreeCells);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Free cells");
+        AlienGui::Text(AlienGui::TextParameters().text("Free cells"));
 
         ImPlot::PopColormap();
 
@@ -388,85 +388,85 @@ void StatisticsWindow::processTimelineStatistics()
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numCreatedCells, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Created cells");
+        AlienGui::Text(AlienGui::TextParameters().text("Created cells"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numAttacks, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Attacks");
+        AlienGui::Text(AlienGui::TextParameters().text("Attacks"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numMuscleActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Muscle activities");
+        AlienGui::Text(AlienGui::TextParameters().text("Muscle activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numTransmitterActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Transmitter activities");
+        AlienGui::Text(AlienGui::TextParameters().text("Transmitter activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numDefenderActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Defender activities");
+        AlienGui::Text(AlienGui::TextParameters().text("Defender activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numGeneratorPulses, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Generator pulses");
+        AlienGui::Text(AlienGui::TextParameters().text("Generator pulses"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numNeuronActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Neural activities");
+        AlienGui::Text(AlienGui::TextParameters().text("Neural activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numSensorActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Sensor activities");
+        AlienGui::Text(AlienGui::TextParameters().text("Sensor activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numSensorMatches, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Sensor matches");
+        AlienGui::Text(AlienGui::TextParameters().text("Sensor matches"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numInjectionActivities, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Injection activities");
+        AlienGui::Text(AlienGui::TextParameters().text("Injection activities"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numCompletedInjections, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Completed injections");
+        AlienGui::Text(AlienGui::TextParameters().text("Completed injections"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numReconnectorCreated, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Reconnector creations");
+        AlienGui::Text(AlienGui::TextParameters().text("Reconnector creations"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numReconnectorRemoved, 6);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Reconnector deletions");
+        AlienGui::Text(AlienGui::TextParameters().text("Reconnector deletions"));
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         processPlot(row++, &DataPointCollection::numDetonations, 8);
         ImGui::TableSetColumnIndex(1);
-        AlienGui::Text("Detonations");
+        AlienGui::Text(AlienGui::TextParameters().text("Detonations"));
 
         ImPlot::PopColormap();
         ImGui::EndTable();

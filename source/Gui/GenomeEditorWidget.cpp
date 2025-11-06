@@ -135,10 +135,10 @@ void _GenomeEditorWidget::processGeneList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    AlienGui::Text(std::to_string(row + 1));
+                    AlienGui::Text(AlienGui::TextParameters().text(std::to_string(row + 1)));
                     if (row == 0) {
                         ImGui::SameLine();
-                        AlienGui::DecentText(" (root)");
+                        AlienGui::DecentText(AlienGui::TextParameters().text(" (root)"));
                     }
                     ImGui::SameLine();
                     auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
@@ -155,9 +155,9 @@ void _GenomeEditorWidget::processGeneList()
                     // Column 1: Name
                     ImGui::TableNextColumn();
                     if (!gene._name.empty()) {
-                        AlienGui::Text(gene._name);
+                        AlienGui::Text(AlienGui::TextParameters().text(gene._name));
                     } else {
-                        AlienGui::DecentText("(unnamed)");
+                        AlienGui::DecentText(AlienGui::TextParameters().text("(unnamed)"));
                     }
 
                     // Column 2: References
@@ -165,7 +165,7 @@ void _GenomeEditorWidget::processGeneList()
                     auto references = GenomeDescriptionInfoService::get().getReferences(gene);
                     auto referencesStrings = references | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                     auto referencesString = boost::algorithm::join(std::vector(referencesStrings.begin(), referencesStrings.end()), ", ");
-                    AlienGui::Text(referencesString);
+                    AlienGui::Text(AlienGui::TextParameters().text(referencesString));
 
                     // Column 3: Referenced by
                     ImGui::TableNextColumn();
@@ -173,42 +173,42 @@ void _GenomeEditorWidget::processGeneList()
                     if (!referencedBy.empty()) {
                         auto referencedByStrings = referencedBy | std::views::transform([](auto const& geneIndex) { return std::to_string(geneIndex + 1); });
                         auto referencedByString = boost::algorithm::join(std::vector(referencedByStrings.begin(), referencedByStrings.end()), ", ");
-                        AlienGui::Text(referencedByString);
+                        AlienGui::Text(AlienGui::TextParameters().text(referencedByString));
                     } else {
                         if (row > 0) {
-                            AlienGui::Text("-");
+                            AlienGui::Text(AlienGui::TextParameters().text("-"));
                         }
                     }
 
                     // Column 4: Shape
                     ImGui::TableNextColumn();
-                    AlienGui::Text(Const::ConstructorShapeStrings.at(gene._shape));
+                    AlienGui::Text(AlienGui::TextParameters().text(Const::ConstructorShapeStrings.at(gene._shape)));
 
                     // Column 5: Branches
                     ImGui::TableNextColumn();
                     if (gene._separation) {
-                        AlienGui::Text("Separation");
+                        AlienGui::Text(AlienGui::TextParameters().text("Separation"));
                     } else {
                         auto const& numBranches = gene._numBranches;
                         CHECK(numBranches >= 1 && numBranches <= 6);
                         if (numBranches == 1) {
-                            AlienGui::Text("1 branch");
+                            AlienGui::Text(AlienGui::TextParameters().text("1 branch"));
                         } else {
-                            AlienGui::Text(std::to_string(gene._numBranches) + " branches");
+                            AlienGui::Text(AlienGui::TextParameters().text(std::to_string(gene._numBranches) + " branches"));
                         }
                     }
 
                     // Column 5: Concatenations
                     ImGui::TableNextColumn();
                     if (gene._numConcatenations != std::numeric_limits<int>::max()) {
-                        AlienGui::Text(std::to_string(gene._numConcatenations));
+                        AlienGui::Text(AlienGui::TextParameters().text(std::to_string(gene._numConcatenations)));
                     } else {
-                        AlienGui::Text("Infinity");
+                        AlienGui::Text(AlienGui::TextParameters().text("Infinity"));
                     }
 
                     // Column 6: Node count
                     ImGui::TableNextColumn();
-                    AlienGui::Text(std::to_string(gene._nodes.size()));
+                    AlienGui::Text(AlienGui::TextParameters().text(std::to_string(gene._nodes.size())));
 
                     if (isUnreachable) {
                         ImGui::PopStyleColor();

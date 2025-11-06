@@ -30,13 +30,13 @@ LoginDialog::LoginDialog()
 
 void LoginDialog::processIntern()
 {
-    AlienGui::Text("How to create a new user?");
+    AlienGui::Text(AlienGui::TextParameters().text("How to create a new user?"));
     AlienGui::HelpMarker(Const::LoginHowToCreateNewUseTooltip);
 
-    AlienGui::Text("Forgot your password?");
+    AlienGui::Text(AlienGui::TextParameters().text("Forgot your password?"));
     AlienGui::HelpMarker(Const::LoginForgotYourPasswordTooltip);
 
-    AlienGui::Text("Security information");
+    AlienGui::Text(AlienGui::TextParameters().text("Security information"));
     AlienGui::HelpMarker(Const::LoginSecurityInformationTooltip);
 
     AlienGui::Separator();
