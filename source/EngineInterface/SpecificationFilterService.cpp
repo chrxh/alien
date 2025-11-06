@@ -76,33 +76,54 @@ ParameterSpec SpecificationFilterService::filterParameterSpec(ParameterSpec cons
 {
     ParameterSpec result = spec;
 
-    // If the parameter name matches, keep it visible
+    // If the parameter name matches, keep it visible with filtered alternatives
     if (matchesFilter(spec._name, filter)) {
         result._visible = true;
+        
+        // If this is an AlternativeSpec, filter its nested parameters
+        if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
+            auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
+            AlternativeSpec filteredAltSpec = alternativeSpec;
+            filteredAltSpec._alternatives.clear();
+            
+            // Filter each alternative
+            for (auto const& [name, alternativeParams] : alternativeSpec._alternatives) {
+                std::vector<ParameterSpec> filteredParams = filterAlternativeSpecs(alternativeParams, filter);
+                // Always include the alternative, even if empty
+                filteredAltSpec._alternatives.push_back({name, filteredParams});
+            }
+            
+            result._reference = filteredAltSpec;
+        }
+        
         return result;
     }
 
     // Check if this parameter contains an AlternativeSpec
     if (std::holds_alternative<AlternativeSpec>(spec._reference)) {
         auto const& alternativeSpec = std::get<AlternativeSpec>(spec._reference);
-
-        // Check if any parameter in any alternative matches the filter
+        AlternativeSpec filteredAltSpec = alternativeSpec;
+        filteredAltSpec._alternatives.clear();
+        
         bool anyParameterMatches = false;
-        for (auto const& [_, alternativeParams] : alternativeSpec._alternatives) {
-            for (auto const& param : alternativeParams) {
-                if (anyParameterMatchesRecursively(param, filter)) {
-                    anyParameterMatches = true;
-                    break;
-                }
+        
+        // Filter each alternative
+        for (auto const& [name, alternativeParams] : alternativeSpec._alternatives) {
+            std::vector<ParameterSpec> filteredParams = filterAlternativeSpecs(alternativeParams, filter);
+            
+            // Check if any parameters matched in this alternative
+            if (!filteredParams.empty()) {
+                anyParameterMatches = true;
             }
-            if (anyParameterMatches) {
-                break;
-            }
+            
+            // Always include the alternative, even if empty
+            filteredAltSpec._alternatives.push_back({name, filteredParams});
         }
 
-        // If any parameter matches, include the entire AlternativeSpec unchanged
+        // If any parameter matches, include the AlternativeSpec with filtered alternatives
         if (anyParameterMatches) {
             result._visible = true;
+            result._reference = filteredAltSpec;
         } else {
             result._visible = false;
         }
