@@ -216,10 +216,10 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
                         CellDescription().id(0).connections({ConnectionDescription().cellId(1)}),
                         CellDescription().id(1).connections({ConnectionDescription().cellId(0)}),
                     })
-                    .creatures({CreatureDescription().cells({
+                    .addCreature(CreatureDescription().cells({
                         CellDescription().id(0).connections({ConnectionDescription().cellId(1)}),
                         CellDescription().id(1).connections({ConnectionDescription().cellId(0)}),
-                    })});
+                    }));
 
     // Perform action
     data.assignNewIds();

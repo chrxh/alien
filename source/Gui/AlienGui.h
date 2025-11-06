@@ -278,10 +278,15 @@ public:
     };
     static bool SelectableButton(SelectableButtonParameters const& parameters, bool& value);
 
-    static void Text(std::string const& text);
-    static void BoldText(std::string const& text);
-    static void MonospaceText(std::string const& text);
-    static void DecentText(std::string const& text);
+    struct TextParameters
+    {
+        MEMBER(TextParameters, std::string, text, "");
+        MEMBER(TextParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+    };
+    static void Text(TextParameters const& parameters);
+    static void BoldText(TextParameters const& parameters);
+    static void MonospaceText(TextParameters const& parameters);
+    static void DecentText(TextParameters const& parameters);
 
     static void BeginMenuBar();
     static void BeginMenu(std::string const& text, bool& toggled, float focus = true);

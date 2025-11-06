@@ -861,50 +861,50 @@ bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bo
     return result;
 }
 
-void AlienGui::Text(std::string const& text)
+void AlienGui::Text(TextParameters const& parameters)
 {
-    //auto refPos = ImGui::GetCursorScreenPos();
-    ImGui::TextUnformatted(text.c_str());
-    //if (isFilterActive()) {
-    //    auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(text, _filterStack.back().text);
-    //    if (!match.empty()) {
-    //        auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str());
-    //        ImGui::GetWindowDrawList()->AddText(
-    //            ImGui::GetFont(),
-    //            ImGui::GetFontSize(),
-    //            {refPos.x + prefixSize.x + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
-    //            ImGui::GetColorU32(ImGuiCol_Text),
-    //            match.c_str());
-    //        ImGui::GetWindowDrawList()->AddText(
-    //            ImGui::GetFont(),
-    //            ImGui::GetFontSize(),
-    //            {refPos.x + prefixSize.x, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
-    //            ImGui::GetColorU32(ImGuiCol_Text),
-    //            match.c_str());
-    //    }
-    //}
+    auto refPos = ImGui::GetCursorScreenPos();
+    ImGui::TextUnformatted(parameters._text.c_str());
+    if (parameters._highlightedSubString.has_value()) {
+        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(parameters._text, parameters._highlightedSubString.value());
+        if (!match.empty()) {
+            auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize.x + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize.x, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+        }
+    }
 }
 
-void AlienGui::BoldText(std::string const& text)
+void AlienGui::BoldText(TextParameters const& parameters)
 {
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
-    AlienGui::Text(text);
+    AlienGui::Text(parameters);
     ImGui::PopFont();
 }
 
-void AlienGui::MonospaceText(std::string const& text)
+void AlienGui::MonospaceText(TextParameters const& parameters)
 {
     ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
     ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
-    Text(text);
+    Text(parameters);
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
 
-void AlienGui::DecentText(std::string const& text)
+void AlienGui::DecentText(TextParameters const& parameters)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-    Text(text);
+    Text(parameters);
     ImGui::PopStyleColor();
 }
 
