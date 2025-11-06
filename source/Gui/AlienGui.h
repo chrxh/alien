@@ -278,16 +278,22 @@ public:
     };
     static bool SelectableButton(SelectableButtonParameters const& parameters, bool& value);
 
+    enum class TextStyle
+    {
+        Normal,
+        Bold,
+        Monospace,
+        Decent
+    };
+
     struct TextParameters
     {
         MEMBER(TextParameters, std::string, text, "");
         MEMBER(TextParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(TextParameters, TextStyle, style, TextStyle::Normal);
     };
     static void Text(TextParameters const& parameters);
     static void Text(std::string const& text);
-    static void BoldText(TextParameters const& parameters);
-    static void MonospaceText(TextParameters const& parameters);
-    static void DecentText(TextParameters const& parameters);
 
     static void BeginMenuBar();
     static void BeginMenu(std::string const& text, bool& toggled, float focus = true);

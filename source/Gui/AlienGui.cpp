@@ -863,6 +863,30 @@ bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bo
 
 void AlienGui::Text(TextParameters const& parameters)
 {
+    // Apply style
+    bool fontPushed = false;
+    bool colorPushed = false;
+    
+    switch (parameters._style) {
+    case TextStyle::Bold:
+        ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
+        fontPushed = true;
+        break;
+    case TextStyle::Monospace:
+        ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
+        fontPushed = true;
+        colorPushed = true;
+        break;
+    case TextStyle::Decent:
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
+        colorPushed = true;
+        break;
+    case TextStyle::Normal:
+    default:
+        break;
+    }
+    
     auto refPos = ImGui::GetCursorScreenPos();
     ImGui::TextUnformatted(parameters._text.c_str());
     if (parameters._highlightedSubString.has_value()) {
@@ -883,34 +907,19 @@ void AlienGui::Text(TextParameters const& parameters)
                 match.c_str());
         }
     }
+    
+    // Pop style
+    if (colorPushed) {
+        ImGui::PopStyleColor();
+    }
+    if (fontPushed) {
+        ImGui::PopFont();
+    }
 }
 
 void AlienGui::Text(std::string const& text)
 {
     Text(TextParameters().text(text));
-}
-
-void AlienGui::BoldText(TextParameters const& parameters)
-{
-    ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
-    AlienGui::Text(parameters);
-    ImGui::PopFont();
-}
-
-void AlienGui::MonospaceText(TextParameters const& parameters)
-{
-    ImGui::PushFont(StyleRepository::get().getMonospaceMediumFont());
-    ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)Const::MonospaceColor);
-    Text(parameters);
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
-}
-
-void AlienGui::DecentText(TextParameters const& parameters)
-{
-    ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-    Text(parameters);
-    ImGui::PopStyleColor();
 }
 
 void AlienGui::BeginMenuBar()
