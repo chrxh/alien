@@ -47,6 +47,7 @@ public:
         MEMBER(SliderFloatParameters, float const*, defaultValue, nullptr);
         MEMBER(SliderFloatParameters, float const*, disabledValue, nullptr);
         MEMBER(SliderFloatParameters, bool const*, defaultEnabledValue, nullptr);
+        MEMBER(SliderFloatParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(SliderFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderFloat(SliderFloatParameters const& parameters, float* value, bool* enabled = nullptr, bool* pinned = nullptr);
@@ -66,6 +67,7 @@ public:
         MEMBER(SliderIntParameters, int const*, defaultValue, nullptr);
         MEMBER(SliderIntParameters, int const*, disabledValue, nullptr);
         MEMBER(SliderIntParameters, bool const*, defaultEnabledValue, nullptr);
+        MEMBER(SliderIntParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(SliderIntParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool SliderInt(SliderIntParameters const& parameters, int* value, bool* enabled = nullptr, bool* pinned = nullptr);
@@ -78,6 +80,7 @@ public:
         MEMBER(SliderFloat2Parameters, std::string, format, "%.3f");
         MEMBER(SliderFloat2Parameters, float, textWidth, 100);
         MEMBER(SliderFloat2Parameters, std::optional<RealVector2D>, defaultValue, std::nullopt);
+        MEMBER(SliderFloat2Parameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(SliderFloat2Parameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER(SliderFloat2Parameters, std::optional<std::function<bool(void)>>, getMousePickerEnabledFunc, std::nullopt);
         MEMBER(SliderFloat2Parameters, std::optional<std::function<void(bool)>>, setMousePickerEnabledFunc, std::nullopt);
@@ -140,6 +143,7 @@ public:
         MEMBER(CheckboxColorMatrixParameters, std::string, name, "");
         MEMBER(CheckboxColorMatrixParameters, float, textWidth, 100);
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::vector<std::vector<bool>>>, defaultValue, std::nullopt);
+        MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(CheckboxColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void CheckboxColorMatrix(CheckboxColorMatrixParameters const& parameters, bool (&value)[MAX_COLORS][MAX_COLORS]);
@@ -152,6 +156,7 @@ public:
         MEMBER(InputIntColorMatrixParameters, bool, logarithmic, false);
         MEMBER(InputIntColorMatrixParameters, float, textWidth, 100);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::vector<std::vector<int>>>, defaultValue, std::nullopt);
+        MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputIntColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputIntColorMatrix(InputIntColorMatrixParameters const& parameters, int (&value)[MAX_COLORS][MAX_COLORS]);
@@ -165,8 +170,9 @@ public:
         MEMBER(InputFloatColorMatrixParameters, std::string, format, "%.2f");
         MEMBER(InputFloatColorMatrixParameters, float, textWidth, 100);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, defaultValue, std::nullopt);
-        MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER(InputFloatColorMatrixParameters, std::optional<std::vector<std::vector<float>>>, disabledValue, std::nullopt);
+        MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(InputFloatColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputFloatColorMatrix(InputFloatColorMatrixParameters const& parameters, float (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);
 
@@ -182,6 +188,7 @@ public:
         MEMBER(InputTextParameters, bool, password, false);
         MEMBER(InputTextParameters, bool, folderButton, false);
         MEMBER(InputTextParameters, std::optional<std::string>, defaultValue, std::nullopt);
+        MEMBER(InputTextParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputTextParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool InputText(InputTextParameters const& parameters, char* buffer, int bufferSize);
@@ -224,6 +231,7 @@ public:
         MEMBER(SwitcherParameters, std::optional<int>, defaultValue, std::nullopt);
         MEMBER(SwitcherParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER(SwitcherParameters, std::optional<int>, disabledValue, std::nullopt);
+        MEMBER(SwitcherParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(SwitcherParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Switcher(SwitcherParameters& parameters, int& value, bool* enabled = nullptr);
@@ -250,6 +258,7 @@ public:
         MEMBER(InputColorTransitionParameters, bool, infinity, false);
         MEMBER(InputColorTransitionParameters, std::optional<int>, defaultTargetColor, std::nullopt);
         MEMBER(InputColorTransitionParameters, std::optional<int>, defaultTransitionAge, std::nullopt);
+        MEMBER(InputColorTransitionParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(InputColorTransitionParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge);
@@ -259,6 +268,7 @@ public:
         MEMBER(CheckboxParameters, std::string, name, "");
         MEMBER(CheckboxParameters, float, textWidth, 100);
         MEMBER(CheckboxParameters, std::optional<bool>, defaultValue, std::nullopt);
+        MEMBER(CheckboxParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(CheckboxParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static bool Checkbox(CheckboxParameters const& parameters, bool& value);
@@ -318,6 +328,7 @@ public:
         MEMBER(ColorButtonWithPickerParameters, std::string, name, "");
         MEMBER(ColorButtonWithPickerParameters, float, textWidth, 100);
         MEMBER(ColorButtonWithPickerParameters, std::optional<FloatColorRGB>, defaultValue, std::nullopt);
+        MEMBER(ColorButtonWithPickerParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
         MEMBER(ColorButtonWithPickerParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     static void ColorButtonWithPicker(ColorButtonWithPickerParameters const& parameters, FloatColorRGB& color);
@@ -467,8 +478,9 @@ private:
         MEMBER(BasicInputColorMatrixParameters, std::string, format, "%.2f");
         MEMBER(BasicInputColorMatrixParameters, float, textWidth, 100);
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, defaultValue, std::nullopt);
-        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER(BasicInputColorMatrixParameters, std::optional<std::vector<std::vector<T>>>, disabledValue, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
+        MEMBER(BasicInputColorMatrixParameters, std::optional<std::string>, tooltip, std::nullopt);
     };
     template <typename T>
     static void BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& parameters, T (&value)[MAX_COLORS][MAX_COLORS], bool* enabled = nullptr);

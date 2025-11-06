@@ -48,7 +48,7 @@ void SpecificationGuiService::createWidgetsForParameters(
             }
             ImGui::PushID(name.c_str());
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters().name(name).visible(isGroupVisibleActive).blinkWhenActivated(isExpertSettings))) {
-                createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber);
+                createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber, filter);
             }
             ImGui::PopID();
             AlienGui::EndTreeNode();
@@ -104,7 +104,8 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
     for (auto const& [index, parameterSpec] : parameterSpecs | boost::adaptors::indexed(0)) {
@@ -114,21 +115,21 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
         ImGui::PushID(toInt(index));
 
         if (std::holds_alternative<BoolSpec>(parameterSpec._reference)) {
-            createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            createWidgetsForBoolSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
-            createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
-            createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
-            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber);
+            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
         } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
-            createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
-            createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber);
+            createWidgetsForColorTransitionRulesSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         }
 
         ImGui::PopID();
@@ -140,7 +141,8 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& boolSpec = std::get<BoolSpec>(parameterSpec._reference);
@@ -154,12 +156,18 @@ void SpecificationGuiService::createWidgetsForBoolSpec(
                 .name(parameterSpec._name)
                 .textWidth(TextColumnWidth)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(origRef.value)))
+                .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description),
             *reinterpret_cast<bool(*)[MAX_COLORS][MAX_COLORS]>(ref.value));
 
     } else {
         AlienGui::Checkbox(
-            AlienGui::CheckboxParameters().name(parameterSpec._name).textWidth(TextColumnWidth).defaultValue(*origRef.value).tooltip(parameterSpec._description),
+            AlienGui::CheckboxParameters()
+                .name(parameterSpec._name)
+                .textWidth(TextColumnWidth)
+                .defaultValue(*origRef.value)
+                .highlightedSubString(filter.containedText)
+                .tooltip(parameterSpec._description),
             *ref.value);
     }
 }
@@ -169,7 +177,8 @@ void SpecificationGuiService::createWidgetsForIntSpec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& intSpec = std::get<IntSpec>(parameterSpec._reference);
@@ -186,6 +195,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .max(intSpec._max)
                 .logarithmic(intSpec._logarithmic)
                 .textWidth(TextColumnWidth)
+                .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(origValue))),
             *reinterpret_cast<int(*)[MAX_COLORS][MAX_COLORS]>(value));
@@ -202,6 +212,7 @@ void SpecificationGuiService::createWidgetsForIntSpec(
                 .disabledValue(disabledValue)
                 .defaultValue(origValue)
                 .defaultEnabledValue(origEnabledValue)
+                .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
                 .colorDependence(valueType == ColorDependence::ColorVector),
             value,
@@ -215,7 +226,8 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& floatSpec = std::get<FloatSpec>(parameterSpec._reference);
@@ -243,6 +255,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                 .logarithmic(floatSpec._logarithmic)
                 .format(floatSpec._format)
                 .textWidth(TextColumnWidth)
+                .highlightedSubString(filter.containedText)
                 .tooltip(parameterSpec._description)
                 .defaultValue(toVector<MAX_COLORS, MAX_COLORS>(*reinterpret_cast<float(*)[MAX_COLORS][MAX_COLORS]>(origValue)))
                 .disabledValue(
@@ -277,6 +290,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
                     .defaultValue(origValue)
                     .defaultEnabledValue(origEnabledValue)
                     .colorDependence(valueType == ColorDependence::ColorVector)
+                    .highlightedSubString(filter.containedText)
                     .tooltip(parameterSpec._description),
                 value,
                 enabledValue,
@@ -296,7 +310,8 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& float2Spec = std::get<Float2Spec>(parameterSpec._reference);
@@ -329,6 +344,7 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
             .getMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerEnabledFunc) : std::nullopt)
             .setMousePickerEnabledFunc(float2Spec._mousePicker ? std::make_optional(setMousePickerEnabledFunc) : std::nullopt)
             .getMousePickerPositionFunc(float2Spec._mousePicker ? std::make_optional(getMousePickerPositionFunc) : std::nullopt)
+            .highlightedSubString(filter.containedText)
             .tooltip(parameterSpec._description),
         value->x,
         value->y);
@@ -339,7 +355,8 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& char64Spec = std::get<Char64Spec>(parameterSpec._reference);
@@ -349,7 +366,12 @@ void SpecificationGuiService::createWidgetsForChar64Spec(
         evaluationService.getRef(char64Spec._member, origParameters, orderNumber);
 
     AlienGui::InputText(
-        AlienGui::InputTextParameters().name(parameterSpec._name).textWidth(TextColumnWidth).defaultValue(*origValue).tooltip(parameterSpec._description),
+        AlienGui::InputTextParameters()
+            .name(parameterSpec._name)
+            .textWidth(TextColumnWidth)
+            .defaultValue(*origValue)
+            .highlightedSubString(filter.containedText)
+            .tooltip(parameterSpec._description),
         *value,
         sizeof(Char64) / sizeof(char));
 }
@@ -360,7 +382,8 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
     SimulationFacade const& simulationFacade,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto alternativeSpec = std::get<AlternativeSpec>(parameterSpec._reference);
@@ -381,6 +404,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
             .defaultValue(*origValue)
             .values(values)
             .readOnly(!enabled)
+            .highlightedSubString(filter.containedText)
             .tooltip(parameterSpec._description),
         *value,
         enabledValue);
@@ -396,7 +420,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
         if (enabled) {
             enabled = enabledValue != nullptr ? *enabledValue : true;
         }
-        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, enabled, parameters, origParameters, simulationFacade, orderNumber);
+        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
         AlienGui::EndIndent();
     }
 }
@@ -406,7 +430,8 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorPickerSpec = std::get<ColorSpec>(parameterSpec._reference);
@@ -416,7 +441,12 @@ void SpecificationGuiService::createWidgetsForColorPickerSpec(
         evaluationService.getRef(colorPickerSpec._member, origParameters, orderNumber);
 
     AlienGui::ColorButtonWithPicker(
-        AlienGui::ColorButtonWithPickerParameters().name(parameterSpec._name).textWidth(TextColumnWidth).defaultValue(*origValue), *value);
+        AlienGui::ColorButtonWithPickerParameters()
+            .name(parameterSpec._name)
+            .textWidth(TextColumnWidth)
+            .highlightedSubString(filter.containedText)
+            .defaultValue(*origValue),
+        *value);
 }
 
 void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
@@ -424,7 +454,8 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    int orderNumber) const
+    int orderNumber,
+    ParametersFilter const& filter) const
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& colorTransitionRulesSpec = std::get<ColorTransitionRulesSpec>(parameterSpec._reference);
@@ -441,7 +472,8 @@ void SpecificationGuiService::createWidgetsForColorTransitionRulesSpec(
                                     .defaultTargetColor(origValue[color].targetColor)
                                     .defaultTransitionAge(origValue[color].duration)
                                     .logarithmic(true)
-                                    .infinity(true);
+                                    .infinity(true)
+                                    .highlightedSubString(filter.containedText);
         if (0 == color) {
             widgetParameters.name(parameterSpec._name).tooltip(parameterSpec._description);
         }

@@ -74,7 +74,7 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
     ImGui::SetNextItemWidth(sliderWidth);
     bool result = ImGui::SliderFloat("##sliderX", &valueX, parameters._min.x, parameters._max.x, parameters._format.c_str(), 0);
 
-    //mouse picker
+    // Mouse picker
     if (parameters._getMousePickerEnabledFunc) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() - ImGui::GetStyle().FramePadding.x);
@@ -94,7 +94,7 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
         }
     }
 
-    //revert button
+    // Revert button
     if (parameters._defaultValue) {
         ImGui::SameLine();
 
@@ -106,10 +106,10 @@ bool AlienGui::SliderFloat2(SliderFloat2Parameters const& parameters, float& val
         ImGui::EndDisabled();
     }
 
-    //text
+    // Label
     if (!parameters._name.empty()) {
         ImGui::SameLine();
-        AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+        AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
     }
 
     //tooltip
@@ -359,6 +359,7 @@ void AlienGui::CheckboxColorMatrix(CheckboxColorMatrixParameters const& paramete
     basicParameters._textWidth = parameters._textWidth;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
+    basicParameters._highlightedSubString = parameters._highlightedSubString;
     BasicInputColorMatrix<bool>(basicParameters, value);
 }
 
@@ -373,6 +374,7 @@ void AlienGui::InputIntColorMatrix(InputIntColorMatrixParameters const& paramete
     basicParameters._textWidth = parameters._textWidth;
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
+    basicParameters._highlightedSubString = parameters._highlightedSubString;
     BasicInputColorMatrix<int>(basicParameters, value);
 }
 
@@ -388,6 +390,7 @@ void AlienGui::InputFloatColorMatrix(InputFloatColorMatrixParameters const& para
     basicParameters._defaultValue = parameters._defaultValue;
     basicParameters._tooltip = parameters._tooltip;
     basicParameters._disabledValue = parameters._disabledValue;
+    basicParameters._highlightedSubString = parameters._highlightedSubString;
     BasicInputColorMatrix<float>(basicParameters, value, enabled);
 }
 
@@ -452,7 +455,7 @@ bool AlienGui::InputText(InputTextParameters const& parameters, char* buffer, in
     }
     if (!parameters._name.empty()) {
         ImGui::SameLine();
-        AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+        AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
     }
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -644,7 +647,7 @@ bool AlienGui::Switcher(SwitcherParameters& parameters, int& value, bool* enable
     }
 
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
+    AlienGui::Text(TextParameters().text(parameters._name).highlightedSubString(parameters._highlightedSubString));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -722,12 +725,12 @@ bool AlienGui::ComboOptionalColor(ComboColorParameters const& parameters, std::o
 
 void AlienGui::InputColorTransition(InputColorTransitionParameters const& parameters, int sourceColor, int& targetColor, int& transitionAge)
 {
-    //source color field
+    // Source color field
     ImGui::PushID(sourceColor);
     AlienGui::ColorField(Const::IndividualCellColors[sourceColor]);
     ImGui::SameLine();
 
-    //combo for target color
+    // Combo for target color
     AlienGui::Text(AlienGui::TextParameters().text(ICON_FA_LONG_ARROW_ALT_RIGHT));
     ImGui::SameLine();
     ImGui::PushID("color");
@@ -735,7 +738,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
     ImGui::PopID();
 
 
-    //slider for transition age
+    // Slider for transition age
     ImGui::PushID(2);
 
     ImGui::SameLine();
@@ -767,7 +770,7 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -831,7 +834,7 @@ bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -1173,7 +1176,7 @@ void AlienGui::ColorButtonWithPicker(ColorButtonWithPickerParameters const& para
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -2086,7 +2089,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 ImGui::EndDisabled();
             }
 
-            //text
+            // Label
             if (!parameters._name.empty()) {
                 ImGui::SameLine();
                 if (enabled) {
@@ -2095,7 +2098,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 if (parameters._readOnly) {
                     ImGui::EndDisabled();
                 }
-                AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
+                AlienGui::Text(TextParameters().text(parameters._name).highlightedSubString(parameters._highlightedSubString));
                 if (parameters._readOnly) {
                     ImGui::BeginDisabled();
                 }
@@ -2104,7 +2107,7 @@ bool AlienGui::BasicSlider(Parameter const& parameters, T* value, bool* enabled,
                 }
             }
 
-            //tooltip
+            // Tooltip
             if (parameters._tooltip) {
                 if (enabled) {
                     ImGui::EndDisabled();
@@ -2284,7 +2287,7 @@ void AlienGui::BasicInputColorMatrix(BasicInputColorMatrixParameters<T> const& p
     }
 
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()).highlightedSubString(parameters._highlightedSubString));
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
