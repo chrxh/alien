@@ -337,17 +337,17 @@ void SimulationParametersMainWindow::processLocationTable()
                 } else if (entry.type == LocationType::Source) {
                     icon = ICON_FA_SUN " ";
                 }
-                AlienGui::Text(AlienGui::TextParameters().text(icon + entry.name));
+                AlienGui::Text(icon + entry.name);
 
 
                 // Column: Type
                 ImGui::TableNextColumn();
                 if (entry.type == LocationType::Base) {
-                    AlienGui::Text(AlienGui::TextParameters().text("Base parameters"));
+                    AlienGui::Text("Base parameters");
                 } else if (entry.type == LocationType::Layer) {
-                    AlienGui::Text(AlienGui::TextParameters().text("Layer"));
+                    AlienGui::Text("Layer");
                 } else if (entry.type == LocationType::Source) {
-                    AlienGui::Text(AlienGui::TextParameters().text("Radiation"));
+                    AlienGui::Text("Radiation");
                 }
 
                 // Column: Position
@@ -359,19 +359,19 @@ void SimulationParametersMainWindow::processLocationTable()
                     }
                     ImGui::SameLine();
                 }
-                AlienGui::Text(AlienGui::TextParameters().text(entry.position));
+                AlienGui::Text(entry.position);
 
                 // Column: Strength
                 ImGui::TableNextColumn();
-                AlienGui::Text(AlienGui::TextParameters().text(entry.strength));
+                AlienGui::Text(entry.strength);
                 ImGui::SameLine();
                 auto pos = ImGui::GetCursorScreenPos();
                 ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
                 ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
                 if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
-                    AlienGui::Text(AlienGui::TextParameters().text("(radiation)"));
+                    AlienGui::Text("(radiation)");
                 } else {
-                    AlienGui::Text(AlienGui::TextParameters().text("(opacity)"));
+                    AlienGui::Text("(opacity)");
                 }
                 ImGui::PopStyleColor();
 

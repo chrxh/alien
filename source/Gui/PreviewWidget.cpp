@@ -216,7 +216,7 @@ void _PreviewWidget::processActionBar()
 
     ImGui::SameLine();
     auto tps = calcTpsForPreview();
-    AlienGui::Text(AlienGui::TextParameters().text("TPS: " + StringHelper::format(tps)));
+    AlienGui::Text("TPS: " + StringHelper::format(tps));
 }
 
 int _PreviewWidget::calcTpsForPreview()

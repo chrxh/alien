@@ -31,7 +31,7 @@ ActivateUserDialog::ActivateUserDialog()
 
 void ActivateUserDialog::processIntern()
 {
-    AlienGui::Text(AlienGui::TextParameters().text("Please enter the confirmation code sent to your email address."));
+    AlienGui::Text("Please enter the confirmation code sent to your email address.");
     AlienGui::HelpMarker(
         "Please check your spam folder if you did not find an email. If you did not receive an email there, try signing up with possibly another "
         "email address. If this still does not work, please contact info@alien-project.org.");

@@ -99,12 +99,12 @@ void MassOperationsDialog::processIntern()
     AlienGui::Group(AlienGui::GroupParameters().text("Mutants"));
     ImGui::Checkbox("##lineageId", &_randomizeLineageId);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text(AlienGui::TextParameters().text("Randomize mutation ids"));
+    AlienGui::Text("Randomize mutation ids");
 
     AlienGui::Group(AlienGui::GroupParameters().text("Options"));
     ImGui::Checkbox("##restrictToSelectedCreatures", &_restrictToSelectedCreatures);
     ImGui::SameLine(0, ImGui::GetStyle().FramePadding.x * 4);
-    AlienGui::Text(AlienGui::TextParameters().text("Restrict to selected creatures"));
+    AlienGui::Text("Restrict to selected creatures");
 
     ImGui::Dummy({0, ImGui::GetContentRegionAvail().y - scale(50.0f)});
     AlienGui::Separator();

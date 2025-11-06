@@ -387,7 +387,7 @@ void _CreaturePreviewWidget::processTitle()
     if (_subGenome.trimmed) {
         title += "  -- trimmed";
     }
-    AlienGui::Text(AlienGui::TextParameters().text(title.c_str()));
+    AlienGui::Text(title.c_str());
 }
 
 RealVector2D _CreaturePreviewWidget::mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const

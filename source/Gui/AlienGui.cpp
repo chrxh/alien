@@ -885,11 +885,21 @@ void AlienGui::Text(TextParameters const& parameters)
     }
 }
 
+void AlienGui::Text(std::string const& text)
+{
+    Text(TextParameters().text(text));
+}
+
 void AlienGui::BoldText(TextParameters const& parameters)
 {
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
     AlienGui::Text(parameters);
     ImGui::PopFont();
+}
+
+void AlienGui::BoldText(std::string const& text)
+{
+    BoldText(TextParameters().text(text));
 }
 
 void AlienGui::MonospaceText(TextParameters const& parameters)
@@ -901,11 +911,21 @@ void AlienGui::MonospaceText(TextParameters const& parameters)
     ImGui::PopFont();
 }
 
+void AlienGui::MonospaceText(std::string const& text)
+{
+    MonospaceText(TextParameters().text(text));
+}
+
 void AlienGui::DecentText(TextParameters const& parameters)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
     Text(parameters);
     ImGui::PopStyleColor();
+}
+
+void AlienGui::DecentText(std::string const& text)
+{
+    DecentText(TextParameters().text(text));
 }
 
 void AlienGui::BeginMenuBar()

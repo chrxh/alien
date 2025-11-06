@@ -171,7 +171,7 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 0: No.
                     ImGui::TableNextColumn();
-                    AlienGui::Text(AlienGui::TextParameters().text(std::to_string(row + 1)));
+                    AlienGui::Text(std::to_string(row + 1));
                     ImGui::SameLine();
                     auto selectedNode = _editData->getSelectedNodeIndex();
                     auto selected = selectedNode ? selectedNode.value() == row : false;
@@ -194,12 +194,12 @@ void _GeneEditorWidget::processNodeList()
                             auto const& constructor = std::get<ConstructorGenomeDescription>(node._cellType);
                             text += " (Gene " + std::to_string(constructor._geneIndex + 1) + ")";
                         }
-                        AlienGui::Text(AlienGui::TextParameters().text(text));
+                        AlienGui::Text(text);
                     }
 
                     // Column 2: Angle
                     ImGui::TableNextColumn();
-                    AlienGui::Text(AlienGui::TextParameters().text(StringHelper::format(node._referenceAngle, 1)));
+                    AlienGui::Text(StringHelper::format(node._referenceAngle, 1));
 
                     // Column 3: Color
                     ImGui::TableNextColumn();
@@ -212,9 +212,9 @@ void _GeneEditorWidget::processNodeList()
                     ImGui::TableNextColumn();
                     if (node._signalRestriction._active) {
                         if (ImGui::BeginChild("signal", {0, scale(17.0f)}, 0, ImGuiWindowFlags_NoInputs)) {
-                            AlienGui::Text(AlienGui::TextParameters().text(
+                            AlienGui::Text(
                                 StringHelper::format(node._signalRestriction._baseAngle, 1) + " deg, "
-                                + StringHelper::format(node._signalRestriction._openingAngle, 1) + " deg"));
+                                + StringHelper::format(node._signalRestriction._openingAngle, 1) + " deg");
                         }
                         ImGui::EndChild();
                     }

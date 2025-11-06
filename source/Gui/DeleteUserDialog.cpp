@@ -15,9 +15,9 @@ DeleteUserDialog::DeleteUserDialog()
 
 void DeleteUserDialog::processIntern()
 {
-    AlienGui::Text(AlienGui::TextParameters().text(
+    AlienGui::Text(
         "Warning: All the data of the user '" + *NetworkService::get().getLoggedInUserName()
-        + "' will be deleted on the server side.\nThese include the likes, the simulations and the account data."));
+        + "' will be deleted on the server side.\nThese include the likes, the simulations and the account data.");
     AlienGui::Separator();
 
     AlienGui::InputText(AlienGui::InputTextParameters().hint("Re-enter password").password(true).textWidth(0), _reenteredPassword);
