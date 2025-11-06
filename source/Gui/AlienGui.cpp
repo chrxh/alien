@@ -864,6 +864,29 @@ bool AlienGui::SelectableButton(SelectableButtonParameters const& parameters, bo
     return result;
 }
 
+namespace
+{
+    void hightlightSubstring(std::string const& label, std::string const& substring, ImVec2 const& refPos)
+    {
+        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(label, substring);
+        if (!match.empty()) {
+            auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str()).x;
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+            ImGui::GetWindowDrawList()->AddText(
+                ImGui::GetFont(),
+                ImGui::GetFontSize(),
+                {refPos.x + prefixSize, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
+                ImGui::GetColorU32(ImGuiCol_Text),
+                match.c_str());
+        }
+    }
+}
+
 void AlienGui::Text(TextParameters const& parameters)
 {
     // Apply style
@@ -891,24 +914,11 @@ void AlienGui::Text(TextParameters const& parameters)
     }
     
     auto refPos = ImGui::GetCursorScreenPos();
+
     ImGui::TextUnformatted(parameters._text.c_str());
+
     if (parameters._highlightedSubString.has_value()) {
-        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(parameters._text, parameters._highlightedSubString.value());
-        if (!match.empty()) {
-            auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str());
-            ImGui::GetWindowDrawList()->AddText(
-                ImGui::GetFont(),
-                ImGui::GetFontSize(),
-                {refPos.x + prefixSize.x + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
-                ImGui::GetColorU32(ImGuiCol_Text),
-                match.c_str());
-            ImGui::GetWindowDrawList()->AddText(
-                ImGui::GetFont(),
-                ImGui::GetFontSize(),
-                {refPos.x + prefixSize.x, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
-                ImGui::GetColorU32(ImGuiCol_Text),
-                match.c_str());
-        }
+        hightlightSubstring(parameters._text, parameters._highlightedSubString.value(), refPos);
     }
     
     // Pop style
@@ -1443,33 +1453,14 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     //}
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
     
-    
-    
     auto refPos = ImGui::GetCursorScreenPos();
     refPos.x += scale(28.0f);
     
     bool result = ImGui::TreeNodeEx(parameters._name.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
 
     if (parameters._highlightedSubString.has_value()) {
-        auto [beforeMatch, match] = StringHelper::decomposeCaseInsensitiveMatch(parameters._name, parameters._highlightedSubString.value());
-        if (!match.empty()) {
-            auto prefixSize = ImGui::CalcTextSize(beforeMatch.c_str()).x;
-            ImGui::GetWindowDrawList()->AddText(
-                ImGui::GetFont(),
-                ImGui::GetFontSize(),
-                {refPos.x + prefixSize + 1, refPos.y + ImGui::GetStyle().FramePadding.y},
-                ImGui::GetColorU32(ImGuiCol_Text),
-                match.c_str());
-            ImGui::GetWindowDrawList()->AddText(
-                ImGui::GetFont(),
-                ImGui::GetFontSize(),
-                {refPos.x + prefixSize, refPos.y + ImGui::GetStyle().FramePadding.y + 1},
-                ImGui::GetColorU32(ImGuiCol_Text),
-                match.c_str());
-        }
+        hightlightSubstring(parameters._name, parameters._highlightedSubString.value(), refPos);
     }
-
-
 
 
     ImGui::PopFont();
