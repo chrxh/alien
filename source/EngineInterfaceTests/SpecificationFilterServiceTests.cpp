@@ -216,19 +216,19 @@ TEST_F(SpecificationFilterServiceTests, filter_alternativeSpec_matchingNestedPar
     EXPECT_EQ("ModeSelection", result._groups[0]._parameters[0]._name);
     EXPECT_TRUE(result._groups[0]._parameters[0]._visible);
 
-    // The entire AlternativeSpec should be included with ALL alternatives
+    // The AlternativeSpec should have both alternatives
     ASSERT_TRUE(std::holds_alternative<AlternativeSpec>(result._groups[0]._parameters[0]._reference));
     auto const& resultAltSpec = std::get<AlternativeSpec>(result._groups[0]._parameters[0]._reference);
     ASSERT_EQ(2, resultAltSpec._alternatives.size());
 
-    // Both alternatives should be present
+    // First alternative should have only the matching parameter
     EXPECT_EQ("Mode1", resultAltSpec._alternatives[0].first);
     ASSERT_EQ(1, resultAltSpec._alternatives[0].second.size());
     EXPECT_EQ("EnergyMode", resultAltSpec._alternatives[0].second[0]._name);
 
+    // Second alternative should be empty (no matching parameters)
     EXPECT_EQ("Mode2", resultAltSpec._alternatives[1].first);
-    ASSERT_EQ(1, resultAltSpec._alternatives[1].second.size());
-    EXPECT_EQ("SpeedMode", resultAltSpec._alternatives[1].second[0]._name);
+    ASSERT_EQ(0, resultAltSpec._alternatives[1].second.size());
 }
 
 TEST_F(SpecificationFilterServiceTests, filter_substringMatch)
@@ -437,3 +437,121 @@ TEST_F(SpecificationFilterServiceTests, filter_nestedAlternatives_noMatch)
     // Should have no groups
     EXPECT_EQ(0, result._groups.size());
 }
+
+TEST_F(SpecificationFilterServiceTests, filter_alternativeSpec_multipleMatchingParameters)
+{
+    // Create a spec with AlternativeSpec containing multiple parameters
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "TestGroup";
+
+    ParameterSpec param;
+    param._name = "ModeSelection";
+
+    AlternativeSpec altSpec;
+
+    // First alternative with two parameters, one matching
+    ParameterSpec altParam1a;
+    altParam1a._name = "EnergyLimit";
+    altParam1a._reference = FloatSpec();
+    
+    ParameterSpec altParam1b;
+    altParam1b._name = "SpeedLimit";
+    altParam1b._reference = FloatSpec();
+    
+    altSpec._alternatives.push_back({"Mode1", {altParam1a, altParam1b}});
+
+    // Second alternative with two parameters, both matching
+    ParameterSpec altParam2a;
+    altParam2a._name = "EnergyRate";
+    altParam2a._reference = FloatSpec();
+    
+    ParameterSpec altParam2b;
+    altParam2b._name = "EnergyCapacity";
+    altParam2b._reference = FloatSpec();
+    
+    altSpec._alternatives.push_back({"Mode2", {altParam2a, altParam2b}});
+
+    param._reference = altSpec;
+    group._parameters.push_back(param);
+    spec._groups.push_back(group);
+
+    // Filter for "Energy"
+    ParametersFilter filter;
+    filter.containedText = "Energy";
+    auto result = _service.filter(spec, filter);
+
+    // Should have the parameter
+    ASSERT_EQ(1, result._groups.size());
+    ASSERT_EQ(1, result._groups[0]._parameters.size());
+    EXPECT_EQ("ModeSelection", result._groups[0]._parameters[0]._name);
+
+    // The AlternativeSpec should have both alternatives
+    ASSERT_TRUE(std::holds_alternative<AlternativeSpec>(result._groups[0]._parameters[0]._reference));
+    auto const& resultAltSpec = std::get<AlternativeSpec>(result._groups[0]._parameters[0]._reference);
+    ASSERT_EQ(2, resultAltSpec._alternatives.size());
+
+    // First alternative should have only EnergyLimit
+    EXPECT_EQ("Mode1", resultAltSpec._alternatives[0].first);
+    ASSERT_EQ(1, resultAltSpec._alternatives[0].second.size());
+    EXPECT_EQ("EnergyLimit", resultAltSpec._alternatives[0].second[0]._name);
+
+    // Second alternative should have both matching parameters
+    EXPECT_EQ("Mode2", resultAltSpec._alternatives[1].first);
+    ASSERT_EQ(2, resultAltSpec._alternatives[1].second.size());
+    EXPECT_EQ("EnergyRate", resultAltSpec._alternatives[1].second[0]._name);
+    EXPECT_EQ("EnergyCapacity", resultAltSpec._alternatives[1].second[1]._name);
+}
+
+TEST_F(SpecificationFilterServiceTests, filter_alternativeSpec_allAlternativesEmpty)
+{
+    // Create a spec with AlternativeSpec where filter matches the parent but no nested parameters
+    ParametersSpec spec;
+    ParameterGroupSpec group;
+    group._name = "TestGroup";
+
+    ParameterSpec param;
+    param._name = "EnergyModeSelection";  // This matches "Energy"
+
+    AlternativeSpec altSpec;
+
+    // First alternative without matching parameter
+    ParameterSpec altParam1;
+    altParam1._name = "SpeedMode";
+    altParam1._reference = FloatSpec();
+    altSpec._alternatives.push_back({"Mode1", {altParam1}});
+
+    // Second alternative without matching parameter
+    ParameterSpec altParam2;
+    altParam2._name = "VelocityMode";
+    altParam2._reference = FloatSpec();
+    altSpec._alternatives.push_back({"Mode2", {altParam2}});
+
+    param._reference = altSpec;
+    group._parameters.push_back(param);
+    spec._groups.push_back(group);
+
+    // Filter for "Energy"
+    ParametersFilter filter;
+    filter.containedText = "Energy";
+    auto result = _service.filter(spec, filter);
+
+    // Should have the parameter because parent name matches
+    ASSERT_EQ(1, result._groups.size());
+    ASSERT_EQ(1, result._groups[0]._parameters.size());
+    EXPECT_EQ("EnergyModeSelection", result._groups[0]._parameters[0]._name);
+    EXPECT_TRUE(result._groups[0]._parameters[0]._visible);
+
+    // The AlternativeSpec should have both alternatives but both should be empty
+    ASSERT_TRUE(std::holds_alternative<AlternativeSpec>(result._groups[0]._parameters[0]._reference));
+    auto const& resultAltSpec = std::get<AlternativeSpec>(result._groups[0]._parameters[0]._reference);
+    ASSERT_EQ(2, resultAltSpec._alternatives.size());
+
+    // Both alternatives should be empty
+    EXPECT_EQ("Mode1", resultAltSpec._alternatives[0].first);
+    EXPECT_EQ(0, resultAltSpec._alternatives[0].second.size());
+
+    EXPECT_EQ("Mode2", resultAltSpec._alternatives[1].first);
+    EXPECT_EQ(0, resultAltSpec._alternatives[1].second.size());
+}
+

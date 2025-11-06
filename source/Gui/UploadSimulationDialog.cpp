@@ -85,7 +85,7 @@ void UploadSimulationDialog::processIntern()
     if (!_folder.empty()) {
         if (ImGui::BeginChild("##folder info", ImVec2(0, scale(85.0f)), true, ImGuiWindowFlags_HorizontalScrollbar)) {
             AlienGui::Text("The following folder has been selected in the browser\nand will used for the upload:\n\n");
-            AlienGui::BoldText(_folder);
+            AlienGui::Text(AlienGui::TextParameters().text(_folder).style(AlienGui::TextStyle::Bold));
         }
         ImGui::EndChild();
     }

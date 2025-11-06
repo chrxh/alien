@@ -138,7 +138,7 @@ void _GenomeEditorWidget::processGeneList()
                     AlienGui::Text(std::to_string(row + 1));
                     if (row == 0) {
                         ImGui::SameLine();
-                        AlienGui::DecentText(" (root)");
+                        AlienGui::Text(AlienGui::TextParameters().text(" (root)").style(AlienGui::TextStyle::Decent));
                     }
                     ImGui::SameLine();
                     auto selected = _editData->selectedGeneIndex.has_value() ? _editData->selectedGeneIndex.value() == row : false;
@@ -157,7 +157,7 @@ void _GenomeEditorWidget::processGeneList()
                     if (!gene._name.empty()) {
                         AlienGui::Text(gene._name);
                     } else {
-                        AlienGui::DecentText("(unnamed)");
+                        AlienGui::Text(AlienGui::TextParameters().text("(unnamed)").style(AlienGui::TextStyle::Decent));
                     }
 
                     // Column 2: References
