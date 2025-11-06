@@ -2665,6 +2665,9 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
+    _parameters.friction.baseValue = 0.01f;
+    _simulationFacade->setSimulationParameters(_parameters);
+
     auto const ConstructionAngle = 8.0f;
     auto const LastAngle = -5.0f;
     auto const n = 20;
@@ -2685,7 +2688,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             CellDescription()
                 .id(1)
                 .energy(getConstructorEnergy() * n)
-                .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(350))
+                .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(200))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
         }),
@@ -2699,7 +2702,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     std::vector<uint64_t> createdCellIds;
     {
         for (int i = 0; i < n; ++i) {
-            _simulationFacade->calcTimesteps(350);
+            _simulationFacade->calcTimesteps(200);
             auto actualData = _simulationFacade->getSimulationData();
 
             ASSERT_EQ(0, actualData._cells.size());
