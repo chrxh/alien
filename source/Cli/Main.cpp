@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <CLI/CLI.hpp>
+
 #include <Base/FileLogger.h>
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
@@ -10,8 +12,6 @@
 #include <EngineImpl/SimulationFacadeImpl.h>
 
 #include <PersisterInterface/SerializerService.h>
-
-#include "CLI/CLI.hpp"
 
 int main(int argc, char** argv)
 {

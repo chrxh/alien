@@ -87,13 +87,17 @@ IncludeCategories:
   - Regex: '^<cereal/.*>$'
     Priority: 104
 
+  # CLI headers
+  - Regex: '^<CLI/.*>$'
+    Priority: 105
+
   # ImGui headers
   - Regex: '^<imgui.*\.h>$'
-    Priority: 105
+    Priority: 106
 
   # Fonts module includes
   - Regex: '^<Fonts/.*>$'
-    Priority: 106
+    Priority: 107
 
   # Base module includes
   - Regex: '^<Base/.*>$'
