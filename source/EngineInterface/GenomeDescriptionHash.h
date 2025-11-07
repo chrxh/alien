@@ -3,338 +3,324 @@
 #include <functional>
 #include <variant>
 
+#include <boost/container_hash/hash_fwd.hpp>
+
+#include <Base/Hashes.h>
+
 #include "GenomeDescription.h"
 
-namespace std
+template <>
+struct std::hash<NeuralNetworkGenomeDescription>
 {
-    template <typename T>
-    inline void hash_combine(std::size_t& seed, const T& val)
+    std::size_t operator()(NeuralNetworkGenomeDescription const& desc) const
     {
-        seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        std::size_t seed = 0;
+        for (const auto& weight : desc._weights) {
+            boost::hash_combine(seed, weight);
+        }
+        for (const auto& bias : desc._biases) {
+            boost::hash_combine(seed, bias);
+        }
+        for (const auto& func : desc._activationFunctions) {
+            boost::hash_combine(seed, static_cast<int>(func));
+        }
+        return seed;
     }
+};
 
-    template <typename... Types>
-    struct variant_hasher
+template <>
+struct std::hash<BaseGenomeDescription>
+{
+    std::size_t operator()(BaseGenomeDescription const& desc) const { return 0; }
+};
+
+template <>
+struct std::hash<DepotGenomeDescription>
+{
+    std::size_t operator()(DepotGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+};
+
+template <>
+struct std::hash<ConstructorGenomeDescription>
+{
+    std::size_t operator()(ConstructorGenomeDescription const& desc) const
     {
-        std::size_t operator()(std::variant<Types...> const& v) const
-        {
-            return std::visit([](const auto& val) -> std::size_t { return std::hash<std::decay_t<decltype(val)>>{}(val); }, v);
+        std::size_t seed = 0;
+        if (desc._autoTriggerInterval) {
+            boost::hash_combine(seed, *desc._autoTriggerInterval);
+        } else {
+            boost::hash_combine(seed, -1);
         }
-    };
+        boost::hash_combine(seed, desc._geneIndex);
+        boost::hash_combine(seed, desc._constructionActivationTime);
+        return seed;
+    }
+};
 
-    template <>
-    struct hash<NeuralNetworkGenomeDescription>
+template <>
+struct std::hash<SensorGenomeDescription>
+{
+    std::size_t operator()(SensorGenomeDescription const& desc) const
     {
-        std::size_t operator()(NeuralNetworkGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            for (const auto& weight : desc._weights) {
-                hash_combine(seed, weight);
-            }
-            for (const auto& bias : desc._biases) {
-                hash_combine(seed, bias);
-            }
-            for (const auto& func : desc._activationFunctions) {
-                hash_combine(seed, static_cast<int>(func));
-            }
-            return seed;
+        std::size_t seed = 0;
+        if (desc._autoTriggerInterval) {
+            boost::hash_combine(seed, *desc._autoTriggerInterval);
+        } else {
+            boost::hash_combine(seed, -1);
         }
-    };
-
-    template <>
-    struct hash<BaseGenomeDescription>
-    {
-        std::size_t operator()(BaseGenomeDescription const& desc) const { return 0; }
-    };
-
-    template <>
-    struct hash<DepotGenomeDescription>
-    {
-        std::size_t operator()(DepotGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
-    };
-
-    template <>
-    struct hash<ConstructorGenomeDescription>
-    {
-        std::size_t operator()(ConstructorGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            if (desc._autoTriggerInterval) {
-                hash_combine(seed, *desc._autoTriggerInterval);
-            } else {
-                hash_combine(seed, -1);
-            }
-            hash_combine(seed, desc._geneIndex);
-            hash_combine(seed, desc._constructionActivationTime);
-            return seed;
+        boost::hash_combine(seed, desc._minDensity);
+        if (desc._minRange) {
+            boost::hash_combine(seed, *desc._minRange);
+        } else {
+            boost::hash_combine(seed, -1);
         }
-    };
-
-    template <>
-    struct hash<SensorGenomeDescription>
-    {
-        std::size_t operator()(SensorGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            if (desc._autoTriggerInterval) {
-                hash_combine(seed, *desc._autoTriggerInterval);
-            } else {
-                hash_combine(seed, -1);
-            }
-            hash_combine(seed, desc._minDensity);
-            if (desc._minRange) {
-                hash_combine(seed, *desc._minRange);
-            } else {
-                hash_combine(seed, -1);
-            }
-            if (desc._maxRange) {
-                hash_combine(seed, *desc._maxRange);
-            } else {
-                hash_combine(seed, -1);
-            }
-            if (desc._restrictToColor) {
-                hash_combine(seed, *desc._restrictToColor);
-            } else {
-                hash_combine(seed, -1);
-            }
-            hash_combine(seed, static_cast<int>(desc._restrictToCreatures));
-            return seed;
+        if (desc._maxRange) {
+            boost::hash_combine(seed, *desc._maxRange);
+        } else {
+            boost::hash_combine(seed, -1);
         }
-    };
-
-    template <>
-    struct hash<GeneratorGenomeDescription>
-    {
-        std::size_t operator()(GeneratorGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._autoTriggerInterval);
-            hash_combine(seed, static_cast<int>(desc._pulseType));
-            hash_combine(seed, desc._alternationInterval);
-            return seed;
+        if (desc._restrictToColor) {
+            boost::hash_combine(seed, *desc._restrictToColor);
+        } else {
+            boost::hash_combine(seed, -1);
         }
-    };
+        boost::hash_combine(seed, static_cast<int>(desc._restrictToCreatures));
+        return seed;
+    }
+};
 
-    template <>
-    struct hash<AttackerGenomeDescription>
+template <>
+struct std::hash<GeneratorGenomeDescription>
+{
+    std::size_t operator()(GeneratorGenomeDescription const& desc) const
     {
-        std::size_t operator()(AttackerGenomeDescription const& desc) const { return 1; }
-    };
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._autoTriggerInterval);
+        boost::hash_combine(seed, static_cast<int>(desc._pulseType));
+        boost::hash_combine(seed, desc._alternationInterval);
+        return seed;
+    }
+};
 
-    template <>
-    struct hash<InjectorGenomeDescription>
-    {
-        std::size_t operator()(InjectorGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
-    };
+template <>
+struct std::hash<AttackerGenomeDescription>
+{
+    std::size_t operator()(AttackerGenomeDescription const& desc) const { return 1; }
+};
 
-    template <>
-    struct hash<AutoBendingGenomeDescription>
+template <>
+struct std::hash<InjectorGenomeDescription>
+{
+    std::size_t operator()(InjectorGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+};
+
+template <>
+struct std::hash<AutoBendingGenomeDescription>
+{
+    std::size_t operator()(AutoBendingGenomeDescription const& desc) const
     {
-        std::size_t operator()(AutoBendingGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._maxAngleDeviation);
-            hash_combine(seed, desc._forwardBackwardRatio);
-            return seed;
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._maxAngleDeviation);
+        boost::hash_combine(seed, desc._forwardBackwardRatio);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<ManualBendingGenomeDescription>
+{
+    std::size_t operator()(ManualBendingGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._maxAngleDeviation);
+        boost::hash_combine(seed, desc._forwardBackwardRatio);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<AngleBendingGenomeDescription>
+{
+    std::size_t operator()(AngleBendingGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._maxAngleDeviation);
+        boost::hash_combine(seed, desc._attractionRepulsionRatio);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<AutoCrawlingGenomeDescription>
+{
+    std::size_t operator()(AutoCrawlingGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._maxDistanceDeviation);
+        boost::hash_combine(seed, desc._forwardBackwardRatio);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<ManualCrawlingGenomeDescription>
+{
+    std::size_t operator()(ManualCrawlingGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._maxDistanceDeviation);
+        boost::hash_combine(seed, desc._forwardBackwardRatio);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<DirectMovementGenomeDescription>
+{
+    std::size_t operator()(DirectMovementGenomeDescription const& desc) const { return 2; }
+};
+
+template <>
+struct std::hash<MuscleModeGenomeDescription>
+{
+    std::size_t operator()(MuscleModeGenomeDescription const& desc) const
+    {
+        return variant_hasher<
+            AutoBendingGenomeDescription,
+            ManualBendingGenomeDescription,
+            AngleBendingGenomeDescription,
+            AutoCrawlingGenomeDescription,
+            ManualCrawlingGenomeDescription,
+            DirectMovementGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<MuscleGenomeDescription>
+{
+    std::size_t operator()(MuscleGenomeDescription const& desc) const { return std::hash<MuscleModeGenomeDescription>{}(desc._mode); }
+};
+
+template <>
+struct std::hash<DefenderGenomeDescription>
+{
+    std::size_t operator()(DefenderGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+};
+
+template <>
+struct std::hash<ReconnectorGenomeDescription>
+{
+    std::size_t operator()(ReconnectorGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        if (desc._restrictToColor) {
+            boost::hash_combine(seed, *desc._restrictToColor);
+        } else {
+            boost::hash_combine(seed, -1);
         }
-    };
+        boost::hash_combine(seed, static_cast<int>(desc._restrictToCreatures));
+        return seed;
+    }
+};
 
-    template <>
-    struct hash<ManualBendingGenomeDescription>
+template <>
+struct std::hash<DetonatorGenomeDescription>
+{
+    std::size_t operator()(DetonatorGenomeDescription const& desc) const { return std::hash<int>{}(desc._countdown); }
+};
+
+template <>
+struct std::hash<CellTypeGenomeDescription>
+{
+    std::size_t operator()(CellTypeGenomeDescription const& desc) const
     {
-        std::size_t operator()(ManualBendingGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._maxAngleDeviation);
-            hash_combine(seed, desc._forwardBackwardRatio);
-            return seed;
+        return variant_hasher<
+            BaseGenomeDescription,
+            DepotGenomeDescription,
+            ConstructorGenomeDescription,
+            SensorGenomeDescription,
+            GeneratorGenomeDescription,
+            AttackerGenomeDescription,
+            InjectorGenomeDescription,
+            MuscleGenomeDescription,
+            DefenderGenomeDescription,
+            ReconnectorGenomeDescription,
+            DetonatorGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<SignalRestrictionGenomeDescription>
+{
+    std::size_t operator()(SignalRestrictionGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._active);
+        boost::hash_combine(seed, desc._baseAngle);
+        boost::hash_combine(seed, desc._openingAngle);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<NodeDescription>
+{
+    std::size_t operator()(NodeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        boost::hash_combine(seed, desc._referenceAngle);
+        boost::hash_combine(seed, desc._color);
+        boost::hash_combine(seed, desc._numAdditionalConnections);
+        boost::hash_combine(seed, std::hash<NeuralNetworkGenomeDescription>{}(desc._neuralNetwork));
+        boost::hash_combine(seed, std::hash<CellTypeGenomeDescription>{}(desc._cellType));
+        boost::hash_combine(seed, std::hash<SignalRestrictionGenomeDescription>{}(desc._signalRestriction));
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<GeneDescription>
+{
+    std::size_t operator()(GeneDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        for (auto const& node : desc._nodes) {
+            boost::hash_combine(seed, std::hash<NodeDescription>{}(node));
         }
-    };
+        boost::hash_combine(seed, static_cast<int>(desc._shape));
+        boost::hash_combine(seed, desc._separation);
+        boost::hash_combine(seed, desc._numBranches);
+        boost::hash_combine(seed, desc._numConcatenations);
+        boost::hash_combine(seed, static_cast<int>(desc._angleAlignment));
+        boost::hash_combine(seed, desc._stiffness);
+        boost::hash_combine(seed, desc._connectionDistance);
+        return seed;
+    }
+};
 
-    template <>
-    struct hash<AngleBendingGenomeDescription>
+template <>
+struct std::hash<GenomeDescription>
+{
+    std::size_t operator()(GenomeDescription const& desc) const
     {
-        std::size_t operator()(AngleBendingGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._maxAngleDeviation);
-            hash_combine(seed, desc._attractionRepulsionRatio);
-            return seed;
+        std::size_t seed = 0;
+        for (auto const& gene : desc._genes) {
+            boost::hash_combine(seed, std::hash<GeneDescription>{}(gene));
         }
-    };
+        boost::hash_combine(seed, desc._frontAngle);
+        return seed;
+    }
+};
 
-    template <>
-    struct hash<AutoCrawlingGenomeDescription>
+template <>
+struct std::hash<SubGenomeDescription>
+{
+    std::size_t operator()(SubGenomeDescription const& genomeWithRootIndex) const
     {
-        std::size_t operator()(AutoCrawlingGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._maxDistanceDeviation);
-            hash_combine(seed, desc._forwardBackwardRatio);
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<ManualCrawlingGenomeDescription>
-    {
-        std::size_t operator()(ManualCrawlingGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._maxDistanceDeviation);
-            hash_combine(seed, desc._forwardBackwardRatio);
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<DirectMovementGenomeDescription>
-    {
-        std::size_t operator()(DirectMovementGenomeDescription const& desc) const { return 2; }
-    };
-
-    template <>
-    struct hash<MuscleModeGenomeDescription>
-    {
-        std::size_t operator()(MuscleModeGenomeDescription const& desc) const
-        {
-            return variant_hasher<
-                AutoBendingGenomeDescription,
-                ManualBendingGenomeDescription,
-                AngleBendingGenomeDescription,
-                AutoCrawlingGenomeDescription,
-                ManualCrawlingGenomeDescription,
-                DirectMovementGenomeDescription>{}(desc);
-        }
-    };
-
-    template <>
-    struct hash<MuscleGenomeDescription>
-    {
-        std::size_t operator()(MuscleGenomeDescription const& desc) const { return std::hash<MuscleModeGenomeDescription>{}(desc._mode); }
-    };
-
-    template <>
-    struct hash<DefenderGenomeDescription>
-    {
-        std::size_t operator()(DefenderGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
-    };
-
-    template <>
-    struct hash<ReconnectorGenomeDescription>
-    {
-        std::size_t operator()(ReconnectorGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            if (desc._restrictToColor) {
-                hash_combine(seed, *desc._restrictToColor);
-            } else {
-                hash_combine(seed, -1);
-            }
-            hash_combine(seed, static_cast<int>(desc._restrictToCreatures));
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<DetonatorGenomeDescription>
-    {
-        std::size_t operator()(DetonatorGenomeDescription const& desc) const { return std::hash<int>{}(desc._countdown); }
-    };
-
-    template <>
-    struct hash<CellTypeGenomeDescription>
-    {
-        std::size_t operator()(CellTypeGenomeDescription const& desc) const
-        {
-            return variant_hasher<
-                BaseGenomeDescription,
-                DepotGenomeDescription,
-                ConstructorGenomeDescription,
-                SensorGenomeDescription,
-                GeneratorGenomeDescription,
-                AttackerGenomeDescription,
-                InjectorGenomeDescription,
-                MuscleGenomeDescription,
-                DefenderGenomeDescription,
-                ReconnectorGenomeDescription,
-                DetonatorGenomeDescription>{}(desc);
-        }
-    };
-
-    template <>
-    struct hash<SignalRestrictionGenomeDescription>
-    {
-        std::size_t operator()(SignalRestrictionGenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._active);
-            hash_combine(seed, desc._baseAngle);
-            hash_combine(seed, desc._openingAngle);
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<NodeDescription>
-    {
-        std::size_t operator()(NodeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, desc._referenceAngle);
-            hash_combine(seed, desc._color);
-            hash_combine(seed, desc._numAdditionalConnections);
-            hash_combine(seed, std::hash<NeuralNetworkGenomeDescription>{}(desc._neuralNetwork));
-            hash_combine(seed, std::hash<CellTypeGenomeDescription>{}(desc._cellType));
-            hash_combine(seed, std::hash<SignalRestrictionGenomeDescription>{}(desc._signalRestriction));
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<GeneDescription>
-    {
-        std::size_t operator()(GeneDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            for (auto const& node : desc._nodes) {
-                hash_combine(seed, std::hash<NodeDescription>{}(node));
-            }
-            hash_combine(seed, static_cast<int>(desc._shape));
-            hash_combine(seed, desc._separation);
-            hash_combine(seed, desc._numBranches);
-            hash_combine(seed, desc._numConcatenations);
-            hash_combine(seed, static_cast<int>(desc._angleAlignment));
-            hash_combine(seed, desc._stiffness);
-            hash_combine(seed, desc._connectionDistance);
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<GenomeDescription>
-    {
-        std::size_t operator()(GenomeDescription const& desc) const
-        {
-            std::size_t seed = 0;
-            for (auto const& gene : desc._genes) {
-                hash_combine(seed, std::hash<GeneDescription>{}(gene));
-            }
-            hash_combine(seed, desc._frontAngle);
-            return seed;
-        }
-    };
-
-    template <>
-    struct hash<SubGenomeDescription>
-    {
-        std::size_t operator()(SubGenomeDescription const& genomeWithRootIndex) const
-        {
-            std::size_t seed = 0;
-            hash_combine(seed, genomeWithRootIndex.genome);
-            hash_combine(seed, genomeWithRootIndex.trimmed);
-            hash_combine(seed, genomeWithRootIndex.startIndex);
-            return seed;
-        }
-    };
-}  // namespace std
+        std::size_t seed = 0;
+        boost::hash_combine(seed, genomeWithRootIndex.genome);
+        boost::hash_combine(seed, genomeWithRootIndex.trimmed);
+        boost::hash_combine(seed, genomeWithRootIndex.startIndex);
+        return seed;
+    }
+};

@@ -11,6 +11,7 @@ public:
     void insertOrAssign(Key const& key, Value const& value);
 
     std::optional<Value> find(Key const& key) const;
+    Value find(Key const& key, std::function<Value()> const& valueFunc) const;
 
 private:
     std::unordered_map<Key, Value> _cacheMap;
@@ -44,5 +45,18 @@ std::optional<Value> Cache<Key, Value, MaxEntries>::find(Key const& key) const
         return findResult->second;
     } else {
         return std::nullopt;
+    }
+}
+
+template <typename Key, typename Value, int MaxEntries>
+Value Cache<Key, Value, MaxEntries>::find(Key const& key, std::function<Value()> const& valueFunc) const
+{
+    auto findResult = _cacheMap.find(key);
+    if (findResult != _cacheMap.end()) {
+        return findResult->second;
+    } else {
+        Value value = valueFunc();
+        insertOrAssign(key, value);
+        return value;
     }
 }

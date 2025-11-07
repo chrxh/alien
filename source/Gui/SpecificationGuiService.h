@@ -5,6 +5,7 @@
 #include <EngineInterface/SimulationParametersSpecification.h>
 
 #include "Definitions.h"
+#include "Base/Cache.h"
 
 class SpecificationGuiService
 {
@@ -89,4 +90,7 @@ private:
         SimulationParameters& origParameters,
         int orderNumber,
         ParametersFilter const& filter) const;
+
+private:
+    Cache<ParametersFilter, ParametersSpec, 10000> _specCache;
 };

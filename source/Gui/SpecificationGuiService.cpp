@@ -30,7 +30,7 @@ void SpecificationGuiService::createWidgetsForParameters(
 {
     auto& evaluationService = SpecificationEvaluationService::get();
     auto const& parametersSpecs = SimulationParameters::getSpec();
-    auto filteredParametersSpecs = SpecificationFilterService::get().filter(parametersSpecs, filter);
+    auto filteredParametersSpecs = _specCache.find(filter, [&] { return SpecificationFilterService::get().filter(parametersSpecs, filter); });
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
 
     AlienGui::DynamicTableLayout table(ColumnWidth);
