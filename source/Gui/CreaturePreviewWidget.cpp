@@ -6,6 +6,7 @@
 #include <boost/range/adaptor/sliced.hpp>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 #include <Fonts/IconsFontAwesome5.h>
 
@@ -25,7 +26,65 @@ namespace
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
+
+    // Helper function to render text with subpixel accuracy
+    // Unlike ImGui's AddText which truncates positions, this preserves fractional coordinates
+    void AddTextWithSubpixelAccuracy(
+        ImDrawList* drawList,
+        ImFont* font,
+        float fontSize,
+        ImVec2 const& pos,
+        ImU32 color,
+        char const* textBegin,
+        char const* textEnd = nullptr)
+    {
+        if (!textEnd)
+            textEnd = textBegin + strlen(textBegin);
+
+        if (textBegin == textEnd)
+            return;
+
+        // Use the fractional position directly without truncation
+        float x = pos.x;
+        float y = pos.y;
+
+        float const scale = fontSize / font->FontSize;
+
+        // Manually render each glyph while preserving subpixel positions
+        drawList->PushTextureID(font->ContainerAtlas->TexID);
+
+        for (char const* s = textBegin; s < textEnd;) {
+            unsigned int c = (unsigned int)*s;
+            if (c < 0x80) {
+                s += 1;
+            } else {
+                s += ImTextCharFromUtf8(&c, s, textEnd);
+                if (c == 0)
+                    break;
+            }
+
+            ImFontGlyph const* glyph = font->FindGlyph((ImWchar)c);
+            if (!glyph)
+                continue;
+
+            if (glyph->Visible) {
+                // Calculate vertex positions with subpixel accuracy (no truncation)
+                float x1 = x + glyph->X0 * scale;
+                float y1 = y + glyph->Y0 * scale;
+                float x2 = x + glyph->X1 * scale;
+                float y2 = y + glyph->Y1 * scale;
+
+                drawList->PrimReserve(6, 4);
+                drawList->PrimRectUV(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), color);
+            }
+
+            x += glyph->AdvanceX * scale;
+        }
+
+        drawList->PopTextureID();
+    }
 }
+
 
 CreaturePreviewWidget
 _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex)
@@ -188,8 +247,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         AlienGui::RotateStart(drawList);
         auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
-        drawList->AddText(
-            nullptr, textSize, {std::floor(textPos.x - textSize) + 0.5f, std::floor(textPos.y - textSize / 2) + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
+        AddTextWithSubpixelAccuracy(drawList, ImGui::GetFont(), textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front");
         AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
     }
 
@@ -335,10 +393,11 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                     {cellPos.x + cellSize * 0.2f, cellPos.y + cellSize * 0.1f},
                     {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.4f, cellPos.y + cellSize * 0.8f},
                     Const::GenomePreviewLinkToGeneBackgroundColor2);
-                drawList->AddText(
+                AddTextWithSubpixelAccuracy(
+                    drawList,
                     style.getSmallBoldFont(),
                     cellSize / 1.5f,
-                    {std::floor(cellPos.x + cellSize * 0.3f) + 0.5f, std::floor(cellPos.y + cellSize * 0.1f) + 0.5f},
+                    {cellPos.x + cellSize * 0.3f, cellPos.y + cellSize * 0.1f},
                     Const::GenomePreviewLinkToGeneTextColor,
                     text.c_str());
             }
