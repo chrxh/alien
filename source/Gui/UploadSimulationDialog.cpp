@@ -19,7 +19,7 @@
 #include "NetworkTransferController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {

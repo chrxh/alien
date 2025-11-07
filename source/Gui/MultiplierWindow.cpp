@@ -13,7 +13,7 @@
 #include "StyleRepository.h"
 
 #include "Fonts/AlienIconFont.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -155,23 +155,23 @@ void MultiplierWindow::validateAndCorrect()
 
 void MultiplierWindow::onBuild()
 {
-    _origSelection = SimulationFacadeProvider::getSimulationFacade()->getSelectedSimulationData(true);
+    _origSelection = Provider::getSimulationFacade()->getSelectedSimulationData(true);
     auto multiplicationResult = [&] {
         if (_mode == MultiplierMode_Grid) {
             return DescriptionEditService::get().gridMultiply(_origSelection, _gridParameters);
         } else {
-            auto data = SimulationFacadeProvider::getSimulationFacade()->getSimulationData();
+            auto data = Provider::getSimulationFacade()->getSimulationData();
             auto overlappingCheckSuccessful = true;
             auto result = DescriptionEditService::get().randomMultiply(
-                _origSelection, _randomParameters, SimulationFacadeProvider::getSimulationFacade()->getWorldSize(), std::move(data), overlappingCheckSuccessful);
+                _origSelection, _randomParameters, Provider::getSimulationFacade()->getWorldSize(), std::move(data), overlappingCheckSuccessful);
             if (!overlappingCheckSuccessful) {
                 GenericMessageDialog::get().information("Random multiplication", "Non-overlapping copies could not be created.");
             }
             return result;
         }
     }();
-    SimulationFacadeProvider::getSimulationFacade()->removeSelectedObjects(true);
-    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(multiplicationResult));
+    Provider::getSimulationFacade()->removeSelectedObjects(true);
+    Provider::getSimulationFacade()->addAndSelectSimulationData(std::move(multiplicationResult));
 
     EditorModel::get().update();
     _selectionDataAfterMultiplication = EditorModel::get().getSelectionShallowData();
@@ -179,7 +179,7 @@ void MultiplierWindow::onBuild()
 
 void MultiplierWindow::onUndo()
 {
-    SimulationFacadeProvider::getSimulationFacade()->removeSelectedObjects(true);
-    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(Description(_origSelection));
+    Provider::getSimulationFacade()->removeSelectedObjects(true);
+    Provider::getSimulationFacade()->addAndSelectSimulationData(Description(_origSelection));
     _selectionDataAfterMultiplication = std::nullopt;
 }

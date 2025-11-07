@@ -11,7 +11,7 @@
 #include "CreateUserDialog.h"
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 void ActivateUserDialog::initIntern()
 {

@@ -15,7 +15,7 @@
 #include "OverlayController.h"
 #include "StatisticsWindow.h"
 #include "StyleRepository.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -66,10 +66,10 @@ void TemporalControlWindow::processIntern()
     }
     ImGui::EndChild();
 
-    if (!_sessionId.has_value() || _sessionId.value() != SimulationFacadeProvider::getSimulationFacade()->getSessionId()) {
+    if (!_sessionId.has_value() || _sessionId.value() != Provider::getSimulationFacade()->getSessionId()) {
         _history.clear();
     }
-    _sessionId = SimulationFacadeProvider::getSimulationFacade()->getSessionId();
+    _sessionId = Provider::getSimulationFacade()->getSessionId();
 }
 
 void TemporalControlWindow::processTpsInfo()
@@ -78,7 +78,7 @@ void TemporalControlWindow::processTpsInfo()
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value /*0xffa07050*/);
-    ImGui::TextUnformatted(StringHelper::format(SimulationFacadeProvider::getSimulationFacade()->getTps(), 1).c_str());
+    ImGui::TextUnformatted(StringHelper::format(Provider::getSimulationFacade()->getTps(), 1).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -89,7 +89,7 @@ void TemporalControlWindow::processTotalTimestepsInfo()
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-    ImGui::TextUnformatted(StringHelper::format(SimulationFacadeProvider::getSimulationFacade()->getCurrentTimestep()).c_str());
+    ImGui::TextUnformatted(StringHelper::format(Provider::getSimulationFacade()->getCurrentTimestep()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -100,7 +100,7 @@ void TemporalControlWindow::processRealTimeInfo()
 
     ImGui::PushFont(StyleRepository::get().getLargeFont());
     ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-    ImGui::TextUnformatted(StringHelper::format(SimulationFacadeProvider::getSimulationFacade()->getRealTime()).c_str());
+    ImGui::TextUnformatted(StringHelper::format(Provider::getSimulationFacade()->getRealTime()).c_str());
     ImGui::PopStyleColor();
     ImGui::PopFont();
 }
@@ -113,36 +113,36 @@ void TemporalControlWindow::processTpsRestriction()
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
     ImGui::SliderInt("##TPSRestriction", &_tpsRestriction, 1, 1000, "%d TPS", ImGuiSliderFlags_Logarithmic);
     if (_slowDown) {
-        SimulationFacadeProvider::getSimulationFacade()->setTpsRestriction(_tpsRestriction);
+        Provider::getSimulationFacade()->setTpsRestriction(_tpsRestriction);
     } else {
-        SimulationFacadeProvider::getSimulationFacade()->setTpsRestriction(std::nullopt);
+        Provider::getSimulationFacade()->setTpsRestriction(std::nullopt);
     }
     ImGui::PopItemWidth();
     ImGui::EndDisabled();
 
-    auto syncSimulationWithRendering = SimulationFacadeProvider::getSimulationFacade()->isSyncSimulationWithRendering();
+    auto syncSimulationWithRendering = Provider::getSimulationFacade()->isSyncSimulationWithRendering();
     if (AlienGui::ToggleButton(AlienGui::ToggleButtonParameters().name("Sync with rendering"), syncSimulationWithRendering)) {
-        SimulationFacadeProvider::getSimulationFacade()->setSyncSimulationWithRendering(syncSimulationWithRendering);
+        Provider::getSimulationFacade()->setSyncSimulationWithRendering(syncSimulationWithRendering);
     }
 
     ImGui::BeginDisabled(!syncSimulationWithRendering);
     ImGui::SameLine(scale(LeftColumnWidth) - (ImGui::GetWindowWidth() - ImGui::GetContentRegionAvail().x));
-    auto syncSimulationWithRenderingRatio = SimulationFacadeProvider::getSimulationFacade()->getSyncSimulationWithRenderingRatio();
+    auto syncSimulationWithRenderingRatio = Provider::getSimulationFacade()->getSyncSimulationWithRenderingRatio();
     if (AlienGui::SliderInt(
             AlienGui::SliderIntParameters().textWidth(0).min(1).max(40).logarithmic(true).format("%d TPS : FPS"), &syncSimulationWithRenderingRatio)) {
-        SimulationFacadeProvider::getSimulationFacade()->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
+        Provider::getSimulationFacade()->setSyncSimulationWithRenderingRatio(syncSimulationWithRenderingRatio);
     }
     ImGui::EndDisabled();
 }
 
 void TemporalControlWindow::processRunButton()
 {
-    ImGui::BeginDisabled(SimulationFacadeProvider::getSimulationFacade()->isSimulationRunning());
+    ImGui::BeginDisabled(Provider::getSimulationFacade()->isSimulationRunning());
     auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PLAY));
     AlienGui::Tooltip("Run");
     if (result) {
         _history.clear();
-        SimulationFacadeProvider::getSimulationFacade()->runSimulation();
+        Provider::getSimulationFacade()->runSimulation();
         printOverlayMessage("Run");
     }
     ImGui::EndDisabled();
@@ -150,11 +150,11 @@ void TemporalControlWindow::processRunButton()
 
 void TemporalControlWindow::processPauseButton()
 {
-    ImGui::BeginDisabled(!SimulationFacadeProvider::getSimulationFacade()->isSimulationRunning());
+    ImGui::BeginDisabled(!Provider::getSimulationFacade()->isSimulationRunning());
     auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PAUSE));
     AlienGui::Tooltip("Pause");
     if (result) {
-        SimulationFacadeProvider::getSimulationFacade()->pauseSimulation();
+        Provider::getSimulationFacade()->pauseSimulation();
         printOverlayMessage("Pause");
     }
     ImGui::EndDisabled();
@@ -162,7 +162,7 @@ void TemporalControlWindow::processPauseButton()
 
 void TemporalControlWindow::processStepBackwardButton()
 {
-    ImGui::BeginDisabled(_history.empty() || SimulationFacadeProvider::getSimulationFacade()->isSimulationRunning());
+    ImGui::BeginDisabled(_history.empty() || Provider::getSimulationFacade()->isSimulationRunning());
     auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_LEFT));
     AlienGui::Tooltip("Load previous time step");
     if (result) {
@@ -177,12 +177,12 @@ void TemporalControlWindow::processStepBackwardButton()
 
 void TemporalControlWindow::processStepForwardButton()
 {
-    ImGui::BeginDisabled(SimulationFacadeProvider::getSimulationFacade()->isSimulationRunning());
+    ImGui::BeginDisabled(Provider::getSimulationFacade()->isSimulationRunning());
     auto result = AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CHEVRON_RIGHT));
     AlienGui::Tooltip("Process single time step");
     if (result) {
         _history.emplace_back(createSnapshot());
-        SimulationFacadeProvider::getSimulationFacade()->calcTimesteps(1);
+        Provider::getSimulationFacade()->calcTimesteps(1);
     }
     ImGui::EndDisabled();
 }
@@ -207,7 +207,7 @@ void TemporalControlWindow::processLoadFlashbackButton()
         "(such as the position of moving layers) will be restored as well.");
     if (result) {
         delayedExecution([this] { applySnapshot(*_snapshot); });
-        SimulationFacadeProvider::getSimulationFacade()->removeSelection();
+        Provider::getSimulationFacade()->removeSelection();
         _history.clear();
 
         printOverlayMessage("Loading flashback ...", true);
@@ -218,17 +218,17 @@ void TemporalControlWindow::processLoadFlashbackButton()
 TemporalControlWindow::Snapshot TemporalControlWindow::createSnapshot()
 {
     Snapshot result;
-    result.timestep = SimulationFacadeProvider::getSimulationFacade()->getCurrentTimestep();
-    result.realTime = SimulationFacadeProvider::getSimulationFacade()->getRealTime();
-    result.data = SimulationFacadeProvider::getSimulationFacade()->getSimulationData();
-    result.parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+    result.timestep = Provider::getSimulationFacade()->getCurrentTimestep();
+    result.realTime = Provider::getSimulationFacade()->getRealTime();
+    result.data = Provider::getSimulationFacade()->getSimulationData();
+    result.parameters = Provider::getSimulationFacade()->getSimulationParameters();
     return result;
 }
 
 
 void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
 {
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
     auto const& origParameters = snapshot.parameters;
 
     if (origParameters.numLayers == parameters.numLayers) {
@@ -257,11 +257,11 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
             parameters.maxCellAge.value[i] = origParameters.maxCellAge.value[i];
         }
     }
-    SimulationFacadeProvider::getSimulationFacade()->setCurrentTimestep(snapshot.timestep);
-    SimulationFacadeProvider::getSimulationFacade()->setRealTime(snapshot.realTime);
-    SimulationFacadeProvider::getSimulationFacade()->clear();
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationData(snapshot.data);
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setCurrentTimestep(snapshot.timestep);
+    Provider::getSimulationFacade()->setRealTime(snapshot.realTime);
+    Provider::getSimulationFacade()->clear();
+    Provider::getSimulationFacade()->setSimulationData(snapshot.data);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
 }
 
 void TemporalControlWindow::restorePosition(

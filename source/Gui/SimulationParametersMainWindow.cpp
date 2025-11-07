@@ -21,7 +21,7 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -49,22 +49,22 @@ void SimulationParametersMainWindow::initIntern()
     _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.expert widget height", scale(ExpertWidgetHeight));
 
     auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
-    baseWidgets->init(SimulationFacadeProvider::getSimulationFacade());
+    baseWidgets->init(Provider::getSimulationFacade());
     _baseWidgets = baseWidgets;
 
     auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
-    layerWidgets->init(SimulationFacadeProvider::getSimulationFacade(), 0);
+    layerWidgets->init(Provider::getSimulationFacade(), 0);
     _layerWidgets = layerWidgets;
 
 
     auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
-    sourceWidgets->init(SimulationFacadeProvider::getSimulationFacade(), 0);
+    sourceWidgets->init(Provider::getSimulationFacade(), 0);
     _sourceWidgets = sourceWidgets;
 }
 
 void SimulationParametersMainWindow::processIntern()
 {
-    if (!_sessionId.has_value() || _sessionId.value() != SimulationFacadeProvider::getSimulationFacade()->getSessionId()) {
+    if (!_sessionId.has_value() || _sessionId.value() != Provider::getSimulationFacade()->getSessionId()) {
         _selectedOrderNumber = 0;
     }
 
@@ -87,7 +87,7 @@ void SimulationParametersMainWindow::processIntern()
 
     processStatusBar();
 
-    _sessionId = SimulationFacadeProvider::getSimulationFacade()->getSessionId();
+    _sessionId = Provider::getSimulationFacade()->getSessionId();
 }
 
 void SimulationParametersMainWindow::shutdownIntern()
@@ -115,15 +115,15 @@ void SimulationParametersMainWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy simulation parameters to clipboard"))) {
-        _copiedParameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+        _copiedParameters = Provider::getSimulationFacade()->getSimulationParameters();
         printOverlayMessage("Simulation parameters copied");
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste simulation parameters from clipboard").disabled(!_copiedParameters))) {
-        SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(*_copiedParameters);
-        SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(*_copiedParameters);
+        Provider::getSimulationFacade()->setSimulationParameters(*_copiedParameters);
+        Provider::getSimulationFacade()->setOriginalSimulationParameters(*_copiedParameters);
         printOverlayMessage("Simulation parameters pasted");
     }
 
@@ -136,9 +136,9 @@ void SimulationParametersMainWindow::processToolbar()
                                     .tooltip("Replace reference values by values from the clipboard. This is useful to see the diff between the current "
                                              "parameters and those from the clipboard.")
                                     .disabled(!_copiedParameters))) {
-        auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+        auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
         if (_copiedParameters->numLayers == parameters.numLayers && _copiedParameters->numSources == parameters.numSources) {
-            SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(*_copiedParameters);
+            Provider::getSimulationFacade()->setOriginalSimulationParameters(*_copiedParameters);
             printOverlayMessage("Reference simulation parameters replaced");
         } else {
             GenericMessageDialog::get().information(
@@ -385,14 +385,14 @@ void SimulationParametersMainWindow::processLocationTable()
 
 void SimulationParametersMainWindow::processExpertSettings()
 {
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
     SpecificationGuiService::get().createWidgetsForExpertToggles(parameters, origParameters);
 
     if (parameters != lastParameters) {
-        SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
+        Provider::getSimulationFacade()->setSimulationParameters(parameters);
     }
 }
 
@@ -408,8 +408,8 @@ void SimulationParametersMainWindow::onOpenParameters()
             if (!SerializerService::get().deserializeSimulationParametersFromFile(parameters, firstFilename.string())) {
                 GenericMessageDialog::get().information("Open simulation parameters", "The selected file could not be opened.");
             } else {
-                SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-                SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(parameters);
+                Provider::getSimulationFacade()->setSimulationParameters(parameters);
+                Provider::getSimulationFacade()->setOriginalSimulationParameters(parameters);
             }
         });
 }
@@ -422,7 +422,7 @@ void SimulationParametersMainWindow::onSaveParameters()
             auto firstFilenameCopy = firstFilename;
             _fileDialogPath = firstFilenameCopy.remove_filename().string();
 
-            auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+            auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
             if (!SerializerService::get().serializeSimulationParametersToFile(firstFilename.string(), parameters)) {
                 GenericMessageDialog::get().information("Save simulation parameters", "The selected file could not be saved.");
             }
@@ -432,8 +432,8 @@ void SimulationParametersMainWindow::onSaveParameters()
 void SimulationParametersMainWindow::onInsertDefaultLayer()
 {
     auto& editService = ParametersEditService::get();
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
 
     if (!checkNumLayers(parameters)) {
         return;
@@ -444,7 +444,7 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
 
     ++_selectedOrderNumber;
 
-    auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
+    auto worldSize = Provider::getSimulationFacade()->getWorldSize();
     auto minRadius = toFloat(std::min(worldSize.x, worldSize.y)) / 2;
 
     auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
@@ -472,8 +472,8 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
     origParameters.layerRadialForceFieldStrength.layerValues[index] = parameters.layerRadialForceFieldStrength.layerValues[index];
     origParameters.layerRadialForceFieldDriftAngle.layerValues[index] = parameters.layerRadialForceFieldDriftAngle.layerValues[index];
 
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-    SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
     ++_insertedLocationCounter;
@@ -482,8 +482,8 @@ void SimulationParametersMainWindow::onInsertDefaultLayer()
 void SimulationParametersMainWindow::onInsertDefaultSource()
 {
     auto& editService = ParametersEditService::get();
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
 
     if (!checkNumSources(parameters)) {
         return;
@@ -500,14 +500,14 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
     editService.applyRadiationStrengths(origParameters, newStrengths);
 
     auto index = LocationHelper::findLocationArrayIndex(parameters, _selectedOrderNumber);
-    auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
+    auto worldSize = Provider::getSimulationFacade()->getWorldSize();
     parameters.sourcePosition.sourceValues[index] = {
         toFloat(worldSize.x / 2 + (_insertedLocationCounter % 10) * worldSize.x / 20),
         toFloat(worldSize.y / 2 + (_insertedLocationCounter % 10) * worldSize.y / 20)};
     origParameters.sourcePosition.sourceValues[index] = parameters.sourcePosition.sourceValues[index];
 
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-    SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
     ++_insertedLocationCounter;
@@ -516,8 +516,8 @@ void SimulationParametersMainWindow::onInsertDefaultSource()
 void SimulationParametersMainWindow::onCloneLocation()
 {
     auto& editService = ParametersEditService::get();
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
 
     auto locationType = LocationHelper::getLocationType(_selectedOrderNumber, parameters);
     if (locationType == LocationType::Layer) {
@@ -542,8 +542,8 @@ void SimulationParametersMainWindow::onCloneLocation()
     }
 
     ++_selectedOrderNumber;
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-    SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
@@ -551,8 +551,8 @@ void SimulationParametersMainWindow::onCloneLocation()
 void SimulationParametersMainWindow::onDeleteLocation()
 {
     auto& editService = ParametersEditService::get();
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
 
     LocationController::get().deleteLocationWindow(_selectedOrderNumber);
 
@@ -563,8 +563,8 @@ void SimulationParametersMainWindow::onDeleteLocation()
         --_selectedOrderNumber;
     }
 
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-    SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
@@ -572,16 +572,16 @@ void SimulationParametersMainWindow::onDeleteLocation()
 void SimulationParametersMainWindow::onDecreaseOrderNumber()
 {
     auto& editService = ParametersEditService::get();
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
 
     auto newByOldOrderNumber = editService.moveLocationUpwards(parameters, _selectedOrderNumber);
     editService.moveLocationUpwards(origParameters, _selectedOrderNumber);
 
     --_selectedOrderNumber;
 
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-    SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
@@ -589,16 +589,16 @@ void SimulationParametersMainWindow::onDecreaseOrderNumber()
 void SimulationParametersMainWindow::onIncreaseOrderNumber()
 {
     auto& editService = ParametersEditService::get();
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
 
     auto newByOldOrderNumber = editService.moveLocationDownwards(parameters, _selectedOrderNumber);
     editService.moveLocationDownwards(origParameters, _selectedOrderNumber);
 
     ++_selectedOrderNumber;
 
-    SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(parameters);
-    SimulationFacadeProvider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
+    Provider::getSimulationFacade()->setSimulationParameters(parameters);
+    Provider::getSimulationFacade()->setOriginalSimulationParameters(origParameters);
 
     LocationController::get().remapLocationIndices(newByOldOrderNumber);
 }
@@ -613,7 +613,7 @@ void SimulationParametersMainWindow::onOpenInLocationWindow()
 
 void SimulationParametersMainWindow::onCenterLocation(int orderNumber)
 {
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
     auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
     auto arrayIndex = LocationHelper::findLocationArrayIndex(parameters, orderNumber);
     RealVector2D pos;
@@ -627,7 +627,7 @@ void SimulationParametersMainWindow::onCenterLocation(int orderNumber)
 
 void SimulationParametersMainWindow::updateLocations()
 {
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
 
     _locations = std::vector<Location>(1 + parameters.numLayers + parameters.numSources);
     auto radiationStrength = ParametersEditService::get().getRadiationStrengths(parameters);

@@ -17,7 +17,7 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 using namespace std::string_literals;
 
@@ -51,7 +51,7 @@ void _InspectorWindow::process()
     }
     auto width = calcWindowWidth();
     auto height = isCell() ? StyleRepository::get().scale(370.0f) : StyleRepository::get().scale(70.0f);
-    auto borderlessRendering = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters().borderlessRendering.value;
+    auto borderlessRendering = Provider::getSimulationFacade()->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -124,7 +124,7 @@ void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
         ImGui::EndTabBar();
 
         if (cell != origCell) {
-            SimulationFacadeProvider::getSimulationFacade()->changeCell(cell);
+            Provider::getSimulationFacade()->changeCell(cell);
         }
     }
 }
@@ -409,7 +409,7 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
 template <typename Description>
 void _InspectorWindow::processCellGenomeTab(Description& desc)
 {
-    auto const& parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+    auto const& parameters = Provider::getSimulationFacade()->getSimulationParameters();
 
     int flags = ImGuiTabItemFlags_None;
     if (_selectGenomeTab) {
@@ -742,7 +742,7 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 
     particle._energy = energy;
     if (particle != origParticle) {
-        SimulationFacadeProvider::getSimulationFacade()->changeParticle(particle);
+        Provider::getSimulationFacade()->changeParticle(particle);
     }
 }
 

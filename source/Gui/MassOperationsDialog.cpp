@@ -11,7 +11,7 @@
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -144,14 +144,14 @@ void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, boo
 
 void MassOperationsDialog::onExecute()
 {
-    auto timestep = static_cast<uint32_t>(SimulationFacadeProvider::getSimulationFacade()->getCurrentTimestep());
-    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
-    auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
+    auto timestep = static_cast<uint32_t>(Provider::getSimulationFacade()->getCurrentTimestep());
+    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
+    auto worldSize = Provider::getSimulationFacade()->getWorldSize();
     auto content = [&] {
         if (_restrictToSelectedCreatures) {
-            return SimulationFacadeProvider::getSimulationFacade()->getSelectedSimulationData(true);
+            return Provider::getSimulationFacade()->getSelectedSimulationData(true);
         } else {
-            return SimulationFacadeProvider::getSimulationFacade()->getSimulationData();
+            return Provider::getSimulationFacade()->getSimulationData();
         }
     }();
 
@@ -184,12 +184,12 @@ void MassOperationsDialog::onExecute()
     }
 
     if (_restrictToSelectedCreatures) {
-        SimulationFacadeProvider::getSimulationFacade()->removeSelectedObjects(true);
-        SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(content));
+        Provider::getSimulationFacade()->removeSelectedObjects(true);
+        Provider::getSimulationFacade()->addAndSelectSimulationData(std::move(content));
     } else {
-        SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
-        SimulationFacadeProvider::getSimulationFacade()->newSimulation(timestep, worldSize, parameters);
-        SimulationFacadeProvider::getSimulationFacade()->setSimulationData(content);
+        Provider::getSimulationFacade()->closeSimulation();
+        Provider::getSimulationFacade()->newSimulation(timestep, worldSize, parameters);
+        Provider::getSimulationFacade()->setSimulationData(content);
     }
 }
 

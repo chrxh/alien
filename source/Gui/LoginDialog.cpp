@@ -17,8 +17,7 @@
 #include "LoginController.h"
 #include "ResetPasswordDialog.h"
 #include "StyleRepository.h"
-#include "SimulationFacadeProvider.h"
-#include "PersisterFacadeProvider.h"
+#include "Provider.h"
 
 void LoginDialog::initIntern()
 {
@@ -62,7 +61,7 @@ void LoginDialog::processIntern()
     AlienGui::ToggleButton(
         AlienGui::ToggleButtonParameters()
             .name("Share GPU model info")
-            .tooltip(Const::LoginShareGpuInfoTooltip1 + SimulationFacadeProvider::getSimulationFacade()->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
+            .tooltip(Const::LoginShareGpuInfoTooltip1 + Provider::getSimulationFacade()->getGpuName() + "\n" + Const::LoginShareGpuInfoTooltip2),
         shareGpuInfo);
     loginController.setShareGpuInfo(shareGpuInfo);
 

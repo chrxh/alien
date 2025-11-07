@@ -13,7 +13,7 @@
 #include "StyleRepository.h"
 #include "UiController.h"
 #include "Viewport.h"
-#include "PersisterFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -67,7 +67,7 @@ void OverlayController::activateProgressAnimation(bool value) {}
 
 void OverlayController::processProgressAnimation()
 {
-    if (PersisterFacadeProvider::getPersisterFacade()->isBusy()) {
+    if (Provider::getPersisterFacade()->isBusy()) {
         _busyTimepoint = std::chrono::steady_clock::now();
     }
     if (!_busyTimepoint.has_value()) {

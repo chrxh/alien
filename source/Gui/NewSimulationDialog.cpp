@@ -10,7 +10,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -61,7 +61,7 @@ void NewSimulationDialog::processIntern()
 
 void NewSimulationDialog::openIntern()
 {
-    auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
+    auto worldSize = Provider::getSimulationFacade()->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
 }
@@ -70,14 +70,14 @@ void NewSimulationDialog::onNewSimulation()
 {
     SimulationParameters parameters;
     if (_adoptSimulationParameters) {
-        parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+        parameters = Provider::getSimulationFacade()->getSimulationParameters();
     }
     for (int i = 0; i < ProjectNameSize; ++i) {
         parameters.projectName.value[i] = _projectName[i];
     }
-    SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
+    Provider::getSimulationFacade()->closeSimulation();
 
-    SimulationFacadeProvider::getSimulationFacade()->newSimulation(0, {_width, _height}, parameters);
+    Provider::getSimulationFacade()->newSimulation(0, {_width, _height}, parameters);
     Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::get().setZoomFactor(4.0f);
     TemporalControlWindow::get().onSnapshot();

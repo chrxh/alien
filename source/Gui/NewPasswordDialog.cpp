@@ -9,7 +9,7 @@
 #include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 void NewPasswordDialog::initIntern()
 {

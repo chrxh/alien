@@ -65,10 +65,9 @@
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
-#include "PersisterFacadeProvider.h"
+#include "Provider.h"
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
-#include "SimulationFacadeProvider.h"
 #include "SimulationInteractionController.h"
 #include "SimulationParametersMainWindow.h"
 #include "SimulationView.h"
@@ -114,7 +113,7 @@ _MainWindow::_MainWindow(GuiLogger const& logger)
     NetworkService::get().setup();
 
     log(Priority::Important, "initialize facades");
-    PersisterFacadeProvider::getPersisterFacade()->setup(SimulationFacadeProvider::getSimulationFacade());
+    Provider::getPersisterFacade()->setup(Provider::getSimulationFacade());
 
     log(Priority::Important, "initialize main loop elements");
     Viewport::get().setup();
@@ -184,8 +183,8 @@ void _MainWindow::shutdown()
     glfwDestroyWindow(WindowController::get().getWindowData().window);
     glfwTerminate();
 
-    PersisterFacadeProvider::getPersisterFacade()->shutdown();
-    SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
+    Provider::getPersisterFacade()->shutdown();
+    Provider::getSimulationFacade()->closeSimulation();
 
     NetworkService::get().shutdown();
 }

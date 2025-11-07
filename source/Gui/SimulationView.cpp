@@ -19,7 +19,7 @@
 #include "SimulationScrollbars.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 void SimulationView::setup()
 {
@@ -56,7 +56,7 @@ void SimulationView::draw()
     if (_renderSimulation) {
         _renderPipeline->execute();
 
-        if (SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters().markReferenceDomain.value) {
+        if (Provider::getSimulationFacade()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
@@ -101,7 +101,7 @@ void SimulationView::processSimulationScrollbars()
         auto mainMenubarHeight = scale(22);
 
         auto worldCenter = Viewport::get().getCenterInWorldPos();
-        auto worldRect = RealRect{{0, 0}, toRealVector2D(SimulationFacadeProvider::getSimulationFacade()->getWorldSize())};
+        auto worldRect = RealRect{{0, 0}, toRealVector2D(Provider::getSimulationFacade()->getWorldSize())};
         auto visibleWorldRect = Viewport::get().getVisibleWorldRect();
         auto viewRect =
             RealRect{{viewport->Pos.x, viewport->Pos.y + mainMenubarHeight}, {viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y}};
@@ -394,7 +394,7 @@ void SimulationView::markReferenceDomain()
 {
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     auto p1 = Viewport::get().mapWorldToViewPosition({0, 0}, false);
-    auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
+    auto worldSize = Provider::getSimulationFacade()->getWorldSize();
     auto p2 = Viewport::get().mapWorldToViewPosition(toRealVector2D(worldSize), false);
     auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
     auto color2 = ImColor::HSV(0, 0, 0, 0.8f);

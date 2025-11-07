@@ -22,7 +22,7 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 namespace
 {
@@ -157,7 +157,7 @@ void PatternEditorWindow::processIntern()
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.posDeltaX = centerPosX - origCenterPosX;
             updateData.posDeltaY = centerPosY - origCenterPosY;
-            SimulationFacadeProvider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
+            Provider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
 
@@ -166,7 +166,7 @@ void PatternEditorWindow::processIntern()
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.velX = centerVelX;
             updateData.velY = centerVelY;
-            SimulationFacadeProvider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
+            Provider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
 
@@ -174,7 +174,7 @@ void PatternEditorWindow::processIntern()
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.angleDelta = _angle - origAngle;
-            SimulationFacadeProvider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
+            Provider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
 
@@ -182,7 +182,7 @@ void PatternEditorWindow::processIntern()
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.angularVel = _angularVel;
-            SimulationFacadeProvider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
+            Provider::getSimulationFacade()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
         ImGui::EndDisabled();
@@ -190,43 +190,43 @@ void PatternEditorWindow::processIntern()
 
         AlienGui::Group(AlienGui::GroupParameters().text("Color"));
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(0);
         }
         ImGui::SameLine();
         if (colorButton("    ##color2", Const::IndividualCellColor2)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(1);
         }
         ImGui::SameLine();
         if (colorButton("    ##color3", Const::IndividualCellColor3)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(2);
         }
         ImGui::SameLine();
         if (colorButton("    ##color4", Const::IndividualCellColor4)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(3);
         }
         ImGui::SameLine();
         if (colorButton("    ##color5", Const::IndividualCellColor5)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(4);
         }
         ImGui::SameLine();
         if (colorButton("    ##color6", Const::IndividualCellColor6)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(5);
         }
         ImGui::SameLine();
         if (colorButton("    ##color7", Const::IndividualCellColor7)) {
-            SimulationFacadeProvider::getSimulationFacade()->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(6);
         }
         AlienGui::Group(AlienGui::GroupParameters().text("Tools"));
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {
-            SimulationFacadeProvider::getSimulationFacade()->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         ImGui::EndDisabled();
         AlienGui::Tooltip("Make uniform velocities");
@@ -234,7 +234,7 @@ void PatternEditorWindow::processIntern()
         ImGui::SameLine();
         ImGui::BeginDisabled(EditorModel::get().isCellSelectionEmpty());
         if (ImGui::Button(ICON_FA_BALANCE_SCALE)) {
-            SimulationFacadeProvider::getSimulationFacade()->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
+            Provider::getSimulationFacade()->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         AlienGui::Tooltip("Release stresses");
 
@@ -296,7 +296,7 @@ void PatternEditorWindow::onOpenPattern()
         if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
             auto center = Viewport::get().getCenterInWorldPos();
             DescriptionEditService::get().setCenter(content, center);
-            SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(Description(content));
+            Provider::getSimulationFacade()->addAndSelectSimulationData(Description(content));
             EditorModel::get().update();
         } else {
             GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
@@ -311,7 +311,7 @@ void PatternEditorWindow::onSavePattern()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        auto content = SimulationFacadeProvider::getSimulationFacade()->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
+        auto content = Provider::getSimulationFacade()->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
         if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
             GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
         }
@@ -335,7 +335,7 @@ bool PatternEditorWindow::isCopyingPossible() const
 
 void PatternEditorWindow::onCopy()
 {
-    _copiedSelection = SimulationFacadeProvider::getSimulationFacade()->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
+    _copiedSelection = Provider::getSimulationFacade()->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
 }
 
 bool PatternEditorWindow::isPastingPossible() const
@@ -348,7 +348,7 @@ void PatternEditorWindow::onPaste()
     auto description = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
     DescriptionEditService::get().setCenter(description, center);
-    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
+    Provider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
     EditorModel::get().update();
 }
 
@@ -359,7 +359,7 @@ bool PatternEditorWindow::isDeletingPossible() const
 
 void PatternEditorWindow::onDelete()
 {
-    SimulationFacadeProvider::getSimulationFacade()->removeSelectedObjects(EditorModel::get().isRolloutToClusters());
+    Provider::getSimulationFacade()->removeSelectedObjects(EditorModel::get().isRolloutToClusters());
     EditorModel::get().update();
 }
 
@@ -374,17 +374,17 @@ void PatternEditorWindow::shutdownIntern()
 
 void PatternEditorWindow::onMakeSticky()
 {
-    SimulationFacadeProvider::getSimulationFacade()->makeSticky(EditorModel::get().isRolloutToClusters());
+    Provider::getSimulationFacade()->makeSticky(EditorModel::get().isRolloutToClusters());
 }
 
 void PatternEditorWindow::onRemoveStickiness()
 {
-    SimulationFacadeProvider::getSimulationFacade()->removeStickiness(EditorModel::get().isRolloutToClusters());
+    Provider::getSimulationFacade()->removeStickiness(EditorModel::get().isRolloutToClusters());
 }
 
 void PatternEditorWindow::onSetBarrier(bool value)
 {
-    SimulationFacadeProvider::getSimulationFacade()->setBarrier(value, EditorModel::get().isRolloutToClusters());
+    Provider::getSimulationFacade()->setBarrier(value, EditorModel::get().isRolloutToClusters());
 }
 
 bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)

@@ -6,7 +6,7 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 #include "WindowController.h"
 
 #include <GLFW/glfw3.h>
@@ -84,7 +84,7 @@ RealVector2D Viewport::mapViewToWorldPosition(RealVector2D const& viewPos)
 RealVector2D Viewport::mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering)
 {
     if (borderlessRendering) {
-        auto simulationFacade = SimulationFacadeProvider::getSimulationFacade();
+        auto simulationFacade = Provider::getSimulationFacade();
         auto worldSize = toRealVector2D(simulationFacade->getWorldSize());
         auto offset = _centerInWorldPos - worldSize / 2;
         worldPos.x = Math::modulo(worldPos.x - offset.x, worldSize.x) + offset.x;

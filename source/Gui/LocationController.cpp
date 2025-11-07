@@ -6,7 +6,7 @@
 #include "SimulationParametersBaseWidget.h"
 #include "SimulationParametersLayerWidget.h"
 #include "SimulationParametersSourceWidget.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 
 void LocationController::addLocationWindow(int orderNumber, RealVector2D const& initialPos)
 {
@@ -14,18 +14,18 @@ void LocationController::addLocationWindow(int orderNumber, RealVector2D const& 
     LocationWidget widget;
     if (orderNumber == 0) {
         auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
-        baseWidgets->init(SimulationFacadeProvider::getSimulationFacade());
+        baseWidgets->init(Provider::getSimulationFacade());
         widget = baseWidgets;
     } else {
-        auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+        auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
         auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
         if (locationType == LocationType::Layer) {
             auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
-            layerWidgets->init(SimulationFacadeProvider::getSimulationFacade(), orderNumber);
+            layerWidgets->init(Provider::getSimulationFacade(), orderNumber);
             widget = layerWidgets;
         } else {
             auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
-            sourceWidgets->init(SimulationFacadeProvider::getSimulationFacade(), orderNumber);
+            sourceWidgets->init(Provider::getSimulationFacade(), orderNumber);
             widget = sourceWidgets;
         }
     }
@@ -61,7 +61,7 @@ void LocationController::init()
 
 void LocationController::process()
 {
-    if (!_sessionId.has_value() || _sessionId.value() != SimulationFacadeProvider::getSimulationFacade()->getSessionId()) {
+    if (!_sessionId.has_value() || _sessionId.value() != Provider::getSimulationFacade()->getSessionId()) {
         _locationWindows.clear();
     }
 
@@ -76,5 +76,5 @@ void LocationController::process()
     }
     _locationWindows.swap(newlocationWindows);
 
-    _sessionId = SimulationFacadeProvider::getSimulationFacade()->getSessionId();
+    _sessionId = Provider::getSimulationFacade()->getSessionId();
 }

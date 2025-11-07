@@ -16,8 +16,7 @@
 #include "GuiLogger.h"
 #include "HelpStrings.h"
 #include "MainWindow.h"
-#include "PersisterFacadeProvider.h"
-#include "SimulationFacadeProvider.h"
+#include "Provider.h"
 #include "StartupCheckService.h"
 
 namespace
@@ -51,8 +50,8 @@ int main(int argc, char** argv)
         persisterFacade = std::make_shared<_PersisterFacadeImpl>();
         StartupCheckService::get().check(simulationFacade);
 
-        SimulationFacadeProvider::setSimulationFacade(simulationFacade);
-        PersisterFacadeProvider::setPersisterFacade(persisterFacade);
+        Provider::setSimulationFacade(simulationFacade);
+        Provider::setPersisterFacade(persisterFacade);
         mainWindow = std::make_shared<_MainWindow>(logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
