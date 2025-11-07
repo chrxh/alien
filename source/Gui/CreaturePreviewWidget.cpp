@@ -340,9 +340,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                     {cellPos.x + cellSize * 0.3f + 0.5f, cellPos.y + cellSize * 0.1f + 0.5f},
                     Const::GenomePreviewLinkToGeneTextColor,
                     text.c_str());
-                if (cell._nodeIndex == 2) {
-                    printf("%f, %f\n", cellPos.x + cellSize * 0.3f + 0.5f, cellPos.y + cellSize * 0.1f + 0.5f);
-                }
             }
         }
     }
