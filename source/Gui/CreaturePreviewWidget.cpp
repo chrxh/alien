@@ -325,21 +325,24 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             if (cell._constructorGeneIndex.has_value()) {
                 auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
                 auto text = std::to_string(cell._constructorGeneIndex.value() + 1);
-                auto textLength = text.size();
+                auto textLength = toFloat(text.size());
                 drawList->AddRectFilled(
-                    {cellPos.x + cellSize * 0.3f, cellPos.y + cellSize * 0.2f},
-                    {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.5f, cellPos.y + cellSize * 0.9f},
+                    {cellPos.x + cellSize * 0.2f, cellPos.y + cellSize * 0.1f},
+                    {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.4f, cellPos.y + cellSize * 0.8f},
                     Const::GenomePreviewLinkToGeneBackgroundColor1);
                 drawList->AddRect(
-                    {cellPos.x + cellSize * 0.3f, cellPos.y + cellSize * 0.2f},
-                    {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.5f, cellPos.y + cellSize * 0.9f},
+                    {cellPos.x + cellSize * 0.2f, cellPos.y + cellSize * 0.1f},
+                    {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.4f, cellPos.y + cellSize * 0.8f},
                     Const::GenomePreviewLinkToGeneBackgroundColor2);
                 drawList->AddText(
                     style.getSmallBoldFont(),
                     cellSize / 1.5f,
-                    {cellPos.x + cellSize * 0.4f + 0.5f, cellPos.y + cellSize * 0.2f + 0.5f},
+                    {cellPos.x + cellSize * 0.3f + 0.5f, cellPos.y + cellSize * 0.1f + 0.5f},
                     Const::GenomePreviewLinkToGeneTextColor,
                     text.c_str());
+                if (cell._nodeIndex == 2) {
+                    printf("%f, %f\n", cellPos.x + cellSize * 0.3f + 0.5f, cellPos.y + cellSize * 0.1f + 0.5f);
+                }
             }
         }
     }

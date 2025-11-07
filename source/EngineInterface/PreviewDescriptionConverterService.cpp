@@ -114,12 +114,9 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             previewCell._signal = SignalPreviewDescription().channels(cell._signal->_channels);
         }
         if (cell.getCellType() == CellType_Constructor) {
-            auto constructor = std::get<ConstructorDescription>(cell._cellType);
             if (!genome._genes.empty()) {
                 auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellType);
-                if (constructor._geneIndex == genome._genes.size()) {
-                    previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
-                }
+                previewCell._constructorGeneIndex = nodeConstructor._geneIndex;
             }
         }
         result.description._cells.emplace_back(previewCell);

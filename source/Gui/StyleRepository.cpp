@@ -32,7 +32,7 @@ void StyleRepository::setup()
     configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
 
     ImGuiIO& io = ImGui::GetIO();
-
+    
     //default font (small with icons)
     io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * scaleFactor);
     {
