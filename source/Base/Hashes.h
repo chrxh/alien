@@ -3,14 +3,18 @@
 #include <bit>
 #include <functional>
 #include <tuple>
+#include <variant>
 
-namespace std
+template <class A, class B>
+struct std::hash<std::pair<A, B>>
 {
-    template <class A, class B>
-    struct hash<pair<A, B>>
-    {
-        size_t operator()(pair<A, B> const& p) const { return std::rotl(hash<A>{}(p.first), 1) ^ hash<B>{}(p.second); }
-    };
+    size_t operator()(std::pair<A, B> const& p) const { return std::rotl(std::hash<A>{}(p.first), 1) ^ std::hash<B>{}(p.second); }
+};
+
+template <typename T>
+inline void hash_combine(std::size_t& seed, const T& val)
+{
+    seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
 template <typename... Types>
