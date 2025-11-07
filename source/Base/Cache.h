@@ -9,21 +9,21 @@ template <typename Key, typename Value, int MaxEntries>
 class Cache
 {
 public:
-    void insertOrAssign(Key const& key, Value const& value);
+    void insertOrAssign(Key const& key, Value const& value) const;
 
     std::optional<Value> find(Key const& key) const;
     Value find(Key const& key, std::function<Value()> const& valueFunc) const;
 
 private:
-    std::unordered_map<Key, Value> _cacheMap;
-    std::list<Key> _usedKeys;
+    mutable std::unordered_map<Key, Value> _cacheMap;
+    mutable std::list<Key> _usedKeys;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 template <typename Key, typename Value, int MaxEntries>
-void Cache<Key, Value, MaxEntries>::insertOrAssign(Key const& key, Value const& value)
+void Cache<Key, Value, MaxEntries>::insertOrAssign(Key const& key, Value const& value) const
 {
     if (_cacheMap.size() >= MaxEntries) {
         _cacheMap.erase(_usedKeys.front());

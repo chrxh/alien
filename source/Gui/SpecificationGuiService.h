@@ -2,6 +2,7 @@
 
 #include <Base/Singleton.h>
 
+#include <EngineInterface/ParametersFilterHash.h>
 #include <EngineInterface/SimulationParametersSpecification.h>
 
 #include "Definitions.h"
@@ -92,5 +93,5 @@ private:
         ParametersFilter const& filter) const;
 
 private:
-    Cache<ParametersFilter, ParametersSpec, 10000> _specCache;
+    mutable Cache<ParametersFilter, ParametersSpec, 10000> _specCache;
 };
