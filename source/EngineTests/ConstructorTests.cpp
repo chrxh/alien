@@ -2972,6 +2972,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
         EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._energy));
+        auto newConstructor = std::get<ConstructorDescription>(actualConstructedCell._cellType);
+        if (separation == Separation::Yes) {
+            EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
+        } else {
+            EXPECT_EQ(ProvideEnergy_FreeGeneration, newConstructor._provideEnergy);
+        }
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
             EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell._energy));
