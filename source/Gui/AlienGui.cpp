@@ -935,6 +935,69 @@ void AlienGui::Text(std::string const& text)
     Text(TextParameters().text(text));
 }
 
+void AlienGui::AddTextWithSubpixelAccuracy(
+    ImDrawList* drawList,
+    ImFont* font,
+    float fontSize,
+    ImVec2 const& pos,
+    ImU32 color,
+    char const* textBegin,
+    char const* textEnd)
+{
+    // Validate inputs
+    if (!drawList || !font || fontSize <= 0.0f)
+        return;
+
+    if (!textEnd)
+        textEnd = textBegin + strlen(textBegin);
+
+    if (textBegin == textEnd)
+        return;
+
+    // Use the fractional position directly without truncation
+    float x = pos.x;
+    float y = pos.y;
+
+    float const scale = fontSize / font->FontSize;
+
+    // Constants for glyph rendering: 2 triangles (6 indices) and 4 vertices (quad corners)
+    constexpr int IndicesPerGlyph = 6;
+    constexpr int VerticesPerGlyph = 4;
+
+    // Manually render each glyph while preserving subpixel positions
+    drawList->PushTextureID(font->ContainerAtlas->TexID);
+
+    for (char const* s = textBegin; s < textEnd;) {
+        unsigned int c = (unsigned int)(unsigned char)*s;
+        if (c < 0x80) {
+            s += 1;
+        } else {
+            s += ImTextCharFromUtf8(&c, s, textEnd);
+            if (c == 0)
+                break;
+        }
+
+        ImFontGlyph const* glyph = font->FindGlyph((ImWchar)c);
+        if (!glyph)
+            continue;
+
+        if (glyph->Visible) {
+            // Calculate vertex positions with subpixel accuracy (no truncation)
+            float x1 = x + glyph->X0 * scale;
+            float y1 = y + glyph->Y0 * scale;
+            float x2 = x + glyph->X1 * scale;
+            float y2 = y + glyph->Y1 * scale;
+
+            drawList->PrimReserve(IndicesPerGlyph, VerticesPerGlyph);
+            drawList->PrimRectUV(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), color);
+        }
+
+        x += glyph->AdvanceX * scale;
+    }
+
+    drawList->PopTextureID();
+}
+
 void AlienGui::BeginMenuBar()
 {
     _menuBarVisible = ImGui::BeginMainMenuBar();
@@ -2360,70 +2423,6 @@ void AlienGui::RotateEnd(float angle, ImDrawList* drawList)
         buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
     }
 }
-
-void AlienGui::AddTextWithSubpixelAccuracy(
-    ImDrawList* drawList,
-    ImFont* font,
-    float fontSize,
-    ImVec2 const& pos,
-    ImU32 color,
-    char const* textBegin,
-    char const* textEnd)
-{
-    // Validate inputs
-    if (!drawList || !font || fontSize <= 0.0f)
-        return;
-
-    if (!textEnd)
-        textEnd = textBegin + strlen(textBegin);
-
-    if (textBegin == textEnd)
-        return;
-
-    // Use the fractional position directly without truncation
-    float x = pos.x;
-    float y = pos.y;
-
-    float const scale = fontSize / font->FontSize;
-
-    // Constants for glyph rendering: 2 triangles (6 indices) and 4 vertices (quad corners)
-    constexpr int IndicesPerGlyph = 6;
-    constexpr int VerticesPerGlyph = 4;
-
-    // Manually render each glyph while preserving subpixel positions
-    drawList->PushTextureID(font->ContainerAtlas->TexID);
-
-    for (char const* s = textBegin; s < textEnd;) {
-        unsigned int c = (unsigned int)(unsigned char)*s;
-        if (c < 0x80) {
-            s += 1;
-        } else {
-            s += ImTextCharFromUtf8(&c, s, textEnd);
-            if (c == 0)
-                break;
-        }
-
-        ImFontGlyph const* glyph = font->FindGlyph((ImWchar)c);
-        if (!glyph)
-            continue;
-
-        if (glyph->Visible) {
-            // Calculate vertex positions with subpixel accuracy (no truncation)
-            float x1 = x + glyph->X0 * scale;
-            float y1 = y + glyph->Y0 * scale;
-            float x2 = x + glyph->X1 * scale;
-            float y2 = y + glyph->Y1 * scale;
-
-            drawList->PrimReserve(IndicesPerGlyph, VerticesPerGlyph);
-            drawList->PrimRectUV(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), color);
-        }
-
-        x += glyph->AdvanceX * scale;
-    }
-
-    drawList->PopTextureID();
-}
-
 //<<<<<<<<<<
 
 int AlienGui::DynamicTableLayout::calcNumColumns(float tableWidth, float columnWidth)

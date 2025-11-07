@@ -304,6 +304,14 @@ public:
     };
     static void Text(TextParameters const& parameters);
     static void Text(std::string const& text);
+    static void AddTextWithSubpixelAccuracy(
+        ImDrawList* drawList,
+        ImFont* font,
+        float fontSize,
+        ImVec2 const& pos,
+        ImU32 color,
+        char const* textBegin,
+        char const* textEnd = nullptr);
 
     static void BeginMenuBar();
     static void BeginMenu(std::string const& text, bool& toggled, float focus = true);
@@ -463,15 +471,6 @@ public:
 
     static void RotateStart(ImDrawList* drawList);
     static void RotateEnd(float angle, ImDrawList* drawList);
-
-    static void AddTextWithSubpixelAccuracy(
-        ImDrawList* drawList,
-        ImFont* font,
-        float fontSize,
-        ImVec2 const& pos,
-        ImU32 color,
-        char const* textBegin,
-        char const* textEnd = nullptr);
 
 private:
     template <typename Parameter, typename T>
