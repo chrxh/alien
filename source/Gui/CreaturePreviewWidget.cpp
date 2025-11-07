@@ -38,6 +38,10 @@ namespace
         char const* textBegin,
         char const* textEnd = nullptr)
     {
+        // Validate inputs
+        if (!drawList || !font || fontSize <= 0.0f)
+            return;
+
         if (!textEnd)
             textEnd = textBegin + strlen(textBegin);
 
@@ -54,7 +58,7 @@ namespace
         drawList->PushTextureID(font->ContainerAtlas->TexID);
 
         for (char const* s = textBegin; s < textEnd;) {
-            unsigned int c = (unsigned int)*s;
+            unsigned int c = (unsigned char)*s;  // Use unsigned char to handle high ASCII correctly
             if (c < 0x80) {
                 s += 1;
             } else {
@@ -74,7 +78,10 @@ namespace
                 float x2 = x + glyph->X1 * scale;
                 float y2 = y + glyph->Y1 * scale;
 
-                drawList->PrimReserve(6, 4);
+                // Reserve space for 2 triangles (6 indices) and 4 vertices (quad corners)
+                constexpr int IndicesPerGlyph = 6;
+                constexpr int VerticesPerGlyph = 4;
+                drawList->PrimReserve(IndicesPerGlyph, VerticesPerGlyph);
                 drawList->PrimRectUV(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), color);
             }
 
