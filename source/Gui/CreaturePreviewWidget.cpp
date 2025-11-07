@@ -54,11 +54,15 @@ namespace
 
         float const scale = fontSize / font->FontSize;
 
+        // Constants for glyph rendering: 2 triangles (6 indices) and 4 vertices (quad corners)
+        constexpr int IndicesPerGlyph = 6;
+        constexpr int VerticesPerGlyph = 4;
+
         // Manually render each glyph while preserving subpixel positions
         drawList->PushTextureID(font->ContainerAtlas->TexID);
 
         for (char const* s = textBegin; s < textEnd;) {
-            unsigned int c = (unsigned char)*s;  // Use unsigned char to handle high ASCII correctly
+            unsigned int c = (unsigned int)(unsigned char)*s;
             if (c < 0x80) {
                 s += 1;
             } else {
@@ -78,9 +82,6 @@ namespace
                 float x2 = x + glyph->X1 * scale;
                 float y2 = y + glyph->Y1 * scale;
 
-                // Reserve space for 2 triangles (6 indices) and 4 vertices (quad corners)
-                constexpr int IndicesPerGlyph = 6;
-                constexpr int VerticesPerGlyph = 4;
                 drawList->PrimReserve(IndicesPerGlyph, VerticesPerGlyph);
                 drawList->PrimRectUV(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), color);
             }
