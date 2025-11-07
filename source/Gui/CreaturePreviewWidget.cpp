@@ -188,7 +188,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         AlienGui::RotateStart(drawList);
         auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
-        drawList->AddText(nullptr, textSize, {textPos.x - textSize + 0.5f, textPos.y - textSize / 2 + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
+        drawList->AddText(
+            nullptr, textSize, {std::floor(textPos.x - textSize) + 0.5f, std::floor(textPos.y - textSize / 2) + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
         AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
     }
 
@@ -337,7 +338,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 drawList->AddText(
                     style.getSmallBoldFont(),
                     cellSize / 1.5f,
-                    {cellPos.x + cellSize * 0.3f + 0.5f, cellPos.y + cellSize * 0.1f + 0.5f},
+                    {std::floor(cellPos.x + cellSize * 0.3f) + 0.5f, std::floor(cellPos.y + cellSize * 0.1f) + 0.5f},
                     Const::GenomePreviewLinkToGeneTextColor,
                     text.c_str());
             }
