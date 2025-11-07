@@ -9,21 +9,21 @@ template <typename Key, typename Value, int MaxEntries>
 class Cache
 {
 public:
-    void insertOrAssign(Key const& key, Value const& value) const;
+    void insertOrAssign(Key const& key, Value const& value);
 
     std::optional<Value> find(Key const& key) const;
-    Value find(Key const& key, std::function<Value()> const& valueFunc) const;
+    Value find(Key const& key, std::function<Value()> const& valueFunc);
 
 private:
-    mutable std::unordered_map<Key, Value> _cacheMap;
-    mutable std::list<Key> _usedKeys;
+    std::unordered_map<Key, Value> _cacheMap;
+    std::list<Key> _usedKeys;
 };
 
 /************************************************************************/
 /* Implementation                                                       */
 /************************************************************************/
 template <typename Key, typename Value, int MaxEntries>
-void Cache<Key, Value, MaxEntries>::insertOrAssign(Key const& key, Value const& value) const
+void Cache<Key, Value, MaxEntries>::insertOrAssign(Key const& key, Value const& value)
 {
     if (_cacheMap.size() >= MaxEntries) {
         _cacheMap.erase(_usedKeys.front());
@@ -50,7 +50,7 @@ std::optional<Value> Cache<Key, Value, MaxEntries>::find(Key const& key) const
 }
 
 template <typename Key, typename Value, int MaxEntries>
-Value Cache<Key, Value, MaxEntries>::find(Key const& key, std::function<Value()> const& valueFunc) const
+Value Cache<Key, Value, MaxEntries>::find(Key const& key, std::function<Value()> const& valueFunc)
 {
     auto findResult = _cacheMap.find(key);
     if (findResult != _cacheMap.end()) {

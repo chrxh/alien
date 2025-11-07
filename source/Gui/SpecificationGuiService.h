@@ -18,7 +18,7 @@ public:
         SimulationParameters& origParameters,
         SimulationFacade const& simulationFacade,
         int orderNumber,
-        ParametersFilter const& filter) const;
+        ParametersFilter const& filter);
 
     void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 
@@ -93,5 +93,5 @@ private:
         ParametersFilter const& filter) const;
 
 private:
-    mutable Cache<ParametersFilter, ParametersSpec, 10000> _specCache;
+    Cache<ParametersFilter, ParametersSpec, 10000> _specCache;
 };
