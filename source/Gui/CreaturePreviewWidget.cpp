@@ -27,6 +27,7 @@ namespace
     auto constexpr ZoomLevelForConnections = 8.0f;
 }
 
+
 CreaturePreviewWidget
 _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex)
 {
@@ -188,7 +189,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         AlienGui::RotateStart(drawList);
         auto textPos = center + Math::unitVectorOfAngle(conversionResult.frontAngle) * (radius + textSize);
-        drawList->AddText(nullptr, textSize, {textPos.x - textSize + 0.5f, textPos.y - textSize / 2 + 0.5f}, ImColor::HSV(0, 0, 0.4f), "Front");
+        AlienGui::AddTextWithSubpixelAccuracy(
+            drawList, ImGui::GetFont(), textSize, {textPos.x - textSize, textPos.y - textSize / 2}, ImColor::HSV(0, 0, 0.4f), "Front");
         AlienGui::RotateEnd(conversionResult.frontAngle, drawList);
     }
 
@@ -326,18 +328,20 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
                 auto text = std::to_string(cell._constructorGeneIndex.value() + 1);
                 auto textLength = toFloat(text.size());
+                auto truncatedSize = std::min(scale(30.0f), cellSize);
                 drawList->AddRectFilled(
-                    {cellPos.x + cellSize * 0.2f, cellPos.y + cellSize * 0.1f},
-                    {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.4f, cellPos.y + cellSize * 0.8f},
+                    {cellPos.x + truncatedSize * 0.2f, cellPos.y + truncatedSize * 0.1f},
+                    {cellPos.x + truncatedSize * 0.32f * textLength + truncatedSize * 0.4f, cellPos.y + truncatedSize * 0.8f},
                     Const::GenomePreviewLinkToGeneBackgroundColor1);
                 drawList->AddRect(
-                    {cellPos.x + cellSize * 0.2f, cellPos.y + cellSize * 0.1f},
-                    {cellPos.x + cellSize * 0.32f * textLength + cellSize * 0.4f, cellPos.y + cellSize * 0.8f},
+                    {cellPos.x + truncatedSize * 0.2f, cellPos.y + truncatedSize * 0.1f},
+                    {cellPos.x + truncatedSize * 0.32f * textLength + truncatedSize * 0.4f, cellPos.y + truncatedSize * 0.8f},
                     Const::GenomePreviewLinkToGeneBackgroundColor2);
-                drawList->AddText(
+                AlienGui::AddTextWithSubpixelAccuracy(
+                    drawList,
                     style.getSmallBoldFont(),
-                    cellSize / 1.5f,
-                    {cellPos.x + cellSize * 0.3f + 0.5f, cellPos.y + cellSize * 0.1f + 0.5f},
+                    truncatedSize / 1.5f,
+                    {cellPos.x + truncatedSize * 0.3f, cellPos.y + truncatedSize * 0.1f},
                     Const::GenomePreviewLinkToGeneTextColor,
                     text.c_str());
             }

@@ -892,7 +892,7 @@ void AlienGui::Text(TextParameters const& parameters)
     // Apply style
     bool fontPushed = false;
     bool colorPushed = false;
-    
+
     switch (parameters._style) {
     case TextStyle::Bold:
         ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
@@ -912,7 +912,7 @@ void AlienGui::Text(TextParameters const& parameters)
     default:
         break;
     }
-    
+
     auto refPos = ImGui::GetCursorScreenPos();
 
     ImGui::TextUnformatted(parameters._text.c_str());
@@ -920,7 +920,7 @@ void AlienGui::Text(TextParameters const& parameters)
     if (parameters._highlightedSubString.has_value()) {
         hightlightSubstring(parameters._text, parameters._highlightedSubString.value(), refPos);
     }
-    
+
     // Pop style
     if (colorPushed) {
         ImGui::PopStyleColor();
@@ -1452,10 +1452,10 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     //    treeNodeOpenFlags |= ImGuiTreeNodeFlags_Bullet;
     //}
     ImGui::PushFont(StyleRepository::get().getSmallBoldFont());
-    
+
     auto refPos = ImGui::GetCursorScreenPos();
     refPos.x += scale(28.0f);
-    
+
     bool result = ImGui::TreeNodeEx(parameters._name.c_str(), parameters._defaultOpen ? treeNodeOpenFlags : treeNodeClosedFlags);
 
     if (parameters._highlightedSubString.has_value()) {
@@ -2359,6 +2359,69 @@ void AlienGui::RotateEnd(float angle, ImDrawList* drawList)
     for (int i = _rotationStartIndex; i < buf.Size; i++) {
         buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
     }
+}
+
+void AlienGui::AddTextWithSubpixelAccuracy(
+    ImDrawList* drawList,
+    ImFont* font,
+    float fontSize,
+    ImVec2 const& pos,
+    ImU32 color,
+    char const* textBegin,
+    char const* textEnd)
+{
+    // Validate inputs
+    if (!drawList || !font || fontSize <= 0.0f)
+        return;
+
+    if (!textEnd)
+        textEnd = textBegin + strlen(textBegin);
+
+    if (textBegin == textEnd)
+        return;
+
+    // Use the fractional position directly without truncation
+    float x = pos.x;
+    float y = pos.y;
+
+    float const scale = fontSize / font->FontSize;
+
+    // Constants for glyph rendering: 2 triangles (6 indices) and 4 vertices (quad corners)
+    constexpr int IndicesPerGlyph = 6;
+    constexpr int VerticesPerGlyph = 4;
+
+    // Manually render each glyph while preserving subpixel positions
+    drawList->PushTextureID(font->ContainerAtlas->TexID);
+
+    for (char const* s = textBegin; s < textEnd;) {
+        unsigned int c = (unsigned int)(unsigned char)*s;
+        if (c < 0x80) {
+            s += 1;
+        } else {
+            s += ImTextCharFromUtf8(&c, s, textEnd);
+            if (c == 0)
+                break;
+        }
+
+        ImFontGlyph const* glyph = font->FindGlyph((ImWchar)c);
+        if (!glyph)
+            continue;
+
+        if (glyph->Visible) {
+            // Calculate vertex positions with subpixel accuracy (no truncation)
+            float x1 = x + glyph->X0 * scale;
+            float y1 = y + glyph->Y0 * scale;
+            float x2 = x + glyph->X1 * scale;
+            float y2 = y + glyph->Y1 * scale;
+
+            drawList->PrimReserve(IndicesPerGlyph, VerticesPerGlyph);
+            drawList->PrimRectUV(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(glyph->U0, glyph->V0), ImVec2(glyph->U1, glyph->V1), color);
+        }
+
+        x += glyph->AdvanceX * scale;
+    }
+
+    drawList->PopTextureID();
 }
 
 //<<<<<<<<<<

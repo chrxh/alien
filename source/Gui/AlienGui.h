@@ -464,6 +464,15 @@ public:
     static void RotateStart(ImDrawList* drawList);
     static void RotateEnd(float angle, ImDrawList* drawList);
 
+    static void AddTextWithSubpixelAccuracy(
+        ImDrawList* drawList,
+        ImFont* font,
+        float fontSize,
+        ImVec2 const& pos,
+        ImU32 color,
+        char const* textBegin,
+        char const* textEnd = nullptr);
+
 private:
     template <typename Parameter, typename T>
     static bool BasicSlider(Parameter const& parameters, T* value, bool* enabled, bool* pinned);
