@@ -469,7 +469,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
     auto input = Description().creatures({
         CreatureDescription().cells({
             CellDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
-            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
+            CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(0)),
         }),
     });
     input.addConnection(0, 1);
@@ -480,10 +480,10 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
     ASSERT_EQ(1, result.description._connections.size());
 
     auto cell1 = getPreviewCell(result.description, 0, 0);
-    EXPECT_FALSE(cell1._constructorGeneIndex.has_value());
+    EXPECT_EQ(1, cell1._constructorGeneIndex.value());
 
     auto cell2 = getPreviewCell(result.description, 1, 0);
-    EXPECT_EQ(0, cell2._constructorGeneIndex);
+    EXPECT_EQ(0, cell2._constructorGeneIndex.value());
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
