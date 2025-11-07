@@ -15,14 +15,14 @@
 
 struct ImPlotPoint;
 
-class StatisticsWindow : public AlienWindow<SimulationFacade>
+class StatisticsWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
 
 private:
     StatisticsWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
 
@@ -74,8 +74,6 @@ private:
     void validateAndCorrect();
 
     float calcPlotHeight(int row) const;
-
-    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
 

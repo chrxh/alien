@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class ResizeWorldDialog : public AlienDialog<SimulationFacade>
+class ResizeWorldDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ResizeWorldDialog);
 
@@ -17,12 +17,10 @@ public:
 private:
     ResizeWorldDialog();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern() override;
 
     void onResizing();
-
-    SimulationFacade _simulationFacade;
 
     bool _scaleContent = false;
     int _width = 0;

@@ -16,6 +16,7 @@
 #include "GuiLogger.h"
 #include "HelpStrings.h"
 #include "MainWindow.h"
+#include "PersisterFacadeProvider.h"
 #include "SimulationFacadeProvider.h"
 #include "StartupCheckService.h"
 
@@ -51,7 +52,8 @@ int main(int argc, char** argv)
         StartupCheckService::get().check(simulationFacade);
 
         SimulationFacadeProvider::setSimulationFacade(simulationFacade);
-        mainWindow = std::make_shared<_MainWindow>(persisterFacade, logger);
+        PersisterFacadeProvider::setPersisterFacade(persisterFacade);
+        mainWindow = std::make_shared<_MainWindow>(logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
 

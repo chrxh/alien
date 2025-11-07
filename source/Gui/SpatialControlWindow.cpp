@@ -13,11 +13,12 @@
 #include "ResizeWorldDialog.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "SimulationFacadeProvider.h"
 
-void SpatialControlWindow::initIntern(SimulationFacade simulationFacade)
+void SpatialControlWindow::initIntern()
 {
-    _simulationFacade = simulationFacade;
-    ResizeWorldDialog::get().setup(simulationFacade);
+
+    ResizeWorldDialog::get().setup();
 
     auto& settings = GlobalSettings::get();
     Viewport::get().setZoomSensitivity(settings.getValue("windows.spatial control.zoom sensitivity factor", Viewport::get().getZoomSensitivity()));
@@ -56,7 +57,7 @@ void SpatialControlWindow::processIntern()
         ImGui::Text("World size");
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-        auto worldSize = _simulationFacade->getWorldSize();
+        auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
         ImGui::TextUnformatted((StringHelper::format(worldSize.x) + " x " + StringHelper::format(worldSize.y)).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
@@ -113,7 +114,7 @@ void SpatialControlWindow::processCenterButton()
 {
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CROSSHAIRS))) {
         Viewport::get().setZoomFactor(1.0f);
-        auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
+        auto worldSize = toRealVector2D(SimulationFacadeProvider::getSimulationFacade()->getWorldSize());
         Viewport::get().setCenterInWorldPos({worldSize.x / 2, worldSize.y / 2});
     }
     AlienGui::Tooltip("Center");
@@ -129,8 +130,8 @@ void SpatialControlWindow::processResizeButton()
 
 void SpatialControlWindow::processCenterOnSelection()
 {
-    if (_centerSelection && _simulationFacade->isSimulationRunning()) {
-        auto shallowData = _simulationFacade->getSelectionShallowData();
+    if (_centerSelection && SimulationFacadeProvider::getSimulationFacade()->isSimulationRunning()) {
+        auto shallowData = SimulationFacadeProvider::getSimulationFacade()->getSelectionShallowData();
         if (shallowData.numCells > 0 || shallowData.numParticles > 0) {
             Viewport::get().setCenterInWorldPos({shallowData.centerPosX, shallowData.centerPosY});
         }

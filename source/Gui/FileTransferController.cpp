@@ -11,6 +11,8 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
+#include "SimulationFacadeProvider.h"
+#include "PersisterFacadeProvider.h"
 
 void FileTransferController::onOpenSimulationDialog()
 {
@@ -30,23 +32,23 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
         [&](auto const& senderId) {
             auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true};
             auto readData = ReadSimulationRequestData{.filename = filename.string(), .initSimulation = false};
-            return _persisterFacade->scheduleReadSimulation(senderInfo, readData);
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleReadSimulation(senderInfo, readData);
         },
         [&](auto const& requestId) {
-            auto const& data = _persisterFacade->fetchReadSimulationData(requestId);
-            _persisterFacade->shutdown();
+            auto const& data = PersisterFacadeProvider::getPersisterFacade()->fetchReadSimulationData(requestId);
+            PersisterFacadeProvider::getPersisterFacade()->shutdown();
 
-            _simulationFacade->closeSimulation();
+            SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
 
             std::optional<std::string> errorMessage;
             try {
-                _simulationFacade->newSimulation(
+                SimulationFacadeProvider::getSimulationFacade()->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
                     data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
-                _simulationFacade->setSimulationData(data.deserializedSimulation.mainData);
-                _simulationFacade->setStatisticsHistory(data.deserializedSimulation.statistics);
-                _simulationFacade->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
+                SimulationFacadeProvider::getSimulationFacade()->setSimulationData(data.deserializedSimulation.mainData);
+                SimulationFacadeProvider::getSimulationFacade()->setStatisticsHistory(data.deserializedSimulation.statistics);
+                SimulationFacadeProvider::getSimulationFacade()->setRealTime(data.deserializedSimulation.auxiliaryData.realTime);
             } catch (CudaMemoryAllocationException const& exception) {
                 errorMessage = exception.what();
             } catch (...) {
@@ -55,13 +57,13 @@ void FileTransferController::onOpenSimulation(std::filesystem::path const& filen
 
             if (errorMessage) {
                 showMessage("Error", *errorMessage);
-                _simulationFacade->closeSimulation();
-                _simulationFacade->newSimulation(
+                SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
+                SimulationFacadeProvider::getSimulationFacade()->newSimulation(
                     data.deserializedSimulation.auxiliaryData.timestep,
                     data.deserializedSimulation.auxiliaryData.worldSize,
                     data.deserializedSimulation.auxiliaryData.simulationParameters);
             }
-            _persisterFacade->restart();
+            PersisterFacadeProvider::getPersisterFacade()->restart();
 
             Viewport::get().setCenterInWorldPos(data.deserializedSimulation.auxiliaryData.center);
             Viewport::get().setZoomFactor(data.deserializedSimulation.auxiliaryData.zoom);
@@ -82,19 +84,18 @@ void FileTransferController::onSaveSimulationDialog()
             [&, firstFilename = firstFilename](auto const& senderId) {
                 auto senderInfo = SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true};
                 auto readData = SaveSimulationRequestData{firstFilename.string(), Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-                return _persisterFacade->scheduleSaveSimulation(senderInfo, readData);
+                return PersisterFacadeProvider::getPersisterFacade()->scheduleSaveSimulation(senderInfo, readData);
             },
             [](auto const&) {},
             [](auto const& criticalErrors) { GenericMessageDialog::get().information("Error", criticalErrors); });
     });
 }
 
-void FileTransferController::init(PersisterFacade persisterFacade, SimulationFacade simulationFacade)
+void FileTransferController::init()
 {
-    _persisterFacade = persisterFacade;
-    _simulationFacade = simulationFacade;
-    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _saveSimulationProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    _openSimulationProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _saveSimulationProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
 
     _referencePath = GlobalSettings::get().getValue("dialogs.directory.reference path", _referencePath);
 }

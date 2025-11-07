@@ -19,7 +19,7 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-class CreatorWindow : public AlienWindow<SimulationFacade>
+class CreatorWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
 
@@ -30,7 +30,7 @@ public:
 private:
     CreatorWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern() override;
     bool isShown() override;
 
@@ -67,6 +67,4 @@ private:
     RealVector2D _lastDrawPos;
 
     CreationMode _mode = CreationMode_Drawing;
-
-    SimulationFacade _simulationFacade;
 };

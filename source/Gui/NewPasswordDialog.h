@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class NewPasswordDialog : public AlienDialog<SimulationFacade>
+class NewPasswordDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NewPasswordDialog);
 
@@ -17,12 +17,10 @@ public:
 private:
     NewPasswordDialog();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern() override;
 
     void onNewPassword();
-
-    SimulationFacade _simulationFacade;
 
     std::string _userName;
     std::string _newPassword;

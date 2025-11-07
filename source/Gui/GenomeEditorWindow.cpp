@@ -22,6 +22,7 @@
 #include "OverlayController.h"
 
 #include <ImFileDialog.h>
+#include "SimulationFacadeProvider.h"
 
 void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
 {
@@ -61,11 +62,10 @@ GenomeEditorWindow::GenomeEditorWindow()
     : AlienWindow("Genome editor", "windows.genome editor", false, true, {500.0f, 300.0f})
 {}
 
-void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
+void GenomeEditorWindow::initIntern()
 {
     ChangeColorDialog::get().setup();
 
-    _simulationFacade = simulationFacade;
     _genomeEditData = std::make_shared<_GenomeWindowEditData>();
 
     auto path = std::filesystem::current_path();
@@ -75,7 +75,7 @@ void GenomeEditorWindow::initIntern(SimulationFacade simulationFacade)
     _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, getDefaultGenome()));
+    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(SimulationFacadeProvider::getSimulationFacade(), _genomeEditData, getDefaultGenome()));
 }
 
 void GenomeEditorWindow::shutdownIntern()
@@ -236,7 +236,7 @@ void GenomeEditorWindow::onSaveGenome()
 void GenomeEditorWindow::onInjectGenome()
 {
     auto const& tab = _tabs.at(_selectedTabIndex);
-    auto success = _simulationFacade->changeCreature(tab->getCreatureId(), tab->getGenomeDescription());
+    auto success = SimulationFacadeProvider::getSimulationFacade()->changeCreature(tab->getCreatureId(), tab->getGenomeDescription());
     tab->onGenomeIntoCreatureInjected();
     if (success) {
         printOverlayMessage("Genome injected");
@@ -255,7 +255,7 @@ void GenomeEditorWindow::onCreateSeed()
     auto tab = _tabs.at(_selectedTabIndex);
     auto genome = tab->getGenomeDescription();
 
-    auto parameter = _simulationFacade->getSimulationParameters();
+    auto parameter = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
     auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
 
     Description seed;
@@ -269,7 +269,7 @@ void GenomeEditorWindow::onCreateSeed()
         }),
         genome);
 
-    _simulationFacade->addAndSelectSimulationData(std::move(seed));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(seed));
     EditorModel::get().update();
 
     printOverlayMessage("Seed created");
@@ -278,13 +278,13 @@ void GenomeEditorWindow::onCreateSeed()
 void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_simulationFacade, _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(SimulationFacadeProvider::getSimulationFacade(), _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_simulationFacade, _genomeEditData, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createDraftTab(SimulationFacadeProvider::getSimulationFacade(), _genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)

@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class ActivateUserDialog : public AlienDialog<SimulationFacade>
+class ActivateUserDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ActivateUserDialog);
 
@@ -17,11 +17,9 @@ public:
 private:
     ActivateUserDialog();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern() override;
     void onActivateUser();
-
-    SimulationFacade _simulationFacade;
 
     std::string _userName;
     std::string _password;

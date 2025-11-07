@@ -14,7 +14,7 @@ class EditorModel
     MAKE_SINGLETON(EditorModel);
 
 public:
-    void setup(SimulationFacade const& simulationFacade);
+    void setup();
 
     SelectionShallowData const& getSelectionShallowData() const;
     void update();
@@ -41,7 +41,6 @@ public:
     bool isRolloutToClusters() const;
 
 private:
-    SimulationFacade _simulationFacade;
     SelectionShallowData _selectionShallowData;
 
     std::unordered_map<uint64_t, ExtendedCellOrParticleDescription> _inspectedEntityById;

@@ -45,6 +45,8 @@
 #include "StyleRepository.h"
 #include "UploadSimulationDialog.h"
 #include "Viewport.h"
+#include "SimulationFacadeProvider.h"
+#include "PersisterFacadeProvider.h"
 
 namespace
 {
@@ -75,15 +77,14 @@ namespace
         {WorkspaceType_Private, std::string("private")}};
 }
 
-void BrowserWindow::initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
+void BrowserWindow::initIntern()
 {
-    _simulationFacade = simulationFacade;
-    _persisterFacade = persisterFacade;
+
     _downloadCache = std::make_shared<_DownloadCache>();
 
-    _refreshProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _reactionProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+    _refreshProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _emojiUserNameProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _reactionProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
 
     auto& settings = GlobalSettings::get();
     _currentWorkspace.resourceType = settings.getValue("windows.browser.resource type", _currentWorkspace.resourceType);
@@ -158,11 +159,11 @@ void BrowserWindow::refreshIntern(bool withRetry)
 {
     _refreshProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleGetNetworkResources(
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleGetNetworkResources(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = withRetry}, GetNetworkResourcesRequestData());
         },
         [&](auto const& requestId) {
-            auto data = _persisterFacade->fetchGetNetworkResourcesData(requestId);
+            auto data = PersisterFacadeProvider::getPersisterFacade()->fetchGetNetworkResourcesData(requestId);
             _userTOs = data.userTOs;
             _ownEmojiTypeBySimId = data.emojiTypeByResourceId;
 
@@ -1372,7 +1373,7 @@ void BrowserWindow::onToggleLike(NetworkResourceTreeTO const& to, int emojiType)
 
         _reactionProcessor->executeTask(
             [&](auto const& senderId) {
-                return _persisterFacade->scheduleToggleReactionNetworkResource(
+                return PersisterFacadeProvider::getPersisterFacade()->scheduleToggleReactionNetworkResource(
                     SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = false},
                     ToggleReactionNetworkResourceRequestData{.resourceId = leaf.rawTO->id, .emojiType = emojiType});
             },
@@ -1430,12 +1431,12 @@ std::string BrowserWindow::getUserNamesToEmojiType(std::string const& resourceId
         if (!_emojiUserNameProcessor->pendingTasks()) {
             _emojiUserNameProcessor->executeTask(
                 [&](auto const& senderId) {
-                    return _persisterFacade->scheduleGetUserNamesForReaction(
+                    return PersisterFacadeProvider::getPersisterFacade()->scheduleGetUserNamesForReaction(
                         SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = false},
                         GetUserNamesForReactionRequestData{.resourceId = resourceId, .emojiType = emojiType});
                 },
                 [&](auto const& requestId) {
-                    auto data = _persisterFacade->fetchGetUserNamesForReactionData(requestId);
+                    auto data = PersisterFacadeProvider::getPersisterFacade()->fetchGetUserNamesForReactionData(requestId);
                     _userNamesByEmojiTypeBySimIdCache.emplace(std::make_pair(data.resourceId, data.emojiType), data.userNames);
                 },
                 [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });

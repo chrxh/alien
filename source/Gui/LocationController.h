@@ -9,7 +9,7 @@
 #include "LocationWindow.h"
 #include "MainLoopEntity.h"
 
-class LocationController : public MainLoopEntity<SimulationFacade>
+class LocationController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(LocationController);
 
@@ -19,11 +19,9 @@ public:
     void remapLocationIndices(std::map<int, int> const& newByOldOrderNumber);
 
 private:
-    void init(SimulationFacade simulationFacade) override;
+    void init() override;
     void process() override;
     void shutdown() override {}
-
-    SimulationFacade _simulationFacade;
 
     std::vector<LocationWindow> _locationWindows;
     std::optional<int> _sessionId;

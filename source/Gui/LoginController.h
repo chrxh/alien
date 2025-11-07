@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class LoginController : public MainLoopEntity<SimulationFacade, PersisterFacade>
+class LoginController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(LoginController);
 
@@ -33,12 +33,9 @@ public:
     UserInfo getUserInfo();
 
 private:
-    void init(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
+    void init() override;
     void process() override;
     void shutdown() override;
-
-    SimulationFacade _simulationFacade;
-    PersisterFacade _persisterFacade;
 
     TaskProcessor _taskProcessor;
 

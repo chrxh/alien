@@ -8,17 +8,18 @@
 
 #include "SimulationInteractionController.h"
 #include "SpecificationGuiService.h"
+#include "SimulationFacadeProvider.h"
 
 void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulationFacade, int orderNumber)
 {
-    _simulationFacade = simulationFacade;
+
     _orderNumber = orderNumber;
 }
 
 void _SimulationParametersSourceWidgets::process(ParametersFilter const& filter)
 {
-    auto parameters = _simulationFacade->getSimulationParameters();
-    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+    auto parameters = SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters();
+    auto origParameters = SimulationFacadeProvider::getSimulationFacade()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
     auto sourceIndex = LocationHelper::findLocationArrayIndex(parameters, _orderNumber);
@@ -26,13 +27,13 @@ void _SimulationParametersSourceWidgets::process(ParametersFilter const& filter)
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 
     ImGui::PushID("Source");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, _orderNumber, filter);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, SimulationFacadeProvider::getSimulationFacade(), _orderNumber, filter);
     ImGui::PopID();
 
     if (parameters != lastParameters) {
-        ParametersValidationService::get().validateAndCorrect({_simulationFacade->getWorldSize()}, parameters);
-        auto isRunning = _simulationFacade->isSimulationRunning();
-        _simulationFacade->setSimulationParameters(
+        ParametersValidationService::get().validateAndCorrect({SimulationFacadeProvider::getSimulationFacade()->getWorldSize()}, parameters);
+        auto isRunning = SimulationFacadeProvider::getSimulationFacade()->isSimulationRunning();
+        SimulationFacadeProvider::getSimulationFacade()->setSimulationParameters(
             parameters, isRunning ? SimulationParametersUpdateConfig::AllExceptChangingPositions : SimulationParametersUpdateConfig::All);
     }
 }

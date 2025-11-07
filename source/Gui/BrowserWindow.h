@@ -20,7 +20,7 @@
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 
-class BrowserWindow : public AlienWindow<SimulationFacade, PersisterFacade>
+class BrowserWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 
@@ -33,7 +33,7 @@ public:
 private:
     BrowserWindow();
 
-    void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
 
     struct WorkspaceId
@@ -145,6 +145,4 @@ private:
 
     DownloadCache _downloadCache;
 
-    SimulationFacade _simulationFacade;
-    PersisterFacade _persisterFacade;
 };

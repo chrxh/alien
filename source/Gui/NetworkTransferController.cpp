@@ -13,17 +13,18 @@
 #include "OverlayController.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
+#include "SimulationFacadeProvider.h"
+#include "PersisterFacadeProvider.h"
 
-void NetworkTransferController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
+void NetworkTransferController::init()
 {
-    _simulationFacade = simulationFacade;
-    _persisterFacade = persisterFacade;
-    _downloadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _uploadProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _replaceProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _deleteProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _editProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
-    _moveProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    _downloadProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _uploadProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _replaceProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _deleteProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _editProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
+    _moveProcessor = _TaskProcessor::createTaskProcessor(PersisterFacadeProvider::getPersisterFacade());
 }
 
 void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData const& requestData)
@@ -32,25 +33,25 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
 
     _downloadProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleDownloadNetworkResource(
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleDownloadNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            auto data = _persisterFacade->fetchDownloadNetworkResourcesData(requestId);
+            auto data = PersisterFacadeProvider::getPersisterFacade()->fetchDownloadNetworkResourcesData(requestId);
 
             if (data.resourceType == NetworkResourceType_Simulation) {
-                _persisterFacade->shutdown();
-                _simulationFacade->closeSimulation();
+                PersisterFacadeProvider::getPersisterFacade()->shutdown();
+                SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
                 std::optional<std::string> errorMessage;
                 auto const& deserializedSimulation = std::get<DeserializedSimulation>(data.resourceData);
                 try {
-                    _simulationFacade->newSimulation(
+                    SimulationFacadeProvider::getSimulationFacade()->newSimulation(
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
-                    _simulationFacade->setRealTime(deserializedSimulation.auxiliaryData.realTime);
-                    _simulationFacade->setSimulationData(deserializedSimulation.mainData);
-                    _simulationFacade->setStatisticsHistory(deserializedSimulation.statistics);
+                    SimulationFacadeProvider::getSimulationFacade()->setRealTime(deserializedSimulation.auxiliaryData.realTime);
+                    SimulationFacadeProvider::getSimulationFacade()->setSimulationData(deserializedSimulation.mainData);
+                    SimulationFacadeProvider::getSimulationFacade()->setStatisticsHistory(deserializedSimulation.statistics);
                 } catch (CudaMemoryAllocationException const& exception) {
                     errorMessage = exception.what();
                 } catch (...) {
@@ -58,13 +59,13 @@ void NetworkTransferController::onDownload(DownloadNetworkResourceRequestData co
                 }
                 if (errorMessage) {
                     showMessage("Error", *errorMessage);
-                    _simulationFacade->closeSimulation();
-                    _simulationFacade->newSimulation(
+                    SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
+                    SimulationFacadeProvider::getSimulationFacade()->newSimulation(
                         deserializedSimulation.auxiliaryData.timestep,
                         deserializedSimulation.auxiliaryData.worldSize,
                         deserializedSimulation.auxiliaryData.simulationParameters);
                 }
-                _persisterFacade->restart();
+                PersisterFacadeProvider::getPersisterFacade()->restart();
 
                 Viewport::get().setCenterInWorldPos(deserializedSimulation.auxiliaryData.center);
                 Viewport::get().setZoomFactor(deserializedSimulation.auxiliaryData.zoom);
@@ -96,11 +97,11 @@ void NetworkTransferController::onUpload(UploadNetworkResourceRequestData const&
 
     _uploadProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleUploadNetworkResource(
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleUploadNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterFacade->fetchUploadNetworkResourcesData(requestId);
+            PersisterFacadeProvider::getPersisterFacade()->fetchUploadNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
@@ -112,11 +113,11 @@ void NetworkTransferController::onReplace(ReplaceNetworkResourceRequestData cons
 
     _replaceProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleReplaceNetworkResource(
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleReplaceNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterFacade->fetchReplaceNetworkResourcesData(requestId);
+            PersisterFacadeProvider::getPersisterFacade()->fetchReplaceNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
@@ -128,11 +129,11 @@ void NetworkTransferController::onDelete(DeleteNetworkResourceRequestData const&
 
     _deleteProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleDeleteNetworkResource(
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleDeleteNetworkResource(
                 SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterFacade->fetchDeleteNetworkResourcesData(requestId);
+            PersisterFacadeProvider::getPersisterFacade()->fetchDeleteNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
@@ -144,10 +145,10 @@ void NetworkTransferController::onEdit(EditNetworkResourceRequestData const& req
 
     _editProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleEditNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleEditNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterFacade->fetchEditNetworkResourcesData(requestId);
+            PersisterFacadeProvider::getPersisterFacade()->fetchEditNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });
@@ -159,10 +160,10 @@ void NetworkTransferController::onMove(MoveNetworkResourceRequestData const& req
 
     _moveProcessor->executeTask(
         [&](auto const& senderId) {
-            return _persisterFacade->scheduleMoveNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
+            return PersisterFacadeProvider::getPersisterFacade()->scheduleMoveNetworkResource(SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true}, requestData);
         },
         [&](auto const& requestId) {
-            _persisterFacade->fetchMoveNetworkResourcesData(requestId);
+            PersisterFacadeProvider::getPersisterFacade()->fetchMoveNetworkResourcesData(requestId);
             BrowserWindow::get().onRefresh();
         },
         [](auto const& errors) { GenericMessageDialog::get().information("Error", errors); });

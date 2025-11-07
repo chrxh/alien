@@ -17,7 +17,6 @@ public:
     void setOrderNumber(int orderNumber) override;
 
 private:
-    SimulationFacade _simulationFacade;
 
     int _orderNumber = 0;
     std::string _sourceName;

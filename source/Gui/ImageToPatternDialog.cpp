@@ -20,11 +20,11 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
+#include "SimulationFacadeProvider.h"
 
 
-void ImageToPatternDialog::init(SimulationFacade simulationFacade)
+void ImageToPatternDialog::init()
 {
-    _simulationFacade = simulationFacade;
 
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -117,7 +117,7 @@ void ImageToPatternDialog::show()
         DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
         DescriptionEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
-        _simulationFacade->addAndSelectSimulationData(std::move(dataDesc));
+        SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(dataDesc));
         //TODO: update pattern editor
     });
 }

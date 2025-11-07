@@ -15,7 +15,6 @@ public:
     void setOrderNumber(int orderNumber) override;
 
 private:
-    SimulationFacade _simulationFacade;
 
     int _orderNumber = 0;
     std::vector<std::string> _cellTypeStrings;

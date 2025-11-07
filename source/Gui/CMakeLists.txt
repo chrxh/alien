@@ -113,6 +113,8 @@ PUBLIC
     OverlayController.h
     PatternEditorWindow.cpp
     PatternEditorWindow.h
+    PersisterFacadeProvider.cpp
+    PersisterFacadeProvider.h
     PreviewWidget.cpp
     PreviewWidget.h
     RenderPipeline.cpp
@@ -127,6 +129,8 @@ PUBLIC
     SelectionWindow.h
     Shader.cpp
     Shader.h
+    SimulationFacadeProvider.cpp
+    SimulationFacadeProvider.h
     SimulationInteractionController.cpp
     SimulationInteractionController.h
     SimulationParametersBaseWidget.cpp

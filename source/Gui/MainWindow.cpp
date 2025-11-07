@@ -65,6 +65,7 @@
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
+#include "PersisterFacadeProvider.h"
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
 #include "SimulationFacadeProvider.h"
@@ -97,9 +98,8 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(PersisterFacade const& persisterFacade, GuiLogger const& logger)
+_MainWindow::_MainWindow(GuiLogger const& logger)
     : _logger(logger)
-    , _persisterFacade(persisterFacade)
 {
     IMGUI_CHECKVERSION();
 
@@ -114,7 +114,7 @@ _MainWindow::_MainWindow(PersisterFacade const& persisterFacade, GuiLogger const
     NetworkService::get().setup();
 
     log(Priority::Important, "initialize facades");
-    _persisterFacade->setup(SimulationFacadeProvider::getSimulationFacade());
+    PersisterFacadeProvider::getPersisterFacade()->setup(SimulationFacadeProvider::getSimulationFacade());
 
     log(Priority::Important, "initialize main loop elements");
     Viewport::get().setup();
@@ -127,23 +127,23 @@ _MainWindow::_MainWindow(PersisterFacade const& persisterFacade, GuiLogger const
     SimulationParametersMainWindow::get().setup();
     LocationController::get().setup();
     GpuSettingsDialog::get().setup();
-    MainLoopController::get().setup(_persisterFacade);
+    MainLoopController::get().setup();
     ExitDialog::get().setup();
     MassOperationsDialog::get().setup();
     LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
     NewSimulationDialog::get().setup();
-    BrowserWindow::get().setup(_persisterFacade);
+    BrowserWindow::get().setup();
     ActivateUserDialog::get().setup();
     NewPasswordDialog::get().setup();
-    LoginDialog::get().setup(_persisterFacade);
+    LoginDialog::get().setup();
     UploadSimulationDialog::get().setup();
     ImageToPatternDialog::get().setup();
-    AutosaveWindow::get().setup(_persisterFacade);
-    OverlayController::get().setup(_persisterFacade);
-    FileTransferController::get().setup(_persisterFacade);
-    NetworkTransferController::get().setup(_persisterFacade);
-    LoginController::get().setup(_persisterFacade);
+    AutosaveWindow::get().setup();
+    OverlayController::get().setup();
+    FileTransferController::get().setup();
+    NetworkTransferController::get().setup();
+    LoginController::get().setup();
     AboutDialog::get().setup();
     CreateUserDialog::get().setup();
     DeleteUserDialog::get().setup();
@@ -184,7 +184,7 @@ void _MainWindow::shutdown()
     glfwDestroyWindow(WindowController::get().getWindowData().window);
     glfwTerminate();
 
-    _persisterFacade->shutdown();
+    PersisterFacadeProvider::getPersisterFacade()->shutdown();
     SimulationFacadeProvider::getSimulationFacade()->closeSimulation();
 
     NetworkService::get().shutdown();

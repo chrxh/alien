@@ -19,6 +19,7 @@
 #include "NetworkTransferController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "SimulationFacadeProvider.h"
 
 namespace
 {
@@ -32,9 +33,8 @@ namespace
         {NetworkResourceType_Genome, "Genome"}};
 }
 
-void UploadSimulationDialog::initIntern(SimulationFacade simulationFacade)
+void UploadSimulationDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
 
     auto& settings = GlobalSettings::get();
     _share = settings.getValue("dialogs.upload.share", _share);

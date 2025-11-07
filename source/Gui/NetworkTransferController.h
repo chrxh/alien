@@ -16,7 +16,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class NetworkTransferController : public MainLoopEntity<SimulationFacade, PersisterFacade>
+class NetworkTransferController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(NetworkTransferController);
 
@@ -29,12 +29,9 @@ public:
     void onMove(MoveNetworkResourceRequestData const& requestData);
 
 private:
-    void init(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
+    void init() override;
     void process() override;
     void shutdown() override {}
-
-    SimulationFacade _simulationFacade;
-    PersisterFacade _persisterFacade;
 
     TaskProcessor _downloadProcessor;
     TaskProcessor _uploadProcessor;

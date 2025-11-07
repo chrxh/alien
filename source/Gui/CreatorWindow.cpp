@@ -1,4 +1,5 @@
 #include "CreatorWindow.h"
+#include "SimulationFacadeProvider.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -38,9 +39,8 @@ namespace
     auto const RightColumnWidth = 160.0f;
 }
 
-void CreatorWindow::initIntern(SimulationFacade simulationFacade)
+void CreatorWindow::initIntern()
 {
-    _simulationFacade = simulationFacade;
 }
 
 void CreatorWindow::processIntern()
@@ -175,7 +175,7 @@ void CreatorWindow::onDrawing()
     auto mousePos = ImGui::GetMousePos();
     auto pos = Viewport::get().mapViewToWorldPosition({mousePos.x, mousePos.y});
     if (!_drawingDescription.isEmpty()) {
-        _simulationFacade->removeSelectedObjects(false);
+        SimulationFacadeProvider::getSimulationFacade()->removeSelectedObjects(false);
     }
 
     auto createAlignedCircle = [&](auto pos) {
@@ -196,7 +196,7 @@ void CreatorWindow::onDrawing()
 
     if (_drawingDescription.isEmpty()) {
         DescriptionEditService::get().addIfSpaceAvailable(
-            _drawingDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, _simulationFacade->getWorldSize());
+            _drawingDescription, _drawingOccupancy, createAlignedCircle(pos), 0.5f, SimulationFacadeProvider::getSimulationFacade()->getWorldSize());
         _lastDrawPos = pos;
     } else {
         auto posDelta = Math::length(pos - _lastDrawPos);
@@ -205,15 +205,15 @@ void CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, toAdd, 0.5f, _simulationFacade->getWorldSize());
+                DescriptionEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, toAdd, 0.5f, SimulationFacadeProvider::getSimulationFacade()->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
     }
     DescriptionEditService::get().reconnectCells(_drawingDescription, 1.5f);
-    _simulationFacade->addAndSelectSimulationData(Description(_drawingDescription));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(Description(_drawingDescription));
 
-    _simulationFacade->reconnectSelectedObjects();
+    SimulationFacadeProvider::getSimulationFacade()->reconnectSelectedObjects();
     EditorModel::get().update();
 }
 
@@ -238,7 +238,7 @@ void CreatorWindow::createCell()
                     .sticky(_makeSticky);
     Description description;
     description._cells.emplace_back(cell);
-    _simulationFacade->addAndSelectSimulationData(std::move(description));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createParticle()
@@ -246,7 +246,7 @@ void CreatorWindow::createParticle()
     auto particle = ParticleDescription().pos(getRandomPos()).energy(_energy);
     Description description;
     description._particles.emplace_back(particle);
-    _simulationFacade->addAndSelectSimulationData(std::move(description));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createRectangle()
@@ -266,7 +266,7 @@ void CreatorWindow::createRectangle()
                                                                     .center(getRandomPos())
                                                                     .barrier(_barrier));
 
-    _simulationFacade->addAndSelectSimulationData(std::move(description));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createHexagon()
@@ -283,7 +283,7 @@ void CreatorWindow::createHexagon()
                                                                           .color(EditorModel::get().getDefaultColorCode())
                                                                           .center(getRandomPos())
                                                                           .barrier(_barrier));
-    _simulationFacade->addAndSelectSimulationData(std::move(description));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::createDisc()
@@ -319,7 +319,7 @@ void CreatorWindow::createDisc()
 
     DescriptionEditService::get().reconnectCells(description, _cellDistance * 1.7f);
     DescriptionEditService::get().setCenter(description, getRandomPos());
-    _simulationFacade->addAndSelectSimulationData(std::move(description));
+    SimulationFacadeProvider::getSimulationFacade()->addAndSelectSimulationData(std::move(description));
 }
 
 void CreatorWindow::validateAndCorrect()

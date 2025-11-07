@@ -11,7 +11,7 @@ struct CompilationResult;
 class _InspectorWindow
 {
 public:
-    _InspectorWindow(SimulationFacade const& simulationFacade, uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab);
+    _InspectorWindow(uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab);
     ~_InspectorWindow();
 
     void process();
@@ -47,8 +47,6 @@ private:
     float calcWindowWidth() const;
 
     void validateAndCorrect(CellDescription& cell) const;
-
-    SimulationFacade _simulationFacade;
 
     RealVector2D _initialPos;
 

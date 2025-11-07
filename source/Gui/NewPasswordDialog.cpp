@@ -9,10 +9,11 @@
 #include "AlienGui.h"
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
+#include "SimulationFacadeProvider.h"
 
-void NewPasswordDialog::initIntern(SimulationFacade simulationFacade)
+void NewPasswordDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
+
 }
 
 void NewPasswordDialog::open(std::string const& userName, UserInfo const& userInfo)

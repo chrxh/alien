@@ -14,7 +14,7 @@ class SimulationView
     MAKE_SINGLETON(SimulationView);
 
 public:
-    void setup(SimulationFacade const& simulationFacade);
+    void setup();
     void shutdown();
 
     void resize(IntVector2D const& viewportSize);
@@ -47,8 +47,6 @@ private:
     void setupRenderPipeline();
 
     void markReferenceDomain();
-
-    SimulationFacade _simulationFacade;
 
     // Widgets
     SimulationScrollbars _scrollbars;

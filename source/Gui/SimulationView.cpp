@@ -19,10 +19,10 @@
 #include "SimulationScrollbars.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include "SimulationFacadeProvider.h"
 
-void SimulationView::setup(SimulationFacade const& simulationFacade)
+void SimulationView::setup()
 {
-    _simulationFacade = simulationFacade;
 
     _cellDetailOverlayActive = GlobalSettings::get().getValue("settings.simulation view.overlay", _cellDetailOverlayActive);
     _brightness = GlobalSettings::get().getValue("windows.simulation view.brightness", _brightness);
@@ -56,7 +56,7 @@ void SimulationView::draw()
     if (_renderSimulation) {
         _renderPipeline->execute();
 
-        if (_simulationFacade->getSimulationParameters().markReferenceDomain.value) {
+        if (SimulationFacadeProvider::getSimulationFacade()->getSimulationParameters().markReferenceDomain.value) {
             markReferenceDomain();
         }
 
@@ -101,7 +101,7 @@ void SimulationView::processSimulationScrollbars()
         auto mainMenubarHeight = scale(22);
 
         auto worldCenter = Viewport::get().getCenterInWorldPos();
-        auto worldRect = RealRect{{0, 0}, toRealVector2D(_simulationFacade->getWorldSize())};
+        auto worldRect = RealRect{{0, 0}, toRealVector2D(SimulationFacadeProvider::getSimulationFacade()->getWorldSize())};
         auto visibleWorldRect = Viewport::get().getVisibleWorldRect();
         auto viewRect =
             RealRect{{viewport->Pos.x, viewport->Pos.y + mainMenubarHeight}, {viewport->Pos.x + viewport->Size.x, viewport->Pos.y + viewport->Size.y}};
@@ -224,7 +224,6 @@ void SimulationView::setupRenderPipeline()
 
     // Define render pipeline
     _renderPipeline = std::make_shared<_RenderPipeline>(
-        _simulationFacade,
         RenderBlocks{
 
             // Render block: Render energy particles
@@ -395,7 +394,7 @@ void SimulationView::markReferenceDomain()
 {
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     auto p1 = Viewport::get().mapWorldToViewPosition({0, 0}, false);
-    auto worldSize = _simulationFacade->getWorldSize();
+    auto worldSize = SimulationFacadeProvider::getSimulationFacade()->getWorldSize();
     auto p2 = Viewport::get().mapWorldToViewPosition(toRealVector2D(worldSize), false);
     auto color = ImColor::HSV(0.66f, 1.0f, 1.0f, 0.8f);
     auto color2 = ImColor::HSV(0, 0, 0, 0.8f);
