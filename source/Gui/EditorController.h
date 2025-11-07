@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class EditorController : public MainLoopEntity<SimulationFacade>
+class EditorController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(EditorController);
 
@@ -39,13 +39,11 @@ public:
     void onAccelerateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos);
 
 private:
-    void init(SimulationFacade simulationFacade) override;
+    void init() override;
     void process() override;
     void shutdown() override {}
 
     void processInspectorWindows();
-
-    SimulationFacade _simulationFacade;
 
     bool _on = false;
 
