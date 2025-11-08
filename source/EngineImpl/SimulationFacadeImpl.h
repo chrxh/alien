@@ -15,6 +15,8 @@
 class _SimulationFacadeImpl : public _SimulationFacade
 {
 public:
+    static void set(SimulationFacade const& instance);
+
     void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters) override;
     int getSessionId() const override;
 

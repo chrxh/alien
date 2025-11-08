@@ -9,7 +9,11 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineImpl/SimulationFacadeImpl.h>
+
 #include <PersisterInterface/SerializerService.h>
+
+#include <PersisterImpl/PersisterFacadeImpl.h>
 
 #include "GuiLogger.h"
 #include "HelpStrings.h"
@@ -41,6 +45,8 @@ int main(int argc, char** argv)
     try {
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
 
+        _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
+        _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());
         StartupCheckService::get().check(_SimulationFacade::get());
 
         mainWindow = std::make_shared<_MainWindow>(logger);

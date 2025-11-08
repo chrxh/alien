@@ -17,8 +17,6 @@ class _SimulationFacade
 public:
     virtual ~_SimulationFacade() = default;
 
-    // Static getter/setter for dependency injection
-    static void set(SimulationFacade const& instance);
     static SimulationFacade get();
 
     virtual void newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& simulationParameters) = 0;
@@ -122,6 +120,6 @@ public:
     virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
     virtual bool testOnly_areArraysValid() = 0;
 
-private:
+protected:
     static SimulationFacade _instance;
 };

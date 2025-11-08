@@ -12,6 +12,8 @@
 class _PersisterFacadeImpl : public _PersisterFacade
 {
 public:
+    static void set(PersisterFacade const& instance);
+
     ~_PersisterFacadeImpl() override;
 
     void setup(SimulationFacade const& simulationFacade) override;

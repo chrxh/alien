@@ -3,6 +3,11 @@
 #include <EngineInterface/Description.h>
 #include <EngineInterface/GeometryBuffers.h>
 
+void _SimulationFacadeImpl::set(SimulationFacade const& instance)
+{
+    _instance = instance;
+}
+
 void _SimulationFacadeImpl::newSimulation(uint64_t timestep, IntVector2D const& worldSize, SimulationParameters const& parameters)
 {
     _worldSize = worldSize;

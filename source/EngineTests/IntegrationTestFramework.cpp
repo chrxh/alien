@@ -9,9 +9,11 @@
 
 #include <EngineTestData/DescriptionTestDataFactory.h>
 
+#include <EngineImpl/SimulationFacadeImpl.h>
+
 IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
 {
-    _simulationFacade = _SimulationFacade::get();
+    _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
     SimulationParameters parameters;
     for (int i = 0; i < MAX_COLORS; ++i) {
         parameters.radiationType1_strength.baseValue[i] = 0;

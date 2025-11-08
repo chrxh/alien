@@ -11,6 +11,8 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineImpl/SimulationFacadeImpl.h>
+
 #include <PersisterInterface/SerializerService.h>
 
 int main(int argc, char** argv)
@@ -49,7 +51,7 @@ int main(int argc, char** argv)
         //run simulation
         auto startTimepoint = std::chrono::steady_clock::now();
 
-        auto simulationFacade = _SimulationFacade::get();
+        auto simulationFacade = std::make_shared<_SimulationFacadeImpl>();
         simulationFacade->newSimulation(simData.auxiliaryData.timestep, simData.auxiliaryData.worldSize, simData.auxiliaryData.simulationParameters);
         simulationFacade->setSimulationData(simData.mainData);
         simulationFacade->setStatisticsHistory(simData.statistics);

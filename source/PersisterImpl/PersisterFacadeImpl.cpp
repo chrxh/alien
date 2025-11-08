@@ -5,6 +5,11 @@
 #include <PersisterInterface/DeserializedSimulation.h>
 #include <PersisterInterface/PersisterRequestResult.h>
 
+void _PersisterFacadeImpl::set(PersisterFacade const& instance)
+{
+    _instance = instance;
+}
+
 _PersisterFacadeImpl::~_PersisterFacadeImpl()
 {
     shutdown();
