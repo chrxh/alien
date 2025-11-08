@@ -15,9 +15,9 @@ _PersisterFacadeImpl::~_PersisterFacadeImpl()
     shutdown();
 }
 
-void _PersisterFacadeImpl::setup(SimulationFacade const& simulationFacade)
+void _PersisterFacadeImpl::setup()
 {
-    _worker = std::make_shared<_PersisterWorker>(simulationFacade);
+    _worker = std::make_shared<_PersisterWorker>();
     restart();
 }
 

@@ -16,7 +16,7 @@ public:
 
     ~_PersisterFacadeImpl() override;
 
-    void setup(SimulationFacade const& simulationFacade) override;
+    void setup() override;
     void shutdown() override;
     void restart() override;
 

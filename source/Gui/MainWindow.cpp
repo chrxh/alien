@@ -118,7 +118,7 @@ _MainWindow::_MainWindow()
     NetworkService::get().setup();
 
     log(Priority::Important, "initialize facades");
-    _PersisterFacade::get()->setup(_SimulationFacade::get());
+    _PersisterFacade::get()->setup();
 
     log(Priority::Important, "initialize main loop elements");
     Viewport::get().setup();

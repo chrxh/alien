@@ -16,8 +16,7 @@
 #include <PersisterInterface/PersisterRequestResult.h>
 #include <PersisterInterface/SerializerService.h>
 
-_PersisterWorker::_PersisterWorker(SimulationFacade const& simulationFacade)
-    : _simulationFacade(simulationFacade)
+_PersisterWorker::_PersisterWorker()
 {}
 
 void _PersisterWorker::runThreadLoop()
@@ -209,14 +208,14 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
 
     try {
         timestamp = std::chrono::system_clock::now();
-        deserializedData.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-        deserializedData.auxiliaryData.realTime = _simulationFacade->getRealTime();
+        deserializedData.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
+        deserializedData.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
         deserializedData.auxiliaryData.zoom = requestData.zoom;
         deserializedData.auxiliaryData.center = requestData.center;
-        deserializedData.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-        deserializedData.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-        deserializedData.mainData = _simulationFacade->getSimulationData();
+        deserializedData.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
+        deserializedData.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+        deserializedData.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+        deserializedData.mainData = _SimulationFacade::get()->getSimulationData();
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
             request->getRequestId(),
@@ -262,12 +261,12 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, ReadSi
         }
         if (requestData.initSimulation) {
             try {
-                _simulationFacade->closeSimulation();
-                _simulationFacade->newSimulation(
+                _SimulationFacade::get()->closeSimulation();
+                _SimulationFacade::get()->newSimulation(
                     deserializedData.auxiliaryData.timestep, deserializedData.auxiliaryData.worldSize, deserializedData.auxiliaryData.simulationParameters);
-                _simulationFacade->setSimulationData(deserializedData.mainData);
-                _simulationFacade->setStatisticsHistory(deserializedData.statistics);
-                _simulationFacade->setRealTime(deserializedData.auxiliaryData.realTime);
+                _SimulationFacade::get()->setSimulationData(deserializedData.mainData);
+                _SimulationFacade::get()->setStatisticsHistory(deserializedData.statistics);
+                _SimulationFacade::get()->setRealTime(deserializedData.auxiliaryData.realTime);
             } catch (CudaMemoryAllocationException const& exception) {
                 return std::make_shared<_PersisterRequestError>(
                     request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{exception.what()});
@@ -402,14 +401,14 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<UploadNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-            deserializedSim.auxiliaryData.realTime = _simulationFacade->getRealTime();
+            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+            deserializedSim.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-            deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-            deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simulationFacade->getSimulationData();
+            deserializedSim.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
+            deserializedSim.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+            deserializedSim.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
+            deserializedSim.mainData = _SimulationFacade::get()->getSimulationData();
         } catch (...) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
@@ -491,14 +490,14 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     if (resourceType == NetworkResourceType_Simulation) {
         try {
             auto simulationData = std::get<ReplaceNetworkResourceRequestData::SimulationData>(requestData.data);
-            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-            deserializedSim.auxiliaryData.realTime = _simulationFacade->getRealTime();
+            deserializedSim.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+            deserializedSim.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
             deserializedSim.auxiliaryData.zoom = simulationData.zoom;
             deserializedSim.auxiliaryData.center = simulationData.center;
-            deserializedSim.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-            deserializedSim.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-            deserializedSim.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-            deserializedSim.mainData = _simulationFacade->getSimulationData();
+            deserializedSim.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
+            deserializedSim.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+            deserializedSim.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
+            deserializedSim.mainData = _SimulationFacade::get()->getSimulationData();
         } catch (...) {
             return std::make_shared<_PersisterRequestError>(
                 request->getRequestId(),
@@ -642,18 +641,18 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         //auto peakStatistics = requestData.peakDeserializedSimulation->getStatisticsRawData();
 
         DeserializedSimulation deserializedSimulation;
-        deserializedSimulation.statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-        //auto currentRawStatistics = _simulationFacade->getStatisticsRawData();
+        deserializedSimulation.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
+        //auto currentRawStatistics = _SimulationFacade::get()->getStatisticsRawData();
         //if (sumColorVector(currentRawStatistics.timeline.timestep.numCellsVariance)
         //    >= sumColorVector(peakStatistics.timeline.timestep.numCellsVariance)) {
 
-        //    deserializedSimulation.auxiliaryData.realTime = _simulationFacade->getRealTime();
+        //    deserializedSimulation.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
         //    deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
         //    deserializedSimulation.auxiliaryData.center = requestData.center;
-        //    deserializedSimulation.auxiliaryData.worldSize = _simulationFacade->getWorldSize();
-        //    deserializedSimulation.auxiliaryData.simulationParameters = _simulationFacade->getSimulationParameters();
-        //    deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-        //    deserializedSimulation.mainData = _simulationFacade->getSimulationData();
+        //    deserializedSimulation.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
+        //    deserializedSimulation.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
+        //    deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+        //    deserializedSimulation.mainData = _SimulationFacade::get()->getSimulationData();
         //    requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
         //    requestData.peakDeserializedSimulation->setLastStatisticsData(currentRawStatistics);
         //}

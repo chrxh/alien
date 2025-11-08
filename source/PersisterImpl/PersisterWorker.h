@@ -15,7 +15,7 @@
 class _PersisterWorker
 {
 public:
-    _PersisterWorker(SimulationFacade const& simulationFacade);
+    _PersisterWorker();
 
     void runThreadLoop();
     void shutdown();
@@ -48,8 +48,6 @@ private:
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, ToggleReactionNetworkResourceRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, GetPeakSimulationRequest const& request);
     PersisterRequestResultOrError processRequest(std::unique_lock<std::mutex>& lock, SaveDeserializedSimulationRequest const& request);
-
-    SimulationFacade _simulationFacade;
 
     std::atomic<bool> _isShutdown{false};
 

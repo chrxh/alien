@@ -49,7 +49,7 @@ public:
     static PersisterFacade get();
 
     //lifecycle control
-    virtual void setup(SimulationFacade const& simulationFacade) = 0;
+    virtual void setup() = 0;
     virtual void shutdown() = 0;
     virtual void restart() = 0;
 
