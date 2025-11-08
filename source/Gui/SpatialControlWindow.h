@@ -8,14 +8,14 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class SpatialControlWindow : public AlienWindow<SimulationFacade>
+class SpatialControlWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SpatialControlWindow);
 
 private:
     SpatialControlWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
     void processBackground() override;
@@ -26,8 +26,6 @@ private:
     void processResizeButton();
 
     void processCenterOnSelection();
-
-    SimulationFacade _simulationFacade;
 
     bool _centerSelection = false;
 };

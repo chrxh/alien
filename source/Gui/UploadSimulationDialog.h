@@ -9,7 +9,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class UploadSimulationDialog : public AlienDialog<SimulationFacade>
+class UploadSimulationDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(UploadSimulationDialog);
 
@@ -19,7 +19,7 @@ public:
 private:
     UploadSimulationDialog();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
 
@@ -35,5 +35,4 @@ private:
     NetworkResourceType _resourceType = NetworkResourceType_Simulation;
     bool _share = false;
 
-    SimulationFacade _simulationFacade;
 };

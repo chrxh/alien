@@ -166,7 +166,7 @@ _GenomeTabWidget::_GenomeTabWidget(
     _genomeEditorWidget = _GenomeEditorWidget::create(_editData, _layoutData);
     _geneEditorWidget = _GeneEditorWidget::create(_editData, _layoutData);
     _nodeEditorWidget = _NodeEditorWidget::create(_editData, _layoutData);
-    _simulatedPreviewWidget = _PreviewWidget::create(simulationFacade, genomeEditData, _editData);
+    _simulatedPreviewWidget = _PreviewWidget::create(genomeEditData, _editData);
     _specificEditData = specificEditData;
 }
 

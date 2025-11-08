@@ -8,14 +8,14 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class AutosaveWindow : public AlienWindow<SimulationFacade, PersisterFacade>
+class AutosaveWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(AutosaveWindow);
 
 private:
     AutosaveWindow();
 
-    void initIntern(SimulationFacade simulationFacade, PersisterFacade persisterFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
     void processBackground() override;
@@ -45,9 +45,6 @@ private:
     void updateSavepointTableFromFile();
     std::string getSavepointFilename() const;
     void validateAndCorrect();
-
-    SimulationFacade _simulationFacade;
-    PersisterFacade _persisterFacade;
 
     bool _settingsOpen = false;
     float _settingsHeight = scale(130.0f);

@@ -8,7 +8,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class GenomeEditorWindow : public AlienWindow<SimulationFacade>
+class GenomeEditorWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 
@@ -19,7 +19,7 @@ public:
 private:
     GenomeEditorWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
     bool isShown() override;
@@ -37,8 +37,6 @@ private:
     void pushStyleColorForTab(GenomeTabWidget const& creatureTab);
 
     GenomeDescription getDefaultGenome();
-
-    SimulationFacade _simulationFacade;
 
     GenomeWindowEditData _genomeEditData;
     std::vector<GenomeTabWidget> _tabs;

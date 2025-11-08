@@ -19,21 +19,20 @@
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
 #include "SelectionWindow.h"
+#include <EngineInterface/SimulationFacade.h>
 #include "StyleRepository.h"
 #include "Viewport.h"
 
 #include <GLFW/glfw3.h>
 
-void EditorController::init(SimulationFacade simulationFacade)
+void EditorController::init()
 {
-    _simulationFacade = simulationFacade;
-
     SelectionWindow::get().setup();
-    EditorModel::get().setup(_simulationFacade);
-    GenomeEditorWindow::get().setup(_simulationFacade);
-    PatternEditorWindow::get().setup(_simulationFacade);
-    CreatorWindow::get().setup(_simulationFacade);
-    MultiplierWindow::get().setup(_simulationFacade);
+    EditorModel::get().setup();
+    GenomeEditorWindow::get().setup();
+    PatternEditorWindow::get().setup();
+    CreatorWindow::get().setup();
+    MultiplierWindow::get().setup();
 }
 
 bool EditorController::isOn() const
@@ -56,7 +55,7 @@ void EditorController::process()
 
     EditorModel::get().setForceNoRollout(ImGui::GetIO().KeyShift);
 
-    if (_simulationFacade->updateSelectionIfNecessary()) {
+    if (_SimulationFacade::get()->updateSelectionIfNecessary()) {
         EditorModel::get().update();
     }
 }
@@ -74,7 +73,7 @@ void EditorController::onCloseAllInspectorWindows()
 
 void EditorController::onInspectSelectedObjects()
 {
-    Description selectedData = _simulationFacade->getSelectedSimulationData(false);
+    Description selectedData = _SimulationFacade::get()->getSelectedSimulationData(false);
     if (!onInspectObjects(DescriptionEditService::get().getObjects(selectedData), false)) {
         showMessage(
             "Inspection not possible",
@@ -84,7 +83,7 @@ void EditorController::onInspectSelectedObjects()
 
 void EditorController::onInspectSelectedGenomes()
 {
-    Description selectedData = _simulationFacade->getSelectedSimulationData(true);
+    Description selectedData = _SimulationFacade::get()->getSelectedSimulationData(true);
     auto constructors = DescriptionEditService::get().getCellsForCreatureRepresentatives(selectedData);
     if (constructors.size() > 1) {
         constructors = {constructors.front()};
@@ -117,7 +116,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
         filteredEntities = entities;
     }
 
-    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
+    auto borderlessRendering = _SimulationFacade::get()->getSimulationParameters().borderlessRendering.value;
 
     std::set<uint64_t> inspectedIds;
     for (auto const& inspectorWindow : _inspectorWindows) {
@@ -167,7 +166,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
         auto windowPosY = (entityPos.y - center.y) * factorY + center.y;
         windowPosX = std::min(std::max(windowPosX, 0.0f), toFloat(viewSize.x) - 300.0f) + 40.0f;
         windowPosY = std::min(std::max(windowPosY, 0.0f), toFloat(viewSize.y) - 500.0f) + 40.0f;
-        _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(_simulationFacade, id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
+        _inspectorWindows.emplace_back(std::make_shared<_InspectorWindow>(id, RealVector2D{windowPosX, windowPosY}, selectGenomeTab));
     }
     return true;
 }
@@ -236,7 +235,7 @@ void EditorController::processInspectorWindows()
         for (auto const& entity : inspectedEntities) {
             entityIds.emplace_back(DescriptionEditService::get().getId(entity));
         }
-        auto inspectedData = _simulationFacade->getInspectedSimulationData(entityIds);
+        auto inspectedData = _SimulationFacade::get()->getInspectedSimulationData(entityIds);
         auto newInspectedEntities = DescriptionEditService::get().getObjects(inspectedData);
         EditorModel::get().setInspectedEntities(newInspectedEntities);
         counter = 0;
@@ -256,9 +255,9 @@ void EditorController::onSelectObjects(RealVector2D const& viewPos, bool modifie
     auto pos = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = Viewport::get().getZoomFactor();
     if (!modifierKeyPressed) {
-        _simulationFacade->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
+        _SimulationFacade::get()->switchSelection(pos, std::max(0.5f, 10.0f / zoom));
     } else {
-        _simulationFacade->swapSelection(pos, std::max(0.5f, 10.0f / zoom));
+        _SimulationFacade::get()->swapSelection(pos, std::max(0.5f, 10.0f / zoom));
     }
 
     EditorModel::get().update();
@@ -275,13 +274,13 @@ void EditorController::onMoveSelectedObjects(RealVector2D const& viewPos, RealVe
     updateData.considerClusters = EditorModel::get().isRolloutToClusters();
     updateData.posDeltaX = delta.x;
     updateData.posDeltaY = delta.y;
-    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
     EditorModel::get().update();
 }
 
 void EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, RealVector2D const& prevWorldPos, RealVector2D const& selectionPositionOnClick)
 {
-    auto shallowData = _simulationFacade->getSelectionShallowData();
+    auto shallowData = _SimulationFacade::get()->getSelectionShallowData();
     auto selectionPosition = RealVector2D{shallowData.centerPosX, shallowData.centerPosY};
     auto selectionDelta = selectionPosition - selectionPositionOnClick;
 
@@ -290,13 +289,13 @@ void EditorController::onFixateSelectedObjects(RealVector2D const& viewPos, Real
     auto mouseDelta = mouseStart - mouseEnd;
 
     auto selectionCorrectionDelta = mouseDelta - selectionDelta;
-    auto worldSize = _simulationFacade->getWorldSize();
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
     if (Math::length(selectionCorrectionDelta) < std::min(worldSize.x, worldSize.y) / 2) {
         ShallowUpdateSelectionData updateData;
         updateData.considerClusters = true;
         updateData.posDeltaX = selectionCorrectionDelta.x;
         updateData.posDeltaY = selectionCorrectionDelta.y;
-        _simulationFacade->shallowUpdateSelectedObjects(updateData);
+        _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
     }
 }
 
@@ -310,7 +309,7 @@ void EditorController::onAccelerateSelectedObjects(RealVector2D const& viewPos, 
     updateData.considerClusters = true;
     updateData.velX = delta.x / 10;
     updateData.velY = delta.y / 10;
-    _simulationFacade->shallowUpdateSelectedObjects(updateData);
+    _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
 }
 
 void EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D const& prevWorldPos)
@@ -318,7 +317,7 @@ void EditorController::onApplyForces(RealVector2D const& viewPos, RealVector2D c
     auto start = prevWorldPos;
     auto end = Viewport::get().mapViewToWorldPosition({viewPos.x, viewPos.y});
     auto zoom = Viewport::get().getZoomFactor();
-    _simulationFacade->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
+    _SimulationFacade::get()->applyForce_async(start, end, (end - start) / 50.0 * std::min(5.0f, zoom), 20.0f / zoom);
 }
 
 void EditorController::onUpdateSelectionRect(RealRect const& rect)
@@ -328,6 +327,6 @@ void EditorController::onUpdateSelectionRect(RealRect const& rect)
     auto topLeft = RealVector2D{std::min(startPos.x, endPos.x), std::min(startPos.y, endPos.y)};
     auto bottomRight = RealVector2D{std::max(startPos.x, endPos.x), std::max(startPos.y, endPos.y)};
 
-    _simulationFacade->setSelection(topLeft, bottomRight);
+    _SimulationFacade::get()->setSelection(topLeft, bottomRight);
     EditorModel::get().update();
 }

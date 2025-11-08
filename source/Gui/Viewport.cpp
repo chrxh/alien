@@ -6,14 +6,14 @@
 
 #include <EngineInterface/SimulationFacade.h>
 
+#include <EngineInterface/SimulationFacade.h>
 #include "WindowController.h"
 
 #include <GLFW/glfw3.h>
 
-void Viewport::setup(SimulationFacade const& simulationFacade)
+void Viewport::setup()
 {
     _viewSize = WindowController::get().getStartupWindowSize();
-    _simulationFacade = simulationFacade;
 }
 
 float Viewport::getZoomFactor()
@@ -84,7 +84,8 @@ RealVector2D Viewport::mapViewToWorldPosition(RealVector2D const& viewPos)
 RealVector2D Viewport::mapWorldToViewPosition(RealVector2D worldPos, bool borderlessRendering)
 {
     if (borderlessRendering) {
-        auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
+        auto simulationFacade = _SimulationFacade::get();
+        auto worldSize = toRealVector2D(simulationFacade->getWorldSize());
         auto offset = _centerInWorldPos - worldSize / 2;
         worldPos.x = Math::modulo(worldPos.x - offset.x, worldSize.x) + offset.x;
         worldPos.y = Math::modulo(worldPos.y - offset.y, worldSize.y) + offset.y;

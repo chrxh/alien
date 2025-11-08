@@ -11,7 +11,7 @@
 class _MainWindow
 {
 public:
-    _MainWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, GuiLogger const& logger);
+    _MainWindow(GuiLogger const& logger);
     void mainLoop();
     void shutdown();
 
@@ -21,7 +21,4 @@ private:
     void initFileDialogs();
 
     GuiLogger _logger;
-
-    PersisterFacade _persisterFacade;
-    SimulationFacade _simulationFacade;
 };

@@ -9,7 +9,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class PatternEditorWindow : public AlienWindow<SimulationFacade>
+class PatternEditorWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(PatternEditorWindow);
 
@@ -27,7 +27,7 @@ public:
 private:
     PatternEditorWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
     bool isShown() override;
@@ -39,8 +39,6 @@ private:
     void onSetBarrier(bool value);
     bool colorButton(std::string id, uint32_t cellColor);
     bool hasSelectionChanged(SelectionShallowData const& selection) const;
-
-    SimulationFacade _simulationFacade;
 
     std::string _startingPath;
     float _angle = 0;

@@ -22,15 +22,16 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
     auto const RightColumnWidth = 120.0f;
 }
 
-void PatternEditorWindow::initIntern(SimulationFacade simulationFacade)
+void PatternEditorWindow::initIntern()
 {
-    _simulationFacade = simulationFacade;
+
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
         path = path.parent_path();
@@ -156,7 +157,7 @@ void PatternEditorWindow::processIntern()
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.posDeltaX = centerPosX - origCenterPosX;
             updateData.posDeltaY = centerPosY - origCenterPosY;
-            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
 
@@ -165,7 +166,7 @@ void PatternEditorWindow::processIntern()
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.velX = centerVelX;
             updateData.velY = centerVelY;
-            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
 
@@ -173,7 +174,7 @@ void PatternEditorWindow::processIntern()
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.angleDelta = _angle - origAngle;
-            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
 
@@ -181,7 +182,7 @@ void PatternEditorWindow::processIntern()
             ShallowUpdateSelectionData updateData;
             updateData.considerClusters = EditorModel::get().isRolloutToClusters();
             updateData.angularVel = _angularVel;
-            _simulationFacade->shallowUpdateSelectedObjects(updateData);
+            _SimulationFacade::get()->shallowUpdateSelectedObjects(updateData);
             EditorModel::get().update();
         }
         ImGui::EndDisabled();
@@ -189,43 +190,43 @@ void PatternEditorWindow::processIntern()
 
         AlienGui::Group(AlienGui::GroupParameters().text("Color"));
         if (colorButton("    ##color1", Const::IndividualCellColor1)) {
-            _simulationFacade->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(0, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(0);
         }
         ImGui::SameLine();
         if (colorButton("    ##color2", Const::IndividualCellColor2)) {
-            _simulationFacade->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(1, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(1);
         }
         ImGui::SameLine();
         if (colorButton("    ##color3", Const::IndividualCellColor3)) {
-            _simulationFacade->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(2, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(2);
         }
         ImGui::SameLine();
         if (colorButton("    ##color4", Const::IndividualCellColor4)) {
-            _simulationFacade->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(3, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(3);
         }
         ImGui::SameLine();
         if (colorButton("    ##color5", Const::IndividualCellColor5)) {
-            _simulationFacade->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(4, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(4);
         }
         ImGui::SameLine();
         if (colorButton("    ##color6", Const::IndividualCellColor6)) {
-            _simulationFacade->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(5, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(5);
         }
         ImGui::SameLine();
         if (colorButton("    ##color7", Const::IndividualCellColor7)) {
-            _simulationFacade->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->colorSelectedObjects(6, EditorModel::get().isRolloutToClusters());
             EditorModel::get().setDefaultColorCode(6);
         }
         AlienGui::Group(AlienGui::GroupParameters().text("Tools"));
         ImGui::BeginDisabled(EditorModel::get().isSelectionEmpty());
         if (ImGui::Button(ICON_FA_WIND)) {
-            _simulationFacade->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->uniformVelocitiesForSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         ImGui::EndDisabled();
         AlienGui::Tooltip("Make uniform velocities");
@@ -233,7 +234,7 @@ void PatternEditorWindow::processIntern()
         ImGui::SameLine();
         ImGui::BeginDisabled(EditorModel::get().isCellSelectionEmpty());
         if (ImGui::Button(ICON_FA_BALANCE_SCALE)) {
-            _simulationFacade->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
+            _SimulationFacade::get()->relaxSelectedObjects(EditorModel::get().isRolloutToClusters());
         }
         AlienGui::Tooltip("Release stresses");
 
@@ -295,7 +296,7 @@ void PatternEditorWindow::onOpenPattern()
         if (SerializerService::get().deserializeContentFromFile(content, firstFilename.string())) {
             auto center = Viewport::get().getCenterInWorldPos();
             DescriptionEditService::get().setCenter(content, center);
-            _simulationFacade->addAndSelectSimulationData(Description(content));
+            _SimulationFacade::get()->addAndSelectSimulationData(Description(content));
             EditorModel::get().update();
         } else {
             GenericMessageDialog::get().information("Open pattern", "The selected file could not be opened.");
@@ -310,7 +311,7 @@ void PatternEditorWindow::onSavePattern()
         auto firstFilenameCopy = firstFilename;
         _startingPath = firstFilenameCopy.remove_filename().string();
 
-        auto content = _simulationFacade->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
+        auto content = _SimulationFacade::get()->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
         if (!SerializerService::get().serializeContentToFile(firstFilename.string(), content)) {
             GenericMessageDialog::get().information("Save pattern", "The selected pattern could not be saved to the specified file.");
         }
@@ -334,7 +335,7 @@ bool PatternEditorWindow::isCopyingPossible() const
 
 void PatternEditorWindow::onCopy()
 {
-    _copiedSelection = _simulationFacade->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
+    _copiedSelection = _SimulationFacade::get()->getSelectedSimulationData(EditorModel::get().isRolloutToClusters());
 }
 
 bool PatternEditorWindow::isPastingPossible() const
@@ -347,7 +348,7 @@ void PatternEditorWindow::onPaste()
     auto description = *_copiedSelection;
     auto center = Viewport::get().getCenterInWorldPos();
     DescriptionEditService::get().setCenter(description, center);
-    _simulationFacade->addAndSelectSimulationData(std::move(description));
+    _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
     EditorModel::get().update();
 }
 
@@ -358,7 +359,7 @@ bool PatternEditorWindow::isDeletingPossible() const
 
 void PatternEditorWindow::onDelete()
 {
-    _simulationFacade->removeSelectedObjects(EditorModel::get().isRolloutToClusters());
+    _SimulationFacade::get()->removeSelectedObjects(EditorModel::get().isRolloutToClusters());
     EditorModel::get().update();
 }
 
@@ -373,17 +374,17 @@ void PatternEditorWindow::shutdownIntern()
 
 void PatternEditorWindow::onMakeSticky()
 {
-    _simulationFacade->makeSticky(EditorModel::get().isRolloutToClusters());
+    _SimulationFacade::get()->makeSticky(EditorModel::get().isRolloutToClusters());
 }
 
 void PatternEditorWindow::onRemoveStickiness()
 {
-    _simulationFacade->removeStickiness(EditorModel::get().isRolloutToClusters());
+    _SimulationFacade::get()->removeStickiness(EditorModel::get().isRolloutToClusters());
 }
 
 void PatternEditorWindow::onSetBarrier(bool value)
 {
-    _simulationFacade->setBarrier(value, EditorModel::get().isRolloutToClusters());
+    _SimulationFacade::get()->setBarrier(value, EditorModel::get().isRolloutToClusters());
 }
 
 bool PatternEditorWindow::colorButton(std::string id, uint32_t cellColor)

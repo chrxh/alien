@@ -42,7 +42,7 @@ using RenderBlocks = std::vector<RenderBlock>;
 class _RenderPipeline
 {
 public:
-    _RenderPipeline(SimulationFacade const& simulationFacade, RenderBlocks&& blocks);
+    _RenderPipeline(RenderBlocks&& blocks);
 
     void resize(IntVector2D const& size);
     void execute();
@@ -72,7 +72,6 @@ private:
         std::vector<RenderTarget> const& previousTargets,
         std::map<RenderTarget, TargetInfo>& usedTargets);
 
-    SimulationFacade _simulationFacade;
     RenderBlocks _blocks;
 
     GeometryBuffers _geometryBuffers;

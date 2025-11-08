@@ -12,12 +12,12 @@
 class _PreviewWidget
 {
 public:
-    static PreviewWidget create(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
+    static PreviewWidget create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void process();
 
 private:
-    _PreviewWidget(SimulationFacade const& simulationFacade, GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
+    _PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData);
 
     void createSubGenomesForPreview();
     void setupPreviewData(bool useCache = true);
@@ -39,7 +39,6 @@ private:
 
     std::vector<SubGenomeDescription> getSubGenomes() const;
 
-    SimulationFacade _simulationFacade;
     std::vector<CreaturePreviewWidget> _creatureWidgets;
 
     GenomeWindowEditData _genomeEditData;

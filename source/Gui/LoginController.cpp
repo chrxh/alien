@@ -14,12 +14,13 @@
 #include "BrowserWindow.h"
 #include "GenericMessageDialog.h"
 #include "MainLoopEntityController.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 
-void LoginController::init(SimulationFacade simulationFacade, PersisterFacade persisterFacade)
+void LoginController::init()
 {
-    _simulationFacade = simulationFacade;
-    _persisterFacade = persisterFacade;
-    _taskProcessor = _TaskProcessor::createTaskProcessor(_persisterFacade);
+
+    _taskProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
 
     auto& settings = GlobalSettings::get();
     _remember = settings.getValue("controller.login.remember", _remember);
@@ -42,7 +43,7 @@ void LoginController::onLogin()
     if (!_userName.empty()) {
         _taskProcessor->executeTask(
             [&](auto const& senderId) {
-                auto result = _persisterFacade->scheduleLogin(
+                auto result = _PersisterFacade::get()->scheduleLogin(
                     SenderInfo{.senderId = senderId, .wishResultData = true, .wishErrorInfo = true},
                     LoginRequestData{.userName = _userName, .password = _password, .userInfo = getUserInfo()});
                 if (!_remember) {
@@ -52,7 +53,7 @@ void LoginController::onLogin()
                 return result;
             },
             [&](auto const& requestId) {
-                auto const& data = _persisterFacade->fetchLoginData(requestId);
+                auto const& data = _PersisterFacade::get()->fetchLoginData(requestId);
                 if (data.unknownUser) {
                     auto& settings = GlobalSettings::get();
                     auto userName = settings.getValue("dialogs.login.user name", std::string());
@@ -126,7 +127,7 @@ UserInfo LoginController::getUserInfo()
 {
     UserInfo result;
     if (_shareGpuInfo) {
-        result.gpu = _simulationFacade->getGpuName();
+        result.gpu = _SimulationFacade::get()->getGpuName();
     }
     return result;
 }

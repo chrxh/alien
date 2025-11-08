@@ -12,7 +12,7 @@ class Viewport
     MAKE_SINGLETON(Viewport);
 
 public:
-    void setup(SimulationFacade const& simulationFacade);
+    void setup();
 
     float getZoomFactor();
     void setZoomFactor(float zoomFactor);
@@ -34,8 +34,6 @@ public:
     bool isVisible(RealVector2D const& viewPos);
 
 private:
-    SimulationFacade _simulationFacade;
-
     float _zoomFactor = 1.0f;
     float _zoomSensitivity = 1.07f;
     RealVector2D _centerInWorldPos;

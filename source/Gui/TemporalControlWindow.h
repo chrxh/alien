@@ -11,7 +11,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class TemporalControlWindow : public AlienWindow<SimulationFacade>
+class TemporalControlWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TemporalControlWindow);
 
@@ -21,7 +21,7 @@ public:
 private:
     TemporalControlWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern();
 
     void processTpsInfo();
@@ -47,8 +47,6 @@ private:
     void applySnapshot(Snapshot const& snapshot);
 
     void restorePosition(RealVector2D& position, RealVector2D const& velocity, RealVector2D const& origPosition, RealVector2D const& origVelocity);
-
-    SimulationFacade _simulationFacade;
 
     std::optional<Snapshot> _snapshot;
 

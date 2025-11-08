@@ -10,23 +10,24 @@
 
 #include "AlienGui.h"
 #include "SpecificationGuiService.h"
+#include <EngineInterface/SimulationFacade.h>
 
 void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFacade)
 {
-    _simulationFacade = simulationFacade;
+
 }
 
 void _SimulationParametersBaseWidget::process(ParametersFilter const& filter)
 {
-    auto parameters = _simulationFacade->getSimulationParameters();
-    auto origParameters = _simulationFacade->getOriginalSimulationParameters();
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _simulationFacade, 0, filter);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _SimulationFacade::get(), 0, filter);
 
     if (parameters != lastParameters) {
-        ParametersValidationService::get().validateAndCorrect({_simulationFacade->getWorldSize()}, parameters);
-        _simulationFacade->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
+        ParametersValidationService::get().validateAndCorrect({_SimulationFacade::get()->getWorldSize()}, parameters);
+        _SimulationFacade::get()->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
     }
 }
 

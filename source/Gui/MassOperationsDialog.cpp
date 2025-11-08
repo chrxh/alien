@@ -11,15 +11,16 @@
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
     auto constexpr RightColumnWidth = 120.0f;
 }
 
-void MassOperationsDialog::initIntern(SimulationFacade simulationFacade)
+void MassOperationsDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
+
 }
 
 void MassOperationsDialog::processIntern()
@@ -143,14 +144,14 @@ void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, boo
 
 void MassOperationsDialog::onExecute()
 {
-    auto timestep = static_cast<uint32_t>(_simulationFacade->getCurrentTimestep());
-    auto parameters = _simulationFacade->getSimulationParameters();
-    auto worldSize = _simulationFacade->getWorldSize();
+    auto timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
     auto content = [&] {
         if (_restrictToSelectedCreatures) {
-            return _simulationFacade->getSelectedSimulationData(true);
+            return _SimulationFacade::get()->getSelectedSimulationData(true);
         } else {
-            return _simulationFacade->getSimulationData();
+            return _SimulationFacade::get()->getSimulationData();
         }
     }();
 
@@ -183,12 +184,12 @@ void MassOperationsDialog::onExecute()
     }
 
     if (_restrictToSelectedCreatures) {
-        _simulationFacade->removeSelectedObjects(true);
-        _simulationFacade->addAndSelectSimulationData(std::move(content));
+        _SimulationFacade::get()->removeSelectedObjects(true);
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
     } else {
-        _simulationFacade->closeSimulation();
-        _simulationFacade->newSimulation(timestep, worldSize, parameters);
-        _simulationFacade->setSimulationData(content);
+        _SimulationFacade::get()->closeSimulation();
+        _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
+        _SimulationFacade::get()->setSimulationData(content);
     }
 }
 

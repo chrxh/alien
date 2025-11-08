@@ -3,6 +3,8 @@ add_library(PersisterImpl
     Definitions.h
     PersisterFacadeImpl.cpp
     PersisterFacadeImpl.h
+    PersisterFacadeRegistration.cpp
+    PersisterFacadeRegistration.h
     PersisterRequest.h
     PersisterRequestError.cpp
     PersisterRequestError.h

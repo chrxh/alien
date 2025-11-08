@@ -9,25 +9,25 @@
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
     auto const RightColumnWidth = 110.0f;
 }
 
-void GpuSettingsDialog::initIntern(SimulationFacade simulationFacade)
+void GpuSettingsDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
 
     CudaSettings gpuSettings;
     gpuSettings.numBlocks = GlobalSettings::get().getValue("settings.gpu.num blocks", gpuSettings.numBlocks);
 
-    _simulationFacade->setGpuSettings_async(gpuSettings);
+    _SimulationFacade::get()->setGpuSettings_async(gpuSettings);
 }
 
 void GpuSettingsDialog::shutdownIntern()
 {
-    auto gpuSettings = _simulationFacade->getGpuSettings();
+    auto gpuSettings = _SimulationFacade::get()->getGpuSettings();
     GlobalSettings::get().setValue("settings.gpu.num blocks", gpuSettings.numBlocks);
 }
 
@@ -37,8 +37,8 @@ GpuSettingsDialog::GpuSettingsDialog()
 
 void GpuSettingsDialog::processIntern()
 {
-    auto gpuSettings = _simulationFacade->getGpuSettings();
-    auto origGpuSettings = _simulationFacade->getOriginalGpuSettings();
+    auto gpuSettings = _SimulationFacade::get()->getGpuSettings();
+    auto origGpuSettings = _SimulationFacade::get()->getOriginalGpuSettings();
     auto lastGpuSettings = gpuSettings;
 
     AlienGui::InputInt(
@@ -67,13 +67,13 @@ void GpuSettingsDialog::processIntern()
     validateAndCorrect(gpuSettings);
 
     if (gpuSettings != lastGpuSettings) {
-        _simulationFacade->setGpuSettings_async(gpuSettings);
+        _SimulationFacade::get()->setGpuSettings_async(gpuSettings);
     }
 }
 
 void GpuSettingsDialog::openIntern()
 {
-    _gpuSettings = _simulationFacade->getGpuSettings();
+    _gpuSettings = _SimulationFacade::get()->getGpuSettings();
 }
 
 void GpuSettingsDialog::validateAndCorrect(CudaSettings& settings) const

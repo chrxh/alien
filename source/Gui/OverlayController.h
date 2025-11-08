@@ -11,7 +11,7 @@ class OverlayController
     MAKE_SINGLETON(OverlayController);
 
 public:
-    void setup(PersisterFacade const& persisterFacade);
+    void setup();
     void process();
 
     void showMessage(std::string const& message, bool withLightning = false);
@@ -23,8 +23,6 @@ public:
 private:
     void processProgressAnimation();
     void processMessage();
-
-    PersisterFacade _persisterFacade;
 
     bool _show = false;
     bool _withLightning = false;

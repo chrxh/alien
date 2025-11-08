@@ -9,14 +9,14 @@
 #include "LayerColorPalette.h"
 #include "SimulationParametersBaseWidget.h"
 
-class SimulationParametersMainWindow : public AlienWindow<SimulationFacade>
+class SimulationParametersMainWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersMainWindow);
 
 private:
     SimulationParametersMainWindow();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern() override;
     void shutdownIntern() override;
 
@@ -62,7 +62,6 @@ private:
     float getDetailWidgetHeight() const;
 
 private:
-    SimulationFacade _simulationFacade;
 
     LocationWidget _baseWidgets;
     LocationWidget _layerWidgets;

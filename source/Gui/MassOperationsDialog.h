@@ -8,14 +8,14 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class MassOperationsDialog : public AlienDialog<SimulationFacade>
+class MassOperationsDialog : public AlienDialog<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MassOperationsDialog);
 
 private:
     MassOperationsDialog();
 
-    void initIntern(SimulationFacade simulationFacade) override;
+    void initIntern() override;
     void processIntern() override;
 
     void colorCheckbox(std::string id, uint32_t cellColor, bool& check);
@@ -23,8 +23,6 @@ private:
     void onExecute();
     bool isOkEnabled();
     void validateAndCorrect();
-
-    SimulationFacade _simulationFacade;
 
     bool _randomizeCellColors = false;
     bool _checkedCellColors[MAX_COLORS] = {false, false, false, false, false, false, false};

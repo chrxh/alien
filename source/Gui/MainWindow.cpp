@@ -65,6 +65,8 @@
 #include "NewSimulationDialog.h"
 #include "OverlayController.h"
 #include "PatternEditorWindow.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 #include "ResetPasswordDialog.h"
 #include "SelectionWindow.h"
 #include "SimulationInteractionController.h"
@@ -96,10 +98,8 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade, GuiLogger const& logger)
+_MainWindow::_MainWindow(GuiLogger const& logger)
     : _logger(logger)
-    , _simulationFacade(simulationFacade)
-    , _persisterFacade(persisterFacade)
 {
     IMGUI_CHECKVERSION();
 
@@ -114,42 +114,42 @@ _MainWindow::_MainWindow(SimulationFacade const& simulationFacade, PersisterFaca
     NetworkService::get().setup();
 
     log(Priority::Important, "initialize facades");
-    _persisterFacade->setup(_simulationFacade);
+    _PersisterFacade::get()->setup(_SimulationFacade::get());
 
     log(Priority::Important, "initialize main loop elements");
-    Viewport::get().setup(_simulationFacade);
-    EditorController::get().setup(_simulationFacade);
-    SimulationView::get().setup(_simulationFacade);
-    SimulationInteractionController::get().setup(_simulationFacade);
-    StatisticsWindow::get().setup(_simulationFacade);
-    TemporalControlWindow::get().setup(_simulationFacade);
-    SpatialControlWindow::get().setup(_simulationFacade);
-    SimulationParametersMainWindow::get().setup(_simulationFacade);
-    LocationController::get().setup(_simulationFacade);
-    GpuSettingsDialog::get().setup(_simulationFacade);
-    MainLoopController::get().setup(_simulationFacade, _persisterFacade);
+    Viewport::get().setup();
+    EditorController::get().setup();
+    SimulationView::get().setup();
+    SimulationInteractionController::get().setup();
+    StatisticsWindow::get().setup();
+    TemporalControlWindow::get().setup();
+    SpatialControlWindow::get().setup();
+    SimulationParametersMainWindow::get().setup();
+    LocationController::get().setup();
+    GpuSettingsDialog::get().setup();
+    MainLoopController::get().setup();
     ExitDialog::get().setup();
-    MassOperationsDialog::get().setup(_simulationFacade);
+    MassOperationsDialog::get().setup();
     LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
-    NewSimulationDialog::get().setup(_simulationFacade);
-    BrowserWindow::get().setup(_simulationFacade, _persisterFacade);
-    ActivateUserDialog::get().setup(_simulationFacade);
-    NewPasswordDialog::get().setup(_simulationFacade);
-    LoginDialog::get().setup(_simulationFacade, _persisterFacade);
-    UploadSimulationDialog::get().setup(_simulationFacade);
-    ImageToPatternDialog::get().setup(_simulationFacade);
-    AutosaveWindow::get().setup(_simulationFacade, _persisterFacade);
-    OverlayController::get().setup(_persisterFacade);
-    FileTransferController::get().setup(_persisterFacade, _simulationFacade);
-    NetworkTransferController::get().setup(_simulationFacade, _persisterFacade);
-    LoginController::get().setup(_simulationFacade, _persisterFacade);
+    NewSimulationDialog::get().setup();
+    BrowserWindow::get().setup();
+    ActivateUserDialog::get().setup();
+    NewPasswordDialog::get().setup();
+    LoginDialog::get().setup();
+    UploadSimulationDialog::get().setup();
+    ImageToPatternDialog::get().setup();
+    AutosaveWindow::get().setup();
+    OverlayController::get().setup();
+    FileTransferController::get().setup();
+    NetworkTransferController::get().setup();
+    LoginController::get().setup();
     AboutDialog::get().setup();
     CreateUserDialog::get().setup();
     DeleteUserDialog::get().setup();
     DisplaySettingsDialog::get().setup();
     NetworkSettingsDialog::get().setup();
-    NewPasswordDialog::get().setup(_simulationFacade);
+    NewPasswordDialog::get().setup();
     ResetPasswordDialog::get().setup();
     GenericMessageDialog::get().setup();
     GenericFileDialog::get().setup();
@@ -184,8 +184,8 @@ void _MainWindow::shutdown()
     glfwDestroyWindow(WindowController::get().getWindowData().window);
     glfwTerminate();
 
-    _persisterFacade->shutdown();
-    _simulationFacade->closeSimulation();
+    _PersisterFacade::get()->shutdown();
+    _SimulationFacade::get()->closeSimulation();
 
     NetworkService::get().shutdown();
 }

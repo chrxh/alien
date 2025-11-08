@@ -15,5 +15,5 @@ public:
     void setOrderNumber(int orderNumber) override;
 
 private:
-    SimulationFacade _simulationFacade;
+
 };

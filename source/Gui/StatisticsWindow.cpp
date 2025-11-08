@@ -25,6 +25,7 @@
 
 #include <ImFileDialog.h>
 #include <implot.h>
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -35,9 +36,8 @@ namespace
     auto constexpr SettingsHeight = 130.0f;
 }
 
-void StatisticsWindow::initIntern(SimulationFacade simulationFacade)
+void StatisticsWindow::initIntern()
 {
-    _simulationFacade = simulationFacade;
 
     auto path = std::filesystem::current_path();
     if (path.has_parent_path()) {
@@ -488,7 +488,7 @@ void StatisticsWindow::processPlot(int row, DataPoint DataPointCollection::*valu
     ImGui::PopID();
     ImGui::SameLine();
 
-    auto const& statisticsHistory = _simulationFacade->getStatisticsHistory();
+    auto const& statisticsHistory = _SimulationFacade::get()->getStatisticsHistory();
 
     std::lock_guard lock(statisticsHistory.getMutex());
     auto longtermStatistics = &statisticsHistory.getDataRef();
@@ -530,9 +530,9 @@ void StatisticsWindow::processBackground()
         _lastTimepoint.has_value() ? static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(timepoint - *_lastTimepoint).count()) : 0;
     if (!_lastTimepoint || duration > LiveStatisticsDeltaTime) {
         _lastTimepoint = timepoint;
-        auto rawStatistics = _simulationFacade->getStatisticsRawData();
+        auto rawStatistics = _SimulationFacade::get()->getStatisticsRawData();
         _histogramLiveStatistics.update(rawStatistics.histogram);
-        _timelineLiveStatistics.update(rawStatistics.timeline, _simulationFacade->getCurrentTimestep());
+        _timelineLiveStatistics.update(rawStatistics.timeline, _SimulationFacade::get()->getCurrentTimestep());
         _tableLiveStatistics.update(rawStatistics.timeline);
     }
 }

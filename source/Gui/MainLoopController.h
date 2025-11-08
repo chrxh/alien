@@ -16,7 +16,7 @@ class MainLoopController
     MAKE_SINGLETON(MainLoopController);
 
 public:
-    void setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade);
+    void setup();
     void process();
     void shutdown();
 
@@ -39,9 +39,6 @@ private:
 
     void pushGlobalStyle();
     void popGlobalStyle();
-
-    SimulationFacade _simulationFacade;
-    PersisterFacade _persisterFacade;
 
     enum class ProgramState
     {

@@ -7,17 +7,18 @@
 
 #include "AlienGui.h"
 #include "TemporalControlWindow.h"
+#include <EngineInterface/SimulationFacade.h>
 
-void ResizeWorldDialog::initIntern(SimulationFacade simulationFacade)
+void ResizeWorldDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
+
 }
 
 void ResizeWorldDialog::open()
 {
     AlienDialog::open();
 
-    auto worldSize = _simulationFacade->getWorldSize();
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
 
     _width = worldSize.x;
     _height = worldSize.y;
@@ -75,25 +76,25 @@ void ResizeWorldDialog::processIntern()
 
 void ResizeWorldDialog::onResizing()
 {
-    auto timestep = _simulationFacade->getCurrentTimestep();
-    auto worldSize = _simulationFacade->getWorldSize();
-    auto parameters = _simulationFacade->getSimulationParameters();
-    auto content = _simulationFacade->getSimulationData();
-    auto realtime = _simulationFacade->getRealTime();
-    auto const& statistics = _simulationFacade->getStatisticsHistory().getCopiedData();
-    _simulationFacade->closeSimulation();
+    auto timestep = _SimulationFacade::get()->getCurrentTimestep();
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto content = _SimulationFacade::get()->getSimulationData();
+    auto realtime = _SimulationFacade::get()->getRealTime();
+    auto const& statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
+    _SimulationFacade::get()->closeSimulation();
 
     IntVector2D origWorldSize = worldSize;
     worldSize.x = _width;
     worldSize.y = _height;
 
-    _simulationFacade->newSimulation(timestep, worldSize, parameters);
+    _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
 
     if (_scaleContent) {
         DescriptionEditService::get().duplicate(content, origWorldSize, {_width, _height});
     }
-    _simulationFacade->setSimulationData(content);
-    _simulationFacade->setStatisticsHistory(statistics);
-    _simulationFacade->setRealTime(realtime);
+    _SimulationFacade::get()->setSimulationData(content);
+    _SimulationFacade::get()->setStatisticsHistory(statistics);
+    _SimulationFacade::get()->setRealTime(realtime);
     TemporalControlWindow::get().onSnapshot();
 }

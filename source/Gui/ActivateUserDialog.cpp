@@ -12,9 +12,9 @@
 #include "GenericMessageDialog.h"
 #include "StyleRepository.h"
 
-void ActivateUserDialog::initIntern(SimulationFacade simulationFacade)
+void ActivateUserDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
+
 }
 
 void ActivateUserDialog::open(std::string const& userName, std::string const& password, UserInfo const& userInfo)

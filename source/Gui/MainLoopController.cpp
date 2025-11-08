@@ -58,6 +58,8 @@
 #include "Viewport.h"
 
 #include <GLFW/glfw3.h>
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 
 namespace
 {
@@ -67,10 +69,8 @@ namespace
     auto const StartupSenderId = "Startup";
 }
 
-void MainLoopController::setup(SimulationFacade const& simulationFacade, PersisterFacade const& persisterFacade)
+void MainLoopController::setup()
 {
-    _simulationFacade = simulationFacade;
-    _persisterFacade = persisterFacade;
 
     _logo = OpenGLHelper::loadTexture(Const::LogoFilename);
     _saveOnExit = GlobalSettings::get().getValue("controllers.main loop.save on exit", _saveOnExit);
@@ -132,7 +132,7 @@ void MainLoopController::processFirstTick()
 
     auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
     auto readData = ReadSimulationRequestData{.filename = Const::AutosaveFile, .initSimulation = true};
-    _loadSimRequestId = _persisterFacade->scheduleReadSimulation(senderInfo, readData);
+    _loadSimRequestId = _PersisterFacade::get()->scheduleReadSimulation(senderInfo, readData);
     _programState = ProgramState::LoadingScreen;
 
     OverlayController::get().process();
@@ -144,9 +144,9 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    auto requestedSimState = _persisterFacade->getRequestState(_loadSimRequestId).value();
+    auto requestedSimState = _PersisterFacade::get()->getRequestState(_loadSimRequestId).value();
     if (requestedSimState == PersisterRequestState::Finished) {
-        auto const& data = _persisterFacade->fetchReadSimulationData(_loadSimRequestId);
+        auto const& data = _PersisterFacade::get()->fetchReadSimulationData(_loadSimRequestId);
         auto const& deserializedSim = data.deserializedSimulation;
         Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
@@ -166,11 +166,11 @@ void MainLoopController::processLoadingScreen()
         deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
         deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
 
-        _simulationFacade->newSimulation(
+        _SimulationFacade::get()->newSimulation(
             deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.worldSize, deserializedSim.auxiliaryData.simulationParameters);
-        _simulationFacade->setSimulationData(deserializedSim.mainData);
-        _simulationFacade->setStatisticsHistory(deserializedSim.statistics);
-        _simulationFacade->setRealTime(deserializedSim.auxiliaryData.realTime);
+        _SimulationFacade::get()->setSimulationData(deserializedSim.mainData);
+        _SimulationFacade::get()->setStatisticsHistory(deserializedSim.statistics);
+        _SimulationFacade::get()->setRealTime(deserializedSim.auxiliaryData.realTime);
         Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
         Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
         TemporalControlWindow::get().onSnapshot();
@@ -240,7 +240,7 @@ void MainLoopController::processScheduleExit()
 
         auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = false};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
-        _saveSimRequestId = _persisterFacade->scheduleSaveSimulation(senderInfo, saveData);
+        _saveSimRequestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
         _programState = ProgramState::Exiting;
     } else {
         _programState = ProgramState::Finished;
@@ -260,9 +260,9 @@ void MainLoopController::processExiting()
 
     FpsController::get().processForceFps(WindowController::get().getFps());
 
-    auto requestedSimState = _persisterFacade->getRequestState(_saveSimRequestId).value();
+    auto requestedSimState = _PersisterFacade::get()->getRequestState(_saveSimRequestId).value();
     if (requestedSimState == PersisterRequestState::Finished) {
-        _persisterFacade->fetchSaveSimulationData(_saveSimRequestId);
+        _PersisterFacade::get()->fetchSaveSimulationData(_saveSimRequestId);
         _programState = ProgramState::Finished;
     } else if (requestedSimState == PersisterRequestState::Error) {
         _programState = ProgramState::Finished;
@@ -340,13 +340,13 @@ void MainLoopController::processMenubar()
     AlienGui::MenuItem(
         AlienGui::MenuItemParameters().name("Save").keyCtrl(true).key(ImGuiKey_S), [&] { FileTransferController::get().onSaveSimulationDialog(); });
     AlienGui::MenuSeparator();
-    auto running = _simulationFacade->isSimulationRunning();
+    auto running = _SimulationFacade::get()->isSimulationRunning();
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Run").key(ImGuiKey_Space).disabled(running).closeMenuWhenItemClicked(false), [&] {
-        _simulationFacade->runSimulation();
+        _SimulationFacade::get()->runSimulation();
         printOverlayMessage("Run");
     });
     AlienGui::MenuItem(AlienGui::MenuItemParameters().name("Pause").key(ImGuiKey_Space).disabled(!running).closeMenuWhenItemClicked(false), [&] {
-        _simulationFacade->pauseSimulation();
+        _SimulationFacade::get()->pauseSimulation();
         printOverlayMessage("Pause");
     });
     AlienGui::EndMenu();

@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class SimulationInteractionController : public MainLoopEntity<SimulationFacade>
+class SimulationInteractionController : public MainLoopEntity<>
 {
     MAKE_SINGLETON(SimulationInteractionController);
 
@@ -25,7 +25,7 @@ public:
     std::optional<RealVector2D> getPositionSelectionData() const;
 
 private:
-    void init(SimulationFacade simulationFacade) override;
+    void init() override;
     void process() override;
     void shutdown() override {}
 
@@ -53,8 +53,6 @@ private:
     void processSelectionRect();
 
     float calcZoomFactor(std::chrono::steady_clock::time_point const& lastTimepoint);
-
-    SimulationFacade _simulationFacade;
 
     TextureData _editorOn;
     TextureData _editorOff;

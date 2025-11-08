@@ -13,6 +13,7 @@
 #include "StyleRepository.h"
 #include "UiController.h"
 #include "Viewport.h"
+#include <PersisterInterface/PersisterFacade.h>
 
 namespace
 {
@@ -23,9 +24,9 @@ namespace
     auto constexpr FadeoutProgressAnimationDuration = 1000;
 }
 
-void OverlayController::setup(PersisterFacade const& persisterFacade)
+void OverlayController::setup()
 {
-    _persisterFacade = persisterFacade;
+
 }
 
 void OverlayController::process()
@@ -66,7 +67,7 @@ void OverlayController::activateProgressAnimation(bool value) {}
 
 void OverlayController::processProgressAnimation()
 {
-    if (_persisterFacade->isBusy()) {
+    if (_PersisterFacade::get()->isBusy()) {
         _busyTimepoint = std::chrono::steady_clock::now();
     }
     if (!_busyTimepoint.has_value()) {

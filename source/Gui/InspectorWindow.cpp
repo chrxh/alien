@@ -17,6 +17,7 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
+#include <EngineInterface/SimulationFacade.h>
 
 using namespace std::string_literals;
 
@@ -35,10 +36,9 @@ namespace
     auto const TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 }
 
-_InspectorWindow::_InspectorWindow(SimulationFacade const& simulationFacade, uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab)
+_InspectorWindow::_InspectorWindow(uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab)
     : _entityId(entityId)
     , _initialPos(initialPos)
-    , _simulationFacade(simulationFacade)
     , _selectGenomeTab(selectGenomeTab)
 {}
 
@@ -51,7 +51,7 @@ void _InspectorWindow::process()
     }
     auto width = calcWindowWidth();
     auto height = isCell() ? StyleRepository::get().scale(370.0f) : StyleRepository::get().scale(70.0f);
-    auto borderlessRendering = _simulationFacade->getSimulationParameters().borderlessRendering.value;
+    auto borderlessRendering = _SimulationFacade::get()->getSimulationParameters().borderlessRendering.value;
     ImGui::SetNextWindowBgAlpha(Const::WindowAlpha * ImGui::GetStyle().Alpha);
     ImGui::SetNextWindowSize({width, height}, ImGuiCond_Appearing);
     ImGui::SetNextWindowPos({_initialPos.x, _initialPos.y}, ImGuiCond_Appearing);
@@ -124,7 +124,7 @@ void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
         ImGui::EndTabBar();
 
         if (cell != origCell) {
-            _simulationFacade->changeCell(cell);
+            _SimulationFacade::get()->changeCell(cell);
         }
     }
 }
@@ -409,7 +409,7 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
 template <typename Description>
 void _InspectorWindow::processCellGenomeTab(Description& desc)
 {
-    auto const& parameters = _simulationFacade->getSimulationParameters();
+    auto const& parameters = _SimulationFacade::get()->getSimulationParameters();
 
     int flags = ImGuiTabItemFlags_None;
     if (_selectGenomeTab) {
@@ -742,7 +742,7 @@ void _InspectorWindow::processParticle(ParticleDescription particle)
 
     particle._energy = energy;
     if (particle != origParticle) {
-        _simulationFacade->changeParticle(particle);
+        _SimulationFacade::get()->changeParticle(particle);
     }
 }
 

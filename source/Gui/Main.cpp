@@ -7,11 +7,9 @@
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
-#include <EngineImpl/SimulationFacadeImpl.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
-
-#include <PersisterImpl/PersisterFacadeImpl.h>
 
 #include "GuiLogger.h"
 #include "HelpStrings.h"
@@ -38,18 +36,14 @@ int main(int argc, char** argv)
         log(Priority::Important, "DEBUG mode");
     }
 
-    SimulationFacade simulationFacade;
-    PersisterFacade persisterFacade;
     MainWindow mainWindow;
 
     try {
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
 
-        simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-        persisterFacade = std::make_shared<_PersisterFacadeImpl>();
-        StartupCheckService::get().check(simulationFacade);
+        StartupCheckService::get().check(_SimulationFacade::get());
 
-        mainWindow = std::make_shared<_MainWindow>(simulationFacade, persisterFacade, logger);
+        mainWindow = std::make_shared<_MainWindow>(logger);
         mainWindow->mainLoop();
         mainWindow->shutdown();
 

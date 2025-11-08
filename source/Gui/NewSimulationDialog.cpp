@@ -10,6 +10,7 @@
 #include "StyleRepository.h"
 #include "TemporalControlWindow.h"
 #include "Viewport.h"
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -17,9 +18,9 @@ namespace
     auto const ProjectNameSize = sizeof(Char64) / sizeof(char);
 }
 
-void NewSimulationDialog::initIntern(SimulationFacade simulationFacade)
+void NewSimulationDialog::initIntern()
 {
-    _simulationFacade = simulationFacade;
+
     _adoptSimulationParameters = GlobalSettings::get().getValue("dialogs.new simulation.adopt simulation parameters", true);
 }
 
@@ -60,7 +61,7 @@ void NewSimulationDialog::processIntern()
 
 void NewSimulationDialog::openIntern()
 {
-    auto worldSize = _simulationFacade->getWorldSize();
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
     _width = worldSize.x;
     _height = worldSize.y;
 }
@@ -69,14 +70,14 @@ void NewSimulationDialog::onNewSimulation()
 {
     SimulationParameters parameters;
     if (_adoptSimulationParameters) {
-        parameters = _simulationFacade->getSimulationParameters();
+        parameters = _SimulationFacade::get()->getSimulationParameters();
     }
     for (int i = 0; i < ProjectNameSize; ++i) {
         parameters.projectName.value[i] = _projectName[i];
     }
-    _simulationFacade->closeSimulation();
+    _SimulationFacade::get()->closeSimulation();
 
-    _simulationFacade->newSimulation(0, {_width, _height}, parameters);
+    _SimulationFacade::get()->newSimulation(0, {_width, _height}, parameters);
     Viewport::get().setCenterInWorldPos({toFloat(_width) / 2, toFloat(_height) / 2});
     Viewport::get().setZoomFactor(4.0f);
     TemporalControlWindow::get().onSnapshot();
