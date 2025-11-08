@@ -49,6 +49,7 @@ public:
     TO getSelectedSimulationData(bool includeClusters);
     TO getInspectedSimulationData(std::vector<uint64_t> entityIds);
     TO getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight);
+    TO getGenomeOfCreature(uint64_t creatureId, bool& found);
     void addAndSelectSimulationData(TO const& to);
     void setSimulationData(TO const& to);
     void removeSelectedObjects(bool includeClusters);

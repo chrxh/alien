@@ -415,6 +415,22 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityI
     }
 }
 
+__global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, SimulationData data)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->creature) {
+            continue;
+        }
+        if (cell->creature->id == creatureId) {
+            cell->creature->genome->genomeIndex = VALUE_NOT_SET_UINT64;
+        }
+    }
+}
+
 __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
@@ -683,6 +699,24 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
             continue;
         }
         createCreatureTO(cell, to);
+    }
+}
+
+__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, int* found)
+{
+    auto const& cells = data.objects.cells;
+    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto& cell = cells.at(index);
+        if (!cell->creature) {
+            continue;
+        }
+        if (cell->creature->id == creatureId) {
+            createGenomeTO(cell->creature->genome, to);
+            atomicExch(found, 1);
+            return;
+        }
     }
 }
 

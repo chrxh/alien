@@ -1,5 +1,6 @@
 #include "EngineWorker.h"
 
+#include <algorithm>
 #include <chrono>
 
 #include <Base/ExitScopeGuard.h>
@@ -206,6 +207,28 @@ bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(creatureId, genome);
 
     return _simulationCudaFacade->changeCreature(dataTO);
+}
+
+std::optional<GenomeDescription> EngineWorker::getGenomeOfCreature(uint64_t creatureId)
+{
+    EngineWorkerGuard access(this);
+
+    // Get the genome data using the dedicated kernel
+    bool found = false;
+    auto dataTO = _simulationCudaFacade->getGenomeOfCreature(creatureId, found);
+
+    if (!found) {
+        return std::nullopt;
+    }
+
+    auto description = DescriptionConverterService::get().convertTOtoDescription(dataTO);
+
+    // The genome should be the only one in the result
+    if (description._genomes.empty()) {
+        return std::nullopt;
+    }
+
+    return description._genomes.front();
 }
 
 void EngineWorker::calcTimesteps(uint64_t timesteps)
