@@ -29,6 +29,8 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
 __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO to);
 __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO to);
 
+__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, bool* found);
+
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to);
 __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO to);
 __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to);

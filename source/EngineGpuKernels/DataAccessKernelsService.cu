@@ -12,6 +12,7 @@ _DataAccessKernelsService::_DataAccessKernelsService()
     CudaMemoryManager::getInstance().acquireMemory(1, _cudaCellArray);
     CudaMemoryManager::getInstance().acquireMemory(1, _arraySizesGPU);
     CudaMemoryManager::getInstance().acquireMemory(1, _arraySizesTO);
+    CudaMemoryManager::getInstance().acquireMemory(1, _foundResult);
 }
 
 _DataAccessKernelsService::~_DataAccessKernelsService()
@@ -19,6 +20,7 @@ _DataAccessKernelsService::~_DataAccessKernelsService()
     CudaMemoryManager::getInstance().freeMemory(_cudaCellArray);
     CudaMemoryManager::getInstance().freeMemory(_arraySizesGPU);
     CudaMemoryManager::getInstance().freeMemory(_arraySizesTO);
+    CudaMemoryManager::getInstance().freeMemory(_foundResult);
 }
 
 ArraySizesForTO _DataAccessKernelsService::estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data)
@@ -78,6 +80,16 @@ void _DataAccessKernelsService::getOverlayData(
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, to);
+}
+
+bool _DataAccessKernelsService::getGenomeOfCreature(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, TO const& to)
+{
+    KERNEL_CALL_1_1(cudaClearDataTO, to);
+    setValueToDevice(_foundResult, false);
+    KERNEL_CALL(cudaGetGenomeOfCreature, creatureId, data, to, _foundResult);
+    cudaDeviceSynchronize();
+
+    return copyToHost(_foundResult);
 }
 
 ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TO const& to)

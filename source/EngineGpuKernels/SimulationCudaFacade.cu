@@ -234,6 +234,18 @@ TO _SimulationCudaFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& 
     return to;
 }
 
+TO _SimulationCudaFacade::getGenomeOfCreature(uint64_t creatureId, bool& found)
+{
+    auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
+    found = _dataAccessKernels->getGenomeOfCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), creatureId, cudaTO);
+    syncAndCheck();
+
+    auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
+    copyDataTOtoHost(to, cudaTO);
+
+    return to;
+}
+
 void _SimulationCudaFacade::addAndSelectSimulationData(TO const& to)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
