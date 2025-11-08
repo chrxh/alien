@@ -134,11 +134,12 @@ void _GeneEditorWidget::processNodeList()
         auto scrollToNodeIndex = -1;
         auto selectedNode = _editData->getSelectedNodeIndex();
         if (!_selectedNodeFromPreviousFrame.has_value() || _selectedNodeFromPreviousFrame != selectedNode) {
-            if (selectedNode.has_value()) {
+            if (selectedNode.has_value() && !_nodeSelectedFromTable) {
                 scrollToNodeIndex = std::max(1, selectedNode.value());
             }
         }
         _selectedNodeFromPreviousFrame = selectedNode;
+        _nodeSelectedFromTable = false;
 
         static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
             | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
@@ -181,6 +182,7 @@ void _GeneEditorWidget::processNodeList()
                             ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                             ImVec2(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
                         if (selected) {
+                            _nodeSelectedFromTable = true;
                             _editData->setSelectedNodeIndex(row);
                         }
                     }

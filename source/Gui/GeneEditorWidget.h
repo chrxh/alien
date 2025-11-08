@@ -28,4 +28,5 @@ private:
     GenomeTabLayoutData _layoutData;
 
     std::optional<int> _selectedNodeFromPreviousFrame;
+    bool _nodeSelectedFromTable = false;
 };
