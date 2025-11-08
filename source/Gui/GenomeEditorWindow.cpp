@@ -200,6 +200,14 @@ void GenomeEditorWindow::processTabWidget()
         }
     }
     ImGui::EndChild();
+
+    auto newSessionId = _SimulationFacade::get()->getSessionId();
+    if (_sessionId != newSessionId) {
+        for (auto const& tab : _tabs) {
+            tab->convertToDraftTab();
+        }
+    }
+    _sessionId = newSessionId;
 }
 
 void GenomeEditorWindow::onOpenGenome()

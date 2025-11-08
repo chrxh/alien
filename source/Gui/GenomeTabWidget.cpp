@@ -62,6 +62,8 @@ void _GenomeTabWidget::process()
     ImGui::EndChild();
 
     GenomeDescriptionValidationService::get().validateAndCorrect(_editData->genome);
+
+    updateSpecificEditDataFromSimulation();
 }
 
 void _GenomeTabWidget::onGenomeIntoCreatureInjected()
@@ -264,4 +266,24 @@ void _GenomeTabWidget::doLayout()
     }
 
     *_origLayoutData = *_layoutData;
+}
+
+void _GenomeTabWidget::updateSpecificEditDataFromSimulation()
+{
+    // Update only every 5 frames to reduce performance impact
+    static int counter = 0;
+    if (++counter % 5 != 0) {
+        return;
+    }
+    counter = 0;
+
+    if (std::holds_alternative<CreatureData>(_specificEditData)) {
+        auto& creatureData = std::get<CreatureData>(_specificEditData);
+        auto actualGenome = _SimulationFacade::get()->getGenomeOfCreature(creatureData.creatureId);
+        if (actualGenome.has_value()) {
+            creatureData.origGenome = *actualGenome;
+        } else {
+            convertToDraftTab();
+        }
+    }
 }

@@ -45,7 +45,7 @@ private:
     {};
     struct CreatureData
     {
-        uint64_t creatureId;
+        uint64_t creatureId = 0;
         GenomeDescription origGenome;
         bool changesMade = false;  // true = origCreature has been changed
     };
@@ -62,6 +62,8 @@ private:
     void processPreview();
 
     void doLayout();
+
+    void updateSpecificEditDataFromSimulation();
 
     // Widgets
     GenomeEditorWidget _genomeEditorWidget;
