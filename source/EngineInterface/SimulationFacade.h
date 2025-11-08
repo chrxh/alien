@@ -58,6 +58,7 @@ public:
     virtual void changeCell(CellDescription const& changedCell) = 0;
     virtual void changeParticle(ParticleDescription const& changedParticle) = 0;
     virtual bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) = 0;
+    virtual GenomeDescription getGenomeOfCreature(uint64_t creatureId) = 0;
 
     virtual void calcTimesteps(uint64_t timesteps) = 0;
     virtual void runSimulation() = 0;

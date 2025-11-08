@@ -151,6 +151,11 @@ bool _SimulationFacadeImpl::changeCreature(uint64_t creatureId, GenomeDescriptio
     return _worker.changeCreature(creatureId, genome);
 }
 
+GenomeDescription _SimulationFacadeImpl::getGenomeOfCreature(uint64_t creatureId)
+{
+    return _worker.getGenomeOfCreature(creatureId);
+}
+
 void _SimulationFacadeImpl::calcTimesteps(uint64_t timesteps)
 {
     _worker.calcTimesteps(timesteps);

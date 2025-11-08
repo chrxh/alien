@@ -47,6 +47,7 @@ public:
     void changeCell(CellDescription const& changedCell) override;
     void changeParticle(ParticleDescription const& changedParticle) override;
     bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) override;
+    GenomeDescription getGenomeOfCreature(uint64_t creatureId) override;
 
     void calcTimesteps(uint64_t timesteps) override;
     void runSimulation() override;

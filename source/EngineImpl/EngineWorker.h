@@ -70,6 +70,7 @@ public:
     void changeCell(CellDescription const& changedCell);
     void changeParticle(ParticleDescription const& changedParticle);
     bool changeCreature(uint64_t creatureId, GenomeDescription const& genome);
+    GenomeDescription getGenomeOfCreature(uint64_t creatureId);
 
     void calcTimesteps(uint64_t timesteps);
     void applyCataclysm(int power);

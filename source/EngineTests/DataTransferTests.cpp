@@ -304,6 +304,37 @@ TEST_F(DataTransferTests, changeGenome_failed)
     ASSERT_FALSE(result);
 }
 
+TEST_F(DataTransferTests, getGenomeOfCreature_successful)
+{
+    auto constexpr CreatureId = 1;
+
+    auto genome =
+        GenomeDescription().name("Test Genome").genes({GeneDescription().name("Gene1").separation(true).nodes({NodeDescription(), NodeDescription()})});
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), genome);
+
+    _simulationFacade->setSimulationData(data);
+
+    auto retrievedGenome = _simulationFacade->getGenomeOfCreature(CreatureId);
+
+    EXPECT_EQ("Test Genome", retrievedGenome._name);
+    ASSERT_EQ(1, retrievedGenome._genes.size());
+    EXPECT_EQ("Gene1", retrievedGenome._genes.front()._name);
+    EXPECT_TRUE(retrievedGenome._genes.front()._separation);
+    EXPECT_EQ(2, retrievedGenome._genes.front()._nodes.size());
+}
+
+TEST_F(DataTransferTests, getGenomeOfCreature_nonexistentCreature)
+{
+    auto constexpr CreatureId = 1;
+    auto constexpr WrongCreatureId = 2;
+
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), GenomeDescription());
+
+    _simulationFacade->setSimulationData(data);
+
+    EXPECT_THROW(_simulationFacade->getGenomeOfCreature(WrongCreatureId), std::runtime_error);
+}
+
 TEST_F(DataTransferTests, getInspectedSimulationData)
 {
     auto constexpr CreatureId1 = 1;

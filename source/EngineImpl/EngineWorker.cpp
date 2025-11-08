@@ -1,5 +1,6 @@
 #include "EngineWorker.h"
 
+#include <algorithm>
 #include <chrono>
 
 #include <Base/ExitScopeGuard.h>
@@ -206,6 +207,33 @@ bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& 
     auto dataTO = DescriptionConverterService::get().convertDescriptionToTO(creatureId, genome);
 
     return _simulationCudaFacade->changeCreature(dataTO);
+}
+
+GenomeDescription EngineWorker::getGenomeOfCreature(uint64_t creatureId)
+{
+    EngineWorkerGuard access(this);
+
+    // Get the creature data using the inspected simulation data interface
+    auto dataTO = _simulationCudaFacade->getInspectedSimulationData({creatureId});
+    auto description = DescriptionConverterService::get().convertTOtoDescription(dataTO);
+
+    // Find the creature with the given ID
+    auto creatureIt =
+        std::find_if(description._creatures.begin(), description._creatures.end(), [creatureId](auto const& creature) { return creature._id == creatureId; });
+
+    if (creatureIt == description._creatures.end()) {
+        throw std::runtime_error("Creature with ID " + std::to_string(creatureId) + " not found");
+    }
+
+    // Find the genome associated with this creature
+    auto genomeId = creatureIt->_genomeId;
+    auto genomeIt = std::find_if(description._genomes.begin(), description._genomes.end(), [genomeId](auto const& genome) { return genome._id == genomeId; });
+
+    if (genomeIt == description._genomes.end()) {
+        throw std::runtime_error("Genome for creature with ID " + std::to_string(creatureId) + " not found");
+    }
+
+    return *genomeIt;
 }
 
 void EngineWorker::calcTimesteps(uint64_t timesteps)
