@@ -5,14 +5,14 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class LogWindow : public AlienWindow<GuiLogger>
+class LogWindow : public AlienWindow<>
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(LogWindow);
 
 private:
     LogWindow();
 
-    void initIntern(GuiLogger logger) override;
+    void initIntern() override;
     void shutdownIntern() override;
     void processIntern() override;
 

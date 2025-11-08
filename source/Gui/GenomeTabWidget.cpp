@@ -19,23 +19,21 @@
 #include "StyleRepository.h"
 
 GenomeTabWidget _GenomeTabWidget::createDraftTab(
-    SimulationFacade const& simulationFacade,
     GenomeWindowEditData const& genomeEditData,
     GenomeDescription const& creature,
     GenomeTabLayoutData const& layoutData)
 {
-    return GenomeTabWidget(new _GenomeTabWidget(simulationFacade, genomeEditData, creature, DraftData(), layoutData));
+    return GenomeTabWidget(new _GenomeTabWidget(genomeEditData, creature, DraftData(), layoutData));
 }
 
 GenomeTabWidget _GenomeTabWidget::createCreatureTab(
-    SimulationFacade const& simulationFacade,
     GenomeWindowEditData const& genomeEditData,
     uint64_t creatureId,
     GenomeDescription const& genome,
     GenomeTabLayoutData const& layoutData)
 {
     return GenomeTabWidget(
-        new _GenomeTabWidget(simulationFacade, genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
+        new _GenomeTabWidget(genomeEditData, genome, CreatureData{.creatureId = creatureId, .origGenome = genome}, layoutData));
 }
 
 void _GenomeTabWidget::process()
@@ -144,7 +142,6 @@ void _GenomeTabWidget::resetChanges()
 }
 
 _GenomeTabWidget::_GenomeTabWidget(
-    SimulationFacade const& simulationFacade,
     GenomeWindowEditData const& genomeEditData,
     GenomeDescription const& genome,
     SpecificEditData const& specificEditData,

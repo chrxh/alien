@@ -10,9 +10,9 @@
 #include "GuiLogger.h"
 #include "StyleRepository.h"
 
-void LogWindow::initIntern(GuiLogger logger)
+void LogWindow::initIntern()
 {
-    _logger = logger;
+    _logger = std::make_shared<_GuiLogger>();
     _verbose = GlobalSettings::get().getValue("windows.log.verbose", false);
 }
 

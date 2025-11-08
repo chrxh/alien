@@ -10,12 +10,10 @@ class _GenomeTabWidget
 {
 public:
     static GenomeTabWidget createDraftTab(
-        SimulationFacade const& simulationFacade,
         GenomeWindowEditData const& genomeEditData,
         GenomeDescription const& creature,
         GenomeTabLayoutData const& layoutData = nullptr);
     static GenomeTabWidget createCreatureTab(
-        SimulationFacade const& simulationFacade,
         GenomeWindowEditData const& genomeEditData,
         uint64_t creatureId,
         GenomeDescription const& genome,
@@ -52,7 +50,6 @@ private:
     using SpecificEditData = std::variant<DraftData, CreatureData>;
 
     _GenomeTabWidget(
-        SimulationFacade const& simulationFacade,
         GenomeWindowEditData const& genomeEditData,
         GenomeDescription const& genome,
         SpecificEditData const& specificEditData,

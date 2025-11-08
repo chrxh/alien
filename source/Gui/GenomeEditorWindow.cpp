@@ -75,7 +75,7 @@ void GenomeEditorWindow::initIntern()
     _startingPath = GlobalSettings::get().getValue("windows.genome editor.starting path", path.string());
 
     // Initialize the first tab with a draft creature
-    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_SimulationFacade::get(), _genomeEditData, getDefaultGenome()));
+    _tabs.emplace_back(_GenomeTabWidget::createDraftTab(_genomeEditData, getDefaultGenome()));
 }
 
 void GenomeEditorWindow::shutdownIntern()
@@ -286,13 +286,13 @@ void GenomeEditorWindow::onCreateSeed()
 void GenomeEditorWindow::onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createCreatureTab(_SimulationFacade::get(), _genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createCreatureTab(_genomeEditData, creatureId, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::onScheduleAddDraftTab(GenomeDescription const& genome)
 {
     auto const& currentTab = _tabs.at(_selectedTabIndex);
-    _tabToAdd = _GenomeTabWidget::createDraftTab(_SimulationFacade::get(), _genomeEditData, genome, currentTab->getLayoutData()->clone());
+    _tabToAdd = _GenomeTabWidget::createDraftTab(_genomeEditData, genome, currentTab->getLayoutData()->clone());
 }
 
 void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab)

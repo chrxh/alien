@@ -6,7 +6,7 @@
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
-void StartupCheckService::check(SimulationFacade const& simulationFacade)
+void StartupCheckService::check()
 {
     log(Priority::Important, "check if resource folder exist");
     if (!std::filesystem::exists(Const::ResourcePath)) {
@@ -14,5 +14,5 @@ void StartupCheckService::check(SimulationFacade const& simulationFacade)
     }
 
     log(Priority::Important, "check if cuda device exist");
-    simulationFacade->getGpuName();
+    _SimulationFacade::get()->getGpuName();
 }

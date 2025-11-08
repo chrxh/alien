@@ -11,7 +11,7 @@
 class _MainWindow
 {
 public:
-    _MainWindow(GuiLogger const& logger);
+    _MainWindow();
     void mainLoop();
     void shutdown();
 
@@ -19,6 +19,4 @@ private:
     void initGlfwAndOpenGL();
     void initGlad();
     void initFileDialogs();
-
-    GuiLogger _logger;
 };

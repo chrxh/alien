@@ -9,5 +9,5 @@ class StartupCheckService
     MAKE_SINGLETON(StartupCheckService);
 
 public:
-    void check(SimulationFacade const& simulationFacade);
+    void check();
 };

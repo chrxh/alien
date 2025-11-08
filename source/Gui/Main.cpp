@@ -7,18 +7,14 @@
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
 
-#include <EngineInterface/SimulationFacade.h>
-
 #include <EngineImpl/SimulationFacadeImpl.h>
 
 #include <PersisterInterface/SerializerService.h>
 
 #include <PersisterImpl/PersisterFacadeImpl.h>
 
-#include "GuiLogger.h"
 #include "HelpStrings.h"
 #include "MainWindow.h"
-#include "StartupCheckService.h"
 
 namespace
 {
@@ -33,7 +29,6 @@ int main(int argc, char** argv)
     auto inDebugMode = isInDebugMode(argc, argv);
     GlobalSettings::get().setDebugMode(inDebugMode);
 
-    GuiLogger logger = std::make_shared<_GuiLogger>();
     FileLogger fileLogger = std::make_shared<_FileLogger>();
 
     if (inDebugMode) {
@@ -47,9 +42,8 @@ int main(int argc, char** argv)
 
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());
-        StartupCheckService::get().check(_SimulationFacade::get());
 
-        mainWindow = std::make_shared<_MainWindow>(logger);
+        mainWindow = std::make_shared<_MainWindow>();
         mainWindow->mainLoop();
         mainWindow->shutdown();
 

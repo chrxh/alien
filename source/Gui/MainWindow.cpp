@@ -81,6 +81,7 @@
 #include "Viewport.h"
 #include "WindowController.h"
 #include "implot.h"
+#include "StartupCheckService.h"
 
 namespace
 {
@@ -98,10 +99,13 @@ namespace
     }
 }
 
-_MainWindow::_MainWindow(GuiLogger const& logger)
-    : _logger(logger)
+_MainWindow::_MainWindow()
 {
     IMGUI_CHECKVERSION();
+
+    LogWindow::get().setup();
+
+    StartupCheckService::get().check();
 
     log(Priority::Important, "initialize GLFW and OpenGL");
     initGlfwAndOpenGL();
@@ -130,7 +134,6 @@ _MainWindow::_MainWindow(GuiLogger const& logger)
     MainLoopController::get().setup();
     ExitDialog::get().setup();
     MassOperationsDialog::get().setup();
-    LogWindow::get().setup(_logger);
     GettingStartedWindow::get().setup();
     NewSimulationDialog::get().setup();
     BrowserWindow::get().setup();
