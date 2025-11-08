@@ -2,7 +2,7 @@
 
 #include "MainLoopEntityController.h"
 
-void AbstractMainLoopEntity::registerObject()
+void MainLoopEntity::registerObject()
 {
     MainLoopEntityController::get().registerObject(this);
 }

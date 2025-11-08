@@ -10,20 +10,6 @@
 
 #include <EngineTestData/TestHelper.h>
 
-namespace std
-{
-    template <>
-    struct hash<std::pair<uint64_t, uint64_t>>
-    {
-        size_t operator()(const std::pair<uint64_t, uint64_t>& p) const
-        {
-            auto hash1 = std::hash<uint64_t>{}(p.first);
-            auto hash2 = std::hash<uint64_t>{}(p.second);
-            return hash1 ^ (hash2 << 1);
-        }
-    };
-}
-
 class IntegrationTestFramework : public ::testing::Test
 {
 public:

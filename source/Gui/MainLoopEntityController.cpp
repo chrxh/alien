@@ -2,7 +2,7 @@
 
 #include <ranges>
 
-void MainLoopEntityController::registerObject(AbstractMainLoopEntity* object)
+void MainLoopEntityController::registerObject(MainLoopEntity* object)
 {
     _objects.emplace_back(object);
 }

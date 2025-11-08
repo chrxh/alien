@@ -1,24 +1,15 @@
 #pragma once
 
-class AbstractMainLoopEntity
+class MainLoopEntity
 {
 public:
-    virtual ~AbstractMainLoopEntity() = default;
+    virtual ~MainLoopEntity() = default;
 
+    void setup();
     virtual void process() = 0;
     virtual void shutdown() = 0;
 
 protected:
     void registerObject();
-};
-
-class MainLoopEntity : public AbstractMainLoopEntity
-{
-public:
-    virtual ~MainLoopEntity() override = default;
-
-    void setup();
-
-protected:
     virtual void init() = 0;
 };
