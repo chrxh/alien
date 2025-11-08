@@ -86,11 +86,11 @@ bool _DataAccessKernelsService::getGenomeOfCreature(CudaSettings const& gpuSetti
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
     KERNEL_CALL(cudaPrepareCreatureGenomeForConversionToTO, creatureId, data);
-    setValueToDevice(_foundResult, false);
+    setValueToDevice(_foundResult, 0);
     KERNEL_CALL(cudaGetGenomeOfCreature, creatureId, data, to, _foundResult);
     cudaDeviceSynchronize();
 
-    return copyToHost(_foundResult);
+    return copyToHost(_foundResult) != 0;
 }
 
 ArraySizesForGpu _DataAccessKernelsService::estimateCapacityNeededForGpu(CudaSettings const& gpuSettings, TO const& to)

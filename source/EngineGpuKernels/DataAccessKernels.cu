@@ -702,7 +702,7 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
     }
 }
 
-__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, bool* found)
+__global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, int* found)
 {
     auto const& cells = data.objects.cells;
     auto const partition = calcAllThreadsPartition(cells.getNumEntries());
@@ -714,7 +714,7 @@ __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data
         }
         if (cell->creature->id == creatureId) {
             createGenomeTO(cell->creature->genome, to);
-            *found = true;
+            atomicExch(found, 1);
             return;
         }
     }
