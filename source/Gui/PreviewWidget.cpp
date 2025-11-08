@@ -20,7 +20,7 @@
 #include "GenomeWindowEditData.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
@@ -85,8 +85,8 @@ void _PreviewWidget::setupPreviewData(bool useCache)
         subGenomesForPreview,
         useCache ? std::optional<std::reference_wrapper<GenotypeToPhenotypeCache const>>(_genomeEditData->genotypeToPhenotypeCache) : std::nullopt);
 
-    Provider::getSimulationFacade()->setPreviewData(preview.description);
-    Provider::getSimulationFacade()->setCurrentTimestepForPreview(_currentTimestep);
+    _SimulationFacade::get()->setPreviewData(preview.description);
+    _SimulationFacade::get()->setCurrentTimestepForPreview(_currentTimestep);
     _genomeEditData->currentPreviewId = _editData->id;
 
     setSeedCreatureIds(preview.seedCreatureIds);
@@ -100,8 +100,8 @@ void _PreviewWidget::calcPreview()
 
     auto fps = WindowController::get().getFps();
     auto duration = std::chrono::milliseconds(1000 / fps * _simulationSpeed / 100);
-    Provider::getSimulationFacade()->calcTimestepsForPreview(duration, _detailSimulation);
-    _currentTimestep = Provider::getSimulationFacade()->getCurrentTimestepForPreview();
+    _SimulationFacade::get()->calcTimestepsForPreview(duration, _detailSimulation);
+    _currentTimestep = _SimulationFacade::get()->getCurrentTimestepForPreview();
 }
 
 namespace
@@ -124,7 +124,7 @@ void _PreviewWidget::processCreaturePreviews()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Preview").highlighted(true));
 
-    auto previewRawData = Provider::getSimulationFacade()->getPreviewData();
+    auto previewRawData = _SimulationFacade::get()->getPreviewData();
 
     auto seedCreatureIds = getSeedCreatureIds();
     auto subGenomesForPreview = getSubGenomes();
@@ -222,7 +222,7 @@ void _PreviewWidget::processActionBar()
 int _PreviewWidget::calcTpsForPreview()
 {
     auto now = std::chrono::steady_clock::now();
-    _currentTimestep = Provider::getSimulationFacade()->getCurrentTimestepForPreview();
+    _currentTimestep = _SimulationFacade::get()->getCurrentTimestepForPreview();
     int tps = 0;
     if (_previewTimestepFromPreviousMeasure.has_value() && _timepointFromPreviousMeasure.has_value()) {
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - *_timepointFromPreviousMeasure);
@@ -252,19 +252,19 @@ void _PreviewWidget::onStepBackward()
 {
     auto lastSavepoint = _savepoints.back();
     _savepoints.pop_back();
-    Provider::getSimulationFacade()->setCurrentTimestepForPreview(lastSavepoint.timestep);
-    Provider::getSimulationFacade()->setPreviewData(lastSavepoint.description);
+    _SimulationFacade::get()->setCurrentTimestepForPreview(lastSavepoint.timestep);
+    _SimulationFacade::get()->setPreviewData(lastSavepoint.description);
     setSeedCreatureIds(lastSavepoint.seedCreatureIds);
 }
 
 void _PreviewWidget::onStepForward()
 {
-    auto timestep = Provider::getSimulationFacade()->getCurrentTimestepForPreview();
-    auto data = Provider::getSimulationFacade()->getPreviewData();
+    auto timestep = _SimulationFacade::get()->getCurrentTimestepForPreview();
+    auto data = _SimulationFacade::get()->getPreviewData();
     auto seedCreatureIds = getSeedCreatureIds();
     _savepoints.emplace_back(timestep, data, seedCreatureIds);
 
-    Provider::getSimulationFacade()->calcTimestepsForPreview(1, _detailSimulation);
+    _SimulationFacade::get()->calcTimestepsForPreview(1, _detailSimulation);
 }
 
 void _PreviewWidget::onRestart()

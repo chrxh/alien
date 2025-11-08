@@ -46,6 +46,10 @@ class _PersisterFacade
 public:
     virtual ~_PersisterFacade() = default;
 
+    // Static getter/setter for dependency injection
+    static void set(PersisterFacade const& instance);
+    static PersisterFacade get();
+
     //lifecycle control
     virtual void setup(SimulationFacade const& simulationFacade) = 0;
     virtual void shutdown() = 0;
@@ -100,4 +104,7 @@ public:
 
     virtual PersisterRequestId scheduleSaveDeserializedSimulation(SenderInfo const& senderInfo, SaveDeserializedSimulationRequestData const& data) = 0;
     virtual SaveDeserializedSimulationResultData fetchSaveDeserializedSimulationData(PersisterRequestId const& id) = 0;
+
+private:
+    static PersisterFacade _instance;
 };

@@ -10,7 +10,7 @@
 
 #include "AlienGui.h"
 #include "SpecificationGuiService.h"
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFacade)
 {
@@ -19,15 +19,15 @@ void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFac
 
 void _SimulationParametersBaseWidget::process(ParametersFilter const& filter)
 {
-    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
-    auto origParameters = Provider::getSimulationFacade()->getOriginalSimulationParameters();
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, Provider::getSimulationFacade(), 0, filter);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _SimulationFacade::get(), 0, filter);
 
     if (parameters != lastParameters) {
-        ParametersValidationService::get().validateAndCorrect({Provider::getSimulationFacade()->getWorldSize()}, parameters);
-        Provider::getSimulationFacade()->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
+        ParametersValidationService::get().validateAndCorrect({_SimulationFacade::get()->getWorldSize()}, parameters);
+        _SimulationFacade::get()->setSimulationParameters(parameters, SimulationParametersUpdateConfig::AllExceptChangingPositions);
     }
 }
 

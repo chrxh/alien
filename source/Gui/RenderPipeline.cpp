@@ -9,7 +9,7 @@
 #include "RenderStep.h"
 #include "Shader.h"
 #include "Viewport.h"
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
     : _geometryBuffers(_GeometryBuffers::create())
@@ -231,12 +231,12 @@ namespace
 void _RenderPipeline::execute()
 {
     // Copy vertex buffer from Cuda to OpenGL
-    Provider::getSimulationFacade()->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers, Viewport::get().getVisibleWorldRect());
+    _SimulationFacade::get()->tryCopyBuffersFromCudaToOpenGL(_geometryBuffers, Viewport::get().getVisibleWorldRect());
 
     GeneralRenderInfo generalRenderInfo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &generalRenderInfo.screenFbo);
 
-    auto simParameters = std::make_shared<SimulationParameters>(Provider::getSimulationFacade()->getSimulationParameters());
+    auto simParameters = std::make_shared<SimulationParameters>(_SimulationFacade::get()->getSimulationParameters());
     int currentTextureTargetIndex = 0;
     forEachStep(
         [this, &currentTextureTargetIndex] {
@@ -260,7 +260,7 @@ void _RenderPipeline::execute()
                               .textures(allTextures)
                               .target(target)
                               .renderInfo(generalRenderInfo)
-                              .simulationFacade(Provider::getSimulationFacade())
+                              .simulationFacade(_SimulationFacade::get())
                               .simulationParameters(simParameters));
         });
 

@@ -3,7 +3,7 @@
 #include <EngineInterface/DescriptionEditService.h>
 #include <EngineInterface/SimulationFacade.h>
 
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 void EditorModel::setup()
 {
@@ -17,7 +17,7 @@ SelectionShallowData const& EditorModel::getSelectionShallowData() const
 
 void EditorModel::update()
 {
-    _selectionShallowData = Provider::getSimulationFacade()->getSelectionShallowData();
+    _selectionShallowData = _SimulationFacade::get()->getSelectionShallowData();
 }
 
 bool EditorModel::isSelectionEmpty() const

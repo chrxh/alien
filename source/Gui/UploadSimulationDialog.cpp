@@ -19,7 +19,6 @@
 #include "NetworkTransferController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "Provider.h"
 
 namespace
 {

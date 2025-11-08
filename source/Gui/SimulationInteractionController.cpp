@@ -16,7 +16,7 @@
 #include "SimulationView.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -175,11 +175,11 @@ void SimulationInteractionController::leftMouseButtonPressed(IntVector2D const& 
             if (!_modes.drawMode) {
                 EditorController::get().onSelectObjects(toRealVector2D(mousePos), ImGui::GetIO().KeyCtrl);
                 _worldPosOnClick = Viewport::get().mapViewToWorldPosition(toRealVector2D(mousePos));
-                if (Provider::getSimulationFacade()->isSimulationRunning()) {
-                    Provider::getSimulationFacade()->setDetached(true);
+                if (_SimulationFacade::get()->isSimulationRunning()) {
+                    _SimulationFacade::get()->setDetached(true);
                 }
 
-                auto shallowData = Provider::getSimulationFacade()->getSelectionShallowData();
+                auto shallowData = _SimulationFacade::get()->getSelectionShallowData();
                 _selectionPositionOnClick = {shallowData.centerPosX, shallowData.centerPosY};
             } else {
                 CreatorWindow::get().onDrawing();
@@ -200,7 +200,7 @@ void SimulationInteractionController::leftMouseButtonHold(IntVector2D const& mou
         RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
 
         if (!_modesAtClick.drawMode) {
-            if (!Provider::getSimulationFacade()->isSimulationRunning()) {
+            if (!_SimulationFacade::get()->isSimulationRunning()) {
                 EditorController::get().onMoveSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             } else {
                 EditorController::get().onFixateSelectedObjects(toRealVector2D(mousePos), *_worldPosOnClick, *_selectionPositionOnClick);
@@ -229,8 +229,8 @@ void SimulationInteractionController::leftMouseButtonReleased(IntVector2D const&
         if (_modesAtClick.drawMode) {
             CreatorWindow::get().finishDrawing();
         } else {
-            if (Provider::getSimulationFacade()->isSimulationRunning()) {
-                Provider::getSimulationFacade()->setDetached(false);
+            if (_SimulationFacade::get()->isSimulationRunning()) {
+                _SimulationFacade::get()->setDetached(false);
                 RealVector2D prevWorldPos = Viewport::get().mapViewToWorldPosition(toRealVector2D(prevMousePos));
                 EditorController::get().onAccelerateSelectedObjects(toRealVector2D(mousePos), prevWorldPos);
             }
@@ -252,7 +252,7 @@ void SimulationInteractionController::rightMouseButtonPressed(IntVector2D const&
         SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() * 2);
     } else {
         if (!ImGui::GetIO().KeyAlt) {
-            if (!Provider::getSimulationFacade()->isSimulationRunning() && !_modes.drawMode) {
+            if (!_SimulationFacade::get()->isSimulationRunning() && !_modes.drawMode) {
                 auto viewPos = toRealVector2D(mousePos);
                 RealRect rect{viewPos, viewPos};
                 _selectionRect = rect;
@@ -271,7 +271,7 @@ void SimulationInteractionController::rightMouseButtonHold(IntVector2D const& mo
         Viewport::get().zoom(mousePos, 1.0f / calcZoomFactor(_lastZoomTimepoint ? *_lastZoomTimepoint : std::chrono::steady_clock::now()));
     } else {
         if (!ImGui::GetIO().KeyAlt) {
-            auto isSimulationRunning = Provider::getSimulationFacade()->isSimulationRunning();
+            auto isSimulationRunning = _SimulationFacade::get()->isSimulationRunning();
             if (!isSimulationRunning && !_modesAtClick.drawMode && _selectionRect.has_value()) {
                 _selectionRect->bottomRight = toRealVector2D(mousePos);
                 EditorController::get().onUpdateSelectionRect(*_selectionRect);
@@ -299,7 +299,7 @@ void SimulationInteractionController::rightMouseButtonReleased()
     if (!_modesAtClick.editMode) {
         SimulationView::get().setMotionBlur(SimulationView::get().getMotionBlur() / 2);
     } else {
-        if (!Provider::getSimulationFacade()->isSimulationRunning()) {
+        if (!_SimulationFacade::get()->isSimulationRunning()) {
             _selectionRect.reset();
         }
     }
@@ -370,7 +370,7 @@ void SimulationInteractionController::drawCursor()
 
     // editing cursors
     if (_modes.editMode) {
-        if (!_modes.drawMode || Provider::getSimulationFacade()->isSimulationRunning()) {
+        if (!_modes.drawMode || _SimulationFacade::get()->isSimulationRunning()) {
             auto cursorSize = scale(CursorRadius);
 
             // shadow

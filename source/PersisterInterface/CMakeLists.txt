@@ -21,6 +21,7 @@ add_library(PersisterInterface
     MoveNetworkResourceResultData.h
     ParameterParser.h
     PersisterErrorInfo.h
+    PersisterFacade.cpp
     PersisterFacade.h
     PersisterRequestId.h
     PersisterRequestResult.h

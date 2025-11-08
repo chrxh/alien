@@ -115,8 +115,6 @@ PUBLIC
     PatternEditorWindow.h
     PreviewWidget.cpp
     PreviewWidget.h
-    Provider.cpp
-    Provider.h
     RenderPipeline.cpp
     RenderPipeline.h
     RenderStep.cpp

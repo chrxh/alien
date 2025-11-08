@@ -18,7 +18,8 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
+#include <PersisterInterface/PersisterFacade.h>
 
 namespace
 {
@@ -55,7 +56,7 @@ void AutosaveWindow::initIntern()
     _lastAutosaveTimepoint = std::chrono::steady_clock::now();
     _lastPeakTimepoint = std::chrono::steady_clock::now();
 
-    _peakProcessor = _TaskProcessor::createTaskProcessor(Provider::getPersisterFacade());
+    _peakProcessor = _TaskProcessor::createTaskProcessor(_PersisterFacade::get());
     _peakDeserializedSimulation = std::make_shared<_SharedDeserializedSimulation>();
     updateSavepointTableFromFile();
 }
@@ -326,12 +327,12 @@ void AutosaveWindow::onCreateSavepoint(bool usePeakSimulation)
             .sharedDeserializedSimulation = _peakDeserializedSimulation,
             .generateNameFromTimestep = true,
             .resetDeserializedSimulation = true};
-        requestId = Provider::getPersisterFacade()->scheduleSaveDeserializedSimulation(senderInfo, saveData);
+        requestId = _PersisterFacade::get()->scheduleSaveDeserializedSimulation(senderInfo, saveData);
     } else {
         auto senderInfo = SenderInfo{.senderId = SenderId{AutosaveSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{
             .filename = _directory, .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos(), .generateNameFromTimestep = true};
-        requestId = Provider::getPersisterFacade()->scheduleSaveSimulation(senderInfo, saveData);
+        requestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
     }
 
     auto entry = std::make_shared<_SavepointEntry>(
@@ -383,9 +384,9 @@ void AutosaveWindow::processAutomaticSavepoints()
         return;
     }
 
-    if (!_lastSessionId.has_value() || _lastSessionId.value() != Provider::getSimulationFacade()->getSessionId()) {
+    if (!_lastSessionId.has_value() || _lastSessionId.value() != _SimulationFacade::get()->getSessionId()) {
         _lastAutosaveTimepoint = std::chrono::steady_clock::now();
-        _lastSessionId = Provider::getSimulationFacade()->getSessionId();
+        _lastSessionId = _SimulationFacade::get()->getSessionId();
         _peakDeserializedSimulation->reset();
     }
 
@@ -401,7 +402,7 @@ void AutosaveWindow::processAutomaticSavepoints()
         if (minSinceLastCatchPeak >= PeakDetectionInterval) {
             _peakProcessor->executeTask(
                 [&](auto const& senderId) {
-                    return Provider::getPersisterFacade()->scheduleGetPeakSimulation(
+                    return _PersisterFacade::get()->scheduleGetPeakSimulation(
                         SenderInfo{.senderId = senderId, .wishResultData = false, .wishErrorInfo = true},
                         GetPeakSimulationRequestData{
                             .peakDeserializedSimulation = _peakDeserializedSimulation,
@@ -428,9 +429,9 @@ void AutosaveWindow::processDeleteNonPersistentSavepoint()
 {
     std::vector<SavepointEntry> newRequestsToDelete;
     for (auto const& entry : _savepointsInProgressToDelete) {
-        if (auto requestState = Provider::getPersisterFacade()->getRequestState(PersisterRequestId{entry->requestId})) {
+        if (auto requestState = _PersisterFacade::get()->getRequestState(PersisterRequestId{entry->requestId})) {
             if (requestState.value() == PersisterRequestState::Finished) {
-                auto requestResult = Provider::getPersisterFacade()->fetchPersisterRequestResult(PersisterRequestId{entry->requestId});
+                auto requestResult = _PersisterFacade::get()->fetchPersisterRequestResult(PersisterRequestId{entry->requestId});
                 if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
                     SerializerService::get().deleteSimulation(saveResult->getData().filename);
                 }
@@ -454,14 +455,14 @@ void AutosaveWindow::updateSavepoint(int row)
     auto state = _savepointTable->at(row)->state;
     if (state != SavepointState_Persisted) {
         auto newEntry = _savepointTable->at(row);
-        auto requestState = Provider::getPersisterFacade()->getRequestState(PersisterRequestId{newEntry->requestId});
+        auto requestState = _PersisterFacade::get()->getRequestState(PersisterRequestId{newEntry->requestId});
         if (requestState.has_value()) {
             if (requestState.value() == PersisterRequestState::InProgress) {
                 newEntry->state = SavepointState_InProgress;
             }
             if (requestState.value() == PersisterRequestState::Finished) {
                 newEntry->state = SavepointState_Persisted;
-                auto requestResult = Provider::getPersisterFacade()->fetchPersisterRequestResult(PersisterRequestId{newEntry->requestId});
+                auto requestResult = _PersisterFacade::get()->fetchPersisterRequestResult(PersisterRequestId{newEntry->requestId});
 
                 if (auto saveResult = std::dynamic_pointer_cast<_SaveSimulationRequestResult>(requestResult)) {
                     auto const& data = saveResult->getData();

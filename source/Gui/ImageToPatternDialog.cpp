@@ -20,7 +20,7 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 
 void ImageToPatternDialog::init()
@@ -117,7 +117,7 @@ void ImageToPatternDialog::show()
         DescriptionEditService::get().reconnectCells(dataDesc, 1 * 1.5f);
         DescriptionEditService::get().setCenter(dataDesc, Viewport::get().getCenterInWorldPos());
 
-        Provider::getSimulationFacade()->addAndSelectSimulationData(std::move(dataDesc));
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(dataDesc));
         //TODO: update pattern editor
     });
 }

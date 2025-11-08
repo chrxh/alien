@@ -11,7 +11,7 @@
 
 #include "AlienGui.h"
 #include "StyleRepository.h"
-#include "Provider.h"
+#include <EngineInterface/SimulationFacade.h>
 
 namespace
 {
@@ -144,14 +144,14 @@ void MassOperationsDialog::colorCheckbox(std::string id, uint32_t cellColor, boo
 
 void MassOperationsDialog::onExecute()
 {
-    auto timestep = static_cast<uint32_t>(Provider::getSimulationFacade()->getCurrentTimestep());
-    auto parameters = Provider::getSimulationFacade()->getSimulationParameters();
-    auto worldSize = Provider::getSimulationFacade()->getWorldSize();
+    auto timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
+    auto parameters = _SimulationFacade::get()->getSimulationParameters();
+    auto worldSize = _SimulationFacade::get()->getWorldSize();
     auto content = [&] {
         if (_restrictToSelectedCreatures) {
-            return Provider::getSimulationFacade()->getSelectedSimulationData(true);
+            return _SimulationFacade::get()->getSelectedSimulationData(true);
         } else {
-            return Provider::getSimulationFacade()->getSimulationData();
+            return _SimulationFacade::get()->getSimulationData();
         }
     }();
 
@@ -184,12 +184,12 @@ void MassOperationsDialog::onExecute()
     }
 
     if (_restrictToSelectedCreatures) {
-        Provider::getSimulationFacade()->removeSelectedObjects(true);
-        Provider::getSimulationFacade()->addAndSelectSimulationData(std::move(content));
+        _SimulationFacade::get()->removeSelectedObjects(true);
+        _SimulationFacade::get()->addAndSelectSimulationData(std::move(content));
     } else {
-        Provider::getSimulationFacade()->closeSimulation();
-        Provider::getSimulationFacade()->newSimulation(timestep, worldSize, parameters);
-        Provider::getSimulationFacade()->setSimulationData(content);
+        _SimulationFacade::get()->closeSimulation();
+        _SimulationFacade::get()->newSimulation(timestep, worldSize, parameters);
+        _SimulationFacade::get()->setSimulationData(content);
     }
 }
 
