@@ -6,7 +6,6 @@
 #include "SimulationParametersBaseWidget.h"
 #include "SimulationParametersLayerWidget.h"
 #include "SimulationParametersSourceWidget.h"
-#include <EngineInterface/SimulationFacade.h>
 
 void LocationController::addLocationWindow(int orderNumber, RealVector2D const& initialPos)
 {
@@ -14,18 +13,18 @@ void LocationController::addLocationWindow(int orderNumber, RealVector2D const& 
     LocationWidget widget;
     if (orderNumber == 0) {
         auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
-        baseWidgets->init(_SimulationFacade::get());
+        baseWidgets->init();
         widget = baseWidgets;
     } else {
         auto parameters = _SimulationFacade::get()->getSimulationParameters();
         auto locationType = LocationHelper::getLocationType(orderNumber, parameters);
         if (locationType == LocationType::Layer) {
             auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
-            layerWidgets->init(_SimulationFacade::get(), orderNumber);
+            layerWidgets->init(orderNumber);
             widget = layerWidgets;
         } else {
             auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
-            sourceWidgets->init(_SimulationFacade::get(), orderNumber);
+            sourceWidgets->init(orderNumber);
             widget = sourceWidgets;
         }
     }
@@ -54,10 +53,7 @@ void LocationController::remapLocationIndices(std::map<int, int> const& newByOld
     }
 }
 
-void LocationController::init()
-{
-
-}
+void LocationController::init() {}
 
 void LocationController::process()
 {

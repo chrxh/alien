@@ -10,7 +10,7 @@
 class _SimulationParametersSourceWidgets : public _LocationWidget
 {
 public:
-    void init(SimulationFacade const& simulationFacade, int orderNumber);
+    void init(int orderNumber);
     void process(ParametersFilter const& filter) override;
     std::string getLocationName() override;
     int getOrderNumber() const override;

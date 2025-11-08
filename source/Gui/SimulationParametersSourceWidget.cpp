@@ -8,9 +8,8 @@
 
 #include "SimulationInteractionController.h"
 #include "SpecificationGuiService.h"
-#include <EngineInterface/SimulationFacade.h>
 
-void _SimulationParametersSourceWidgets::init(SimulationFacade const& simulationFacade, int orderNumber)
+void _SimulationParametersSourceWidgets::init(int orderNumber)
 {
 
     _orderNumber = orderNumber;
@@ -27,7 +26,7 @@ void _SimulationParametersSourceWidgets::process(ParametersFilter const& filter)
     _sourceName = std::string(parameters.sourceName.sourceValues[sourceIndex]);
 
     ImGui::PushID("Source");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _SimulationFacade::get(), _orderNumber, filter);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _orderNumber, filter);
     ImGui::PopID();
 
     if (parameters != lastParameters) {

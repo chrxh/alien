@@ -49,16 +49,16 @@ void SimulationParametersMainWindow::initIntern()
     _expertWidgetHeight = GlobalSettings::get().getValue("windows.simulation parameters.expert widget height", scale(ExpertWidgetHeight));
 
     auto baseWidgets = std::make_shared<_SimulationParametersBaseWidget>();
-    baseWidgets->init(_SimulationFacade::get());
+    baseWidgets->init();
     _baseWidgets = baseWidgets;
 
     auto layerWidgets = std::make_shared<_SimulationParameterLayerWidget>();
-    layerWidgets->init(_SimulationFacade::get(), 0);
+    layerWidgets->init(0);
     _layerWidgets = layerWidgets;
 
 
     auto sourceWidgets = std::make_shared<_SimulationParametersSourceWidgets>();
-    sourceWidgets->init(_SimulationFacade::get(), 0);
+    sourceWidgets->init(0);
     _sourceWidgets = sourceWidgets;
 }
 

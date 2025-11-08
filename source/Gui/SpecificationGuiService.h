@@ -1,24 +1,20 @@
 #pragma once
 
+#include <Base/Cache.h>
 #include <Base/Singleton.h>
 
 #include <EngineInterface/ParametersFilterHash.h>
 #include <EngineInterface/SimulationParametersSpecification.h>
 
 #include "Definitions.h"
-#include "Base/Cache.h"
 
 class SpecificationGuiService
 {
     MAKE_SINGLETON(SpecificationGuiService);
 
 public:
-    void createWidgetsForParameters(
-        SimulationParameters& parameters,
-        SimulationParameters& origParameters,
-        SimulationFacade const& simulationFacade,
-        int orderNumber,
-        ParametersFilter const& filter) const;
+    void createWidgetsForParameters(SimulationParameters& parameters, SimulationParameters& origParameters, int orderNumber, ParametersFilter const& filter)
+        const;
 
     void createWidgetsForExpertToggles(SimulationParameters& parameters, SimulationParameters& origParameters) const;
 
@@ -28,7 +24,6 @@ private:
         bool enabled,
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
-        SimulationFacade const& simulationFacade,
         int orderNumber,
         ParametersFilter const& filter) const;
 
@@ -51,7 +46,6 @@ private:
         bool enabled,
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
-        SimulationFacade const& simulationFacade,
         int orderNumber,
         ParametersFilter const& filter) const;
     void createWidgetsForFloat2Spec(
@@ -59,7 +53,6 @@ private:
         bool enabled,
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
-        SimulationFacade const& simulationFacade,
         int orderNumber,
         ParametersFilter const& filter) const;
     void createWidgetsForChar64Spec(
@@ -74,7 +67,6 @@ private:
         bool enabled,
         SimulationParameters& parameters,
         SimulationParameters& origParameters,
-        SimulationFacade const& simulationFacade,
         int orderNumber,
         ParametersFilter const& filter) const;
     void createWidgetsForColorPickerSpec(

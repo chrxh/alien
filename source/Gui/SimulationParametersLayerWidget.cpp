@@ -9,9 +9,8 @@
 #include "SpecificationGuiService.h"
 #include <EngineInterface/SimulationFacade.h>
 
-void _SimulationParameterLayerWidget::init(SimulationFacade const& simulationFacade, int orderNumber)
+void _SimulationParameterLayerWidget::init(int orderNumber)
 {
-
     _orderNumber = orderNumber;
 }
 
@@ -25,7 +24,7 @@ void _SimulationParameterLayerWidget::process(ParametersFilter const& filter)
     _layerName = std::string(parameters.layerName.layerValues[layerIndex]);
 
     ImGui::PushID("Layer");
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _SimulationFacade::get(), _orderNumber, filter);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _orderNumber, filter);
     ImGui::PopID();
 
     if (parameters != lastParameters) {

@@ -10,12 +10,8 @@
 
 #include "AlienGui.h"
 #include "SpecificationGuiService.h"
-#include <EngineInterface/SimulationFacade.h>
 
-void _SimulationParametersBaseWidget::init(SimulationFacade const& simulationFacade)
-{
-
-}
+void _SimulationParametersBaseWidget::init() {}
 
 void _SimulationParametersBaseWidget::process(ParametersFilter const& filter)
 {
@@ -23,7 +19,7 @@ void _SimulationParametersBaseWidget::process(ParametersFilter const& filter)
     auto origParameters = _SimulationFacade::get()->getOriginalSimulationParameters();
     auto lastParameters = parameters;
 
-    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, _SimulationFacade::get(), 0, filter);
+    SpecificationGuiService::get().createWidgetsForParameters(parameters, origParameters, 0, filter);
 
     if (parameters != lastParameters) {
         ParametersValidationService::get().validateAndCorrect({_SimulationFacade::get()->getWorldSize()}, parameters);

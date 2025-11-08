@@ -24,7 +24,6 @@ namespace
 void SpecificationGuiService::createWidgetsForParameters(
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    SimulationFacade const& simulationFacade,
     int orderNumber,
     ParametersFilter const& filter) const
 {
@@ -52,7 +51,7 @@ void SpecificationGuiService::createWidgetsForParameters(
                                             .visible(isGroupVisibleActive)
                                             .blinkWhenActivated(isExpertSettings)
                                             .highlightedSubString(filter.containedText))) {
-                createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, simulationFacade, orderNumber, filter);
+                createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, orderNumber, filter);
             }
             ImGui::PopID();
             AlienGui::EndTreeNode();
@@ -107,7 +106,6 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    SimulationFacade const& simulationFacade,
     int orderNumber,
     ParametersFilter const& filter) const
 {
@@ -123,13 +121,13 @@ void SpecificationGuiService::createWidgetsForParameterGroup(
         } else if (std::holds_alternative<IntSpec>(parameterSpec._reference)) {
             createWidgetsForIntSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<FloatSpec>(parameterSpec._reference)) {
-            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
+            createWidgetsForFloatSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<Float2Spec>(parameterSpec._reference)) {
-            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
+            createWidgetsForFloat2Spec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<Char64Spec>(parameterSpec._reference)) {
             createWidgetsForChar64Spec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<AlternativeSpec>(parameterSpec._reference)) {
-            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
+            createWidgetsForAlternativeSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<ColorSpec>(parameterSpec._reference)) {
             createWidgetsForColorPickerSpec(parameterSpec, enabled, parameters, origParameters, orderNumber, filter);
         } else if (std::holds_alternative<ColorTransitionRulesSpec>(parameterSpec._reference)) {
@@ -229,7 +227,6 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    SimulationFacade const& simulationFacade,
     int orderNumber,
     ParametersFilter const& filter) const
 {
@@ -243,7 +240,7 @@ void SpecificationGuiService::createWidgetsForFloatSpec(
     auto min = std::get<float>(floatSpec._min);
     auto max = [&] {
         if (std::holds_alternative<MaxWorldRadiusSize>(floatSpec._max)) {
-            auto worldSize = simulationFacade->getWorldSize();
+            auto worldSize = _SimulationFacade::get()->getWorldSize();
             return toFloat(std::max(worldSize.x, worldSize.y));
         } else {
             return std::get<float>(floatSpec._max);
@@ -313,7 +310,6 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    SimulationFacade const& simulationFacade,
     int orderNumber,
     ParametersFilter const& filter) const
 {
@@ -327,7 +323,7 @@ void SpecificationGuiService::createWidgetsForFloat2Spec(
     RealVector2D min = std::get<RealVector2D>(float2Spec._min);
     RealVector2D max = [&] {
         if (std::holds_alternative<WorldSize>(float2Spec._max)) {
-            return toRealVector2D(simulationFacade->getWorldSize());
+            return toRealVector2D(_SimulationFacade::get()->getWorldSize());
         } else {
             return std::get<RealVector2D>(float2Spec._max);
         }
@@ -385,7 +381,6 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
     bool enabled,
     SimulationParameters& parameters,
     SimulationParameters& origParameters,
-    SimulationFacade const& simulationFacade,
     int orderNumber,
     ParametersFilter const& filter) const
 {
@@ -424,7 +419,7 @@ void SpecificationGuiService::createWidgetsForAlternativeSpec(
         if (enabled) {
             enabled = enabledValue != nullptr ? *enabledValue : true;
         }
-        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, enabled, parameters, origParameters, simulationFacade, orderNumber, filter);
+        createWidgetsForParameterGroup(alternativeSpec._alternatives.at(*value).second, enabled, parameters, origParameters, orderNumber, filter);
         AlienGui::EndIndent();
     }
 }
