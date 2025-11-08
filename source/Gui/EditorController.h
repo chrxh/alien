@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class EditorController : public MainLoopEntity<>
+class EditorController : public MainLoopEntity
 {
     MAKE_SINGLETON(EditorController);
 

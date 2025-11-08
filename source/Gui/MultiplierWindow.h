@@ -16,7 +16,7 @@ enum MultiplierMode_
     MultiplierMode_Random
 };
 
-class MultiplierWindow : public AlienWindow<>
+class MultiplierWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MultiplierWindow);
 

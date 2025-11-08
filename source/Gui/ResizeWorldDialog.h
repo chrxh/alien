@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class ResizeWorldDialog : public AlienDialog<>
+class ResizeWorldDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ResizeWorldDialog);
 

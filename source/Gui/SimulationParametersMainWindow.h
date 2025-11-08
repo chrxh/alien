@@ -9,7 +9,7 @@
 #include "LayerColorPalette.h"
 #include "SimulationParametersBaseWidget.h"
 
-class SimulationParametersMainWindow : public AlienWindow<>
+class SimulationParametersMainWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationParametersMainWindow);
 

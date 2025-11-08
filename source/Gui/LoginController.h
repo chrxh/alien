@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class LoginController : public MainLoopEntity<>
+class LoginController : public MainLoopEntity
 {
     MAKE_SINGLETON(LoginController);
 

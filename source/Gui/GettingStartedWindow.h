@@ -7,7 +7,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class GettingStartedWindow : public AlienWindow<>
+class GettingStartedWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GettingStartedWindow);
 

@@ -15,7 +15,7 @@
 
 struct ImPlotPoint;
 
-class StatisticsWindow : public AlienWindow<>
+class StatisticsWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(StatisticsWindow);
 

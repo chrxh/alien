@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class NetworkSettingsDialog : public AlienDialog<>
+class NetworkSettingsDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NetworkSettingsDialog);
 

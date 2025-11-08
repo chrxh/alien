@@ -20,7 +20,7 @@
 #include "Definitions.h"
 #include "LastSessionBrowserData.h"
 
-class BrowserWindow : public AlienWindow<>
+class BrowserWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(BrowserWindow);
 

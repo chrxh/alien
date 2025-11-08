@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class NewPasswordDialog : public AlienDialog<>
+class NewPasswordDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(NewPasswordDialog);
 

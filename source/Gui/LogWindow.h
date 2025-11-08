@@ -5,7 +5,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class LogWindow : public AlienWindow<>
+class LogWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(LogWindow);
 

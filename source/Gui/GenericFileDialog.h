@@ -10,7 +10,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class GenericFileDialog : public MainLoopEntity<>
+class GenericFileDialog : public MainLoopEntity
 {
     MAKE_SINGLETON(GenericFileDialog);
 

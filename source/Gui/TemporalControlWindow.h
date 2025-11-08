@@ -11,7 +11,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class TemporalControlWindow : public AlienWindow<>
+class TemporalControlWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TemporalControlWindow);
 

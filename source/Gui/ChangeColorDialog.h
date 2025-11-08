@@ -6,7 +6,7 @@
 
 #include "AlienDialog.h"
 
-class ChangeColorDialog : public AlienDialog<>
+class ChangeColorDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(ChangeColorDialog);
 

@@ -7,7 +7,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class ImageToPatternDialog : public MainLoopEntity<>
+class ImageToPatternDialog : public MainLoopEntity
 {
     MAKE_SINGLETON(ImageToPatternDialog);
 

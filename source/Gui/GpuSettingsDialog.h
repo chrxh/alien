@@ -8,7 +8,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class GpuSettingsDialog : public AlienDialog<>
+class GpuSettingsDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GpuSettingsDialog);
 

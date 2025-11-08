@@ -16,7 +16,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class NetworkTransferController : public MainLoopEntity<>
+class NetworkTransferController : public MainLoopEntity
 {
     MAKE_SINGLETON(NetworkTransferController);
 

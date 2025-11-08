@@ -8,7 +8,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class SpatialControlWindow : public AlienWindow<>
+class SpatialControlWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SpatialControlWindow);
 

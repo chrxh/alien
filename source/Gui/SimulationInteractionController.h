@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class SimulationInteractionController : public MainLoopEntity<>
+class SimulationInteractionController : public MainLoopEntity
 {
     MAKE_SINGLETON(SimulationInteractionController);
 

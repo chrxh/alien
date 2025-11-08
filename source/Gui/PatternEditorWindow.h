@@ -9,7 +9,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class PatternEditorWindow : public AlienWindow<>
+class PatternEditorWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(PatternEditorWindow);
 

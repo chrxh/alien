@@ -5,12 +5,12 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class DelayedExecutionController : public MainLoopEntity<>
+class DelayedExecutionController : public MainLoopEntity
 {
     MAKE_SINGLETON(DelayedExecutionController);
 
 public:
-    void executeLater(std::function<void(void)> const& execFunc);
+    void executeLater(std::function<void()> const& execFunc);
 
 private:
     void init() override {}
@@ -19,13 +19,13 @@ private:
 
     struct ExecutionData
     {
-        std::function<void(void)> func;
+        std::function<void()> func;
         int timer = 0;
     };
     std::vector<ExecutionData> _execDatas;
 };
 
-inline void delayedExecution(std::function<void(void)> const& execFunc)
+inline void delayedExecution(std::function<void()> const& execFunc)
 {
     DelayedExecutionController::get().executeLater(execFunc);
 }

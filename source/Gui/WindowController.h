@@ -6,7 +6,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class WindowController : public MainLoopEntity<>
+class WindowController : public MainLoopEntity
 {
     MAKE_SINGLETON(WindowController);
 

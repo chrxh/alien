@@ -10,7 +10,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class GenericMessageDialog : public AlienDialog<>
+class GenericMessageDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenericMessageDialog);
 

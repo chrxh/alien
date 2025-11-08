@@ -19,7 +19,7 @@ enum CreationMode_
     CreationMode_Drawing
 };
 
-class CreatorWindow : public AlienWindow<>
+class CreatorWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(CreatorWindow);
 

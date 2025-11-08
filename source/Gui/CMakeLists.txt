@@ -4,9 +4,11 @@ PUBLIC
     AboutDialog.h
     ActivateUserDialog.cpp
     ActivateUserDialog.h
+    AlienDialog.cpp
     AlienDialog.h
     AlienGui.cpp
     AlienGui.h
+    AlienWindow.cpp
     AlienWindow.h
     AutosaveWindow.cpp
     AutosaveWindow.h

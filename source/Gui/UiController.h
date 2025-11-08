@@ -7,7 +7,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class UiController : public MainLoopEntity<>
+class UiController : public MainLoopEntity
 {
     MAKE_SINGLETON(UiController);
 

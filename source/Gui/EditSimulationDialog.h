@@ -7,7 +7,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class EditSimulationDialog : public AlienDialog<>
+class EditSimulationDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(EditSimulationDialog);
 

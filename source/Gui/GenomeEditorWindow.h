@@ -8,7 +8,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class GenomeEditorWindow : public AlienWindow<>
+class GenomeEditorWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GenomeEditorWindow);
 

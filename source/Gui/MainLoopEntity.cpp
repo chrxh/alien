@@ -6,3 +6,9 @@ void AbstractMainLoopEntity::registerObject()
 {
     MainLoopEntityController::get().registerObject(this);
 }
+
+void MainLoopEntity::setup()
+{
+    init();
+    registerObject();
+}

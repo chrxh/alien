@@ -8,7 +8,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class MassOperationsDialog : public AlienDialog<>
+class MassOperationsDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(MassOperationsDialog);
 

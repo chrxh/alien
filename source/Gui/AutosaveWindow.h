@@ -8,7 +8,7 @@
 #include "AlienWindow.h"
 #include "Definitions.h"
 
-class AutosaveWindow : public AlienWindow<>
+class AutosaveWindow : public AlienWindow
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(AutosaveWindow);
 

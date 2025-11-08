@@ -9,7 +9,7 @@
 #include "AlienDialog.h"
 #include "Definitions.h"
 
-class UploadSimulationDialog : public AlienDialog<>
+class UploadSimulationDialog : public AlienDialog
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(UploadSimulationDialog);
 

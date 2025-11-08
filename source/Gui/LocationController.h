@@ -9,7 +9,7 @@
 #include "LocationWindow.h"
 #include "MainLoopEntity.h"
 
-class LocationController : public MainLoopEntity<>
+class LocationController : public MainLoopEntity
 {
     MAKE_SINGLETON(LocationController);
 

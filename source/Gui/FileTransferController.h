@@ -9,7 +9,7 @@
 #include "Definitions.h"
 #include "MainLoopEntity.h"
 
-class FileTransferController : public MainLoopEntity<>
+class FileTransferController : public MainLoopEntity
 {
     MAKE_SINGLETON(FileTransferController);
 
