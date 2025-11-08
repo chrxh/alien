@@ -310,7 +310,8 @@ TEST_F(DataTransferTests, getGenomeOfCreature_successful)
 
     auto genome =
         GenomeDescription().name("Test Genome").genes({GeneDescription().name("Gene1").separation(true).nodes({NodeDescription(), NodeDescription()})});
-    auto data = Description().addCreature(CreatureDescription().id(CreatureId).cells({CellDescription()}), genome);
+    auto data = Description().addCreature(
+        CreatureDescription().id(CreatureId).cells({CellDescription(), CellDescription(), CellDescription(), CellDescription()}), genome);
 
     _simulationFacade->setSimulationData(data);
 

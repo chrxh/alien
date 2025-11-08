@@ -35,5 +35,5 @@ private:
     Cell** _cudaCellArray;
     ArraySizesForGpu* _arraySizesGPU;
     ArraySizesForTO* _arraySizesTO;
-    int* _foundResult;
+    bool* _foundResult;
 };
