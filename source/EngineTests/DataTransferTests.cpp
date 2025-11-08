@@ -316,11 +316,12 @@ TEST_F(DataTransferTests, getGenomeOfCreature_successful)
 
     auto retrievedGenome = _simulationFacade->getGenomeOfCreature(CreatureId);
 
-    EXPECT_EQ("Test Genome", retrievedGenome._name);
-    ASSERT_EQ(1, retrievedGenome._genes.size());
-    EXPECT_EQ("Gene1", retrievedGenome._genes.front()._name);
-    EXPECT_TRUE(retrievedGenome._genes.front()._separation);
-    EXPECT_EQ(2, retrievedGenome._genes.front()._nodes.size());
+    ASSERT_TRUE(retrievedGenome.has_value());
+    EXPECT_EQ("Test Genome", retrievedGenome->_name);
+    ASSERT_EQ(1, retrievedGenome->_genes.size());
+    EXPECT_EQ("Gene1", retrievedGenome->_genes.front()._name);
+    EXPECT_TRUE(retrievedGenome->_genes.front()._separation);
+    EXPECT_EQ(2, retrievedGenome->_genes.front()._nodes.size());
 }
 
 TEST_F(DataTransferTests, getGenomeOfCreature_nonexistentCreature)
@@ -332,7 +333,8 @@ TEST_F(DataTransferTests, getGenomeOfCreature_nonexistentCreature)
 
     _simulationFacade->setSimulationData(data);
 
-    EXPECT_THROW(_simulationFacade->getGenomeOfCreature(WrongCreatureId), std::runtime_error);
+    auto result = _simulationFacade->getGenomeOfCreature(WrongCreatureId);
+    EXPECT_FALSE(result.has_value());
 }
 
 TEST_F(DataTransferTests, getInspectedSimulationData)

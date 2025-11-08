@@ -16,6 +16,7 @@
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data);
 __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data);
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data);
+__global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, SimulationData data);
 
 __global__ void cudaGetSelectedParticleData(SimulationData data, TO access);
 __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, TO access);

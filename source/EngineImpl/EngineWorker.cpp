@@ -209,7 +209,7 @@ bool EngineWorker::changeCreature(uint64_t creatureId, GenomeDescription const& 
     return _simulationCudaFacade->changeCreature(dataTO);
 }
 
-GenomeDescription EngineWorker::getGenomeOfCreature(uint64_t creatureId)
+std::optional<GenomeDescription> EngineWorker::getGenomeOfCreature(uint64_t creatureId)
 {
     EngineWorkerGuard access(this);
 
@@ -218,14 +218,14 @@ GenomeDescription EngineWorker::getGenomeOfCreature(uint64_t creatureId)
     auto dataTO = _simulationCudaFacade->getGenomeOfCreature(creatureId, found);
 
     if (!found) {
-        throw std::runtime_error("Creature with ID " + std::to_string(creatureId) + " not found");
+        return std::nullopt;
     }
 
     auto description = DescriptionConverterService::get().convertTOtoDescription(dataTO);
 
     // The genome should be the only one in the result
     if (description._genomes.empty()) {
-        throw std::runtime_error("Genome for creature with ID " + std::to_string(creatureId) + " not found");
+        return std::nullopt;
     }
 
     return description._genomes.front();

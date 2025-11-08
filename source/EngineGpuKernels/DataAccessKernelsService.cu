@@ -85,6 +85,7 @@ void _DataAccessKernelsService::getOverlayData(
 bool _DataAccessKernelsService::getGenomeOfCreature(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t creatureId, TO const& to)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
+    KERNEL_CALL(cudaPrepareCreatureGenomeForConversionToTO, creatureId, data);
     setValueToDevice(_foundResult, false);
     KERNEL_CALL(cudaGetGenomeOfCreature, creatureId, data, to, _foundResult);
     cudaDeviceSynchronize();
