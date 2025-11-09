@@ -22,6 +22,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     
     - name: Install Packages
       run: |
@@ -44,15 +46,13 @@ jobs:
         
     - name: Bootstrap vcpkg
       run: |
-        git clone https://github.com/Microsoft/vcpkg.git external/vcpkg
         pushd external/vcpkg
         ./bootstrap-vcpkg.sh -disableMetrics
         popd
 
     - name: Configure CMake (mit vcpkg Manifest-Mode)
       run: cmake -S . -B build \
-        -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
-        -DVCPKG_TARGET_TRIPLET=$VCPKG_DEFAULT_TRIPLET \
+        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 
