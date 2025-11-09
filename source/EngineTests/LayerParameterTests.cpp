@@ -192,14 +192,14 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
 
     _simulationFacade->setSimulationParameters(_parameters);
 
-    // Create test cells at different positions with energy = 0.5 * minCellEnergy for cells that should die
+    // Create test cells at different positions with very low energy for cells that should die
     auto data = Description().cells({
-        createCell({300.0f, 500.0f}, 50.0f, 0),   // Zone 1 center, energy = 0.5 * 100 (should die)
+        createCell({300.0f, 500.0f}, 10.0f, 0),   // Zone 1 center, very low energy (should die)
         createCell({305.0f, 500.0f}, 110.0f, 0),  // Zone 1, energy > 100 (should survive)
-        createCell({700.0f, 500.0f}, 60.0f, 0),   // Zone 2 center, energy = 0.5 * 120 (should die)
+        createCell({700.0f, 500.0f}, 10.0f, 0),   // Zone 2 center, very low energy (should die)
         createCell({710.0f, 500.0f}, 130.0f, 0),  // Zone 2, energy > 120 (should survive)
-        createCell({500.0f, 500.0f}, 25.0f, 0),   // Outside both zones, energy = 0.5 * 50 (should die)
-        createCell({510.0f, 500.0f}, 70.0f, 0),   // Outside both zones, energy > 50 (should survive)
+        createCell({900.0f, 500.0f}, 10.0f, 0),   // Outside both zones, very low energy (should die)
+        createCell({910.0f, 500.0f}, 70.0f, 0),   // Outside both zones, energy > 50 (should survive)
     });
 
     _simulationFacade->setSimulationData(data);
@@ -244,19 +244,19 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
 
     _simulationFacade->setSimulationParameters(_parameters);
 
-    // Create cells in different regions with energy = 0.5 * minCellEnergy for cells that should die:
+    // Create cells in different regions with very low energy for cells that should die:
     // - Only in Zone 1
     // - In overlapping region (both zones)
     // - Only in Zone 2
     auto data = Description().cells({
-        createCell({450.0f, 500.0f}, 50.0f, 0),   // Only Zone 1, energy = 0.5 * 100 (should die)
+        createCell({450.0f, 500.0f}, 10.0f, 0),   // Only Zone 1, very low energy (should die)
         createCell({460.0f, 500.0f}, 110.0f, 0),  // Only Zone 1, energy > 100 (should survive)
-        createCell({525.0f, 500.0f}, 60.0f, 0),   // Overlap, energy = 0.5 * 120 for Zone 2 (should die)
+        createCell({525.0f, 500.0f}, 10.0f, 0),   // Overlap, very low energy (should die)
         createCell({530.0f, 500.0f}, 130.0f, 0),  // Overlap, energy > 120 (should survive)
-        createCell({610.0f, 500.0f}, 60.0f, 0),   // Only Zone 2, energy = 0.5 * 120 (should die)
+        createCell({610.0f, 500.0f}, 10.0f, 0),   // Only Zone 2, very low energy (should die)
         createCell({620.0f, 500.0f}, 140.0f, 0),  // Only Zone 2, energy > 120 (should survive)
-        createCell({350.0f, 500.0f}, 25.0f, 0),   // Outside zones, energy = 0.5 * 50 (should die)
-        createCell({360.0f, 500.0f}, 70.0f, 0),   // Outside zones, energy > 50 (should survive)
+        createCell({300.0f, 500.0f}, 10.0f, 0),   // Outside zones, very low energy (should die)
+        createCell({310.0f, 500.0f}, 70.0f, 0),   // Outside zones, energy > 50 (should survive)
     });
 
     _simulationFacade->setSimulationData(data);
@@ -377,11 +377,11 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
 
     auto data = Description().cells({
         createCell({300.0f, 500.0f}, 110.0f, 0),  // Circular zone, energy > 100 (survives)
-        createCell({310.0f, 500.0f}, 50.0f, 0),   // Circular zone, energy = 0.5 * 100 (dies)
+        createCell({310.0f, 500.0f}, 10.0f, 0),   // Circular zone, very low energy (dies)
         createCell({700.0f, 500.0f}, 120.0f, 0),  // Rectangular zone, energy > 110 (survives)
-        createCell({710.0f, 500.0f}, 55.0f, 0),   // Rectangular zone, energy = 0.5 * 110 (dies)
-        createCell({500.0f, 500.0f}, 25.0f, 0),   // Outside both, energy = 0.5 * 50 (dies)
-        createCell({510.0f, 500.0f}, 70.0f, 0),   // Outside both, energy > 50 (survives)
+        createCell({710.0f, 500.0f}, 10.0f, 0),   // Rectangular zone, very low energy (dies)
+        createCell({900.0f, 500.0f}, 10.0f, 0),   // Outside both, very low energy (dies)
+        createCell({910.0f, 500.0f}, 70.0f, 0),   // Outside both, energy > 50 (survives)
     });
 
     _simulationFacade->setSimulationData(data);
