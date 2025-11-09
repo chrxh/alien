@@ -17,6 +17,7 @@ PUBLIC
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
+    LayerParameterTests.cpp
     MuscleTests.cpp
     NeuronTests.cpp
     PhysicsTests.cpp
