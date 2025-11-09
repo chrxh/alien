@@ -390,3 +390,80 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
     // Expect 3 survivors
     EXPECT_EQ(3, resultData._cells.size());
 }
+
+/**
+ * Test: Moving rectangular zone
+ * Tests that a rectangular zone with velocity correctly applies its parameter values
+ * to cells as the zone moves through space.
+ */
+TEST_F(LayerParameterTests, movingRectangularZone_cellsAffectedByMovingZone)
+{
+    // Setup: Create a rectangular zone that moves horizontally with velocity
+    setupRectangularLayer(0, {300.0f, 500.0f}, {100.0f, 80.0f}, 20.0f);
+
+    // Set zone velocity - moving rightward at 1.0 unit per timestep
+    _parameters.layerVelocity.layerValues[0] = {1.0f, 0.0f};
+
+    _parameters.minCellEnergy.baseValue[0] = 50.0f;
+    _parameters.minCellEnergy.layerValues[0].value[0] = 120.0f;
+    _parameters.minCellEnergy.layerValues[0].enabled = true;
+
+    _parameters.cellDeathProbability.baseValue[0] = 1.0f;
+    _parameters.radiationAbsorption.baseValue[0] = 0;
+
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    // Create stationary cells at different positions:
+    // - Cell at zone's initial position (should die immediately)
+    // - Cell ahead of zone's path (initially outside, will be inside after zone moves)
+    // - Cell far from zone's path (should survive throughout)
+    auto data = Description().cells({
+        createCell({300.0f, 500.0f}, 110.0f, 0),  // At initial zone center, dies (< 120)
+        createCell({320.0f, 500.0f}, 125.0f, 0),  // Inside initial zone, survives (> 120)
+        createCell({450.0f, 500.0f}, 110.0f, 0),  // Ahead of zone, initially safe but will be caught
+        createCell({460.0f, 500.0f}, 130.0f, 0),  // Ahead of zone, will survive when caught
+        createCell({300.0f, 650.0f}, 55.0f, 0),   // Far outside zone path, survives (> 50 base)
+    });
+
+    _simulationFacade->setSimulationData(data);
+
+    // Run simulation for 100 timesteps
+    // Zone moves from x=300 to x=400 (100 units rightward)
+    // This should bring the zone over the cells at x=450, x=460
+    _simulationFacade->calcTimesteps(100);
+
+    auto resultData = _simulationFacade->getSimulationData();
+
+    // Expected survivors:
+    // - Cell at 320 (survives in initial zone)
+    // - Cell at 460 (survives when zone moves over it)
+    // - Cell at 300,650 (outside zone path)
+    // Dead cells:
+    // - Cell at 300 (dies in initial zone)
+    // - Cell at 450 (dies when zone moves over it)
+    EXPECT_EQ(3, resultData._cells.size());
+
+    // Verify at least one survivor is near the expected positions
+    bool foundInitialZoneSurvivor = false;
+    bool foundCaughtSurvivor = false;
+    bool foundOutsideSurvivor = false;
+
+    for (auto const& cell : resultData._cells) {
+        // Check for cell that was initially in zone (around x=320)
+        if (approxCompare(cell._pos.x, 320.0f, 20.0f) && approxCompare(cell._pos.y, 500.0f, 20.0f)) {
+            foundInitialZoneSurvivor = true;
+        }
+        // Check for cell that got caught by moving zone (around x=460)
+        if (approxCompare(cell._pos.x, 460.0f, 20.0f) && approxCompare(cell._pos.y, 500.0f, 20.0f)) {
+            foundCaughtSurvivor = true;
+        }
+        // Check for cell outside zone path (around y=650)
+        if (approxCompare(cell._pos.y, 650.0f, 20.0f)) {
+            foundOutsideSurvivor = true;
+        }
+    }
+
+    EXPECT_TRUE(foundInitialZoneSurvivor);
+    EXPECT_TRUE(foundCaughtSurvivor);
+    EXPECT_TRUE(foundOutsideSurvivor);
+}
