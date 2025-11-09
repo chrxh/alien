@@ -11,20 +11,62 @@
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
-IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
+// Static member initialization
+std::map<std::string, std::shared_ptr<IntegrationTestFramework::TestSuiteContext>> IntegrationTestFramework::_contextMap;
+
+// TestSuiteContext destructor implementation
+IntegrationTestFramework::TestSuiteContext::~TestSuiteContext()
 {
-    _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-    SimulationParameters parameters;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        parameters.radiationType1_strength.baseValue[i] = 0;
+    if (simulationFacade) {
+        simulationFacade->closeSimulation();
     }
-    _simulationFacade->newSimulation(0, universeSize, parameters);
-    _parameters = _simulationFacade->getSimulationParameters();
+}
+
+IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
+    : _universeSize(universeSize)
+{
+    // Get the test suite name (e.g., "CellConnectionTests")
+    auto testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
+    std::string testSuiteName = testInfo ? testInfo->test_suite_name() : "Unknown";
+    
+    // Get or create context for this test suite
+    auto& context = _contextMap[testSuiteName];
+    if (!context) {
+        context = std::make_shared<TestSuiteContext>();
+        context->simulationFacade = std::make_shared<_SimulationFacadeImpl>();
+        
+        SimulationParameters parameters;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        context->simulationFacade->newSimulation(0, _universeSize, parameters);
+    }
+    
+    context->refCount++;
+    _context = context;
+    _simulationFacade = context->simulationFacade;
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
-    _simulationFacade->closeSimulation();
+    if (_context) {
+        _context->refCount--;
+        if (_context->refCount == 0) {
+            // Last test in the suite - close simulation
+            // This will be done automatically by TestSuiteContext destructor when shared_ptr goes out of scope
+            auto testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
+            if (testInfo) {
+                _contextMap.erase(testInfo->test_suite_name());
+            }
+        }
+    }
+}
+
+void IntegrationTestFramework::SetUp()
+{
+    _simulationFacade->clear();
+    _simulationFacade->setCurrentTimestep(0);
+    _parameters = _simulationFacade->getSimulationParameters();
 }
 
 double IntegrationTestFramework::getEnergy(Description const& data) const

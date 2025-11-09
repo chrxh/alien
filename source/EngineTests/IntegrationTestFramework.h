@@ -1,6 +1,9 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include <map>
+#include <string>
+#include <memory>
 
 #include <Base/Definitions.h>
 
@@ -15,6 +18,8 @@ class IntegrationTestFramework : public ::testing::Test
 public:
     IntegrationTestFramework(IntVector2D const& universeSize = IntVector2D{1000, 1000});
     virtual ~IntegrationTestFramework();
+
+    void SetUp() override;
 
 protected:
     double getEnergy(Description const& data) const;
@@ -38,4 +43,17 @@ protected:
 
     SimulationFacade _simulationFacade;
     SimulationParameters _parameters;
+
+private:
+    struct TestSuiteContext
+    {
+        SimulationFacade simulationFacade;
+        int refCount = 0;
+        
+        ~TestSuiteContext();
+    };
+
+    static std::map<std::string, std::shared_ptr<TestSuiteContext>> _contextMap;
+    std::shared_ptr<TestSuiteContext> _context;
+    IntVector2D _universeSize;
 };
