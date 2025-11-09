@@ -23,7 +23,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
+        submodules: recursive
+    
+    - name: Unshallow vcpkg submodule
+      run: |
+        cd external/vcpkg
+        git fetch --unshallow || true
+        cd ../..
     
     - name: Install Packages
       run: |
