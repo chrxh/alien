@@ -87,11 +87,12 @@ void _GenomeEditorWidget::processGeneList()
     if (ImGui::BeginChild("GeneList", ImVec2(0, 0))) {
         auto scrollToGeneIndex = -1;
         if (!_selectedGeneFromPreviousFrame.has_value() || _selectedGeneFromPreviousFrame != _editData->selectedGeneIndex) {
-            if (_editData->selectedGeneIndex.has_value()) {
+            if (_editData->selectedGeneIndex.has_value() && !_geneSelectedFromTable) {
                 scrollToGeneIndex = std::max(1, _editData->selectedGeneIndex.value());
             }
         }
         _selectedGeneFromPreviousFrame = _editData->selectedGeneIndex;
+        _geneSelectedFromTable = false;
 
         auto rootHull = GenomeDescriptionInfoService::get().getReferencedGenesInRootGeneHull(_editData->genome);
 
@@ -148,6 +149,7 @@ void _GenomeEditorWidget::processGeneList()
                             ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap,
                             ImVec2(0, scale(ImGui::GetTextLineHeightWithSpacing()) - ImGui::GetStyle().FramePadding.y))) {
                         if (selected) {
+                            _geneSelectedFromTable = true;
                             _editData->selectedGeneIndex = row;
                         }
                     }

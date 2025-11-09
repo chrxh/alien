@@ -30,4 +30,5 @@ private:
     int _sequenceNumberForCreatedGenes = 0;
 
     std::optional<int> _selectedGeneFromPreviousFrame;
+    bool _geneSelectedFromTable = false;
 };
