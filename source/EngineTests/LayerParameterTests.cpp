@@ -173,7 +173,7 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
     _parameters.layerShape.layerValues[0] = LayerShapeType_Circular;
     _parameters.layerPosition.layerValues[0] = {300.0f, 500.0f};
     _parameters.layerCoreRadius.layerValues[0] = 50.0f;
-    _parameters.layerFadeoutRadius.layerValues[0] = 10.0f;
+    _parameters.layerFadeoutRadius.layerValues[0] = 0.0f;
     _parameters.minCellEnergy.layerValues[0].value[0] = 100.0f;
     _parameters.minCellEnergy.layerValues[0].enabled = true;
 
@@ -182,7 +182,7 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
     _parameters.layerShape.layerValues[1] = LayerShapeType_Circular;
     _parameters.layerPosition.layerValues[1] = {700.0f, 500.0f};
     _parameters.layerCoreRadius.layerValues[1] = 150.0f;
-    _parameters.layerFadeoutRadius.layerValues[1] = 10.0f;
+    _parameters.layerFadeoutRadius.layerValues[1] = 0.0f;
     _parameters.minCellEnergy.layerValues[1].value[0] = 120.0f;
     _parameters.minCellEnergy.layerValues[1].enabled = true;
 
@@ -198,7 +198,8 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
         createCell({305.0f, 500.0f}, 110.0f, 0),  // Zone 1, energy > 100 (should survive)
         createCell({700.0f, 500.0f}, 60.0f, 0),   // Zone 2 center, energy = 0.5 * 120 (should die)
         createCell({710.0f, 500.0f}, 130.0f, 0),  // Zone 2, energy > 120 (should survive)
-        createCell({500.0f, 500.0f}, 60.0f, 0),   // Outside both zones, energy > 50 (should survive)
+        createCell({500.0f, 500.0f}, 25.0f, 0),   // Outside both zones, energy = 0.5 * 50 (should die)
+        createCell({510.0f, 500.0f}, 70.0f, 0),   // Outside both zones, energy > 50 (should survive)
     });
 
     _simulationFacade->setSimulationData(data);
@@ -224,7 +225,7 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
     _parameters.layerShape.layerValues[0] = LayerShapeType_Circular;
     _parameters.layerPosition.layerValues[0] = {500.0f, 500.0f};
     _parameters.layerCoreRadius.layerValues[0] = 100.0f;
-    _parameters.layerFadeoutRadius.layerValues[0] = 10.0f;
+    _parameters.layerFadeoutRadius.layerValues[0] = 0.0f;
     _parameters.minCellEnergy.layerValues[0].value[0] = 100.0f;
     _parameters.minCellEnergy.layerValues[0].enabled = true;
 
@@ -233,7 +234,7 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
     _parameters.layerShape.layerValues[1] = LayerShapeType_Circular;
     _parameters.layerPosition.layerValues[1] = {550.0f, 500.0f};
     _parameters.layerCoreRadius.layerValues[1] = 80.0f;
-    _parameters.layerFadeoutRadius.layerValues[1] = 10.0f;
+    _parameters.layerFadeoutRadius.layerValues[1] = 0.0f;
     _parameters.minCellEnergy.layerValues[1].value[0] = 120.0f;
     _parameters.minCellEnergy.layerValues[1].enabled = true;
 
@@ -253,7 +254,9 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
         createCell({525.0f, 500.0f}, 60.0f, 0),   // Overlap, energy = 0.5 * 120 for Zone 2 (should die)
         createCell({530.0f, 500.0f}, 130.0f, 0),  // Overlap, energy > 120 (should survive)
         createCell({610.0f, 500.0f}, 60.0f, 0),   // Only Zone 2, energy = 0.5 * 120 (should die)
-        createCell({615.0f, 500.0f}, 140.0f, 0),  // Only Zone 2, energy > 120 (should survive)
+        createCell({620.0f, 500.0f}, 140.0f, 0),  // Only Zone 2, energy > 120 (should survive)
+        createCell({350.0f, 500.0f}, 25.0f, 0),   // Outside zones, energy = 0.5 * 50 (should die)
+        createCell({360.0f, 500.0f}, 70.0f, 0),   // Outside zones, energy > 50 (should survive)
     });
 
     _simulationFacade->setSimulationData(data);
@@ -261,8 +264,8 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
 
     auto resultData = _simulationFacade->getSimulationData();
 
-    // Verify: 3 cells should survive (one from each region)
-    EXPECT_EQ(3, resultData._cells.size());
+    // Verify: 4 cells should survive (one from each region: zone1 only, overlap, zone2 only, outside)
+    EXPECT_EQ(4, resultData._cells.size());
 }
 
 /**
@@ -353,7 +356,7 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
     _parameters.layerShape.layerValues[0] = LayerShapeType_Circular;
     _parameters.layerPosition.layerValues[0] = {300.0f, 500.0f};
     _parameters.layerCoreRadius.layerValues[0] = 60.0f;
-    _parameters.layerFadeoutRadius.layerValues[0] = 10.0f;
+    _parameters.layerFadeoutRadius.layerValues[0] = 0.0f;
     _parameters.minCellEnergy.layerValues[0].value[0] = 100.0f;
     _parameters.minCellEnergy.layerValues[0].enabled = true;
 
@@ -362,7 +365,7 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
     _parameters.layerShape.layerValues[1] = LayerShapeType_Rectangular;
     _parameters.layerPosition.layerValues[1] = {700.0f, 500.0f};
     _parameters.layerCoreRect.layerValues[1] = {100.0f, 80.0f};
-    _parameters.layerFadeoutRadius.layerValues[1] = 10.0f;
+    _parameters.layerFadeoutRadius.layerValues[1] = 0.0f;
     _parameters.minCellEnergy.layerValues[1].value[0] = 110.0f;
     _parameters.minCellEnergy.layerValues[1].enabled = true;
 
@@ -377,7 +380,8 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
         createCell({310.0f, 500.0f}, 50.0f, 0),   // Circular zone, energy = 0.5 * 100 (dies)
         createCell({700.0f, 500.0f}, 120.0f, 0),  // Rectangular zone, energy > 110 (survives)
         createCell({710.0f, 500.0f}, 55.0f, 0),   // Rectangular zone, energy = 0.5 * 110 (dies)
-        createCell({500.0f, 500.0f}, 60.0f, 0),   // Outside both, energy > 50 (survives)
+        createCell({500.0f, 500.0f}, 25.0f, 0),   // Outside both, energy = 0.5 * 50 (dies)
+        createCell({510.0f, 500.0f}, 70.0f, 0),   // Outside both, energy > 50 (survives)
     });
 
     _simulationFacade->setSimulationData(data);
