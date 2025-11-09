@@ -22,6 +22,30 @@ IntegrationTestFramework::TestSuiteContext::~TestSuiteContext()
     }
 }
 
+// Test listener to clean up contexts after each test suite
+class IntegrationTestListener : public ::testing::EmptyTestEventListener
+{
+    void OnTestSuiteEnd(const ::testing::TestSuite& test_suite) override
+    {
+        // Clean up the context for this test suite
+        IntegrationTestFramework::_contextMap.erase(test_suite.name());
+    }
+};
+
+// Register the listener (done once at program startup)
+namespace
+{
+    struct ListenerRegistrar
+    {
+        ListenerRegistrar()
+        {
+            auto& listeners = ::testing::UnitTest::GetInstance()->listeners();
+            listeners.Append(new IntegrationTestListener());
+        }
+    };
+    static ListenerRegistrar registrar;
+}
+
 IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
     : _universeSize(universeSize)
 {
@@ -51,14 +75,6 @@ IntegrationTestFramework::~IntegrationTestFramework()
 {
     if (_context) {
         _context->refCount--;
-        if (_context->refCount == 0) {
-            // Last test in the suite - close simulation
-            // This will be done automatically by TestSuiteContext destructor when shared_ptr goes out of scope
-            auto testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
-            if (testInfo) {
-                _contextMap.erase(testInfo->test_suite_name());
-            }
-        }
     }
 }
 

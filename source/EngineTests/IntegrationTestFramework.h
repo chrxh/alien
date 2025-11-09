@@ -13,8 +13,12 @@
 
 #include <EngineTestData/TestHelper.h>
 
+class IntegrationTestListener;
+
 class IntegrationTestFramework : public ::testing::Test
 {
+    friend class IntegrationTestListener;
+
 public:
     IntegrationTestFramework(IntVector2D const& universeSize = IntVector2D{1000, 1000});
     virtual ~IntegrationTestFramework();
