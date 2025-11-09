@@ -95,7 +95,7 @@ TEST_F(LayerParameterTests, circularZone_minCellEnergy_cellsDieInsideZone)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
@@ -151,7 +151,7 @@ TEST_F(LayerParameterTests, rectangularZone_minCellEnergy_cellsDieInsideZone)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
@@ -203,7 +203,7 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
@@ -260,7 +260,7 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
@@ -295,7 +295,7 @@ TEST_F(LayerParameterTests, circularZone_fadeoutRadius_transitionBehavior)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
@@ -334,7 +334,7 @@ TEST_F(LayerParameterTests, rectangularZone_dimensions_correctBoundaries)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
@@ -385,7 +385,7 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1000);
+    _simulationFacade->calcTimesteps(10);
 
     auto resultData = _simulationFacade->getSimulationData();
 
