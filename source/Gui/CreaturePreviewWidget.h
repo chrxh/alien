@@ -42,13 +42,13 @@ private:
     SubGenomeDescription _subGenome;
     uint64_t _creatureId = 0;
     std::optional<float> _visualFrontAngle;
-    std::optional<uint64_t> _selectedCellId;
+    std::optional<uint64_t> _selectedCellIdFromPreview;
 
     RealVector2D _worldCenter;
     float _zoom = 20.0f;
     bool _initialScrollPositionSet = false;
     std::optional<float> _lastFrontAngleRadius;
-    std::optional<int> _selectedNode;
+    std::optional<int> _selectedNodeFromPreview;
 
     std::optional<RealVector2D> _worldPosForPanning;
 };

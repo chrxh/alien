@@ -161,9 +161,17 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto mousePos = ImGui::GetMousePos();
     auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 
-    if (_selectedNode != selectedNode) {
-        _selectedCellId.reset();
-        _selectedNode.reset();
+    // Clear selection if another node has been selected outside of this widget or if cell id does not exist in preview
+    auto selectedCellIdExists = false;
+    for (auto const& cell : desc._cells) {
+        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
+            selectedCellIdExists = true;
+            break;
+        }
+    }
+    if (!selectedCellIdExists || _selectedNodeFromPreview != selectedNode) {
+        _selectedCellIdFromPreview.reset();
+        _selectedNodeFromPreview.reset();
     }
 
     // Draw front circle
@@ -199,7 +207,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw selected gene
-    auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
+    auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.15f);
     for (auto const& cell : desc._cells) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
@@ -208,11 +216,14 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw selected nodes
-    auto selectedNodeColor = ImColor::HSV(0, 0, 0.3f);
     for (auto const& cell : desc._cells) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
-            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedNodeColor);
+            float h, s, v;
+            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
+            s = 0.5f;
+            v = 0.3f;
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(h, s, v));
         }
     }
 
@@ -225,7 +236,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-        if (_selectedCellId.has_value() && _selectedCellId.value() == cell._id) {
+        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
             if (_zoom > ZoomLevelForLabels) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 1.0f/*cellSize * 0.05f*/);
             }
@@ -236,8 +247,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 && mousePos.y <= cellPos.y + cellSize / 2) {
                 selectedGene = cell._geneIndex;
                 selectedNode = cell._nodeIndex;
-                _selectedNode = selectedNode;
-                _selectedCellId = cell._id;
+                _selectedNodeFromPreview = selectedNode;
+                _selectedCellIdFromPreview = cell._id;
 
             }
         }
