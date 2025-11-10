@@ -2,8 +2,6 @@
 
 #include <boost/range/combine.hpp>
 
-#include <Base/Math.h>
-
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 
@@ -11,10 +9,8 @@
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
-// Static member initialization
-std::map<std::string, std::shared_ptr<IntegrationTestFramework::TestSuiteContext>> IntegrationTestFramework::_contextMap;
+IntegrationTestFramework::TestSuiteContext IntegrationTestFramework::_globalContext;
 
-// TestSuiteContext destructor implementation
 IntegrationTestFramework::TestSuiteContext::~TestSuiteContext()
 {
     if (simulationFacade) {
@@ -22,67 +18,35 @@ IntegrationTestFramework::TestSuiteContext::~TestSuiteContext()
     }
 }
 
-// Test listener to clean up contexts after each test suite
-class IntegrationTestListener : public ::testing::EmptyTestEventListener
+IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
+    : _worldSize(worldSize)
 {
-    void OnTestSuiteEnd(const ::testing::TestSuite& test_suite) override
-    {
-        // Clean up the context for this test suite
-        IntegrationTestFramework::_contextMap.erase(test_suite.name());
+    if (_globalContext.simulationFacade == nullptr) {
+        _globalContext.simulationFacade = std::make_shared<_SimulationFacadeImpl>();
     }
-};
 
-// Register the listener (done once at program startup)
-namespace
-{
-    struct ListenerRegistrar
-    {
-        ListenerRegistrar()
-        {
-            auto& listeners = ::testing::UnitTest::GetInstance()->listeners();
-            listeners.Append(new IntegrationTestListener());
-        }
-    };
-    static ListenerRegistrar registrar;
-}
-
-IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
-    : _universeSize(universeSize)
-{
-    // Get the test suite name (e.g., "CellConnectionTests")
-    auto testInfo = ::testing::UnitTest::GetInstance()->current_test_info();
-    std::string testSuiteName = testInfo ? testInfo->test_suite_name() : "Unknown";
-    
-    // Get or create context for this test suite
-    auto& context = _contextMap[testSuiteName];
-    if (!context) {
-        context = std::make_shared<TestSuiteContext>();
-        context->simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-        
-        SimulationParameters parameters;
+    _simulationFacade = _globalContext.simulationFacade;
+    if (_simulationFacade->getWorldSize() != worldSize) {
+        _simulationFacade->closeSimulation();
         for (int i = 0; i < MAX_COLORS; ++i) {
-            parameters.radiationType1_strength.baseValue[i] = 0;
+            _parameters.radiationType1_strength.baseValue[i] = 0;
         }
-        context->simulationFacade->newSimulation(0, _universeSize, parameters);
+        _simulationFacade->newSimulation(0, _worldSize, _parameters);
+    } else {
+        _simulationFacade->clear();
+        _simulationFacade->setPreviewData(Description());
+        _simulationFacade->setCurrentTimestepForPreview(0);
+        _simulationFacade->setCurrentTimestep(0);
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
     }
-    
-    context->refCount++;
-    _context = context;
-    _simulationFacade = context->simulationFacade;
+
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
-    if (_context) {
-        _context->refCount--;
-    }
-}
-
-void IntegrationTestFramework::SetUp()
-{
-    _simulationFacade->clear();
-    _simulationFacade->setCurrentTimestep(0);
-    _parameters = _simulationFacade->getSimulationParameters();
 }
 
 double IntegrationTestFramework::getEnergy(Description const& data) const
