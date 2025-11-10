@@ -28,12 +28,15 @@ PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData,
 
 void _PreviewWidget::process()
 {
+    // Has genome changed?
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         createSubGenomesForPreview();
         setupPreviewData();
         _run = true;
         _savepoints.clear();
     }
+
+    // Has tab changed?
     if (_genomeEditData->currentPreviewId.has_value() && _genomeEditData->currentPreviewId.value() != _editData->id) {
         setupPreviewData();
     }

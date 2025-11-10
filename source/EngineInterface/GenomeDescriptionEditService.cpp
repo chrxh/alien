@@ -206,14 +206,14 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
             if (cachedPhenotype._creatures.front()._generation == 0) {
                 seedFirst = true;  // first Creature is seed
             }
-            result.description.add(std::move(cachedPhenotype));
+            result.description.add(std::move(cachedPhenotype), false);
 
             auto index = seedFirst ? result.description._creatures.size() - cachedPhenotype._creatures.size()
                                    : result.description._creatures.size() - cachedPhenotype._creatures.size() + 1;
             result.seedCreatureIds.emplace_back(result.description._creatures.at(index)._id);
         } else {
             auto seed = createSeedForPreview(subGenome, currentPos);
-            result.description.add(std::move(seed));
+            result.description.add(std::move(seed), false);
 
             result.seedCreatureIds.emplace_back(result.description._creatures.back()._id);
         }

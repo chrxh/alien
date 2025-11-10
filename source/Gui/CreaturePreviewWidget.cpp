@@ -156,7 +156,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto selectedNode = _editData->getSelectedNodeIndex();
     auto drawList = ImGui::GetWindowDrawList();
     auto& style = StyleRepository::get();
-
     RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
     RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
     auto mousePos = ImGui::GetMousePos();
