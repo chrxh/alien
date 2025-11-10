@@ -120,7 +120,7 @@ struct SimulationParameters
     BaseLayerParameter<ColorVector<float>> minCellEnergy = {.baseValue = {50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
     BaseParameter<ColorVector<float>> normalCellEnergy = {100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f, 100.0f};
     BaseLayerParameter<ColorVector<float>> cellDeathProbability = {.baseValue = {0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f, 0.001f}};
-    BaseParameter<CellDeathConsquences> cellDeathConsequences = {CellDeathConsquences_DetachedPartsDie};
+    BaseParameter<CellDeathConsequences> cellDeathConsequences = {CellDeathConsequences_DetachedPartsDie};
 
     // Mutations
     BaseLayerParameter<ColorVector<float>> copyMutationNeuronData = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};

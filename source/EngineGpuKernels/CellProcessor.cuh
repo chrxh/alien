@@ -613,43 +613,40 @@ __inline__ __device__ void CellProcessor::cellStateTransition_calcFutureState(Si
 
         if (cell->barrier) {
             cellState = CellState_Ready;
-        } else if (origCellState == CellState_Activating) {
-            cellState = CellState_Ready;
-            if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
-                atomicExch(&cell->age, 0);
-            }
-        } else if (origCellState == CellState_Reviving) {
-            cellState = CellState_Ready;
-        } else if (origCellState == CellState_Constructing) {
-            if (isNeighborActivating) {
-                cellState = CellState_Activating;
-                //auto prevCell = cell->connections[activatingCellConnection].cell;
-                //if (prevCell != cell->connections[0].cell) {
-                //    cell->frontAngle =
-                //        Math::normalizedAngle(prevCell->frontAngle + (180.0f - cell->getAngelSpan(prevCell, cell->connections[0].cell)), -180.0f);
-                //} else {
-                //    cell->frontAngle = Math::normalizedAngle(prevCell->frontAngle + 180.0f, -180.0f);
-                //}
-                //cell->frontAngle = Math::normalizedAngle(cell->frontAngle, -180.0f);
-            }
-            if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
-                cellState = CellState_Detaching;
-            }
-        } else if (origCellState == CellState_Detaching) {
-            if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie) {
-                cellState = CellState_Reviving;
-            }
-            if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_None) {
+        } else {
+            if (origCellState == CellState_Activating) {
                 cellState = CellState_Ready;
-            }
-        } else if (origCellState == CellState_Ready) {
-            if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsquences_None) {
-                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsquences_DetachedPartsDie && cell->creature != nullptr
-                    && cell->headCell) {
-                    cellState = CellState_Reviving;
-                } else {
+                if (cudaSimulationParameters.cellAgeLimiterToggle.value && cudaSimulationParameters.resetCellAgeAfterActivation.value) {
+                    atomicExch(&cell->age, 0);
+                }
+            } else if (origCellState == CellState_Reviving) {
+                cellState = CellState_Ready;
+            } else if (origCellState == CellState_Constructing) {
+                if (isNeighborActivating) {
+                    cellState = CellState_Activating;
+                }
+                if (isOtherCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsequences_None) {
                     cellState = CellState_Detaching;
                 }
+            } else if (origCellState == CellState_Detaching) {
+                if (isSameCreatureNeighborReviving && cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_DetachedPartsDie) {
+                    cellState = CellState_Reviving;
+                }
+                if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_None) {
+                    cellState = CellState_Ready;
+                }
+            } else if (origCellState == CellState_Ready) {
+                if (isSameCreatureNeighborDetaching && cudaSimulationParameters.cellDeathConsequences.value != CellDeathConsequences_None) {
+                    if (cudaSimulationParameters.cellDeathConsequences.value == CellDeathConsequences_DetachedPartsDie && cell->creature != nullptr
+                        && cell->headCell) {
+                        cellState = CellState_Reviving;
+                    } else {
+                        cellState = CellState_Detaching;
+                    }
+                }
+            }
+            if (cell->cellType == CellType_Free || cell->cellType == CellType_Structure) {
+                cellState = origCellState;
             }
         }
         cell->tempValue.as_uint32_float.uint32Part = cellState;

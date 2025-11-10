@@ -17,7 +17,6 @@
 #include "OverlayController.h"
 #include "StyleRepository.h"
 #include "Viewport.h"
-#include <EngineInterface/SimulationFacade.h>
 
 using namespace std::string_literals;
 
