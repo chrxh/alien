@@ -78,7 +78,7 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->barrier) {
+        if (cell->fixed) {
             continue;
         }
         statistics.maxValue(cell->age);
@@ -93,7 +93,7 @@ __global__ void cudaUpdateHistogramData_substep3(SimulationData data, Simulation
     auto maxAge = statistics.getMaxValue();
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
-        if (cell->barrier) {
+        if (cell->fixed) {
             continue;
         }
         auto slot = cell->age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);

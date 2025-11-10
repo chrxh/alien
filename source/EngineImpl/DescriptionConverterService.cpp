@@ -257,7 +257,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     }
     result._connections = connections;
     result._cellState = cellTO.cellState;
-    result._barrier = cellTO.barrier;
+    result._fixed = cellTO.fixed;
     result._sticky = cellTO.sticky;
     result._age = cellTO.age;
     result._color = cellTO.color;
@@ -983,7 +983,7 @@ void DescriptionConverterService::convertCellToTO(
     }
     cellTO.activationTime = cellDesc._activationTime;
     cellTO.numConnections = 0;
-    cellTO.barrier = cellDesc._barrier;
+    cellTO.fixed = cellDesc._fixed;
     cellTO.sticky = cellDesc._sticky;
     cellTO.age = cellDesc._age;
     cellTO.color = cellDesc._color;

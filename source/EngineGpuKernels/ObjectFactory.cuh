@@ -260,7 +260,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->energy = cellTO.energy;
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
-    cell->barrier = cellTO.barrier;
+    cell->fixed = cellTO.fixed;
     cell->sticky = cellTO.sticky;
     cell->age = cellTO.age;
     cell->color = cellTO.color;
@@ -447,7 +447,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->frontAngle = VALUE_NOT_SET_FLOAT;
     cell->frontAngleId = 0;
     cell->headCell = false;
-    cell->barrier = false;
+    cell->fixed = false;
     cell->sticky = false;
     cell->age = 0;
     cell->activationTime = 0;
@@ -492,7 +492,7 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    cell->scheduledOperationIndex = -1;
 //    cell->locked = 0;
 //    cell->color = 0;
-//    cell->barrier = false;
+//    cell->fixed = false;
 //    cell->sticky = false;
 //    cell->age = 0;
 //    cell->vel = {0, 0};
@@ -531,7 +531,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     cell->color = node->color;
     cell->frontAngle = VALUE_NOT_SET_FLOAT;
     cell->stiffness = 1.0f;
-    cell->barrier = false;
+    cell->fixed = false;
     cell->sticky = false;
     cell->age = 0;
     cell->cellState = CellState_Constructing;

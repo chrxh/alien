@@ -65,7 +65,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto& cell = cells.at(index);
-            if (cell->barrier) {
+            if (cell->fixed) {
                 continue;
             }
             cell->shared1 += calcResultingAcceleration(cell->pos);

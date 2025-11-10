@@ -94,7 +94,7 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
             }
         } else {
             if (auto cell = data.cellMap.getFirst(particle->pos + particle->vel)) {
-                if (cell->barrier) {
+                if (cell->fixed) {
                     auto vr = particle->vel - cell->vel;
                     auto r = data.cellMap.getCorrectedDirection(particle->pos - cell->pos);
                     auto dot_vr_r = Math::dot(vr, r);

@@ -234,7 +234,7 @@ struct CellTO
     uint8_t color;
     uint8_t numConnections;
     float frontAngle;  // May be invalid
-    bool barrier;
+    bool fixed;
     bool sticky;
     uint32_t age;
     CellState cellState;

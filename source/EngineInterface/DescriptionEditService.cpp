@@ -23,7 +23,7 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
                                            .energy(parameters._energy)
                                            .stiffness(parameters._stiffness)
                                            .color(parameters._color)
-                                           .barrier(parameters._barrier)
+                                           .fixed(parameters._fixed)
                                            .sticky(parameters._sticky)
                                            .cellType(parameters._cellType));
         }
@@ -47,7 +47,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
                                            .stiffness(parameters._stiffness)
                                            .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                            .color(parameters._color)
-                                           .barrier(parameters._barrier)
+                                           .fixed(parameters._fixed)
                                            .sticky(parameters._sticky)
                                            .cellType(parameters._cellType));
 
@@ -59,7 +59,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
                                                .stiffness(parameters._stiffness)
                                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                                .color(parameters._color)
-                                               .barrier(parameters._barrier));
+                                               .fixed(parameters._fixed));
             }
         }
     }
@@ -81,7 +81,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                                        .energy(parameters._energy)
                                        .stiffness(parameters._stiffness)
                                        .color(parameters._color)
-                                       .barrier(parameters._barrier)
+                                       .fixed(parameters._fixed)
                                        .sticky(parameters._sticky));
         return result;
     }
@@ -105,7 +105,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
                                            .stiffness(parameters._stiffness)
                                            .pos({parameters._center.x + dxMod, parameters._center.y + dy})
                                            .color(parameters._color)
-                                           .barrier(parameters._barrier)
+                                           .fixed(parameters._fixed)
                                            .sticky(parameters._sticky));
         }
     }
