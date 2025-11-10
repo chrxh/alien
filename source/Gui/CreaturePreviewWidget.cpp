@@ -162,6 +162,11 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto mousePos = ImGui::GetMousePos();
     auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
 
+    if (_selectedNode != selectedNode) {
+        _selectedCellId.reset();
+        _selectedNode.reset();
+    }
+
     // Draw front circle
     {
         auto maxDistance = 0.0f;
@@ -203,6 +208,15 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         }
     }
 
+    // Draw selected nodes
+    auto selectedNodeColor = ImColor::HSV(0, 0, 0.3f);
+    for (auto const& cell : desc._cells) {
+        auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
+        if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedNodeColor);
+        }
+    }
+
     // Draw cells and selected cells
     for (auto const& cell : desc._cells) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
@@ -212,16 +226,9 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-        if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
-            if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.4f, ImColor::HSV(0, 0, 1, 0.7f));
-            } else {
-                drawList->AddCircle({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * 0.4f), ImColor::HSV(h, s * 0.8f, v * 1.2f));
-            }
-        }
         if (_selectedCellId.has_value() && _selectedCellId.value() == cell._id) {
             if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(0, 0, 1, 1.0f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 1.0f/*cellSize * 0.05f*/);
             }
         }
 
@@ -230,7 +237,9 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 && mousePos.y <= cellPos.y + cellSize / 2) {
                 selectedGene = cell._geneIndex;
                 selectedNode = cell._nodeIndex;
+                _selectedNode = selectedNode;
                 _selectedCellId = cell._id;
+
             }
         }
     }
@@ -254,8 +263,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             if (!cell._signalRestriction.has_value()) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
             } else {
-                auto startAngle = cell._signalRestriction->_startAngle;
-                auto endAngle = cell._signalRestriction->_endAngle;
+                auto startAngle = Math::getNormalizedAngle(cell._signalRestriction->_startAngle, 0);
+                auto endAngle = Math::getNormalizedAngle(cell._signalRestriction->_endAngle, 0);
 
                 // With the following code to draw a filled arc (pie segment) between startAngle and endAngle:
                 const int numSegments = 32;  // Increase for smoother arc
@@ -290,8 +299,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto direction = cellPos1 - cellPos2;
 
             Math::normalize(direction);
-            auto connectionStartPos = cellPos1 - direction * cellSize / 4;
-            auto connectionEndPos = cellPos2 + direction * cellSize / 4;
+            auto connectionStartPos = cellPos1 - direction * cellSize * 0.30f;
+            auto connectionEndPos = cellPos2 + direction * cellSize * 0.30f;
             drawList->AddLine(
                 {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 

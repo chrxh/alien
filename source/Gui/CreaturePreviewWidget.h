@@ -48,6 +48,7 @@ private:
     float _zoom = 20.0f;
     bool _initialScrollPositionSet = false;
     std::optional<float> _lastFrontAngleRadius;
+    std::optional<int> _selectedNode;
 
     std::optional<RealVector2D> _worldPosForPanning;
 };

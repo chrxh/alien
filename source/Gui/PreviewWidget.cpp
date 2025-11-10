@@ -20,7 +20,6 @@
 #include "GenomeWindowEditData.h"
 #include "StyleRepository.h"
 #include "WindowController.h"
-#include <EngineInterface/SimulationFacade.h>
 
 PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
 {
