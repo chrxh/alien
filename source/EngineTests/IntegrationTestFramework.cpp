@@ -2,8 +2,6 @@
 
 #include <boost/range/combine.hpp>
 
-#include <Base/Math.h>
-
 #include <EngineInterface/SimulationFacade.h>
 #include <EngineInterface/SimulationParameters.h>
 
@@ -11,20 +9,44 @@
 
 #include <EngineImpl/SimulationFacadeImpl.h>
 
-IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& universeSize)
+IntegrationTestFramework::TestSuiteContext IntegrationTestFramework::_globalContext;
+
+IntegrationTestFramework::TestSuiteContext::~TestSuiteContext()
 {
-    _simulationFacade = std::make_shared<_SimulationFacadeImpl>();
-    SimulationParameters parameters;
-    for (int i = 0; i < MAX_COLORS; ++i) {
-        parameters.radiationType1_strength.baseValue[i] = 0;
+    if (simulationFacade) {
+        simulationFacade->closeSimulation();
     }
-    _simulationFacade->newSimulation(0, universeSize, parameters);
-    _parameters = _simulationFacade->getSimulationParameters();
+}
+
+IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
+    : _worldSize(worldSize)
+{
+    if (_globalContext.simulationFacade == nullptr) {
+        _globalContext.simulationFacade = std::make_shared<_SimulationFacadeImpl>();
+    }
+
+    _simulationFacade = _globalContext.simulationFacade;
+    if (_simulationFacade->getWorldSize() != worldSize) {
+        _simulationFacade->closeSimulation();
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        _simulationFacade->newSimulation(0, _worldSize, _parameters);
+    } else {
+        _simulationFacade->clear();
+        _simulationFacade->setPreviewData(Description());
+        _simulationFacade->setCurrentTimestepForPreview(0);
+        _simulationFacade->setCurrentTimestep(0);
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
+
 }
 
 IntegrationTestFramework::~IntegrationTestFramework()
 {
-    _simulationFacade->closeSimulation();
 }
 
 double IntegrationTestFramework::getEnergy(Description const& data) const
