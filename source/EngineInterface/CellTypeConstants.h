@@ -82,7 +82,7 @@ using SignalState = uint8_t;
 enum SignalState_
 {
     SignalState_Inactive,
-    SignalState_RecentlyActive,
+    SignalState_Fading,
     SignalState_Active,
     SignalState_Count,
 };

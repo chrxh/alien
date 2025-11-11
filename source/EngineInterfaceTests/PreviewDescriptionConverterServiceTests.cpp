@@ -496,7 +496,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
     auto input = Description().creatures({
         CreatureDescription().cells({
             CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).signalAndState(signal),
-            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalState(SignalState_RecentlyActive),
+            CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalState(SignalState_Fading),
         }),
     });
     input.addConnection(1, 2);
@@ -512,5 +512,5 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
     EXPECT_EQ(SignalState_Active, cell1._signalState);
     EXPECT_TRUE(cell1._signal.has_value());
     EXPECT_EQ(signal, cell1._signal->_channels);
-    EXPECT_EQ(SignalState_RecentlyActive, cell2._signalState);
+    EXPECT_EQ(SignalState_Fading, cell2._signalState);
 }

@@ -292,7 +292,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
                 drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
             }
-            if (cell._signalState == SignalState_RecentlyActive) {
+            if (cell._signalState == SignalState_Fading) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 1.0f, 0.5f));
                 drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 0.2f, 0.5f));
             }
@@ -388,14 +388,16 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(13.0f)});
     auto height = selectedCell->_signalState == SignalState_Active ? scale(135.0f) : scale(30.0f);
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), height), ImGuiChildFlags_FrameStyle)) {
-        auto signalActive = selectedCell->_signalState == SignalState_Active;
-        if (ImGui::Checkbox("Signal", &signalActive)) {
-            if (signalActive) {
-                updatedCell->_signalState = SignalState_Active;
-            } else {
-                updatedCell->_signalState = SignalState_Inactive;
-            }
-        }
+        int signalState = 0;
+        AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Fading signal", "Signal"}).textWidth(0),
+            signalState);
+        //if (ImGui::Checkbox("Signal", &signalActive)) {
+        //    if (signalActive) {
+        //        updatedCell->_signalState = SignalState_Active;
+        //    } else {
+        //        updatedCell->_signalState = SignalState_Inactive;
+        //    }
+        //}
         if (selectedCell->_signalState == SignalState_Active) {
 
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
