@@ -156,11 +156,23 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     auto selectedNode = _editData->getSelectedNodeIndex();
     auto drawList = ImGui::GetWindowDrawList();
     auto& style = StyleRepository::get();
-
     RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
     RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
     auto mousePos = ImGui::GetMousePos();
     auto clickedOnPreviewWindow = ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem);
+
+    // Clear selection if another node has been selected outside of this widget or if cell id does not exist in preview
+    auto selectedCellIdExists = false;
+    for (auto const& cell : desc._cells) {
+        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
+            selectedCellIdExists = true;
+            break;
+        }
+    }
+    if (!selectedCellIdExists || _selectedNodeFromPreview != selectedNode) {
+        _selectedCellIdFromPreview.reset();
+        _selectedNodeFromPreview.reset();
+    }
 
     // Draw front circle
     {
@@ -195,13 +207,63 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw selected gene
-    auto selectedGeneColor = ImColor::HSV(0, 0, 0.15f);
+    auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.15f);
     for (auto const& cell : desc._cells) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
         }
     }
+
+    // Draw selected nodes
+    for (auto const& cell : desc._cells) {
+        auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
+        if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
+            float h, s, v;
+            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
+            s = 0.5f;
+            v = 0.3f;
+            drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(h, s, v));
+        }
+    }
+
+    // Draw signal restrictions
+    if (_zoom > ZoomLevelForConnections) {
+        for (auto const& cell : desc._cells) {
+            auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
+            float radius = cellSize * 0.33f;
+
+            if (!cell._signalRestriction.has_value()) {
+                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
+            } else {
+                auto startAngle = Math::getNormalizedAngle(cell._signalRestriction->_startAngle, 0);
+                auto endAngle = Math::getNormalizedAngle(cell._signalRestriction->_endAngle, 0);
+
+                // Draw filled ring sector (annular sector) between startAngle and endAngle
+                const int numSegments = 32;  // Increase for smoother arc
+                float startRad = Math::getNormalizedAngle(startAngle * Const::DegToRad, 0);
+                float endRad = Math::getNormalizedAngle(endAngle * Const::DegToRad, 0);
+                if (startRad > endRad) {
+                    endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
+                }
+                float angleStep = (endRad - startRad) / numSegments;
+
+                std::vector<ImVec2> ringPoints;
+                ringPoints.reserve((numSegments + 1) * 2);
+
+                // Outer arc (from start to end)
+                for (int i = 0; i <= numSegments; ++i) {
+                    float angle = startRad + i * angleStep;
+                    ringPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
+                }
+                ringPoints.push_back(ImVec2(cellPos.x, cellPos.y));
+
+                // Draw filled polygon (ring sector)
+                drawList->AddConvexPolyFilled(ringPoints.data(), ringPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
+            }
+        }
+    }
+
 
     // Draw cells and selected cells
     for (auto const& cell : desc._cells) {
@@ -212,16 +274,9 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-        if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
+        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
             if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.4f, ImColor::HSV(0, 0, 1, 0.7f));
-            } else {
-                drawList->AddCircle({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * 0.4f), ImColor::HSV(h, s * 0.8f, v * 1.2f));
-            }
-        }
-        if (_selectedCellId.has_value() && _selectedCellId.value() == cell._id) {
-            if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(0, 0, 1, 1.0f));
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 1.0f/*cellSize * 0.05f*/);
             }
         }
 
@@ -230,12 +285,14 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 && mousePos.y <= cellPos.y + cellSize / 2) {
                 selectedGene = cell._geneIndex;
                 selectedNode = cell._nodeIndex;
-                _selectedCellId = cell._id;
+                _selectedNodeFromPreview = selectedNode;
+                _selectedCellIdFromPreview = cell._id;
+
             }
         }
     }
 
-    // Draw signals and signal restrictions
+    // Draw signals
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& cell : desc._cells) {
             auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
@@ -250,34 +307,6 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 1.0f, 0.5f));
                 drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 0.2f, 0.5f));
             }
-
-            if (!cell._signalRestriction.has_value()) {
-                drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
-            } else {
-                auto startAngle = cell._signalRestriction->_startAngle;
-                auto endAngle = cell._signalRestriction->_endAngle;
-
-                // With the following code to draw a filled arc (pie segment) between startAngle and endAngle:
-                const int numSegments = 32;  // Increase for smoother arc
-                float radius = cellSize * cellRadiusFactor;
-                float startRad = startAngle * Const::DegToRad;
-                float endRad = endAngle * Const::DegToRad;
-                if (startRad > endRad) {
-                    endRad += 2 * Const::Pi;  // If the angle wraps around, we need to adjust the end angle
-                }
-
-                float angleStep = (endRad - startRad) / numSegments;
-
-                std::vector<ImVec2> arcPoints;
-                arcPoints.push_back(ImVec2(cellPos.x, cellPos.y));  // Center
-                for (int i = 0; i <= numSegments; ++i) {
-                    float angle = startRad + i * angleStep;
-                    arcPoints.push_back(ImVec2(cellPos.x + radius * sinf(angle), cellPos.y - radius * cosf(angle)));
-                }
-
-                // Draw filled polygon (pie segment)
-                drawList->AddConvexPolyFilled(arcPoints.data(), arcPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
-            }
         }
     }
 
@@ -290,8 +319,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             auto direction = cellPos1 - cellPos2;
 
             Math::normalize(direction);
-            auto connectionStartPos = cellPos1 - direction * cellSize / 4;
-            auto connectionEndPos = cellPos2 + direction * cellSize / 4;
+            auto connectionStartPos = cellPos1 - direction * cellSize * 0.25f;
+            auto connectionEndPos = cellPos2 + direction * cellSize * 0.25f;
             drawList->AddLine(
                 {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 

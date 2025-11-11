@@ -158,12 +158,12 @@ enum CellColoring_
     CellColoring_EveryCellType
 };
 
-using CellDeathConsquences = int;
-enum CellDeathConsquences_
+using CellDeathConsequences = int;
+enum CellDeathConsequences_
 {
-    CellDeathConsquences_None,
-    CellDeathConsquences_CreatureDies,
-    CellDeathConsquences_DetachedPartsDie
+    CellDeathConsequences_None,
+    CellDeathConsequences_CreatureDies,
+    CellDeathConsequences_DetachedPartsDie
 };
 
 using MotionType = int;
