@@ -291,7 +291,7 @@ struct CellDescription
         std::optional<float>,
         frontAngle,
         std::nullopt);  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
-    MEMBER(CellDescription, bool, barrier, false);
+    MEMBER(CellDescription, bool, fixed, false);
     MEMBER(CellDescription, bool, sticky, false);
     MEMBER(CellDescription, int, age, 0);
     MEMBER(CellDescription, CellState, cellState, CellState_Ready);

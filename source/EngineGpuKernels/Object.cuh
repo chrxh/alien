@@ -290,7 +290,7 @@ struct Cell
     float stiffness;
     uint8_t color;
     float frontAngle;  // May be invalid
-    bool barrier;
+    bool fixed;
     bool sticky;
     uint32_t age;
     CellState cellState;

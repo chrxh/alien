@@ -166,7 +166,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                     AlienGui::CheckboxParameters().name("Sticky").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip), cell._sticky);
                 AlienGui::Checkbox(
                     AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip),
-                    cell._barrier);
+                    cell._fixed);
                 AlienGui::InputText(
                     AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
                 if (auto frontAngle = cell._frontAngle) {

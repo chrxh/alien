@@ -52,7 +52,7 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
                 if (otherCell == cell) {
                     return;
                 }
-                if (otherCell->barrier) {
+                if (otherCell->fixed) {
                     return;
                 }
                 auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);

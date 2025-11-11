@@ -21,7 +21,7 @@ public:
         MEMBER(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateRectParameters, bool, sticky, false);
         MEMBER(CreateRectParameters, int, color, 0);
-        MEMBER(CreateRectParameters, bool, barrier, false);
+        MEMBER(CreateRectParameters, bool, fixed, false);
     };
     Description createRect(CreateRectParameters const& parameters) const;
 
@@ -35,7 +35,7 @@ public:
         MEMBER(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateHexParameters, bool, sticky, false);
         MEMBER(CreateHexParameters, int, color, 0);
-        MEMBER(CreateHexParameters, bool, barrier, false);
+        MEMBER(CreateHexParameters, bool, fixed, false);
     };
     Description createHex(CreateHexParameters const& parameters) const;
 
@@ -47,7 +47,7 @@ public:
         MEMBER(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
         MEMBER(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateUnconnectedCircleParameters, int, color, 0);
-        MEMBER(CreateUnconnectedCircleParameters, bool, barrier, false);
+        MEMBER(CreateUnconnectedCircleParameters, bool, fixed, false);
         MEMBER(CreateUnconnectedCircleParameters, bool, sticky, false);
     };
     Description createUnconnectedCircle(CreateUnconnectedCircleParameters const& parameters) const;

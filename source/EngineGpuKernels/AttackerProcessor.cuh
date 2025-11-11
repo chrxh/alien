@@ -49,7 +49,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
                 return;
             }
-            if (otherCell->barrier) {
+            if (otherCell->fixed) {
                 return;
             }
 

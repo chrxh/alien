@@ -318,7 +318,7 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().cells({
-        CellDescription().id(1).barrier(true).pos({10.0f, 10.0f}).cellState(CellState_Dying).cellType(getCellTypeDescription(cellType)),
+        CellDescription().id(1).fixed(true).pos({10.0f, 10.0f}).cellState(CellState_Dying).cellType(getCellTypeDescription(cellType)),
     });
 
     _simulationFacade->setSimulationData(data);

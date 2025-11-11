@@ -15,7 +15,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .energy(150.0f)
                       .age(42)
                       .color(3)
-                      .barrier(true)
+                      .fixed(true)
                       .cellState(false)
                       .geneIndex(42)
                       .nodeIndex(13)

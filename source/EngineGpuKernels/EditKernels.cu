@@ -365,7 +365,7 @@ __global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClus
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (isSelected(cell, includeClusters)) {
-            cell->barrier = value;
+            cell->fixed = value;
         }
     }
 }
@@ -563,7 +563,7 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
             auto pos = cell->pos;
             pos += data.cellMap.getCorrectionIncrement(applyData.startPos, pos);
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
-            if (distanceToSegment < applyData.radius && !cell->barrier) {
+            if (distanceToSegment < applyData.radius && !cell->fixed) {
                 auto weightedForce = applyData.force;
                 //*(actionRadius - distanceToSegment) / actionRadius;
                 cell->vel = cell->vel + weightedForce;

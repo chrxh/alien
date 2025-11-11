@@ -54,7 +54,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
             return;
         }
-        if (otherCell->barrier) {
+        if (otherCell->fixed) {
             return;
         }
         if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {

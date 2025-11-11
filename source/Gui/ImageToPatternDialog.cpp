@@ -109,7 +109,7 @@ void ImageToPatternDialog::show()
                                                      .energy(matchedCellIntensity * 200)
                                                      .pos({toFloat(x) + xOffset, toFloat(y)})
                                                      .color(matchedCellColor)
-                                                     .barrier(false));
+                                                     .fixed(false));
                 }
             }
         }

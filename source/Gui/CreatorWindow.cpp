@@ -129,7 +129,7 @@ void CreatorWindow::processIntern()
         }
         if (_mode != CreationMode_CreateParticle) {
             AlienGui::Checkbox(
-                AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _barrier);
+                AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(RightColumnWidth).tooltip(Const::CellIndestructibleTooltip), _fixed);
         }
     }
     ImGui::EndChild();
@@ -191,7 +191,7 @@ void CreatorWindow::onDrawing()
                                                                          .sticky(_makeSticky)
                                                                          .cellDistance(1.0f)
                                                                          .color(EditorModel::get().getDefaultColorCode())
-                                                                         .barrier(_barrier));
+                                                                         .fixed(_fixed));
     };
 
     if (_drawingDescription.isEmpty()) {
@@ -234,7 +234,7 @@ void CreatorWindow::createCell()
                     .energy(_energy)
                     .stiffness(_stiffness)
                     .color(EditorModel::get().getDefaultColorCode())
-                    .barrier(_barrier)
+                    .fixed(_fixed)
                     .sticky(_makeSticky);
     Description description;
     description._cells.emplace_back(cell);
@@ -264,7 +264,7 @@ void CreatorWindow::createRectangle()
                                                                     .sticky(_makeSticky)
                                                                     .color(EditorModel::get().getDefaultColorCode())
                                                                     .center(getRandomPos())
-                                                                    .barrier(_barrier));
+                                                                    .fixed(_fixed));
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
@@ -282,7 +282,7 @@ void CreatorWindow::createHexagon()
                                                                           .sticky(_makeSticky)
                                                                           .color(EditorModel::get().getDefaultColorCode())
                                                                           .center(getRandomPos())
-                                                                          .barrier(_barrier));
+                                                                          .fixed(_fixed));
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -313,7 +313,7 @@ void CreatorWindow::createDisc()
                                                 .sticky(_makeSticky)
                                                 .pos(relPos)
                                                 .color(EditorModel::get().getDefaultColorCode())
-                                                .barrier(_barrier));
+                                                .fixed(_fixed));
         }
     }
 
