@@ -212,12 +212,19 @@ void _NeuralNetEditorWidget::processEditWidgets(
             AlienGui::ComboParameters().name("ActFn").values(Const::ActivationFunctionStrings).textWidth(WidgetTextColumnWidth), activationFunction);
         activationFunctions.at(selectionData.outputNeuronIndex) = static_cast<ActivationFunction>(activationFunction);
 
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Weight").step(0.05f).textWidth(WidgetTextColumnWidth),
-            weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex]);
+        ImGuiStyle& style = ImGui::GetStyle();
+        auto originalGrabMinSize = style.GrabMinSize;
+        style.GrabMinSize = scale(8.0f);
 
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Bias").step(0.05f).textWidth(WidgetTextColumnWidth), biases.at(selectionData.outputNeuronIndex));
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().name("Weight").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth),
+            &weights[selectionData.outputNeuronIndex * MAX_CHANNELS + selectionData.inputNeuronIndex]);
+
+        AlienGui::SliderFloat(
+            AlienGui::SliderFloatParameters().name("Bias").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &biases.at(selectionData.outputNeuronIndex));
+
+        style.GrabMinSize = originalGrabMinSize;
+        ImGui::PopStyleColor();
     }
     ImGui::EndChild();
 }
