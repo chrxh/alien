@@ -1,6 +1,7 @@
 #include "CreaturePreviewWidget.h"
 
 #include <cmath>
+#include <ranges>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/range/adaptor/sliced.hpp>
@@ -25,6 +26,7 @@ namespace
 {
     auto constexpr ZoomLevelForLabels = 16.0f;
     auto constexpr ZoomLevelForConnections = 8.0f;
+    auto constexpr SignalTextWidth = 25.0f;
 }
 
 
@@ -47,24 +49,11 @@ void _CreaturePreviewWidget::process(Description&& phenotype, float width)
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
 
     if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
-        processNavigation();
-
+        processMouseNavigation();
         processCellGraphAndSelection(conversionResult);
-
-        ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowSize().y - scale(40.0f)});
+        processSignalEditor(conversionResult);
         processActionButtons();
-
-        RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
-        RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
-
-        RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
-        RealRect visibleWorldRect{
-            mapViewToWorldPosition(windowPos, windowSize, windowPos),
-            mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
-        };
-        RealRect viewRect{windowPos, windowPos + windowSize};
-        _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
-
+        processScrollbars();
         processTitle();
     }
     ImGui::EndChild();
@@ -118,7 +107,7 @@ _CreaturePreviewWidget::_CreaturePreviewWidget(
     _scrollbars = std::make_shared<_SimulationScrollbars>(false);
 }
 
-void _CreaturePreviewWidget::processNavigation()
+void _CreaturePreviewWidget::processMouseNavigation()
 {
     if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
         RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
@@ -380,8 +369,40 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     _editData->setSelectedNodeIndex(selectedNode);
 }
 
+void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& conversionResult)
+{
+    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(23.0f)});
+    if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), scale(135)), ImGuiChildFlags_FrameStyle)) {
+        auto signalActive = true;
+        ImGui::Checkbox("Signal", &signalActive);
+        std::vector<float> channels(8, 0);
+        int index = 0;
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
+        if (ImGui::BeginChild("1", ImVec2(scale(85), scale(0)))) {
+            for (auto& channel : channels | std::views::take(4)) {
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("#" + std::to_string(index)).format("%.3f").step(0).textWidth(SignalTextWidth), channel);
+                ++index;
+            }
+        }
+        ImGui::EndChild();
+        ImGui::SameLine();
+        if (ImGui::BeginChild("2", ImVec2(scale(85), scale(0)))) {
+            for (auto& channel : channels | std::views::drop(4)) {
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("#" + std::to_string(index)).format("%.3f").step(0).textWidth(SignalTextWidth), channel);
+                ++index;
+            }
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndChild();
+}
+
 void _CreaturePreviewWidget::processActionButtons()
 {
+    ImGui::SetCursorPos({ImGui::GetScrollX() + scale(10.0f), ImGui::GetScrollY() + ImGui::GetWindowHeight() - scale(40.0f)});
     if (ImGui::BeginChild("##buttons", ImVec2(scale(105), scale(30)), 0)) {
         ImGui::SetCursorPos({0, 0});
         ImGui::PushID(1);
@@ -395,16 +416,22 @@ void _CreaturePreviewWidget::processActionButtons()
             _zoom /= 1.5f;
         }
         ImGui::PopID();
-        //ImGui::SameLine();
-        //AlienGui::VerticalSeparator(23);
-        //ImGui::SameLine();
-        //ImGui::PushID(3);
-        //if (AlienGui::ActionButton(AlienGui::ActionButtonParameters().buttonText(ICON_FA_FORWARD).highlighted(_settings->maxSpeed))) {
-        //    _settings->maxSpeed = !_settings->maxSpeed;
-        //}
-        //ImGui::PopID();
     }
     ImGui::EndChild();
+}
+
+void _CreaturePreviewWidget::processScrollbars()
+{
+    RealVector2D windowSize{ImGui::GetWindowWidth(), ImGui::GetWindowHeight()};
+    RealVector2D windowPos{ImGui::GetWindowPos().x, ImGui::GetWindowPos().y};
+
+    RealRect worldRect{{-100.0f, -100.0f}, {100.0f, 100.0f}};
+    RealRect visibleWorldRect{
+        mapViewToWorldPosition(windowPos, windowSize, windowPos),
+        mapViewToWorldPosition(windowPos + windowSize, windowSize, windowPos),
+    };
+    RealRect viewRect{windowPos, windowPos + windowSize};
+    _scrollbars->process(_worldCenter, worldRect, visibleWorldRect, viewRect);
 }
 
 void _CreaturePreviewWidget::processTitle()

@@ -22,17 +22,17 @@ using namespace std::string_literals;
 
 namespace
 {
-    auto const CellWindowWidth = 380.0f;
-    auto const ParticleWindowWidth = 280.0f;
-    auto const BaseTabTextWidth = 162.0f;
-    auto const CellTypeTextWidth = 195.0f;
-    auto const CellTypeDefenderWidth = 100.0f;
-    auto const CellTypeBaseTabTextWidth = 150.0f;
-    auto const SignalTextWidth = 130.0f;
-    auto const GenomeTabTextWidth = 195.0f;
-    auto const ParticleContentTextWidth = 80.0f;
+    auto constexpr CellWindowWidth = 380.0f;
+    auto constexpr ParticleWindowWidth = 280.0f;
+    auto constexpr BaseTabTextWidth = 162.0f;
+    auto constexpr CellTypeTextWidth = 195.0f;
+    auto constexpr CellTypeDefenderWidth = 100.0f;
+    auto constexpr CellTypeBaseTabTextWidth = 150.0f;
+    auto constexpr SignalTextWidth = 130.0f;
+    auto constexpr GenomeTabTextWidth = 195.0f;
+    auto constexpr ParticleContentTextWidth = 80.0f;
 
-    auto const TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
+    auto constexpr TreeNodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
 }
 
 _InspectorWindow::_InspectorWindow(uint64_t entityId, RealVector2D const& initialPos, bool selectGenomeTab)

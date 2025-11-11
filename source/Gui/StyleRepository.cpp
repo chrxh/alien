@@ -25,6 +25,7 @@ void StyleRepository::setup()
 
     auto& style = ImGui::GetStyle();
     style.ScaleAllSizes(scaleFactor);
+    style.FrameRounding = scale(4.0f);
 
 
     ImFontConfig configMerge;

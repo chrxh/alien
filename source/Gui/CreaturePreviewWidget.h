@@ -27,10 +27,13 @@ public:
 private:
     _CreaturePreviewWidget(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex);
 
-    void processNavigation();
+    void processMouseNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);
+    void processSignalEditor(ConversionResult const& conversionResult);
     void processActionButtons();
+    void processScrollbars();
     void processTitle();
+
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     void moveCenter(RealVector2D const& startWorldPosition, RealVector2D const& endViewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos);
