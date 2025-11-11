@@ -490,7 +490,7 @@ namespace
     auto constexpr Id_Cell_Vel = 3;
     auto constexpr Id_Cell_Stiffness = 4;
     auto constexpr Id_Cell_Color = 5;
-    auto constexpr Id_Cell_Barrier = 6;
+    auto constexpr Id_Cell_Fixed = 6;
     auto constexpr Id_Cell_Age = 7;
     auto constexpr Id_Cell_CellState = 8;
     auto constexpr Id_Cell_ActivationTime = 9;
@@ -509,7 +509,7 @@ namespace
 
     auto constexpr Id_SignalRestriction_Active = 0;
     auto constexpr Id_SignalRestriction_BaseAngle = 1;
-    auto constexpr Id_SignalRestriction_OpeneningAngle = 2;
+    auto constexpr Id_SignalRestriction_OpeningAngle = 2;
 
     auto constexpr Id_Connection_CellId = 0;
     auto constexpr Id_Connection_Distance = 1;
@@ -625,7 +625,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRestriction_Active, data._active, defaultObject._active);
         loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
-        loadSave(task, auxiliaries, Id_SignalRestriction_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
+        loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRestrictionDescription)
@@ -866,7 +866,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Cell_Color, data._color, defaultObject._color);
         loadSave(task, auxiliaries, Id_Cell_AngleToFront, data._frontAngle, defaultObject._frontAngle);
-        loadSave(task, auxiliaries, Id_Cell_Barrier, data._fixed, defaultObject._fixed);
+        loadSave(task, auxiliaries, Id_Cell_Fixed, data._fixed, defaultObject._fixed);
         loadSave(task, auxiliaries, Id_Cell_Sticky, data._sticky, defaultObject._sticky);
         loadSave(task, auxiliaries, Id_Cell_Age, data._age, defaultObject._age);
         loadSave(task, auxiliaries, Id_Cell_CellState, data._cellState, defaultObject._cellState);
