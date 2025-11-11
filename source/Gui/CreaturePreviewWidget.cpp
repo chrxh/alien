@@ -265,7 +265,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
         if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
             if (_zoom > ZoomLevelForLabels) {
-                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 1.0f/*cellSize * 0.05f*/);
+                drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f/*cellSize * 0.05f*/);
             }
         }
 
