@@ -5,19 +5,19 @@
 #include <imgui.h>
 #include <imgui_freetype.h>
 
+#include <Fonts/AlienIconFont.h>
+#include <Fonts/Cousine-Regular.h>
+#include <Fonts/DroidSans.h>
+#include <Fonts/DroidSansBold.h>
+#include <Fonts/FontAwesomeSolid.h>
 #include <Fonts/IconsFontAwesome5.h>
+#include <Fonts/Reef.h>
 
-#include "WindowController.h"
-
-#include "Fonts/AlienIconFont.h"
-#include "Fonts/Cousine-Regular.h"
-#include "Fonts/DroidSans.h"
-#include "Fonts/DroidSansBold.h"
-#include "Fonts/FontAwesomeSolid.h"
-#include "Fonts/Reef.h"
 #include <GLFW/glfw3.h>  // Will drag system OpenGL headers
 #include <ImFileDialog.h>
 #include <implot.h>
+
+#include "WindowController.h"
 
 void StyleRepository::setup()
 {
@@ -27,13 +27,16 @@ void StyleRepository::setup()
     style.ScaleAllSizes(scaleFactor);
     style.FrameRounding = scale(4.0f);
 
+    style.Colors[ImGuiCol_Tab] = Const::TreeNodeHighColor.Value;
+    style.Colors[ImGuiCol_TabSelected] = Const::TreeNodeHighActiveColor.Value;
+    style.Colors[ImGuiCol_TabHovered] = Const::TreeNodeHighHoveredColor.Value;
 
     ImFontConfig configMerge;
     configMerge.MergeMode = true;
     configMerge.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_LightHinting;
 
     ImGuiIO& io = ImGui::GetIO();
-    
+
     //default font (small with icons)
     io.Fonts->AddFontFromMemoryCompressedTTF(DroidSans_compressed_data, DroidSans_compressed_size, 16.0f * scaleFactor);
     {

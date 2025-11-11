@@ -85,7 +85,8 @@ std::string _GenomeTabWidget::getName() const
         return _editData->genome._name;
     } else {
         auto const& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
-        auto result = ICON_FA_LINK " " + _editData->genome._name + ": " + StringHelper::formatInHex(simulatedCreatureData.creatureId);
+        auto result = ICON_FA_DNA " " + _editData->genome._name;
+        //+": " + StringHelper::formatInHex(simulatedCreatureData.creatureId);
         if (simulatedCreatureData.changesMade) {
             result = "* " + result;
         }

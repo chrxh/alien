@@ -56,7 +56,7 @@ _PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, Genom
 void _PreviewWidget::createSubGenomesForPreview()
 {
     auto geneIndicesForSubGenomes = GenomeDescriptionInfoService::get().getGeneIndicesForSubGenomes(_editData->genome);
-    auto subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _detailSimulation);
+    auto subGenomesForPreview = GenomeDescriptionEditService::get().createSubGenomesForPreview(_editData->genome, geneIndicesForSubGenomes, _editData->detailSimulation);
 
     if (_creatureWidgets.size() != subGenomesForPreview.size()) {
         _creatureWidgets.clear();
@@ -102,7 +102,7 @@ void _PreviewWidget::calcPreview()
 
     auto fps = WindowController::get().getFps();
     auto duration = std::chrono::milliseconds(1000 / fps * _simulationSpeed / 100);
-    _SimulationFacade::get()->calcTimestepsForPreview(duration, _detailSimulation);
+    _SimulationFacade::get()->calcTimestepsForPreview(duration, _editData->detailSimulation);
     _currentTimestep = _SimulationFacade::get()->getCurrentTimestepForPreview();
 }
 
@@ -162,7 +162,7 @@ void _PreviewWidget::processActionBar()
     // Alternatives: ICON_FA_GEM, ICON_FA_FIRE, ICON_FA_CUDA
     if (AlienGui::SelectableButton(
             AlienGui::SelectableButtonParameters().name(ICON_FA_DICE_D20).tooltip("Activates a more detail simulation including signals and muscles"),
-            _detailSimulation)) {
+            _editData->detailSimulation)) {
         onRestart();
     }
 
@@ -266,7 +266,7 @@ void _PreviewWidget::onStepForward()
     auto seedCreatureIds = getSeedCreatureIds();
     _savepoints.emplace_back(timestep, data, seedCreatureIds);
 
-    _SimulationFacade::get()->calcTimestepsForPreview(1, _detailSimulation);
+    _SimulationFacade::get()->calcTimestepsForPreview(1, _editData->detailSimulation);
 }
 
 void _PreviewWidget::onRestart()

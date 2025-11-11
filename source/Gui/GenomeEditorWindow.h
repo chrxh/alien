@@ -43,7 +43,7 @@ private:
     int _selectedTabIndex = 0;
     int _sequenceNumberForCreatedGenomes = 0;
     std::string _startingPath;
-    int _sessionId = 0;
+    std::optional<int> _lastSessionId;
 
     // Actions
     std::optional<GenomeTabWidget> _tabToAdd;

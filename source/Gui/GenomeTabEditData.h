@@ -11,6 +11,7 @@ struct _GenomeTabEditData
     GenomeDescription genome;
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
+    bool detailSimulation = false;
 
     std::optional<int> getSelectedNodeIndex() const
     {

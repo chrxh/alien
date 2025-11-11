@@ -170,7 +170,12 @@ void GenomeEditorWindow::processTabWidget()
                 int flags = (tabIndexToSelect && *tabIndexToSelect == index) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
 
                 pushStyleColorForTab(creatureTab);
-                if (ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags)) {
+                ImGui::PushStyleColor(ImGuiCol_Button, Const::TreeNodeHighColor.Value);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Const::TreeNodeHighHoveredColor.Value);
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, Const::TreeNodeHighActiveColor.Value);
+                auto tabResult = ImGui::BeginTabItem((creatureTab->getName() + "###" + std::to_string(creatureTab->getTabId())).c_str(), openPtr, flags);
+                ImGui::PopStyleColor(3);
+                if (tabResult) {
                     _selectedTabIndex = toInt(index);
                     creatureTab->process();
                     ImGui::EndTabItem();
@@ -202,12 +207,12 @@ void GenomeEditorWindow::processTabWidget()
     ImGui::EndChild();
 
     auto newSessionId = _SimulationFacade::get()->getSessionId();
-    if (_sessionId != newSessionId) {
+    if (_lastSessionId.has_value() && _lastSessionId.value() != newSessionId) {
         for (auto const& tab : _tabs) {
             tab->convertToDraftTab();
         }
     }
-    _sessionId = newSessionId;
+    _lastSessionId = newSessionId;
 }
 
 void GenomeEditorWindow::onOpenGenome()
@@ -307,10 +312,10 @@ void GenomeEditorWindow::pushStyleColorForTab(GenomeTabWidget const& creatureTab
     } else {
         // Use creature ID to create a unique color
         auto creatureId = creatureTab->getTabId();
-        auto h = 0.1f + toFloat(creatureId % 20) / 20.0f * 0.5f;
-        auto s = 0.4f + toFloat(creatureId % 10) / 10.0f * 0.4f;
-        ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.35f).Value);
-        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.62f).Value);
+        auto h = 0.0f + toFloat(creatureId % 20) / 20.0f * 1.0f;
+        auto s = 0.4f + toFloat(creatureId % 10) / 10.0f * 0.6f;
+        ImGui::PushStyleColor(ImGuiCol_Tab, ImColor::HSV(h, s, 0.4f).Value);
+        ImGui::PushStyleColor(ImGuiCol_TabActive, ImColor::HSV(h, s, 0.6f).Value);
         ImGui::PushStyleColor(ImGuiCol_TabHovered, ImColor::HSV(h, s, 0.7f).Value);
     }
 }

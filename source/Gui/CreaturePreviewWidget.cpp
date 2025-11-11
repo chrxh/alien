@@ -371,6 +371,9 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& conversionResult)
 {
+    if (!_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
+        return;
+    }
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(23.0f)});
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), scale(135)), ImGuiChildFlags_FrameStyle)) {
         auto signalActive = true;
