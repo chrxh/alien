@@ -44,9 +44,9 @@ namespace Const
     ImColor const ToggleButtonActiveColor = ImColor::HSV(0.14f, 0.8f, 0.7f);
     ImColor const ToggleButtonActiveHoveredColor = ImColor::HSV(0.14f, 0.8f, 0.8f);
 
-    ImColor const TreeNodeHighColor = ImColor::HSV(0.23f, 0.6f, 0.40f);
-    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.23f, 0.6f, 0.60f);
-    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.23f, 0.6f, 0.70f);
+    ImColor const TreeNodeHighColor = ImColor::HSV(0.5f, 0.6f, 0.40f);
+    ImColor const TreeNodeHighHoveredColor = ImColor::HSV(0.5f, 0.6f, 0.60f);
+    ImColor const TreeNodeHighActiveColor = ImColor::HSV(0.5f, 0.6f, 0.70f);
     ImColor const TreeNodeDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
     ImColor const TreeNodeDefaultHoveredColor = ImColor::HSV(0.6f, 0.6f, 0.55f);
     ImColor const TreeNodeDefaultActiveColor = ImColor::HSV(0.6f, 0.6f, 0.65f);
@@ -58,7 +58,7 @@ namespace Const
     ImColor const DisabledOverlayColor2 = ImColor::HSV(0.0f, 0.0f, 0.06f, 0.2f);
 
     ImColor const GroupDefaultColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
-    ImColor const GroupHighColor = ImColor::HSV(0.23f, 0.6f, 0.40f);
+    ImColor const GroupHighColor = ImColor::HSV(0.5f, 0.6f, 0.40f);
 
     ImColor const TableHeaderColor = ImColor::HSV(0.6f, 0.6f, 0.40f);
 

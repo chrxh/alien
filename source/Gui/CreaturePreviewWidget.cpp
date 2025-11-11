@@ -374,31 +374,59 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
     if (!_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
         return;
     }
-    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(23.0f)});
-    if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), scale(135)), ImGuiChildFlags_FrameStyle)) {
-        auto signalActive = true;
-        ImGui::Checkbox("Signal", &signalActive);
-        std::vector<float> channels(8, 0);
-        int index = 0;
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
-        if (ImGui::BeginChild("1", ImVec2(scale(85), scale(0)))) {
-            for (auto& channel : channels | std::views::take(4)) {
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("#" + std::to_string(index)).format("%.3f").step(0).textWidth(SignalTextWidth), channel);
-                ++index;
+    std::optional<CellPreviewDescription> selectedCell;
+    for (auto const& cell : conversionResult.description._cells) {
+        if (cell._id == _selectedCellIdFromPreview.value()) {
+            selectedCell = cell;
+            break;
+        }
+    }
+    CHECK(selectedCell.has_value());
+
+    std::optional<CellPreviewDescription> updatedCell;
+
+    ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(13.0f)});
+    auto height = selectedCell->_signalState == SignalState_Active ? scale(135.0f) : scale(30.0f);
+    if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), height), ImGuiChildFlags_FrameStyle)) {
+        auto signalActive = selectedCell->_signalState == SignalState_Active;
+        if (ImGui::Checkbox("Signal", &signalActive)) {
+            if (signalActive) {
+                updatedCell->_signalState = SignalState_Active;
+            } else {
+                updatedCell->_signalState = SignalState_Inactive;
             }
         }
-        ImGui::EndChild();
-        ImGui::SameLine();
-        if (ImGui::BeginChild("2", ImVec2(scale(85), scale(0)))) {
-            for (auto& channel : channels | std::views::drop(4)) {
-                AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("#" + std::to_string(index)).format("%.3f").step(0).textWidth(SignalTextWidth), channel);
-                ++index;
+        if (selectedCell->_signalState == SignalState_Active) {
+
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
+            ImGuiStyle& style = ImGui::GetStyle();
+            auto originalGrabMinSize = style.GrabMinSize;
+            style.GrabMinSize = scale(8.0f);
+
+            auto& channels = selectedCell->_signal->_channels;
+            int index = 0;
+            if (ImGui::BeginChild("1", ImVec2(scale(85), scale(0)))) {
+                for (auto& channel : channels | std::views::take(4)) {
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f), &channel);
+                    ++index;
+                }
             }
+            ImGui::EndChild();
+            ImGui::SameLine();
+            if (ImGui::BeginChild("2", ImVec2(scale(85), scale(0)))) {
+                for (auto& channel : channels | std::views::drop(4)) {
+                    AlienGui::SliderFloat(
+                        AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f),
+                        &channel);
+                    ++index;
+                }
+            }
+            ImGui::EndChild();
+
+            style.GrabMinSize = originalGrabMinSize; 
+            ImGui::PopStyleColor();
         }
-        ImGui::EndChild();
-        ImGui::PopStyleColor();
     }
     ImGui::EndChild();
 }
