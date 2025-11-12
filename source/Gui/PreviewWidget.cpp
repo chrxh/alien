@@ -128,31 +128,39 @@ void _PreviewWidget::processCreaturePreviews()
 
     auto previewRawData = _SimulationFacade::get()->getPreviewData();
 
+    // Get phenotypes for all sub-genomes
     auto seedCreatureIds = getSeedCreatureIds();
     auto subGenomesForPreview = getSubGenomes();
     auto phenotypes = GenomeDescriptionEditService::get().extractPhenotypesFromPreview(std::move(previewRawData), seedCreatureIds);
-    for (auto const& [subGenome, phenotype] : boost::combine(subGenomesForPreview, phenotypes)) {
-        _genomeEditData->genotypeToPhenotypeCache.insertOrAssign(subGenome, phenotype);
-    }
 
+    // Display and edit previews
+    auto phenotypeChanged = false;
     if (ImGui::BeginChild("Sandboxes", ImVec2(0, -scale(47.0f)), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto space = ImGui::GetContentRegionAvail();
         auto width = std::max(space.x / _creatureWidgets.size() - scale(7.0f), space.y);
         for (int i = 0, size = toInt(phenotypes.size()); i < size; ++i) {
-            processCreaturePreview(i, std::move(phenotypes.at(i)), width);
+            processCreaturePreview(phenotypeChanged, i, phenotypes.at(i), width);
             if (i < size - 1) {
                 ImGui::SameLine();
             }
         }
     }
+
+    // Update cache for new phenotypes
+    for (auto const& [subGenome, phenotype] : boost::combine(subGenomesForPreview, phenotypes)) {
+        _genomeEditData->genotypeToPhenotypeCache.insertOrAssign(subGenome, phenotype);
+    }
+    if (phenotypeChanged) {
+        setupPreviewData();
+    }
     ImGui::EndChild();
 }
 
-void _PreviewWidget::processCreaturePreview(int subGenomeIndex, Description&& phenotype, float width)
+void _PreviewWidget::processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Description& phenotype, float width)
 {
     ImGui::PushID(subGenomeIndex);
     auto& creatureWidget = _creatureWidgets.at(subGenomeIndex);
-    creatureWidget->process(std::move(phenotype), width);
+    creatureWidget->process(phenotypeChanged, phenotype, width);
     ImGui::PopID();
 }
 

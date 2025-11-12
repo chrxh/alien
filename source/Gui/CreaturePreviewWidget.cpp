@@ -36,14 +36,15 @@ _CreaturePreviewWidget::create(GenomeTabEditData const& editData, GeneIndicesFor
     return CreaturePreviewWidget(new _CreaturePreviewWidget(editData, geneIndices, genomeWithStartIndex));
 }
 
-void _CreaturePreviewWidget::process(Description&& phenotype, float width)
+void _CreaturePreviewWidget::process(bool& phenotypeChanged, Description& phenotype, float width)
 {
-    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotype);
+    auto phenotypeWithoutSeed = phenotype;
+    GenomeDescriptionEditService::get().removeSeedFromPhenotype(phenotypeWithoutSeed);
 
     auto geneStartIndex = _subGenome.startIndex;
 
-    auto conversionResult =
-        PreviewDescriptionConverterService::get().convertToPreviewDescription(_editData->genome, geneStartIndex, std::move(phenotype), _visualFrontAngle);
+    auto conversionResult = PreviewDescriptionConverterService::get().convertToPreviewDescription(
+        _editData->genome, geneStartIndex, std::move(phenotypeWithoutSeed), _visualFrontAngle);
     _visualFrontAngle = conversionResult.visualFrontAngle;
 
     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImColor(0.0f, 0.0f, 0.106f).Value);
@@ -51,7 +52,7 @@ void _CreaturePreviewWidget::process(Description&& phenotype, float width)
     if (ImGui::BeginChild("CellGraphWidget", ImVec2(width, 0), 0, ImGuiWindowFlags_NoScrollbar)) {
         processMouseNavigation();
         processCellGraphAndSelection(conversionResult);
-        processSignalEditor(conversionResult);
+        processSignalEditor(phenotypeChanged, phenotype, conversionResult);
         processActionButtons();
         processScrollbars();
         processTitle();
@@ -369,7 +370,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     _editData->setSelectedNodeIndex(selectedNode);
 }
 
-void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& conversionResult)
+void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Description& phenotype, ConversionResult const& conversionResult)
 {
     if (!_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
         return;
@@ -383,23 +384,17 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
     }
     CHECK(selectedCell.has_value());
 
-    std::optional<CellPreviewDescription> updatedCell;
 
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(13.0f)});
     auto height = selectedCell->_signalState == SignalState_Active ? scale(168.0f) : scale(67.0f);
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), height), ImGuiChildFlags_FrameStyle)) {
 
         AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
-        int signalState = 0;
-        AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Fading signal", "Signal"}).textWidth(0),
-            signalState);
-        //if (ImGui::Checkbox("Signal", &signalActive)) {
-        //    if (signalActive) {
-        //        updatedCell->_signalState = SignalState_Active;
-        //    } else {
-        //        updatedCell->_signalState = SignalState_Inactive;
-        //    }
-        //}
+        int signalState = selectedCell->_signalState; 
+        phenotypeChanged |=
+            AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Fading signal", "Signal"}).textWidth(0), signalState);
+        selectedCell->_signalState = static_cast<uint8_t>(signalState);
+
         if (selectedCell->_signalState == SignalState_Active) {
 
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));  // Transparent background
@@ -407,11 +402,14 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
             auto originalGrabMinSize = style.GrabMinSize;
             style.GrabMinSize = scale(8.0f);
 
+            if (!selectedCell->_signal.has_value()) {
+                selectedCell->_signal = SignalPreviewDescription();
+            }
             auto& channels = selectedCell->_signal->_channels;
             int index = 0;
             if (ImGui::BeginChild("1", ImVec2(scale(85), scale(0)))) {
                 for (auto& channel : channels | std::views::take(4)) {
-                    AlienGui::SliderFloat(
+                    phenotypeChanged |= AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f), &channel);
                     ++index;
                 }
@@ -420,7 +418,7 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
             ImGui::SameLine();
             if (ImGui::BeginChild("2", ImVec2(scale(85), scale(0)))) {
                 for (auto& channel : channels | std::views::drop(4)) {
-                    AlienGui::SliderFloat(
+                    phenotypeChanged |= AlienGui::SliderFloat(
                         AlienGui::SliderFloatParameters().name("#" + std::to_string(index)).format("%.3f").textWidth(SignalTextWidth).min(-2.0f).max(2.0f),
                         &channel);
                     ++index;
@@ -430,6 +428,10 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
 
             style.GrabMinSize = originalGrabMinSize; 
             ImGui::PopStyleColor();
+        }
+
+        if (phenotypeChanged) {
+            updatePhenotype(phenotype, selectedCell.value());
         }
     }
     ImGui::EndChild();
@@ -510,4 +512,19 @@ void _CreaturePreviewWidget::moveCenter(
     auto deltaViewPos = endViewPos - viewStartPos - viewSize / 2.0f;
     auto deltaWorldPos = deltaViewPos / _zoom;
     _worldCenter = startWorldPosition - deltaWorldPos;
+}
+
+void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const
+{
+    phenotype.forEachCell([&](CellDescription& cell) {
+        if (cell._id == editedCell._id) {
+            cell._signalState = editedCell._signalState;
+            if (editedCell._signalState == SignalState_Active) {
+                auto signalDesc = SignalDescription().channels(editedCell._signal.value()._channels);
+                cell._signal = signalDesc;
+            } else {
+                cell._signal.reset();
+            }
+        }
+    });
 }

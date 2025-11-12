@@ -23,7 +23,7 @@ private:
     void setupPreviewData(bool useCache = true);
     void calcPreview();
     void processCreaturePreviews();
-    void processCreaturePreview(int subGenomeIndex, Description&& phenotype, float width);
+    void processCreaturePreview(bool& phenotypeChanged, int subGenomeIndex, Description& phenotype, float width);
     void processActionBar();
 
     int calcTpsForPreview();

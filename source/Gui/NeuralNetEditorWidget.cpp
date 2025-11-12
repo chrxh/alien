@@ -224,7 +224,6 @@ void _NeuralNetEditorWidget::processEditWidgets(
             AlienGui::SliderFloatParameters().name("Bias").min(-4.0f).max(4.0f).textWidth(WidgetTextColumnWidth), &biases.at(selectionData.outputNeuronIndex));
 
         style.GrabMinSize = originalGrabMinSize;
-        ImGui::PopStyleColor();
     }
     ImGui::EndChild();
 }

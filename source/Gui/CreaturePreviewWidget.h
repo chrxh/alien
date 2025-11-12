@@ -11,7 +11,7 @@ public:
     static CreaturePreviewWidget
     create(GenomeTabEditData const& editData, GeneIndicesForSubGenome const& geneIndices, SubGenomeDescription const& genomeWithStartIndex);
 
-    void process(Description&& phenotype, float width);
+    void process(bool& phenotypeChanged, Description& phenotype, float width);
 
     uint64_t getCreatureId() const;
     void setCreatureId(uint64_t value);
@@ -29,7 +29,7 @@ private:
 
     void processMouseNavigation();
     void processCellGraphAndSelection(ConversionResult const& conversionResult);
-    void processSignalEditor(ConversionResult const& conversionResult);
+    void processSignalEditor(bool& phenotypeChanged, Description& phenotype, ConversionResult const& conversionResult);
     void processActionButtons();
     void processScrollbars();
     void processTitle();
@@ -37,6 +37,8 @@ private:
     RealVector2D mapWorldToViewPosition(RealVector2D const& worldPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     RealVector2D mapViewToWorldPosition(RealVector2D const& viewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos) const;
     void moveCenter(RealVector2D const& startWorldPosition, RealVector2D const& endViewPos, RealVector2D const& viewSize, RealVector2D const& viewStartPos);
+
+    void updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const;
 
     SimulationScrollbars _scrollbars;
 
