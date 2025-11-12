@@ -32,7 +32,7 @@ void _PreviewWidget::process()
     if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
         createSubGenomesForPreview();
         setupPreviewData();
-        _run = true;
+        _editData->run = true;
         _savepoints.clear();
     }
 
@@ -96,12 +96,12 @@ void _PreviewWidget::setupPreviewData(bool useCache)
 
 void _PreviewWidget::calcPreview()
 {
-    if (!_run) {
+    if (!_editData->run) {
         return;
     }
 
     auto fps = WindowController::get().getFps();
-    auto duration = std::chrono::milliseconds(1000 / fps * _simulationSpeed / 100);
+    auto duration = std::chrono::milliseconds(1000 / fps * _editData->simulationSpeed / 100);
     _SimulationFacade::get()->calcTimestepsForPreview(duration, _editData->detailSimulation);
     _currentTimestep = _SimulationFacade::get()->getCurrentTimestepForPreview();
 }
@@ -178,16 +178,16 @@ void _PreviewWidget::processActionBar()
     AlienGui::VerticalSeparator(20.0f);
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_run);
+    ImGui::BeginDisabled(_editData->run);
     if (AlienGui::Button(ICON_FA_PLAY)) {
         onRun();
     }
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(!_run);
+    ImGui::BeginDisabled(!_editData->run);
     if (AlienGui::Button(ICON_FA_PAUSE)) {
-        _run = false;
+        _editData->run = false;
     }
     ImGui::EndDisabled();
 
@@ -195,14 +195,14 @@ void _PreviewWidget::processActionBar()
     AlienGui::VerticalSeparator(20.0f);
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_run || _savepoints.empty());
+    ImGui::BeginDisabled(_editData->run || _savepoints.empty());
     if (AlienGui::Button(ICON_FA_CHEVRON_LEFT)) {
         onStepBackward();
     }
     ImGui::EndDisabled();
 
     ImGui::SameLine();
-    ImGui::BeginDisabled(_run);
+    ImGui::BeginDisabled(_editData->run);
     if (AlienGui::Button(ICON_FA_CHEVRON_RIGHT)) {
         onStepForward();
     }
@@ -218,8 +218,8 @@ void _PreviewWidget::processActionBar()
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(scale(90.0f));
-    ImGui::SliderInt("##TPSRestriction", &_simulationSpeed, 1, 100, "%d%% speed", ImGuiSliderFlags_None);
-    _simulationSpeed = std::clamp(_simulationSpeed, 1, 100);
+    ImGui::SliderInt("##TPSRestriction", &_editData->simulationSpeed, 1, 100, "%d%% speed", ImGuiSliderFlags_None);
+    _editData->simulationSpeed = std::clamp(_editData->simulationSpeed, 1, 100);
 
     ImGui::SameLine();
     AlienGui::VerticalSeparator(20.0f);
@@ -254,7 +254,7 @@ int _PreviewWidget::calcTpsForPreview()
 
 void _PreviewWidget::onRun()
 {
-    _run = true;
+    _editData->run = true;
     _savepoints.clear();
 }
 
@@ -281,7 +281,7 @@ void _PreviewWidget::onRestart()
 {
     createSubGenomesForPreview();
     setupPreviewData(false);
-    _run = true;
+    _editData->run = true;
     _savepoints.clear();
 }
 

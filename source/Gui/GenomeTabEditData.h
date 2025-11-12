@@ -11,6 +11,8 @@ struct _GenomeTabEditData
     GenomeDescription genome;
     std::optional<int> selectedGeneIndex;
     std::map<int, int> selectedNodeByGeneIndex;
+    bool run = true;
+    int simulationSpeed = 50;  // In percent of full speed
     bool detailSimulation = false;
 
     std::optional<int> getSelectedNodeIndex() const

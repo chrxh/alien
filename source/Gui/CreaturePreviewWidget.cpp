@@ -372,7 +372,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Description& phenotype, ConversionResult const& conversionResult)
 {
-    if (!_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
+    if (_editData->run || !_editData->detailSimulation || !_selectedCellIdFromPreview.has_value()) {
         return;
     }
     std::optional<CellPreviewDescription> selectedCell;

@@ -45,9 +45,6 @@ private:
     GenomeTabEditData _editData;
     GenomeTabLayoutData _layoutData;
 
-    bool _run = true;
-    int _simulationSpeed = 50;  // In percent of full speed
-
     struct Savepoint
     {
         uint64_t timestep = 0;
