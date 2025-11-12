@@ -386,8 +386,10 @@ void _CreaturePreviewWidget::processSignalEditor(ConversionResult const& convers
     std::optional<CellPreviewDescription> updatedCell;
 
     ImGui::SetCursorPos({ImGui::GetScrollX() + ImGui::GetWindowWidth() - scale(220.0f), ImGui::GetScrollY() + scale(13.0f)});
-    auto height = selectedCell->_signalState == SignalState_Active ? scale(135.0f) : scale(30.0f);
+    auto height = selectedCell->_signalState == SignalState_Active ? scale(168.0f) : scale(67.0f);
     if (ImGui::BeginChild("signalEditor", ImVec2(scale(190), height), ImGuiChildFlags_FrameStyle)) {
+
+        AlienGui::Group(AlienGui::GroupParameters().text("Signal editor").highlighted(true));
         int signalState = 0;
         AlienGui::Switcher(AlienGui::SwitcherParameters().name("").values({"No signal", "Fading signal", "Signal"}).textWidth(0),
             signalState);
