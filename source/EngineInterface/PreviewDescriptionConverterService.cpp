@@ -93,7 +93,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     auto getNode = [&](CellDescription const& cell) -> NodeDescription const& { return genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex); };
     phenotype.forEachCell([&](CellDescription const& cell) {
         auto const& node = getNode(cell);
-        auto const& color = node._color;
+        auto const& color = cell._cellState == CellState_Ready ? node._color : -1;
         auto previewCell = CellPreviewDescription()
                                .id(cell._id)
                                .pos(cell._pos)

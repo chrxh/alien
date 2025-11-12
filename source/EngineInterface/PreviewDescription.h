@@ -29,7 +29,7 @@ struct CellPreviewDescription
 
     MEMBER(CellPreviewDescription, uint64_t, id, 0);
     MEMBER(CellPreviewDescription, RealVector2D, pos, {});
-    MEMBER(CellPreviewDescription, int, color, 0);
+    MEMBER(CellPreviewDescription, int, color, 0);  // -1 if cell is not in ready state
     MEMBER(CellPreviewDescription, int, geneIndex, 0);
     MEMBER(CellPreviewDescription, int, nodeIndex, 0);
     MEMBER(CellPreviewDescription, std::optional<SignalPreviewDescription>, signal, std::nullopt);

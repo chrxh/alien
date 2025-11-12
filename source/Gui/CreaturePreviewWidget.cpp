@@ -259,7 +259,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     for (auto const& cell : desc._cells) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         float h, s, v;
-        AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
+        uint32_t color = cell._color != -1 ? Const::IndividualCellColors[cell._color] : 0x707070;
+        AlienGui::ConvertRGBtoHSV(color, h, s, v);
 
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
