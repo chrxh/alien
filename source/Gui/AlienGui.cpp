@@ -241,7 +241,7 @@ bool AlienGui::InputInt(InputIntParameters const& parameters, int& value, bool* 
     if (enabled) {
         ImGui::EndDisabled();
     }
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name));
+    drawTextWithInfoLabel(parameters._name, parameters._infoLabel);
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
     }
@@ -290,7 +290,7 @@ bool AlienGui::InputFloat(InputFloatParameters const& parameters, float& value)
         ImGui::EndDisabled();
     }
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    drawTextWithInfoLabel(parameters._name, parameters._infoLabel);
 
     if (parameters._tooltip) {
         HelpMarker(*parameters._tooltip);
@@ -569,7 +569,7 @@ bool AlienGui::Combo(ComboParameters& parameters, int& value, bool* enabled)
     }
 
     ImGui::SameLine();
-    AlienGui::Text(AlienGui::TextParameters().text(parameters._name.c_str()));
+    drawTextWithInfoLabel(parameters._name, parameters._infoLabel);
 
     if (parameters._tooltip) {
         AlienGui::HelpMarker(*parameters._tooltip);
@@ -2402,6 +2402,40 @@ bool AlienGui::RevertButton(std::string const& id)
     auto result = ImGui::Button((ICON_FA_UNDO "##" + id).c_str());
     AlienGui::Tooltip("Revert changes", true, ImGuiHoveredFlags_None);
     return result;
+}
+
+void AlienGui::drawTextWithInfoLabel(
+    std::string const& text,
+    std::optional<std::string> const& infoLabel,
+    std::optional<std::string> const& highlightedSubString)
+{
+    // Draw main text
+    AlienGui::Text(TextParameters().text(text.c_str()).highlightedSubString(highlightedSubString));
+
+    // Draw infoLabel if present, framed
+    if (infoLabel) {
+        ImGui::SameLine();
+
+        // Draw a visible border rectangle behind the label
+        ImVec2 labelPos = ImGui::GetCursorScreenPos();
+        ImVec2 labelSize = ImGui::CalcTextSize(infoLabel->c_str());
+        auto const& style = ImGui::GetStyle();
+        labelPos.y += scale(1.0f);
+        labelSize.x += style.FramePadding.x * 2; // padding left+right
+        labelSize.y += style.FramePadding.y * 2;  // padding top+bottom
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        ImU32 borderColor = ImGui::GetColorU32(ImGuiCol_Border);
+        drawList->AddRect(
+            labelPos,
+            ImVec2(labelPos.x + labelSize.x, labelPos.y + labelSize.y),
+            borderColor,
+            4.0f,
+            0,
+            2.0f // thickness
+        );
+        ImGui::SetCursorScreenPos(ImVec2(labelPos.x + style.FramePadding.x, labelPos.y));
+        ImGui::TextDisabled("%s", infoLabel->c_str());
+    }
 }
 
 namespace

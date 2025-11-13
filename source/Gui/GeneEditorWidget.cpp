@@ -93,10 +93,10 @@ void _GeneEditorWidget::processHeaderData()
             AlienGui::Combo(
                 AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
                 gene._angleAlignment);
-        } else {
+        } /*else {
             std::string text = Const::ConstructorAlignmentStrings.at(gene._angleAlignment);
             AlienGui::InputText(AlienGui::InputTextParameters().name("Angle alignment").textWidth(rightColumnWidth).readOnly(true), text);
-        }
+        }*/
         AlienGui::EndIndent();
 
         // Separation

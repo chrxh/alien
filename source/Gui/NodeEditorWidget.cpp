@@ -112,8 +112,15 @@ void _NodeEditorWidget::processNodeAttributes()
 
         // Angle
         auto nodeIndex = _editData->getSelectedNodeIndex();
-        if (AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Angle").textWidth(rightColumnWidth).format("%.1f"), node._referenceAngle)) {
-            if (nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1) {
+        auto isInnerNode = nodeIndex.value() != 0 && nodeIndex != gene._nodes.size() - 1;
+        if (AlienGui::InputFloat(
+                AlienGui::InputFloatParameters()
+                    .name("Angle")
+                    .textWidth(rightColumnWidth)
+                    .infoLabel(gene._shape != ConstructorShape_Custom && isInnerNode ? std::make_optional(std::string("Deduced")) : std::nullopt)
+                    .format("%.1f"),
+                node._referenceAngle)) {
+            if (isInnerNode) {
                 gene._shape = ConstructorShape_Custom;
             }
         }
@@ -121,7 +128,12 @@ void _NodeEditorWidget::processNodeAttributes()
         // Previous nodes connections
         if (nodeIndex != 0) {
             auto numAdditionalConnections = node._numAdditionalConnections + 1;
-            if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Prev nodes connections").textWidth(rightColumnWidth), numAdditionalConnections)) {
+            if (AlienGui::InputInt(
+                    AlienGui::InputIntParameters()
+                        .name("Prev nodes connections")
+                        .infoLabel(gene._shape != ConstructorShape_Custom ? std::make_optional(std::string("Deduced")) : std::nullopt)
+                        .textWidth(rightColumnWidth),
+                    numAdditionalConnections)) {
                 gene._shape = ConstructorShape_Custom;
             }
             node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);

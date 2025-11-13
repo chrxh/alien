@@ -108,6 +108,7 @@ public:
         MEMBER(InputIntParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER(InputIntParameters, std::optional<int>, disabledValue, std::nullopt);
         MEMBER(InputIntParameters, bool, readOnly, false);
+        MEMBER(InputIntParameters, std::optional<std::string>, infoLabel, std::nullopt);
     };
     static bool InputInt(InputIntParameters const& parameters, int& value, bool* enabled = nullptr);
     static bool InputOptionalInt(InputIntParameters const& parameters, std::optional<int>& value);
@@ -121,6 +122,7 @@ public:
         MEMBER(InputFloatParameters, std::optional<float>, defaultValue, std::nullopt);
         MEMBER(InputFloatParameters, std::optional<std::string>, tooltip, std::nullopt);
         MEMBER(InputFloatParameters, bool, readOnly, false);
+        MEMBER(InputFloatParameters, std::optional<std::string>, infoLabel, std::nullopt);
     };
     static bool InputFloat(InputFloatParameters const& parameters, float& value);
 
@@ -218,6 +220,7 @@ public:
         MEMBER(ComboParameters, bool const*, defaultEnabledValue, nullptr);
         MEMBER(ComboParameters, std::vector<std::string>, values, std::vector<std::string>());
         MEMBER(ComboParameters, std::optional<std::string>, tooltip, std::nullopt);
+        MEMBER(ComboParameters, std::optional<std::string>, infoLabel, std::nullopt);
     };
     static bool Combo(ComboParameters& parameters, int& value, bool* enabled = nullptr);
     static bool ComboOptional(ComboParameters& parameters, std::optional<int>& value, bool* enabled = nullptr);
@@ -502,6 +505,11 @@ private:
     static bool RevertButton(std::string const& id);
 
 private:
+    static void drawTextWithInfoLabel(
+        std::string const& text,
+        std::optional<std::string> const& infoLabel = std::nullopt,
+        std::optional<std::string> const& highlightedSubString = std::nullopt);
+
     static std::vector<TreeNodeStackElement> _treeNodeStack;
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
 
