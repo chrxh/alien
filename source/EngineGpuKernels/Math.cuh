@@ -43,7 +43,7 @@ public:
     __inline__ __device__ static float alignAngleOnBoundaries(float angle, float maxAngle, ConstructorAngleAlignment alignment);
     __inline__ __device__ static bool
     crossing(float2 const& segmentStart, float2 const& segmentEnd, float2 const& otherSegmentStart, float2 const& otherSegmentEnd);
-    __inline__ __device__ static float modulo(float value, float size);
+    __inline__ __device__ static float modulo(float value, float boundary);
     __inline__ __device__ static float3 cross(float2 const& a, float2 const& b);
     __inline__ __device__ static float2 crossReduced(float3 const& a, float2 const& b);
 };
@@ -422,9 +422,9 @@ __inline__ __device__ bool Math::crossing(float2 const& segmentStart, float2 con
     return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
 }
 
-__inline__ __device__ float Math::modulo(float value, float size)
+__inline__ __device__ float Math::modulo(float value, float boundary)
 {
-    return fmodf(fmodf(value, size) + size, size);
+    return fmodf(fmodf(value, boundary) + boundary, boundary);
 }
 
 __inline__ __device__ float3 Math::cross(float2 const& a, float2 const& b)

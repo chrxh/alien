@@ -170,9 +170,9 @@ bool Math::isCrossing(
     return lambda >= NEAR_ZERO && lambda <= 1 - NEAR_ZERO;
 }
 
-float Math::modulo(float value, float size)
+float Math::modulo(float value, float boundary)
 {
-    return fmodf(fmodf(value, size) + size, size);
+    return fmodf(fmodf(value, boundary) + boundary, boundary);
 }
 
 float Math::sigmoid(float x)
