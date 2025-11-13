@@ -249,7 +249,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                 ringPoints.push_back(ImVec2(cellPos.x, cellPos.y));
 
                 // Draw filled polygon (ring sector)
-                drawList->AddConvexPolyFilled(ringPoints.data(), ringPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
+                drawList->AddConcavePolyFilled(ringPoints.data(), ringPoints.size(), ImColor::HSV(0, 0, 1.0f, 0.2f));
             }
         }
     }

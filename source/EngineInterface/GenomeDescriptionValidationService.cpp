@@ -3,10 +3,13 @@
 #include <algorithm>
 #include <cmath>
 
+#include <Base/Math.h>
+
 void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& genome)
 {
     // Validate genome-level attributes
     // frontAngle is unbounded, so no validation needed
+    genome._frontAngle = Math::modulo(genome._frontAngle, 360.0f);
 
     // Validate each gene
     for (auto& gene : genome._genes) {
@@ -31,7 +34,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
             }
 
             // Validate signal restriction
-            node._signalRestriction._openingAngle = std::clamp(node._signalRestriction._openingAngle, 0.0f, 360.0f);
+            node._signalRestriction._baseAngle = Math::getNormalizedAngle(node._signalRestriction._baseAngle, -180.0f);
+            node._signalRestriction._openingAngle = Math::modulo(node._signalRestriction._openingAngle, 360.0f);
 
             // Validate cell-specific attributes based on type
             auto nodeType = node.getCellType();
