@@ -29,7 +29,7 @@ public:
     /**
      * Transfers the simulation data from CUDA to the provided buffer.
      * Resizes buffers if necessary and fills it with data for rendering.
-     * If the GPU is busy for a specified duration, the buffers will not be updated and std::nullopt will be returned.
+     * If the GPU is busy for a specified duration, the buffers will not be updated.
      */
     virtual void tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
 
