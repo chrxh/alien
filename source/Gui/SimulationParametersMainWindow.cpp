@@ -299,12 +299,13 @@ void SimulationParametersMainWindow::processLocationTable()
     static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_RowBg
         | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX;
 
-    if (ImGui::BeginTable("Locations", 4, flags, ImVec2(-1, -1), 0)) {
+    if (ImGui::BeginTable("Locations", 5, flags, ImVec2(-1, -1), 0)) {
 
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed, scale(140.0f));
         ImGui::TableSetupColumn("Position", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(115.0f));
         ImGui::TableSetupColumn("Strength", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
+        ImGui::TableSetupColumn("Opacity", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthFixed, scale(130.0f));
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableHeadersRow();
         ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg0, Const::TableHeaderColor);
@@ -363,18 +364,19 @@ void SimulationParametersMainWindow::processLocationTable()
 
                 // Column: Strength
                 ImGui::TableNextColumn();
-                AlienGui::Text(entry.strength);
-                ImGui::SameLine();
-                auto pos = ImGui::GetCursorScreenPos();
-                ImGui::SetCursorScreenPos({pos.x + scale(3.0f), pos.y});
-                ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)Const::TextDecentColor);
                 if (entry.type == LocationType::Base || entry.type == LocationType::Source) {
-                    AlienGui::Text("(radiation)");
+                    AlienGui::Text(entry.strength);
                 } else {
-                    AlienGui::Text("(opacity)");
+                    AlienGui::Text("-");
                 }
-                ImGui::PopStyleColor();
 
+                // Column: Opacity
+                ImGui::TableNextColumn();
+                if (entry.type == LocationType::Layer) {
+                    AlienGui::Text(entry.strength);
+                } else {
+                    AlienGui::Text("-");
+                }
 
                 ImGui::PopID();
             }
