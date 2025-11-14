@@ -57,7 +57,7 @@ CellDescription::CellDescription(bool createIds)
 
 CellDescription CellDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.objectId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
@@ -146,7 +146,7 @@ ParticleDescription::ParticleDescription()
 
 ParticleDescription ParticleDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.objectId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
@@ -158,7 +158,7 @@ CreatureDescription::CreatureDescription()
 
 CreatureDescription CreatureDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.creatureId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }

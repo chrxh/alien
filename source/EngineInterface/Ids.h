@@ -4,8 +4,6 @@
 
 struct Ids
 {
-    uint64_t objectId = 0;  // cell or particle
-    uint64_t creatureId = 0;
-    uint64_t genomeId = 0;
+    uint64_t entityId = 0;  // unified counter for cells, particles, creatures and genomes
     uint32_t lineageId = 0;
 };

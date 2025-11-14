@@ -41,24 +41,22 @@ uint32_t NumberGenerator::getLargeRandomInt(uint32_t range)
 
 uint64_t NumberGenerator::createObjectId()
 {
-    return _ids.objectId++;
+    return _ids.entityId++;
 }
 
 uint64_t NumberGenerator::createCreatureId()
 {
-    return _ids.creatureId++;
+    return _ids.entityId++;
 }
 
 uint64_t NumberGenerator::createGenomeId()
 {
-    return _ids.genomeId++;
+    return _ids.entityId++;
 }
 
 void NumberGenerator::adaptMaxIds(Ids const& ids)
 {
-    _ids.objectId = std::max(_ids.objectId, ids.objectId + 1);
-    _ids.creatureId = std::max(_ids.creatureId, ids.creatureId + 1);
-    _ids.genomeId = std::max(_ids.genomeId, ids.genomeId + 1);
+    _ids.entityId = std::max(_ids.entityId, ids.entityId + 1);
     _ids.lineageId = std::max(_ids.lineageId, ids.lineageId + 1);
 }
 

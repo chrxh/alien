@@ -211,9 +211,9 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
 
             // Adapt ids in NumberGenerator
             Ids maxIds;
-            cachedPhenotype.forEachCell([&maxIds](CellDescription const& cell) { maxIds.objectId = std::max(maxIds.objectId, cell._id); });
+            cachedPhenotype.forEachCell([&maxIds](CellDescription const& cell) { maxIds.entityId = std::max(maxIds.entityId, cell._id); });
             for (auto const& creature : cachedPhenotype._creatures) {
-                maxIds.creatureId = std::max(maxIds.creatureId, creature._id);
+                maxIds.entityId = std::max(maxIds.entityId, creature._id);
             }
             NumberGenerator::get().adaptMaxIds(maxIds);
 
