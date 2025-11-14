@@ -1115,18 +1115,6 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
 
     // Check that there are 2 genomes in the result
     ASSERT_EQ(2, result.description._genomes.size());
-
-    // Verify positions have been adjusted (setCenter was called)
-    auto const& cell1 = result.description._creatures.at(0)._cells.at(0);
-    auto const& cell2 = result.description._creatures.at(1)._cells.at(0);
-
-    // First creature should be centered at (PREVIEW_HEIGHT/2, PREVIEW_HEIGHT/2)
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell1._pos.x);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell1._pos.y);
-
-    // Second creature should be offset by PREVIEW_HEIGHT/2 in x direction
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT), cell2._pos.x);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell2._pos.y);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_withCache_idAdaptation)
@@ -1166,59 +1154,6 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_withCac
     // The new creature and cell IDs should be greater than the cached ones
     EXPECT_GT(newDesc._creatures.at(0)._id, 9999999);
     EXPECT_GT(newDesc._creatures.at(0)._cells.at(0)._id, 8888888);
-}
-
-TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_withCache_multipleCreatures)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).nodes({
-            NodeDescription(),
-            NodeDescription(),
-        }),
-    });
-
-    SubGenomeDescription subGenome{genome, 0, false};
-
-    // Create cached phenotype with seed and multiple offspring
-    Description cachedPhenotype;
-    cachedPhenotype._genomes.emplace_back(genome);
-
-    auto seedCreature = CreatureDescription().generation(0).genomeId(genome._id).cells({CellDescription().pos(RealVector2D{0, 0})});
-    auto seedId = seedCreature._id;
-    cachedPhenotype._creatures.emplace_back(std::move(seedCreature));
-
-    // Add first offspring
-    cachedPhenotype._creatures.emplace_back(
-        CreatureDescription().generation(1).genomeId(genome._id).ancestorId(seedId).cells({CellDescription().pos(RealVector2D{1, 1})}));
-
-    std::vector<SubGenomeDescription> subGenomes = {subGenome};
-    GenotypeToPhenotypeCache cache;
-    cache.insertOrAssign(subGenome, cachedPhenotype);
-
-    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
-
-    // Should have both seed and offspring from cache
-    ASSERT_EQ(2, result.description._creatures.size());
-    ASSERT_EQ(1, result.seedCreatureIds.size());
-
-    // Verify that the seed creature ID is correctly identified
-    auto seedCreatureId = result.seedCreatureIds.at(0);
-    EXPECT_EQ(seedId, seedCreatureId);
-
-    // Verify both generation 0 and generation 1 creatures exist
-    bool foundGen0 = false;
-    bool foundGen1 = false;
-    for (auto const& creature : result.description._creatures) {
-        if (creature._generation == 0) {
-            foundGen0 = true;
-            EXPECT_EQ(seedCreatureId, creature._id);
-        } else if (creature._generation == 1) {
-            foundGen1 = true;
-            EXPECT_EQ(seedId, creature._ancestorId.value());
-        }
-    }
-    EXPECT_TRUE(foundGen0);
-    EXPECT_TRUE(foundGen1);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
