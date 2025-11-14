@@ -54,6 +54,7 @@ private:
     std::vector<Savepoint> _savepoints;
 
     std::optional<GenomeDescription> _genomeFromPreviousFrame;
+    std::optional<uint64_t> _sessionIdFromPreviousFrame;
 
     std::optional<uint64_t> _previewTimestepFromPreviousMeasure;
     std::optional<std::chrono::steady_clock::time_point> _timepointFromPreviousMeasure;

@@ -29,7 +29,9 @@ PreviewWidget _PreviewWidget::create(GenomeWindowEditData const& genomeEditData,
 void _PreviewWidget::process()
 {
     // Has genome changed?
-    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome) {
+    auto sessionId = _SimulationFacade::get()->getSessionId();
+    if (!_genomeFromPreviousFrame.has_value() || _genomeFromPreviousFrame.value() != _editData->genome || !_sessionIdFromPreviousFrame.has_value()
+        || sessionId != _sessionIdFromPreviousFrame.value()) {
         createSubGenomesForPreview();
         setupPreviewData();
         _editData->run = true;
@@ -46,6 +48,7 @@ void _PreviewWidget::process()
     processActionBar();
 
     _genomeFromPreviousFrame = _editData->genome;
+    _sessionIdFromPreviousFrame = sessionId;
 }
 
 _PreviewWidget::_PreviewWidget(GenomeWindowEditData const& genomeEditData, GenomeTabEditData const& editData)
