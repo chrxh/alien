@@ -53,9 +53,9 @@ void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, Geno
     }
 }
 
-GenomeDescription GenomeEditorWindow::getCurrentCreature() const
+GenomeDescription GenomeEditorWindow::getCurrentGenome() const
 {
-    return GenomeDescription();
+    return _tabs.at(_selectedTabIndex)->getGenomeDescription();
 }
 
 GenomeEditorWindow::GenomeEditorWindow()
@@ -118,6 +118,19 @@ void GenomeEditorWindow::processToolbar()
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
     }
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome to clipboard"))) {
+        _copiedGenome = getCurrentGenome();
+    }
+
+    ImGui::SameLine();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste genome from clipboard").disabled(!_copiedGenome.has_value()))) {
+        _tabs.at(_selectedTabIndex)->setGenomeDescription(_copiedGenome.value());
+    }
+
+    ImGui::SameLine();
+    AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_PALETTE).tooltip("Change the color of all nodes with a certain color"))) {

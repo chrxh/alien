@@ -4,8 +4,8 @@
 
 struct Ids
 {
-    uint64_t currentObjectId = 0;
-    uint64_t currentCreatureId = 0;
-    uint64_t currentGenomeId = 0;
-    uint32_t currentLineageId = 0;
+    uint64_t objectId = 0;  // cell or particle
+    uint64_t creatureId = 0;
+    uint64_t genomeId = 0;
+    uint32_t lineageId = 0;
 };

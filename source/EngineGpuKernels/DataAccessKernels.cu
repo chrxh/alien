@@ -836,11 +836,11 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
         auto const partition = calcAllThreadsPartition(*to.numCells);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = to.cells[index];
-            maxIds.currentObjectId = max(maxIds.currentObjectId, cell.id);
+            maxIds.objectId = max(maxIds.objectId, cell.id);
 
             if (cell.belongToCreature) {
                 auto const& creature = to.creatures[cell.creatureIndex];
-                maxIds.currentCreatureId = max(maxIds.currentCreatureId, creature.id);
+                maxIds.creatureId = max(maxIds.creatureId, creature.id);
             }
             //maxIds.currentLineageId = max(maxIds.currentLineageId, cell.lineageId);
         }
@@ -850,7 +850,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& particle = to.particles[index];
-            maxIds.currentObjectId = max(maxIds.currentObjectId, particle.id);
+            maxIds.objectId = max(maxIds.objectId, particle.id);
         }
     }
     numberGen.adaptMaxIds(maxIds);

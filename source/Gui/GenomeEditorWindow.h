@@ -14,7 +14,7 @@ class GenomeEditorWindow : public AlienWindow
 
 public:
     void openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed = true);
-    GenomeDescription getCurrentCreature() const;
+    GenomeDescription getCurrentGenome() const;
 
 private:
     GenomeEditorWindow();
@@ -44,6 +44,7 @@ private:
     int _sequenceNumberForCreatedGenomes = 0;
     std::string _startingPath;
     std::optional<int> _lastSessionId;
+    std::optional<GenomeDescription> _copiedGenome;
 
     // Actions
     std::optional<GenomeTabWidget> _tabToAdd;

@@ -104,11 +104,15 @@ GenomeTabLayoutData const& _GenomeTabWidget::getLayoutData() const
     return _layoutData;
 }
 
-GenomeDescription const& _GenomeTabWidget::getGenomeDescription()
+GenomeDescription const& _GenomeTabWidget::getGenomeDescription() const
 {
     return _editData->genome;
 }
 
+void _GenomeTabWidget::setGenomeDescription(GenomeDescription const& genome)
+{
+    _editData->genome = genome;
+}
 
 bool _GenomeTabWidget::hasCreaturesGenomeBeChanged() const
 {

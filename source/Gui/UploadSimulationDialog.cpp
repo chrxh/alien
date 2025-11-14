@@ -141,7 +141,7 @@ void UploadSimulationDialog::onUpload()
         if (_resourceType == NetworkResourceType_Simulation) {
             return UploadNetworkResourceRequestData::SimulationData{.zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
         } else {
-            return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentCreature()};
+            return UploadNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
         }
     }();
     auto workspaceType = _share ? WorkspaceType_Public : WorkspaceType_Private;

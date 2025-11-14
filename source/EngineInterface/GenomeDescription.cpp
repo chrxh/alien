@@ -25,7 +25,7 @@ GenomeDescription::GenomeDescription()
 
 GenomeDescription GenomeDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.currentGenomeId = id});
+    NumberGenerator::get().adaptMaxIds({.genomeId = id});
     _id = id;
     return *this;
 }

@@ -1255,7 +1255,7 @@ void BrowserWindow::onReplaceResource(BrowserLeaf const& leaf)
                 return ReplaceNetworkResourceRequestData::SimulationData{
                     .zoom = Viewport::get().getZoomFactor(), .center = Viewport::get().getCenterInWorldPos()};
             } else {
-                return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentCreature()};
+                return ReplaceNetworkResourceRequestData::CreatureData{.description = GenomeEditorWindow::get().getCurrentGenome()};
             }
         }();
         NetworkTransferController::get().onReplace(ReplaceNetworkResourceRequestData{

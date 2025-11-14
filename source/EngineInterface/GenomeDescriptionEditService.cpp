@@ -5,6 +5,8 @@
 
 #include <boost/range/adaptors.hpp>
 
+#include <EngineInterface/NumberGenerator.h>
+
 #include "DescriptionEditService.h"
 #include "GenomeDescriptionInfoService.h"
 
@@ -206,6 +208,15 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
             if (cachedPhenotype._creatures.front()._generation == 0) {
                 seedFirst = true;  // first Creature is seed
             }
+
+            // Adapt ids in NumberGenerator
+            Ids maxIds;
+            cachedPhenotype.forEachCell([&maxIds](CellDescription const& cell) { maxIds.objectId = std::max(maxIds.objectId, cell._id); });
+            for (auto const& creature : cachedPhenotype._creatures) {
+                maxIds.creatureId = std::max(maxIds.creatureId, creature._id);
+            }
+            NumberGenerator::get().adaptMaxIds(maxIds);
+
             result.description.add(std::move(cachedPhenotype), false);  // Try keeping ids stable for preview selection
 
             auto index = seedFirst ? result.description._creatures.size() - cachedPhenotype._creatures.size()

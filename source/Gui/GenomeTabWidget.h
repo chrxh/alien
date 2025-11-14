@@ -29,7 +29,9 @@ public:
 
     GenomeTabEditData const& getEditData() const;
     GenomeTabLayoutData const& getLayoutData() const;
-    GenomeDescription const& getGenomeDescription();
+    GenomeDescription const& getGenomeDescription() const;
+
+    void setGenomeDescription(GenomeDescription const& genome);
 
     bool hasCreaturesGenomeBeChanged() const;
     uint64_t getCreatureId();
