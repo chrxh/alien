@@ -86,15 +86,9 @@ public:
         }
     }
 
-    __device__ __inline__ uint64_t createObjectId() { return alienAtomicAdd64(&_ids->entityId, static_cast<uint64_t>(1)); }
-    __device__ __inline__ uint64_t createCreatureId() { return alienAtomicAdd64(&_ids->entityId, static_cast<uint64_t>(1)); }
-    __device__ __inline__ uint32_t createLineageId() { return alienAtomicAdd32(&_ids->lineageId, static_cast<uint32_t>(1)); }
+    __device__ __inline__ uint64_t createId() { return alienAtomicAdd64(&_ids->entityId, static_cast<uint64_t>(1)); }
 
-    __device__ __inline__ void adaptMaxIds(Ids const& ids)
-    {
-        alienAtomicMax64(&_ids->entityId, ids.entityId + 1);
-        alienAtomicMax32(&_ids->lineageId, ids.lineageId + 1);
-    }
+    __device__ __inline__ void adaptMaxIds(Ids const& ids) { alienAtomicMax64(&_ids->entityId, ids.entityId + 1); }
 
 private:
     __device__ __inline__ int getRandomNumber()

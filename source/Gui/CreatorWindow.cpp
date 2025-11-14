@@ -1,5 +1,4 @@
 #include "CreatorWindow.h"
-#include <EngineInterface/SimulationFacade.h>
 
 #include <cmath>
 #include <cstdlib>
@@ -39,9 +38,7 @@ namespace
     auto const RightColumnWidth = 160.0f;
 }
 
-void CreatorWindow::initIntern()
-{
-}
+void CreatorWindow::initIntern() {}
 
 void CreatorWindow::processIntern()
 {
@@ -205,7 +202,8 @@ void CreatorWindow::onDrawing()
             for (float interDelta = 0; interDelta < posDelta; interDelta += 1.0f) {
                 auto drawPos = lastDrawPos + (pos - lastDrawPos) * interDelta / posDelta;
                 auto toAdd = createAlignedCircle(drawPos);
-                DescriptionEditService::get().addIfSpaceAvailable(_drawingDescription, _drawingOccupancy, toAdd, 0.5f, _SimulationFacade::get()->getWorldSize());
+                DescriptionEditService::get().addIfSpaceAvailable(
+                    _drawingDescription, _drawingOccupancy, toAdd, 0.5f, _SimulationFacade::get()->getWorldSize());
                 _lastDrawPos = drawPos;
             }
         }
@@ -307,7 +305,7 @@ void CreatorWindow::createDisc()
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
             description._cells.emplace_back(CellDescription()
-                                                .id(NumberGenerator::get().createObjectId())
+                                                .id(NumberGenerator::get().createId())
                                                 .energy(_energy)
                                                 .stiffness(_stiffness)
                                                 .sticky(_makeSticky)
