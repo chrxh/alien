@@ -892,4 +892,133 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3) {}
+__inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3)
+{
+    // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
+    // to form a closed polygon
+    
+    // Find the path from cell3 to cell1 (not going through cell2)
+    Cell* currentCell = cell3;
+    Cell* previousCell = cell2;
+    int numIntermediateCells = 0; // cells between cell3 and cell1
+    bool foundPolygon = false;
+    Cell* cell4 = nullptr; // The next cell after cell3 in the polygon
+    
+    constexpr int maxPolygonSize = 50;
+    for (int step = 0; step < maxPolygonSize; ++step) {
+        // Look for next cell in the path
+        Cell* nextCell = nullptr;
+        for (int i = 0; i < currentCell->numConnections; ++i) {
+            Cell* candidate = currentCell->connections[i].cell;
+            if (candidate == cell1) {
+                // Found path back to cell1 - we have a polygon
+                foundPolygon = true;
+                break;
+            } else if (candidate != previousCell && candidate != cell2) {
+                // Continue traversal
+                nextCell = candidate;
+                if (step == 0) {
+                    // This is cell4 - the cell after cell3
+                    cell4 = candidate;
+                }
+                break;
+            }
+        }
+        
+        if (foundPolygon || nextCell == nullptr) {
+            break;
+        }
+        
+        previousCell = currentCell;
+        currentCell = nextCell;
+        numIntermediateCells++;
+    }
+    
+    if (!foundPolygon) {
+        // No closed polygon found, no angle correction needed
+        return;
+    }
+    
+    // If cell4 is still null, it means cell3 connects directly to cell1
+    if (cell4 == nullptr) {
+        cell4 = cell1;
+    }
+    
+    // Number of vertices in the polygon
+    int numVertices = 3 + numIntermediateCells; // cell1, cell2, cell3, + intermediate cells
+    
+    // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
+    float expectedAngleSum = (numVertices - 2) * 180.0f;
+    
+    // Calculate current inner angle sum by traversing the polygon and summing interior angles
+    float currentAngleSum = 0.0f;
+    
+    // Angle at cell1: from cell3 (or last cell before cell1) to cell2
+    Cell* lastCellBeforeCell1 = currentCell; // This is the last cell we visited before reaching cell1
+    currentAngleSum += cell1->getAngelSpan(lastCellBeforeCell1, cell2);
+    
+    // Angle at cell2: from cell1 to cell3
+    currentAngleSum += cell2->getAngelSpan(cell1, cell3);
+    
+    // Angles at intermediate cells (if any) from cell3 to cell1
+    currentCell = cell3;
+    previousCell = cell2;
+    for (int i = 0; i < numIntermediateCells; ++i) {
+        Cell* nextCell = nullptr;
+        for (int j = 0; j < currentCell->numConnections; ++j) {
+            Cell* candidate = currentCell->connections[j].cell;
+            if (candidate != previousCell && candidate != cell2) {
+                nextCell = candidate;
+                break;
+            }
+        }
+        
+        if (nextCell == nullptr) {
+            break;
+        }
+        
+        // Add angle at nextCell: from currentCell to the next cell after nextCell
+        Cell* nextNextCell = nullptr;
+        if (i == numIntermediateCells - 1) {
+            // Last intermediate cell, next is cell1
+            nextNextCell = cell1;
+        } else {
+            // Find the next cell after nextCell
+            for (int j = 0; j < nextCell->numConnections; ++j) {
+                Cell* candidate = nextCell->connections[j].cell;
+                if (candidate != currentCell && candidate != cell2) {
+                    nextNextCell = candidate;
+                    break;
+                }
+            }
+        }
+        
+        if (nextNextCell != nullptr) {
+            currentAngleSum += nextCell->getAngelSpan(currentCell, nextNextCell);
+        }
+        
+        previousCell = currentCell;
+        currentCell = nextCell;
+    }
+    
+    // Angle at cell3: from cell2 to cell4
+    currentAngleSum += cell3->getAngelSpan(cell2, cell4);
+    
+    // Calculate angle correction needed
+    float angleError = expectedAngleSum - currentAngleSum;
+    
+    // Find the index of cell4 in cell3's connections
+    int cell4Index = cell3->getConnectionIndex(cell4);
+    
+    // Adjust the angle at cell3 between cell2 and cell4
+    // The angleFromPrevious at cell4's connection should be adjusted
+    cell3->connections[cell4Index].angleFromPrevious += angleError;
+    
+    // Clamp to valid range [0, 360]
+    if (cell3->connections[cell4Index].angleFromPrevious < 0) {
+        cell3->connections[cell4Index].angleFromPrevious = 0;
+    }
+    if (cell3->connections[cell4Index].angleFromPrevious > 360.0f) {
+        cell3->connections[cell4Index].angleFromPrevious = 360.0f;
+    }
+}
