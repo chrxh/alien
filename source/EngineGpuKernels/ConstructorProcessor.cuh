@@ -76,7 +76,23 @@ private:
     __inline__ __device__ static bool checkAndReduceHostEnergy(SimulationData& data, Cell* hostCell, ConstructionData const& constructionData);
     __inline__ __device__ static void activateNewCellOnLastNode(Cell* newCell, Cell* hostCell, ConstructionData const& constructionData);
 
-    //    __inline__ __device__ static float calcNumCells(int color, uint8_t* genome, uint16_t genomeSize);
+    //
+    // Assumption: cell1 is connected with cell2 and cell2 is connected with cell3
+    // 
+    // If cell3 is connected to cell1 directly or via further cells (not cell2):
+    //  Calculates the inner angle sum of the n-polygon spanned by
+    //      (1) cell1
+    //      (2) cell2
+    //      (3) cell3
+    //      + possibly further cells between (3) and (1)
+    //  and 
+    //      set the angle on cell (3) between the connected cells (2) and (4)
+    //      (where (4) can be (1) if no further cells are in the polygon, i.e. n=3)
+    //      such that the inner angle sum of the polygon is (n - 2) * 180 deg
+    // Else:
+    //  No angle correction
+    //
+    __inline__ __device__ static void correctAngles(Cell* cell1, Cell* cell2, Cell* cell3);
 };
 
 /************************************************************************/
@@ -500,7 +516,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     }
 
     // Possibly connect newCell to hostCell
-    bool adaptReferenceAngle = false;
+    bool adaptReferenceAngles = false;
     if (!constructionData.isLastNodeOfLastConcatenation || !constructionData.isSeparation) {
 
         auto distance = constructionData.gene->connectionDistance;
@@ -518,7 +534,7 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
                 }
             }
         } else {
-            adaptReferenceAngle = true;
+            adaptReferenceAngles = true;
         }
     }
 
@@ -553,38 +569,49 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
         }
     }
 
-    // Adapt angles according to genome
-    if (adaptReferenceAngle) {
+    if (adaptReferenceAngles) {
+
+        // Adapt angles on new cell
         auto n = newCell->numConnections;
-        int constructionIndex = 0;
-        for (; constructionIndex < n; ++constructionIndex) {
-            if (newCell->connections[constructionIndex].cell == constructionData.lastConstructionCell) {
-                break;
-            }
-        }
-        int hostIndex = 0;
-        for (; hostIndex < n; ++hostIndex) {
-            if (newCell->connections[hostIndex].cell == hostCell) {
-                break;
-            }
-        }
+        //int constructionIndex = 0;
+        //for (; constructionIndex < n; ++constructionIndex) {
+        //    if (newCell->connections[constructionIndex].cell == constructionData.lastConstructionCell) {
+        //        break;
+        //    }
+        //}
+        //int hostIndex = 0;
+        //for (; hostIndex < n; ++hostIndex) {
+        //    if (newCell->connections[hostIndex].cell == hostCell) {
+        //        break;
+        //    }
+        //}
+        auto lastCellIndex = newCell->getConnectionIndex(constructionData.lastConstructionCell);
+        auto hostCellIndex = newCell->getConnectionIndex(hostCell);
 
         float consumedAngle1 = 0;
         if (n > 2) {
-            for (int i = constructionIndex; (i + n) % n != (hostIndex + 1) % n && (i + n) % n != hostIndex; --i) {
+            for (int i = lastCellIndex; (i + n) % n != (hostCellIndex + 1) % n && (i + n) % n != hostCellIndex; --i) {
                 consumedAngle1 += newCell->connections[(i + n) % n].angleFromPrevious;
             }
         }
 
         float consumedAngle2 = 0;
         if (n > 2) {
-            for (int i = constructionIndex + 1; i % n != hostIndex; ++i) {
+            for (int i = lastCellIndex + 1; i % n != hostCellIndex; ++i) {
                 consumedAngle2 += newCell->connections[i % n].angleFromPrevious;
             }
         }
         if (angleFromPreviousForNewCell - consumedAngle1 >= 0 && 360.0f - angleFromPreviousForNewCell - consumedAngle2 >= 0) {
-            newCell->connections[(hostIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewCell - consumedAngle1;
-            newCell->connections[hostIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
+            newCell->connections[(hostCellIndex + 1) % n].angleFromPrevious = angleFromPreviousForNewCell - consumedAngle1;
+            newCell->connections[hostCellIndex].angleFromPrevious = 360.0f - angleFromPreviousForNewCell - consumedAngle2;
+        }
+
+        // Adapt angles on other connected cells
+        for (int i = lastCellIndex; (i + n) % n != (hostCellIndex + 1) % n && (i + n) % n != hostCellIndex; --i) {
+            correctAngles(newCell->connections[i].cell, newCell, newCell->connections[(i + 1) % n].cell);
+        }
+        for (int i = lastCellIndex + 1; i % n != hostCellIndex; ++i) {
+            correctAngles(newCell->connections[(i + n - 1) % n].cell, newCell, newCell->connections[i].cell);
         }
     }
 
@@ -864,3 +891,5 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
         alienAtomicAdd32(&newCell->creature->frontAngleId, static_cast<uint32_t>(1));
     }
 }
+
+__inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3) {}

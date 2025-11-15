@@ -323,7 +323,7 @@ __inline__ __device__ bool CellConnectionProcessor::tryAddConnectionOneWay(
         }
         angleDiff = Math::alignAngle(angleDiff, angleAlignment);
         if (angleDiff < 0) {
-            angleDiff += 360.0;
+            angleDiff += 360.0f;
         }
         angleDiff = Math::alignAngleOnBoundaries(angleDiff, 360.0f, angleAlignment);
         if (abs(angleDiff) < NEAR_ZERO || abs(angleDiff - 360.0f) < NEAR_ZERO || abs(angleDiff + 360.0f) < NEAR_ZERO) {
