@@ -2472,7 +2472,7 @@ AlienGui::DynamicTableLayout::DynamicTableLayout(float columnWidth)
 
 bool AlienGui::DynamicTableLayout::begin()
 {
-    auto result = ImGui::BeginTable("##", _numColumns, ImGuiTableFlags_BordersInnerV);
+    auto result = ImGui::BeginTable("##", _numColumns, /*ImGuiTableFlags_BordersInnerV*/0);
     if (result) {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
@@ -2495,4 +2495,14 @@ void AlienGui::DynamicTableLayout::next()
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
     }
+}
+
+int AlienGui::DynamicTableLayout::getCurrentColumn() const
+{
+    return _elementNumber % _numColumns;
+}
+
+int AlienGui::DynamicTableLayout::getCurrentRow() const
+{
+    return _elementNumber / _numColumns;
 }

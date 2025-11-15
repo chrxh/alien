@@ -45,7 +45,15 @@ void SpecificationGuiService::createWidgetsForParameters(
                 isGroupVisibleActive = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
                 name = "Expert settings: " + name;
             }
+
             ImGui::PushID(name.c_str());
+            auto padding = ImGui::GetStyle().FramePadding;
+            if (table.getCurrentColumn() > 0) {
+                ImGui::Dummy({padding.x, 0});
+
+                ImGui::SameLine();
+                ImGui::BeginGroup();
+            }
             if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters()
                                             .name(name)
                                             .visible(isGroupVisibleActive)
@@ -53,8 +61,13 @@ void SpecificationGuiService::createWidgetsForParameters(
                                             .highlightedSubString(filter.containedText))) {
                 createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, orderNumber, filter);
             }
-            ImGui::PopID();
             AlienGui::EndTreeNode();
+            if (table.getCurrentColumn() > 0) {
+                ImGui::EndGroup();
+            }
+            ImGui::PopID();
+            ImGui::Dummy({0, padding.y});
+
             if (isGroupVisibleActive) {
                 table.next();
             }

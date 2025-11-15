@@ -466,6 +466,9 @@ public:
         void end();
         void next();
 
+        int getCurrentColumn() const;
+        int getCurrentRow() const;
+
     private:
         float _columnWidth = 0;
         int _numColumns = 0;
