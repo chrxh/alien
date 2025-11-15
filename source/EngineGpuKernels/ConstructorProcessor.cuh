@@ -897,31 +897,77 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
     // to form a closed polygon
     
-    // Find the path from cell3 to cell1 (not going through cell2)
+    // Determine traversal direction to find minimal polygon
+    // Find indices of cell1 and cell3 in cell2's connections (which are sorted clockwise)
+    int cell1IndexInCell2 = cell2->getConnectionIndex(cell1);
+    int cell3IndexInCell2 = cell2->getConnectionIndex(cell3);
+    
+    // Determine if we go clockwise or counter-clockwise from cell3 to find cell1
+    // The polygon is: cell1 -> cell2 -> cell3 -> ... -> cell1
+    // From cell2's perspective, we go clockwise from cell1 to cell3
+    // So from cell3, we should continue in a consistent direction to find cell1
+    bool goClockwiseFromCell3;
+    if (cell3IndexInCell2 > cell1IndexInCell2) {
+        // cell3 is clockwise from cell1 in cell2's connections
+        goClockwiseFromCell3 = true;
+    } else {
+        // cell3 is counter-clockwise from cell1 (wrapped around)
+        goClockwiseFromCell3 = false;
+    }
+    
+    // Find the minimal path from cell3 to cell1 (not going through cell2)
     Cell* currentCell = cell3;
     Cell* previousCell = cell2;
-    int numIntermediateCells = 0; // cells between cell3 and cell1
+    int numIntermediateCells = 0;
     bool foundPolygon = false;
     Cell* cell4 = nullptr; // The next cell after cell3 in the polygon
     
+    // Find cell2's index in cell3's connections to determine traversal direction
+    int cell2IndexInCell3 = cell3->getConnectionIndex(cell2);
+    
     constexpr int maxPolygonSize = 50;
     for (int step = 0; step < maxPolygonSize; ++step) {
-        // Look for next cell in the path
         Cell* nextCell = nullptr;
-        for (int i = 0; i < currentCell->numConnections; ++i) {
-            Cell* candidate = currentCell->connections[i].cell;
-            if (candidate == cell1) {
-                // Found path back to cell1 - we have a polygon
-                foundPolygon = true;
-                break;
-            } else if (candidate != previousCell && candidate != cell2) {
-                // Continue traversal
-                nextCell = candidate;
-                if (step == 0) {
-                    // This is cell4 - the cell after cell3
+        
+        if (step == 0) {
+            // First step from cell3: traverse in the appropriate direction
+            // Connections are sorted clockwise, so we go clockwise or counter-clockwise from cell2
+            int startIndex = goClockwiseFromCell3 ? (cell2IndexInCell3 + 1) % cell3->numConnections 
+                                                   : (cell2IndexInCell3 - 1 + cell3->numConnections) % cell3->numConnections;
+            
+            for (int i = 0; i < cell3->numConnections; ++i) {
+                int idx = goClockwiseFromCell3 
+                    ? (startIndex + i) % cell3->numConnections
+                    : (startIndex - i + cell3->numConnections) % cell3->numConnections;
+                    
+                Cell* candidate = cell3->connections[idx].cell;
+                if (candidate == cell1) {
+                    foundPolygon = true;
+                    break;
+                } else if (candidate != cell2) {
+                    nextCell = candidate;
                     cell4 = candidate;
+                    break;
                 }
-                break;
+            }
+        } else {
+            // Subsequent steps: find next cell that's not the previous one
+            int prevIndex = currentCell->getConnectionIndex(previousCell);
+            
+            // Continue in the same general direction
+            for (int i = 1; i < currentCell->numConnections; ++i) {
+                int idx = goClockwiseFromCell3
+                    ? (prevIndex + i) % currentCell->numConnections
+                    : (prevIndex - i + currentCell->numConnections) % currentCell->numConnections;
+                    
+                Cell* candidate = currentCell->connections[idx].cell;
+                if (candidate == cell1) {
+                    foundPolygon = true;
+                    break;
+                } else if (candidate != cell2) {
+                    nextCell = candidate;
+                    break;
+                }
             }
         }
         
