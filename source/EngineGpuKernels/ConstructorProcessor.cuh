@@ -1011,7 +1011,8 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     int cell4Index = cell3->getConnectionIndex(cell4);
     
     // Adjust the angle at cell3 between cell2 and cell4
-    // The angleFromPrevious at cell4's connection should be adjusted
+    // Since connections are sorted clockwise and angleFromPrevious is the angle from the previous (counter-clockwise) connection,
+    // we adjust the angleFromPrevious at cell4Index, which contributes to the angle span from cell2 to cell4
     cell3->connections[cell4Index].angleFromPrevious += angleError;
     
     // Clamp to valid range [0, 360]
