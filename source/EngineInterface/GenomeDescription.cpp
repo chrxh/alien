@@ -20,12 +20,12 @@ NeuralNetworkGenomeDescription& NeuralNetworkGenomeDescription::weight(int row, 
 
 GenomeDescription::GenomeDescription()
 {
-    _id = NumberGenerator::get().createGenomeId();
+    _id = NumberGenerator::get().createId();
 }
 
 GenomeDescription GenomeDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.genomeId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }

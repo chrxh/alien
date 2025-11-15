@@ -51,13 +51,13 @@ InjectorDescription::InjectorDescription() {}
 CellDescription::CellDescription(bool createIds)
 {
     if (createIds) {
-        _id = NumberGenerator::get().createObjectId();
+        _id = NumberGenerator::get().createId();
     }
 }
 
 CellDescription CellDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.objectId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
@@ -141,24 +141,24 @@ CellDescription& CellDescription::signalRestriction(float baseAngle, float openi
 
 ParticleDescription::ParticleDescription()
 {
-    _id = NumberGenerator::get().createObjectId();
+    _id = NumberGenerator::get().createId();
 }
 
 ParticleDescription ParticleDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.objectId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
 
 CreatureDescription::CreatureDescription()
 {
-    _id = NumberGenerator::get().createCreatureId();
+    _id = NumberGenerator::get().createId();
 }
 
 CreatureDescription CreatureDescription::id(uint64_t id)
 {
-    NumberGenerator::get().adaptMaxIds({.creatureId = id});
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
     _id = id;
     return *this;
 }
@@ -326,7 +326,7 @@ void Description::assignNewIds()
     std::unordered_map<uint64_t, uint64_t> oldToNewCellId_global;
     std::unordered_set<uint64_t> nonUniqueCellIds_global;
     for (auto& [key, value] : indexToNewCellId) {
-        value = NumberGenerator::get().createObjectId();
+        value = NumberGenerator::get().createId();
         auto& cell = getCellRef(key.creatureIndex, key.cellIndex);
         auto insertionResult = oldToNewCellId_global.insert({cell._id, value});
         if (!insertionResult.second) {
@@ -378,7 +378,7 @@ void Description::assignNewIds()
     std::unordered_map<uint64_t, uint64_t> oldToNewCreatureId;
     std::unordered_set<uint64_t> nonUniqueCreatureIds;
     for (auto& creature : _creatures) {
-        auto newId = NumberGenerator::get().createObjectId();
+        auto newId = NumberGenerator::get().createId();
         auto insertionResult = oldToNewCreatureId.insert({creature._id, newId});
         if (!insertionResult.second) {
             nonUniqueCreatureIds.insert(creature._id);
@@ -403,7 +403,7 @@ void Description::assignNewIds()
     std::unordered_map<uint64_t, uint64_t> oldToNewGenomeId;
     std::unordered_set<uint64_t> nonUniqueGenomeIds;
     for (auto& genome : _genomes) {
-        auto newId = NumberGenerator::get().createGenomeId();
+        auto newId = NumberGenerator::get().createId();
         auto insertionResult = oldToNewGenomeId.insert({genome._id, newId});
         if (!insertionResult.second) {
             nonUniqueGenomeIds.insert(genome._id);
@@ -420,7 +420,7 @@ void Description::assignNewIds()
 
     // Assign new particle ids
     for (auto& particle : _particles) {
-        particle._id = NumberGenerator::get().createObjectId();
+        particle._id = NumberGenerator::get().createId();
     }
 }
 

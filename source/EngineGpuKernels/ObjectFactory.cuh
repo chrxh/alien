@@ -415,7 +415,7 @@ __inline__ __device__ Particle* ObjectFactory::createParticle(float energy, floa
     Particle** particlePointer = _data->objects.particles.getNewElement();
     Particle* particle = _data->objects.heap.getTypedSubArray<Particle>(1);
     *particlePointer = particle;
-    particle->id = _data->primaryNumberGen.createObjectId();
+    particle->id = _data->primaryNumberGen.createId();
     particle->selected = 0;
     particle->locked = 0;
     particle->energy = energy;
@@ -432,7 +432,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     auto cellPointers = _data->objects.cells.getNewElement();
     *cellPointers = cell;
 
-    cell->id = _data->primaryNumberGen.createObjectId();
+    cell->id = _data->primaryNumberGen.createId();
     cell->pos = pos;
     cell->vel = vel;
     cell->energy = energy;
@@ -523,7 +523,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     auto cell = _data->objects.heap.getTypedSubArray<Cell>(1);
     auto cellPointer = _data->objects.cells.getNewElement(&cellIndex);
     *cellPointer = cell;
-    cell->id = _data->primaryNumberGen.createObjectId();
+    cell->id = _data->primaryNumberGen.createId();
     cell->pos = pos;
     cell->vel = vel;
     cell->energy = energy;
@@ -700,7 +700,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
 __inline__ __device__ Creature* ObjectFactory::createEmptyCreature()
 {
     auto creature = _data->objects.heap.getTypedSubArray<Creature>(1);
-    creature->id = _data->primaryNumberGen.createCreatureId();
+    creature->id = _data->primaryNumberGen.createId();
     return creature;
 }
 

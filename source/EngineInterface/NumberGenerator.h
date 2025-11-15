@@ -19,9 +19,7 @@ public:
     float getRandomFloat(float min, float max);
     uint32_t getLargeRandomInt(uint32_t range);
 
-    uint64_t createObjectId();
-    uint64_t createCreatureId();
-    uint64_t createGenomeId();
+    uint64_t createId();
 
     void adaptMaxIds(Ids const& ids);
 

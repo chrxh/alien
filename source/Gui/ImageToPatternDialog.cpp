@@ -20,7 +20,6 @@
 #include "Viewport.h"
 
 #include <ImFileDialog.h>
-#include <EngineInterface/SimulationFacade.h>
 
 
 void ImageToPatternDialog::init()
@@ -104,7 +103,7 @@ void ImageToPatternDialog::show()
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
                     dataDesc._cells.emplace_back(CellDescription()
-                                                     .id(NumberGenerator::get().createObjectId())
+                                                     .id(NumberGenerator::get().createId())
                                                      .cellType(StructureCellDescription())
                                                      .energy(matchedCellIntensity * 200)
                                                      .pos({toFloat(x) + xOffset, toFloat(y)})
