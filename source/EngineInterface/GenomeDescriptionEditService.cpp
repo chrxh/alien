@@ -191,6 +191,7 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
     RealVector2D currentPos{toFloat(PREVIEW_HEIGHT) / 2, toFloat(PREVIEW_HEIGHT) / 2};
 
     SeedCollectionResult result;
+
     for (auto const& subGenome : subGenomes) {
         std::optional<Description> cachedValue;
 
@@ -208,14 +209,6 @@ auto GenomeDescriptionEditService::createSeedCollectionForPreview(
             if (cachedPhenotype._creatures.front()._generation == 0) {
                 seedFirst = true;  // first Creature is seed
             }
-
-            // Adapt ids in NumberGenerator
-            Ids maxIds;
-            cachedPhenotype.forEachCell([&maxIds](CellDescription const& cell) { maxIds.entityId = std::max(maxIds.entityId, cell._id); });
-            for (auto const& creature : cachedPhenotype._creatures) {
-                maxIds.entityId = std::max(maxIds.entityId, creature._id);
-            }
-            NumberGenerator::get().adaptMaxIds(maxIds);
 
             result.description.add(std::move(cachedPhenotype), false);  // Try keeping ids stable for preview selection
 

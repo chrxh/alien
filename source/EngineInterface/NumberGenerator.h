@@ -22,6 +22,7 @@ public:
     uint64_t createId();
 
     void adaptMaxIds(Ids const& ids);
+    void setIds(Ids const& ids);
 
 private:
     NumberGenerator();

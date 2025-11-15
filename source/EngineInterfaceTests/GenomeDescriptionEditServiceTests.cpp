@@ -1117,45 +1117,6 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
     ASSERT_EQ(2, result.description._genomes.size());
 }
 
-TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_withCache_idAdaptation)
-{
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).nodes({
-            NodeDescription(),
-        }),
-    });
-
-    SubGenomeDescription subGenome{genome, 0, false};
-
-    // Create cached phenotype with specific IDs to test ID adaptation
-    Description cachedPhenotype;
-    cachedPhenotype._genomes.emplace_back(genome);
-
-    // Create a seed creature with a high ID
-    auto seedCreature = CreatureDescription().id(9999999).generation(0).genomeId(genome._id).cells({CellDescription().id(8888888).pos(RealVector2D{0, 0})});
-    cachedPhenotype._creatures.emplace_back(std::move(seedCreature));
-
-    std::vector<SubGenomeDescription> subGenomes = {subGenome};
-    GenotypeToPhenotypeCache cache;
-    cache.insertOrAssign(subGenome, cachedPhenotype);
-
-    auto result = GenomeDescriptionEditService::get().createSeedCollectionForPreview(subGenomes, cache);
-
-    // Verify that the result contains the high IDs from cache
-    ASSERT_EQ(1, result.description._creatures.size());
-    EXPECT_EQ(9999999, result.description._creatures.at(0)._id);
-    EXPECT_EQ(8888888, result.description._creatures.at(0)._cells.at(0)._id);
-
-    // Now create a new description to verify NumberGenerator has been adapted
-    // The next IDs generated should be higher than the cached ones
-    Description newDesc;
-    newDesc._creatures.emplace_back(CreatureDescription().cells({CellDescription()}));
-
-    // The new creature and cell IDs should be greater than the cached ones
-    EXPECT_GT(newDesc._creatures.at(0)._id, 9999999);
-    EXPECT_GT(newDesc._creatures.at(0)._cells.at(0)._id, 8888888);
-}
-
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_emptyPreview)
 {
     Description preview;

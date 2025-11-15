@@ -49,6 +49,11 @@ void NumberGenerator::adaptMaxIds(Ids const& ids)
     _ids.entityId = std::max(_ids.entityId, ids.entityId + 1);
 }
 
+void NumberGenerator::setIds(Ids const& ids)
+{
+    _ids = ids;
+}
+
 double NumberGenerator::getRandomDouble(double min, double max)
 {
     return getLargeRandomInt(static_cast<int>((max - min) * 1000)) / 1000.0 + min;

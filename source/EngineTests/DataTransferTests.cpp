@@ -5,6 +5,7 @@
 
 #include <EngineInterface/Description.h>
 #include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include <EngineTestData/DescriptionTestDataFactory.h>
@@ -368,4 +369,56 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
         std::find_if(inspectedData._genomes.begin(), inspectedData._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
     ASSERT_NE(genomeIt, inspectedData._genomes.end());
     EXPECT_EQ(genome, *genomeIt);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_cells)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Description().cells({CellDescription().id(HighId)});
+    _simulationFacade->setSimulationData(data);
+
+    NumberGenerator::get().setIds({1});
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto newId = NumberGenerator::get().createId();
+    EXPECT_TRUE(newId > HighId);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_particles)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Description().particles({ParticleDescription().id(HighId)});
+    _simulationFacade->setSimulationData(data);
+
+    NumberGenerator::get().setIds({1});
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto newId = NumberGenerator::get().createId();
+    EXPECT_TRUE(newId > HighId);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_creatures)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Description().addCreature(CreatureDescription().id(HighId).cells({CellDescription().id(1)}));
+    _simulationFacade->setSimulationData(data);
+
+    NumberGenerator::get().setIds({1});
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto newId = NumberGenerator::get().createId();
+    EXPECT_TRUE(newId > HighId);
+}
+
+TEST_F(DataTransferTests, adaptIdGenerator_genomes)
+{
+    auto constexpr HighId = 1000000;
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({CellDescription().id(2)}), GenomeDescription().id(HighId));
+    _simulationFacade->setSimulationData(data);
+
+    NumberGenerator::get().setIds({1});
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto newId = NumberGenerator::get().createId();
+    EXPECT_TRUE(newId > HighId);
 }

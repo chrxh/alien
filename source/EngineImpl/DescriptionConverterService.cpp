@@ -237,6 +237,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
 
     auto const& cellTO = to.cells[cellIndex];
     result._id = cellTO.id;
+    NumberGenerator::get().adaptMaxIds({.entityId = cellTO.id});
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result._vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
     result._energy = cellTO.energy;
@@ -567,6 +568,7 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
 
     GenomeDescription result;
     result._id = genomeTO.id;
+    NumberGenerator::get().adaptMaxIds({.entityId = genomeTO.id});
     result._name = char64ToString(genomeTO.name);
     result._frontAngle = genomeTO.frontAngle;
     result._genes.reserve(genomeTO.numGenes);
@@ -602,9 +604,11 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
 
     auto const& creatureTO = to.creatures[creatureIndex];
     result._id = creatureTO.id;
+    NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.id});
     result._ancestorId = creatureTO.ancestorId != VALUE_NOT_SET_UINT64 ? std::make_optional(creatureTO.ancestorId) : std::nullopt;
     result._generation = creatureTO.generation;
     result._lineageId = creatureTO.lineageId;
+    NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.lineageId});
     result._numCells = creatureTO.numCells;
     result._frontAngleId = creatureTO.frontAngleId;
 
@@ -614,6 +618,7 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
 ParticleDescription DescriptionConverterService::createParticleDescription(TO const& to, int particleIndex) const
 {
     auto const& particle = to.particles[particleIndex];
+    NumberGenerator::get().adaptMaxIds({.entityId = particle.id});
     return ParticleDescription()
         .id(particle.id)
         .pos({particle.pos.x, particle.pos.y})
