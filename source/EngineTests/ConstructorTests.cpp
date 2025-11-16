@@ -3137,7 +3137,7 @@ TEST_F(ConstructorTests, regressionTestMassiveReplicationsWithSeeds)
     _simulationFacade->calcTimesteps(10000);
 }
 
-TEST_F(ConstructorTests, additionalCellAlignment)
+TEST_F(ConstructorTests, angleCorrectionBasedOnPolygon)
 {
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).angleAlignment(ConstructorAngleAlignment_90).nodes({

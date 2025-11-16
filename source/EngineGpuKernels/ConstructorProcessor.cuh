@@ -975,7 +975,6 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
 
         if (step > 0) {
             if (!goClockwiseFromCell3) {
-                printf("z: %f\n", currentCell->getAngelSpan(nextCell, previousCell));
                 currentAngleSum += currentCell->getAngelSpan(nextCell, previousCell);
             }
         }
@@ -990,7 +989,7 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     }
     
     if (!foundPolygon) {
-        // No closed polygon found, no angle correction needed
+        // No closed polygon found, no angle correction based on polygon possible
         return;
     }
     
@@ -1014,59 +1013,9 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
         currentAngleSum += cell2->getAngelSpan(cell3, cell1);
         currentAngleSum += cell3->getAngelSpan(cell4, cell2);
     }
-
-    //printf("%llx\n", currentCell->id);
-    //currentAngleSum += Math::getNormalizedAngle(cell1->getAngelSpan(lastCellBeforeCell1, cell2), 0.0f);
-    //
-    //// Angle at cell2: from cell1 to cell3
-    //currentAngleSum += Math::getNormalizedAngle(cell2->getAngelSpan(cell1, cell3), 0.0f);
-    //
-    //// Angles at intermediate cells (if any) from cell3 to cell1
-    //currentCell = cell3;
-    //previousCell = cell2;
-    //for (int i = 0; i < numIntermediateCells; ++i) {
-    //    Cell* nextCell = nullptr;
-    //    for (int j = 0; j < currentCell->numConnections; ++j) {
-    //        Cell* candidate = currentCell->connections[j].cell;
-    //        if (candidate != previousCell && candidate != cell2) {
-    //            nextCell = candidate;
-    //            break;
-    //        }
-    //    }
-    //    
-    //    if (nextCell == nullptr) {
-    //        break;
-    //    }
-    //    
-    //    // Add angle at nextCell: from currentCell to the next cell after nextCell
-    //    Cell* nextNextCell = nullptr;
-    //    if (i == numIntermediateCells - 1) {
-    //        // Last intermediate cell, next is cell1
-    //        nextNextCell = cell1;
-    //    } else {
-    //        // Find the next cell after nextCell
-    //        for (int j = 0; j < nextCell->numConnections; ++j) {
-    //            Cell* candidate = nextCell->connections[j].cell;
-    //            if (candidate != currentCell && candidate != cell2) {
-    //                nextNextCell = candidate;
-    //                break;
-    //            }
-    //        }
-    //    }
-    //    
-    //    if (nextNextCell != nullptr) {
-    //        currentAngleSum += Math::getNormalizedAngle(nextCell->getAngelSpan(currentCell, nextNextCell), 0.0f);
-    //    }
-    //    
-    //    previousCell = currentCell;
-    //    currentCell = nextCell;
-    //}
-    //
-    //// Angle at cell3: from cell2 to cell4
-    //currentAngleSum += Math::getNormalizedAngle(cell3->getAngelSpan(cell2, cell4), 0.0f);
     
     // Calculate angle correction needed
-    float angleError = expectedAngleSum - currentAngleSum;
+    float angleCorrection = expectedAngleSum - currentAngleSum;
 
     printf("numIntermediateCells: %d\n", numIntermediateCells);
     printf("expectedAngleSum: %f, currentAngleSum: %f\n", expectedAngleSum, currentAngleSum);
@@ -1074,19 +1023,8 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Find the index of cell4 in cell3's connections
     int cell2Index = cell3->getConnectionIndex(cell2);
     
-    // Adjust the angle at cell3 between cell2 and cell4
-    // Since connections are sorted clockwise and angleFromPrevious is the angle from the previous (counter-clockwise) connection,
-    // we adjust the angleFromPrevious at cell4Index, which contributes to the angle span from cell2 to cell4
-    printf("angleError: %f, before: %f\n", angleError, cell3->getConnection(cell2Index).angleFromPrevious);
-    cell3->getConnection(cell2Index).angleFromPrevious += angleError;
-    cell3->getConnection(cell2Index + 1).angleFromPrevious -= angleError;
+    printf("angleError: %f, before: %f\n", angleCorrection, cell3->getConnection(cell2Index).angleFromPrevious);
+    cell3->increaseAngle(cell2Index, angleCorrection);
     
-    // Clamp to valid range [0, 360]
-    //if (cell3->connections[cell2Index].angleFromPrevious < 0) {
-    //    cell3->connections[cell2Index].angleFromPrevious = 0;
-    //}
-    //if (cell3->connections[cell2Index].angleFromPrevious > 360.0f) {
-    //    cell3->connections[cell2Index].angleFromPrevious = 360.0f;
-    //}
 }
 
