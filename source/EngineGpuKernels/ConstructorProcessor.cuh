@@ -894,8 +894,6 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
 
 __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3)
 {
-    //printf("%llx, %llx, %llx\n", cell1->id, cell2->id, cell3->id);
-
     // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
     // to form a closed polygon
     
@@ -1005,7 +1003,6 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     float expectedAngleSum = (numVertices - 2) * 180.0f;
     
     // Calculate current inner angle sum by traversing the polygon and summing interior angles
-    //float currentAngleSum = 0.0f;
     
     Cell* lastCellBeforeCell1 = currentCell; // This is the last cell we visited before reaching cell1
     if (!goClockwiseFromCell3) {
@@ -1017,13 +1014,9 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Calculate angle correction needed
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
-    //printf("numIntermediateCells: %d\n", numIntermediateCells);
-    //printf("expectedAngleSum: %f, currentAngleSum: %f\n", expectedAngleSum, currentAngleSum);
-    
     // Find the index of cell4 in cell3's connections
     int cell2Index = cell3->getConnectionIndex(cell2);
     
-    //printf("angleError: %f, before: %f\n", angleCorrection, cell3->getConnection(cell2Index).angleFromPrevious);
     if (!goClockwiseFromCell3) {
         cell3->increaseAngle(cell2Index, angleCorrection);
     }
