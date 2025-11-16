@@ -904,7 +904,7 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     int cell1IndexInCell2 = cell2->getConnectionIndex(cell1);
     int cell3IndexInCell2 = cell2->getConnectionIndex(cell3);
 
-    printf("cell1IndexInCell2: %d, cell3IndexInCell2: %d\n", cell1IndexInCell2, cell3IndexInCell2);
+    //printf("cell1IndexInCell2: %d, cell3IndexInCell2: %d\n", cell1IndexInCell2, cell3IndexInCell2);
     
     // Determine if we go clockwise or counter-clockwise from cell3 to find cell1
     // The polygon is: cell1 -> cell2 -> cell3 -> ... -> cell1
@@ -1017,14 +1017,15 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Calculate angle correction needed
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
-    printf("numIntermediateCells: %d\n", numIntermediateCells);
-    printf("expectedAngleSum: %f, currentAngleSum: %f\n", expectedAngleSum, currentAngleSum);
+    //printf("numIntermediateCells: %d\n", numIntermediateCells);
+    //printf("expectedAngleSum: %f, currentAngleSum: %f\n", expectedAngleSum, currentAngleSum);
     
     // Find the index of cell4 in cell3's connections
     int cell2Index = cell3->getConnectionIndex(cell2);
     
-    printf("angleError: %f, before: %f\n", angleCorrection, cell3->getConnection(cell2Index).angleFromPrevious);
-    cell3->increaseAngle(cell2Index, angleCorrection);
-    
+    //printf("angleError: %f, before: %f\n", angleCorrection, cell3->getConnection(cell2Index).angleFromPrevious);
+    if (!goClockwiseFromCell3) {
+        cell3->increaseAngle(cell2Index, angleCorrection);
+    }
 }
 
