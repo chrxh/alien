@@ -692,10 +692,10 @@ bool Description::hasConnection(CellDescription const& cell1, CellDescription co
     return hasConnection(cell1._id, cell2._id);
 }
 
-ConnectionDescription Description::getConnection(uint64_t id, uint64_t otherId) const
+ConnectionDescription& Description::getConnectionRef(uint64_t id, uint64_t otherId)
 {
-    auto cell = getCellRef(id);
-    for (auto const& connection : cell._connections) {
+    auto& cell = getCellRef(id);
+    for (auto& connection : cell._connections) {
         if (connection._cellId == otherId) {
             return connection;
         }
@@ -703,7 +703,7 @@ ConnectionDescription Description::getConnection(uint64_t id, uint64_t otherId) 
     CHECK(false);
 }
 
-ConnectionDescription Description::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
+ConnectionDescription const& Description::getConnection(CellDescription const& cell1, CellDescription const& cell2) const
 {
     for (auto const& connection : cell1._connections) {
         if (connection._cellId == cell2._id) {

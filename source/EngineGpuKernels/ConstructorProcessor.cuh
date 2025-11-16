@@ -937,15 +937,12 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
         if (step == 0) {
             // First step from cell3: traverse in the appropriate direction
             // Connections are sorted clockwise, so we go clockwise or counter-clockwise from cell2
-            int startIndex = goClockwiseFromCell3 ? (cell2IndexInCell3 + 1) % cell3->numConnections 
-                                                   : (cell2IndexInCell3 - 1 + cell3->numConnections) % cell3->numConnections;
+            int startIndex = goClockwiseFromCell3 ? cell2IndexInCell3 + 1 : cell2IndexInCell3 - 1;
             
             for (int i = 0; i < cell3->numConnections; ++i) {
-                int idx = goClockwiseFromCell3 
-                    ? (startIndex + i) % cell3->numConnections
-                    : (startIndex - i + cell3->numConnections) % cell3->numConnections;
+                int index = goClockwiseFromCell3 ? startIndex + i : startIndex - i;
                     
-                Cell* candidate = cell3->connections[idx].cell;
+                Cell* candidate = cell3->getConnectedCell(index);
                 if (candidate == cell1) {
                     nextCell = candidate;
                     foundPolygon = true;
@@ -962,11 +959,9 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
             
             // Continue in the same general direction
             for (int i = 1; i < currentCell->numConnections; ++i) {
-                int idx = goClockwiseFromCell3
-                    ? (prevIndex + i) % currentCell->numConnections
-                    : (prevIndex - i + currentCell->numConnections) % currentCell->numConnections;
+                int index = goClockwiseFromCell3 ? prevIndex + i : prevIndex - i;
                     
-                Cell* candidate = currentCell->connections[idx].cell;
+                Cell* candidate = currentCell->connections[index].cell;
                 if (candidate == cell1) {
                     nextCell = candidate;
                     foundPolygon = true;
@@ -980,8 +975,8 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
 
         if (step > 0) {
             if (!goClockwiseFromCell3) {
-                printf("z: %f\n", Math::getNormalizedAngle(currentCell->getAngelSpan(nextCell, previousCell), 0.0f));
-                currentAngleSum += Math::getNormalizedAngle(currentCell->getAngelSpan(nextCell, previousCell), 0.0f);
+                printf("z: %f\n", currentCell->getAngelSpan(nextCell, previousCell));
+                currentAngleSum += currentCell->getAngelSpan(nextCell, previousCell);
             }
         }
 
@@ -1015,9 +1010,9 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     
     Cell* lastCellBeforeCell1 = currentCell; // This is the last cell we visited before reaching cell1
     if (!goClockwiseFromCell3) {
-        currentAngleSum += Math::getNormalizedAngle(cell1->getAngelSpan(cell2, lastCellBeforeCell1), 0.0f);
-        currentAngleSum += Math::getNormalizedAngle(cell2->getAngelSpan(cell3, cell1), 0.0f);
-        currentAngleSum += Math::getNormalizedAngle(cell3->getAngelSpan(cell4, cell2), 0.0f);
+        currentAngleSum += cell1->getAngelSpan(cell2, lastCellBeforeCell1);
+        currentAngleSum += cell2->getAngelSpan(cell3, cell1);
+        currentAngleSum += cell3->getAngelSpan(cell4, cell2);
     }
 
     //printf("%llx\n", currentCell->id);
@@ -1083,8 +1078,8 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Since connections are sorted clockwise and angleFromPrevious is the angle from the previous (counter-clockwise) connection,
     // we adjust the angleFromPrevious at cell4Index, which contributes to the angle span from cell2 to cell4
     printf("angleError: %f, before: %f\n", angleError, cell3->connections[cell2Index].angleFromPrevious);
-    cell3->connections[cell2Index].angleFromPrevious += angleError;
-    cell3->connections[(cell2Index + 1) % cell3->numConnections].angleFromPrevious -= angleError;
+    cell3->getConnection(cell2Index).angleFromPrevious += angleError;
+    cell3->getConnection(cell2Index + 1).angleFromPrevious -= angleError;
     
     // Clamp to valid range [0, 360]
     //if (cell3->connections[cell2Index].angleFromPrevious < 0) {

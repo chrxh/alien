@@ -409,8 +409,8 @@ struct Description
 
     bool hasConnection(uint64_t id, uint64_t otherId) const;
     bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
-    ConnectionDescription getConnection(uint64_t id, uint64_t otherId) const;
-    ConnectionDescription getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
+    ConnectionDescription& getConnectionRef(uint64_t id, uint64_t otherId);
+    ConnectionDescription const& getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
     CreatureDescription& getCreatureRef(uint64_t id);
     CreatureDescription& getOtherCreatureRef(uint64_t id);
 
