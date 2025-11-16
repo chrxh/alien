@@ -608,10 +608,10 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
         // Adapt angles on other connected cells
         for (int i = lastCellIndex; (i + n) % n != (hostCellIndex + 1) % n && (i + n) % n != hostCellIndex; --i) {
-            correctAngles(newCell->connections[i].cell, newCell, newCell->connections[(i + 1) % n].cell);
+            correctAngles(newCell->connections[i].cell, newCell, newCell->connections[(i + n - 1) % n].cell);
         }
         for (int i = lastCellIndex + 1; i % n != hostCellIndex; ++i) {
-            correctAngles(newCell->connections[(i + n - 1) % n].cell, newCell, newCell->connections[i].cell);
+            correctAngles(newCell->connections[(i + 1) % n].cell, newCell, newCell->connections[i].cell);
         }
     }
 
@@ -892,4 +892,140 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3) {}
+__inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3)
+{
+    //printf("%llx, %llx, %llx\n", cell1->id, cell2->id, cell3->id);
+
+    // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
+    // to form a closed polygon
+    
+    // Determine traversal direction to find minimal polygon
+    // Find indices of cell1 and cell3 in cell2's connections (which are sorted clockwise)
+    int cell1IndexInCell2 = cell2->getConnectionIndex(cell1);
+    int cell3IndexInCell2 = cell2->getConnectionIndex(cell3);
+
+    //printf("cell1IndexInCell2: %d, cell3IndexInCell2: %d\n", cell1IndexInCell2, cell3IndexInCell2);
+    
+    // Determine if we go clockwise or counter-clockwise from cell3 to find cell1
+    // The polygon is: cell1 -> cell2 -> cell3 -> ... -> cell1
+    // From cell2's perspective, we go clockwise from cell1 to cell3
+    // So from cell3, we should continue in a consistent direction to find cell1
+    bool goClockwiseFromCell3;
+    if (cell3IndexInCell2 == (cell1IndexInCell2 + 1) % cell2->numConnections) {
+        // cell3 is clockwise from cell1 in cell2's connections
+        goClockwiseFromCell3 = true;
+    } else {
+        // cell3 is counter-clockwise from cell1 (wrapped around)
+        goClockwiseFromCell3 = false;
+    }
+    
+    // Find the minimal path from cell3 to cell1 (not going through cell2)
+    Cell* currentCell = cell3;
+    Cell* previousCell = cell2;
+    int numIntermediateCells = 0;
+    bool foundPolygon = false;
+    Cell* cell4 = nullptr; // The next cell after cell3 in the polygon
+    
+    // Find cell2's index in cell3's connections to determine traversal direction
+    int cell2IndexInCell3 = cell3->getConnectionIndex(cell2);
+    
+    constexpr int maxPolygonSize = 50;
+    float currentAngleSum = 0.0f;
+    for (int step = 0; step < maxPolygonSize; ++step) {
+        Cell* nextCell = nullptr;
+        
+        if (step == 0) {
+            // First step from cell3: traverse in the appropriate direction
+            // Connections are sorted clockwise, so we go clockwise or counter-clockwise from cell2
+            int startIndex = goClockwiseFromCell3 ? cell2IndexInCell3 + 1 : cell2IndexInCell3 - 1;
+            
+            for (int i = 0; i < cell3->numConnections; ++i) {
+                int index = goClockwiseFromCell3 ? startIndex + i : startIndex - i;
+                    
+                Cell* candidate = cell3->getConnectedCell(index);
+                if (candidate == cell1) {
+                    nextCell = candidate;
+                    foundPolygon = true;
+                    break;
+                } else if (candidate != cell2) {
+                    nextCell = candidate;
+                    cell4 = candidate;
+                    break;
+                }
+            }
+        } else {
+            // Subsequent steps: find next cell that's not the previous one
+            int prevIndex = currentCell->getConnectionIndex(previousCell);
+            
+            // Continue in the same general direction
+            for (int i = 1; i < currentCell->numConnections; ++i) {
+                int index = goClockwiseFromCell3 ? prevIndex + i : prevIndex - i;
+                    
+                Cell* candidate = currentCell->getConnectedCell(index);
+                if (candidate == cell1) {
+                    nextCell = candidate;
+                    foundPolygon = true;
+                    break;
+                } else if (candidate != cell2) {
+                    nextCell = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (step > 0) {
+            if (!goClockwiseFromCell3) {
+                currentAngleSum += currentCell->getAngelSpan(nextCell, previousCell);
+            }
+        }
+
+        if (foundPolygon || nextCell == nullptr) {
+            break;
+        }
+        
+        previousCell = currentCell;
+        currentCell = nextCell;
+        numIntermediateCells++;
+    }
+    
+    if (!foundPolygon) {
+        // No closed polygon found, no angle correction based on polygon possible
+        return;
+    }
+    
+    // If cell4 is still null, it means cell3 connects directly to cell1
+    if (cell4 == nullptr) {
+        cell4 = cell1;
+    }
+    
+    // Number of vertices in the polygon
+    int numVertices = 3 + numIntermediateCells; // cell1, cell2, cell3, + intermediate cells
+    
+    // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
+    float expectedAngleSum = (numVertices - 2) * 180.0f;
+    
+    // Calculate current inner angle sum by traversing the polygon and summing interior angles
+    //float currentAngleSum = 0.0f;
+    
+    Cell* lastCellBeforeCell1 = currentCell; // This is the last cell we visited before reaching cell1
+    if (!goClockwiseFromCell3) {
+        currentAngleSum += cell1->getAngelSpan(cell2, lastCellBeforeCell1);
+        currentAngleSum += cell2->getAngelSpan(cell3, cell1);
+        currentAngleSum += cell3->getAngelSpan(cell4, cell2);
+    }
+    
+    // Calculate angle correction needed
+    float angleCorrection = expectedAngleSum - currentAngleSum;
+
+    //printf("numIntermediateCells: %d\n", numIntermediateCells);
+    //printf("expectedAngleSum: %f, currentAngleSum: %f\n", expectedAngleSum, currentAngleSum);
+    
+    // Find the index of cell4 in cell3's connections
+    int cell2Index = cell3->getConnectionIndex(cell2);
+    
+    //printf("angleError: %f, before: %f\n", angleCorrection, cell3->getConnection(cell2Index).angleFromPrevious);
+    if (!goClockwiseFromCell3) {
+        cell3->increaseAngle(cell2Index, angleCorrection);
+    }
+}
+

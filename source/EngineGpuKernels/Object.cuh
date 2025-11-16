@@ -371,7 +371,17 @@ struct Cell
         return 0;
     }
 
+    __device__ __inline__ CellConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
     __device__ __inline__ Cell* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].cell; }
+    __device__ __inline__ void increaseAngle(int index, float increment) {
+        auto& angle1 = getConnection(index).angleFromPrevious;
+        auto& angle2 = getConnection(index + 1).angleFromPrevious;
+        if (angle1 + increment < 0 || angle2 - increment < 0) {
+            return;
+        }
+        angle1 += increment;
+        angle2 -= increment;
+    }
 
     __device__ __inline__ float getAngelSpan(int connectionIndex1, int connectionIndex2)
     {
@@ -386,7 +396,7 @@ struct Cell
                 break;
             }
         }
-        return Math::getNormalizedAngle(result, -180.0f);
+        return Math::getNormalizedAngle(result, 0.0f);
     }
 
     __device__ __inline__ float getAngelSpan(Cell* connectedCell1, Cell* connectedCell2)
