@@ -961,7 +961,7 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
             for (int i = 1; i < currentCell->numConnections; ++i) {
                 int index = goClockwiseFromCell3 ? prevIndex + i : prevIndex - i;
                     
-                Cell* candidate = currentCell->connections[index].cell;
+                Cell* candidate = currentCell->getConnectedCell(index);
                 if (candidate == cell1) {
                     nextCell = candidate;
                     foundPolygon = true;
@@ -1077,7 +1077,7 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Adjust the angle at cell3 between cell2 and cell4
     // Since connections are sorted clockwise and angleFromPrevious is the angle from the previous (counter-clockwise) connection,
     // we adjust the angleFromPrevious at cell4Index, which contributes to the angle span from cell2 to cell4
-    printf("angleError: %f, before: %f\n", angleError, cell3->connections[cell2Index].angleFromPrevious);
+    printf("angleError: %f, before: %f\n", angleError, cell3->getConnection(cell2Index).angleFromPrevious);
     cell3->getConnection(cell2Index).angleFromPrevious += angleError;
     cell3->getConnection(cell2Index + 1).angleFromPrevious -= angleError;
     
