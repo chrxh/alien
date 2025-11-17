@@ -92,7 +92,7 @@ private:
     // Else:
     //  No angle correction
     //
-    __inline__ __device__ static void correctAngles(Cell* cell1, Cell* cell2, Cell* cell3);
+    __inline__ __device__ static void correctAnglesByInnerAngleSum(Cell* cell1, Cell* cell2, Cell* cell3);
 };
 
 /************************************************************************/
@@ -573,18 +573,6 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
         // Adapt angles on new cell
         auto n = newCell->numConnections;
-        //int constructionIndex = 0;
-        //for (; constructionIndex < n; ++constructionIndex) {
-        //    if (newCell->connections[constructionIndex].cell == constructionData.lastConstructionCell) {
-        //        break;
-        //    }
-        //}
-        //int hostIndex = 0;
-        //for (; hostIndex < n; ++hostIndex) {
-        //    if (newCell->connections[hostIndex].cell == hostCell) {
-        //        break;
-        //    }
-        //}
         auto lastCellIndex = newCell->getConnectionIndex(constructionData.lastConstructionCell);
         auto hostCellIndex = newCell->getConnectionIndex(hostCell);
 
@@ -608,10 +596,10 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
 
         // Adapt angles on other connected cells
         for (int i = lastCellIndex; (i + n) % n != (hostCellIndex + 1) % n && (i + n) % n != hostCellIndex; --i) {
-            correctAngles(newCell->connections[i].cell, newCell, newCell->connections[(i + n - 1) % n].cell);
+            correctAnglesByInnerAngleSum(newCell->getConnectedCell(i), newCell, newCell->getConnectedCell(i - 1));
         }
         for (int i = lastCellIndex + 1; i % n != hostCellIndex; ++i) {
-            correctAngles(newCell->connections[(i + 1) % n].cell, newCell, newCell->connections[i].cell);
+            correctAnglesByInnerAngleSum(newCell->getConnectedCell(i - 1), newCell, newCell->getConnectedCell(i));
         }
     }
 
@@ -892,7 +880,7 @@ __inline__ __device__ void ConstructorProcessor::activateNewCellOnLastNode(Cell*
     }
 }
 
-__inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell* cell2, Cell* cell3)
+__inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Cell* cell1, Cell* cell2, Cell* cell3)
 {
     // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
     // to form a closed polygon
@@ -933,8 +921,6 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
         Cell* nextCell = nullptr;
         
         if (step == 0) {
-            // First step from cell3: traverse in the appropriate direction
-            // Connections are sorted clockwise, so we go clockwise or counter-clockwise from cell2
             int startIndex = goClockwiseFromCell3 ? cell2IndexInCell3 + 1 : cell2IndexInCell3 - 1;
             
             for (int i = 0; i < cell3->numConnections; ++i) {
@@ -974,6 +960,8 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
         if (step > 0) {
             if (!goClockwiseFromCell3) {
                 currentAngleSum += currentCell->getAngelSpan(nextCell, previousCell);
+            } else {
+                currentAngleSum += currentCell->getAngelSpan(previousCell, nextCell);
             }
         }
 
@@ -1002,23 +990,25 @@ __inline__ __device__ void ConstructorProcessor::correctAngles(Cell* cell1, Cell
     // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
     float expectedAngleSum = (numVertices - 2) * 180.0f;
     
-    // Calculate current inner angle sum by traversing the polygon and summing interior angles
-    
     Cell* lastCellBeforeCell1 = currentCell; // This is the last cell we visited before reaching cell1
     if (!goClockwiseFromCell3) {
         currentAngleSum += cell1->getAngelSpan(cell2, lastCellBeforeCell1);
         currentAngleSum += cell2->getAngelSpan(cell3, cell1);
         currentAngleSum += cell3->getAngelSpan(cell4, cell2);
+    } else {
+        currentAngleSum += cell1->getAngelSpan(lastCellBeforeCell1, cell2);
+        currentAngleSum += cell2->getAngelSpan(cell1, cell3);
+        currentAngleSum += cell3->getAngelSpan(cell2, cell4);
     }
     
-    // Calculate angle correction needed
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
-    // Find the index of cell4 in cell3's connections
     int cell2Index = cell3->getConnectionIndex(cell2);
     
     if (!goClockwiseFromCell3) {
         cell3->increaseAngle(cell2Index, angleCorrection);
+    } else {
+        cell3->increaseAngle(cell2Index, -angleCorrection);
     }
 }
 
