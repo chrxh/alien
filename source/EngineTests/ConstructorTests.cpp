@@ -2090,10 +2090,13 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(2)}),
         }));
     data.addConnection(1, 2);
-    auto cell3_refPos = data.getCellRef(2)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
-    data.addConnection(2, 3, cell3_refPos);
-    auto cell4_refPos = data.getCellRef(3)._pos + Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
-    data.addConnection(3, 4, cell4_refPos);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+    data.getConnectionRef(2, 3)._angleFromPrevious = 60.0f;
+    data.getConnectionRef(2, 1)._angleFromPrevious = 300.0f;
+    data.getConnectionRef(3, 4)._angleFromPrevious = 90.0f;
+    data.getConnectionRef(3, 2)._angleFromPrevious = 270.0f;
+
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -2129,8 +2132,8 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualPrevPrevConstructedCell, actualPrevPrevPrevConstructedCell)._angleFromPrevious));
 
-    EXPECT_TRUE(approxCompare(120.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
-    EXPECT_TRUE(approxCompare(240.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(60.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualConstructedCell)._angleFromPrevious));
+    EXPECT_TRUE(approxCompare(300.0f, actualData.getConnection(actualPrevPrevPrevConstructedCell, actualPrevPrevConstructedCell)._angleFromPrevious));
 }
 
 TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_2__threeCellsWithSmallAngles__variant_2)
