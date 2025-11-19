@@ -266,3 +266,158 @@ TEST_F(EnergyFlowTests, energyFlowsEquallyToActiveConstructors)
     EXPECT_TRUE(abs(cell1._energy - actualEnergy / 2) < 1.0f);
     EXPECT_TRUE(abs(cell2._energy - actualEnergy / 2) < 1.0f);
 }
+
+TEST_F(EnergyFlowTests, energyFlowsPrioritizeLowEnergyCell)
+{
+    // Test that energy flows preferentially to cells with low energy (below normal energy threshold)
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 5),    // High energy cell
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.5),  // Low energy cell (below normal)
+        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy),        // Normal energy cell
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(100);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // Cell 2 (low energy) should receive energy preferentially from cell 1
+    auto cell1 = actualData.getCellRef(1);
+    auto cell2 = actualData.getCellRef(2);
+    auto cell3 = actualData.getCellRef(3);
+
+    // Cell 2 should have gained significant energy (approaching normal energy)
+    EXPECT_TRUE(cell2._energy > normalCellEnergy * 0.5 + 10.0f);
+
+    // Cell 1 should have lost energy to cell 2
+    EXPECT_TRUE(cell1._energy < normalCellEnergy * 5);
+
+    // Total energy should be conserved
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, energyFlowsToLowEnergyBeforeNormalEnergy)
+{
+    // Test that a cell with low energy receives energy before a cell with normal energy
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 3),    // High energy
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.3),  // Low energy (below normal)
+        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy),        // Normal energy
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(50);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell1 = actualData.getCellRef(1);
+    auto cell2 = actualData.getCellRef(2);
+    auto cell3 = actualData.getCellRef(3);
+
+    // Cell 2 (low energy) should have gained more energy than cell 3 (normal energy)
+    auto cell2Gain = cell2._energy - normalCellEnergy * 0.3;
+    auto cell3Gain = cell3._energy - normalCellEnergy;
+
+    EXPECT_TRUE(cell2Gain > cell3Gain);
+
+    // Total energy should be conserved
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, energyFlowsEqualizeLowEnergyCells)
+{
+    // Test that when connected cell has low energy, energy flows to equalize
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 0.8),  // Below normal
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.2),  // Much lower
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(200);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell1 = actualData.getCellRef(1);
+    auto cell2 = actualData.getCellRef(2);
+
+    // Both cells should approach equal energy levels (since both are below normal)
+    auto avgEnergy = (normalCellEnergy * 0.8 + normalCellEnergy * 0.2) / 2.0f;
+    EXPECT_TRUE(abs(cell1._energy - avgEnergy) < 10.0f);
+    EXPECT_TRUE(abs(cell2._energy - avgEnergy) < 10.0f);
+
+    // Total energy should be conserved
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, energyFlowsFromHighToLowEnergyInChain)
+{
+    // Test energy flow prioritization in a chain with one low energy cell
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 2),    // High
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy),        // Normal
+        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy * 0.4),  // Low
+        CellDescription().id(4).pos({103.0f, 100.0f}).energy(normalCellEnergy),        // Normal
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(150);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell3 = actualData.getCellRef(3);
+
+    // Cell 3 (low energy) should receive energy and approach normal energy
+    EXPECT_TRUE(cell3._energy > normalCellEnergy * 0.4 + 10.0f);
+
+    // Total energy should be conserved
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, energyFlowsMultipleLowEnergyCells)
+{
+    // Test that multiple low energy cells all receive energy
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 10),   // Very high energy
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.3),  // Low
+        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy * 0.4),  // Low
+        CellDescription().id(4).pos({103.0f, 100.0f}).energy(normalCellEnergy * 0.5),  // Low
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addConnection(1, 4);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(200);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell2 = actualData.getCellRef(2);
+    auto cell3 = actualData.getCellRef(3);
+    auto cell4 = actualData.getCellRef(4);
+
+    // All low energy cells should have gained energy
+    EXPECT_TRUE(cell2._energy > normalCellEnergy * 0.3);
+    EXPECT_TRUE(cell3._energy > normalCellEnergy * 0.4);
+    EXPECT_TRUE(cell4._energy > normalCellEnergy * 0.5);
+
+    // Total energy should be conserved
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
