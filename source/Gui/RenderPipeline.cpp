@@ -274,6 +274,7 @@ void _RenderPipeline::resizeTarget(TextureTarget const& target)
     if (target->initialized) {
         glDeleteFramebuffers(1, &target->fbo);
         glDeleteTextures(1, &target->texture);
+        glDeleteRenderbuffers(1, &target->depthBuffer);
     }
     // Init output texture
     glGenTextures(1, &target->texture);
@@ -284,11 +285,19 @@ void _RenderPipeline::resizeTarget(TextureTarget const& target)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _textureSize->x, _textureSize->y, 0, GL_RGBA, GL_FLOAT, NULL);
 
+    // Init depth buffer
+    glGenRenderbuffers(1, &target->depthBuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, target->depthBuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, _textureSize->x, _textureSize->y);
+
     // Init framebuffer
     glGenFramebuffers(1, &target->fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, target->fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target->texture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, target->depthBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    target->initialized = true;
 }
 
 void _RenderPipeline::forEachStep(
