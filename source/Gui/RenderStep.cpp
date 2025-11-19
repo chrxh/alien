@@ -152,7 +152,7 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
 
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
 
     // Draw lines (geometry shader will convert to quads with proper width)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
