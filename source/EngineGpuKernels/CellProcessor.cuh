@@ -927,25 +927,36 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         //}
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
+
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+        auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
 
         auto needsEnergy = [](Cell* cell) {
             return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
                 && cell->cellType == CellType_Constructor && cell->creature
                 && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, *cell->creature->genome);
         };
+        auto lowEnergy = [&](Cell* cell) { return cell->energy < cellNormalEnergy; };
+
         auto cellNeedsEnergy = needsEnergy(cell);
         auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
+        auto connectedCellLowEnergy = lowEnergy(cell);
 
         auto flow = 0.0f;
-        if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
+        if (connectedCellLowEnergy) {
             if (cell->energy > connectedCell->energy) {
                 flow = (cell->energy - connectedCell->energy) / 2;
             }
-        }
-        if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
-            if (cell->energy > cudaSimulationParameters.normalCellEnergy.value[cell->color]) {
-                flow = cell->energy - cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        } else {
+            if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
+                if (cell->energy > connectedCell->energy) {
+                    flow = (cell->energy - connectedCell->energy) / 2;
+                }
+            }
+            if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
+                if (cell->energy > cellNormalEnergy) {
+                    flow = cell->energy - cellNormalEnergy;
+                }
             }
         }
 
