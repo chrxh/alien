@@ -196,18 +196,16 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
 
     auto addTriangle = [&](Cell* cell, uint64_t cellIndex, Cell* connectedCell, Cell* prevConnectedCell) {
         // Only add triangle once (avoid duplicates by checking ids)
-        if (cell->id < connectedCell->id && cell->id < prevConnectedCell->id) {
-            if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]
-                && Math::length(cell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]
-                && Math::length(connectedCell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell->color]) {
-                uint64_t connectedIndex1 = connectedCell->tempValue.as_uint64;
-                uint64_t connectedIndex2 = prevConnectedCell->tempValue.as_uint64;
-                uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
-                if (triangleIndices != nullptr) {
-                    triangleIndices[triangleIndex] = static_cast<unsigned int>(cellIndex);
-                    triangleIndices[triangleIndex + 1] = static_cast<unsigned int>(connectedIndex1);
-                    triangleIndices[triangleIndex + 2] = static_cast<unsigned int>(connectedIndex2);
-                }
+        if (Math::length(cell->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]
+            && Math::length(cell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[cell->color]
+            && Math::length(connectedCell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell->color]) {
+            uint64_t connectedIndex1 = connectedCell->tempValue.as_uint64;
+            uint64_t connectedIndex2 = prevConnectedCell->tempValue.as_uint64;
+            uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
+            if (triangleIndices != nullptr) {
+                triangleIndices[triangleIndex] = static_cast<unsigned int>(cellIndex);
+                triangleIndices[triangleIndex + 1] = static_cast<unsigned int>(connectedIndex1);
+                triangleIndices[triangleIndex + 2] = static_cast<unsigned int>(connectedIndex2);
             }
         }
     };
@@ -233,7 +231,9 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
 
             // Triangle?
             if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == connectedCell) {
-                addTriangle(cell, index, prevConnectedCell, connectedCell);
+                if (cell->id < connectedCell->id && cell->id < prevConnectedCell->id) {
+                    addTriangle(cell, index, prevConnectedCell, connectedCell);
+                }
             }
 
             // Rectangle?
@@ -241,8 +241,10 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != cell && fourthCellCandidate2 != cell
                 && connectedCell != prevConnectedCell) {
-                addTriangle(cell, index, connectedCell, fourthCellCandidate1);
-                addTriangle(cell, index, fourthCellCandidate1, prevConnectedCell);
+                if (cell->id < connectedCell->id && cell->id < prevConnectedCell->id && cell->id < fourthCellCandidate2->id) {
+                    addTriangle(cell, index, connectedCell, fourthCellCandidate1);
+                    addTriangle(cell, index, fourthCellCandidate1, prevConnectedCell);
+                }
             }
         }
     }
