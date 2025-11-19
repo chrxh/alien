@@ -146,6 +146,10 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
+    // Enable depth testing for proper occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -154,8 +158,9 @@ void _LineRenderStep::execute(ExecutionParameters parameters)
     glBindVertexArray(parameters._geometryBuffers->getVaoForPointsAndLines());
     glDrawElements(GL_LINES, toInt(parameters._geometryBuffers->getNumObjects().lineIndices), GL_UNSIGNED_INT, 0);
 
-    // Disable blending
+    // Disable blending and depth testing
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _LineRenderStep::_LineRenderStep(StepParameters const& parameters)
