@@ -97,7 +97,7 @@ void _RenderStep::prepareExecution(ExecutionParameters const& parameters)
     if (parameters._clearBackground) {
         // Clear with black background
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 }
 
@@ -174,6 +174,10 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     }
     prepareExecution(parameters);
 
+    // Enable depth testing for proper occlusion
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Enable blending for anti-aliasing
     glEnable(GL_BLEND);
     glBlendFunc(/*GL_SRC_ALPHA*/ GL_ONE, /*GL_ONE*/ GL_ZERO);
@@ -183,8 +187,9 @@ void _TriangleRenderStep::execute(ExecutionParameters parameters)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, parameters._geometryBuffers->getEboForTriangles());
     glDrawElements(GL_TRIANGLES, toInt(parameters._geometryBuffers->getNumObjects().triangleIndices), GL_UNSIGNED_INT, 0);
 
-    // Disable blending
+    // Disable blending and depth testing
     glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
 }
 
 _TriangleRenderStep::_TriangleRenderStep(StepParameters const& parameters)

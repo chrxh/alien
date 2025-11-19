@@ -19,6 +19,7 @@ struct _TextureTarget
     bool initialized = false;
     unsigned int fbo = 0;
     unsigned int texture = 0;
+    unsigned int depthBuffer = 0;
 
 private:
     _TextureTarget() = default;
