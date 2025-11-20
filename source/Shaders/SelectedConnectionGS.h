@@ -24,7 +24,7 @@ vec2 transform(vec2 v)
     return vec2(v.x, -v.y);
 }
 
-void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
+void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth, float aspectRatio)
 {
     // Calculate line direction in screen space
     vec2 dir = normalize(p1.xy - p0.xy);
@@ -34,7 +34,6 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
     
     // Calculate aspect ratio corrected offset
     // Since transform divides by viewportSize, we need to pre-scale by aspect ratio
-    float aspectRatio = viewportSize.x / viewportSize.y;
     vec2 offset = perp * lineWidth * 0.5;
     offset.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
@@ -58,7 +57,7 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
     EndPrimitive();
 }
 
-void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float arrowSize)
+void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float arrowSize, float aspectRatio)
 {
     // Create arrowhead at the end of the line
     // Arrow has 90-degree tip with both sides at 45 degrees to the baseline
@@ -71,9 +70,6 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     vec4 arrowTip = basePos;
     vec4 arrowPoint1 = vec4(basePos.xy + arrowDir1, 0.0, 1.0);
     vec4 arrowPoint2 = vec4(basePos.xy + arrowDir2, 0.0, 1.0);
-    
-    // Calculate aspect ratio for isotropic rendering
-    float aspectRatio = viewportSize.x / viewportSize.y;
     
     // First arrow line
     vec2 perp1 = normalize(vec2(-arrowDir1.y, arrowDir1.x));
@@ -135,6 +131,9 @@ void main()
     bool arrowToCell1 = (vertexActive[0] & 1) != 0;
     bool arrowToCell2 = (vertexActive[0] & 2) != 0;
     
+    // Calculate aspect ratio once for isotropic rendering
+    float aspectRatio = viewportSize.x / viewportSize.y;
+    
     // Line width in NDC coordinates - thinner lines (1-2 pixels)
     float lineWidth = 2.0;
     // Arrow size - make arrows more visible
@@ -146,15 +145,15 @@ void main()
 	p1.xy = p1.xy - dir * 0.28 * zoom;
     
     // Draw the main line
-    emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth);
+    emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth, aspectRatio);
     
     // Draw arrow heads if signal can flow
     if (arrowToCell1) {
-        emitArrowHead(p0, -dir, vertexColor[0], lineWidth, arrowSize);
+        emitArrowHead(p0, -dir, vertexColor[0], lineWidth, arrowSize, aspectRatio);
     }
     
     if (arrowToCell2) {
-        emitArrowHead(p1, dir, vertexColor[1], lineWidth, arrowSize);
+        emitArrowHead(p1, dir, vertexColor[1], lineWidth, arrowSize, aspectRatio);
     }
 }
 )";
