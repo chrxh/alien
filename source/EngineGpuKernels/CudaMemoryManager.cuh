@@ -11,8 +11,11 @@ class CudaMemoryManager
 public:
     static CudaMemoryManager& getInstance()
     {
-        static CudaMemoryManager instance;
-        return instance;
+        // Use leaked singleton pattern to avoid static destruction order issues
+        // The instance is intentionally never deleted to ensure it remains available
+        // during the destruction of other static objects that may depend on it
+        static CudaMemoryManager* instance = new CudaMemoryManager();
+        return *instance;
     }
 
     CudaMemoryManager(CudaMemoryManager const&) = delete;
