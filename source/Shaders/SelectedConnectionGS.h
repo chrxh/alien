@@ -24,7 +24,7 @@ vec2 transform(vec2 v)
     return vec2(v.x, -v.y);
 }
 
-void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth, float aspectRatio)
+void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
 {
     // Calculate line direction in screen space
     vec2 dir = normalize(p1.xy - p0.xy);
@@ -32,10 +32,7 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth, float
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
-    // Calculate aspect ratio corrected offset
-    // Since transform divides by viewportSize, we need to pre-scale by aspect ratio
     vec2 offset = perp * lineWidth * 0.5;
-    offset.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
     // Generate quad (4 vertices as triangle strip)
     gl_Position = vec4(transform(p0.xy - offset), 0.0, 1.0);
@@ -57,7 +54,7 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth, float
     EndPrimitive();
 }
 
-void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float arrowSize, float aspectRatio)
+void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float arrowSize)
 {
     // Create arrowhead at the end of the line
     // Arrow has 90-degree tip with both sides at 45 degrees to the baseline
@@ -74,7 +71,6 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     // First arrow line
     vec2 perp1 = normalize(vec2(-arrowDir1.y, arrowDir1.x));
     vec2 offset1 = perp1 * lineWidth * 0.4;
-    offset1.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
     gl_Position = vec4(transform(arrowTip.xy - offset1), 0.0, 1.0);
     fragColor = color;
@@ -97,7 +93,6 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     // Second arrow line
     vec2 perp2 = normalize(vec2(-arrowDir2.y, arrowDir2.x));
     vec2 offset2 = perp2 * lineWidth * 0.4;
-    offset2.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
     gl_Position = vec4(transform(arrowTip.xy - offset2), 0.0, 1.0);
     fragColor = color;
@@ -131,9 +126,6 @@ void main()
     bool arrowToCell1 = (vertexActive[0] & 1) != 0;
     bool arrowToCell2 = (vertexActive[0] & 2) != 0;
     
-    // Calculate aspect ratio once for isotropic rendering
-    float aspectRatio = viewportSize.x / viewportSize.y;
-    
     // Line width in NDC coordinates - thinner lines (1-2 pixels)
     float lineWidth = 2.0;
     // Arrow size - make arrows more visible
@@ -145,15 +137,15 @@ void main()
 	p1.xy = p1.xy - dir * 0.28 * zoom;
     
     // Draw the main line
-    emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth, aspectRatio);
+    emitLine(p0, p1, vertexColor[0], vertexColor[1], lineWidth);
     
     // Draw arrow heads if signal can flow
     if (arrowToCell1) {
-        emitArrowHead(p0, -dir, vertexColor[0], lineWidth, arrowSize, aspectRatio);
+        emitArrowHead(p0, -dir, vertexColor[0], lineWidth, arrowSize);
     }
     
     if (arrowToCell2) {
-        emitArrowHead(p1, dir, vertexColor[1], lineWidth, arrowSize, aspectRatio);
+        emitArrowHead(p1, dir, vertexColor[1], lineWidth, arrowSize);
     }
 }
 )";

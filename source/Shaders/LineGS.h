@@ -17,9 +17,15 @@ uniform float zoom;
 
 #define PI 3.1415926538
 
+vec2 transform(vec2 v)
+{
+    v = v / viewportSize * 2.0 - 1.0;
+    return vec2(v.x, -v.y);
+}
+
 void main()
 {
-    // Get the two vertices of the line in NDC
+    // Get the two vertices of the line in screen space
     vec4 p0 = gl_in[0].gl_Position;
     vec4 p1 = gl_in[1].gl_Position;
     
@@ -29,11 +35,9 @@ void main()
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
-    // Line width in NDC coordinates
-    // zoom * 0.15 pixels converted to NDC space, accounting for aspect ratio
+    // Line width in pixels
     float lineWidthPixels = zoom * 0.15;
-    vec2 pixelSize = 2.0 / viewportSize;  // NDC size of one pixel in each dimension
-    vec2 offset = perp * lineWidthPixels * pixelSize * 0.5;
+    vec2 offset = perp * lineWidthPixels * 0.5;
     
     // Create 3D positions for lighting calculation
     vec3 pos0 = vec3(p0.xyz);
@@ -55,22 +59,22 @@ void main()
     
     // Generate quad (4 vertices as triangle strip)
     // Vertex 0 (bottom-left)
-    gl_Position = vec4(p0.xy - offset, p0.z, 1.0);
+    gl_Position = vec4(transform(p0.xy - offset), p0.z, 1.0);
     fragColor = color0;
     EmitVertex();
     
     // Vertex 1 (top-left)
-    gl_Position = vec4(p0.xy + offset, p0.z, 1.0);
+    gl_Position = vec4(transform(p0.xy + offset), p0.z, 1.0);
     fragColor = color0;
     EmitVertex();
     
     // Vertex 2 (bottom-right)
-    gl_Position = vec4(p1.xy - offset, p1.z, 1.0);
+    gl_Position = vec4(transform(p1.xy - offset), p1.z, 1.0);
     fragColor = color1;
     EmitVertex();
     
     // Vertex 3 (top-right)
-    gl_Position = vec4(p1.xy + offset, p1.z, 1.0);
+    gl_Position = vec4(transform(p1.xy + offset), p1.z, 1.0);
     fragColor = color1;
     EmitVertex();
     

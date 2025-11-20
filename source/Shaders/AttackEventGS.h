@@ -16,9 +16,15 @@ out vec2 lineCoord;
 uniform vec2 viewportSize;
 uniform float zoom;
 
+vec2 transform(vec2 v)
+{
+    v = v / viewportSize * 2.0 - 1.0;
+    return vec2(v.x, -v.y);
+}
+
 void main()
 {
-    // Get the two vertices of the line in NDC
+    // Get the two vertices of the line in screen space
     vec4 p0 = gl_in[0].gl_Position;
     vec4 p1 = gl_in[1].gl_Position;
     
@@ -28,10 +34,9 @@ void main()
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
-    // Line width in NDC coordinates, accounting for aspect ratio
+    // Line width in pixels
     float lineWidthPixels = zoom * 0.40;
-    vec2 pixelSize = 2.0 / viewportSize;  // NDC size of one pixel in each dimension
-    vec2 offset = perp * lineWidthPixels * pixelSize * 0.5;
+    vec2 offset = perp * lineWidthPixels * 0.5;
     
     // Calculate line length for dashed pattern
     float lineLength = length(p1.xy - p0.xy);
@@ -41,25 +46,25 @@ void main()
     
     // Generate quad (4 vertices as triangle strip)
     // Vertex 0 (bottom-left)
-    gl_Position = vec4(p0.xy - offset / 4, 0.0, 1.0);
+    gl_Position = vec4(transform(p0.xy - offset / 4), 0.0, 1.0);
     fragColor = color;
     lineCoord = vec2(0.0, 0.0);
     EmitVertex();
     
     // Vertex 1 (top-left)
-    gl_Position = vec4(p0.xy + offset / 4, 0.0, 1.0);
+    gl_Position = vec4(transform(p0.xy + offset / 4), 0.0, 1.0);
     fragColor = color;
     lineCoord = vec2(0.0, 1.0);
     EmitVertex();
     
     // Vertex 2 (bottom-right)
-    gl_Position = vec4(p1.xy - offset, 0.0, 1.0);
+    gl_Position = vec4(transform(p1.xy - offset), 0.0, 1.0);
     fragColor = color;
     lineCoord = vec2(lineLength, 0.0);
     EmitVertex();
     
     // Vertex 3 (top-right)
-    gl_Position = vec4(p1.xy + offset, 0.0, 1.0);
+    gl_Position = vec4(transform(p1.xy + offset), 0.0, 1.0);
     fragColor = color;
     lineCoord = vec2(lineLength, 1.0);
     EmitVertex();
