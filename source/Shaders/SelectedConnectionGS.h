@@ -32,7 +32,11 @@ void emitLine(vec4 p0, vec4 p1, vec3 color0, vec3 color1, float lineWidth)
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
+    // Calculate aspect ratio corrected offset
+    // Since transform divides by viewportSize, we need to pre-scale by aspect ratio
+    float aspectRatio = viewportSize.x / viewportSize.y;
     vec2 offset = perp * lineWidth * 0.5;
+    offset.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
     // Generate quad (4 vertices as triangle strip)
     gl_Position = vec4(transform(p0.xy - offset), 0.0, 1.0);
@@ -68,9 +72,13 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     vec4 arrowPoint1 = vec4(basePos.xy + arrowDir1, 0.0, 1.0);
     vec4 arrowPoint2 = vec4(basePos.xy + arrowDir2, 0.0, 1.0);
     
+    // Calculate aspect ratio for isotropic rendering
+    float aspectRatio = viewportSize.x / viewportSize.y;
+    
     // First arrow line
     vec2 perp1 = normalize(vec2(-arrowDir1.y, arrowDir1.x));
     vec2 offset1 = perp1 * lineWidth * 0.4;
+    offset1.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
     gl_Position = vec4(transform(arrowTip.xy - offset1), 0.0, 1.0);
     fragColor = color;
@@ -93,6 +101,7 @@ void emitArrowHead(vec4 basePos, vec2 dir, vec3 color, float lineWidth, float ar
     // Second arrow line
     vec2 perp2 = normalize(vec2(-arrowDir2.y, arrowDir2.x));
     vec2 offset2 = perp2 * lineWidth * 0.4;
+    offset2.y *= aspectRatio;  // Compensate for non-uniform scaling in transform
     
     gl_Position = vec4(transform(arrowTip.xy - offset2), 0.0, 1.0);
     fragColor = color;

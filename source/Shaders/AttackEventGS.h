@@ -28,9 +28,10 @@ void main()
     // Calculate perpendicular direction (for line thickness)
     vec2 perp = vec2(-dir.y, dir.x);
     
-    // Line width in NDC coordinates (same as Line.gs)
-    float lineWidth = (zoom * 0.40) / viewportSize.x * 2.0;
-    vec2 offset = perp * lineWidth * 0.5;
+    // Line width in NDC coordinates, accounting for aspect ratio
+    float lineWidthPixels = zoom * 0.40;
+    vec2 pixelSize = 2.0 / viewportSize;  // NDC size of one pixel in each dimension
+    vec2 offset = perp * lineWidthPixels * pixelSize * 0.5;
     
     // Calculate line length for dashed pattern
     float lineLength = length(p1.xy - p0.xy);

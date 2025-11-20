@@ -30,9 +30,10 @@ void main()
     vec2 perp = vec2(-dir.y, dir.x);
     
     // Line width in NDC coordinates
-    // zoom * 0.1 pixels converted to NDC space
-    float lineWidth = (zoom * 0.15) / viewportSize.x * 2.0;
-    vec2 offset = perp * lineWidth * 0.5;
+    // zoom * 0.15 pixels converted to NDC space, accounting for aspect ratio
+    float lineWidthPixels = zoom * 0.15;
+    vec2 pixelSize = 2.0 / viewportSize;  // NDC size of one pixel in each dimension
+    vec2 offset = perp * lineWidthPixels * pixelSize * 0.5;
     
     // Create 3D positions for lighting calculation
     vec3 pos0 = vec3(p0.xyz);
