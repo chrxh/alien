@@ -307,7 +307,7 @@ TEST_F(EnergyFlowTests, energyFlowsEqualizeLowEnergyCells)
 
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 0.8f),  // Below normal
-        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.2f),  // Much lower
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.55f),  // Much lower
     });
     data.addConnection(1, 2);
 
@@ -320,7 +320,7 @@ TEST_F(EnergyFlowTests, energyFlowsEqualizeLowEnergyCells)
     auto cell2 = actualData.getCellRef(2);
 
     // Both cells should approach equal energy levels (since both are below normal)
-    auto avgEnergy = (normalCellEnergy * 0.8 + normalCellEnergy * 0.2) / 2.0f;
+    auto avgEnergy = (normalCellEnergy * 0.8 + normalCellEnergy * 0.55) / 2.0f;
     EXPECT_TRUE(abs(cell1._energy - avgEnergy) < 10.0f);
     EXPECT_TRUE(abs(cell2._energy - avgEnergy) < 10.0f);
 
@@ -336,7 +336,7 @@ TEST_F(EnergyFlowTests, energyFlowsFromHighToLowEnergyInChain)
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 2),    // High
         CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy),        // Normal
-        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy * 0.4f),  // Low
+        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy * 0.55f),  // Low
         CellDescription().id(4).pos({103.0f, 100.0f}).energy(normalCellEnergy),        // Normal
     });
     data.addConnection(1, 2);
@@ -364,9 +364,9 @@ TEST_F(EnergyFlowTests, energyFlowsMultipleLowEnergyCells)
 
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).energy(normalCellEnergy * 10),   // Very high energy
-        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.3f),  // Low
-        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy * 0.4f),  // Low
-        CellDescription().id(4).pos({103.0f, 100.0f}).energy(normalCellEnergy * 0.5f),  // Low
+        CellDescription().id(2).pos({101.0f, 100.0f}).energy(normalCellEnergy * 0.55f),  // Low
+        CellDescription().id(3).pos({102.0f, 100.0f}).energy(normalCellEnergy * 0.6f),  // Low
+        CellDescription().id(4).pos({103.0f, 100.0f}).energy(normalCellEnergy * 0.7f),  // Low
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);

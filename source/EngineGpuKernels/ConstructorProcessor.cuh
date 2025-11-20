@@ -890,8 +890,6 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
     int cell1IndexInCell2 = cell2->getConnectionIndex(cell1);
     int cell3IndexInCell2 = cell2->getConnectionIndex(cell3);
 
-    //printf("cell1IndexInCell2: %d, cell3IndexInCell2: %d\n", cell1IndexInCell2, cell3IndexInCell2);
-    
     // Determine if we go clockwise or counter-clockwise from cell3 to find cell1
     // The polygon is: cell1 -> cell2 -> cell3 -> ... -> cell1
     // From cell2's perspective, we go clockwise from cell1 to cell3
