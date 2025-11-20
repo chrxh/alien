@@ -13,15 +13,13 @@
 
 #include <EngineTestData/TestHelper.h>
 
-class IntegrationTestListener;
-
 class IntegrationTestFramework : public ::testing::Test
 {
-    friend class IntegrationTestListener;
-
 public:
     IntegrationTestFramework(IntVector2D const& worldSize = IntVector2D{1000, 1000});
     virtual ~IntegrationTestFramework();
+
+    static void cleanupGlobalContext();
 
 protected:
     double getEnergy(Description const& data) const;
@@ -50,12 +48,9 @@ private:
     struct TestSuiteContext
     {
         SimulationFacade simulationFacade;
-        //int refCount = 0;
         
-        ~TestSuiteContext();
+        void cleanup();
     };
     static TestSuiteContext _globalContext;
-    //static std::map<std::string, std::shared_ptr<TestSuiteContext>> _contextMap;
-    //std::shared_ptr<TestSuiteContext> _context;
     IntVector2D _worldSize;
 };
