@@ -18,13 +18,12 @@ uniform vec2 viewportSize;
 
 void main()
 {
-    // Transform world position to normalized device coordinates
+    // Transform world position to screen coordinates
+    // Note: Transform to normalized device coordinates is done in geometry shader.
     vec2 relativePos = aPos - rectUpperLeft;
     vec2 screenPos = relativePos * zoom;
-    vec2 ndc = (screenPos / viewportSize) * 2.0 - 1.0;
-    ndc.y = -ndc.y; // Flip Y coordinate
     
-    gl_Position = vec4(ndc, 0.0, 1.0);
+    gl_Position = vec4(screenPos, 0.0, 1.0);
     
     // Pass color to geometry shader
     vertexColor = aColor;
