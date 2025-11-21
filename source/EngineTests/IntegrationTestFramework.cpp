@@ -11,11 +11,17 @@
 
 IntegrationTestFramework::TestSuiteContext IntegrationTestFramework::_globalContext;
 
-IntegrationTestFramework::TestSuiteContext::~TestSuiteContext()
+void IntegrationTestFramework::TestSuiteContext::cleanup()
 {
     if (simulationFacade) {
         simulationFacade->closeSimulation();
+        simulationFacade.reset();
     }
+}
+
+void IntegrationTestFramework::cleanupGlobalContext()
+{
+    _globalContext.cleanup();
 }
 
 IntegrationTestFramework::IntegrationTestFramework(IntVector2D const& worldSize)
