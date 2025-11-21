@@ -111,17 +111,13 @@ namespace Channels
     auto constexpr SensorDistance = 3;
 }
 
-using SensorRestrictToCreatures = int;
-enum SensorRestrictToCreatures_
+using DetectCreatureLineageRestriction = int;
+enum DetectCreatureLineageRestriction_
 {
-    SensorRestrictToCreatures_NoRestriction,
-    SensorRestrictToCreatures_RestrictToSameMutants,
-    SensorRestrictToCreatures_RestrictToOtherMutants,
-    SensorRestrictToCreatures_RestrictToFreeCells,
-    SensorRestrictToCreatures_RestrictToStructures,
-    SensorRestrictToCreatures_RestrictToLessComplexMutants,
-    SensorRestrictToCreatures_RestrictToMoreComplexMutants,
-    SensorRestrictToCreatures_Count,
+    DetectCreatureLineageRestriction_No,
+    DetectCreatureLineageRestriction_SameLineage,
+    DetectCreatureLineageRestriction_OtherLineage,
+    DetectCreatureLineageRestriction_Count,
 };
 
 namespace Const

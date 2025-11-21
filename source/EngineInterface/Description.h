@@ -74,16 +74,41 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, currentBranch, 0);
 };
 
+struct DetectEnergyDescription
+{
+    MEMBER(DetectEnergyDescription, float, minDensity, 0.05f);
+};
+
+struct DetectStructureDescription
+{};
+
+struct DetectFreeCellDescription
+{
+    MEMBER(DetectFreeCellDescription, float, minDensity, 0.05f);
+    MEMBER(DetectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct DetectCreatureDescription
+{
+    MEMBER(DetectCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(DetectCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(DetectCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectCreatureDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+
+    // Process data
+    MEMBER(DetectCreatureDescription, std::optional<RealVector2D>, lastMatchPos, std::nullopt);
+};
+
+using SensorModeDescription = std::variant<DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;
+
 struct SensorDescription
 {
     auto operator<=>(SensorDescription const&) const = default;
 
     MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
-    MEMBER(SensorDescription, float, minDensity, 0.05f);
+    MEMBER(SensorDescription, SensorModeDescription, mode, SensorModeDescription());
     MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
     MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
-    MEMBER(SensorDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(SensorDescription, SensorRestrictToCreatures, restrictToCreatures, SensorRestrictToCreatures_NoRestriction);
 };
 
 struct GeneratorDescription
