@@ -16,6 +16,7 @@ public:
     {
         CellType cellType;
         MuscleMode muscleMode;
+        SensorMode sensorMode;
     };
     CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
     ParticleDescription createNonDefaultParticleDescription() const;
@@ -24,6 +25,7 @@ public:
     {
         CellTypeGenome cellTypeGenome;
         MuscleMode muscleMode;
+        SensorMode sensorMode;
     };
     NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
     std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;

@@ -109,6 +109,8 @@ struct SensorDescription
     MEMBER(SensorDescription, SensorModeDescription, mode, SensorModeDescription());
     MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
     MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
+
+    SensorMode getMode() const;
 };
 
 struct GeneratorDescription

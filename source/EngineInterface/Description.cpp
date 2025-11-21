@@ -28,6 +28,20 @@ SignalDescription::SignalDescription()
     _channels.resize(MAX_CHANNELS, 0);
 }
 
+SensorMode SensorDescription::getMode() const
+{
+    if (std::holds_alternative<DetectEnergyDescription>(_mode)) {
+        return SensorMode_DetectEnergy;
+    } else if (std::holds_alternative<DetectStructureDescription>(_mode)) {
+        return SensorMode_DetectStructure;
+    } else if (std::holds_alternative<DetectFreeCellDescription>(_mode)) {
+        return SensorMode_DetectFreeCell;
+    } else if (std::holds_alternative<DetectCreatureDescription>(_mode)) {
+        return SensorMode_DetectCreature;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 MuscleMode MuscleDescription::getMode() const
 {
     if (std::holds_alternative<AutoBendingDescription>(_mode)) {

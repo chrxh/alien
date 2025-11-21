@@ -20,14 +20,43 @@ struct DepotGenome
     EnergyDistributionMode mode;
 };
 
+struct DetectEnergyGenome
+{
+    float minDensity;
+};
+
+struct DetectStructureGenome
+{};
+
+struct DetectFreeCellGenome
+{
+    float minDensity;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+};
+
+struct DetectCreatureGenome
+{
+    uint32_t minNumCells;  // 0 = no restriction
+    uint32_t maxNumCells;  // 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    DetectCreatureLineageRestriction restrictToLineage;
+};
+
+union SensorModeGenome
+{
+    DetectEnergyGenome detectEnergy;
+    DetectStructureGenome detectStructure;
+    DetectFreeCellGenome detectFreeCell;
+    DetectCreatureGenome detectCreature;
+};
+
 struct SensorGenome
 {
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    float minDensity;
-    int8_t minRange;          // < 0 = no restriction
-    int8_t maxRange;          // < 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    SensorRestrictToCreatures restrictToCreatures;
+    SensorMode mode;
+    SensorModeGenome modeData;
+    int8_t minRange;  // < 0 = no restriction
+    int8_t maxRange;  // < 0 = no restriction
 };
 
 struct ConstructorGenome
