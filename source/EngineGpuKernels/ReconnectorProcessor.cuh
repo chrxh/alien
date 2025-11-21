@@ -60,10 +60,10 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
             return;
         }
-        if (reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToSameMutants
-            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToOtherMutants
-            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToLessComplexMutants
-            || reconnector.restrictToCreatures == SensorRestrictToCreatures_RestrictToMoreComplexMutants) {
+        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
+            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
+            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
+            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants) {
             if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
                 return;
             }

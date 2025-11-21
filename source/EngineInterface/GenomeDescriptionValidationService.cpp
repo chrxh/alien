@@ -61,7 +61,6 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                     auto& value = sensor._autoTriggerInterval.value();
                     value = std::max(value, 1);
                 }
-                sensor._minDensity = std::clamp(sensor._minDensity, 0.0f, 1.0f);
                 if (sensor._minRange.has_value()) {
                     auto& value = sensor._minRange.value();
                     value = std::max(value, 0);
@@ -70,11 +69,35 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                     auto& value = sensor._maxRange.value();
                     value = std::max(value, 0);
                 }
-                if (sensor._restrictToColor.has_value()) {
-                    auto& value = sensor._restrictToColor.value();
-                    value = std::clamp(value, 0, MAX_COLORS - 1);
+                
+                // Validate mode-specific data
+                auto mode = sensor.getMode();
+                if (mode == SensorMode_DetectEnergy) {
+                    auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
+                    detectEnergy._minDensity = std::clamp(detectEnergy._minDensity, 0.0f, 1.0f);
+                } else if (mode == SensorMode_DetectFreeCell) {
+                    auto& detectFreeCell = std::get<DetectFreeCellGenomeDescription>(sensor._mode);
+                    detectFreeCell._minDensity = std::clamp(detectFreeCell._minDensity, 0.0f, 1.0f);
+                    if (detectFreeCell._restrictToColor.has_value()) {
+                        auto& value = detectFreeCell._restrictToColor.value();
+                        value = std::clamp(value, 0, MAX_COLORS - 1);
+                    }
+                } else if (mode == SensorMode_DetectCreature) {
+                    auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
+                    if (detectCreature._minNumCells.has_value()) {
+                        auto& value = detectCreature._minNumCells.value();
+                        value = std::max(value, 0);
+                    }
+                    if (detectCreature._maxNumCells.has_value()) {
+                        auto& value = detectCreature._maxNumCells.value();
+                        value = std::max(value, 0);
+                    }
+                    if (detectCreature._restrictToColor.has_value()) {
+                        auto& value = detectCreature._restrictToColor.value();
+                        value = std::clamp(value, 0, MAX_COLORS - 1);
+                    }
+                    detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
                 }
-                sensor._restrictToCreatures = std::clamp(sensor._restrictToCreatures, 0, SensorRestrictToCreatures_Count - 1);
 
             } else if (nodeType == CellTypeGenome_Generator) {
                 auto& generator = std::get<GeneratorGenomeDescription>(node._cellType);

@@ -76,20 +76,28 @@ struct ConstructorDescription
 
 struct DetectEnergyDescription
 {
+    auto operator<=>(DetectEnergyDescription const&) const = default;
+
     MEMBER(DetectEnergyDescription, float, minDensity, 0.05f);
 };
 
 struct DetectStructureDescription
-{};
+{
+    auto operator<=>(DetectStructureDescription const&) const = default;
+};
 
 struct DetectFreeCellDescription
 {
+    auto operator<=>(DetectFreeCellDescription const&) const = default;
+
     MEMBER(DetectFreeCellDescription, float, minDensity, 0.05f);
     MEMBER(DetectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct DetectCreatureDescription
 {
+    auto operator<=>(DetectCreatureDescription const&) const = default;
+
     MEMBER(DetectCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
     MEMBER(DetectCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);

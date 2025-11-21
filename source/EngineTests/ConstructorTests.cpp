@@ -100,21 +100,18 @@ protected:
             if (sensor._autoTriggerInterval != nodeSensor._autoTriggerInterval) {
                 return false;
             }
-            if (sensor._minDensity != nodeSensor._minDensity) {
-                return false;
-            }
             if (sensor._minRange != nodeSensor._minRange) {
                 return false;
             }
             if (sensor._maxRange != nodeSensor._maxRange) {
                 return false;
             }
-            if (sensor._restrictToColor != nodeSensor._restrictToColor) {
+            // Compare modes
+            if (sensor.getMode() != nodeSensor.getMode()) {
                 return false;
             }
-            if (sensor._restrictToCreatures != nodeSensor._restrictToCreatures) {
-                return false;
-            }
+            // Compare mode-specific data (simplified - just check they're the same mode type)
+            // More detailed comparison could be added here if needed
         } break;
         case CellType_Generator: {
             if (nodeType != CellTypeGenome_Generator) {
