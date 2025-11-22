@@ -15,7 +15,8 @@ public:
     struct CellParameter
     {
         CellType cellType;
-        MuscleMode muscleMode;
+        std::optional<MuscleMode> muscleMode;
+        std::optional<SensorMode> sensorMode;
     };
     CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
     ParticleDescription createNonDefaultParticleDescription() const;
@@ -23,7 +24,8 @@ public:
     struct NodeParameter
     {
         CellTypeGenome cellTypeGenome;
-        MuscleMode muscleMode;
+        std::optional<MuscleMode> muscleMode;
+        std::optional<SensorMode> sensorMode;
     };
     NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
     std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;

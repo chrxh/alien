@@ -73,6 +73,7 @@ namespace cereal
         std::optional<int8_t>,
         std::optional<int>,
         std::optional<float>,
+        std::optional<RealVector2D>,
         std::vector<bool>,
         std::vector<uint8_t>,
         std::vector<int8_t>,
@@ -174,6 +175,16 @@ namespace
     auto constexpr Id_SensorGenome_MaxRange = 4;
     auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
 
+    auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
+
+    auto constexpr Id_SensorModeGenome_DetectFreeCell_MinDensity = 0;
+    auto constexpr Id_SensorModeGenome_DetectFreeCell_RestrictToColor = 1;
+
+    auto constexpr Id_SensorModeGenome_DetectCreature_MinNumCells = 0;
+    auto constexpr Id_SensorModeGenome_DetectCreature_MaxNumCells = 1;
+    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToColor = 2;
+    auto constexpr Id_SensorModeGenome_DetectCreature_RestrictToLineage = 3;
+
     auto constexpr Id_MuscleModeGenome_AutoBending_MaxAngleDeviation = 0;
     auto constexpr Id_MuscleModeGenome_AutoBending_ForwardBackwardRatio = 4;
 
@@ -250,17 +261,58 @@ namespace cereal
     SPLIT_SERIALIZATION(ConstructorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectEnergyGenomeDescription& data)
+    {
+        DetectEnergyGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectEnergyGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectStructureGenomeDescription& data)
+    {
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectStructureGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectFreeCellGenomeDescription& data)
+    {
+        DetectFreeCellGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectFreeCellGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectCreatureGenomeDescription& data)
+    {
+        DetectCreatureGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorModeGenome_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectCreatureGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
     {
         SensorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_SensorGenome_MinDensity, data._minDensity, defaultObject._minDensity);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_SensorGenome_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(SensorGenomeDescription)
 
@@ -583,6 +635,17 @@ namespace
     auto constexpr Id_Sensor_MaxRange = 9;
     auto constexpr Id_Sensor_AutoTriggerInterval = 10;
 
+    auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
+
+    auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
+    auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;
+
+    auto constexpr Id_SensorMode_DetectCreature_MinNumCells = 0;
+    auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = 1;
+    auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = 2;
+    auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = 3;
+    auto constexpr Id_SensorMode_DetectCreature_LastMatchPos = 4;
+
     auto constexpr Id_Transmitter_Mode = 0;
 
     auto constexpr Id_Reconnector_RestrictToColor = 0;
@@ -679,17 +742,59 @@ namespace cereal
     SPLIT_SERIALIZATION(ConstructorDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectEnergyDescription& data)
+    {
+        DetectEnergyDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectEnergy_MinDensity, data._minDensity, defaultObject._minDensity);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectEnergyDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectStructureDescription& data)
+    {
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectStructureDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDescription& data)
+    {
+        DetectFreeCellDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectFreeCellDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
+    {
+        DetectCreatureDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_LastMatchPos, data._lastMatchPos, defaultObject._lastMatchPos);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectCreatureDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SensorDescription& data)
     {
         SensorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Sensor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
-        loadSave(task, auxiliaries, Id_Sensor_MinDensity, data._minDensity, defaultObject._minDensity);
-        loadSave(task, auxiliaries, Id_Sensor_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_Sensor_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(SensorDescription)
 

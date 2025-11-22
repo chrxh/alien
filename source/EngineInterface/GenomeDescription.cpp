@@ -30,6 +30,20 @@ GenomeDescription GenomeDescription::id(uint64_t id)
     return *this;
 }
 
+SensorMode SensorGenomeDescription::getMode() const
+{
+    if (std::holds_alternative<DetectEnergyGenomeDescription>(_mode)) {
+        return SensorMode_DetectEnergy;
+    } else if (std::holds_alternative<DetectStructureGenomeDescription>(_mode)) {
+        return SensorMode_DetectStructure;
+    } else if (std::holds_alternative<DetectFreeCellGenomeDescription>(_mode)) {
+        return SensorMode_DetectFreeCell;
+    } else if (std::holds_alternative<DetectCreatureGenomeDescription>(_mode)) {
+        return SensorMode_DetectCreature;
+    }
+    CHECK(false);
+}
+
 MuscleMode MuscleGenomeDescription::getMode() const
 {
     if (std::holds_alternative<AutoBendingGenomeDescription>(_mode)) {

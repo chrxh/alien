@@ -670,28 +670,61 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 sensor._autoTriggerInterval);
         }
 
-        AlienGui::ComboOptionalColor(
-            AlienGui::ComboColorParameters().name("Scan color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
-            sensor._restrictToColor);
-
+        // Mode selection
+        auto mode = sensor.getMode();
         AlienGui::Combo(
-            AlienGui::ComboParameters()
-                .name("Scan mutants")
-                .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
-                .textWidth(CellTypeTextWidth)
-                .tooltip(Const::SensorRestrictToCreaturesTooltip),
-            sensor._restrictToCreatures);
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters()
-                .name("Min density")
-                .format("%.2f")
-                .step(0.05f)
-                .textWidth(CellTypeTextWidth)
-                .tooltip(Const::GenomeSensorMinDensityTooltip),
-            sensor._minDensity);
-        AlienGui::InputOptionalInt(
+            AlienGui::ComboParameters().name("Mode").values(Const::SensorModeStrings).textWidth(CellTypeTextWidth),
+            mode);
+        // Note: Mode cannot be changed in inspector - only viewing
+        
+        // Mode-specific parameters
+        if (mode == SensorMode_DetectEnergy) {
+            auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters()
+                    .name("Min density")
+                    .format("%.2f")
+                    .step(0.05f)
+                    .textWidth(CellTypeTextWidth)
+                    .tooltip(Const::GenomeSensorMinDensityTooltip),
+                detectEnergy._minDensity);
+        } else if (mode == SensorMode_DetectStructure) {
+            // No parameters
+        } else if (mode == SensorMode_DetectFreeCell) {
+            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters()
+                    .name("Min density")
+                    .format("%.2f")
+                    .step(0.05f)
+                    .textWidth(CellTypeTextWidth)
+                    .tooltip(Const::GenomeSensorMinDensityTooltip),
+                detectFreeCell._minDensity);
+            AlienGui::ComboOptionalColor(
+                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+                detectFreeCell._restrictToColor);
+        } else if (mode == SensorMode_DetectCreature) {
+            auto& detectCreature = std::get<DetectCreatureDescription>(sensor._mode);
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Min num cells").textWidth(CellTypeTextWidth),
+                detectCreature._minNumCells);
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Max num cells").textWidth(CellTypeTextWidth),
+                detectCreature._maxNumCells);
+            AlienGui::ComboOptionalColor(
+                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorScanColorTooltip),
+                detectCreature._restrictToColor);
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
+                    .name("Restrict to lineage")
+                    .values({"No", "Same lineage", "Other lineage"})
+                    .textWidth(CellTypeTextWidth),
+                detectCreature._restrictToLineage);
+        }
+
+        AlienGui::InputInt(
             AlienGui::InputIntParameters().name("Min range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor._minRange);
-        AlienGui::InputOptionalInt(
+        AlienGui::InputInt(
             AlienGui::InputIntParameters().name("Max range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor._maxRange);
         ImGui::TreePop();
     }
@@ -786,13 +819,16 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
     } break;
     case CellType_Sensor: {
         auto& sensor = std::get<SensorDescription>(cell._cellType);
-        sensor._minDensity = std::max(0.0f, std::min(1.0f, sensor._minDensity));
-        if (sensor._minRange) {
-            sensor._minRange = std::max(0, std::min(127, *sensor._minRange));
+        auto mode = sensor.getMode();
+        if (mode == SensorMode_DetectEnergy) {
+            auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
+            detectEnergy._minDensity = std::max(0.0f, std::min(1.0f, detectEnergy._minDensity));
+        } else if (mode == SensorMode_DetectFreeCell) {
+            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+            detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
         }
-        if (sensor._maxRange) {
-            sensor._maxRange = std::max(0, std::min(127, *sensor._maxRange));
-        }
+        sensor._minRange = std::max(0, std::min(255, sensor._minRange));
+        sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
     } break;
     case CellType_Generator: {
         auto& _generator = std::get<GeneratorDescription>(cell._cellType);

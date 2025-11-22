@@ -120,10 +120,23 @@ enum DetectCreatureLineageRestriction_
     DetectCreatureLineageRestriction_Count,
 };
 
+using SensorMode = int;
+enum SensorMode_
+{
+    SensorMode_DetectEnergy,
+    SensorMode_DetectStructure,
+    SensorMode_DetectFreeCell,
+    SensorMode_DetectCreature,
+    SensorMode_Count,
+};
+
 namespace Const
 {
     std::vector<std::string> const SensorRestrictToMutantStrings =
         {"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"};
+
+    std::vector<std::string> const SensorModeStrings =
+        {"Detect energy", "Detect structure", "Detect free cell", "Detect creature"};
 }
 
 //********************

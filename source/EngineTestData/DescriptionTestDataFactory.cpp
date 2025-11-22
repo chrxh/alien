@@ -107,7 +107,8 @@ bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescr
 CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const
 {
     auto const& type = cellParameter.cellType;
-    auto const& muscleMode = cellParameter.muscleMode;
+    auto muscleMode = cellParameter.muscleMode.value_or(MuscleMode_AutoBending);
+    auto sensorMode = cellParameter.sensorMode.value_or(SensorMode_DetectEnergy);
 
     switch (type) {
     case CellType_Structure:
@@ -130,9 +131,32 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             .currentBranch(3)
             .currentConcatenation(2);
     }
-    case CellType_Sensor:
-        return SensorDescription().autoTriggerInterval(80).restrictToColor(2).minRange(10).maxRange(50).minDensity(0.3f).restrictToCreatures(
-            SensorRestrictToCreatures_RestrictToLessComplexMutants);
+    case CellType_Sensor: {
+        SensorModeDescription sensorModeDesc;
+        switch (sensorMode) {
+        case SensorMode_DetectEnergy:
+            sensorModeDesc = DetectEnergyDescription().minDensity(0.3f);
+            break;
+        case SensorMode_DetectStructure:
+            sensorModeDesc = DetectStructureDescription();
+            break;
+        case SensorMode_DetectFreeCell:
+            sensorModeDesc = DetectFreeCellDescription().minDensity(0.25f).restrictToColor(2);
+            break;
+        case SensorMode_DetectCreature:
+            sensorModeDesc = DetectCreatureDescription()
+                .minNumCells(5)
+                .maxNumCells(20)
+                .restrictToColor(3)
+                .restrictToLineage(DetectCreatureLineageRestriction_SameLineage)
+                .lastMatchPos(RealVector2D{10.5f, 20.3f});
+            break;
+        default:
+            sensorModeDesc = SensorModeDescription();
+            break;
+        }
+        return SensorDescription().autoTriggerInterval(80).mode(sensorModeDesc).minRange(10).maxRange(50);
+    }
     case CellType_Generator: {
         return GeneratorDescription().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
     }
@@ -204,7 +228,8 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
 CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const
 {
     auto const& type = cellParameter.cellTypeGenome;
-    auto const& muscleMode = cellParameter.muscleMode;
+    auto muscleMode = cellParameter.muscleMode.value_or(MuscleMode_AutoBending);
+    auto sensorMode = cellParameter.sensorMode.value_or(SensorMode_DetectEnergy);
     switch (type) {
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
@@ -216,9 +241,31 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             .constructionActivationTime(85)
             .provideEnergy(ProvideEnergy_FreeGeneration)
             .constructionAngle(30.0f);
-    case CellTypeGenome_Sensor:
-        return SensorGenomeDescription().autoTriggerInterval(70).restrictToColor(6).minRange(5).maxRange(30).minDensity(0.25f).restrictToCreatures(
-            SensorRestrictToCreatures_RestrictToLessComplexMutants);
+    case CellTypeGenome_Sensor: {
+        SensorModeGenomeDescription sensorModeDesc;
+        switch (sensorMode) {
+        case SensorMode_DetectEnergy:
+            sensorModeDesc = DetectEnergyGenomeDescription().minDensity(0.25f);
+            break;
+        case SensorMode_DetectStructure:
+            sensorModeDesc = DetectStructureGenomeDescription();
+            break;
+        case SensorMode_DetectFreeCell:
+            sensorModeDesc = DetectFreeCellGenomeDescription().minDensity(0.20f).restrictToColor(6);
+            break;
+        case SensorMode_DetectCreature:
+            sensorModeDesc = DetectCreatureGenomeDescription()
+                .minNumCells(3)
+                .maxNumCells(15)
+                .restrictToColor(4)
+                .restrictToLineage(DetectCreatureLineageRestriction_OtherLineage);
+            break;
+        default:
+            sensorModeDesc = SensorModeGenomeDescription();
+            break;
+        }
+        return SensorGenomeDescription().autoTriggerInterval(70).mode(sensorModeDesc).minRange(5).maxRange(30);
+    }
     case CellTypeGenome_Generator:
         return GeneratorGenomeDescription().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
     case CellTypeGenome_Attacker:

@@ -99,6 +99,22 @@ namespace
             CHECK(false);
         }
     }
+
+    SensorModeGenomeDescription createSensorModeGenomeDescription(SensorMode mode)
+    {
+        switch (mode) {
+        case SensorMode_DetectEnergy:
+            return DetectEnergyGenomeDescription();
+        case SensorMode_DetectStructure:
+            return DetectStructureGenomeDescription();
+        case SensorMode_DetectFreeCell:
+            return DetectFreeCellGenomeDescription();
+        case SensorMode_DetectCreature:
+            return DetectCreatureGenomeDescription();
+        default:
+            CHECK(false);
+        }
+    }
 }
 
 void _NodeEditorWidget::processNodeAttributes()
@@ -216,22 +232,52 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::InputOptionalInt(
                 AlienGui::InputIntParameters().name("Auto activation interval").textWidth(rightColumnWidth), sensor._autoTriggerInterval);
 
-            // Minimum density
-            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), sensor._minDensity);
+            // Mode selection
+            auto mode = sensor.getMode();
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::SensorModeStrings).textWidth(rightColumnWidth), mode)) {
+                sensor._mode = createSensorModeGenomeDescription(mode);
+            }
+
+            // Mode-specific parameters
+            if (mode == SensorMode_DetectEnergy) {
+                AlienGui::BeginIndent();
+                auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), detectEnergy._minDensity);
+                AlienGui::EndIndent();
+            } else if (mode == SensorMode_DetectStructure) {
+                // No parameters
+            } else if (mode == SensorMode_DetectFreeCell) {
+                AlienGui::BeginIndent();
+                auto& detectFreeCell = std::get<DetectFreeCellGenomeDescription>(sensor._mode);
+                AlienGui::InputFloat(
+                    AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), detectFreeCell._minDensity);
+                AlienGui::ComboOptionalColor(
+                    AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectFreeCell._restrictToColor);
+                AlienGui::EndIndent();
+            } else if (mode == SensorMode_DetectCreature) {
+                AlienGui::BeginIndent();
+                auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
+                AlienGui::InputOptionalInt(
+                    AlienGui::InputIntParameters().name("Min num cells").textWidth(rightColumnWidth), detectCreature._minNumCells);
+                AlienGui::InputOptionalInt(
+                    AlienGui::InputIntParameters().name("Max num cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
+                AlienGui::ComboOptionalColor(
+                    AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectCreature._restrictToColor);
+                AlienGui::Combo(
+                    AlienGui::ComboParameters()
+                        .name("Restrict to lineage")
+                        .values({"No", "Same lineage", "Other lineage"})
+                        .textWidth(rightColumnWidth),
+                    detectCreature._restrictToLineage);
+                AlienGui::EndIndent();
+            }
 
             // Minimum range
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
 
             // Maximum range
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
-
-            // Scan color
-            AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Scan color").textWidth(rightColumnWidth), sensor._restrictToColor);
-
-            // Scan mutants
-            AlienGui::Combo(
-                AlienGui::ComboParameters().name("Scan mutants").values(Const::SensorRestrictToMutantStrings).textWidth(rightColumnWidth),
-                sensor._restrictToCreatures);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
 
             AlienGui::EndIndent();
 

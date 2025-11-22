@@ -60,14 +60,46 @@ struct ConstructorTO
     uint8_t currentBranch;
 };
 
+struct DetectEnergyTO
+{
+    float minDensity;
+};
+
+struct DetectStructureTO
+{};
+
+struct DetectFreeCellTO
+{
+    float minDensity;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+};
+
+struct DetectCreatureTO
+{
+    uint32_t minNumCells;  // 0 = no restriction
+    uint32_t maxNumCells;  // 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    DetectCreatureLineageRestriction restrictToLineage;
+
+    // Process data
+    float2 lastMatchPos;  // May be invalid
+};
+
+union SensorModeTO
+{
+    DetectEnergyTO detectEnergy;
+    DetectStructureTO detectStructure;
+    DetectFreeCellTO detectFreeCell;
+    DetectCreatureTO detectCreature;
+};
+
 struct SensorTO
 {
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    float minDensity;
-    int8_t minRange;          // < 0 = no restriction
-    int8_t maxRange;          // < 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    SensorRestrictToCreatures restrictToCreatures;
+    SensorMode mode;
+    SensorModeTO modeData;
+    int8_t minRange;  // < 0 = no restriction
+    int8_t maxRange;  // < 0 = no restriction
 };
 
 struct GeneratorTO

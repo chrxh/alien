@@ -137,11 +137,21 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 break;
             case CellTypeGenome_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
-                node.cellTypeData.sensor.minDensity = nodeTO.cellTypeData.sensor.minDensity;
+                node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
-                node.cellTypeData.sensor.restrictToColor = nodeTO.cellTypeData.sensor.restrictToColor;
-                node.cellTypeData.sensor.restrictToCreatures = nodeTO.cellTypeData.sensor.restrictToCreatures;
+                if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                    node.cellTypeData.sensor.modeData.detectEnergy.minDensity = nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
+                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+                    node.cellTypeData.sensor.modeData.detectFreeCell.minDensity = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+                    node.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = nodeTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+                    node.cellTypeData.sensor.modeData.detectCreature.minNumCells = nodeTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
+                    node.cellTypeData.sensor.modeData.detectCreature.maxNumCells = nodeTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
+                    node.cellTypeData.sensor.modeData.detectCreature.restrictToColor = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+                    node.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = nodeTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+                }
                 break;
             case CellTypeGenome_Generator:
                 node.cellTypeData.generator.autoTriggerInterval = nodeTO.cellTypeData.generator.autoTriggerInterval;
@@ -312,11 +322,22 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     } break;
     case CellType_Sensor: {
         cell->cellTypeData.sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
-        cell->cellTypeData.sensor.minDensity = cellTO.cellTypeData.sensor.minDensity;
+        cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
         cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
         cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
-        cell->cellTypeData.sensor.restrictToColor = cellTO.cellTypeData.sensor.restrictToColor;
-        cell->cellTypeData.sensor.restrictToCreatures = cellTO.cellTypeData.sensor.restrictToCreatures;
+        if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            cell->cellTypeData.sensor.modeData.detectEnergy.minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+            cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+            cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+            cell->cellTypeData.sensor.modeData.detectCreature.minNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells;
+            cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
+            cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
+            cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatchPos = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos;
+        }
     } break;
     case CellType_Generator: {
         cell->cellTypeData.generator.autoTriggerInterval = cellTO.cellTypeData.generator.autoTriggerInterval;
@@ -597,11 +618,22 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto const& nodeSensor = node->cellTypeData.sensor;
         auto& sensor = cell->cellTypeData.sensor;
         sensor.autoTriggerInterval = nodeSensor.autoTriggerInterval;
-        sensor.minDensity = nodeSensor.minDensity;
+        sensor.mode = nodeSensor.mode;
         sensor.minRange = nodeSensor.minRange;
         sensor.maxRange = nodeSensor.maxRange;
-        sensor.restrictToColor = nodeSensor.restrictToColor;
-        sensor.restrictToCreatures = nodeSensor.restrictToCreatures;
+        if (nodeSensor.mode == SensorMode_DetectEnergy) {
+            sensor.modeData.detectEnergy.minDensity = nodeSensor.modeData.detectEnergy.minDensity;
+        } else if (nodeSensor.mode == SensorMode_DetectStructure) {
+        } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {
+            sensor.modeData.detectFreeCell.minDensity = nodeSensor.modeData.detectFreeCell.minDensity;
+            sensor.modeData.detectFreeCell.restrictToColor = nodeSensor.modeData.detectFreeCell.restrictToColor;
+        } else if (nodeSensor.mode == SensorMode_DetectCreature) {
+            sensor.modeData.detectCreature.minNumCells = nodeSensor.modeData.detectCreature.minNumCells;
+            sensor.modeData.detectCreature.maxNumCells = nodeSensor.modeData.detectCreature.maxNumCells;
+            sensor.modeData.detectCreature.restrictToColor = nodeSensor.modeData.detectCreature.restrictToColor;
+            sensor.modeData.detectCreature.restrictToLineage = nodeSensor.modeData.detectCreature.restrictToLineage;
+            sensor.modeData.detectCreature.lastMatchPos = {VALUE_NOT_SET_FLOAT, VALUE_NOT_SET_FLOAT};
+        }
     } break;
     case CellTypeGenome_Generator: {
         cell->cellType = CellType_Generator;

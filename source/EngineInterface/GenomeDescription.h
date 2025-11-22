@@ -50,16 +50,48 @@ struct ConstructorGenomeDescription
     MEMBER(ConstructorGenomeDescription, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
 };
 
+struct DetectEnergyGenomeDescription
+{
+    auto operator<=>(DetectEnergyGenomeDescription const&) const = default;
+
+    MEMBER(DetectEnergyGenomeDescription, float, minDensity, 0.05f);
+};
+
+struct DetectStructureGenomeDescription
+{
+    auto operator<=>(DetectStructureGenomeDescription const&) const = default;
+};
+
+struct DetectFreeCellGenomeDescription
+{
+    auto operator<=>(DetectFreeCellGenomeDescription const&) const = default;
+
+    MEMBER(DetectFreeCellGenomeDescription, float, minDensity, 0.05f);
+    MEMBER(DetectFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct DetectCreatureGenomeDescription
+{
+    auto operator<=>(DetectCreatureGenomeDescription const&) const = default;
+
+    MEMBER(DetectCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(DetectCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(DetectCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectCreatureGenomeDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+};
+
+using SensorModeGenomeDescription = std::variant<DetectEnergyGenomeDescription, DetectStructureGenomeDescription, DetectFreeCellGenomeDescription, DetectCreatureGenomeDescription>;
+
 struct SensorGenomeDescription
 {
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
     MEMBER(SensorGenomeDescription, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
-    MEMBER(SensorGenomeDescription, float, minDensity, 0.05f);
-    MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
-    MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
-    MEMBER(SensorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(SensorGenomeDescription, SensorRestrictToCreatures, restrictToCreatures, SensorRestrictToCreatures_NoRestriction);
+    MEMBER(SensorGenomeDescription, SensorModeGenomeDescription, mode, SensorModeGenomeDescription());
+    MEMBER(SensorGenomeDescription, int, minRange, 0);
+    MEMBER(SensorGenomeDescription, int, maxRange, 255);
+
+    SensorMode getMode() const;
 };
 
 struct GeneratorGenomeDescription

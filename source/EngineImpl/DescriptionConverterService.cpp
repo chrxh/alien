@@ -309,12 +309,41 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         SensorDescription sensor;
         sensor._autoTriggerInterval =
             cellTO.cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
-        sensor._minDensity = cellTO.cellTypeData.sensor.minDensity;
-        sensor._minRange = cellTO.cellTypeData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.minRange) : std::nullopt;
-        sensor._maxRange = cellTO.cellTypeData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.maxRange) : std::nullopt;
-        sensor._restrictToColor =
-            cellTO.cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.sensor.restrictToColor) : std::nullopt;
-        sensor._restrictToCreatures = cellTO.cellTypeData.sensor.restrictToCreatures;
+        sensor._minRange = cellTO.cellTypeData.sensor.minRange;
+        sensor._maxRange = cellTO.cellTypeData.sensor.maxRange;
+
+        if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            DetectEnergyDescription detectEnergy;
+            detectEnergy._minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
+            sensor._mode = detectEnergy;
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+            DetectStructureDescription detectStructure;
+            sensor._mode = detectStructure;
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+            DetectFreeCellDescription detectFreeCell;
+            detectFreeCell._minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+            detectFreeCell._restrictToColor = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
+                : std::nullopt;
+            sensor._mode = detectFreeCell;
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+            DetectCreatureDescription detectCreature;
+            detectCreature._minNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectCreature.minNumCells))
+                : std::nullopt;
+            detectCreature._maxNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells))
+                : std::nullopt;
+            detectCreature._restrictToColor = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor))
+                : std::nullopt;
+            detectCreature._restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            detectCreature._lastMatchPos = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos.x != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(RealVector2D{cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos.x, cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos.y})
+                : std::nullopt;
+            sensor._mode = detectCreature;
+        }
+
         result._cellType = sensor;
     } break;
     case CellType_Generator: {
@@ -478,12 +507,38 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         SensorGenomeDescription sensorDesc;
         sensorDesc._autoTriggerInterval =
             nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
-        sensorDesc._minDensity = nodeTO->cellTypeData.sensor.minDensity;
-        sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.minRange) : std::nullopt;
-        sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.maxRange) : std::nullopt;
-        sensorDesc._restrictToColor =
-            nodeTO->cellTypeData.sensor.restrictToColor != 255 ? std::make_optional(nodeTO->cellTypeData.sensor.restrictToColor) : std::nullopt;
-        sensorDesc._restrictToCreatures = nodeTO->cellTypeData.sensor.restrictToCreatures;
+        sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
+        sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
+
+        if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            DetectEnergyGenomeDescription detectEnergy;
+            detectEnergy._minDensity = nodeTO->cellTypeData.sensor.modeData.detectEnergy.minDensity;
+            sensorDesc._mode = detectEnergy;
+        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+            DetectStructureGenomeDescription detectStructure;
+            sensorDesc._mode = detectStructure;
+        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+            DetectFreeCellGenomeDescription detectFreeCell;
+            detectFreeCell._minDensity = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+            detectFreeCell._restrictToColor = nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
+                : std::nullopt;
+            sensorDesc._mode = detectFreeCell;
+        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+            DetectCreatureGenomeDescription detectCreature;
+            detectCreature._minNumCells = nodeTO->cellTypeData.sensor.modeData.detectCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.minNumCells))
+                : std::nullopt;
+            detectCreature._maxNumCells = nodeTO->cellTypeData.sensor.modeData.detectCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.maxNumCells))
+                : std::nullopt;
+            detectCreature._restrictToColor = nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToColor))
+                : std::nullopt;
+            detectCreature._restrictToLineage = nodeTO->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            sensorDesc._mode = detectCreature;
+        }
+
         nodeDesc._cellType = sensorDesc;
     } break;
     case CellTypeGenome_Generator: {
@@ -699,11 +754,28 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
-                sensorTO.minDensity = sensorDesc._minDensity;
-                sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
-                sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
-                sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
-                sensorTO.restrictToCreatures = sensorDesc._restrictToCreatures;
+                sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange);
+                sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
+                sensorTO.mode = sensorDesc.getMode();
+
+                if (sensorTO.mode == SensorMode_DetectEnergy) {
+                    auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDescription>(sensorDesc._mode);
+                    auto& detectEnergyTO = sensorTO.modeData.detectEnergy;
+                    detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
+                } else if (sensorTO.mode == SensorMode_DetectStructure) {
+                } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
+                    auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDescription>(sensorDesc._mode);
+                    auto& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
+                    detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
+                    detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+                } else if (sensorTO.mode == SensorMode_DetectCreature) {
+                    auto const& detectCreatureDesc = std::get<DetectCreatureGenomeDescription>(sensorDesc._mode);
+                    auto& detectCreatureTO = sensorTO.modeData.detectCreature;
+                    detectCreatureTO.minNumCells = static_cast<uint32_t>(detectCreatureDesc._minNumCells.value_or(0));
+                    detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
+                    detectCreatureTO.restrictToColor = static_cast<uint8_t>(detectCreatureDesc._restrictToColor.value_or(255));
+                    detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
+                }
             } break;
             case CellTypeGenome_Generator: {
                 auto const& generatorDesc = std::get<GeneratorGenomeDescription>(nodeDesc._cellType);
@@ -881,11 +953,33 @@ void DescriptionConverterService::convertCellToTO(
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellType);
         SensorTO& sensorTO = cellTO.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
-        sensorTO.restrictToColor = sensorDesc._restrictToColor.value_or(255);
-        sensorTO.restrictToCreatures = sensorDesc._restrictToCreatures;
-        sensorTO.minDensity = sensorDesc._minDensity;
-        sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
-        sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
+        sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange);
+        sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
+        sensorTO.mode = sensorDesc.getMode();
+
+        if (sensorTO.mode == SensorMode_DetectEnergy) {
+            auto const& detectEnergyDesc = std::get<DetectEnergyDescription>(sensorDesc._mode);
+            DetectEnergyTO& detectEnergyTO = sensorTO.modeData.detectEnergy;
+            detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
+        } else if (sensorTO.mode == SensorMode_DetectStructure) {
+        } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
+            auto const& detectFreeCellDesc = std::get<DetectFreeCellDescription>(sensorDesc._mode);
+            DetectFreeCellTO& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
+            detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
+            detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+        } else if (sensorTO.mode == SensorMode_DetectCreature) {
+            auto const& detectCreatureDesc = std::get<DetectCreatureDescription>(sensorDesc._mode);
+            DetectCreatureTO& detectCreatureTO = sensorTO.modeData.detectCreature;
+            detectCreatureTO.minNumCells = static_cast<uint32_t>(detectCreatureDesc._minNumCells.value_or(0));
+            detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
+            detectCreatureTO.restrictToColor = static_cast<uint8_t>(detectCreatureDesc._restrictToColor.value_or(255));
+            detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
+            if (detectCreatureDesc._lastMatchPos.has_value()) {
+                detectCreatureTO.lastMatchPos = {detectCreatureDesc._lastMatchPos->x, detectCreatureDesc._lastMatchPos->y};
+            } else {
+                detectCreatureTO.lastMatchPos = {VALUE_NOT_SET_FLOAT, VALUE_NOT_SET_FLOAT};
+            }
+        }
     } break;
     case CellType_Generator: {
         auto const& generatorDesc = std::get<GeneratorDescription>(cellDesc._cellType);

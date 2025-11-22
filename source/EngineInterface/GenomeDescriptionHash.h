@@ -66,23 +66,43 @@ struct std::hash<SensorGenomeDescription>
         } else {
             hash_combine(seed, -1);
         }
-        hash_combine(seed, desc._minDensity);
-        if (desc._minRange) {
-            hash_combine(seed, *desc._minRange);
-        } else {
-            hash_combine(seed, -1);
+        hash_combine(seed, desc._minRange);
+        hash_combine(seed, desc._maxRange);
+        hash_combine(seed, desc.getMode());
+        
+        // Hash mode-specific data
+        if (desc.getMode() == SensorMode_DetectEnergy) {
+            auto const& mode = std::get<DetectEnergyGenomeDescription>(desc._mode);
+            hash_combine(seed, mode._minDensity);
+        } else if (desc.getMode() == SensorMode_DetectStructure) {
+            // No additional data
+        } else if (desc.getMode() == SensorMode_DetectFreeCell) {
+            auto const& mode = std::get<DetectFreeCellGenomeDescription>(desc._mode);
+            hash_combine(seed, mode._minDensity);
+            if (mode._restrictToColor) {
+                hash_combine(seed, *mode._restrictToColor);
+            } else {
+                hash_combine(seed, -1);
+            }
+        } else if (desc.getMode() == SensorMode_DetectCreature) {
+            auto const& mode = std::get<DetectCreatureGenomeDescription>(desc._mode);
+            if (mode._minNumCells) {
+                hash_combine(seed, *mode._minNumCells);
+            } else {
+                hash_combine(seed, -1);
+            }
+            if (mode._maxNumCells) {
+                hash_combine(seed, *mode._maxNumCells);
+            } else {
+                hash_combine(seed, -1);
+            }
+            if (mode._restrictToColor) {
+                hash_combine(seed, *mode._restrictToColor);
+            } else {
+                hash_combine(seed, -1);
+            }
+            hash_combine(seed, static_cast<int>(mode._restrictToLineage));
         }
-        if (desc._maxRange) {
-            hash_combine(seed, *desc._maxRange);
-        } else {
-            hash_combine(seed, -1);
-        }
-        if (desc._restrictToColor) {
-            hash_combine(seed, *desc._restrictToColor);
-        } else {
-            hash_combine(seed, -1);
-        }
-        hash_combine(seed, static_cast<int>(desc._restrictToCreatures));
         return seed;
     }
 };

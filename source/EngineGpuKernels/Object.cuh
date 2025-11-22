@@ -82,14 +82,46 @@ struct Constructor
     Creature* offspring;  // Must be reset if separated construction is finished
 };
 
+struct DetectEnergy
+{
+    float minDensity;
+};
+
+struct DetectStructure
+{};
+
+struct DetectFreeCell
+{
+    float minDensity;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+};
+
+struct DetectCreature
+{
+    uint32_t minNumCells;  // 0 = no restriction
+    uint32_t maxNumCells;  // 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    DetectCreatureLineageRestriction restrictToLineage;
+
+    // Process data
+    float2 lastMatchPos;  // May be invalid
+};
+
+union SensorModeData
+{
+    DetectEnergy detectEnergy;
+    DetectStructure detectStructure;
+    DetectFreeCell detectFreeCell;
+    DetectCreature detectCreature;
+};
+
 struct Sensor
 {
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
-    float minDensity;
-    int8_t minRange;          // < 0 = no restriction
-    int8_t maxRange;          // < 0 = no restriction
-    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    SensorRestrictToCreatures restrictToCreatures;
+    SensorMode mode;
+    SensorModeData modeData;
+    int8_t minRange;  // < 0 = no restriction
+    int8_t maxRange;  // < 0 = no restriction
 };
 
 struct Generator
