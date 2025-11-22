@@ -73,6 +73,7 @@ namespace cereal
         std::optional<int8_t>,
         std::optional<int>,
         std::optional<float>,
+        std::optional<RealVector2D>,
         std::vector<bool>,
         std::vector<uint8_t>,
         std::vector<int8_t>,
@@ -643,6 +644,7 @@ namespace
     auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = 1;
     auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = 2;
     auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = 3;
+    auto constexpr Id_SensorMode_DetectCreature_LastMatchPos = 4;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -777,7 +779,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
-        // lastMatchPos is process data and doesn't need to be serialized
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_LastMatchPos, data._lastMatchPos, defaultObject._lastMatchPos);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DetectCreatureDescription)

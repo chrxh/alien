@@ -240,18 +240,23 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Mode-specific parameters
             if (mode == SensorMode_DetectEnergy) {
+                AlienGui::BeginIndent();
                 auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), detectEnergy._minDensity);
+                AlienGui::EndIndent();
             } else if (mode == SensorMode_DetectStructure) {
                 // No parameters
             } else if (mode == SensorMode_DetectFreeCell) {
+                AlienGui::BeginIndent();
                 auto& detectFreeCell = std::get<DetectFreeCellGenomeDescription>(sensor._mode);
                 AlienGui::InputFloat(
                     AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), detectFreeCell._minDensity);
                 AlienGui::ComboOptionalColor(
                     AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectFreeCell._restrictToColor);
+                AlienGui::EndIndent();
             } else if (mode == SensorMode_DetectCreature) {
+                AlienGui::BeginIndent();
                 auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
                 AlienGui::InputOptionalInt(
                     AlienGui::InputIntParameters().name("Min num cells").textWidth(rightColumnWidth), detectCreature._minNumCells);
@@ -265,6 +270,7 @@ void _NodeEditorWidget::processNodeAttributes()
                         .values({"No", "Same lineage", "Other lineage"})
                         .textWidth(rightColumnWidth),
                     detectCreature._restrictToLineage);
+                AlienGui::EndIndent();
             }
 
             // Minimum range
