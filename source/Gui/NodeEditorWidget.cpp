@@ -268,10 +268,10 @@ void _NodeEditorWidget::processNodeAttributes()
             }
 
             // Minimum range
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Min range").textWidth(rightColumnWidth), sensor._minRange);
 
             // Maximum range
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Max range").textWidth(rightColumnWidth), sensor._maxRange);
 
             AlienGui::EndIndent();
 

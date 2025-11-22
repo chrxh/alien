@@ -107,8 +107,8 @@ bool DescriptionTestDataFactory::compare(ParticleDescription left, ParticleDescr
 CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const
 {
     auto const& type = cellParameter.cellType;
-    auto const& muscleMode = cellParameter.muscleMode;
-    auto const& sensorMode = cellParameter.sensorMode;
+    auto muscleMode = cellParameter.muscleMode.value_or(MuscleMode_AutoBending);
+    auto sensorMode = cellParameter.sensorMode.value_or(SensorMode_DetectEnergy);
 
     switch (type) {
     case CellType_Structure:
@@ -228,8 +228,8 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
 CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const
 {
     auto const& type = cellParameter.cellTypeGenome;
-    auto const& muscleMode = cellParameter.muscleMode;
-    auto const& sensorMode = cellParameter.sensorMode;
+    auto muscleMode = cellParameter.muscleMode.value_or(MuscleMode_AutoBending);
+    auto sensorMode = cellParameter.sensorMode.value_or(SensorMode_DetectEnergy);
     switch (type) {
     case CellTypeGenome_Base:
         return BaseGenomeDescription();

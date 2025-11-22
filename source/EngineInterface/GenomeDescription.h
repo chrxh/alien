@@ -88,8 +88,8 @@ struct SensorGenomeDescription
 
     MEMBER(SensorGenomeDescription, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
     MEMBER(SensorGenomeDescription, SensorModeGenomeDescription, mode, SensorModeGenomeDescription());
-    MEMBER(SensorGenomeDescription, std::optional<int>, minRange, std::nullopt);
-    MEMBER(SensorGenomeDescription, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorGenomeDescription, int, minRange, 0);
+    MEMBER(SensorGenomeDescription, int, maxRange, 255);
 
     SensorMode getMode() const;
 };

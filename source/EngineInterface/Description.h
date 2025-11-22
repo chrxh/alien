@@ -115,8 +115,8 @@ struct SensorDescription
 
     MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
     MEMBER(SensorDescription, SensorModeDescription, mode, SensorModeDescription());
-    MEMBER(SensorDescription, std::optional<int>, minRange, std::nullopt);
-    MEMBER(SensorDescription, std::optional<int>, maxRange, std::nullopt);
+    MEMBER(SensorDescription, int, minRange, 0);
+    MEMBER(SensorDescription, int, maxRange, 255);
 
     SensorMode getMode() const;
 };

@@ -722,9 +722,9 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
                 detectCreature._restrictToLineage);
         }
 
-        AlienGui::InputOptionalInt(
+        AlienGui::InputInt(
             AlienGui::InputIntParameters().name("Min range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMinRangeTooltip), sensor._minRange);
-        AlienGui::InputOptionalInt(
+        AlienGui::InputInt(
             AlienGui::InputIntParameters().name("Max range").textWidth(CellTypeTextWidth).tooltip(Const::GenomeSensorMaxRangeTooltip), sensor._maxRange);
         ImGui::TreePop();
     }
@@ -827,12 +827,8 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
             auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
             detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
         }
-        if (sensor._minRange) {
-            sensor._minRange = std::max(0, std::min(127, *sensor._minRange));
-        }
-        if (sensor._maxRange) {
-            sensor._maxRange = std::max(0, std::min(127, *sensor._maxRange));
-        }
+        sensor._minRange = std::max(0, std::min(255, sensor._minRange));
+        sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
     } break;
     case CellType_Generator: {
         auto& _generator = std::get<GeneratorDescription>(cell._cellType);

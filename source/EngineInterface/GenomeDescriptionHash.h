@@ -66,16 +66,8 @@ struct std::hash<SensorGenomeDescription>
         } else {
             hash_combine(seed, -1);
         }
-        if (desc._minRange) {
-            hash_combine(seed, *desc._minRange);
-        } else {
-            hash_combine(seed, -1);
-        }
-        if (desc._maxRange) {
-            hash_combine(seed, *desc._maxRange);
-        } else {
-            hash_combine(seed, -1);
-        }
+        hash_combine(seed, desc._minRange);
+        hash_combine(seed, desc._maxRange);
         hash_combine(seed, desc.getMode());
         
         // Hash mode-specific data

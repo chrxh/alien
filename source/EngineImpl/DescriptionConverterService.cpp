@@ -309,8 +309,8 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         SensorDescription sensor;
         sensor._autoTriggerInterval =
             cellTO.cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(cellTO.cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
-        sensor._minRange = cellTO.cellTypeData.sensor.minRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.minRange) : std::nullopt;
-        sensor._maxRange = cellTO.cellTypeData.sensor.maxRange >= 0 ? std::make_optional(cellTO.cellTypeData.sensor.maxRange) : std::nullopt;
+        sensor._minRange = cellTO.cellTypeData.sensor.minRange;
+        sensor._maxRange = cellTO.cellTypeData.sensor.maxRange;
 
         if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyDescription detectEnergy;
@@ -507,8 +507,8 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         SensorGenomeDescription sensorDesc;
         sensorDesc._autoTriggerInterval =
             nodeTO->cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(nodeTO->cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
-        sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.minRange) : std::nullopt;
-        sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange >= 0 ? std::make_optional(nodeTO->cellTypeData.sensor.maxRange) : std::nullopt;
+        sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
+        sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
         if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyGenomeDescription detectEnergy;
@@ -754,8 +754,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
-                sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
-                sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
+                sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange);
+                sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
 
                 if (sensorTO.mode == SensorMode_DetectEnergy) {
@@ -953,8 +953,8 @@ void DescriptionConverterService::convertCellToTO(
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellType);
         SensorTO& sensorTO = cellTO.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
-        sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange.value_or(-1));
-        sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange.value_or(-1));
+        sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange);
+        sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
         sensorTO.mode = sensorDesc.getMode();
 
         if (sensorTO.mode == SensorMode_DetectEnergy) {

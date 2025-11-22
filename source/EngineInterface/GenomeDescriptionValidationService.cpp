@@ -61,14 +61,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                     auto& value = sensor._autoTriggerInterval.value();
                     value = std::max(value, 1);
                 }
-                if (sensor._minRange.has_value()) {
-                    auto& value = sensor._minRange.value();
-                    value = std::max(value, 0);
-                }
-                if (sensor._maxRange.has_value()) {
-                    auto& value = sensor._maxRange.value();
-                    value = std::max(value, 0);
-                }
+                sensor._minRange = std::max(0, std::min(255, sensor._minRange));
+                sensor._maxRange = std::max(0, std::min(255, sensor._maxRange));
                 
                 // Validate mode-specific data
                 auto mode = sensor.getMode();
