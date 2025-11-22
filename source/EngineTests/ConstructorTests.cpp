@@ -110,8 +110,45 @@ protected:
             if (sensor.getMode() != nodeSensor.getMode()) {
                 return false;
             }
-            // Compare mode-specific data (simplified - just check they're the same mode type)
-            // More detailed comparison could be added here if needed
+            // Compare mode-specific data
+            switch (sensor.getMode()) {
+            case SensorMode_DetectEnergy: {
+                auto const& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
+                auto const& nodeDetectEnergy = std::get<DetectEnergyGenomeDescription>(nodeSensor._mode);
+                if (detectEnergy._minDensity != nodeDetectEnergy._minDensity) {
+                    return false;
+                }
+            } break;
+            case SensorMode_DetectStructure: {
+                // No fields to compare
+            } break;
+            case SensorMode_DetectFreeCell: {
+                auto const& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+                auto const& nodeDetectFreeCell = std::get<DetectFreeCellGenomeDescription>(nodeSensor._mode);
+                if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
+                    return false;
+                }
+                if (detectFreeCell._restrictToColor != nodeDetectFreeCell._restrictToColor) {
+                    return false;
+                }
+            } break;
+            case SensorMode_DetectCreature: {
+                auto const& detectCreature = std::get<DetectCreatureDescription>(sensor._mode);
+                auto const& nodeDetectCreature = std::get<DetectCreatureGenomeDescription>(nodeSensor._mode);
+                if (detectCreature._minNumCells != nodeDetectCreature._minNumCells) {
+                    return false;
+                }
+                if (detectCreature._maxNumCells != nodeDetectCreature._maxNumCells) {
+                    return false;
+                }
+                if (detectCreature._restrictToColor != nodeDetectCreature._restrictToColor) {
+                    return false;
+                }
+                if (detectCreature._restrictToLineage != nodeDetectCreature._restrictToLineage) {
+                    return false;
+                }
+            } break;
+            }
         } break;
         case CellType_Generator: {
             if (nodeType != CellTypeGenome_Generator) {
