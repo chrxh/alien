@@ -6,9 +6,6 @@
 
 #include "IntegrationTestFramework.h"
 
-// Sensor tests temporarily disabled pending update to new variant-based sensor mode API
-#if 0
-
 class SensorTests : public IntegrationTestFramework
 {
 public:
@@ -18,6 +15,403 @@ public:
 
     ~SensorTests() = default;
 };
+
+/**
+ * Tests for SensorMode_DetectEnergy
+ */
+
+TEST_F(SensorTests, detectEnergy_autoTriggered)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(15).mode(DetectEnergyDescription())),
+    };
+    _simulationFacade->setSimulationData(data);
+
+    {
+        _simulationFacade->calcTimesteps(1);
+        auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+        EXPECT_TRUE(actualSensor._signal.has_value());
+    }
+    {
+        _simulationFacade->calcTimesteps(1);
+        auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+        EXPECT_FALSE(actualSensor._signal.has_value());
+    }
+    {
+        _simulationFacade->calcTimesteps(14);
+        auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+        EXPECT_TRUE(actualSensor._signal.has_value());
+    }
+}
+
+TEST_F(SensorTests, detectEnergy_manuallyTriggered_noSignal)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(std::nullopt).mode(DetectEnergyDescription())),
+    };
+    _simulationFacade->setSimulationData(data);
+
+    for (int i = 0; i < 10; ++i) {
+        _simulationFacade->calcTimesteps(1);
+        auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+        EXPECT_FALSE(actualSensor._signal.has_value());
+    }
+}
+
+TEST_F(SensorTests, detectEnergy_manuallyTriggered_withSignal)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(std::nullopt).mode(DetectEnergyDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+    };
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+}
+
+TEST_F(SensorTests, detectEnergy_noFrontAngle)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.1f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    data._particles.emplace_back(ParticleDescription().id(100).pos({100.0f, 10.0f}).energy(50.0f));
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_FALSE(actualSensor._signal.has_value());
+}
+
+TEST_F(SensorTests, detectEnergy_particleFound)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add energy particles near the sensor - cluster them in same 8x8 region to accumulate energy
+    for (int i = 0; i < 10; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
+}
+
+TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(50.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add a particle with low energy
+    data._particles.emplace_back(ParticleDescription().id(100).pos({100.0f, 50.0f}).energy(1.0f));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_particleAbove)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles above the sensor - cluster them to reach minDensity
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 20.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Angle should be roughly -90 degrees (-0.5 normalized)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
+}
+
+TEST_F(SensorTests, detectEnergy_particleBelow)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles below the sensor
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 180.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Angle should be roughly +90 degrees (+0.5 normalized)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > 0.3f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < 0.7f);
+}
+
+TEST_F(SensorTests, detectEnergy_closerParticleDetected)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add a close cluster with high energy
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 50.0f})
+            .energy(10.0f));
+    }
+    
+    // Add a far cluster with even more energy
+    for (int i = 0; i < 12; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(200 + i)
+            .pos({98.0f + i, 200.0f})
+            .energy(15.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    // Should detect the closer particles (above the sensor)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.6f); // Closer = higher value
+}
+
+TEST_F(SensorTests, detectEnergy_minRange_found)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).minRange(40)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles just beyond minRange
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 50.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_minRange_notFound)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).minRange(120)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles within minRange (too close)
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 50.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_maxRange_found)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).maxRange(120)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles within maxRange
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 50.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_maxRange_notFound)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).maxRange(30)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles beyond maxRange (too far)
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 50.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_noParticles)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_multipleDirections)
+{
+    Description data;
+    data._cells = {
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    };
+    data.addConnection(1, 2);
+    
+    // Add particles in front (right side, angle 0)
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({150.0f, 98.0f + i})
+            .energy(10.0f));
+    }
+    
+    // Add particles behind (left side, angle 180)
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(200 + i)
+            .pos({50.0f, 98.0f + i})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    // Should detect the closer one (right side at distance ~50 is closer than left at ~50)
+    // Actually both are same distance, so it should detect the first one encountered
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+}
+
+// Old tests for other sensor modes - temporarily disabled pending implementation
+#if 0
 
 TEST_F(SensorTests, autoTriggered)
 {
