@@ -13,6 +13,7 @@ class EnergyParticleProcessor
 {
 public:
     __inline__ __device__ static void updateMap(SimulationData& data);
+    __inline__ __device__ static void fillDensityMap(SimulationData& data);
     __inline__ __device__ static void calcActiveSources(SimulationData& data);
     __inline__ __device__ static void movement(SimulationData& data);
     __inline__ __device__ static void collision(SimulationData& data);
@@ -37,6 +38,14 @@ __inline__ __device__ void EnergyParticleProcessor::updateMap(SimulationData& da
 
     Particle** particlePointers = &data.objects.particles.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
+}
+
+__inline__ __device__ void EnergyParticleProcessor::fillDensityMap(SimulationData& data)
+{
+    auto const partition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        data.preprocessedSimulationData.densityMap.addParticle(data.objects.particles.at(index));
+    }
 }
 
 __inline__ __device__ void EnergyParticleProcessor::calcActiveSources(SimulationData& data)

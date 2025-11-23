@@ -20,6 +20,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _lessNumCellsDensityMap2);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreNumCellsDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreNumCellsDensityMap2);
+        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
         _slotSize = slotSize;
     }
 
@@ -34,6 +35,7 @@ public:
         CudaMemoryManager::getInstance().freeMemory(_lessNumCellsDensityMap2);
         CudaMemoryManager::getInstance().freeMemory(_moreNumCellsDensityMap1);
         CudaMemoryManager::getInstance().freeMemory(_moreNumCellsDensityMap2);
+        CudaMemoryManager::getInstance().freeMemory(_energyParticleDensityMap);
     }
 
     __device__ __inline__ void clear()
@@ -49,6 +51,7 @@ public:
             _lessNumCellsDensityMap2[index] = 0;
             _moreNumCellsDensityMap1[index] = 0;
             _moreNumCellsDensityMap2[index] = 0;
+            _energyParticleDensityMap[index] = 0;
         }
     }
 
@@ -142,6 +145,24 @@ public:
         return 0ul;
     }
 
+    __device__ __inline__ uint32_t getEnergyParticleDensity(float2 const& pos) const
+    {
+        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            return static_cast<uint32_t>((_energyParticleDensityMap[index] >> 56) & 0xff);
+        }
+        return 0;
+    }
+
+    __device__ __inline__ uint32_t getEnergyParticleColorDensity(float2 const& pos, int color) const
+    {
+        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            return static_cast<uint32_t>((_energyParticleDensityMap[index] >> (color * 8)) & 0xff);
+        }
+        return 0;
+    }
+
     __device__ __inline__ void addCell(uint64_t const& timestep, Cell* cell)
     {
         auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
@@ -207,6 +228,15 @@ public:
         }
     }
 
+    __device__ __inline__ void addParticle(Particle* particle)
+    {
+        auto index = toInt(particle->pos.x) / _slotSize + toInt(particle->pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            auto color = calcMod(particle->color, MAX_COLORS);
+            alienAtomicAdd64(&_energyParticleDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
+        }
+    }
+
 private:
     // timestep is used as an offset to avoid same buckets for different lineageIds for all times
     __device__ __inline__ uint64_t calcOtherMutantsBucket(uint32_t const& lineageId, uint64_t const& timestep) const
@@ -227,4 +257,5 @@ private:
     uint64_t* _lessNumCellsDensityMap2;
     uint64_t* _moreNumCellsDensityMap1;
     uint64_t* _moreNumCellsDensityMap2;
+    uint64_t* _energyParticleDensityMap;
 };

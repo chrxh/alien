@@ -52,6 +52,7 @@ __global__ void cudaNextTimestep_physics_calcFluidForces(SimulationData data)
 {
     CellProcessor::calcFluidForces_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
+    EnergyParticleProcessor::fillDensityMap(data);
 
     EnergyParticleProcessor::updateMap(data);
 }
@@ -60,6 +61,7 @@ __global__ void cudaNextTimestep_physics_calcCollisionForces(SimulationData data
 {
     CellProcessor::calcCollisions_reconnectCells_correctOverlap(data);
     CellProcessor::fillDensityMap(data);
+    EnergyParticleProcessor::fillDensityMap(data);
 
     EnergyParticleProcessor::updateMap(data);
 }

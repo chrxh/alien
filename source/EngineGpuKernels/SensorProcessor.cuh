@@ -10,28 +10,15 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    //__inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void searchNeighborhoodForEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    //__inline__ __device__ static uint32_t getCellDensity(
-    //    uint64_t const& timestep,
-    //    Cell* const& cell,
-    //    uint8_t const& restrictToColor,
-    //    SensorRestrictToCreatures const& restrictToCreatures,
-    //    DensityMap const& densityMap,
-    //    float2 const& scanPos);
-    //__inline__ __device__ static void searchNeighborhood(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static uint8_t convertAngleToData(float angle);
+    __inline__ __device__ static float convertDataToAngle(uint8_t b);
 
-    //__inline__ __device__ static void flagDetectedCells(SimulationData& data, Cell* cell, float2 const& scanPos);
-
-    //__inline__ __device__ static float
-    //calcStartDistanceForScanning(uint8_t const& restrictToColor, SensorRestrictToCreatures const& restrictToCreatures, int const& color);
-
-    //__inline__ __device__ static uint8_t convertAngleToData(float angle);
-    //__inline__ __device__ static float convertDataToAngle(uint8_t b);
-
-    //static int constexpr NumScanAngles = 64;
-    //static int constexpr NumScanPoints = 64;
-    //static float constexpr ScanStep = 8.0f;
+    static int constexpr NumScanAngles = 64;
+    static int constexpr NumScanPoints = 64;
+    static float constexpr ScanStep = 8.0f;
 };
 
 /************************************************************************/
@@ -43,29 +30,109 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
     auto& operations = data.cellTypeOperations[CellType_Sensor];
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        //processCell(data, statistics, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).cell);
     }
 }
-//
-//__inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-//{
-//    __shared__ bool isTriggered;
-//    if (threadIdx.x == 0) {
-//        isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval);
-//        if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
-//            isTriggered = false;
-//        }
-//        if (isTriggered && !cell->signal.active) {
-//            SignalProcessor::createEmptySignal(cell);
-//        }
-//    }
-//    __syncthreads();
-//
-//    if (isTriggered) {
-//        statistics.incNumSensorActivities(cell->color);
-//        searchNeighborhood(data, statistics, cell);
-//    }
-//}
+
+__inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    __shared__ bool isTriggered;
+    if (threadIdx.x == 0) {
+        isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, cell, cell->cellTypeData.sensor.autoTriggerInterval);
+        if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
+            isTriggered = false;
+        }
+        if (isTriggered && !cell->signal.active) {
+            SignalProcessor::createEmptySignal(cell);
+        }
+    }
+    __syncthreads();
+
+    if (isTriggered) {
+        statistics.incNumSensorActivities(cell->color);
+        if (cell->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            searchNeighborhoodForEnergy(data, statistics, cell);
+        }
+    }
+}
+
+__inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    __shared__ uint32_t minDensity;
+    __shared__ float refAngle;
+    __shared__ uint64_t lookupResult;
+
+    if (threadIdx.x == 0) {
+        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+        minDensity = toInt(cell->cellTypeData.sensor.modeData.detectEnergy.minDensity * 64 + 0.5f);
+        lookupResult = 0xffffffffffffffff;
+    }
+    auto const angleIndex = threadIdx.x;
+
+    __syncthreads();
+
+    auto const& densityMap = data.preprocessedSimulationData.densityMap;
+
+    auto const startRadius = max(toFloat(cell->cellTypeData.sensor.minRange), 0.0f);
+    auto endRadius = cudaSimulationParameters.sensorRadius.value[cell->color];
+    if (cell->cellTypeData.sensor.maxRange >= 0) {
+        endRadius = min(endRadius, toFloat(cell->cellTypeData.sensor.maxRange));
+    }
+
+    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
+
+    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
+        auto delta = Math::unitVectorOfAngle(angle) * radius;
+        auto scanPos = cell->pos + delta;
+        data.cellMap.correctPosition(scanPos);
+
+        uint32_t density = densityMap.getEnergyParticleDensity(scanPos);
+        
+        if (density >= minDensity) {
+            float preciseDistance = radius;
+            uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
+            uint64_t combined =
+                static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleEncoded) << 32;
+            alienAtomicMin64(&lookupResult, combined);
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        if (lookupResult != 0xffffffffffffffff) {
+            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff));
+            auto distance = toFloat(lookupResult >> 48);
+
+            cell->signal.channels[Channels::SensorFoundResult] = 1;                                      //something found
+            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                            //angle: between -1.0 and 1.0
+            cell->signal.channels[Channels::SensorDensity] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
+
+            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
+            statistics.incNumSensorMatches(cell->color);
+        } else {
+            cell->signal.channels[Channels::SensorFoundResult] = 0;  //nothing found
+        }
+    }
+    __syncthreads();
+}
+
+__inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
+{
+    angle = Math::getNormalizedAngle(angle, -180.0f);
+    int result = static_cast<int>(angle * 128.0f / 180.0f);
+    return static_cast<uint8_t>(result);
+}
+
+__inline__ __device__ float SensorProcessor::convertDataToAngle(uint8_t b)
+{
+    //0 to 127 => 0 to 179 degree
+    //128 to 255 => -179 to 0 degree
+    if (b < 128) {
+        return (0.5f + static_cast<float>(b)) * (180.0f / 128.0f);
+    } else {
+        return (-256.0f - 0.5f + static_cast<float>(b)) * (180.0f / 128.0f);
+    }
+}
 
 //__inline__ __device__ uint32_t SensorProcessor::getCellDensity(
 //    uint64_t const& timestep,
