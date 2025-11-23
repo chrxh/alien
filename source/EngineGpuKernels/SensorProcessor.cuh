@@ -58,13 +58,13 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 
 __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    __shared__ uint32_t minDensity;
+    __shared__ float minDensity;
     __shared__ float refAngle;
     __shared__ uint64_t lookupResult;
 
     if (threadIdx.x == 0) {
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
-        minDensity = toInt(cell->cellTypeData.sensor.modeData.detectEnergy.minDensity * 64 + 0.5f);
+        minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
         lookupResult = 0xffffffffffffffff;
     }
     auto const angleIndex = threadIdx.x;
@@ -86,13 +86,15 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
         auto scanPos = cell->pos + delta;
         data.cellMap.correctPosition(scanPos);
 
-        uint32_t density = densityMap.getEnergyParticleDensity(scanPos);
+        float energy = densityMap.getEnergyParticleDensity(scanPos);
         
-        if (density >= minDensity) {
+        if (energy >= minDensity) {
             float preciseDistance = radius;
             uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
+            // Encode energy as a normalized 16-bit value (0-65535) for packing
+            uint32_t energyEncoded = static_cast<uint32_t>(min(65535.0f, energy * 100.0f));
             uint64_t combined =
-                static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(density) << 40 | static_cast<uint64_t>(relAngleEncoded) << 32;
+                static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(energyEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
             alienAtomicMin64(&lookupResult, combined);
         }
         __syncthreads();
@@ -100,12 +102,14 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 32) & 0xff));
+            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
             auto distance = toFloat(lookupResult >> 48);
+            auto energyEncoded = (lookupResult >> 32) & 0xffff;
+            auto energy = toFloat(energyEncoded) / 100.0f;
 
             cell->signal.channels[Channels::SensorFoundResult] = 1;                                      //something found
             cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                            //angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = toFloat((lookupResult >> 40) & 0xff) / 64;  //density
+            cell->signal.channels[Channels::SensorDensity] = min(1.0f, energy / 100.0f);                 //normalized energy density
 
             cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  //distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);

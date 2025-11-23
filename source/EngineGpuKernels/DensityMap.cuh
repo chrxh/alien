@@ -20,7 +20,7 @@ public:
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _lessNumCellsDensityMap2);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreNumCellsDensityMap1);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreNumCellsDensityMap2);
-        CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
+        CudaMemoryManager::getInstance().acquireMemory<float>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
         _slotSize = slotSize;
     }
 
@@ -51,7 +51,7 @@ public:
             _lessNumCellsDensityMap2[index] = 0;
             _moreNumCellsDensityMap1[index] = 0;
             _moreNumCellsDensityMap2[index] = 0;
-            _energyParticleDensityMap[index] = 0;
+            _energyParticleDensityMap[index] = 0.0f;
         }
     }
 
@@ -145,22 +145,13 @@ public:
         return 0ul;
     }
 
-    __device__ __inline__ uint32_t getEnergyParticleDensity(float2 const& pos) const
+    __device__ __inline__ float getEnergyParticleDensity(float2 const& pos) const
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return static_cast<uint32_t>((_energyParticleDensityMap[index] >> 56) & 0xff);
+            return _energyParticleDensityMap[index];
         }
-        return 0;
-    }
-
-    __device__ __inline__ uint32_t getEnergyParticleColorDensity(float2 const& pos, int color) const
-    {
-        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
-        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return static_cast<uint32_t>((_energyParticleDensityMap[index] >> (color * 8)) & 0xff);
-        }
-        return 0;
+        return 0.0f;
     }
 
     __device__ __inline__ void addCell(uint64_t const& timestep, Cell* cell)
@@ -232,8 +223,7 @@ public:
     {
         auto index = toInt(particle->pos.x) / _slotSize + toInt(particle->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto color = calcMod(particle->color, MAX_COLORS);
-            alienAtomicAdd64(&_energyParticleDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
+            atomicAdd(&_energyParticleDensityMap[index], particle->energy);
         }
     }
 
@@ -257,5 +247,5 @@ private:
     uint64_t* _lessNumCellsDensityMap2;
     uint64_t* _moreNumCellsDensityMap1;
     uint64_t* _moreNumCellsDensityMap2;
-    uint64_t* _energyParticleDensityMap;
+    float* _energyParticleDensityMap;
 };
