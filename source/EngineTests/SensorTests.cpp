@@ -22,11 +22,10 @@ public:
 
 TEST_F(SensorTests, detectEnergy_autoTriggered)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(15).mode(DetectEnergyDescription())),
-    };
+    });
     _simulationFacade->setSimulationData(data);
 
     {
@@ -48,11 +47,10 @@ TEST_F(SensorTests, detectEnergy_autoTriggered)
 
 TEST_F(SensorTests, detectEnergy_manuallyTriggered_noSignal)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(std::nullopt).mode(DetectEnergyDescription())),
-    };
+    });
     _simulationFacade->setSimulationData(data);
 
     for (int i = 0; i < 10; ++i) {
@@ -64,12 +62,11 @@ TEST_F(SensorTests, detectEnergy_manuallyTriggered_noSignal)
 
 TEST_F(SensorTests, detectEnergy_manuallyTriggered_withSignal)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(std::nullopt).mode(DetectEnergyDescription())),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-    };
+    });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
@@ -80,12 +77,11 @@ TEST_F(SensorTests, detectEnergy_manuallyTriggered_withSignal)
 
 TEST_F(SensorTests, detectEnergy_noFrontAngle)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.1f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     data._particles.emplace_back(ParticleDescription().id(100).pos({100.0f, 10.0f}).energy(50.0f));
 
@@ -98,12 +94,11 @@ TEST_F(SensorTests, detectEnergy_noFrontAngle)
 
 TEST_F(SensorTests, detectEnergy_particleFound)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add energy particles near the sensor - cluster them in same 8x8 region to accumulate energy
@@ -126,12 +121,11 @@ TEST_F(SensorTests, detectEnergy_particleFound)
 
 TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(50.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add a particle with low energy
@@ -147,12 +141,11 @@ TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
 
 TEST_F(SensorTests, detectEnergy_particleAbove)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles above the sensor - cluster them to reach minDensity
@@ -178,12 +171,11 @@ TEST_F(SensorTests, detectEnergy_particleAbove)
 
 TEST_F(SensorTests, detectEnergy_particleBelow)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles below the sensor
@@ -209,12 +201,11 @@ TEST_F(SensorTests, detectEnergy_particleBelow)
 
 TEST_F(SensorTests, detectEnergy_closerParticleDetected)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add a close cluster with high energy
@@ -246,12 +237,11 @@ TEST_F(SensorTests, detectEnergy_closerParticleDetected)
 
 TEST_F(SensorTests, detectEnergy_minRange_found)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).minRange(40)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles just beyond minRange
@@ -273,12 +263,11 @@ TEST_F(SensorTests, detectEnergy_minRange_found)
 
 TEST_F(SensorTests, detectEnergy_minRange_notFound)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).minRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles within minRange (too close)
@@ -300,12 +289,11 @@ TEST_F(SensorTests, detectEnergy_minRange_notFound)
 
 TEST_F(SensorTests, detectEnergy_maxRange_found)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).maxRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles within maxRange
@@ -327,12 +315,11 @@ TEST_F(SensorTests, detectEnergy_maxRange_found)
 
 TEST_F(SensorTests, detectEnergy_maxRange_notFound)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).maxRange(30)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles beyond maxRange (too far)
@@ -354,12 +341,11 @@ TEST_F(SensorTests, detectEnergy_maxRange_notFound)
 
 TEST_F(SensorTests, detectEnergy_noParticles)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -374,12 +360,11 @@ TEST_F(SensorTests, detectEnergy_noParticles)
 
 TEST_F(SensorTests, detectEnergy_multipleDirections)
 {
-    Description data;
-    data._cells = {
+    auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
             SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-    };
+    });
     data.addConnection(1, 2);
     
     // Add particles in front (right side, angle 0)

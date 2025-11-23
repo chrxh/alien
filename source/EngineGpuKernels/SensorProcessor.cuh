@@ -73,11 +73,8 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
 
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
-    auto const startRadius = max(toFloat(cell->cellTypeData.sensor.minRange), 0.0f);
-    auto endRadius = cudaSimulationParameters.sensorRadius.value[cell->color];
-    if (cell->cellTypeData.sensor.maxRange >= 0) {
-        endRadius = min(endRadius, toFloat(cell->cellTypeData.sensor.maxRange));
-    }
+    auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
+    auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
 
     float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
 
