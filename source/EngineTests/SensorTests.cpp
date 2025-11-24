@@ -169,6 +169,36 @@ TEST_F(SensorTests, detectEnergy_particleAbove)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
 }
 
+TEST_F(SensorTests, detectEnergy_particleAbove_differentFrontAngle)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(90.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add particles above the sensor - cluster them to reach minDensity
+    for (int i = 0; i < 8; ++i) {
+        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({98.0f + i, 20.0f}).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Angle should be roughly -180 degrees
+    auto angleAsSignal = actualSensor._signal->_channels[Channels::SensorAngle];
+    EXPECT_TRUE(angleAsSignal < -0.9f || angleAsSignal > 0.9f);
+}
+
 TEST_F(SensorTests, detectEnergy_particleBelow)
 {
     auto data = Description().cells({
