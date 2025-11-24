@@ -243,7 +243,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
                 auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), detectEnergy._minDensity);
+                    AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth), detectEnergy._minDensity);
                 AlienGui::EndIndent();
             } else if (mode == SensorMode_DetectStructure) {
                 // No parameters
@@ -251,7 +251,7 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
                 auto& detectFreeCell = std::get<DetectFreeCellGenomeDescription>(sensor._mode);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Min density").format("%.2f").textWidth(rightColumnWidth), detectFreeCell._minDensity);
+                    AlienGui::InputFloatParameters().name("Min density").step(0.05f).format("%.2f").textWidth(rightColumnWidth), detectFreeCell._minDensity);
                 AlienGui::ComboOptionalColor(
                     AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectFreeCell._restrictToColor);
                 AlienGui::EndIndent();

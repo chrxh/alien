@@ -120,8 +120,8 @@ struct Sensor
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
     SensorMode mode;
     SensorModeData modeData;
-    int8_t minRange;  // < 0 = no restriction
-    int8_t maxRange;  // < 0 = no restriction
+    uint16_t minRange;
+    uint16_t maxRange;
 };
 
 struct Generator
