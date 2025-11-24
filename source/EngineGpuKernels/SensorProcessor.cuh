@@ -19,6 +19,8 @@ private:
 
     static int constexpr NumScanAngles = 64;
     static float constexpr ScanStep = 8.0f;
+    static int constexpr MaxNearCreatureCells = 9 * 9;
+    static float constexpr RayBlockingTestLength = 10.0f;
 };
 
 /************************************************************************/
@@ -65,7 +67,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
     __shared__ uint64_t lookupResult;
     __shared__ bool rayBlocked[NumScanAngles];
 
-    __shared__ Cell* nearCreatureCells[9 * 9];
+    __shared__ Cell* nearCreatureCells[MaxNearCreatureCells];
     __shared__ int numNearCreatureCells;
 
     if (threadIdx.x == 0) {
@@ -73,7 +75,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
         minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
         lookupResult = 0xffffffffffffffff;
 
-        data.cellMap.getMatchingCells(nearCreatureCells, 9 * 9, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
+        data.cellMap.getMatchingCells(nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
             return cell->isSameCreature(otherCell);
         });
     }
@@ -94,7 +96,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
         auto nearCell = nearCreatureCells[i];
         for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
             auto& connectedNearCell = nearCell->connections[j].cell;
-            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * 10.0f)) {
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
                 rayBlocked[angleIndex] = true;
             }
         }
@@ -154,7 +156,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
     __shared__ uint64_t lookupResult;
     __shared__ bool rayBlocked[NumScanAngles];
 
-    __shared__ Cell* nearCreatureCells[9 * 9];
+    __shared__ Cell* nearCreatureCells[MaxNearCreatureCells];
     __shared__ int numNearCreatureCells;
 
     if (threadIdx.x == 0) {
@@ -163,7 +165,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
         restrictToColor = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
         lookupResult = 0xffffffffffffffff;
 
-        data.cellMap.getMatchingCells(nearCreatureCells, 9 * 9, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
+        data.cellMap.getMatchingCells(nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
             return cell->isSameCreature(otherCell);
         });
     }
@@ -184,7 +186,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
         auto nearCell = nearCreatureCells[i];
         for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
             auto& connectedNearCell = nearCell->connections[j].cell;
-            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * 10.0f)) {
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
                 rayBlocked[angleIndex] = true;
             }
         }
