@@ -66,7 +66,7 @@ struct DetectFreeCellGenomeDescription
 {
     auto operator<=>(DetectFreeCellGenomeDescription const&) const = default;
 
-    MEMBER(DetectFreeCellGenomeDescription, float, minDensity, 1.0f);
+    MEMBER(DetectFreeCellGenomeDescription, float, minDensity, 0.5f);
     MEMBER(DetectFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
