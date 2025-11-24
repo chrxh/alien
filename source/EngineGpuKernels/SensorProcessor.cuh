@@ -63,11 +63,19 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
     __shared__ float minDensity;
     __shared__ float refAngle;
     __shared__ uint64_t lookupResult;
+    __shared__ bool rayBlocked[NumScanAngles];
+
+    __shared__ Cell* nearCreatureCells[9 * 9];
+    __shared__ int numNearCreatureCells;
 
     if (threadIdx.x == 0) {
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
         minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
         lookupResult = 0xffffffffffffffff;
+
+        data.cellMap.getMatchingCells(nearCreatureCells, 9 * 9, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
+            return cell->isSameCreature(otherCell);
+        });
     }
     auto const angleIndex = threadIdx.x;
 
@@ -80,21 +88,40 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
 
     float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
 
-    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
-        auto delta = Math::unitVectorOfAngle(angle) * radius;
-        auto scanPos = cell->pos + delta;
-        data.cellMap.correctPosition(scanPos);
+    // Check if ray is blocked by connections of nearby same-creature cells
+    rayBlocked[angleIndex] = false;
+    for (int i = 0; i < numNearCreatureCells; ++i) {
+        auto nearCell = nearCreatureCells[i];
+        for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
+            auto& connectedNearCell = nearCell->connections[j].cell;
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * 10.0f)) {
+                rayBlocked[angleIndex] = true;
+            }
+        }
+    }
 
-        float energy = densityMap.getEnergyParticleDensity(scanPos);
-        
-        if (energy >= minDensity) {
-            float preciseDistance = radius;
-            uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-            // Encode energy as a normalized 16-bit value (0-65535) for packing
-            uint32_t energyEncoded = static_cast<uint32_t>(min(65535.0f, energy));
-            uint64_t combined =
-                static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(energyEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
-            alienAtomicMin64(&lookupResult, combined);
+    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
+        if (!rayBlocked[angleIndex]) {
+            auto delta = Math::unitVectorOfAngle(angle) * radius;
+            auto scanPos = cell->pos + delta;
+            data.cellMap.correctPosition(scanPos);
+
+            // Block ray if it encounters structure cells
+            if (densityMap.getStructureDensity(scanPos) > 0) {
+                rayBlocked[angleIndex] = true;
+            } else {
+                float energy = densityMap.getEnergyParticleDensity(scanPos);
+                
+                if (energy >= minDensity) {
+                    float preciseDistance = radius;
+                    uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
+                    // Encode energy as a normalized 16-bit value (0-65535) for packing
+                    uint32_t energyEncoded = static_cast<uint32_t>(min(65535.0f, energy));
+                    uint64_t combined =
+                        static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(energyEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
+                    alienAtomicMin64(&lookupResult, combined);
+                }
+            }
         }
         __syncthreads();
     }
@@ -125,12 +152,20 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
     __shared__ uint8_t restrictToColor;
     __shared__ float refAngle;
     __shared__ uint64_t lookupResult;
+    __shared__ bool rayBlocked[NumScanAngles];
+
+    __shared__ Cell* nearCreatureCells[9 * 9];
+    __shared__ int numNearCreatureCells;
 
     if (threadIdx.x == 0) {
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
         minDensity = cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
         restrictToColor = cell->cellTypeData.sensor.modeData.detectFreeCell.restrictToColor;
         lookupResult = 0xffffffffffffffff;
+
+        data.cellMap.getMatchingCells(nearCreatureCells, 9 * 9, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
+            return cell->isSameCreature(otherCell);
+        });
     }
     auto const angleIndex = threadIdx.x;
 
@@ -143,21 +178,40 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
 
     float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
 
-    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
-        auto delta = Math::unitVectorOfAngle(angle) * radius;
-        auto scanPos = cell->pos + delta;
-        data.cellMap.correctPosition(scanPos);
+    // Check if ray is blocked by connections of nearby same-creature cells
+    rayBlocked[angleIndex] = false;
+    for (int i = 0; i < numNearCreatureCells; ++i) {
+        auto nearCell = nearCreatureCells[i];
+        for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
+            auto& connectedNearCell = nearCell->connections[j].cell;
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * 10.0f)) {
+                rayBlocked[angleIndex] = true;
+            }
+        }
+    }
 
-        float freeCellCount = densityMap.getFreeCellDensity(scanPos, restrictToColor);
-        
-        if (freeCellCount >= minDensity) {
-            float preciseDistance = radius;
-            uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-            // Encode free cell count as a 16-bit value (0-65535) for packing
-            uint32_t densityEncoded = static_cast<uint32_t>(min(65535.0f, freeCellCount));
-            uint64_t combined =
-                static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(densityEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
-            alienAtomicMin64(&lookupResult, combined);
+    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
+        if (!rayBlocked[angleIndex]) {
+            auto delta = Math::unitVectorOfAngle(angle) * radius;
+            auto scanPos = cell->pos + delta;
+            data.cellMap.correctPosition(scanPos);
+
+            // Block ray if it encounters structure cells
+            if (densityMap.getStructureDensity(scanPos) > 0) {
+                rayBlocked[angleIndex] = true;
+            } else {
+                float freeCellCount = densityMap.getFreeCellDensity(scanPos, restrictToColor);
+                
+                if (freeCellCount >= minDensity) {
+                    float preciseDistance = radius;
+                    uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
+                    // Encode free cell count as a 16-bit value (0-65535) for packing
+                    uint32_t densityEncoded = static_cast<uint32_t>(min(65535.0f, freeCellCount));
+                    uint64_t combined =
+                        static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(densityEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
+                    alienAtomicMin64(&lookupResult, combined);
+                }
+            }
         }
         __syncthreads();
     }

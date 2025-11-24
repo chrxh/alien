@@ -22,6 +22,7 @@ public:
         //CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _moreNumCellsDensityMap2);
         CudaMemoryManager::getInstance().acquireMemory<float>(_densityMapSize.x * _densityMapSize.y, _energyParticleDensityMap);
         CudaMemoryManager::getInstance().acquireMemory<uint64_t>(_densityMapSize.x * _densityMapSize.y, _freeCellDensityMap);
+        CudaMemoryManager::getInstance().acquireMemory<uint32_t>(_densityMapSize.x * _densityMapSize.y, _structureCellDensityMap);
         _slotSize = slotSize;
     }
 
@@ -38,6 +39,7 @@ public:
         //CudaMemoryManager::getInstance().freeMemory(_moreNumCellsDensityMap2);
         CudaMemoryManager::getInstance().freeMemory(_energyParticleDensityMap);
         CudaMemoryManager::getInstance().freeMemory(_freeCellDensityMap);
+        CudaMemoryManager::getInstance().freeMemory(_structureCellDensityMap);
     }
 
     __device__ __inline__ void clear()
@@ -55,6 +57,7 @@ public:
             //_moreNumCellsDensityMap2[index] = 0;
             _energyParticleDensityMap[index] = 0.0f;
             _freeCellDensityMap[index] = 0;
+            _structureCellDensityMap[index] = 0;
         }
     }
 
@@ -174,6 +177,15 @@ public:
         return 0.0f;
     }
 
+    __device__ __inline__ uint32_t getStructureDensity(float2 const& pos) const
+    {
+        auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            return _structureCellDensityMap[index];
+        }
+        return 0;
+    }
+
     //__device__ __inline__ void addCell(uint64_t const& timestep, Cell* cell)
     //{
     //    auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
@@ -257,6 +269,14 @@ public:
         }
     }
 
+    __device__ __inline__ void addStructureCell(Cell* cell)
+    {
+        auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
+        if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            atomicAdd(&_structureCellDensityMap[index], 1u);
+        }
+    }
+
 private:
     //// timestep is used as an offset to avoid same buckets for different lineageIds for all times
     //__device__ __inline__ uint64_t calcOtherMutantsBucket(uint32_t const& lineageId, uint64_t const& timestep) const
@@ -279,4 +299,5 @@ private:
     //uint64_t* _moreNumCellsDensityMap2;
     float* _energyParticleDensityMap;
     uint64_t* _freeCellDensityMap;
+    uint32_t* _structureCellDensityMap;
 };

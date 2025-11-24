@@ -97,6 +97,8 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
         auto cell = data.objects.cells.at(index);
         if (cell->cellType == CellType_Free) {
             data.preprocessedSimulationData.densityMap.addFreeCell(cell);
+        } else if (cell->cellType == CellType_Structure) {
+            data.preprocessedSimulationData.densityMap.addStructureCell(cell);
         }
     }
 }
