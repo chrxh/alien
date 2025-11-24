@@ -54,7 +54,7 @@ struct DetectEnergyGenomeDescription
 {
     auto operator<=>(DetectEnergyGenomeDescription const&) const = default;
 
-    MEMBER(DetectEnergyGenomeDescription, float, minDensity, 0.05f);
+    MEMBER(DetectEnergyGenomeDescription, float, minDensity, 1.0f);
 };
 
 struct DetectStructureGenomeDescription
@@ -66,7 +66,7 @@ struct DetectFreeCellGenomeDescription
 {
     auto operator<=>(DetectFreeCellGenomeDescription const&) const = default;
 
-    MEMBER(DetectFreeCellGenomeDescription, float, minDensity, 0.05f);
+    MEMBER(DetectFreeCellGenomeDescription, float, minDensity, 1.0f);
     MEMBER(DetectFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
