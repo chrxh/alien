@@ -96,7 +96,7 @@ TEST_F(SensorTests, detectEnergy_particleFound)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -123,7 +123,7 @@ TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(50.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -142,8 +142,7 @@ TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
 TEST_F(SensorTests, detectEnergy_particleAbove)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -176,7 +175,7 @@ TEST_F(SensorTests, detectEnergy_particleAbove_differentFrontAngle)
             .id(1)
             .pos({100.0f, 100.0f})
             .frontAngle(90.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -202,8 +201,7 @@ TEST_F(SensorTests, detectEnergy_particleAbove_differentFrontAngle)
 TEST_F(SensorTests, detectEnergy_particleBelow)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -233,7 +231,7 @@ TEST_F(SensorTests, detectEnergy_closerParticleDetected)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -269,7 +267,7 @@ TEST_F(SensorTests, detectEnergy_minRange_found)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).minRange(40)),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f)).minRange(40)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -295,7 +293,7 @@ TEST_F(SensorTests, detectEnergy_minRange_notFound)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).minRange(120)),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f)).minRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -321,7 +319,7 @@ TEST_F(SensorTests, detectEnergy_maxRange_found)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).maxRange(120)),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f)).maxRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -347,7 +345,7 @@ TEST_F(SensorTests, detectEnergy_maxRange_notFound)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f)).maxRange(30)),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f)).maxRange(30)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -372,8 +370,7 @@ TEST_F(SensorTests, detectEnergy_maxRange_notFound)
 TEST_F(SensorTests, detectEnergy_noParticles)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -392,7 +389,7 @@ TEST_F(SensorTests, detectEnergy_multipleDirections)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -457,8 +454,7 @@ TEST_F(SensorTests, detectFreeCell_autoTriggered)
 TEST_F(SensorTests, detectFreeCell_freeCellsFound)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -486,7 +482,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_lowDensity)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(50.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -506,7 +502,7 @@ TEST_F(SensorTests, detectFreeCell_freeCellsAbove)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -536,8 +532,7 @@ TEST_F(SensorTests, detectFreeCell_freeCellsAbove)
 TEST_F(SensorTests, detectFreeCell_freeCellsBelow)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -568,7 +563,7 @@ TEST_F(SensorTests, detectFreeCell_closerCellsDetected)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -605,8 +600,7 @@ TEST_F(SensorTests, detectFreeCell_closerCellsDetected)
 TEST_F(SensorTests, detectFreeCell_restrictToColor)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).color(0).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f).restrictToColor(1))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).color(0).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1))),
         CellDescription().id(2).pos({101.0f, 100.0f}).color(0),
     });
     data.addConnection(1, 2);
@@ -615,7 +609,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
     for (int i = 0; i < 10; ++i) {
         data._cells.emplace_back(CellDescription()
             .id(100 + i)
-            .pos({98.0f + i, 50.0f})
+            .pos({98.0f + i, 80.0f})
             .color(0)
             .cellType(FreeCellDescription())
             .energy(10.0f));
@@ -625,7 +619,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
     for (int i = 0; i < 8; ++i) {
         data._cells.emplace_back(CellDescription()
             .id(200 + i)
-            .pos({98.0f + i, 150.0f})
+            .pos({98.0f + i, 250.0f})
             .color(1)
             .cellType(FreeCellDescription())
             .energy(10.0f));
@@ -646,8 +640,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 TEST_F(SensorTests, detectFreeCell_minRange_found)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f)).minRange(40)),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)).minRange(40)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -673,8 +666,7 @@ TEST_F(SensorTests, detectFreeCell_minRange_found)
 TEST_F(SensorTests, detectFreeCell_minRange_notFound)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f)).minRange(120)),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)).minRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -700,8 +692,7 @@ TEST_F(SensorTests, detectFreeCell_minRange_notFound)
 TEST_F(SensorTests, detectFreeCell_maxRange_found)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f)).maxRange(60)),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)).maxRange(60)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -727,8 +718,7 @@ TEST_F(SensorTests, detectFreeCell_maxRange_found)
 TEST_F(SensorTests, detectFreeCell_maxRange_notFound)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f)).maxRange(30)),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)).maxRange(30)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -754,8 +744,7 @@ TEST_F(SensorTests, detectFreeCell_maxRange_notFound)
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
-            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);

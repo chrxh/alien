@@ -155,7 +155,8 @@ public:
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            return _energyParticleDensityMap[index] / toFloat(_slotSize);
+            auto slotSizeAsFlot = toFloat(_slotSize);
+            return _energyParticleDensityMap[index] / (slotSizeAsFlot * slotSizeAsFlot);
         }
         return 0.0f;
     }
@@ -164,14 +165,15 @@ public:
     {
         auto index = toInt(pos.x) / _slotSize + toInt(pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
+            auto slotSizeAsFlot = toFloat(_slotSize);
             if (restrictToColor == 255) {
                 // No color restriction - return total free cell count
                 auto totalCount = (_freeCellDensityMap[index] >> 56) & 0xff;
-                return toFloat(totalCount);
+                return toFloat(totalCount) / (slotSizeAsFlot * slotSizeAsFlot);
             } else {
                 // Color restriction - return count for specific color
                 auto colorCount = (_freeCellDensityMap[index] >> (restrictToColor * 8)) & 0xff;
-                return toFloat(colorCount);
+                return toFloat(colorCount) / (slotSizeAsFlot * slotSizeAsFlot);
             }
         }
         return 0.0f;

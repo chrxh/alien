@@ -112,15 +112,15 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
             if (densityMap.getStructureDensity(scanPos) > 0) {
                 rayBlocked[angleIndex] = true;
             } else {
-                float energy = densityMap.getEnergyParticleDensity(scanPos);
+                float energyDensity = densityMap.getEnergyParticleDensity(scanPos);
                 
-                if (energy >= minDensity) {
+                if (energyDensity >= minDensity) {
                     float preciseDistance = radius;
                     uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
                     // Encode energy as a normalized 16-bit value (0-65535) for packing
-                    uint32_t energyEncoded = static_cast<uint32_t>(min(65535.0f, energy));
+                    uint32_t energyDensityEncoded = static_cast<uint32_t>(min(65535.0f, energyDensity * 100));
                     uint64_t combined =
-                        static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(energyEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
+                        static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(energyDensityEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
                     alienAtomicMin64(&lookupResult, combined);
                 }
             }
@@ -132,12 +132,12 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
         if (lookupResult != 0xffffffffffffffff) {
             auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
             auto distance = toFloat(lookupResult >> 48);
-            auto energyEncoded = (lookupResult >> 32) & 0xffff;
-            auto energy = toFloat(energyEncoded);
+            auto energyDensityEncoded = (lookupResult >> 32) & 0xffff;
+            auto energyDensity = toFloat(energyDensityEncoded) / 100;
 
             cell->signal.channels[Channels::SensorFoundResult] = 1;             // Something found
             cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;   // Angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = min(1.0f, energy / 100.0f);  // Normalized energy density
+            cell->signal.channels[Channels::SensorDensity] = min(1.0f, energyDensity / 100.0f);  // Normalized energy density
 
             cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);
@@ -202,13 +202,13 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
             if (densityMap.getStructureDensity(scanPos) > 0) {
                 rayBlocked[angleIndex] = true;
             } else {
-                float freeCellCount = densityMap.getFreeCellDensity(scanPos, restrictToColor);
+                float freeCellDensity = densityMap.getFreeCellDensity(scanPos, restrictToColor);
                 
-                if (freeCellCount >= minDensity) {
+                if (freeCellDensity >= minDensity) {
                     float preciseDistance = radius;
                     uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
                     // Encode free cell count as a 16-bit value (0-65535) for packing
-                    uint32_t densityEncoded = static_cast<uint32_t>(min(65535.0f, freeCellCount));
+                    uint32_t densityEncoded = static_cast<uint32_t>(min(65535.0f, freeCellDensity * 100));
                     uint64_t combined =
                         static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(densityEncoded) << 32 | static_cast<uint64_t>(relAngleEncoded) << 16;
                     alienAtomicMin64(&lookupResult, combined);
@@ -223,11 +223,11 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForFreeCells(Simul
             auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
             auto distance = toFloat(lookupResult >> 48);
             auto densityEncoded = (lookupResult >> 32) & 0xffff;
-            auto density = toFloat(densityEncoded);
+            auto density = toFloat(densityEncoded) / 100;
 
             cell->signal.channels[Channels::SensorFoundResult] = 1;             // Something found
             cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;   // Angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = min(1.0f, density / 64.0f);  // Normalized density (1.0 = 64 cells in 8x8 region)
+            cell->signal.channels[Channels::SensorDensity] = min(1.0f, density);  // Normalized density (1.0 = 64 cells in 8x8 region)
 
             cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);
