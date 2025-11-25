@@ -768,6 +768,245 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
+/**
+ * Tests for ray blocking (both DetectEnergy and DetectFreeCell modes)
+ */
+
+TEST_F(SensorTests, detectEnergy_rayBlockedByStructureCells)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    
+    // Add structure cells between sensor and energy particles (to block the ray)
+    for (int i = 0; i < 5; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(50 + i)
+            .pos({100.0f, 50.0f + i * 2.0f})
+            .cellType(StructureCellDescription()));
+    }
+    
+    // Add energy particles behind the structure cells
+    for (int i = 0; i < 10; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 20.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Should not find energy particles because ray is blocked by structure cells
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_rayNotBlockedByStructureCells_differentAngle)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    
+    // Add structure cells on the left side
+    for (int i = 0; i < 5; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(50 + i)
+            .pos({80.0f, 100.0f + i * 2.0f})
+            .cellType(StructureCellDescription()));
+    }
+    
+    // Add energy particles on the right side (not blocked)
+    for (int i = 0; i < 10; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({120.0f + i, 100.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Should find energy particles because ray is not blocked (different direction)
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+}
+
+TEST_F(SensorTests, detectEnergy_rayBlockedBySameCreatureConnections)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+        // Create a connection that crosses the ray path
+        CellDescription().id(3).pos({98.0f, 50.0f}),
+        CellDescription().id(4).pos({102.0f, 50.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);  // Same creature cells
+    data.addConnection(3, 4);  // This connection crosses the ray path upward
+    
+    // Add energy particles above the sensor
+    for (int i = 0; i < 10; ++i) {
+        data._particles.emplace_back(ParticleDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 20.0f})
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Ray should be blocked by same-creature connection
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectFreeCell_rayBlockedByStructureCells)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    
+    // Add structure cells between sensor and free cells (to block the ray)
+    for (int i = 0; i < 5; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(50 + i)
+            .pos({100.0f, 50.0f + i * 2.0f})
+            .cellType(StructureCellDescription()));
+    }
+    
+    // Add free cells behind the structure cells
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 20.0f})
+            .cellType(FreeCellDescription())
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Should not find free cells because ray is blocked by structure cells
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectFreeCell_rayNotBlockedByStructureCells_differentAngle)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    
+    // Add structure cells on the left side
+    for (int i = 0; i < 5; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(50 + i)
+            .pos({80.0f, 100.0f + i * 2.0f})
+            .cellType(StructureCellDescription()));
+    }
+    
+    // Add free cells on the right side (not blocked)
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(100 + i)
+            .pos({120.0f + i, 100.0f})
+            .cellType(FreeCellDescription())
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Should find free cells because ray is not blocked (different direction)
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+}
+
+TEST_F(SensorTests, detectFreeCell_rayBlockedBySameCreatureConnections)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+        // Create a connection that crosses the ray path
+        CellDescription().id(3).pos({98.0f, 50.0f}),
+        CellDescription().id(4).pos({102.0f, 50.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);  // Same creature cells
+    data.addConnection(3, 4);  // This connection crosses the ray path upward
+    
+    // Add free cells above the sensor
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 20.0f})
+            .cellType(FreeCellDescription())
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Ray should be blocked by same-creature connection
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectFreeCell_rayNotBlockedByDifferentCreatureConnections)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+            SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(5.0f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+        // Create a different creature with a connection that would cross the ray path
+        CellDescription().id(10).pos({98.0f, 50.0f}),
+        CellDescription().id(11).pos({102.0f, 50.0f}),
+    });
+    data.addConnection(1, 2);   // Sensor creature
+    data.addConnection(10, 11); // Different creature (no connection to sensor)
+    
+    // Add free cells above the sensor
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription()
+            .id(100 + i)
+            .pos({98.0f + i, 20.0f})
+            .cellType(FreeCellDescription())
+            .energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Ray should NOT be blocked by different creature connections
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+}
+
 // Old tests for other sensor modes - temporarily disabled pending implementation
 #if 0
 
