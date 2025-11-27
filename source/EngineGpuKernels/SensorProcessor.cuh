@@ -201,7 +201,8 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForStructure(Simul
             if (densityMap.getStructureDensity(scanPos) > 0) {
                 float preciseDistance = radius;
                 uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-                // For structure detection, we don't use density in the encoding
+                // Structure detection does not return density, only distance and angle.
+                // Bits 32-47 are unused (unlike energy/free cell modes which encode density there).
                 uint64_t combined =
                     static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(relAngleEncoded) << 16;
                 alienAtomicMin64(&lookupResult, combined);

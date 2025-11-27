@@ -1105,7 +1105,7 @@ TEST_F(SensorTests, detectStructure_structureCellsFound)
     });
     data.addConnection(1, 2);
     
-    // Add structure cells near the sensor - cluster them in same 8x8 region
+    // Add structure cells near the sensor (creates a 3x4 grid pattern)
     for (int i = 0; i < 10; ++i) {
         data._cells.emplace_back(CellDescription()
             .id(100 + i)
@@ -1233,8 +1233,9 @@ TEST_F(SensorTests, detectStructure_closerStructureDetected)
     auto actualSensor = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    // Should detect the closer structure cells (above the sensor)
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.6f); // Closer = higher value
+    // Should detect the closer structure cells (distance ~50 from sensor at y=100 to structure at y=50)
+    // Distance formula: 1.0 - min(1.0, distance/256) = 1.0 - 50/256 ≈ 0.8, so > 0.6 means closer detected
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.6f);
 }
 
 TEST_F(SensorTests, detectStructure_minRange_found)
