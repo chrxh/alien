@@ -183,6 +183,10 @@ TEST_P(SensorTests_AllModes, targetAbove)
     auto actualSensor = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    // DetectEnergy and DetectFreeCell modes return density, DetectStructure does not
+    if (!std::holds_alternative<DetectStructureDescription>(getMode())) {
+        EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    }
     // Angle should be roughly -90 degrees (-0.5 normalized)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
@@ -206,6 +210,10 @@ TEST_P(SensorTests_AllModes, targetBelow)
     auto actualSensor = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    // DetectEnergy and DetectFreeCell modes return density, DetectStructure does not
+    if (!std::holds_alternative<DetectStructureDescription>(getMode())) {
+        EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    }
     // Angle should be roughly +90 degrees (+0.5 normalized)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > 0.3f);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < 0.7f);
