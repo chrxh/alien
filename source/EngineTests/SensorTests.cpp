@@ -17,6 +17,7 @@ public:
 
 protected:
     // Helper to create a sensor mode description with appropriate minDensity
+    // Note: Creates a fresh description with the specified density since test parameters use default modes
     static SensorModeDescription createModeWithDensity(SensorModeDescription const& mode, float minDensity)
     {
         if (std::holds_alternative<DetectEnergyDescription>(mode)) {
