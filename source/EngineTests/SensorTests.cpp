@@ -497,14 +497,14 @@ TEST_F(SensorTests, detectEnergy_rayBlockedBySameCreatureConnections)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
             .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
+
         // Create a connection that crosses the ray path
-        CellDescription().id(3).pos({98.0f, 50.0f}),
-        CellDescription().id(4).pos({102.0f, 50.0f}),
+        CellDescription().id(2).pos({99.0f, 99.0f}),
+        CellDescription().id(3).pos({101.0f, 99.0f}),
     });
     data.addConnection(1, 2);
-    data.addConnection(1, 3);  // Same creature cells
-    data.addConnection(3, 4);  // This connection crosses the ray path upward
+    data.addConnection(2, 3);
+    data.addConnection(1, 3);
 
     // Add energy particles above the sensor
     for (int i = 0; i < 10; ++i) {
@@ -518,6 +518,39 @@ TEST_F(SensorTests, detectEnergy_rayBlockedBySameCreatureConnections)
     EXPECT_TRUE(actualSensor._signal.has_value());
     // Ray should be blocked by same-creature connection
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectEnergy_rayNotBlockedByDifferentCreature)
+{
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(0).cells(
+                        {CellDescription()
+                             .id(1)
+                             .pos({100.0f, 100.0f})
+                             .frontAngle(0.0f)
+                             .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
+                         CellDescription().id(2).pos({101.0f, 100.0f})}))
+                    .addCreature(CreatureDescription().cells({
+                        // Create a different creature with a connection that would cross the ray path
+                        CellDescription().id(10).pos({100.0f, 50.0f}),
+                        CellDescription().id(11).pos({101.0f, 50.0f}),
+                    }));
+    data.addConnection(1, 2);    // Sensor creature
+    data.addConnection(10, 11);  // Different creature
+
+    // Add energy particles above the sensor
+    for (int i = 0; i < 10; ++i) {
+        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({98.0f + i, 20.0f}).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Ray should NOT be blocked by different creature connections
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
 }
 
 /**
@@ -940,14 +973,14 @@ TEST_F(SensorTests, detectFreeCell_rayBlockedBySameCreatureConnections)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
+
         // Create a connection that crosses the ray path
-        CellDescription().id(3).pos({98.0f, 50.0f}),
-        CellDescription().id(4).pos({102.0f, 50.0f}),
+        CellDescription().id(2).pos({99.0f, 99.0f}),
+        CellDescription().id(3).pos({101.0f, 99.0f}),
     });
     data.addConnection(1, 2);
-    data.addConnection(1, 3);  // Same creature cells
-    data.addConnection(3, 4);  // This connection crosses the ray path upward
+    data.addConnection(2, 3);
+    data.addConnection(1, 3);
     
     // Add free cells above the sensor
     for (int i = 0; i < 10; ++i) {
@@ -967,17 +1000,23 @@ TEST_F(SensorTests, detectFreeCell_rayBlockedBySameCreatureConnections)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectFreeCell_rayNotBlockedByDifferentCreatureConnections)
+TEST_F(SensorTests, detectFreeCell_rayNotBlockedByDifferentCreature)
 {
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-        // Create a different creature with a connection that would cross the ray path
-        CellDescription().id(10).pos({98.0f, 50.0f}),
-        CellDescription().id(11).pos({102.0f, 50.0f}),
-    });
-    data.addConnection(1, 2);   // Sensor creature
-    data.addConnection(10, 11); // Different creature (no connection to sensor)
+    auto data = Description()
+                    .addCreature(CreatureDescription().id(0).cells(
+                        {CellDescription()
+                             .id(1)
+                             .pos({100.0f, 100.0f})
+                             .frontAngle(0.0f)
+                             .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
+                         CellDescription().id(2).pos({101.0f, 100.0f})}))
+                    .addCreature(CreatureDescription().cells({
+                        // Create a different creature with a connection that would cross the ray path
+                        CellDescription().id(10).pos({100.0f, 50.0f}),
+                        CellDescription().id(11).pos({101.0f, 50.0f}),
+                    }));
+    data.addConnection(1, 2);    // Sensor creature
+    data.addConnection(10, 11);  // Different creature
     
     // Add free cells above the sensor
     for (int i = 0; i < 10; ++i) {
