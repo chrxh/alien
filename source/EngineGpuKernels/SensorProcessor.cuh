@@ -12,6 +12,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void searchNeighborhoodForEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void searchNeighborhoodForStructure(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void searchNeighborhoodForFreeCells(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
@@ -54,6 +55,8 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
         statistics.incNumSensorActivities(cell->color);
         if (cell->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             searchNeighborhoodForEnergy(data, statistics, cell);
+        } else if (cell->cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+            searchNeighborhoodForStructure(data, statistics, cell);
         } else if (cell->cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
             searchNeighborhoodForFreeCells(data, statistics, cell);
         }
@@ -139,6 +142,83 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForEnergy(Simulati
             cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;   // Angle: between -1.0 and 1.0
             cell->signal.channels[Channels::SensorDensity] = min(1.0f, energyDensity / 100.0f);  // Normalized energy density
 
+            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+            statistics.incNumSensorMatches(cell->color);
+        } else {
+            cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
+        }
+    }
+    __syncthreads();
+}
+
+__inline__ __device__ void SensorProcessor::searchNeighborhoodForStructure(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    __shared__ float refAngle;
+    __shared__ uint64_t lookupResult;
+    __shared__ bool rayBlocked[NumScanAngles];
+
+    __shared__ Cell* nearCreatureCells[MaxNearCreatureCells];
+    __shared__ int numNearCreatureCells;
+
+    if (threadIdx.x == 0) {
+        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+        lookupResult = 0xffffffffffffffff;
+
+        data.cellMap.getMatchingCells(nearCreatureCells, MaxNearCreatureCells, numNearCreatureCells, cell->pos, 4.0f, cell->detached, [&](Cell* const& otherCell) {
+            return cell->isSameCreature(otherCell);
+        });
+    }
+    auto const angleIndex = threadIdx.x;
+
+    __syncthreads();
+
+    auto const& densityMap = data.preprocessedSimulationData.densityMap;
+
+    auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
+    auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
+
+    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
+
+    // Check if ray is blocked by connections of nearby same-creature cells
+    rayBlocked[angleIndex] = false;
+    for (int i = 0; i < numNearCreatureCells; ++i) {
+        auto nearCell = nearCreatureCells[i];
+        for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
+            auto& connectedNearCell = nearCell->connections[j].cell;
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, cell->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
+                rayBlocked[angleIndex] = true;
+            }
+        }
+    }
+
+    for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
+        if (!rayBlocked[angleIndex]) {
+            auto delta = Math::unitVectorOfAngle(angle) * radius;
+            auto scanPos = cell->pos + delta;
+            data.cellMap.correctPosition(scanPos);
+
+            // Check if this position has structure cells (density > 0)
+            if (densityMap.getStructureDensity(scanPos) > 0) {
+                float preciseDistance = radius;
+                uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
+                // For structure detection, we don't use density in the encoding
+                uint64_t combined =
+                    static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(relAngleEncoded) << 16;
+                alienAtomicMin64(&lookupResult, combined);
+                rayBlocked[angleIndex] = true;  // Stop scanning further along this ray
+            }
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        if (lookupResult != 0xffffffffffffffff) {
+            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
+            auto distance = toFloat(lookupResult >> 48);
+
+            cell->signal.channels[Channels::SensorFoundResult] = 1;             // Something found
+            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;   // Angle: between -1.0 and 1.0
+            cell->signal.channels[Channels::SensorDensity] = 0.0f;              // No density for structure detection
             cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
             statistics.incNumSensorMatches(cell->color);
         } else {
