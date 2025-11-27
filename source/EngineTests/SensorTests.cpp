@@ -29,64 +29,21 @@ protected:
         }
     }
 
-    // Helper to add detection targets based on sensor mode
-    void addDetectionTargets(Description& data, SensorModeDescription const& mode, RealVector2D const& pos, int count = 10)
-    {
-        if (std::holds_alternative<DetectEnergyDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._particles.emplace_back(
-                    ParticleDescription().id(100 + i).pos({pos.x + (i % 3) * 2.0f, pos.y + (i / 3) * 2.0f}).energy(10.0f));
-            }
-        } else if (std::holds_alternative<DetectFreeCellDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(CellDescription()
-                                             .id(100 + i)
-                                             .pos({pos.x + (i % 3) * 2.0f, pos.y + (i / 3) * 2.0f})
-                                             .cellType(FreeCellDescription())
-                                             .energy(10.0f));
-            }
-        } else if (std::holds_alternative<DetectStructureDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(
-                    CellDescription().id(100 + i).pos({pos.x + (i % 3) * 2.0f, pos.y + (i / 3) * 2.0f}).cellType(StructureCellDescription()));
-            }
-        }
-    }
-
     // Helper to add detection targets for row layout (horizontal line of targets)
     void addDetectionTargetsRow(Description& data, SensorModeDescription const& mode, RealVector2D const& startPos, int count = 8)
     {
         if (std::holds_alternative<DetectEnergyDescription>(mode)) {
             for (int i = 0; i < count; ++i) {
-                data._particles.emplace_back(ParticleDescription().id(100 + i).pos({startPos.x + i, startPos.y}).energy(10.0f));
+                data._particles.emplace_back(ParticleDescription().pos({startPos.x + i, startPos.y}).energy(10.0f));
             }
         } else if (std::holds_alternative<DetectFreeCellDescription>(mode)) {
             for (int i = 0; i < count; ++i) {
                 data._cells.emplace_back(
-                    CellDescription().id(100 + i).pos({startPos.x + i, startPos.y}).cellType(FreeCellDescription()).energy(10.0f));
+                    CellDescription().pos({startPos.x + i, startPos.y}).cellType(FreeCellDescription()));
             }
         } else if (std::holds_alternative<DetectStructureDescription>(mode)) {
             for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(CellDescription().id(100 + i).pos({startPos.x + i, startPos.y}).cellType(StructureCellDescription()));
-            }
-        }
-    }
-
-    // Helper to add a second cluster of detection targets for distance tests
-    void addDetectionTargetsRowSecondCluster(Description& data, SensorModeDescription const& mode, RealVector2D const& startPos, int count = 12)
-    {
-        if (std::holds_alternative<DetectEnergyDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._particles.emplace_back(ParticleDescription().id(200 + i).pos({startPos.x + i, startPos.y}).energy(15.0f));
-            }
-        } else if (std::holds_alternative<DetectFreeCellDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(
-                    CellDescription().id(200 + i).pos({startPos.x + i, startPos.y}).cellType(FreeCellDescription()).energy(10.0f));
-            }
-        } else if (std::holds_alternative<DetectStructureDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(CellDescription().id(200 + i).pos({startPos.x + i, startPos.y}).cellType(StructureCellDescription()));
+                data._cells.emplace_back(CellDescription().pos({startPos.x + i, startPos.y}).cellType(StructureCellDescription()));
             }
         }
     }
@@ -232,7 +189,7 @@ TEST_P(SensorTests_AllModes, closerTargetDetected)
     addDetectionTargetsRow(data, getMode(), {98.0f, 50.0f}, 8);
 
     // Add a far cluster with more items
-    addDetectionTargetsRowSecondCluster(data, getMode(), {98.0f, 200.0f}, 12);
+    addDetectionTargetsRow(data, getMode(), {98.0f, 200.0f}, 12);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
