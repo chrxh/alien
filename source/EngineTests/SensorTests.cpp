@@ -532,8 +532,8 @@ TEST_F(SensorTests, detectEnergy_rayNotBlockedByDifferentCreature)
                          CellDescription().id(2).pos({101.0f, 100.0f})}))
                     .addCreature(CreatureDescription().cells({
                         // Create a different creature with a connection that would cross the ray path
-                        CellDescription().id(10).pos({100.0f, 50.0f}),
-                        CellDescription().id(11).pos({101.0f, 50.0f}),
+                        CellDescription().id(10).pos({100.0f, 99.0f}),
+                        CellDescription().id(11).pos({101.0f, 99.0f}),
                     }));
     data.addConnection(1, 2);    // Sensor creature
     data.addConnection(10, 11);  // Different creature
@@ -1012,8 +1012,8 @@ TEST_F(SensorTests, detectFreeCell_rayNotBlockedByDifferentCreature)
                          CellDescription().id(2).pos({101.0f, 100.0f})}))
                     .addCreature(CreatureDescription().cells({
                         // Create a different creature with a connection that would cross the ray path
-                        CellDescription().id(10).pos({100.0f, 50.0f}),
-                        CellDescription().id(11).pos({101.0f, 50.0f}),
+                        CellDescription().id(10).pos({100.0f, 99.0f}),
+                        CellDescription().id(11).pos({101.0f, 99.0f}),
                     }));
     data.addConnection(1, 2);    // Sensor creature
     data.addConnection(10, 11);  // Different creature
