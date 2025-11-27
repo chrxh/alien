@@ -94,7 +94,12 @@ __inline__ __device__ void CellProcessor::fillDensityMap(SimulationData& data)
 {
     auto const partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-        //data.preprocessedSimulationData.densityMap.addCell(data.timestep, data.objects.cells.at(index));
+        auto cell = data.objects.cells.at(index);
+        if (cell->cellType == CellType_Free) {
+            data.preprocessedSimulationData.densityMap.addFreeCell(cell);
+        } else if (cell->cellType == CellType_Structure) {
+            data.preprocessedSimulationData.densityMap.addStructureCell(cell);
+        }
     }
 }
 
