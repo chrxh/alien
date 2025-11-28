@@ -427,7 +427,9 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForCreatures(Simul
                         if (matches) {
                             float preciseDistance = radius;
                             uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-                            uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(relAngleEncoded) << 16;
+                            // Pack creatureId (lower 32 bits) in the lower portion
+                            uint32_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint32_t>(otherCell->creature->id & 0xFFFFFFFF) : 0;
+                            uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(relAngleEncoded) << 40 | creatureIdPart;
 
                             alienAtomicMin64(&lookupResult, combined);
 
@@ -444,8 +446,9 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForCreatures(Simul
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
+            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 40) & 0xff));
             auto distance = toFloat(lookupResult >> 48);
+            auto creatureIdPart = lookupResult & 0xFFFFFFFF;
 
             cell->signal.channels[Channels::SensorFoundResult] = 1;                              // Something found
             cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                    // Angle: between -1.0 and 1.0
@@ -459,7 +462,7 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForCreatures(Simul
             data.cellMap.correctPosition(matchPos);
 
             cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable = true;
-            cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId = 0;  // Cannot reliably store creature ID
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId = creatureIdPart;
             cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.pos = matchPos;
         } else {
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
