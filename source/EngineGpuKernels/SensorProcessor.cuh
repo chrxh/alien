@@ -395,20 +395,25 @@ __inline__ __device__ void SensorProcessor::searchNeighborhoodForCreatures(Simul
                             matches = false;
                         }
 
-                        // Apply minNumCells filter
-                        if (matches && minNumCells > 0 && otherCell->creature != nullptr && otherCell->creature->numCells < minNumCells) {
-                            matches = false;
+                        // Apply minNumCells filter - if restriction is set but creature is null, fail the match
+                        if (matches && minNumCells > 0) {
+                            if (otherCell->creature == nullptr || otherCell->creature->numCells < minNumCells) {
+                                matches = false;
+                            }
                         }
 
-                        // Apply maxNumCells filter
-                        if (matches && maxNumCells > 0 && otherCell->creature != nullptr && otherCell->creature->numCells > maxNumCells) {
-                            matches = false;
+                        // Apply maxNumCells filter - if restriction is set but creature is null, fail the match
+                        if (matches && maxNumCells > 0) {
+                            if (otherCell->creature == nullptr || otherCell->creature->numCells > maxNumCells) {
+                                matches = false;
+                            }
                         }
 
-                        // Apply restrictToLineage filter
-                        if (matches && restrictToLineage != DetectCreatureLineageRestriction_No && cell->creature != nullptr
-                            && otherCell->creature != nullptr) {
-                            if (restrictToLineage == DetectCreatureLineageRestriction_SameLineage) {
+                        // Apply restrictToLineage filter - if restriction is set but either creature is null, fail the match
+                        if (matches && restrictToLineage != DetectCreatureLineageRestriction_No) {
+                            if (cell->creature == nullptr || otherCell->creature == nullptr) {
+                                matches = false;
+                            } else if (restrictToLineage == DetectCreatureLineageRestriction_SameLineage) {
                                 if (cell->creature->lineageId != otherCell->creature->lineageId) {
                                     matches = false;
                                 }
