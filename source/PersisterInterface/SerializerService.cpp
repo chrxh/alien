@@ -640,11 +640,13 @@ namespace
     auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
     auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;
 
+    auto constexpr Id_SensorMode_DetectCreatureLastMatch_CreatureId = 0;
+    auto constexpr Id_SensorMode_DetectCreatureLastMatch_Pos = 1;
+
     auto constexpr Id_SensorMode_DetectCreature_MinNumCells = 0;
     auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = 1;
     auto constexpr Id_SensorMode_DetectCreature_RestrictToColor = 2;
     auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = 3;
-    auto constexpr Id_SensorMode_DetectCreature_LastMatchPos = 4;
 
     auto constexpr Id_Transmitter_Mode = 0;
 
@@ -771,6 +773,17 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectFreeCellDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DetectCreatureLastMatchDescription& data)
+    {
+        DetectCreatureLastMatchDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreatureLastMatch_CreatureId, data._creatureId, defaultObject._creatureId);
+        loadSave(task, auxiliaries, Id_SensorMode_DetectCreatureLastMatch_Pos, data._pos, defaultObject._pos);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DetectCreatureLastMatchDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
     {
         DetectCreatureDescription defaultObject;
@@ -779,8 +792,9 @@ namespace cereal
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
-        loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_LastMatchPos, data._lastMatchPos, defaultObject._lastMatchPos);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._lastMatch);
     }
     SPLIT_SERIALIZATION(DetectCreatureDescription)
 

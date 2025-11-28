@@ -94,6 +94,14 @@ struct DetectFreeCellDescription
     MEMBER(DetectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
+struct DetectCreatureLastMatchDescription
+{
+    auto operator<=>(DetectCreatureLastMatchDescription const&) const = default;
+
+    MEMBER(DetectCreatureLastMatchDescription, uint64_t, creatureId, 0);
+    MEMBER(DetectCreatureLastMatchDescription, RealVector2D, pos, RealVector2D());
+};
+
 struct DetectCreatureDescription
 {
     auto operator<=>(DetectCreatureDescription const&) const = default;
@@ -104,7 +112,7 @@ struct DetectCreatureDescription
     MEMBER(DetectCreatureDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
 
     // Process data
-    MEMBER(DetectCreatureDescription, std::optional<RealVector2D>, lastMatchPos, std::nullopt);
+    MEMBER(DetectCreatureDescription, std::optional<DetectCreatureLastMatchDescription>, lastMatch, std::nullopt);
 };
 
 using SensorModeDescription = std::variant<DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;

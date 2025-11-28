@@ -338,9 +338,14 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
                 ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor))
                 : std::nullopt;
             detectCreature._restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
-            detectCreature._lastMatchPos = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos.x != VALUE_NOT_SET_FLOAT
-                ? std::make_optional(RealVector2D{cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos.x, cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos.y})
-                : std::nullopt;
+            if (cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable) {
+                DetectCreatureLastMatchDescription lastMatchDesc;
+                lastMatchDesc._creatureId = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId;
+                lastMatchDesc._pos = RealVector2D{
+                    cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.pos.x,
+                    cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.pos.y};                    
+                detectCreature._lastMatch = lastMatchDesc;
+            }
             sensor._mode = detectCreature;
         }
 
@@ -974,10 +979,10 @@ void DescriptionConverterService::convertCellToTO(
             detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
             detectCreatureTO.restrictToColor = static_cast<uint8_t>(detectCreatureDesc._restrictToColor.value_or(255));
             detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
-            if (detectCreatureDesc._lastMatchPos.has_value()) {
-                detectCreatureTO.lastMatchPos = {detectCreatureDesc._lastMatchPos->x, detectCreatureDesc._lastMatchPos->y};
-            } else {
-                detectCreatureTO.lastMatchPos = {VALUE_NOT_SET_FLOAT, VALUE_NOT_SET_FLOAT};
+            detectCreatureTO.lastMatchAvailable = detectCreatureDesc._lastMatch.has_value();
+            if (detectCreatureDesc._lastMatch.has_value()) {
+                detectCreatureTO.lastMatch.creatureId = detectCreatureDesc._lastMatch->_creatureId;
+                detectCreatureTO.lastMatch.pos = {detectCreatureDesc._lastMatch->_pos.x, detectCreatureDesc._lastMatch->_pos.y};
             }
         }
     } break;

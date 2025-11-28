@@ -74,6 +74,12 @@ struct DetectFreeCellTO
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
 };
 
+struct DetectCreatureLastMatchTO
+{
+    uint64_t creatureId;
+    float2 pos;
+};
+
 struct DetectCreatureTO
 {
     uint32_t minNumCells;  // 0 = no restriction
@@ -82,7 +88,8 @@ struct DetectCreatureTO
     DetectCreatureLineageRestriction restrictToLineage;
 
     // Process data
-    float2 lastMatchPos;  // May be invalid
+    bool lastMatchAvailable;
+    DetectCreatureLastMatchTO lastMatch;
 };
 
 union SensorModeTO

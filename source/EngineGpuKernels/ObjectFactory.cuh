@@ -336,7 +336,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells = cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells;
             cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor;
             cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
-            cell->cellTypeData.sensor.modeData.detectCreature.lastMatchPos = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchPos;
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable;
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId =
+                cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId;
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.pos =
+                cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.pos;
         }
     } break;
     case CellType_Generator: {
@@ -632,7 +636,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             sensor.modeData.detectCreature.maxNumCells = nodeSensor.modeData.detectCreature.maxNumCells;
             sensor.modeData.detectCreature.restrictToColor = nodeSensor.modeData.detectCreature.restrictToColor;
             sensor.modeData.detectCreature.restrictToLineage = nodeSensor.modeData.detectCreature.restrictToLineage;
-            sensor.modeData.detectCreature.lastMatchPos = {VALUE_NOT_SET_FLOAT, VALUE_NOT_SET_FLOAT};
+            sensor.modeData.detectCreature.lastMatchAvailable = false;
         }
     } break;
     case CellTypeGenome_Generator: {

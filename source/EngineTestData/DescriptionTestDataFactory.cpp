@@ -145,11 +145,11 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc = DetectCreatureDescription()
-                .minNumCells(5)
-                .maxNumCells(20)
-                .restrictToColor(3)
-                .restrictToLineage(DetectCreatureLineageRestriction_SameLineage)
-                .lastMatchPos(RealVector2D{10.5f, 20.3f});
+                                 .minNumCells(5)
+                                 .maxNumCells(20)
+                                 .restrictToColor(3)
+                                 .restrictToLineage(DetectCreatureLineageRestriction_SameLineage)
+                                 .lastMatch(DetectCreatureLastMatchDescription().creatureId(42).pos({10.5f, 20.3f}));
             break;
         default:
             sensorModeDesc = SensorModeDescription();
