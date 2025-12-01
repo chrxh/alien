@@ -19,8 +19,13 @@ private:
     __inline__ __device__ static void scanVicinityForCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void trackCreatureFromLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static uint8_t convertAngleToData(float angle);
-    __inline__ __device__ static float convertDataToAngle(uint8_t b);
+    __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
+    __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
+
+    __inline__ __device__ static void writeSignal(Signal& signal, float angle, float density, float distance);
+
+    __inline__ __device__ static uint16_t convertAngleToUint16(float angle);
+    __inline__ __device__ static float convertUint16ToAngle(uint16_t b);
 
     static int constexpr NumScanAngles = 64;
     static float constexpr ScanStep = 8.0f;
@@ -88,7 +93,6 @@ __inline__ __device__ void SensorProcessor::processDetectEnergy(SimulationData& 
                 return cell->isSameCreature(otherCell);
             });
     }
-    auto const angleIndex = threadIdx.x;
 
     __syncthreads();
 
@@ -97,7 +101,7 @@ __inline__ __device__ void SensorProcessor::processDetectEnergy(SimulationData& 
     auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
 
-    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
+    float angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x);
 
     // Check if ray is blocked by connections of nearby same-creature cells
     auto rayBlocked = false;
@@ -116,8 +120,8 @@ __inline__ __device__ void SensorProcessor::processDetectEnergy(SimulationData& 
     }
 
     if (!rayBlocked) {
-        for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
-            auto delta = Math::unitVectorOfAngle(angle) * radius;
+        for (float distance = startRadius; distance <= endRadius; distance += ScanStep) {
+            auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
@@ -126,14 +130,9 @@ __inline__ __device__ void SensorProcessor::processDetectEnergy(SimulationData& 
                 break;
             } else {
                 float energyDensity = densityMap.getEnergyParticleDensity(scanPos);
-
                 if (energyDensity >= minDensity) {
-                    float preciseDistance = radius;
-                    uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-                    // Encode energy as a normalized 16-bit value (0-65535) for packing
-                    uint32_t energyDensityEncoded = static_cast<uint32_t>(min(65535.0f, energyDensity * 100));
-                    uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(energyDensityEncoded) << 32
-                        | static_cast<uint64_t>(relAngleEncoded) << 16;
+                    float preciseDistance = distance;
+                    uint64_t combined = pack(preciseDistance, angle - refAngle - cell->frontAngle, energyDensity);
                     alienAtomicMin64(&lookupResult, combined);
                 }
             }
@@ -144,22 +143,15 @@ __inline__ __device__ void SensorProcessor::processDetectEnergy(SimulationData& 
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
-            auto distance = toFloat(lookupResult >> 48);
-            auto energyDensityEncoded = (lookupResult >> 32) & 0xffff;
-            auto energyDensity = toFloat(energyDensityEncoded) / 100;
-
-            cell->signal.channels[Channels::SensorFoundResult] = 1;                              // Something found
-            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                    // Angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = min(1.0f, energyDensity / 100.0f);  // Normalized energy density
-
-            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+            float distance, relAngle, density;
+            uint16_t misc;
+            unpack(distance, relAngle, density, misc, lookupResult);
+            writeSignal(cell->signal, relAngle, density, distance);
             statistics.incNumSensorMatches(cell->color);
         } else {
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
-    __syncthreads();
 }
 
 __inline__ __device__ void SensorProcessor::processDetectStructure(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -179,7 +171,6 @@ __inline__ __device__ void SensorProcessor::processDetectStructure(SimulationDat
                 return cell->isSameCreature(otherCell);
             });
     }
-    auto const angleIndex = threadIdx.x;
 
     __syncthreads();
 
@@ -188,7 +179,7 @@ __inline__ __device__ void SensorProcessor::processDetectStructure(SimulationDat
     auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
 
-    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
+    float angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x);
 
     // Check if ray is blocked by connections of nearby same-creature cells
     auto rayBlocked = false;
@@ -207,18 +198,14 @@ __inline__ __device__ void SensorProcessor::processDetectStructure(SimulationDat
     }
 
     if (!rayBlocked) {
-        for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
-            auto delta = Math::unitVectorOfAngle(angle) * radius;
+        for (float distance = startRadius; distance <= endRadius; distance += ScanStep) {
+            auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
             // Check if this position has structure cells (density > 0)
             if (densityMap.getStructureDensity(scanPos) > 0) {
-                float preciseDistance = radius;
-                uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-                // Structure detection does not return density, only distance and angle.
-                // Bits 32-47 are unused (unlike energy/free cell modes which encode density there).
-                uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(relAngleEncoded) << 16;
+                uint64_t combined = pack(distance, angle - refAngle - cell->frontAngle, 0);
                 alienAtomicMin64(&lookupResult, combined);
                 break;  // Stop scanning further along this ray
             }
@@ -228,19 +215,15 @@ __inline__ __device__ void SensorProcessor::processDetectStructure(SimulationDat
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
-            auto distance = toFloat(lookupResult >> 48);
-
-            cell->signal.channels[Channels::SensorFoundResult] = 1;                              // Something found
-            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                    // Angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = 0.0f;                               // No density for structure detection
-            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+            float distance, relAngle, density;
+            uint16_t misc;
+            unpack(distance, relAngle, density, misc, lookupResult);
+            writeSignal(cell->signal, relAngle, density, distance);
             statistics.incNumSensorMatches(cell->color);
         } else {
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
-    __syncthreads();
 }
 
 __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -264,7 +247,6 @@ __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationDat
                 return cell->isSameCreature(otherCell);
             });
     }
-    auto const angleIndex = threadIdx.x;
 
     __syncthreads();
 
@@ -273,7 +255,7 @@ __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationDat
     auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
 
-    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
+    float angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x);
 
     // Check if ray is blocked by connections of nearby same-creature cells
     auto rayBlocked = false;
@@ -292,8 +274,8 @@ __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationDat
     }
 
     if (!rayBlocked) {
-        for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
-            auto delta = Math::unitVectorOfAngle(angle) * radius;
+        for (float distance = startRadius; distance <= endRadius; distance += ScanStep) {
+            auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
@@ -304,12 +286,7 @@ __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationDat
                 float freeCellDensity = densityMap.getFreeCellDensity(scanPos, restrictToColor);
 
                 if (freeCellDensity >= minDensity) {
-                    float preciseDistance = radius;
-                    uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-                    // Encode free cell count as a 16-bit value (0-65535) for packing
-                    uint32_t densityEncoded = static_cast<uint32_t>(min(65535.0f, freeCellDensity * 100));
-                    uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(densityEncoded) << 32
-                        | static_cast<uint64_t>(relAngleEncoded) << 16;
+                    uint64_t combined = pack(distance, angle - refAngle - cell->frontAngle, freeCellDensity);
                     alienAtomicMin64(&lookupResult, combined);
                 }
             }
@@ -319,22 +296,15 @@ __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationDat
     __syncthreads();
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 16) & 0xff));
-            auto distance = toFloat(lookupResult >> 48);
-            auto densityEncoded = (lookupResult >> 32) & 0xffff;
-            auto density = toFloat(densityEncoded) / 100;
-
-            cell->signal.channels[Channels::SensorFoundResult] = 1;               // Something found
-            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;     // Angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = min(1.0f, density);  // Normalized density (1.0 = 64 cells in 8x8 region)
-
-            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+            float distance, realAngle, density;
+            uint16_t misc;
+            unpack(distance, realAngle, density, misc, lookupResult);
+            writeSignal(cell->signal, realAngle, density, distance);
             statistics.incNumSensorMatches(cell->color);
         } else {
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
-    __syncthreads();
 }
 
 __inline__ __device__ void SensorProcessor::processDetectCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
@@ -372,7 +342,6 @@ __inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationD
                 return cell->isSameCreature(otherCell);
             });
     }
-    auto const angleIndex = threadIdx.x;
 
     __syncthreads();
 
@@ -381,7 +350,7 @@ __inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationD
     auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
 
-    float angle = 360.0f / NumScanAngles * toFloat(angleIndex);
+    float angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x);
 
     // Check if ray is blocked by connections of nearby same-creature cells
     auto rayBlocked = false;
@@ -399,8 +368,8 @@ __inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationD
     }
 
     if (!rayBlocked) {
-        for (float radius = startRadius; radius <= endRadius; radius += ScanStep) {
-            auto delta = Math::unitVectorOfAngle(angle) * radius;
+        for (float distance = startRadius; distance <= endRadius; distance += ScanStep) {
+            auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
@@ -450,12 +419,8 @@ __inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationD
                         }
 
                         if (matches) {
-                            float preciseDistance = radius;
-                            uint32_t relAngleEncoded = convertAngleToData(angle - refAngle - cell->frontAngle);
-                            // Pack creatureId (lower 32 bits) in the lower portion
-                            uint32_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint32_t>(otherCell->creature->id & 0xFFFFFFFF) : 0;
-                            uint64_t combined = static_cast<uint64_t>(preciseDistance) << 48 | static_cast<uint64_t>(relAngleEncoded) << 40 | creatureIdPart;
-
+                            uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xFFFF) : 0;
+                            uint64_t combined = pack(distance, angle - refAngle - cell->frontAngle, 0, creatureIdPart);
                             alienAtomicMin64(&lookupResult, combined);
                             rayBlocked = true;
                             break;
@@ -473,14 +438,12 @@ __inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationD
     __syncthreads();
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
-            auto relAngle = convertDataToAngle(static_cast<int8_t>((lookupResult >> 40) & 0xff));
-            auto distance = toFloat(lookupResult >> 48);
-            auto creatureIdPart = lookupResult & 0xFFFFFFFF;
 
-            cell->signal.channels[Channels::SensorFoundResult] = 1;                              // Something found
-            cell->signal.channels[Channels::SensorAngle] = relAngle / 180.0f;                    // Angle: between -1.0 and 1.0
-            cell->signal.channels[Channels::SensorDensity] = 0.0f;                               // No density for creature detection
-            cell->signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+            float distance, relAngle, density;
+            uint16_t creatureIdPart;
+            unpack(distance, relAngle, density, creatureIdPart, lookupResult);
+            writeSignal(cell->signal, relAngle, 0.0f, distance);
+
             statistics.incNumSensorMatches(cell->color);
 
             // Fill process data (but not used) - calculate position from angle and distance
@@ -495,28 +458,104 @@ __inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationD
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
-    __syncthreads(); 
 }
 
 __inline__ __device__ void SensorProcessor::trackCreatureFromLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
+    int radius = toInt(blockDim.x) / 2;
+    int deltaX = toInt(threadIdx.x) - radius;
+
+    __shared__ uint64_t lookupResult;
+    __shared__ float refAngle;
+
+    if (threadIdx.x == 0) {
+        lookupResult = 0xffffffffffffffff;
+        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+    }
+
+    auto& detectCreatureData = cell->cellTypeData.sensor.modeData.detectCreature;
+
+    auto centerScanPos = detectCreatureData.lastMatch.pos;
+    for (int deltaY = -radius; deltaY < radius; ++deltaY) {
+        auto otherCell = data.cellMap.getFirst(float2{centerScanPos.x + toFloat(deltaX), centerScanPos.y + toFloat(deltaY)});
+        while (otherCell != nullptr) {
+            if (otherCell->creature != nullptr && otherCell->creature->id == detectCreatureData.lastMatch.creatureId) {
+
+                auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
+                auto distance = Math::length(delta);
+                auto angle = Math::angleOfVector(delta);
+
+                uint64_t combined = pack(distance, angle - refAngle - cell->frontAngle, 0, 0);
+
+                alienAtomicMin64(&lookupResult, combined);
+            }
+
+            otherCell = otherCell->nextCell;
+        }
+    }
+    __syncthreads();
+
+    if (threadIdx.x == 0) {
+        if (lookupResult != 0xffffffffffffffff) {
+            float distance, relAngle, density;
+            uint16_t misc;
+            unpack(distance, relAngle, density, misc, lookupResult);
+            writeSignal(cell->signal, relAngle, 0.0f, distance);
+
+            statistics.incNumSensorMatches(cell->color);
+
+            // Fill process data (but not used) - calculate position from angle and distance
+            auto absAngle = relAngle + refAngle + cell->frontAngle;
+            auto matchPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
+            data.cellMap.correctPosition(matchPos);
+
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable = true;
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.pos = matchPos;
+        } else {
+            cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable = false;
+        }
+    }
 }
 
-__inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
+__inline__ __device__ uint64_t SensorProcessor::pack(float distance, float angle, float density, uint16_t misc)
+{
+    uint32_t angleEncoded = convertAngleToUint16(angle);
+    uint32_t densityEncoded = static_cast<uint32_t>(min(65535.0f, density * 100));
+    return static_cast<uint64_t>(distance) << 48 | static_cast<uint64_t>(densityEncoded) << 32 | static_cast<uint64_t>(angleEncoded) << 16
+        | static_cast<uint64_t>(misc);
+}
+
+__inline__ __device__ void SensorProcessor::unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes)
+{
+    distance = toFloat(bytes >> 48);
+    density = toFloat((bytes >> 32) & 0xFFFF) / 100;
+    angle = convertUint16ToAngle(static_cast<int16_t>((bytes >> 16) & 0xFFFF));
+    misc = static_cast<int16_t>(bytes & 0xFFFF);
+}
+
+__inline__ __device__ void SensorProcessor::writeSignal(Signal& signal, float angle, float density, float distance)
+{
+    signal.channels[Channels::SensorFoundResult] = 1;               // Something found
+    signal.channels[Channels::SensorAngle] = angle / 180.0f;                       // Angle: between -1.0 and 1.0
+    signal.channels[Channels::SensorDensity] = min(1.0f, density);  // Normalized density (1.0 = 64 cells in 8x8 region)
+    signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
+}
+
+__inline__ __device__ uint16_t SensorProcessor::convertAngleToUint16(float angle)
 {
     angle = Math::getNormalizedAngle(angle, -180.0f);
-    int result = static_cast<int>(angle * 128.0f / 180.0f);
-    return static_cast<uint8_t>(result);
+    int result = static_cast<int>(angle / 180.0f * 32768.0f);
+    return static_cast<uint16_t>(result);
 }
 
-__inline__ __device__ float SensorProcessor::convertDataToAngle(uint8_t b)
+__inline__ __device__ float SensorProcessor::convertUint16ToAngle(uint16_t b)
 {
-    //0 to 127 => 0 to 179 degree
-    //128 to 255 => -179 to 0 degree
-    if (b < 128) {
-        return (0.5f + static_cast<float>(b)) * (180.0f / 128.0f);
+    //0 to 32767 => 0 to 179 degree
+    //32768 to 65535 => -179 to 0 degree
+    if (b < 32768) {
+        return (0.5f + static_cast<float>(b)) * (180.0f / 32768.0f);
     } else {
-        return (-256.0f - 0.5f + static_cast<float>(b)) * (180.0f / 128.0f);
+        return (-65536.0f - 0.5f + static_cast<float>(b)) * (180.0f / 32768.0f);
     }
 }
 
