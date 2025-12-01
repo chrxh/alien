@@ -339,6 +339,7 @@ TEST_F(ConstructorTests, emptyGenome)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -366,6 +367,7 @@ TEST_F(ConstructorTests, emptyGene)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -397,6 +399,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -428,6 +431,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -455,6 +459,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
 
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, creature._cells.size());
+    ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -486,6 +491,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
+    ASSERT_EQ(2, hostCreature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -527,9 +533,11 @@ TEST_F(ConstructorTests, insufficientSpace)
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
+    ASSERT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getCreatureRef(1);
     ASSERT_EQ(1, newCreature._cells.size());
+    ASSERT_EQ(1, newCreature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -593,9 +601,11 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
@@ -634,9 +644,11 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
@@ -673,9 +685,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
@@ -712,9 +726,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(1, hostCreature._cells.size());
+    EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
     ASSERT_EQ(1, newCreature._cells.size());
+    EXPECT_EQ(1, newCreature._numCells);
 
     auto hostCell = hostCreature._cells.front();
     auto newCell = newCreature._cells.front();
@@ -847,6 +863,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto hostCreature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, hostCreature._cells.size());
+    ASSERT_EQ(2, hostCreature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef(0);

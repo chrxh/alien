@@ -446,9 +446,10 @@ Description& Description::addCreature(CreatureDescription const& creature, Genom
         _genomes.emplace_back(genome);
     }
 
-    // Add creature with genomeId set
+    // Add creature with genomeId and numCells set
     auto newCreature = creature;
     newCreature._genomeId = genome._id;
+    newCreature._numCells = toInt(newCreature._cells.size());
     _creatures.emplace_back(newCreature);
 
     return *this;

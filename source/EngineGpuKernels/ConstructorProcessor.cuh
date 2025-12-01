@@ -188,6 +188,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         auto constructionData = createConstructionData(cell);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
+            ++constructionData.creature->numCells;
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
             } else {
@@ -247,7 +248,9 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     // Nothing found => clone creature
     ObjectFactory factory;
     factory.init(&data);
-    return factory.cloneCreature(cell->creature);
+    auto result = factory.cloneCreature(cell->creature);
+    result->numCells = 0;
+    return result;
 }
 
 __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Cell* cell)
