@@ -16,6 +16,9 @@ private:
     __inline__ __device__ static void processDetectFreeCells(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processDetectCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
+    __inline__ __device__ static void scanVicinityForCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void trackCreatureFromLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+
     __inline__ __device__ static uint8_t convertAngleToData(float angle);
     __inline__ __device__ static float convertDataToAngle(uint8_t b);
 
@@ -336,6 +339,16 @@ __inline__ __device__ void SensorProcessor::processDetectFreeCells(SimulationDat
 
 __inline__ __device__ void SensorProcessor::processDetectCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
+    if (cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable) {
+        trackCreatureFromLastMatch(data, statistics, cell);
+    }
+    if (!cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable) {
+        scanVicinityForCreatures(data, statistics, cell);
+    }
+}
+
+__inline__ __device__ void SensorProcessor::scanVicinityForCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
     __shared__ uint32_t minNumCells;
     __shared__ uint32_t maxNumCells;
     __shared__ uint8_t restrictToColor;
@@ -482,7 +495,11 @@ __inline__ __device__ void SensorProcessor::processDetectCreatures(SimulationDat
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
         }
     }
-    __syncthreads();
+    __syncthreads(); 
+}
+
+__inline__ __device__ void SensorProcessor::trackCreatureFromLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
 }
 
 __inline__ __device__ uint8_t SensorProcessor::convertAngleToData(float angle)
