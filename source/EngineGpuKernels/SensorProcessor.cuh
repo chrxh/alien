@@ -288,12 +288,12 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
             auto& sensor = cell->cellTypeData.sensor;
             auto otherCell = data.cellMap.getFirst(scanPos);
             while (otherCell != nullptr) {
-                if (otherCell->creature != nullptr && otherCell->creature->id == sensor.lastMatch.creatureId) {
+                if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == sensor.lastMatch.creatureId) {
                     auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
                     auto distance = Math::length(delta);
                     auto angle = Math::angleOfVector(delta);
                     auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
-                    uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xFFFF) : 0;
+                    uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xffff) : 0;
                     return pack(distance, angle - refAngle - cell->frontAngle, 1.0f, creatureIdPart);
                 }
                 otherCell = otherCell->nextCell;
