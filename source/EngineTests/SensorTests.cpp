@@ -882,6 +882,9 @@ TEST_F(SensorTests, detectEnergy_relocation_targetStationary)
    // Verify lastMatch is still present
    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+   
+   // Note: During relocation, density is set to 0 (not recalculated)
+   EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
 }
 
 TEST_F(SensorTests, detectEnergy_relocation_targetDisappeared)
@@ -967,6 +970,9 @@ TEST_F(SensorTests, detectFreeCell_relocation_targetStationary)
    // Verify lastMatch is still present
    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+   
+   // Note: During relocation, density is set to 0 (not recalculated)
+   EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
 }
 
 TEST_F(SensorTests, detectStructure_relocation_targetStationary)
