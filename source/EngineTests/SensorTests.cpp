@@ -837,6 +837,181 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 }
 
 /**
+ * Tests for relocation behavior (non-creature modes)
+ * For DetectEnergy, DetectStructure, and DetectFreeCell, relocation simply means
+ * scanning a small area around the last match position instead of full raycast
+ */
+
+TEST_F(SensorTests, detectEnergy_relocation_targetStationary)
+{
+   // First scan - target is detected and position stored
+   auto data = Description().cells({
+       CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+           SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
+       CellDescription().id(2).pos({101.0f, 100.0f}),
+   });
+   data.addConnection(1, 2);
+   
+   // Add energy particles
+   for (int i = 0; i < 10; ++i) {
+       data._particles.emplace_back(ParticleDescription()
+           .id(100 + i)
+           .pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f})
+           .energy(10.0f));
+   }
+
+   _simulationFacade->setSimulationData(data);
+   _simulationFacade->calcTimesteps(1);
+
+   auto actualData = _simulationFacade->getSimulationData();
+   auto actualSensor = actualData.getCellRef(1);
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch was stored
+   auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+   
+   // Second scan - target hasn't moved, should still be found via relocation
+   _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+   actualData = _simulationFacade->getSimulationData();
+   actualSensor = actualData.getCellRef(1);
+
+   EXPECT_TRUE(actualSensor._signal.has_value());
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch is still present
+   sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+}
+
+TEST_F(SensorTests, detectEnergy_relocation_targetDisappeared)
+{
+   // First scan - target is detected and position stored
+   auto data = Description().cells({
+       CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+           SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
+       CellDescription().id(2).pos({101.0f, 100.0f}),
+   });
+   data.addConnection(1, 2);
+   
+   // Add energy particles
+   for (int i = 0; i < 10; ++i) {
+       data._particles.emplace_back(ParticleDescription()
+           .id(100 + i)
+           .pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f})
+           .energy(10.0f));
+   }
+
+   _simulationFacade->setSimulationData(data);
+   _simulationFacade->calcTimesteps(1);
+
+   auto actualData = _simulationFacade->getSimulationData();
+   auto actualSensor = actualData.getCellRef(1);
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+   // Remove all particles
+   actualData._particles.clear();
+   _simulationFacade->setSimulationData(actualData);
+
+   // Second scan - target disappeared, should not be found
+   _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+   actualData = _simulationFacade->getSimulationData();
+   actualSensor = actualData.getCellRef(1);
+
+   EXPECT_TRUE(actualSensor._signal.has_value());
+   EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch was cleared
+   auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_FALSE(sensorDesc._lastMatch.has_value());
+}
+
+TEST_F(SensorTests, detectFreeCell_relocation_targetStationary)
+{
+   // First scan - target is detected and position stored
+   auto data = Description().cells({
+       CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+           SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
+       CellDescription().id(2).pos({101.0f, 100.0f}),
+   });
+   data.addConnection(1, 2);
+   
+   // Add free cells
+   for (int i = 0; i < 10; ++i) {
+       data._cells.emplace_back(CellDescription()
+           .id(100 + i)
+           .pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f})
+           .cellType(FreeCellDescription())
+           .energy(10.0f));
+   }
+
+   _simulationFacade->setSimulationData(data);
+   _simulationFacade->calcTimesteps(1);
+
+   auto actualData = _simulationFacade->getSimulationData();
+   auto actualSensor = actualData.getCellRef(1);
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch was stored
+   auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+   
+   // Second scan - target hasn't moved, should still be found via relocation
+   _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+   actualData = _simulationFacade->getSimulationData();
+   actualSensor = actualData.getCellRef(1);
+
+   EXPECT_TRUE(actualSensor._signal.has_value());
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch is still present
+   sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+}
+
+TEST_F(SensorTests, detectStructure_relocation_targetStationary)
+{
+   // First scan - target is detected and position stored
+   auto data = Description().cells({
+       CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(
+           SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
+       CellDescription().id(2).pos({101.0f, 100.0f}),
+   });
+   data.addConnection(1, 2);
+   
+   // Add structure cells
+   for (int i = 0; i < 10; ++i) {
+       data._cells.emplace_back(CellDescription()
+           .id(100 + i)
+           .pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f})
+           .cellType(StructureCellDescription()));
+   }
+
+   _simulationFacade->setSimulationData(data);
+   _simulationFacade->calcTimesteps(1);
+
+   auto actualData = _simulationFacade->getSimulationData();
+   auto actualSensor = actualData.getCellRef(1);
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch was stored
+   auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+   
+   // Second scan - target hasn't moved, should still be found via relocation
+   _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+   actualData = _simulationFacade->getSimulationData();
+   actualSensor = actualData.getCellRef(1);
+
+   EXPECT_TRUE(actualSensor._signal.has_value());
+   EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+   
+   // Verify lastMatch is still present
+   sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+   EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+}
+
+/**
 * Tests for SensorMode_DetectCreature
 */
 
