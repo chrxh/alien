@@ -56,9 +56,6 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
         if (cell->frontAngle == VALUE_NOT_SET_FLOAT) {
             isTriggered = false;
         }
-        if (isTriggered && !cell->signal.active) {
-            SignalProcessor::createEmptySignal(cell);
-        }
     }
     __syncthreads();
 
@@ -142,6 +139,11 @@ __inline__ __device__ void SensorProcessor::scanVicinityOfSensorCell(SimulationD
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
+            // Create signal if not already existing
+            if (!cell->signal.active) {
+                SignalProcessor::createEmptySignal(cell);
+            }
+
             float distance, relAngle, density;
             uint16_t creatureIdPart;
             unpack(distance, relAngle, density, creatureIdPart, lookupResult);
@@ -229,6 +231,11 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
+            // Create signal if not already existing
+            if (!cell->signal.active) {
+                SignalProcessor::createEmptySignal(cell);
+            }
+
             float distance, relAngle, density;
             uint16_t creatureIdPart;
             unpack(distance, relAngle, density, creatureIdPart, lookupResult);

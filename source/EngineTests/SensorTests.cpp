@@ -112,7 +112,7 @@ TEST_P(SensorTests_AllModes, autoTriggered_noTarget)
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-        EXPECT_TRUE(actualSensor._signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
     {
         _simulationFacade->calcTimesteps(1);
@@ -122,7 +122,7 @@ TEST_P(SensorTests_AllModes, autoTriggered_noTarget)
     {
         _simulationFacade->calcTimesteps(14);
         auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-        EXPECT_TRUE(actualSensor._signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
 }
 
@@ -160,6 +160,7 @@ TEST_P(SensorTests_AllModes, manuallyTriggered_withSignal)
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
     EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
 TEST_P(SensorTests_AllModes, noFrontAngle)
@@ -338,7 +339,7 @@ TEST_P(SensorTests_AllModes, minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_P(SensorTests_AllModes, maxRange_found)
@@ -386,7 +387,7 @@ TEST_P(SensorTests_AllModes, maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_P(SensorTests_AllModes, rayBlockedBySameCreatureConnections)
@@ -409,9 +410,7 @@ TEST_P(SensorTests_AllModes, rayBlockedBySameCreatureConnections)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Ray should be blocked by same-creature connection
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
@@ -467,9 +466,9 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, rayBlockedByStructureCells)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should not find energy particles because ray is blocked by structure cells
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Should not find target because ray is blocked by structure cells
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_P(SensorTests_AllModesExceptDetectStructure, rayNotBlockedByStructureCells_behind)
@@ -663,8 +662,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetDisappeared)
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 
     // Verify lastMatch was cleared
     auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
@@ -706,8 +704,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetBlocked)
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 
     // Verify lastMatch was cleared
     auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
@@ -736,8 +733,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 /**
@@ -763,7 +759,7 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
     auto actualSensor = actualData.getCellRef(1);
 
     // Should not find anything because only non-structure cells are present
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 /**
@@ -788,8 +784,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectFreeCell_restrictToColor)
@@ -851,7 +846,7 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
     auto actualSensor = actualData.getCellRef(1);
 
     // Should not find anything because only non-free cells are present
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 /**
@@ -905,8 +900,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_minNumCells_found)
@@ -950,8 +944,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_maxNumCells_found)
@@ -1000,8 +993,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
@@ -1051,8 +1043,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
@@ -1102,8 +1093,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_ignoreStructureCells)
@@ -1127,8 +1117,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_ignoreFreeCells)
@@ -1152,8 +1141,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_ignoreSameCreature)
@@ -1180,7 +1168,6 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
     // Should not detect own creature cells
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
