@@ -202,17 +202,20 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             if (threadIdx.x == 0) {
                 unpack(distance, relAngle, density, creatureIdPart, lookupResult);
                 auto absAngle = relAngle + refAngle + cell->frontAngle;
-                direction = Math::unitVectorOfAngle(absAngle);
+                auto targetPos = cell->cellTypeData.sensor.lastMatch.pos + Math::unitVectorOfAngle(absAngle) * distance;
+
+                auto delta = data.cellMap.getCorrectedDirection(targetPos - cell->pos);
+                distance = Math::length(delta);
+                direction = Math::getNormalized(delta);
             }
             __syncthreads();
 
             if (distance >= ScanStep) {
                 auto const partition = calcAllThreadsPartition(toInt(distance) / ScanStep);
-
                 auto const& densityMap = data.preprocessedSimulationData.densityMap;
                 for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
                     auto scanDistance = toFloat(index) * ScanStep;
-                    auto scanPos = cell->pos + direction * scanDistance;
+                    auto scanPos = data.cellMap.getCorrectedPosition(cell->pos + direction * scanDistance);
                     if (densityMap.getStructureDensity(scanPos) > 0) {
                         lookupResult = 0xffffffffffffffff;
                         break;
