@@ -188,6 +188,11 @@ namespace Const
 //*************************
 //* Constructor constants *
 //*************************
+namespace Channels
+{
+    auto constexpr ConstructorSuccess = 0;
+}
+
 using ConstructorAngleAlignment = int;
 enum ConstructorAlignment_
 {
