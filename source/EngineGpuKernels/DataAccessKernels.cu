@@ -287,12 +287,10 @@ namespace
                 cellTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells = cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells;
                 cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor = cell->cellTypeData.sensor.modeData.detectCreature.restrictToColor;
                 cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage = cell->cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
-                cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable = cell->cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable;
-                cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId =
-                    cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId;
-                cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.pos =
-                    cell->cellTypeData.sensor.modeData.detectCreature.lastMatch.pos;
             }
+            cellTO.cellTypeData.sensor.lastMatchAvailable = cell->cellTypeData.sensor.lastMatchAvailable;
+            cellTO.cellTypeData.sensor.lastMatch.creatureId = cell->cellTypeData.sensor.lastMatch.creatureId;
+            cellTO.cellTypeData.sensor.lastMatch.pos = cell->cellTypeData.sensor.lastMatch.pos;
         } break;
         case CellType_Generator: {
             cellTO.cellTypeData.generator.autoTriggerInterval = cell->cellTypeData.generator.autoTriggerInterval;

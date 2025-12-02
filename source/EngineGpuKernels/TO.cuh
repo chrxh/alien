@@ -74,22 +74,12 @@ struct DetectFreeCellTO
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
 };
 
-struct DetectCreatureLastMatchTO
-{
-    uint64_t creatureId;
-    float2 pos;
-};
-
 struct DetectCreatureTO
 {
     uint32_t minNumCells;  // 0 = no restriction
     uint32_t maxNumCells;  // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     DetectCreatureLineageRestriction restrictToLineage;
-
-    // Process data
-    bool lastMatchAvailable;
-    DetectCreatureLastMatchTO lastMatch;
 };
 
 union SensorModeTO
@@ -100,6 +90,12 @@ union SensorModeTO
     DetectCreatureTO detectCreature;
 };
 
+struct SensorLastMatchTO
+{
+    uint64_t creatureId;
+    float2 pos;
+};
+
 struct SensorTO
 {
     uint32_t autoTriggerInterval;  // 0 = manual (triggered by signal), > 0 = auto trigger
@@ -107,6 +103,10 @@ struct SensorTO
     SensorModeTO modeData;
     uint16_t minRange;
     uint16_t maxRange;
+
+    // Process data
+    bool lastMatchAvailable;
+    SensorLastMatchTO lastMatch;
 };
 
 struct GeneratorTO
