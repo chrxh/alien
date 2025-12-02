@@ -14,17 +14,10 @@ private:
     __inline__ __device__ static void scanVicinityOfSensorCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    //__inline__ __device__ static void processDetectStructure(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    //__inline__ __device__ static void processDetectFreeCells(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    //__inline__ __device__ static void processDetectCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-
-    //__inline__ __device__ static void scanVicinityForCreatures(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    //__inline__ __device__ static void trackCreatureFromLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-
     enum class ScanType
     {
-        RayCastingFromSensorPosition,
-        RelocationFromLastMatchPosition
+        LocateMatch,
+        RelocateLastMatch
     };
     __inline__ __device__ static uint64_t getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float angle, float distance, ScanType scanType);
 
@@ -129,7 +122,7 @@ __inline__ __device__ void SensorProcessor::scanVicinityOfSensorCell(SimulationD
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
-            if (uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::RayCastingFromSensorPosition)) {
+            if (uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::LocateMatch)) {
                 alienAtomicMin64(&lookupResult, matchInfo);
                 break;
             }
@@ -186,7 +179,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             auto scanPos = centerScanPos + delta;
             auto distance = Math::length(delta);
             auto angle = Math::angleOfVector(delta);
-            if (uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::RelocationFromLastMatchPosition)) {
+            if (uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::RelocateLastMatch)) {
                 alienAtomicMin64(&lookupResult, matchInfo);
                 break;
             }
@@ -243,7 +236,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
             return pack(distance, angle - refAngle - cell->frontAngle, density);
         }
     } else if (mode == SensorMode_DetectCreature) {
-        if (scanType == ScanType::RayCastingFromSensorPosition) {
+        if (scanType == ScanType::LocateMatch) {
 
             auto const& minNumCells = cell->cellTypeData.sensor.modeData.detectCreature.minNumCells;
             auto const& maxNumCells = cell->cellTypeData.sensor.modeData.detectCreature.maxNumCells;
