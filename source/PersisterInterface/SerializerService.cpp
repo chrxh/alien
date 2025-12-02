@@ -640,8 +640,8 @@ namespace
     auto constexpr Id_SensorMode_DetectFreeCell_MinDensity = 0;
     auto constexpr Id_SensorMode_DetectFreeCell_RestrictToColor = 1;
 
-    auto constexpr Id_SensorMode_DetectCreatureLastMatch_CreatureId = 0;
-    auto constexpr Id_SensorMode_DetectCreatureLastMatch_Pos = 1;
+    auto constexpr Id_SensorMode_SensorLastMatch_CreatureId = 0;
+    auto constexpr Id_SensorMode_SensorLastMatch_Pos = 1;
 
     auto constexpr Id_SensorMode_DetectCreature_MinNumCells = 0;
     auto constexpr Id_SensorMode_DetectCreature_MaxNumCells = 1;
@@ -773,17 +773,6 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectFreeCellDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectCreatureLastMatchDescription& data)
-    {
-        DetectCreatureLastMatchDescription defaultObject;
-        auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SensorMode_DetectCreatureLastMatch_CreatureId, data._creatureId, defaultObject._creatureId);
-        loadSave(task, auxiliaries, Id_SensorMode_DetectCreatureLastMatch_Pos, data._pos, defaultObject._pos);
-        processLoadSaveMap(task, ar, auxiliaries);
-    }
-    SPLIT_SERIALIZATION(DetectCreatureLastMatchDescription)
-
-    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
     {
         DetectCreatureDescription defaultObject;
@@ -793,10 +782,19 @@ namespace cereal
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_SensorMode_DetectCreature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data._lastMatch);
     }
     SPLIT_SERIALIZATION(DetectCreatureDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SensorLastMatchDescription& data)
+    {
+        SensorLastMatchDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_CreatureId, data._creatureId, defaultObject._creatureId);
+        loadSave(task, auxiliaries, Id_SensorMode_SensorLastMatch_Pos, data._pos, defaultObject._pos);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SensorLastMatchDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SensorDescription& data)
@@ -808,7 +806,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._mode);
+        ar(data._mode, data._lastMatch);
     }
     SPLIT_SERIALIZATION(SensorDescription)
 

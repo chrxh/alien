@@ -148,14 +148,18 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
                                  .minNumCells(5)
                                  .maxNumCells(20)
                                  .restrictToColor(3)
-                                 .restrictToLineage(DetectCreatureLineageRestriction_SameLineage)
-                                 .lastMatch(DetectCreatureLastMatchDescription().creatureId(42).pos({10.5f, 20.3f}));
+                                 .restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
             break;
         default:
             sensorModeDesc = SensorModeDescription();
             break;
         }
-        return SensorDescription().autoTriggerInterval(80).mode(sensorModeDesc).minRange(10).maxRange(50);
+        return SensorDescription()
+            .autoTriggerInterval(80)
+            .mode(sensorModeDesc)
+            .minRange(10)
+            .maxRange(50)
+            .lastMatch(SensorLastMatchDescription().creatureId(42).pos({10.5f, 20.3f}));
     }
     case CellType_Generator: {
         return GeneratorDescription().autoTriggerInterval(60).alternationInterval(3).numPulses(5);

@@ -338,15 +338,14 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
                 ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor))
                 : std::nullopt;
             detectCreature._restrictToLineage = cellTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
-            if (cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatchAvailable) {
-                DetectCreatureLastMatchDescription lastMatchDesc;
-                lastMatchDesc._creatureId = cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.creatureId;
-                lastMatchDesc._pos = RealVector2D{
-                    cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.pos.x,
-                    cellTO.cellTypeData.sensor.modeData.detectCreature.lastMatch.pos.y};                    
-                detectCreature._lastMatch = lastMatchDesc;
-            }
             sensor._mode = detectCreature;
+        }
+        if (cellTO.cellTypeData.sensor.lastMatchAvailable) {
+            SensorLastMatchDescription lastMatchDesc;
+            lastMatchDesc._creatureId = cellTO.cellTypeData.sensor.lastMatch.creatureId;
+            lastMatchDesc._pos = RealVector2D{
+                cellTO.cellTypeData.sensor.lastMatch.pos.x, cellTO.cellTypeData.sensor.lastMatch.pos.y};
+            sensor._lastMatch = lastMatchDesc;
         }
 
         result._cellType = sensor;
@@ -979,11 +978,11 @@ void DescriptionConverterService::convertCellToTO(
             detectCreatureTO.maxNumCells = static_cast<uint32_t>(detectCreatureDesc._maxNumCells.value_or(0));
             detectCreatureTO.restrictToColor = static_cast<uint8_t>(detectCreatureDesc._restrictToColor.value_or(255));
             detectCreatureTO.restrictToLineage = detectCreatureDesc._restrictToLineage;
-            detectCreatureTO.lastMatchAvailable = detectCreatureDesc._lastMatch.has_value();
-            if (detectCreatureDesc._lastMatch.has_value()) {
-                detectCreatureTO.lastMatch.creatureId = detectCreatureDesc._lastMatch->_creatureId;
-                detectCreatureTO.lastMatch.pos = {detectCreatureDesc._lastMatch->_pos.x, detectCreatureDesc._lastMatch->_pos.y};
-            }
+        }
+        sensorTO.lastMatchAvailable = sensorDesc._lastMatch.has_value();
+        if (sensorDesc._lastMatch.has_value()) {
+            sensorTO.lastMatch.creatureId = sensorDesc._lastMatch->_creatureId;
+            sensorTO.lastMatch.pos = {sensorDesc._lastMatch->_pos.x, sensorDesc._lastMatch->_pos.y};
         }
     } break;
     case CellType_Generator: {
