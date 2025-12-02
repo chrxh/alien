@@ -98,6 +98,7 @@ __inline__ __device__ void SensorProcessor::scanVicinityOfSensorCell(SimulationD
     auto const startRadius = toFloat(cell->cellTypeData.sensor.minRange);
     auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
 
+    auto seedDistance = data.primaryNumberGen.random(0, ScanStep);
     auto angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x) + seedAngle;
 
     // Check if ray is blocked by connections of nearby same-creature cells
@@ -117,12 +118,13 @@ __inline__ __device__ void SensorProcessor::scanVicinityOfSensorCell(SimulationD
     }
 
     if (!rayBlocked) {
-        for (float distance = startRadius; distance <= endRadius; distance += ScanStep) {
+        for (float distance = startRadius + seedDistance; distance <= endRadius; distance += ScanStep) {
             auto delta = Math::unitVectorOfAngle(angle) * distance;
             auto scanPos = cell->pos + delta;
             data.cellMap.correctPosition(scanPos);
 
-            if (uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::LocateMatch)) {
+            uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::LocateMatch);
+            if (matchInfo != 0xffffffffffffffff) {
                 alienAtomicMin64(&lookupResult, matchInfo);
                 break;
             }
@@ -149,9 +151,12 @@ __inline__ __device__ void SensorProcessor::scanVicinityOfSensorCell(SimulationD
             auto matchPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
             data.cellMap.correctPosition(matchPos);
 
-            cell->cellTypeData.sensor.lastMatchAvailable = true;
-            cell->cellTypeData.sensor.lastMatch.creatureId = creatureIdPart;
-            cell->cellTypeData.sensor.lastMatch.pos = matchPos;
+            // No relocation for structures 
+            if (cell->cellTypeData.sensor.mode != SensorMode_DetectStructure) {
+                cell->cellTypeData.sensor.lastMatchAvailable = true;
+                cell->cellTypeData.sensor.lastMatch.creatureId = creatureIdPart;
+                cell->cellTypeData.sensor.lastMatch.pos = matchPos;
+            }
         } else {
             cell->cellTypeData.sensor.lastMatchAvailable = false;
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
@@ -179,7 +184,8 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             auto scanPos = centerScanPos + delta;
             auto distance = Math::length(delta);
             auto angle = Math::angleOfVector(delta);
-            if (uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::RelocateLastMatch)) {
+            uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::RelocateLastMatch);
+            if (matchInfo != 0xffffffffffffffff) {
                 alienAtomicMin64(&lookupResult, matchInfo);
                 break;
             }
@@ -249,17 +255,18 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
                 if (otherCell->cellType != CellType_Structure && otherCell->cellType != CellType_Free && !cell->isSameCreature(otherCell)) {
                     bool matches = true;
 
-                    // Apply restrictToColor filter
                     if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                         matches = false;
                     }
-
-                    // Apply minNumCells filter - if restriction is set but creature is null, fail the match
-                    if (otherCell->creature == nullptr || otherCell->creature->numCells < minNumCells || otherCell->creature->numCells > maxNumCells) {
+                    if (otherCell->creature == nullptr) {
                         matches = false;
                     }
-
-                    // Apply restrictToLineage filter - if restriction is set but either creature is null, fail the match
+                    if (minNumCells > 0 && otherCell->creature->numCells < minNumCells) {
+                        matches = false;
+                    }
+                    if (maxNumCells > 0 && otherCell->creature->numCells > maxNumCells) {
+                        matches = false;
+                    }
                     if (matches && restrictToLineage != DetectCreatureLineageRestriction_No) {
                         if (cell->creature == nullptr || otherCell->creature == nullptr) {
                             matches = false;
