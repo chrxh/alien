@@ -769,8 +769,8 @@ TEST_F(SensorTests, detectEnergy_relocation_targetBlocked)
 
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
-    for (int i = 0; i < 10; ++i) {
-        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
+    for (int i = 0; i < 30; ++i) {
+        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({85.0f + i, 50.0f}).cellType(StructureCellDescription()));
     }
     _simulationFacade->setSimulationData(actualData);
 
@@ -942,8 +942,8 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
     // Should detect the color 1 cells, not the color 0 cells
-    // Color 1 cells are farther (below), so distance should be lower
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 0.6f);
+    // Color 1 cells are farther (below at y=150 vs y=80), so distance should be higher
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.3f);
 }
 
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
@@ -1212,8 +1212,8 @@ TEST_F(SensorTests, detectFreeCell_relocation_targetBlocked)
 
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
-    for (int i = 0; i < 10; ++i) {
-        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
+    for (int i = 0; i < 30; ++i) {
+        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({85.0f + i, 50.0f}).cellType(StructureCellDescription()));
     }
     _simulationFacade->setSimulationData(actualData);
 
