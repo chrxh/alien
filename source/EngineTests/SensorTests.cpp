@@ -603,10 +603,6 @@ TEST_F(SensorTests, detectEnergy_rayNotBlockedByStructureCells_differentAngle)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
 }
 
-/**
-* Tests for SensorMode_DetectFreeCell (mode-specific tests)
-*/
-
 TEST_F(SensorTests, detectEnergy_relocation_targetStationary)
 {
     // First scan - target is detected and position stored
@@ -759,9 +755,9 @@ TEST_F(SensorTests, detectEnergy_relocation_targetBlocked)
     });
     data.addConnection(1, 2);
 
-    // Add energy particles
+    // Add energy particles above the sensor
     for (int i = 0; i < 10; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).energy(10.0f));
+        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({98.0f + i, 20.0f}).energy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -774,7 +770,7 @@ TEST_F(SensorTests, detectEnergy_relocation_targetBlocked)
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 10; ++i) {
-        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 75.0f}).cellType(StructureCellDescription()));
+        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
     }
     _simulationFacade->setSimulationData(actualData);
 
@@ -928,14 +924,14 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
     });
     data.addConnection(1, 2);
 
-    // Add free cells with wrong color (color 0)
+    // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
         data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).cellType(FreeCellDescription()).energy(10.0f));
     }
 
-    // Add free cells with correct color (color 1) but fewer
+    // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 250.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1039,10 +1035,6 @@ TEST_F(SensorTests, detectFreeCell_rayNotBlockedByStructureCells_differentAngle)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
 }
-
-/**
-* Tests for SensorMode_DetectStructure (mode-specific tests)
-*/
 
 TEST_F(SensorTests, detectFreeCell_relocation_targetStationary)
 {
@@ -1205,10 +1197,10 @@ TEST_F(SensorTests, detectFreeCell_relocation_targetBlocked)
     });
     data.addConnection(1, 2);
 
-    // Add free cells
+    // Add free cells above the sensor
     for (int i = 0; i < 10; ++i) {
         data._cells.emplace_back(
-            CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(FreeCellDescription()).energy(10.0f));
+            CellDescription().id(100 + i).pos({98.0f + i, 20.0f}).cellType(FreeCellDescription()).energy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1221,7 +1213,7 @@ TEST_F(SensorTests, detectFreeCell_relocation_targetBlocked)
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
     for (int i = 0; i < 10; ++i) {
-        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 75.0f}).cellType(StructureCellDescription()));
+        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
     }
     _simulationFacade->setSimulationData(actualData);
 
