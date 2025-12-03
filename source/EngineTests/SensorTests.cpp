@@ -98,6 +98,10 @@ INSTANTIATE_TEST_SUITE_P(
  * Parameterized tests that work across all sensor modes
  */
 
+/**
+ * Parameterized tests that work across all sensor modes
+ */
+
 TEST_P(SensorTests_AllModes, autoTriggered)
 {
     auto data = Description().cells({
@@ -381,8 +385,8 @@ TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
 }
 
 /**
-* Non-parameterized tests for mode-specific behavior
-*/
+ * Tests for SensorMode_DetectEnergy (mode-specific tests)
+ */
 
 TEST_F(SensorTests, detectEnergy_noFrontAngle)
 {
@@ -536,10 +540,6 @@ TEST_F(SensorTests, detectEnergy_multipleDirections)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
 }
 
-/**
-* Tests for ray blocking (both DetectEnergy and DetectFreeCell modes)
-*/
-
 TEST_F(SensorTests, detectEnergy_rayBlockedByStructureCells)
 {
     auto data = Description().cells({
@@ -606,255 +606,6 @@ TEST_F(SensorTests, detectEnergy_rayNotBlockedByStructureCells_differentAngle)
 /**
 * Tests for SensorMode_DetectFreeCell (mode-specific tests)
 */
-
-TEST_F(SensorTests, detectFreeCell_freeCellsFound)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add free cells near the sensor - cluster them in same 8x8 region
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(
-            CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
-}
-
-TEST_F(SensorTests, detectFreeCell_notFound_lowDensity)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add just a few free cells
-    data._cells.emplace_back(CellDescription().id(100).pos({100.0f, 50.0f}).cellType(FreeCellDescription()).energy(10.0f));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectFreeCell_restrictToColor)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .color(0)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1))),
-        CellDescription().id(2).pos({101.0f, 100.0f}).color(0),
-    });
-    data.addConnection(1, 2);
-
-    // Add free cells with wrong color (color 0)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    // Add free cells with correct color (color 1) but fewer
-    for (int i = 0; i < 8; ++i) {
-        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 250.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    // Should detect the color 1 cells, not the color 0 cells
-    // Color 1 cells are farther (below), so distance should be lower
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 0.6f);
-}
-
-TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add many non-free cells (should be ignored)
-    for (int i = 0; i < 20; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    // Should not find anything because only non-free cells are present
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectFreeCell_rayBlockedByStructureCells)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells between sensor and free cells (to block the ray)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add free cells behind the structure cells
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 20.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should not find free cells because ray is blocked by structure cells
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectFreeCell_rayNotBlockedByStructureCells_differentAngle)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells on the left side
-    for (int i = 0; i < 5; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({80.0f, 100.0f + i * 2.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add free cells on the right side (not blocked)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({120.0f + i, 100.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should find free cells because ray is not blocked (different direction)
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-}
-
-/**
-* Tests for SensorMode_DetectStructure (mode-specific tests)
-*/
-
-TEST_F(SensorTests, detectStructure_structureCellsFound)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells near the sensor (creates a 3x4 grid pattern)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(StructureCellDescription()));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
-    EXPECT_FALSE(std::get<SensorDescription>(actualSensor._cellType)._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectStructure_noStructureCells)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add many non-structure cells (should be ignored)
-    for (int i = 0; i < 20; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    // Should not find anything because only non-structure cells are present
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-/**
- * Tests for relocation behavior (non-creature modes)
- */
 
 TEST_F(SensorTests, detectEnergy_relocation_targetStationary)
 {
@@ -1039,6 +790,259 @@ TEST_F(SensorTests, detectEnergy_relocation_targetBlocked)
     auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
+
+/**
+ * Tests for SensorMode_DetectStructure (mode-specific tests)
+ */
+
+TEST_F(SensorTests, detectStructure_structureCellsFound)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add structure cells near the sensor (creates a 3x4 grid pattern)
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(StructureCellDescription()));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
+    EXPECT_FALSE(std::get<SensorDescription>(actualSensor._cellType)._lastMatch.has_value());
+}
+
+TEST_F(SensorTests, detectStructure_noStructureCells)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add many non-structure cells (should be ignored)
+    for (int i = 0; i < 20; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    // Should not find anything because only non-structure cells are present
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+/**
+ * Tests for SensorMode_DetectFreeCell (mode-specific tests)
+ */
+
+TEST_F(SensorTests, detectFreeCell_freeCellsFound)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add free cells near the sensor - cluster them in same 8x8 region
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(
+            CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(FreeCellDescription()).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
+}
+
+TEST_F(SensorTests, detectFreeCell_notFound_lowDensity)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add just a few free cells
+    data._cells.emplace_back(CellDescription().id(100).pos({100.0f, 50.0f}).cellType(FreeCellDescription()).energy(10.0f));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectFreeCell_restrictToColor)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .color(0)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1))),
+        CellDescription().id(2).pos({101.0f, 100.0f}).color(0),
+    });
+    data.addConnection(1, 2);
+
+    // Add free cells with wrong color (color 0)
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).cellType(FreeCellDescription()).energy(10.0f));
+    }
+
+    // Add free cells with correct color (color 1) but fewer
+    for (int i = 0; i < 8; ++i) {
+        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 250.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    // Should detect the color 1 cells, not the color 0 cells
+    // Color 1 cells are farther (below), so distance should be lower
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 0.6f);
+}
+
+TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add many non-free cells (should be ignored)
+    for (int i = 0; i < 20; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    // Should not find anything because only non-free cells are present
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectFreeCell_rayBlockedByStructureCells)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add structure cells between sensor and free cells (to block the ray)
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
+    }
+
+    // Add free cells behind the structure cells
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 20.0f}).cellType(FreeCellDescription()).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Should not find free cells because ray is blocked by structure cells
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+}
+
+TEST_F(SensorTests, detectFreeCell_rayNotBlockedByStructureCells_differentAngle)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add structure cells on the left side
+    for (int i = 0; i < 5; ++i) {
+        data._cells.emplace_back(CellDescription().id(50 + i).pos({80.0f, 100.0f + i * 2.0f}).cellType(StructureCellDescription()));
+    }
+
+    // Add free cells on the right side (not blocked)
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({120.0f + i, 100.0f}).cellType(FreeCellDescription()).energy(10.0f));
+    }
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    // Should find free cells because ray is not blocked (different direction)
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+}
+
+/**
+* Tests for SensorMode_DetectStructure (mode-specific tests)
+*/
 
 TEST_F(SensorTests, detectFreeCell_relocation_targetStationary)
 {
@@ -1235,8 +1239,8 @@ TEST_F(SensorTests, detectFreeCell_relocation_targetBlocked)
 }
 
 /**
-* Tests for SensorMode_DetectCreature
-*/
+ * Tests for SensorMode_DetectCreature (mode-specific tests)
+ */
 
 TEST_F(SensorTests, detectCreature_initialScan_found)
 {
