@@ -1073,21 +1073,12 @@ TEST_F(SensorTests, detectCreature_tracking_creatureStationary)
 TEST_F(SensorTests, detectCreature_tracking_creatureMoved)
 {
     // First scan - creature is detected and position stored
-    auto data = Description()
-                    .addCreature(CreatureDescription().id(0).cells({
-                        CellDescription()
-                            .id(1)
-                            .pos({100.0f, 100.0f})
-                            .frontAngle(0.0f)
-                            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-                        CellDescription().id(2).pos({101.0f, 100.0f}),
-                    }))
-                    .addCreature(CreatureDescription().id(1).cells({
-                        CellDescription().id(10).pos({100.0f, 50.0f}),
-                        CellDescription().id(11).pos({101.0f, 50.0f}),
-                    }));
+    auto data = Description().addCreature(CreatureDescription().id(0).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    }));
     data.addConnection(1, 2);
-    data.addConnection(10, 11);
+    data.add(createLargeCreature(), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1101,10 +1092,9 @@ TEST_F(SensorTests, detectCreature_tracking_creatureMoved)
 
     // Move the target creature slightly
     actualData = _simulationFacade->getSimulationData();
-    auto targetCell1 = actualData.getCellRef(10);
-    auto targetCell2 = actualData.getCellRef(11);
-    targetCell1._pos = {105.0f, 55.0f};
-    targetCell2._pos = {106.0f, 55.0f};
+    for (int i = 0; i < 100; ++i) {
+        actualData.getCellRef(10 + i)._pos.x += 10.0f;  // Move right by 10 units
+    }
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - creature has moved, should be relocated via tracking
@@ -1132,7 +1122,7 @@ TEST_F(SensorTests, detectCreature_tracking_creatureDisappeared)
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
-    data.add(createLargeCreature());
+    data.add(createLargeCreature(), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1141,10 +1131,10 @@ TEST_F(SensorTests, detectCreature_tracking_creatureDisappeared)
     auto actualSensor = actualData.getCellRef(1);
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 
-    // Remove the target creature (IDs 10-109 from createLargeCreature)
-    actualData._cells.erase(
-        std::remove_if(actualData._cells.begin(), actualData._cells.end(), [](auto const& cell) { return cell._id >= 10 && cell._id <= 109; }),
-        actualData._cells.end());
+    // Remove the target creature
+    actualData._creatures.erase(
+        std::remove_if(actualData._creatures.begin(), actualData._creatures.end(), [](auto const& creature) { return creature._id == 1; }),
+        actualData._creatures.end());
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - creature disappeared, should not be found
@@ -1495,18 +1485,18 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_F(SensorTests, detectCreature_rayBlockedByStructure)
+TEST_F(SensorTests, detectCreature_rayBlockedByStructureCells)
 {
     auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
+        CellDescription().id(1).pos({100.0f, 110.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
+        CellDescription().id(2).pos({101.0f, 110.0f}),
     }));
     data.addConnection(1, 2);
-    data.add(createLargeCreature());
+    data.add(createLargeCreature(), false);
 
     // Add structure cells blocking the ray
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(200 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
+    for (int i = 0; i < 30; ++i) {
+        data._cells.emplace_back(CellDescription().id(200 + i).pos({85.0f + i, 100.0f}).cellType(StructureCellDescription()));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1517,30 +1507,5 @@ TEST_F(SensorTests, detectCreature_rayBlockedByStructure)
 
     EXPECT_TRUE(actualSensor._signal.has_value());
     // Structure cells should block detection
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectCreature_rayBlockedByStructureCells)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells between sensor and creature (to block the ray)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add large creature behind the structure cells
-    data.add(createLargeCreature());
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should not find creature because ray is blocked by structure cells
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
