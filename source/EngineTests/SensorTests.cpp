@@ -1040,7 +1040,7 @@ TEST_F(SensorTests, detectCreature_initialScan_notFound_noCreature)
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_F(SensorTests, detectCreature_tracking_creatureStationary)
+TEST_F(SensorTests, detectCreature_relocation_creatureStationary)
 {
     // First scan - creature is detected and position stored
     auto data = Description().addCreature(CreatureDescription().id(0).cells({
@@ -1070,7 +1070,7 @@ TEST_F(SensorTests, detectCreature_tracking_creatureStationary)
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_F(SensorTests, detectCreature_tracking_creatureMoved)
+TEST_F(SensorTests, detectCreature_relocation_creatureMoved)
 {
     // First scan - creature is detected and position stored
     auto data = Description().addCreature(CreatureDescription().id(0).cells({
@@ -1114,7 +1114,7 @@ TEST_F(SensorTests, detectCreature_tracking_creatureMoved)
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_F(SensorTests, detectCreature_tracking_creatureDisappeared)
+TEST_F(SensorTests, detectCreature_relocation_creatureDisappeared)
 {
     // First scan - creature is detected and position stored
     auto data = Description().addCreature(CreatureDescription().id(0).cells({

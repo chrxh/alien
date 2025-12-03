@@ -193,7 +193,36 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             }
         }
         __syncthreads();
-    
+
+        // Check if ray from sensor to match pos is blocked by structure
+        if (lookupResult != 0xffffffffffffffff) {
+            __shared__ float distance, relAngle, density;
+            __shared__ uint16_t creatureIdPart;
+            __shared__ float2 direction;
+            if (threadIdx.x == 0) {
+                unpack(distance, relAngle, density, creatureIdPart, lookupResult);
+                auto absAngle = relAngle + refAngle + cell->frontAngle;
+                direction = Math::unitVectorOfAngle(absAngle);
+            }
+            __syncthreads();
+
+            if (distance >= ScanStep) {
+                auto const partition = calcAllThreadsPartition(toInt(distance) / ScanStep);
+
+                auto const& densityMap = data.preprocessedSimulationData.densityMap;
+                for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+                    auto scanDistance = toFloat(index) * ScanStep;
+                    auto scanPos = cell->pos + direction * scanDistance;
+                    if (densityMap.getStructureDensity(scanPos) > 0) {
+                        lookupResult = 0xffffffffffffffff;
+                        break;
+                    }
+
+                }
+            }
+        }
+        __syncthreads();
+
         if (threadIdx.x == 0) {
             if (lookupResult != 0xffffffffffffffff) {
                 float distance, relAngle, density;
