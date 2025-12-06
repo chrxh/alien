@@ -823,7 +823,7 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostCell->color];
 
-    if (cudaSimulationParameters.externalEnergyControlToggle.value && hostCell->energy < constructionData.energy + normalCellEnergy
+    if (cudaSimulationParameters.externalEnergyControlToggle.value && hostCell->usableEnergy < constructionData.energy + normalCellEnergy
         && cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
@@ -837,12 +837,12 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
 
         auto origExternalEnergy = alienAtomicRead(data.externalEnergy);
         if (origExternalEnergy == Infinity<float>::value) {
-            hostCell->energy += externalEnergyPortion;
+            hostCell->usableEnergy += externalEnergyPortion;
         } else {
             externalEnergyPortion = max(0.0f, min(origExternalEnergy, externalEnergyPortion));
             auto origExternalEnergy_tickLater = atomicAdd(data.externalEnergy, -externalEnergyPortion);
             if (origExternalEnergy_tickLater >= externalEnergyPortion) {
-                hostCell->energy += externalEnergyPortion;
+                hostCell->usableEnergy += externalEnergyPortion;
             } else {
                 atomicAdd(data.externalEnergy, externalEnergyPortion);
             }
@@ -863,19 +863,19 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     auto energyNeededFromHost =
         max(0.0f, constructionData.energy - normalCellEnergy) + min(constructionData.energy, normalCellEnergy) * (1.0f - externalEnergyConditionalInflowFactor);
 
-    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->energy < normalCellEnergy + energyNeededFromHost) {
+    if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->usableEnergy < normalCellEnergy + energyNeededFromHost) {
         return false;
     }
     auto energyNeededFromExternalSource = constructionData.energy - energyNeededFromHost;
     auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostCell->energy < normalCellEnergy + constructionData.energy) {
+        if (hostCell->usableEnergy < normalCellEnergy + constructionData.energy) {
             return false;
         }
-        hostCell->energy -= constructionData.energy;
+        hostCell->usableEnergy -= constructionData.energy;
     } else {
-        hostCell->energy -= energyNeededFromHost;
+        hostCell->usableEnergy -= energyNeededFromHost;
     }
     return true;
 }

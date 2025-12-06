@@ -33,7 +33,7 @@ protected:
      */
     CellDescription createCell(RealVector2D const& pos, float energy, int color = 0)
     {
-        return CellDescription().pos(pos).energy(energy).color(color).vel({0, 0});
+        return CellDescription().pos(pos).usableEnergy(energy).color(color).vel({0, 0});
     }
 
     /**

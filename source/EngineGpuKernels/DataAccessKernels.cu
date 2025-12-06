@@ -218,7 +218,7 @@ namespace
         cellTO.vel = cell->vel;
         cellTO.fixed = cell->fixed;
         cellTO.sticky = cell->sticky;
-        cellTO.energy = cell->energy;
+        cellTO.usableEnergy = cell->usableEnergy;
         cellTO.rawEnergy = cell->rawEnergy;
         cellTO.stiffness = cell->stiffness;
         cellTO.numConnections = cell->numConnections;

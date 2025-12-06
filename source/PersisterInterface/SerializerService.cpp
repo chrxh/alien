@@ -1008,7 +1008,7 @@ namespace cereal
         CellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Cell_Energy, data._energy, defaultObject._energy);
+        loadSave(task, auxiliaries, Id_Cell_Energy, data._usableEnergy, defaultObject._usableEnergy);
         loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
         loadSave(task, auxiliaries, Id_Cell_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Cell_Vel, data._vel, defaultObject._vel);

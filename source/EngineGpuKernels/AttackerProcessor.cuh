@@ -54,7 +54,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Only attack cells with energy above base value
-            auto energyToTransfer = (atomicAdd(&otherCell->energy, 0) - baseValue) * cudaSimulationParameters.attackerStrength.value[cell->color];
+            auto energyToTransfer = (atomicAdd(&otherCell->usableEnergy, 0) - baseValue) * cudaSimulationParameters.attackerStrength.value[cell->color];
             if (energyToTransfer < 0) {
                 return;
             }
@@ -143,33 +143,33 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 otherCell->eventCounter = 10;
                 otherCell->eventPos = cell->pos;
 
-                auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
+                auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
                 if (origEnergy > baseValue + energyToTransfer) {
                     energyDelta += energyToTransfer;
                 }
                 // Revert
                 else {
-                    atomicAdd(&otherCell->energy, energyToTransfer);
+                    atomicAdd(&otherCell->usableEnergy, energyToTransfer);
                 }
             } else if (energyToTransfer < -NEAR_ZERO) {
-                auto origEnergy = atomicAdd(&otherCell->energy, -energyToTransfer);
+                auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
                 if (origEnergy >= baseValue - (energyDelta + energyToTransfer)) {
                     energyDelta += energyToTransfer;
                 }
                 // Revert
                 else {
-                    atomicAdd(&otherCell->energy, energyToTransfer);
+                    atomicAdd(&otherCell->usableEnergy, energyToTransfer);
                 }
             }
         });
 
         if (energyDelta > NEAR_ZERO) {
-            atomicAdd(&cell->energy, energyDelta);
+            atomicAdd(&cell->usableEnergy, energyDelta);
             //distributeEnergy(data, cell, energyDelta);
         } else {
-            auto origEnergy = atomicAdd(&cell->energy, energyDelta);
+            auto origEnergy = atomicAdd(&cell->usableEnergy, energyDelta);
             if (origEnergy + energyDelta < 0) {
-                atomicAdd(&someOtherCell->energy, -energyDelta);  //revert
+                atomicAdd(&someOtherCell->usableEnergy, -energyDelta);  //revert
             }
         }
 

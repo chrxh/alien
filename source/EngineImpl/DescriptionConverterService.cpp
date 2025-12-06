@@ -240,7 +240,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     NumberGenerator::get().adaptMaxIds({.entityId = cellTO.id});
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result._vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
-    result._energy = cellTO.energy;
+    result._usableEnergy = cellTO.usableEnergy;
     result._rawEnergy = cellTO.rawEnergy;
     result._stiffness = cellTO.stiffness;
     std::vector<ConnectionDescription> connections;
@@ -927,8 +927,8 @@ void DescriptionConverterService::convertCellToTO(
     }
     cellTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
     cellTO.vel = {cellDesc._vel.x, cellDesc._vel.y};
-    cellTO.energy = cellDesc._energy;
-    checkAndCorrectInvalidEnergy(cellTO.energy);
+    cellTO.usableEnergy = cellDesc._usableEnergy;
+    checkAndCorrectInvalidEnergy(cellTO.usableEnergy);
     cellTO.rawEnergy = cellDesc._rawEnergy;
     cellTO.stiffness = cellDesc._stiffness;
     cellTO.cellState = cellDesc._cellState;

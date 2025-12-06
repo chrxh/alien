@@ -24,8 +24,11 @@ TEST_F(CellConnectionTests, decay)
     _parameters.cellDeathProbability.baseValue[0] = 0.5f;
 
     _simulationFacade->setSimulationParameters(_parameters);
-    auto origData = DescriptionEditService::get().createRect(
-        DescriptionEditService::CreateRectParameters().width(1).height(1).energy(_parameters.minCellEnergy.baseValue[0] / 2));
+    auto origData = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+                                                                 .width(1)
+                                                                 .height(1)
+                                                                 .usableEnergy(_parameters.minCellEnergy.baseValue[0] / 2)
+                                                                 .rawEnergy(_parameters.minCellEnergy.baseValue[0] / 2));
 
     _simulationFacade->setSimulationData(origData);
     _simulationFacade->calcTimesteps(1000);

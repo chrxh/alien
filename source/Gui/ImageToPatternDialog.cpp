@@ -105,7 +105,7 @@ void ImageToPatternDialog::show()
                     dataDesc._cells.emplace_back(CellDescription()
                                                      .id(NumberGenerator::get().createId())
                                                      .cellType(StructureCellDescription())
-                                                     .energy(matchedCellIntensity * 200)
+                                                     .usableEnergy(matchedCellIntensity * 200)
                                                      .pos({toFloat(x) + xOffset, toFloat(y)})
                                                      .color(matchedCellColor)
                                                      .fixed(false));

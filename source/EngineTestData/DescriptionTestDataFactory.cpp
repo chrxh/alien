@@ -12,7 +12,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
     auto result = CellDescription()
                       .pos({0.5f, 0.8f})
                       .vel({-0.3f, 0.7f})
-                      .energy(150.0f)
+                      .usableEnergy(150.0f)
                       .rawEnergy(12.5f)
                       .age(42)
                       .color(3)

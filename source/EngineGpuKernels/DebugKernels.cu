@@ -66,12 +66,12 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
             }
-            if (cell->energy < 0 || isnan(cell->energy)) {
+            if (cell->usableEnergy < 0 || isnan(cell->usableEnergy)) {
                 printf("cell energy invalid at %d", location);
                 //CUDA_THROW_NOT_IMPLEMENTED();
             }
             if (sumEnergy != nullptr) {
-                atomicAdd(sumEnergy, cell->energy);
+                atomicAdd(sumEnergy, cell->usableEnergy);
             }
         }
     }

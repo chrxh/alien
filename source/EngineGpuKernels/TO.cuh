@@ -276,7 +276,7 @@ struct CellTO
     ConnectionTO connections[MAX_CELL_BONDS];
     float2 pos;
     float2 vel;
-    float energy;
+    float usableEnergy;
     float rawEnergy;
     float stiffness;
     uint8_t color;

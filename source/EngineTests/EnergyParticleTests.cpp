@@ -55,7 +55,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
     // Verify the cell has approximately the same energy as the original particle
     if (!actualData._cells.empty()) {
         auto const& cell = actualData._cells.at(0);
-        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, cell._energy, 1.0f));
+        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, cell._usableEnergy, 1.0f));
         EXPECT_EQ(0, cell._color);
     }
 }
@@ -118,4 +118,28 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
     // Verify that the particle was NOT transformed (insufficient energy)
     EXPECT_EQ(1, actualData._particles.size());
     EXPECT_EQ(0, actualData._cells.size());
+}
+
+TEST_F(EnergyParticleTests, particleAbsorption)
+{
+    auto cellEnergy = _parameters.normalCellEnergy.value[0];
+    auto particleEnergy = 10.0f;
+
+    auto data = Description()
+                    .cells({CellDescription().id(1).pos({100.4f, 100.4f}).usableEnergy(cellEnergy).color(0)})
+                    .particles({ParticleDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    EXPECT_EQ(0, actualData._particles.size());
+    EXPECT_EQ(1, actualData._cells.size());
+
+    auto const& cell = actualData.getCellRef(1);
+    EXPECT_TRUE(approxCompare(cellEnergy, cell._usableEnergy));
+    EXPECT_TRUE(approxCompare(particleEnergy, cell._rawEnergy));
 }

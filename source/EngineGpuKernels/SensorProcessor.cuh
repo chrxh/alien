@@ -94,14 +94,14 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
 
         // Measure cell energy level
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
-        auto energyAboveMin = max(cell->energy - cellMinEnergy, 0.0f);
+        auto energyAboveMin = max(cell->usableEnergy - cellMinEnergy, 0.0f);
         // Mapping energyAboveMin to [0.0, 1.0]
         // 0    -> 0
         // 10   -> 0.21
         // 50   -> 0.32
         // 100  -> 0.36
         // 1000 -> 0.5
-        cell->signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(cell->energy + 1.0f, 0.1f);
+        cell->signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(cell->usableEnergy + 1.0f, 0.1f);
 
         // Measure cell velocity with respect to front angle
         auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));

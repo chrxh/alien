@@ -148,7 +148,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), cell._color);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip), cell._energy);
+                    AlienGui::InputFloatParameters().name("Energy").format("%.2f").textWidth(BaseTabTextWidth).tooltip(Const::CellEnergyTooltip), cell._usableEnergy);
                 AlienGui::InputInt(AlienGui::InputIntParameters().name("Age").textWidth(BaseTabTextWidth).tooltip(Const::CellAgeTooltip), cell._age);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position X").format("%.2f").textWidth(BaseTabTextWidth), cell._pos.x);
                 AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Position Y").format("%.2f").textWidth(BaseTabTextWidth), cell._pos.y);
@@ -790,7 +790,7 @@ float _InspectorWindow::calcWindowWidth() const
 void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
 {
     cell._stiffness = std::max(0.0f, std::min(1.0f, cell._stiffness));
-    cell._energy = std::max(0.0f, cell._energy);
+    cell._usableEnergy = std::max(0.0f, cell._usableEnergy);
     switch (cell.getCellType()) {
     case CellType_Constructor: {
         auto& constructor = std::get<ConstructorDescription>(cell._cellType);

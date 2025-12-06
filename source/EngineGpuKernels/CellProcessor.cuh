@@ -238,7 +238,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
                     // Fusion
                     if (Math::length(velDelta) >= cellFusionVelocity && cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
-                        && (cell->sticky || otherCell->sticky) && cell->energy <= cellMaxBindingEnergy && otherCell->energy <= cellMaxBindingEnergy
+                        && (cell->sticky || otherCell->sticky) && cell->usableEnergy <= cellMaxBindingEnergy && otherCell->usableEnergy <= cellMaxBindingEnergy
                         && !cell->fixed && !otherCell->fixed) {
                         CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                     }
@@ -360,8 +360,8 @@ __inline__ __device__ void CellProcessor::calcCollisions_reconnectCells_correctO
                 auto cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
                 if (cell->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS && (cell->sticky || otherCell->sticky)
-                    && Math::length(velDelta) >= cellFusionVelocity && isApproaching && cell->energy <= cellMaxBindingEnergy
-                    && otherCell->energy <= cellMaxBindingEnergy && !cell->fixed && !otherCell->fixed) {
+                    && Math::length(velDelta) >= cellFusionVelocity && isApproaching && cell->usableEnergy <= cellMaxBindingEnergy
+                    && otherCell->usableEnergy <= cellMaxBindingEnergy && !cell->fixed && !otherCell->fixed) {
                     CellConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
                 }
             }
@@ -793,33 +793,37 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         }
         if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
 
-            auto radiationFactor = 0.0f;
-            if (cell->energy > cudaSimulationParameters.radiationType2_energyThreshold.value[cell->color]) {
-                radiationFactor += cudaSimulationParameters.radiationType2_strength.value[cell->color];
+            auto radiation1 = 0.0f;
+            auto radiation2 = 0.0f;
+            auto const& cellEnergy = cell->usableEnergy;
+            auto const& cellRawEnergy = cell->rawEnergy;
+            if (cell->usableEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[cell->color]) {
+                radiation1 += cudaSimulationParameters.radiationType2_strength.value[cell->color];
+            }
+            if (cell->rawEnergy > cudaSimulationParameters.radiationType2_energyThreshold.value[cell->color]) {
+                radiation2 += cudaSimulationParameters.radiationType2_strength.value[cell->color];
             }
             if (cell->age > cudaSimulationParameters.radiationType1_minimumAge.value[cell->color]) {
-                radiationFactor += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
+                radiation1 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
+                radiation2 += ParameterCalculator::calcParameter(cudaSimulationParameters.radiationType1_strength, data, cell->pos, cell->color);
             }
+            radiation1 *= cellEnergy;
+            radiation2 *= cellRawEnergy;
 
-            if (radiationFactor > 0) {
+            radiation1 = max(min(radiation1 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, cellEnergy - 1), 0.0f);
+            radiation2 = max(min(radiation2 / cudaSimulationParameters.radiationProbability * data.primaryNumberGen.random() * 2, cellRawEnergy - 1), 0.0f);
 
-                auto const& cellEnergy = cell->energy;
-                auto energyLoss = cellEnergy * radiationFactor;
-                energyLoss = energyLoss / cudaSimulationParameters.radiationProbability;
-                energyLoss = 2 * energyLoss * data.primaryNumberGen.random();
-                if (cellEnergy > 1) {
+            if (radiation1 > 0 || radiation2 > 0) {
+                float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
+                    + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
+                float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f
+                    - particleVel;  // minus particleVel because particle will still be moved in current time step
+                data.cellMap.correctPosition(particlePos);
 
-                    float2 particleVel = cell->vel * cudaSimulationParameters.radiationVelocityMultiplier
-                        + Math::unitVectorOfAngle(data.primaryNumberGen.random() * 360) * cudaSimulationParameters.radiationVelocityPerturbation;
-                    float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f
-                        - particleVel;  // minus particleVel because particle will still be moved in current time step
-                    data.cellMap.correctPosition(particlePos);
-                    if (energyLoss > cellEnergy - 1) {
-                        energyLoss = cellEnergy - 1;
-                    }
-                    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, energyLoss);
-                    cell->energy -= energyLoss;
-                }
+                EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiation1 + radiation2);
+
+                cell->usableEnergy -= radiation1;
+                cell->rawEnergy -= radiation2;
             }
         }
     }
@@ -836,7 +840,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
             continue;
         }
         auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
-        if (cell->energy > cellMaxBindingEnergy) {
+        if (cell->usableEnergy > cellMaxBindingEnergy) {
             CellConnectionProcessor::scheduleDeleteAllConnections(data, cell);
         }
 
@@ -850,7 +854,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
         }
 
         bool cellDestruction = false;
-        if (cell->energy < cellMinEnergy) {
+        if (cell->usableEnergy < cellMinEnergy) {
             cellDestruction = true;
         }
 
@@ -941,7 +945,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
                 && cell->cellType == CellType_Constructor && cell->creature
                 && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, *cell->creature->genome);
         };
-        auto lowEnergy = [&](Cell* cell) { return cell->energy < cellNormalEnergy; };
+        auto lowEnergy = [&](Cell* cell) { return cell->usableEnergy < cellNormalEnergy; };
 
         auto cellNeedsEnergy = needsEnergy(cell);
         auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
@@ -949,29 +953,29 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
         auto flow = 0.0f;
         if (connectedCellLowEnergy) {
-            if (cell->energy > connectedCell->energy) {
-                flow = (cell->energy - connectedCell->energy) / 2;
+            if (cell->usableEnergy > connectedCell->usableEnergy) {
+                flow = (cell->usableEnergy - connectedCell->usableEnergy) / 2;
             }
         } else {
             if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
-                if (cell->energy > connectedCell->energy) {
-                    flow = (cell->energy - connectedCell->energy) / 2;
+                if (cell->usableEnergy > connectedCell->usableEnergy) {
+                    flow = (cell->usableEnergy - connectedCell->usableEnergy) / 2;
                 }
             }
             if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
-                if (cell->energy > cellNormalEnergy) {
-                    flow = cell->energy - cellNormalEnergy;
+                if (cell->usableEnergy > cellNormalEnergy) {
+                    flow = cell->usableEnergy - cellNormalEnergy;
                 }
             }
         }
 
         if (flow > 0) {
             flow = min(2.0f, flow);
-            auto orig = atomicAdd(&cell->energy, -flow);
+            auto orig = atomicAdd(&cell->usableEnergy, -flow);
             if (orig < cellMinEnergy) {
-                atomicAdd(&cell->energy, flow);
+                atomicAdd(&cell->usableEnergy, flow);
             } else {
-                atomicAdd(&connectedCell->energy, flow);
+                atomicAdd(&connectedCell->usableEnergy, flow);
             }
         }
     }

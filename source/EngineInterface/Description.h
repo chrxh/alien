@@ -337,7 +337,7 @@ struct CellDescription
     MEMBER(CellDescription, std::vector<ConnectionDescription>, connections, {});
     MEMBER(CellDescription, RealVector2D, pos, RealVector2D());
     MEMBER(CellDescription, RealVector2D, vel, RealVector2D());
-    MEMBER(CellDescription, float, energy, 100.0f);
+    MEMBER(CellDescription, float, usableEnergy, 100.0f);
     MEMBER(CellDescription, float, rawEnergy, 0.0f);
     MEMBER(CellDescription, float, stiffness, 1.0f);
     MEMBER(CellDescription, int, color, 0);

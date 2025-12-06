@@ -293,7 +293,7 @@ TEST_F(ConstructorTests, alreadyFinished)
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({100.0f, 101.0f}),
         }),
         GenomeDescription().genes({
@@ -325,7 +325,7 @@ TEST_F(ConstructorTests, emptyGenome)
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
         }),
         GenomeDescription());
 
@@ -354,7 +354,7 @@ TEST_F(ConstructorTests, emptyGene)
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
         }),
         GenomeDescription().genes({GeneDescription().separation(true)}));
 
@@ -385,7 +385,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentBranch(0).currentNodeIndex(1))
                 .pos({100.0f, 100.0f}),
         }),
@@ -418,7 +418,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(1).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),
         }),
@@ -515,7 +515,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
@@ -551,7 +551,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}),
@@ -586,7 +586,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentBranch(0).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
         }),
@@ -620,7 +620,7 @@ TEST_F(ConstructorTests, insufficientSpace)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
         }),
@@ -699,7 +699,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells(
-            {CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).frontAngleId(FrontAngleId).pos({100.0f, 100.0f})}),
+            {CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).frontAngleId(FrontAngleId).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({randomNode}),
         }));
@@ -743,7 +743,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
+        CreatureDescription().id(0).cells({CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({randomNode}),
         }));
@@ -784,7 +784,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(NodeParameter{CellTypeGenome_Base});
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
+        CreatureDescription().id(0).cells({CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({randomNode}),
         }));
@@ -824,7 +824,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells(
-            {CellDescription().energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f})}),
+            {CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(true),
             GeneDescription().separation(true).nodes({NodeDescription()}),
@@ -868,7 +868,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
         }),
         GenomeDescription().genes({
@@ -917,7 +917,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
         }),
         GenomeDescription().genes({
@@ -962,7 +962,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells(
-            {CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
+            {CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         }));
@@ -1001,7 +1001,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells(
-            {CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f})}),
+            {CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(1)).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(true),
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
@@ -1045,7 +1045,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
             .id(0)
             .frontAngleId(InitialFrontAngleId)
 
-            .cells({CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
+            .cells({CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).numConcatenations(1).nodes({NodeDescription(), NodeDescription()}),
         }));
@@ -1091,7 +1091,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 
             .cells({CellDescription()
                         .id(0)
-                        .energy(getConstructorEnergy())
+                        .usableEnergy(getConstructorEnergy())
                         .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(0))
                         .pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
@@ -1161,7 +1161,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
                 CellDescription().id(0).pos({100.0f, 100.0f}),
                 CellDescription()
                     .id(1)
-                    .energy(getConstructorEnergy())
+                    .usableEnergy(getConstructorEnergy())
                     .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(1).lastConstructedCellId(3))
                     .pos({100.0f, 101.0f}),
                 CellDescription().id(2).pos({100.0f, 102.0f}),
@@ -1224,7 +1224,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
             .id(0)
             .frontAngleId(InitialFrontAngleId)
             .cells({
-                CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
+                CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
             }),
         genome);
 
@@ -1264,7 +1264,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
     });
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({100.0f, 101.0f}),
         }),
         genome);
@@ -1307,7 +1307,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
     });
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
         }),
         genome);
 
@@ -1348,7 +1348,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
     });
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
         }),
         genome);
 
@@ -1382,7 +1382,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}),
         }),
         GenomeDescription().genes({
@@ -1419,7 +1419,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}),
         }),
         GenomeDescription().genes({
@@ -1458,7 +1458,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
             CellDescription().id(0).pos({101.0f, 100.0f}),
             CellDescription()
                 .id(1)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentBranch(1).constructionAngle(
                     10.0f))  // constructionAngle should be ignored for the second branch
                 .pos({100.0f, 100.0f}),
@@ -1498,7 +1498,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
             CellDescription().id(0).pos({101.0f, 100.0f}),
-            CellDescription().id(1).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(1).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.0f, 101.0f}),
         }),
         GenomeDescription().genes({
@@ -1543,7 +1543,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
         }),
@@ -1599,7 +1599,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
@@ -1656,7 +1656,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
                 CellDescription().id(0).pos({101.0f, 100.0f}).cellState(CellState_Constructing),
                 CellDescription()
                     .id(1)
-                    .energy(getConstructorEnergy())
+                    .usableEnergy(getConstructorEnergy())
                     .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(3))
                     .pos({100.0f, 100.0f}),
                 CellDescription().id(2).pos({100.0f, 101.0f}),
@@ -1705,7 +1705,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
             CellDescription().id(0).pos({100.0f, 101.0f}),
             CellDescription()
                 .id(1)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(3))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({101.0f, 100.0f}).cellState(CellState_Constructing),
@@ -1754,7 +1754,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
             CellDescription()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(3)),
             CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
         }),
@@ -1800,7 +1800,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
         }),
@@ -1855,7 +1855,7 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(2).lastConstructedCellId(2))
                 .pos({100.0f, 100.0f}),
         }),
@@ -1945,7 +1945,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(2).lastConstructedCellId(2))
                 .pos({100.0f, 100.0f}),
         }),
@@ -2070,7 +2070,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(1).currentNodeIndex(0).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
@@ -2127,7 +2127,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(1).currentNodeIndex(0).lastConstructedCellId(4))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({100.0f + addDistance, 98.0f}).cellState(CellState_Constructing),
@@ -2183,7 +2183,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).cellState(CellState_Constructing),
@@ -2249,7 +2249,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).cellState(CellState_Constructing),
@@ -2312,7 +2312,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({458.20f, 239.23f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).lastConstructedCellId(2)),
             CellDescription().id(2).pos({456.40f, 238.88f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({455.96f, 239.75f}).cellState(CellState_Constructing),
@@ -2381,7 +2381,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).cellState(CellState_Constructing),
@@ -2446,7 +2446,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
@@ -2510,7 +2510,7 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
@@ -2564,7 +2564,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(3).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).cellState(CellState_Constructing),
@@ -2621,7 +2621,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
     });
     auto data = Description().addCreature(
         CreatureDescription().id(0).cells({
-            CellDescription().id(0).energy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
+            CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
         }),
         genome);
 
@@ -2658,7 +2658,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
         CreatureDescription().id(0).cells({
             CellDescription()
                 .id(0)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0).currentConcatenation(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
         }),
@@ -2718,7 +2718,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
                 .id(1)
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
@@ -2758,7 +2758,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
             CellDescription()
                 .id(2)
                 .pos({9.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0)),
             CellDescription().id(3).pos({9.0f, 11.0f}),
         }),
@@ -2793,7 +2793,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
             CellDescription()
                 .id(2)
                 .pos({9.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0)),
             CellDescription().id(3).pos({9.0f, 11.0f}),
         }),
@@ -2859,7 +2859,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
                 .id(1)
-                .energy(getConstructorEnergy() * n)
+                .usableEnergy(getConstructorEnergy() * n)
                 .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(200))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
@@ -2956,13 +2956,13 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
             CellDescription()
                 .id(2)
                 .pos({10.0f, 9.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(6)),
             CellDescription().id(3).pos({11.0f, 9.0f}),
             CellDescription()
                 .id(4)
                 .pos({11.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(8)),
 
             CellDescription().id(5).pos({10.0f, 9.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
@@ -3006,13 +3006,13 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .nodeIndex(0)
                 .cellType(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(4)),
             CellDescription()
                 .id(2)
                 .pos({11.0f, 10.0f})
-                .energy(getConstructorEnergy())
+                .usableEnergy(getConstructorEnergy())
                 .nodeIndex(1)
                 .cellType(ConstructorDescription().geneIndex(2).currentNodeIndex(2).lastConstructedCellId(6)),
 
@@ -3122,7 +3122,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
-                .energy(constructorEnergy)
+                .usableEnergy(constructorEnergy)
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
@@ -3143,7 +3143,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._energy));
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._usableEnergy));
         auto newConstructor = std::get<ConstructorDescription>(actualConstructedCell._cellType);
         if (separation == Separation::Yes) {
             EXPECT_EQ(ProvideEnergy_CellOnly, newConstructor._provideEnergy);
@@ -3152,9 +3152,9 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         }
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell._energy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 * 3 * 2 + 1), actualConstructedCell._usableEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._usableEnergy));
         }
     }
 }
@@ -3183,7 +3183,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
-                .energy(constructorEnergy)
+                .usableEnergy(constructorEnergy)
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
@@ -3237,7 +3237,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
-                .energy(constructorEnergy)
+                .usableEnergy(constructorEnergy)
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
@@ -3258,12 +3258,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
-        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._energy));
+        EXPECT_TRUE(approxCompare(normalCellEnergy, actualData.getCellRef(0)._usableEnergy));
     } else {
         if (provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No) {
-            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), actualConstructedCell._energy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy * (2 + 1), actualConstructedCell._usableEnergy));
         } else {
-            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._energy));
+            EXPECT_TRUE(approxCompare(normalCellEnergy, actualConstructedCell._usableEnergy));
         }
     }
 }

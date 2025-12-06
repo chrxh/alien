@@ -16,7 +16,8 @@ public:
         MEMBER(CreateRectParameters, int, height, 10);
         MEMBER(CreateRectParameters, CellTypeDescription, cellType, StructureCellDescription());
         MEMBER(CreateRectParameters, float, cellDistance, 1.0f);
-        MEMBER(CreateRectParameters, float, energy, 100.0f);
+        MEMBER(CreateRectParameters, float, usableEnergy, 100.0f);
+        MEMBER(CreateRectParameters, float, rawEnergy, 0.0f);
         MEMBER(CreateRectParameters, float, stiffness, 1.0f);
         MEMBER(CreateRectParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateRectParameters, bool, sticky, false);
@@ -30,7 +31,7 @@ public:
         MEMBER(CreateHexParameters, int, layers, 10);
         MEMBER(CreateHexParameters, CellTypeDescription, cellType, StructureCellDescription());
         MEMBER(CreateHexParameters, float, cellDistance, 1.0f);
-        MEMBER(CreateHexParameters, float, energy, 100.0f);
+        MEMBER(CreateHexParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateHexParameters, float, stiffness, 1.0f);
         MEMBER(CreateHexParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateHexParameters, bool, sticky, false);
@@ -43,7 +44,7 @@ public:
     {
         MEMBER(CreateUnconnectedCircleParameters, float, radius, 3.0f);
         MEMBER(CreateUnconnectedCircleParameters, float, cellDistance, 1.0f);
-        MEMBER(CreateUnconnectedCircleParameters, float, energy, 100.0f);
+        MEMBER(CreateUnconnectedCircleParameters, float, usableEnergy, 100.0f);
         MEMBER(CreateUnconnectedCircleParameters, float, stiffness, 1.0f);
         MEMBER(CreateUnconnectedCircleParameters, RealVector2D, center, RealVector2D({0, 0}));
         MEMBER(CreateUnconnectedCircleParameters, int, color, 0);

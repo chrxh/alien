@@ -59,11 +59,11 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
 {
     double result = 0;
     for (auto const& cell : data._cells) {
-        result += cell._energy;
+        result += cell._usableEnergy + cell._rawEnergy;
     }
     for (auto const& creature : data._creatures) {
         for (auto const& cell : creature._cells) {
-            result += cell._energy;
+            result += cell._usableEnergy + cell._rawEnergy;
         }
     }
     for (auto const& particle : data._particles) {

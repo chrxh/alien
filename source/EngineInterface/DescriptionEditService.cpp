@@ -20,7 +20,8 @@ Description DescriptionEditService::createRect(CreateRectParameters const& param
         for (int j = 0; j < parameters._height; ++j) {
             result._cells.emplace_back(CellDescription()
                                            .pos({toFloat(i) * parameters._cellDistance, toFloat(j) * parameters._cellDistance})
-                                           .energy(parameters._energy)
+                                           .usableEnergy(parameters._usableEnergy)
+                                           .rawEnergy(parameters._rawEnergy)
                                            .stiffness(parameters._stiffness)
                                            .color(parameters._color)
                                            .fixed(parameters._fixed)
@@ -43,7 +44,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
             //create cell: upper layer
             result._cells.emplace_back(CellDescription()
                                            .cellType(StructureCellDescription())
-                                           .energy(parameters._energy)
+                                           .usableEnergy(parameters._usableEnergy)
                                            .stiffness(parameters._stiffness)
                                            .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(-j * incY)})
                                            .color(parameters._color)
@@ -55,7 +56,7 @@ Description DescriptionEditService::createHex(CreateHexParameters const& paramet
             if (j > 0) {
                 result._cells.emplace_back(CellDescription()
                                                .cellType(StructureCellDescription())
-                                               .energy(parameters._energy)
+                                               .usableEnergy(parameters._usableEnergy)
                                                .stiffness(parameters._stiffness)
                                                .pos({toFloat(i * parameters._cellDistance + j * parameters._cellDistance / 2.0), toFloat(j * incY)})
                                                .color(parameters._color)
@@ -78,7 +79,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
         result._cells.emplace_back(CellDescription()
                                        .cellType(StructureCellDescription())
                                        .pos(parameters._center)
-                                       .energy(parameters._energy)
+                                       .usableEnergy(parameters._usableEnergy)
                                        .stiffness(parameters._stiffness)
                                        .color(parameters._color)
                                        .fixed(parameters._fixed)
@@ -101,7 +102,7 @@ Description DescriptionEditService::createUnconnectedCircle(CreateUnconnectedCir
             }
             result._cells.emplace_back(CellDescription()
                                            .cellType(StructureCellDescription())
-                                           .energy(parameters._energy)
+                                           .usableEnergy(parameters._usableEnergy)
                                            .stiffness(parameters._stiffness)
                                            .pos({parameters._center.x + dxMod, parameters._center.y + dy})
                                            .color(parameters._color)
@@ -440,13 +441,13 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
     for (auto& creature : description._creatures) {
         auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : creature._cells) {
-            cell._energy = energy;
+            cell._usableEnergy = energy;
         }
     }
     {
         auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
         for (auto& cell : description._cells) {
-            cell._energy = energy;
+            cell._usableEnergy = energy;
         }
     }
 }

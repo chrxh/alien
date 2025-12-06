@@ -805,7 +805,7 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 
     // Add many non-structure cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).usableEnergy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -834,7 +834,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
     data.addConnection(1, 2);
 
     // Add just a few free cells
-    data._cells.emplace_back(CellDescription().id(100).pos({100.0f, 50.0f}).cellType(FreeCellDescription()).energy(10.0f));
+    data._cells.emplace_back(CellDescription().id(100).pos({100.0f, 50.0f}).cellType(FreeCellDescription()).usableEnergy(10.0f));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -858,12 +858,12 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 
     // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).cellType(FreeCellDescription()).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).cellType(FreeCellDescription()).usableEnergy(10.0f));
     }
 
     // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).cellType(FreeCellDescription()).usableEnergy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -892,7 +892,7 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 
     // Add many non-free cells (should be ignored)
     for (int i = 0; i < 20; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).usableEnergy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1240,7 +1240,7 @@ TEST_F(SensorTests, telemetry_allOutputs)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
             .vel({0.1f, 0.05f})  // Moving with both x and y components
-            .energy(100.0f)
+            .usableEnergy(100.0f)
             .cellType(SensorDescription().autoTriggerInterval(3).mode(TelemetryDescription())),
     });
     _simulationFacade->setSimulationData(data);

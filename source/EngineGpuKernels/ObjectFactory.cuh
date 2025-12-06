@@ -270,7 +270,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     _map.correctPosition(cell->pos);
     cell->vel = cellTO.vel;
     cell->cellState = cellTO.cellState;
-    cell->energy = cellTO.energy;
+    cell->usableEnergy = cellTO.usableEnergy;
     cell->rawEnergy = cellTO.rawEnergy;
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
@@ -465,7 +465,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->id = _data->primaryNumberGen.createId();
     cell->pos = pos;
     cell->vel = vel;
-    cell->energy = energy;
+    cell->usableEnergy = energy;
     cell->stiffness = _data->primaryNumberGen.random();
     cell->numConnections = 0;
     cell->cellState = CellState_Ready;
@@ -556,7 +556,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     cell->id = _data->primaryNumberGen.createId();
     cell->pos = pos;
     cell->vel = vel;
-    cell->energy = energy;
+    cell->usableEnergy = energy;
+    cell->rawEnergy = 0;
     cell->stiffness = gene->stiffness;
     cell->color = node->color;
     cell->frontAngle = VALUE_NOT_SET_FLOAT;
