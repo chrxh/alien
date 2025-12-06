@@ -23,13 +23,14 @@ enum CellType_
     CellType_Defender,
     CellType_Reconnector,
     CellType_Detonator,
+    CellType_Digestor,
     CellType_Count,
 };
 
 namespace Const
 {
     std::vector<std::string> const CellTypeStrings =
-        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
+        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor"};
 }
 
 using CellTypeGenome = int;
@@ -46,13 +47,14 @@ enum CellTypeGenome_
     CellTypeGenome_Defender,
     CellTypeGenome_Reconnector,
     CellTypeGenome_Detonator,
+    CellTypeGenome_Digestor,
     CellTypeGenome_Count,
 };
 
 namespace Const
 {
     std::vector<std::string> const CellTypeGenomeStrings =
-        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator"};
+        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor"};
 }
 
 using CellState = int;
@@ -109,6 +111,9 @@ namespace Channels
     auto constexpr SensorAngle = 1;
     auto constexpr SensorDensity = 2;
     auto constexpr SensorDistance = 3;
+    auto constexpr SensorTelemetryCellEnergy = 1;
+    auto constexpr SensorTelemetryCellVelAngle = 2;
+    auto constexpr SensorTelemetryCellVelStrength = 3;
 }
 
 using DetectCreatureLineageRestriction = int;
@@ -123,6 +128,7 @@ enum DetectCreatureLineageRestriction_
 using SensorMode = int;
 enum SensorMode_
 {
+    SensorMode_Telemetry,
     SensorMode_DetectEnergy,
     SensorMode_DetectStructure,
     SensorMode_DetectFreeCell,
@@ -132,11 +138,8 @@ enum SensorMode_
 
 namespace Const
 {
-    std::vector<std::string> const SensorRestrictToMutantStrings =
-        {"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"};
-
     std::vector<std::string> const SensorModeStrings =
-        {"Detect energy", "Detect structure", "Detect free cell", "Detect creature"};
+        {"Telemetry", "Detect energy", "Detect structure", "Detect free cell", "Detect creature"};
 }
 
 //********************

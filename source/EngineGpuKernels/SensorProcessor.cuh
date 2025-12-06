@@ -11,6 +11,9 @@ public:
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+
+    __inline__ __device__ static void processDetection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processTelemetry(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void scanVicinityOfSensorCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
@@ -62,11 +65,59 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
     if (isTriggered) {
         statistics.incNumSensorActivities(cell->color);
 
-        if (cell->cellTypeData.sensor.lastMatchAvailable) {
-            relocateLastMatch(data, statistics, cell);
+        if (cell->cellTypeData.sensor.mode != SensorMode_Telemetry) {
+            processDetection(data, statistics, cell);
         } else {
-            scanVicinityOfSensorCell(data, statistics, cell);
+            processTelemetry(data, statistics, cell);
         }
+    }
+}
+
+__inline__ __device__ void SensorProcessor::processDetection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    if (cell->cellTypeData.sensor.lastMatchAvailable) {
+        relocateLastMatch(data, statistics, cell);
+    } else {
+        scanVicinityOfSensorCell(data, statistics, cell);
+    }
+}
+
+__inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    if (threadIdx.x == 0) {
+
+        // Create signal if not already existing
+        if (!cell->signal.active) {
+            SignalProcessor::createEmptySignal(cell);
+        }
+
+        // Measure cell energy level
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+        auto energyAboveMin = max(cell->energy - cellMinEnergy, 0.0f);
+        // Mapping energyAboveMin to [0.0, 1.0]
+        // 0    -> 0
+        // 10   -> 0.21
+        // 50   -> 0.32
+        // 100  -> 0.36
+        // 1000 -> 0.5
+        cell->signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(cell->energy + 1.0f, 0.1f);
+
+        // Measure cell velocity with respect to front angle
+        auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+        auto absFrontAngle = refAngle + cell->frontAngle;
+        auto velAngle = Math::angleOfVector(cell->vel);
+        cell->signal.channels[Channels::SensorTelemetryCellVelAngle] =
+            Math::getNormalizedAngle(velAngle - absFrontAngle, -180.0f) / 180.0f;  // Angle: between -1.0 and 1.0
+
+        // Measure cell velocity with 
+        auto vel = Math::length(cell->vel);
+        // Mapping velocity to [0.0, 1.0]
+        // 0     -> 0
+        // 0.001 -> 0.014
+        // 0.01  -> 0.12
+        // 0.1   -> 0.52
+        // 0.5   -> 0.94
+        cell->signal.channels[Channels::SensorTelemetryCellVelStrength] = min(log10f(1.0f + vel * 50) / 1.5f, 1.0f);
     }
 }
 
@@ -371,7 +422,7 @@ __inline__ __device__ void SensorProcessor::unpack(float& distance, float& angle
 __inline__ __device__ void SensorProcessor::writeSignal(Signal& signal, float angle, float density, float distance)
 {
     signal.channels[Channels::SensorFoundResult] = 1;               // Something found
-    signal.channels[Channels::SensorAngle] = angle / 180.0f;                       // Angle: between -1.0 and 1.0
+    signal.channels[Channels::SensorAngle] = angle / 180.0f;        // Angle: between -1.0 and 1.0
     signal.channels[Channels::SensorDensity] = min(1.0f, density);  // Normalized density (1.0 = 64 cells in 8x8 region)
     signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
 }

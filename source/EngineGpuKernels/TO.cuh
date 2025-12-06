@@ -60,6 +60,9 @@ struct ConstructorTO
     uint8_t currentBranch;
 };
 
+struct TelemetryTO
+{};
+
 struct DetectEnergyTO
 {
     float minDensity;
@@ -84,6 +87,7 @@ struct DetectCreatureTO
 
 union SensorModeTO
 {
+    TelemetryTO telemetry;
     DetectEnergyTO detectEnergy;
     DetectStructureTO detectStructure;
     DetectFreeCellTO detectFreeCell;
@@ -233,6 +237,9 @@ struct DetonatorTO
     int32_t countdown;
 };
 
+struct DigestorTO
+{};
+
 union CellTypeDataTO
 {
     BaseTO base;
@@ -246,6 +253,7 @@ union CellTypeDataTO
     DefenderTO defender;
     ReconnectorTO reconnector;
     DetonatorTO detonator;
+    DigestorTO digestor;
 };
 
 struct SignalRestrictionTO
@@ -269,6 +277,7 @@ struct CellTO
     float2 pos;
     float2 vel;
     float energy;
+    float rawEnergy;
     float stiffness;
     uint8_t color;
     uint8_t numConnections;

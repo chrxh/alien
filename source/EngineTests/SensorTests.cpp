@@ -74,31 +74,31 @@ protected:
     }
 };
 
-class SensorTests_AllModes
+class SensorTests_AllDetectionModes
     : public SensorTests
     , public testing::WithParamInterface<SensorMode>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
     SensorModes,
-    SensorTests_AllModes,
+    SensorTests_AllDetectionModes,
     ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectStructure, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
 
-class SensorTests_AllModesExceptDetectStructure
+class SensorTests_AllDetectionModesExceptStructure
     : public SensorTests
     , public testing::WithParamInterface<SensorMode>
 {};
 
 INSTANTIATE_TEST_SUITE_P(
     SensorModes,
-    SensorTests_AllModesExceptDetectStructure,
+    SensorTests_AllDetectionModesExceptStructure,
     ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
 
 /**
  * Parameterized tests that work across all sensor modes
  */
 
-TEST_P(SensorTests_AllModes, autoTriggered_noTarget)
+TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
 {
     auto data = Description().cells({
         CellDescription()
@@ -126,7 +126,7 @@ TEST_P(SensorTests_AllModes, autoTriggered_noTarget)
     }
 }
 
-TEST_P(SensorTests_AllModes, manuallyTriggered_noSignal)
+TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
 {
     auto data = Description().cells({
         CellDescription()
@@ -144,7 +144,7 @@ TEST_P(SensorTests_AllModes, manuallyTriggered_noSignal)
     }
 }
 
-TEST_P(SensorTests_AllModes, manuallyTriggered_withSignal)
+TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
 {
     auto data = Description().cells({
         CellDescription()
@@ -163,7 +163,7 @@ TEST_P(SensorTests_AllModes, manuallyTriggered_withSignal)
     EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllModes, noFrontAngle)
+TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
@@ -181,7 +181,7 @@ TEST_P(SensorTests_AllModes, noFrontAngle)
     EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, targetAbove)
+TEST_P(SensorTests_AllDetectionModes, targetAbove)
 {
     auto data = Description().cells({
         CellDescription()
@@ -209,7 +209,7 @@ TEST_P(SensorTests_AllModes, targetAbove)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
 }
 
-TEST_P(SensorTests_AllModes, targetAbove_differentFrontAngle)
+TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
 {
     auto data = Description().cells({
         CellDescription()
@@ -237,7 +237,7 @@ TEST_P(SensorTests_AllModes, targetAbove_differentFrontAngle)
     EXPECT_TRUE(angleAsSignal < -0.9f || angleAsSignal > 0.9f);
 }
 
-TEST_P(SensorTests_AllModes, targetBelow)
+TEST_P(SensorTests_AllDetectionModes, targetBelow)
 {
     auto data = Description().cells({
         CellDescription()
@@ -265,7 +265,7 @@ TEST_P(SensorTests_AllModes, targetBelow)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < 0.7f);
 }
 
-TEST_P(SensorTests_AllModes, closerTargetDetected)
+TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
@@ -294,7 +294,7 @@ TEST_P(SensorTests_AllModes, closerTargetDetected)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
 }
 
-TEST_P(SensorTests_AllModes, minRange_found)
+TEST_P(SensorTests_AllDetectionModes, minRange_found)
 {
     auto data = Description().cells({
         CellDescription()
@@ -318,7 +318,7 @@ TEST_P(SensorTests_AllModes, minRange_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllModes, minRange_notFound)
+TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
 {
     auto data = Description().cells({
         CellDescription()
@@ -342,7 +342,7 @@ TEST_P(SensorTests_AllModes, minRange_notFound)
     ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, maxRange_found)
+TEST_P(SensorTests_AllDetectionModes, maxRange_found)
 {
     auto data = Description().cells({
         CellDescription()
@@ -366,7 +366,7 @@ TEST_P(SensorTests_AllModes, maxRange_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllModes, maxRange_notFound)
+TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
 {
     auto data = Description().cells({
         CellDescription()
@@ -390,7 +390,7 @@ TEST_P(SensorTests_AllModes, maxRange_notFound)
     ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, rayBlockedBySameCreatureConnections)
+TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
@@ -413,7 +413,7 @@ TEST_P(SensorTests_AllModes, rayBlockedBySameCreatureConnections)
     EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
+TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
 {
     auto data = Description()
                     .addCreature(CreatureDescription().id(0).cells(
@@ -443,7 +443,7 @@ TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, rayBlockedByStructureCells)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
 {
     auto data = Description().cells({
         CellDescription()
@@ -471,7 +471,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, rayBlockedByStructureCells)
     EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, rayNotBlockedByStructureCells_behind)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_behind)
 {
     auto data = Description().cells({
         CellDescription()
@@ -500,7 +500,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, rayNotBlockedByStructureCells_
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, rayNotBlockedByStructureCells_differentAngle)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_differentAngle)
 {
     auto data = Description().cells({
         CellDescription()
@@ -529,7 +529,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, rayNotBlockedByStructureCells_
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetStationary)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary)
 {
     // First scan - target is detected and position stored
     auto data = Description().cells({
@@ -572,7 +572,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetStationary)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetMoved)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
 {
     // First scan - target is detected and position stored
     auto data = Description().cells({
@@ -625,7 +625,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetMoved)
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetDisappeared)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeared)
 {
     // First scan - target is detected and position stored
     auto data = Description().cells({
@@ -669,7 +669,7 @@ TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetDisappeared)
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllModesExceptDetectStructure, relocation_targetBlocked)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
 {
     // First scan - target is detected and position stored
     auto data = Description().cells({
@@ -1170,4 +1170,47 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
 
     // Should not detect own creature cells
     EXPECT_FALSE(actualSensor._signal.has_value());
+}
+
+/**
+ * Tests for SensorMode_Telemetry (mode-specific tests)
+ */
+TEST_F(SensorTests, telemetry_allOutputs)
+{
+    // Test with a cell that has energy and velocity to verify all telemetry outputs
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .vel({0.1f, 0.05f})  // Moving with both x and y components
+            .energy(100.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(TelemetryDescription())),
+    });
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    
+    ASSERT_TRUE(actualSensor._signal.has_value());
+    
+    // Verify cell energy channel is populated and within expected range
+    // Formula: 1.0 - 1.0 / pow(energy + 1.0, 0.1)
+    // For energy=100: 1.0 - 1.0 / pow(101, 0.1) ≈ 0.36
+    auto energySignal = actualSensor._signal->_channels[Channels::SensorTelemetryCellEnergy];
+    EXPECT_TRUE(energySignal > 0.3f);
+    EXPECT_TRUE(energySignal < 0.4f);
+    
+    // Verify velocity angle channel is populated
+    // Range: [-1.0, 1.0] representing angle relative to front angle
+    auto velAngle = actualSensor._signal->_channels[Channels::SensorTelemetryCellVelAngle];
+    EXPECT_TRUE(velAngle >= -1.0f);
+    EXPECT_TRUE(velAngle <= 1.0f);
+    
+    // Verify velocity strength channel is populated and within expected range
+    // Formula: min(log(1.0 + vel * 50) / 1.5, 1.0)
+    // For vel ≈ 0.112: log(1 + 5.6) / 1.5 ≈ 0.63
+    auto velStrength = actualSensor._signal->_channels[Channels::SensorTelemetryCellVelStrength];
+    EXPECT_TRUE(velStrength > 0.5f);
+    EXPECT_TRUE(velStrength < 0.7f);
 }

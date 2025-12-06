@@ -20,6 +20,9 @@ struct DepotGenome
     EnergyDistributionMode mode;
 };
 
+struct TelemetryGenome
+{};
+
 struct DetectEnergyGenome
 {
     float minDensity;
@@ -44,6 +47,7 @@ struct DetectCreatureGenome
 
 union SensorModeGenome
 {
+    TelemetryGenome telemetry;
     DetectEnergyGenome detectEnergy;
     DetectStructureGenome detectStructure;
     DetectFreeCellGenome detectFreeCell;

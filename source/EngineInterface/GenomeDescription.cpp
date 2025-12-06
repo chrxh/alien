@@ -32,7 +32,9 @@ GenomeDescription GenomeDescription::id(uint64_t id)
 
 SensorMode SensorGenomeDescription::getMode() const
 {
-    if (std::holds_alternative<DetectEnergyGenomeDescription>(_mode)) {
+    if (std::holds_alternative<TelemetryGenomeDescription>(_mode)) {
+        return SensorMode_Telemetry;
+    } else if (std::holds_alternative<DetectEnergyGenomeDescription>(_mode)) {
         return SensorMode_DetectEnergy;
     } else if (std::holds_alternative<DetectStructureGenomeDescription>(_mode)) {
         return SensorMode_DetectStructure;
@@ -86,6 +88,8 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Reconnector;
     } else if (std::holds_alternative<DetonatorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Detonator;
+    } else if (std::holds_alternative<DigestorGenomeDescription>(_cellType)) {
+        return CellTypeGenome_Digestor;
     }
     CHECK(false);
 }

@@ -189,9 +189,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
         auto constructionData = createConstructionData(cell);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
 
-            if (cell->signal.active) {
-                cell->signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
-            }
+            cell->signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
             ++constructionData.creature->numCells;
             if (!constructionData.isLastNode) {
@@ -217,9 +215,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                 }
             }
         } else {
-            if (cell->signal.active) {
-                cell->signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
-            }
+            cell->signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
         }
     }
 }

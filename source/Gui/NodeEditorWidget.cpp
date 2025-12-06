@@ -103,6 +103,8 @@ namespace
     SensorModeGenomeDescription createSensorModeGenomeDescription(SensorMode mode)
     {
         switch (mode) {
+        case SensorMode_Telemetry:
+            return TelemetryGenomeDescription();
         case SensorMode_DetectEnergy:
             return DetectEnergyGenomeDescription();
         case SensorMode_DetectStructure:
@@ -239,7 +241,9 @@ void _NodeEditorWidget::processNodeAttributes()
             }
 
             // Mode-specific parameters
-            if (mode == SensorMode_DetectEnergy) {
+            if (mode == SensorMode_DetectStructure) {
+                // No parameters
+            } else if (mode == SensorMode_DetectEnergy) {
                 AlienGui::BeginIndent();
                 auto& detectEnergy = std::get<DetectEnergyGenomeDescription>(sensor._mode);
                 AlienGui::InputFloat(

@@ -50,6 +50,11 @@ struct ConstructorGenomeDescription
     MEMBER(ConstructorGenomeDescription, ProvideEnergy, provideEnergy, ProvideEnergy_CellOnly);
 };
 
+struct TelemetryGenomeDescription
+{
+    auto operator<=>(TelemetryGenomeDescription const&) const = default;
+};
+
 struct DetectEnergyGenomeDescription
 {
     auto operator<=>(DetectEnergyGenomeDescription const&) const = default;
@@ -80,7 +85,7 @@ struct DetectCreatureGenomeDescription
     MEMBER(DetectCreatureGenomeDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
 };
 
-using SensorModeGenomeDescription = std::variant<DetectEnergyGenomeDescription, DetectStructureGenomeDescription, DetectFreeCellGenomeDescription, DetectCreatureGenomeDescription>;
+using SensorModeGenomeDescription = std::variant<TelemetryGenomeDescription, DetectEnergyGenomeDescription, DetectStructureGenomeDescription, DetectFreeCellGenomeDescription, DetectCreatureGenomeDescription>;
 
 struct SensorGenomeDescription
 {
@@ -204,6 +209,11 @@ struct DetonatorGenomeDescription
     MEMBER(DetonatorGenomeDescription, int, countdown, 10);
 };
 
+struct DigestorGenomeDescription
+{
+    auto operator<=>(DigestorGenomeDescription const&) const = default;
+};
+
 using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
@@ -215,7 +225,8 @@ using CellTypeGenomeDescription = std::variant<
     MuscleGenomeDescription,
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
-    DetonatorGenomeDescription>;
+    DetonatorGenomeDescription,
+    DigestorGenomeDescription>;
 
 struct SignalRestrictionGenomeDescription
 {
