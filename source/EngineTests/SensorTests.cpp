@@ -542,7 +542,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     });
     data.addConnection(1, 2);
 
-    addDetectionTargets(data, GetParam(), {100.0f, 50.0f});
+    addDetectionTargets(data, GetParam(), {100.0f, 60.0f});
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -563,13 +563,16 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     EXPECT_TRUE(actualSensor._signal.has_value());
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 
-    // Verify lastMatch is still present
-    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
     // Angle should be roughly -90 degrees (-0.5 normalized)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 0.9f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.7f);
+
+    // Verify lastMatch is still present
+    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
 TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
@@ -595,9 +598,6 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     auto actualSensor = actualData.getCellRef(1);
     CHECK(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 
-    // Get the initial distance
-    auto initialDistance = actualSensor._signal->_channels[Channels::SensorDistance];
-
     // Move the target by deleting and re-adding at a new position
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getCellRef(1);
@@ -605,7 +605,8 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     actualData.clear();
     actualData._cells.emplace_back(sensorCell);
     actualData._cells.emplace_back(auxCell);
-    addDetectionTargets(actualData, GetParam(), {120.0f, 70.0f}, 8, false);
+    addDetectionTargets(actualData, GetParam(), {120.0f, 30.0f}, 8, false);
+    addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 8, true);  // Add a closer target which should be ignored
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved, should be relocated via tracking
@@ -616,9 +617,64 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     EXPECT_TRUE(actualSensor._signal.has_value());
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 
-    // Distance should be different since target moved
-    auto newDistance = actualSensor._signal->_channels[Channels::SensorDistance];
-    EXPECT_FALSE(approxCompare(initialDistance, newDistance));
+    // Angle should be roughly -65 degrees (~ -0.4 normalized)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.5f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 0.8f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.5f);
+
+    // Verify lastMatch position was updated
+    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forceInitialScan)
+{
+    // First scan - target is detected and position stored
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .neuralNetwork(NeuralNetworkDescription().weight(0, 0, -1.0f))
+            .cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
+    });
+    data.addConnection(1, 2);
+
+    // Add target
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8, false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    CHECK(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Move the target by deleting and re-adding at a new position
+    actualData = _simulationFacade->getSimulationData();
+    auto sensorCell = actualData.getCellRef(1);
+    auto auxCell = actualData.getCellRef(2);
+    actualData.clear();
+    actualData._cells.emplace_back(sensorCell);
+    actualData._cells.emplace_back(auxCell);
+    addDetectionTargets(actualData, GetParam(), {120.0f, 80.0f}, 8, false);
+    addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 8, true);  // Add a closer target which should matched by initial scan
+    _simulationFacade->setSimulationData(actualData);
+
+    // Second scan - target has moved, should be relocated via tracking
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Angle should be roughly +90 degrees (+0.5 normalized)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > 0.3f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < 0.7f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.8f);
 
     // Verify lastMatch position was updated
     auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);

@@ -107,6 +107,7 @@ namespace Channels
 //********************
 namespace Channels
 {
+    auto constexpr SensorForceInitialScan = 0;
     auto constexpr SensorFoundResult = 0;
     auto constexpr SensorAngle = 1;
     auto constexpr SensorDensity = 2;
@@ -147,9 +148,6 @@ namespace Const
 //********************
 namespace Channels
 {
-    auto constexpr AttackerNotify = 7;
-    auto constexpr AttackerSuccess = 2;
-
     auto constexpr MuscleTrigger = 0;
     auto constexpr MuscleAngle = 1;
 }
@@ -170,6 +168,15 @@ namespace Const
 {
     std::vector<std::string> const MuscleModeStrings =
         {"Auto bending", "Manual bending", "Angle bending", "Auto crawling", "Manual crawling", "Direct movement"};
+}
+
+//**********************
+//* Attacker constants *
+//**********************
+namespace Channels
+{
+    auto constexpr AttackerSuccess = 2;
+    auto constexpr AttackerNotify = 7;
 }
 
 //**********************

@@ -14,7 +14,7 @@ private:
 
     __inline__ __device__ static void processDetection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processTelemetry(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void scanVicinityOfSensorCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void initialScan(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
     enum class ScanType
@@ -22,7 +22,7 @@ private:
         LocateMatch,
         RelocateLastMatch
     };
-    __inline__ __device__ static uint64_t getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float angle, float distance, ScanType scanType);
+    __inline__ __device__ static uint64_t getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -75,10 +75,11 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
 
 __inline__ __device__ void SensorProcessor::processDetection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (cell->cellTypeData.sensor.lastMatchAvailable) {
-        relocateLastMatch(data, statistics, cell);
+    auto forceInitialScan = cell->signal.channels[Channels::SensorForceInitialScan] < -NEAR_ZERO;
+    if (!cell->cellTypeData.sensor.lastMatchAvailable || forceInitialScan) {
+        initialScan(data, statistics, cell);
     } else {
-        scanVicinityOfSensorCell(data, statistics, cell);
+        relocateLastMatch(data, statistics, cell);
     }
 }
 
@@ -121,7 +122,7 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
     }
 }
 
-__inline__ __device__ void SensorProcessor::scanVicinityOfSensorCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     __shared__ uint64_t lookupResult;
 
@@ -290,17 +291,23 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             float distance, relAngle, density;
             uint16_t creatureIdPart;
             unpack(distance, relAngle, density, creatureIdPart, lookupResult);
+
+            // relAngle and distance are relative to last match pos
+            // recalculate them to be based on the sensor cell pos
+            auto absAngle = relAngle + refAngle + cell->frontAngle;
+            auto targetPos = cell->cellTypeData.sensor.lastMatch.pos + Math::unitVectorOfAngle(absAngle) * distance;
+            auto delta = data.cellMap.getCorrectedDirection(targetPos - cell->pos);
+            distance = Math::length(delta);
+            absAngle = Math::angleOfVector(delta);
+            relAngle = Math::getNormalizedAngle(absAngle - refAngle - cell->frontAngle, -180.0f);
+
             writeSignal(cell->signal, relAngle, density, distance);
     
             statistics.incNumSensorMatches(cell->color);
     
-            auto absAngle = relAngle + refAngle + cell->frontAngle;
-            auto matchPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
-            data.cellMap.correctPosition(matchPos);
-    
             cell->cellTypeData.sensor.lastMatchAvailable = true;
             cell->cellTypeData.sensor.lastMatch.creatureId = creatureIdPart;
-            cell->cellTypeData.sensor.lastMatch.pos = matchPos;
+            cell->cellTypeData.sensor.lastMatch.pos = targetPos;
         } else {
             cell->cellTypeData.sensor.lastMatchAvailable = false;
             cell->signal.channels[Channels::SensorFoundResult] = 0;  // Nothing found
@@ -309,7 +316,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 }
 
 __inline__ __device__ uint64_t
-SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float angle, float distance, ScanType scanType)
+SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
 {
     auto const& mode = cell->cellTypeData.sensor.mode;
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
@@ -319,12 +326,13 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
         auto density = densityMap.getEnergyParticleDensity(scanPos);
         if (density >= minDensity) {
             auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
-            return pack(distance, angle - refAngle - cell->frontAngle, density);
+            auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - cell->frontAngle, -180.0f);
+            return pack(distance, relAngle, density);
         }
     } else if (mode == SensorMode_DetectStructure) {
         if (densityMap.getStructureDensity(scanPos) > 0) {
             auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
-            return pack(distance, angle - refAngle - cell->frontAngle, 1.0f);
+            return pack(distance, absAngle - refAngle - cell->frontAngle, 1.0f);
         }
     } else if (mode == SensorMode_DetectFreeCell) {
         auto const& minDensity =  cell->cellTypeData.sensor.modeData.detectFreeCell.minDensity;
@@ -332,7 +340,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
         auto density = densityMap.getFreeCellDensity(scanPos, restrictToColor);
         if (density >= minDensity) {
             auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
-            return pack(distance, angle - refAngle - cell->frontAngle, density);
+            return pack(distance, absAngle - refAngle - cell->frontAngle, density);
         }
     } else if (mode == SensorMode_DetectCreature) {
         if (scanType == ScanType::LocateMatch) {
@@ -377,7 +385,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
                     if (matches) {
                         uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xFFFF) : 0;
                         auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
-                        return pack(distance, angle - refAngle - cell->frontAngle, 1.0f, creatureIdPart);
+                        return pack(distance, absAngle - refAngle - cell->frontAngle, 1.0f, creatureIdPart);
                     }
                 }
                 otherCell = otherCell->nextCell;
