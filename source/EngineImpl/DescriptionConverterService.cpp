@@ -457,6 +457,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     } break;
     case CellType_Digestor: {
         DigestorDescription digestor;
+        digestor._rawEnergyConductivity = cellTO.cellTypeData.digestor.rawEnergyConductivity;
         result._cellType = digestor;
     } break;
     }
@@ -630,6 +631,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Digestor: {
         DigestorGenomeDescription digestorDesc;
+        digestorDesc._rawEnergyConductivity = nodeTO->cellTypeData.digestor.rawEnergyConductivity;
         nodeDesc._cellType = digestorDesc;
     } break;
     }
@@ -869,6 +871,9 @@ void DescriptionConverterService::convertGenomeToTO(
                 detonatorTO.countdown = detonatorDesc._countdown;
             } break;
             case CellTypeGenome_Digestor: {
+                auto const& digestorDesc = std::get<DigestorGenomeDescription>(nodeDesc._cellType);
+                auto& digestorTO = nodeTO.cellTypeData.digestor;
+                digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
             } break;
             }
         }
@@ -1098,6 +1103,9 @@ void DescriptionConverterService::convertCellToTO(
         detonatorTO.countdown = detonatorDesc._countdown;
     } break;
     case CellType_Digestor: {
+        auto const& digestorDesc = std::get<DigestorDescription>(cellDesc._cellType);
+        DigestorTO& digestorTO = cellTO.cellTypeData.digestor;
+        digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

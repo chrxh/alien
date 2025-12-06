@@ -152,6 +152,11 @@ struct DetonatorGenome
     int32_t countdown;
 };
 
+struct DigestorGenome
+{
+    float rawEnergyConductivity;  // Between 0 and 1
+};
+
 union CellTypeDataGenome
 {
     BaseGenome base;
@@ -165,6 +170,7 @@ union CellTypeDataGenome
     DefenderGenome defender;
     ReconnectorGenome reconnector;
     DetonatorGenome detonator;
+    DigestorGenome digestor;
 };
 
 struct SignalRestrictionGenome

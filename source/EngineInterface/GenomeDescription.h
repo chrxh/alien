@@ -212,6 +212,8 @@ struct DetonatorGenomeDescription
 struct DigestorGenomeDescription
 {
     auto operator<=>(DigestorGenomeDescription const&) const = default;
+
+    MEMBER(DigestorGenomeDescription, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
 };
 
 using CellTypeGenomeDescription = std::variant<

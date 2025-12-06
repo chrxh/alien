@@ -229,7 +229,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
     case CellType_Digestor:
-        return DigestorDescription();
+        return DigestorDescription().rawEnergyConductivity(0.7f);
     default:
         return CellTypeDescription();
     }
@@ -319,7 +319,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         return DetonatorGenomeDescription().countdown(45);
     }
     case CellTypeGenome_Digestor: {
-        return DigestorGenomeDescription();
+        return DigestorGenomeDescription().rawEnergyConductivity(0.8f);
     }
     default:
         return CellTypeGenomeDescription();
