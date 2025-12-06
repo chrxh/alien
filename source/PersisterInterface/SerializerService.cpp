@@ -116,6 +116,32 @@ namespace cereal
         }
     }
 
+    /**
+     * Serialize a nested structure with backward compatibility support.
+     * Writes a presence flag before the data, allowing old versions to use default values.
+     * 
+     * @param task Save or Load operation
+     * @param ar Archive for serialization
+     * @param data The data to serialize/deserialize
+     * @param defaultValue Default value to use if data is not present in stream
+     */
+    template <class Archive, typename T>
+    void serializeOptionalNested(SerializationTask task, Archive& ar, T& data, T const& defaultValue)
+    {
+        if (task == SerializationTask::Save) {
+            bool hasData = true;
+            ar(hasData, data);
+        } else {
+            bool hasData = false;
+            ar(hasData);
+            if (hasData) {
+                ar(data);
+            } else {
+                data = defaultValue;
+            }
+        }
+    }
+
     template <class Archive>
     void serialize(Archive& ar, IntVector2D& data)
     {
