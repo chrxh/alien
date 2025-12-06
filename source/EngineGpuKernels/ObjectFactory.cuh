@@ -137,10 +137,11 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 break;
             case CellTypeGenome_Sensor:
                 node.cellTypeData.sensor.autoTriggerInterval = nodeTO.cellTypeData.sensor.autoTriggerInterval;
-                node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
                 node.cellTypeData.sensor.minRange = nodeTO.cellTypeData.sensor.minRange;
                 node.cellTypeData.sensor.maxRange = nodeTO.cellTypeData.sensor.maxRange;
-                if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                node.cellTypeData.sensor.mode = nodeTO.cellTypeData.sensor.mode;
+                if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+                } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                     node.cellTypeData.sensor.modeData.detectEnergy.minDensity = nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                 } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -203,6 +204,8 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 break;
             case CellTypeGenome_Detonator:
                 node.cellTypeData.detonator.countdown = nodeTO.cellTypeData.detonator.countdown;
+                break;
+            case CellTypeGenome_Digestor:
                 break;
             }
         }
@@ -268,6 +271,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->vel = cellTO.vel;
     cell->cellState = cellTO.cellState;
     cell->energy = cellTO.energy;
+    cell->rawEnergy = cellTO.rawEnergy;
     cell->stiffness = cellTO.stiffness;
     cell->cellType = cellTO.cellType;
     cell->fixed = cellTO.fixed;
@@ -322,10 +326,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     } break;
     case CellType_Sensor: {
         cell->cellTypeData.sensor.autoTriggerInterval = cellTO.cellTypeData.sensor.autoTriggerInterval;
-        cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
         cell->cellTypeData.sensor.minRange = cellTO.cellTypeData.sensor.minRange;
         cell->cellTypeData.sensor.maxRange = cellTO.cellTypeData.sensor.maxRange;
-        if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+        cell->cellTypeData.sensor.mode = cellTO.cellTypeData.sensor.mode;
+        if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             cell->cellTypeData.sensor.modeData.detectEnergy.minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
         } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
         } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -405,6 +410,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     case CellType_Detonator: {
         cell->cellTypeData.detonator.state = cellTO.cellTypeData.detonator.state;
         cell->cellTypeData.detonator.countdown = cellTO.cellTypeData.detonator.countdown;
+    } break;
+    case CellType_Digestor: {
     } break;
     }
 }
@@ -620,10 +627,11 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto const& nodeSensor = node->cellTypeData.sensor;
         auto& sensor = cell->cellTypeData.sensor;
         sensor.autoTriggerInterval = nodeSensor.autoTriggerInterval;
-        sensor.mode = nodeSensor.mode;
         sensor.minRange = nodeSensor.minRange;
         sensor.maxRange = nodeSensor.maxRange;
-        if (nodeSensor.mode == SensorMode_DetectEnergy) {
+        sensor.mode = nodeSensor.mode;
+        if (nodeSensor.mode == SensorMode_Telemetry) {
+        } else if (nodeSensor.mode == SensorMode_DetectEnergy) {
             sensor.modeData.detectEnergy.minDensity = nodeSensor.modeData.detectEnergy.minDensity;
         } else if (nodeSensor.mode == SensorMode_DetectStructure) {
         } else if (nodeSensor.mode == SensorMode_DetectFreeCell) {
@@ -726,6 +734,9 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto& detonator = cell->cellTypeData.detonator;
         detonator.state = DetonatorState_Ready;
         detonator.countdown = nodeDetonator.countdown;
+    } break;
+    case CellTypeGenome_Digestor: {
+        cell->cellType = CellType_Digestor;
     } break;
     }
     return cell;

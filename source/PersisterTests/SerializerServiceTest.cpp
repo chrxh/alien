@@ -54,6 +54,7 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Base},
         CellParameter{CellType_Depot},
         CellParameter{CellType_Constructor},
+        CellParameter{CellType_Sensor, std::nullopt, SensorMode_Telemetry},
         CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectEnergy},
         CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectStructure},
         CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectFreeCell},
@@ -69,7 +70,8 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Muscle, MuscleMode_DirectMovement},
         CellParameter{CellType_Defender},
         CellParameter{CellType_Reconnector},
-        CellParameter{CellType_Detonator}));
+        CellParameter{CellType_Detonator},
+        CellParameter{CellType_Digestor}));
 
 TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
 {
@@ -94,6 +96,7 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Base},
         NodeParameter{CellTypeGenome_Depot},
         NodeParameter{CellTypeGenome_Constructor},
+        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_Telemetry},
         NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectEnergy},
         NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectStructure},
         NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectFreeCell},
@@ -109,7 +112,8 @@ INSTANTIATE_TEST_SUITE_P(
         NodeParameter{CellTypeGenome_Muscle, MuscleMode_DirectMovement},
         NodeParameter{CellTypeGenome_Defender},
         NodeParameter{CellTypeGenome_Reconnector},
-        NodeParameter{CellTypeGenome_Detonator}));
+        NodeParameter{CellTypeGenome_Detonator},
+        NodeParameter{CellTypeGenome_Digestor}));
 
 TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
 {

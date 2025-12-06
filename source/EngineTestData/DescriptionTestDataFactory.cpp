@@ -13,6 +13,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .pos({0.5f, 0.8f})
                       .vel({-0.3f, 0.7f})
                       .energy(150.0f)
+                      .rawEnergy(12.5f)
                       .age(42)
                       .color(3)
                       .fixed(true)
@@ -134,6 +135,9 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Sensor: {
         SensorModeDescription sensorModeDesc;
         switch (sensorMode) {
+        case SensorMode_Telemetry:
+            sensorModeDesc = TelemetryDescription();
+            break;
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyDescription().minDensity(0.3f);
             break;
@@ -224,6 +228,8 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         return ReconnectorDescription().restrictToColor(1).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
+    case CellType_Digestor:
+        return DigestorDescription();
     default:
         return CellTypeDescription();
     }
@@ -248,6 +254,9 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Sensor: {
         SensorModeGenomeDescription sensorModeDesc;
         switch (sensorMode) {
+        case SensorMode_Telemetry:
+            sensorModeDesc = TelemetryGenomeDescription();
+            break;
         case SensorMode_DetectEnergy:
             sensorModeDesc = DetectEnergyGenomeDescription().minDensity(0.25f);
             break;
@@ -308,6 +317,9 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         return ReconnectorGenomeDescription().restrictToColor(4).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
     case CellTypeGenome_Detonator: {
         return DetonatorGenomeDescription().countdown(45);
+    }
+    case CellTypeGenome_Digestor: {
+        return DigestorGenomeDescription();
     }
     default:
         return CellTypeGenomeDescription();

@@ -87,10 +87,11 @@ namespace
                         break;
                     case CellTypeGenome_Sensor:
                         nodeTO.cellTypeData.sensor.autoTriggerInterval = node.cellTypeData.sensor.autoTriggerInterval;
-                        nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
                         nodeTO.cellTypeData.sensor.minRange = node.cellTypeData.sensor.minRange;
                         nodeTO.cellTypeData.sensor.maxRange = node.cellTypeData.sensor.maxRange;
-                        if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+                        nodeTO.cellTypeData.sensor.mode = node.cellTypeData.sensor.mode;
+                        if (nodeTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+                        } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                             nodeTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = node.cellTypeData.sensor.modeData.detectEnergy.minDensity;
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
                         } else if (nodeTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -158,6 +159,8 @@ namespace
                     case CellTypeGenome_Detonator:
                         nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
                         break;
+                    case CellTypeGenome_Digestor:
+                        break;
                     }
                 }
             }
@@ -216,6 +219,7 @@ namespace
         cellTO.fixed = cell->fixed;
         cellTO.sticky = cell->sticky;
         cellTO.energy = cell->energy;
+        cellTO.rawEnergy = cell->rawEnergy;
         cellTO.stiffness = cell->stiffness;
         cellTO.numConnections = cell->numConnections;
         cellTO.cellState = cell->cellState;
@@ -273,10 +277,11 @@ namespace
         } break;
         case CellType_Sensor: {
             cellTO.cellTypeData.sensor.autoTriggerInterval = cell->cellTypeData.sensor.autoTriggerInterval;
-            cellTO.cellTypeData.sensor.mode = cell->cellTypeData.sensor.mode;
             cellTO.cellTypeData.sensor.minRange = cell->cellTypeData.sensor.minRange;
             cellTO.cellTypeData.sensor.maxRange = cell->cellTypeData.sensor.maxRange;
-            if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+            cellTO.cellTypeData.sensor.mode = cell->cellTypeData.sensor.mode;
+            if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+            } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
                 cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity = cell->cellTypeData.sensor.modeData.detectEnergy.minDensity;
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
             } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
@@ -360,6 +365,8 @@ namespace
         case CellType_Detonator: {
             cellTO.cellTypeData.detonator.state = cell->cellTypeData.detonator.state;
             cellTO.cellTypeData.detonator.countdown = cell->cellTypeData.detonator.countdown;
+        } break;
+        case CellType_Digestor: {
         } break;
         }
     }

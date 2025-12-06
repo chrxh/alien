@@ -168,12 +168,9 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
 
-    auto constexpr Id_SensorGenome_MinDensity = 0;
-    auto constexpr Id_SensorGenome_RestrictToColor = 1;
-    auto constexpr Id_SensorGenome_RestrictToCreatures = 2;
-    auto constexpr Id_SensorGenome_MinRange = 3;
-    auto constexpr Id_SensorGenome_MaxRange = 4;
-    auto constexpr Id_SensorGenome_AutoTriggerInterval = 5;
+    auto constexpr Id_SensorGenome_MinRange = 1;
+    auto constexpr Id_SensorGenome_MaxRange = 2;
+    auto constexpr Id_SensorGenome_AutoTriggerInterval = 2;
 
     auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
 
@@ -259,6 +256,15 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, TelemetryGenomeDescription& data)
+    {
+        //TelemetryGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(TelemetryGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyGenomeDescription& data)
@@ -458,6 +464,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DetonatorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DigestorGenomeDescription& data)
+    {
+        DigestorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DigestorGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescription& data)
     {
         SignalRestrictionGenomeDescription defaultObject;
@@ -538,6 +553,7 @@ namespace
 
     auto constexpr Id_Cell_Id = 0;
     auto constexpr Id_Cell_Energy = 1;
+    auto constexpr Id_Cell_RawEnergy = 20;
     auto constexpr Id_Cell_Pos = 2;
     auto constexpr Id_Cell_Vel = 3;
     auto constexpr Id_Cell_Stiffness = 4;
@@ -628,12 +644,9 @@ namespace
     auto constexpr Id_Generator_AlternationMode = 2;
     auto constexpr Id_Generator_NumPulses = 3;
 
-    auto constexpr Id_Sensor_MinDensity = 0;
-    auto constexpr Id_Sensor_RestrictToColor = 4;
-    auto constexpr Id_Sensor_RestrictToCreatures = 5;
-    auto constexpr Id_Sensor_MinRange = 8;
-    auto constexpr Id_Sensor_MaxRange = 9;
-    auto constexpr Id_Sensor_AutoTriggerInterval = 10;
+    auto constexpr Id_Sensor_MinRange = 0;
+    auto constexpr Id_Sensor_MaxRange = 1;
+    auto constexpr Id_Sensor_AutoTriggerInterval = 2;
 
     auto constexpr Id_SensorMode_DetectEnergy_MinDensity = 0;
 
@@ -742,6 +755,15 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(ConstructorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, TelemetryDescription& data)
+    {
+        //TelemetryDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(TelemetryDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectEnergyDescription& data)
@@ -972,12 +994,22 @@ namespace cereal
     SPLIT_SERIALIZATION(DetonatorDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, DigestorDescription& data)
+    {
+        DigestorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(DigestorDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
     {
         CellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Cell_Energy, data._energy, defaultObject._energy);
+        loadSave(task, auxiliaries, Id_Cell_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
         loadSave(task, auxiliaries, Id_Cell_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Cell_Vel, data._vel, defaultObject._vel);
         loadSave(task, auxiliaries, Id_Cell_Stiffness, data._stiffness, defaultObject._stiffness);

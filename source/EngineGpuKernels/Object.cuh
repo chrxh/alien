@@ -82,6 +82,9 @@ struct Constructor
     Creature* offspring;  // Must be reset if separated construction is finished
 };
 
+struct Telemetry
+{};
+
 struct DetectEnergy
 {
     float minDensity;
@@ -106,6 +109,7 @@ struct DetectCreature
 
 union SensorModeData
 {
+    Telemetry telemetry;
     DetectEnergy detectEnergy;
     DetectStructure detectStructure;
     DetectFreeCell detectFreeCell;
@@ -326,6 +330,7 @@ struct Cell
     float2 pos;
     float2 vel;
     float energy;
+    float rawEnergy;
     float stiffness;
     uint8_t color;
     float frontAngle;  // May be invalid

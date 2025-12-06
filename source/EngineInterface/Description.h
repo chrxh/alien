@@ -74,6 +74,11 @@ struct ConstructorDescription
     MEMBER(ConstructorDescription, int, currentBranch, 0);
 };
 
+struct TelemetryDescription
+{
+    auto operator<=>(TelemetryDescription const&) const = default;
+};
+
 struct DetectEnergyDescription
 {
     auto operator<=>(DetectEnergyDescription const&) const = default;
@@ -104,7 +109,7 @@ struct DetectCreatureDescription
     MEMBER(DetectCreatureDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
 };
 
-using SensorModeDescription = std::variant<DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;
+using SensorModeDescription = std::variant<TelemetryDescription, DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;
 
 struct SensorLastMatchDescription
 {
@@ -283,6 +288,11 @@ struct DetonatorDescription
     MEMBER(DetonatorDescription, int, countdown, 60);
 };
 
+struct DigestorDescription
+{
+    auto operator<=>(DigestorDescription const&) const = default;
+};
+
 using CellTypeDescription = std::variant<
     StructureCellDescription,
     FreeCellDescription,
@@ -296,7 +306,8 @@ using CellTypeDescription = std::variant<
     MuscleDescription,
     DefenderDescription,
     ReconnectorDescription,
-    DetonatorDescription>;
+    DetonatorDescription,
+    DigestorDescription>;
 
 struct SignalRestrictionDescription
 {
@@ -327,6 +338,7 @@ struct CellDescription
     MEMBER(CellDescription, RealVector2D, pos, RealVector2D());
     MEMBER(CellDescription, RealVector2D, vel, RealVector2D());
     MEMBER(CellDescription, float, energy, 100.0f);
+    MEMBER(CellDescription, float, rawEnergy, 0.0f);
     MEMBER(CellDescription, float, stiffness, 1.0f);
     MEMBER(CellDescription, int, color, 0);
     MEMBER(

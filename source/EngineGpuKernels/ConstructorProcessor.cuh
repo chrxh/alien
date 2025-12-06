@@ -188,6 +188,9 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
 
         auto constructionData = createConstructionData(cell);
         if (tryConstructCell(data, statistics, cell, constructionData)) {
+
+            cell->signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
+
             ++constructionData.creature->numCells;
             if (!constructionData.isLastNode) {
                 ++constructor.currentNodeIndex;
@@ -211,6 +214,8 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
                     }
                 }
             }
+        } else {
+            cell->signal.channels[Channels::ConstructorSuccess] = 0;  // Failed
         }
     }
 }

@@ -17,98 +17,102 @@ public:
 
 protected:
     // Helper to create a sensor mode description with appropriate minDensity
-    // Note: Creates a fresh description with the specified density since test parameters use default modes
-    static SensorModeDescription createModeWithDensity(SensorModeDescription const& mode, float minDensity)
+    static SensorModeDescription createModeWithDensity(SensorMode const& mode)
     {
-        if (std::holds_alternative<DetectEnergyDescription>(mode)) {
-            return DetectEnergyDescription().minDensity(minDensity);
-        } else if (std::holds_alternative<DetectFreeCellDescription>(mode)) {
-            return DetectFreeCellDescription().minDensity(minDensity);
+        if (mode == SensorMode_DetectEnergy) {
+            return DetectEnergyDescription().minDensity(0.05f);
+        } else if (mode == SensorMode_DetectStructure) {
+            return DetectStructureDescription();
+        } else if (mode == SensorMode_DetectFreeCell) {
+            return DetectFreeCellDescription().minDensity(0.05f);
+        } else if (mode == SensorMode_DetectCreature) {
+            return DetectCreatureDescription();
         } else {
-            return mode;  // DetectStructureDescription has no minDensity
+            CHECK(false);
         }
     }
 
-    // Helper to add detection targets for row layout (horizontal line of targets)
-    void addDetectionTargetsRow(Description& data, SensorModeDescription const& mode, RealVector2D const& startPos, int count = 8)
-    {
-        if (std::holds_alternative<DetectEnergyDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._particles.emplace_back(ParticleDescription().pos({startPos.x + i, startPos.y}).energy(10.0f));
-            }
-        } else if (std::holds_alternative<DetectFreeCellDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(CellDescription().pos({startPos.x + i, startPos.y}).cellType(FreeCellDescription()));
-            }
-        } else if (std::holds_alternative<DetectStructureDescription>(mode)) {
-            for (int i = 0; i < count; ++i) {
-                data._cells.emplace_back(CellDescription().pos({startPos.x + i, startPos.y}).cellType(StructureCellDescription()));
-            }
-        } else if (std::holds_alternative<DetectCreatureDescription>(mode)) {
-            // Create a large creature (10x10 grid) at the specified position
-            std::vector<CellDescription> creatureCells;
-            for (int j = 0; j < 10; ++j) {
-                for (int i = 0; i < 10; ++i) {
-                    creatureCells.emplace_back(CellDescription().pos({startPos.x + i, startPos.y + j}));
-                }
-            }
-            auto creature = CreatureDescription().cells(creatureCells);
-            data.addCreature(creature);
-        }
-    }
-    
-    Description createLargeCreature()
+    // Helper to create a large creature (10x10 grid) at the specified position
+    Description createLargeCreature(RealVector2D const& startPos = RealVector2D{95.0f, 80.0f}, int diameterCount = 10)
     {
         Description result;
         std::vector<CellDescription> target;
-        for (int j = 0; j < 10; ++j) {
-            for (int i = 0; i < 10; ++i) {
-                target.emplace_back(CellDescription().id(10 + i + j * 10).pos({95.0f + i, 80.0f + j}));
+        for (int j = 0; j < diameterCount; ++j) {
+            for (int i = 0; i < diameterCount; ++i) {
+                target.emplace_back(CellDescription().id(diameterCount + i + j * diameterCount).pos({startPos.x + i, startPos.y + j}));
             }
         }
         result.addCreature(CreatureDescription().id(1).cells(target));
-        for (int j = 0; j < 10; ++j) {
-            for (int i = 0; i < 9; ++i) {
-                result.addConnection(10 + i + 10 * j, 11 + i + 10 * j);
+        for (int j = 0; j < diameterCount; ++j) {
+            for (int i = 0; i < diameterCount - 1; ++i) {
+                result.addConnection(diameterCount + i + diameterCount * j, diameterCount + 1 + i + diameterCount * j);
             }
         }
         return result;
     }
+
+    // Helper to add detection targets
+    void addDetectionTargets(Description& data, SensorMode const& mode, RealVector2D const& startPos, int count = 8, bool assignNewIds = true)
+    {
+        if (mode == SensorMode_DetectEnergy) {
+            for (int i = 0; i < count; ++i) {
+                data._particles.emplace_back(ParticleDescription().pos({startPos.x + i, startPos.y}).energy(10.0f));
+            }
+        } else if (mode == SensorMode_DetectFreeCell) {
+            for (int i = 0; i < count; ++i) {
+                data._cells.emplace_back(CellDescription().pos({startPos.x + i, startPos.y}).cellType(FreeCellDescription()));
+            }
+        } else if (mode == SensorMode_DetectStructure) {
+            for (int i = 0; i < count; ++i) {
+                data._cells.emplace_back(CellDescription().pos({startPos.x + i, startPos.y}).cellType(StructureCellDescription()));
+            }
+        } else if (mode == SensorMode_DetectCreature) {
+            data.add(createLargeCreature(startPos, count), assignNewIds);
+        } else {
+            CHECK(false);
+        }
+    }
 };
 
-/**
- * Parameterized test class for sensor modes that share common behavior
- */
-class SensorTests_AllModes
+class SensorTests_AllDetectionModes
     : public SensorTests
-    , public testing::WithParamInterface<SensorModeDescription>
-{
-protected:
-    SensorModeDescription getMode() const { return GetParam(); }
-
-    SensorModeDescription getModeWithDensity(float minDensity) const { return createModeWithDensity(GetParam(), minDensity); }
-};
+    , public testing::WithParamInterface<SensorMode>
+{};
 
 INSTANTIATE_TEST_SUITE_P(
     SensorModes,
-    SensorTests_AllModes,
-    ::testing::Values(DetectEnergyDescription(), DetectStructureDescription(), DetectFreeCellDescription(), DetectCreatureDescription()));
+    SensorTests_AllDetectionModes,
+    ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectStructure, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
+
+class SensorTests_AllDetectionModesExceptStructure
+    : public SensorTests
+    , public testing::WithParamInterface<SensorMode>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    SensorModes,
+    SensorTests_AllDetectionModesExceptStructure,
+    ::testing::Values(SensorMode_DetectEnergy, SensorMode_DetectFreeCell, SensorMode_DetectCreature));
 
 /**
  * Parameterized tests that work across all sensor modes
  */
 
-TEST_P(SensorTests_AllModes, autoTriggered)
+TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(15).mode(getMode())),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(15).mode(createModeWithDensity(GetParam()))),
     });
     _simulationFacade->setSimulationData(data);
 
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-        EXPECT_TRUE(actualSensor._signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
     {
         _simulationFacade->calcTimesteps(1);
@@ -118,14 +122,18 @@ TEST_P(SensorTests_AllModes, autoTriggered)
     {
         _simulationFacade->calcTimesteps(14);
         auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-        EXPECT_TRUE(actualSensor._signal.has_value());
+        EXPECT_FALSE(actualSensor._signal.has_value());
     }
 }
-//
-TEST_P(SensorTests_AllModes, manuallyTriggered_noSignal)
+
+TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(getMode())),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam()))),
     });
     _simulationFacade->setSimulationData(data);
 
@@ -136,10 +144,14 @@ TEST_P(SensorTests_AllModes, manuallyTriggered_noSignal)
     }
 }
 
-TEST_P(SensorTests_AllModes, manuallyTriggered_withSignal)
+TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(getMode())),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(std::nullopt).mode(createModeWithDensity(GetParam()))),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     });
     data.addConnection(1, 2);
@@ -148,18 +160,41 @@ TEST_P(SensorTests_AllModes, manuallyTriggered_withSignal)
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
     EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
-//
-TEST_P(SensorTests_AllModes, targetAbove)
+
+TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add detection targets above the sensor
-    addDetectionTargetsRow(data, getMode(), {98.0f, 20.0f}, 8);
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_FALSE(actualSensor._signal.has_value());
+}
+
+TEST_P(SensorTests_AllDetectionModes, targetAbove)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add detection targets above the sensor
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -168,25 +203,26 @@ TEST_P(SensorTests_AllModes, targetAbove)
     auto actualSensor = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    // DetectEnergy and DetectFreeCell modes return density, DetectStructure and DetectCreature do not
-    if (!std::holds_alternative<DetectStructureDescription>(getMode()) && !std::holds_alternative<DetectCreatureDescription>(getMode())) {
-        EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-    }
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
     // Angle should be roughly -90 degrees (-0.5 normalized)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
 }
 
-TEST_P(SensorTests_AllModes, targetBelow)
+TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f))),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(90.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
-    // Add detection targets below the sensor
-    addDetectionTargetsRow(data, getMode(), {98.0f, 180.0f}, 8);
+    // Add detection targets above the sensor
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -195,28 +231,53 @@ TEST_P(SensorTests_AllModes, targetBelow)
     auto actualSensor = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    // DetectEnergy and DetectFreeCell modes return density, DetectStructure and DetectCreature do not
-    if (!std::holds_alternative<DetectStructureDescription>(getMode()) && !std::holds_alternative<DetectCreatureDescription>(getMode())) {
-        EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-    }
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Angle should be roughly -180 degrees
+    auto angleAsSignal = actualSensor._signal->_channels[Channels::SensorAngle];
+    EXPECT_TRUE(angleAsSignal < -0.9f || angleAsSignal > 0.9f);
+}
+
+TEST_P(SensorTests_AllDetectionModes, targetBelow)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add detection targets below the sensor
+    addDetectionTargets(data, GetParam(), {98.0f, 180.0f}, 8);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
     // Angle should be roughly +90 degrees (+0.5 normalized)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > 0.3f);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < 0.7f);
 }
 
-TEST_P(SensorTests_AllModes, closerTargetDetected)
+TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
-    // Add a close cluster
-    addDetectionTargetsRow(data, getMode(), {98.0f, 50.0f}, 8);
+    // Add a close cluster above
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8);
 
-    // Add a far cluster with more items
-    addDetectionTargetsRow(data, getMode(), {98.0f, 200.0f}, 12);
+    // Add a far cluster with more items below
+    addDetectionTargets(data, GetParam(), {100.0f, 170.0f}, 12);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -227,22 +288,26 @@ TEST_P(SensorTests_AllModes, closerTargetDetected)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
     // Should detect the closer targets (above the sensor)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.6f);  // Closer = higher value
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Angle should be roughly -90 degrees (-0.5 normalized)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
 }
 
-TEST_P(SensorTests_AllModes, minRange_found)
+TEST_P(SensorTests_AllDetectionModes, minRange_found)
 {
     auto data = Description().cells({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f)).minRange(40)),
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).minRange(40)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add targets just beyond minRange
-    addDetectionTargetsRow(data, getMode(), {98.0f, 50.0f}, 8);
+    addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -253,20 +318,20 @@ TEST_P(SensorTests_AllModes, minRange_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllModes, minRange_notFound)
+TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
 {
     auto data = Description().cells({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f)).minRange(120)),
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).minRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add targets within minRange (too close)
-    addDetectionTargetsRow(data, getMode(), {98.0f, 50.0f}, 8);
+    addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -274,23 +339,23 @@ TEST_P(SensorTests_AllModes, minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, maxRange_found)
+TEST_P(SensorTests_AllDetectionModes, maxRange_found)
 {
     auto data = Description().cells({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f)).maxRange(120)),
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).maxRange(120)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add targets within maxRange
-    addDetectionTargetsRow(data, getMode(), {98.0f, 50.0f}, 8);
+    addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -301,20 +366,20 @@ TEST_P(SensorTests_AllModes, maxRange_found)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-TEST_P(SensorTests_AllModes, maxRange_notFound)
+TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
 {
     auto data = Description().cells({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f)).maxRange(30)),
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).maxRange(30)),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add targets beyond maxRange (too far)
-    addDetectionTargetsRow(data, getMode(), {98.0f, 50.0f}, 8);
+    addDetectionTargets(data, GetParam(), {98.0f, 50.0f}, 8);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -322,13 +387,13 @@ TEST_P(SensorTests_AllModes, maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, rayBlockedBySameCreatureConnections)
+TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
 
         // Create a connection that crosses the ray path
         CellDescription().id(2).pos({99.0f, 99.0f}),
@@ -339,18 +404,16 @@ TEST_P(SensorTests_AllModes, rayBlockedBySameCreatureConnections)
     data.addConnection(1, 3);
 
     // Add detection targets above the sensor
-    addDetectionTargetsRow(data, getMode(), {98.0f, 20.0f}, 10);
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Ray should be blocked by same-creature connection
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
+TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
 {
     auto data = Description()
                     .addCreature(CreatureDescription().id(0).cells(
@@ -358,7 +421,7 @@ TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
                              .id(1)
                              .pos({100.0f, 100.0f})
                              .frontAngle(0.0f)
-                             .cellType(SensorDescription().autoTriggerInterval(3).mode(getModeWithDensity(0.05f))),
+                             .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
                          CellDescription().id(2).pos({101.0f, 100.0f})}))
                     .addCreature(CreatureDescription().cells({
                         // Create a different creature with a connection that would cross the ray path
@@ -369,7 +432,7 @@ TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
     data.addConnection(10, 11);  // Different creature
 
     // Add detection targets above the sensor
-    addDetectionTargetsRow(data, getMode(), {98.0f, 20.0f}, 10);
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -380,42 +443,53 @@ TEST_P(SensorTests_AllModes, rayNotBlockedByDifferentCreature)
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
 }
 
-/**
-* Non-parameterized tests for mode-specific behavior
-*/
-
-TEST_F(SensorTests, detectEnergy_noFrontAngle)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
 {
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.1f))),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
-    data._particles.emplace_back(ParticleDescription().id(100).pos({100.0f, 10.0f}).energy(50.0f));
+
+    // Add structure cells between sensor and target (to block the ray)
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
+    }
+
+    // Add target behind the structure cells
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
-
     _simulationFacade->calcTimesteps(1);
+
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+
+    // Should not find target because ray is blocked by structure cells
     EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
-TEST_F(SensorTests, detectEnergy_particleFound)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_behind)
 {
     auto data = Description().cells({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
-    // Add energy particles near the sensor - cluster them in same 8x8 region to accumulate energy
+    // Add structure cells behind sensor and target
     for (int i = 0; i < 10; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 5.0f}).cellType(StructureCellDescription()));
     }
+
+    // Add target behind the structure cells
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -424,10 +498,223 @@ TEST_F(SensorTests, detectEnergy_particleFound)
     EXPECT_TRUE(actualSensor._signal.has_value());
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
 }
 
-TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_differentAngle)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add structure cells behind sensor and target
+    for (int i = 0; i < 10; ++i) {
+        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 150.0f}).cellType(StructureCellDescription()));
+    }
+
+    // Add target at different angle (not blocking)
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 10);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary)
+{
+    // First scan - target is detected and position stored
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    CHECK(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Verify lastMatch was stored
+    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    CHECK(sensorDesc._lastMatch.has_value());
+
+    // Second scan - target hasn't moved, should still be found via relocation
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Verify lastMatch is still present
+    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Angle should be roughly -90 degrees (-0.5 normalized)
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > -0.7f);
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
+{
+    // First scan - target is detected and position stored
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add target
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8, false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    CHECK(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Get the initial distance
+    auto initialDistance = actualSensor._signal->_channels[Channels::SensorDistance];
+
+    // Move the target by deleting and re-adding at a new position
+    actualData = _simulationFacade->getSimulationData();
+    auto sensorCell = actualData.getCellRef(1);
+    auto auxCell = actualData.getCellRef(2);
+    actualData.clear();
+    actualData._cells.emplace_back(sensorCell);
+    actualData._cells.emplace_back(auxCell);
+    addDetectionTargets(actualData, GetParam(), {120.0f, 70.0f}, 8, false);
+    _simulationFacade->setSimulationData(actualData);
+
+    // Second scan - target has moved, should be relocated via tracking
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Distance should be different since target moved
+    auto newDistance = actualSensor._signal->_channels[Channels::SensorDistance];
+    EXPECT_FALSE(approxCompare(initialDistance, newDistance));
+
+    // Verify lastMatch position was updated
+    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeared)
+{
+    // First scan - target is detected and position stored
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add target
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    CHECK(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Move the target by deleting and re-adding at a new position
+    actualData = _simulationFacade->getSimulationData();
+    auto sensorCell = actualData.getCellRef(1);
+    auto auxCell = actualData.getCellRef(2);
+    actualData.clear();
+    actualData._cells.emplace_back(sensorCell);
+    actualData._cells.emplace_back(auxCell);
+    _simulationFacade->setSimulationData(actualData);
+
+    // Second scan - target disappeared, should not be found
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_FALSE(actualSensor._signal.has_value());
+
+    // Verify lastMatch was cleared
+    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_FALSE(sensorDesc._lastMatch.has_value());
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
+{
+    // First scan - target is detected and position stored
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add energy particles above the sensor
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+
+    // Add structure cells between sensor and target to block the ray
+    actualData = _simulationFacade->getSimulationData();
+    for (int i = 0; i < 30; ++i) {
+        actualData._cells.emplace_back(CellDescription().id(50 + i).pos({85.0f + i, 70.0f}).cellType(StructureCellDescription()));
+    }
+    _simulationFacade->setSimulationData(actualData);
+
+    // Second scan - target is now blocked by structure cells
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_FALSE(actualSensor._signal.has_value());
+
+    // Verify lastMatch was cleared
+    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_FALSE(sensorDesc._lastMatch.has_value());
+}
+
+/**
+ * Tests for SensorMode_DetectEnergy (mode-specific tests)
+ */
+TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
 {
     auto data = Description().cells({
         CellDescription()
@@ -446,196 +733,39 @@ TEST_F(SensorTests, detectEnergy_particleNotFound_lowEnergy)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectEnergy_particleAbove_differentFrontAngle)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(90.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add particles above the sensor - cluster them to reach minDensity
-    for (int i = 0; i < 8; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({98.0f + i, 20.0f}).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-    // Angle should be roughly -180 degrees
-    auto angleAsSignal = actualSensor._signal->_channels[Channels::SensorAngle];
-    EXPECT_TRUE(angleAsSignal < -0.9f || angleAsSignal > 0.9f);
-}
-
-TEST_F(SensorTests, detectEnergy_noParticles)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectEnergy_multipleDirections)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add particles in front (right side, angle 0)
-    for (int i = 0; i < 8; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({150.0f, 98.0f + i}).energy(10.0f));
-    }
-
-    // Add particles behind (left side, angle 180)
-    for (int i = 0; i < 8; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(200 + i).pos({50.0f, 98.0f + i}).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    // Should detect the closer one (right side at distance ~50 is closer than left at ~50)
-    // Actually both are same distance, so it should detect the first one encountered
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 /**
-* Tests for ray blocking (both DetectEnergy and DetectFreeCell modes)
-*/
-
-TEST_F(SensorTests, detectEnergy_rayBlockedByStructureCells)
+ * Tests for SensorMode_DetectStructure (mode-specific tests)
+ */
+TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 {
     auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
-    // Add structure cells between sensor and energy particles (to block the ray)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add energy particles behind the structure cells
-    for (int i = 0; i < 10; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({98.0f + i, 20.0f}).energy(10.0f));
+    // Add many non-structure cells (should be ignored)
+    for (int i = 0; i < 20; ++i) {
+        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should not find energy particles because ray is blocked by structure cells
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
 
-TEST_F(SensorTests, detectEnergy_rayNotBlockedByStructureCells_differentAngle)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells on the left side
-    for (int i = 0; i < 5; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({80.0f, 100.0f + i * 2.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add energy particles on the right side (not blocked)
-    for (int i = 0; i < 10; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({120.0f + i, 100.0f}).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should find energy particles because ray is not blocked (different direction)
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    // Should not find anything because only non-structure cells are present
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 /**
-* Tests for SensorMode_DetectFreeCell (mode-specific tests)
-*/
-
-TEST_F(SensorTests, detectFreeCell_freeCellsFound)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add free cells near the sensor - cluster them in same 8x8 region
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(
-            CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
-}
-
-TEST_F(SensorTests, detectFreeCell_notFound_lowDensity)
+ * Tests for SensorMode_DetectFreeCell (mode-specific tests)
+ */
+TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 {
     auto data = Description().cells({
         CellDescription()
@@ -654,8 +784,7 @@ TEST_F(SensorTests, detectFreeCell_notFound_lowDensity)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectFreeCell_restrictToColor)
@@ -671,14 +800,14 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
     });
     data.addConnection(1, 2);
 
-    // Add free cells with wrong color (color 0)
+    // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
         data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).cellType(FreeCellDescription()).energy(10.0f));
     }
 
-    // Add free cells with correct color (color 1) but fewer
+    // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 250.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
+        data._cells.emplace_back(CellDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).cellType(FreeCellDescription()).energy(10.0f));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -689,8 +818,8 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
     // Should detect the color 1 cells, not the color 0 cells
-    // Color 1 cells are farther (below), so distance should be lower
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] < 0.6f);
+    // Color 1 cells are farther (below at y=150 vs y=80), so distance should be higher
+    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.3f);
 }
 
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
@@ -717,439 +846,12 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
     auto actualSensor = actualData.getCellRef(1);
 
     // Should not find anything because only non-free cells are present
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectFreeCell_rayBlockedByStructureCells)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells between sensor and free cells (to block the ray)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({95.0f + i, 50.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add free cells behind the structure cells
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + i, 20.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should not find free cells because ray is blocked by structure cells
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectFreeCell_rayNotBlockedByStructureCells_differentAngle)
-{
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells on the left side
-    for (int i = 0; i < 5; ++i) {
-        data._cells.emplace_back(CellDescription().id(50 + i).pos({80.0f, 100.0f + i * 2.0f}).cellType(StructureCellDescription()));
-    }
-
-    // Add free cells on the right side (not blocked)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({120.0f + i, 100.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should find free cells because ray is not blocked (different direction)
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDensity] > 0.0f);
+    ASSERT_FALSE(actualSensor._signal.has_value());
 }
 
 /**
-* Tests for SensorMode_DetectStructure (mode-specific tests)
-*/
-
-TEST_F(SensorTests, detectStructure_structureCellsFound)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add structure cells near the sensor (creates a 3x4 grid pattern)
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(StructureCellDescription()));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
-    EXPECT_FALSE(std::get<SensorDescription>(actualSensor._cellType)._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectStructure_noStructureCells)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add many non-structure cells (should be ignored)
-    for (int i = 0; i < 20; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({98.0f + (i % 4), 50.0f + (i / 4)}).cellType(BaseDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    // Should not find anything because only non-structure cells are present
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-/**
- * Tests for relocation behavior (non-creature modes)
+ * Tests for SensorMode_DetectCreature (mode-specific tests)
  */
-
-TEST_F(SensorTests, detectEnergy_relocation_targetStationary)
-{
-    // First scan - target is detected and position stored
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add energy particles
-    for (int i = 0; i < 10; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-
-    // Second scan - target hasn't moved, should still be found via relocation
-    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
-    actualData = _simulationFacade->getSimulationData();
-    actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch is still present
-    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-
-    // Note: During relocation, density is set to 0 (not recalculated)
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
-}
-
-TEST_F(SensorTests, detectEnergy_relocation_targetDisappeared)
-{
-    // First scan - target is detected and position stored
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectEnergyDescription().minDensity(0.5f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add energy particles
-    for (int i = 0; i < 10; ++i) {
-        data._particles.emplace_back(ParticleDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Remove all particles
-    actualData._particles.clear();
-    _simulationFacade->setSimulationData(actualData);
-
-    // Second scan - target disappeared, should not be found
-    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
-    actualData = _simulationFacade->getSimulationData();
-    actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch was cleared
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_FALSE(sensorDesc._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectFreeCell_relocation_targetStationary)
-{
-    // First scan - target is detected and position stored
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .frontAngle(0.0f)
-            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f))),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    // Add free cells
-    for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(
-            CellDescription().id(100 + i).pos({100.0f + (i % 3) * 2.0f, 50.0f + (i / 3) * 2.0f}).cellType(FreeCellDescription()).energy(10.0f));
-    }
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-
-    // Second scan - target hasn't moved, should still be found via relocation
-    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
-    actualData = _simulationFacade->getSimulationData();
-    actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch is still present
-    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-
-    // Note: During relocation, density is set to 0 (not recalculated)
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
-}
-
-/**
-* Tests for SensorMode_DetectCreature
-*/
-
-TEST_F(SensorTests, detectCreature_initialScan_found)
-{
-    auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    }));
-    data.addConnection(1, 2);
-    data.add(createLargeCreature());
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorDensity]));
-    EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.0f);
-
-    // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectCreature_initialScan_notFound_noCreature)
-{
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    });
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch was NOT stored
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_FALSE(sensorDesc._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectCreature_relocation_creatureStationary)
-{
-    // First scan - creature is detected and position stored
-    auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    }));
-    data.addConnection(1, 2);
-    data.add(createLargeCreature());
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Second scan - creature hasn't moved, should still be tracked
-    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
-    actualData = _simulationFacade->getSimulationData();
-    actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch is still present
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectCreature_relocation_creatureMoved)
-{
-    // First scan - creature is detected and position stored
-    auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    }));
-    data.addConnection(1, 2);
-    data.add(createLargeCreature(), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Get the initial distance
-    auto initialDistance = actualSensor._signal->_channels[Channels::SensorDistance];
-
-    // Move the target creature slightly
-    actualData = _simulationFacade->getSimulationData();
-    for (int i = 0; i < 100; ++i) {
-        actualData.getCellRef(10 + i)._pos.x += 10.0f;  // Move right by 10 units
-    }
-    _simulationFacade->setSimulationData(actualData);
-
-    // Second scan - creature has moved, should be relocated via tracking
-    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
-    actualData = _simulationFacade->getSimulationData();
-    actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Distance should be different since creature moved
-    auto newDistance = actualSensor._signal->_channels[Channels::SensorDistance];
-    EXPECT_FALSE(approxCompare(initialDistance, newDistance));
-
-    // Verify lastMatch position was updated
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_TRUE(sensorDesc._lastMatch.has_value());
-}
-
-TEST_F(SensorTests, detectCreature_relocation_creatureDisappeared)
-{
-    // First scan - creature is detected and position stored
-    auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    }));
-    data.addConnection(1, 2);
-    data.add(createLargeCreature(), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Remove the target creature
-    actualData._creatures.erase(
-        std::remove_if(actualData._creatures.begin(), actualData._creatures.end(), [](auto const& creature) { return creature._id == 1; }),
-        actualData._creatures.end());
-    _simulationFacade->setSimulationData(actualData);
-
-    // Second scan - creature disappeared, should not be found
-    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
-    actualData = _simulationFacade->getSimulationData();
-    actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-
-    // Verify lastMatch was cleared
-    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
-    EXPECT_FALSE(sensorDesc._lastMatch.has_value());
-}
-
 TEST_F(SensorTests, detectCreature_restrictToColor_found)
 {
     auto data = Description().addCreature(CreatureDescription().id(0).cells({
@@ -1179,22 +881,18 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
 
 TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
 {
-    auto data = Description()
-                    .addCreature(CreatureDescription().id(0).cells({
-                        CellDescription()
-                            .id(1)
-                            .pos({100.0f, 100.0f})
-                            .frontAngle(0.0f)
-                            .color(0)
-                            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToColor(1))),
-                        CellDescription().id(2).pos({101.0f, 100.0f}).color(0),
-                    }))
-                    .addCreature(CreatureDescription().id(1).cells({
-                        CellDescription().id(10).pos({100.0f, 50.0f}).color(0),  // Wrong color
-                        CellDescription().id(11).pos({101.0f, 50.0f}).color(0),
-                    }));
+    auto data = Description().addCreature(CreatureDescription().id(0).cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .color(0)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToColor(1))),
+        CellDescription().id(2).pos({101.0f, 100.0f}).color(0),
+    }));
     data.addConnection(1, 2);
-    data.addConnection(10, 11);
+
+    data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1202,8 +900,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_minNumCells_found)
@@ -1213,6 +910,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_found)
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
+
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
@@ -1233,17 +931,12 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
                             .id(1)
                             .pos({100.0f, 100.0f})
                             .frontAngle(0.0f)
-                            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().minNumCells(5))),
+                            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().minNumCells(105))),
                         CellDescription().id(2).pos({101.0f, 100.0f}),
-                    }))
-                    .addCreature(CreatureDescription().id(1).numCells(3).cells({
-                        CellDescription().id(10).pos({100.0f, 50.0f}),
-                        CellDescription().id(11).pos({101.0f, 50.0f}),
-                        CellDescription().id(12).pos({102.0f, 50.0f}),
                     }));
     data.addConnection(1, 2);
-    data.addConnection(10, 11);
-    data.addConnection(11, 12);
+
+    data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1251,8 +944,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_maxNumCells_found)
@@ -1262,6 +954,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_found)
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
+
     data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
@@ -1282,7 +975,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
                             .id(1)
                             .pos({100.0f, 100.0f})
                             .frontAngle(0.0f)
-                            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().maxNumCells(2))),
+                            .cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().maxNumCells(99))),
                         CellDescription().id(2).pos({101.0f, 100.0f}),
                     }))
                     .addCreature(CreatureDescription().id(1).numCells(3).cells({
@@ -1291,8 +984,8 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
                         CellDescription().id(12).pos({102.0f, 50.0f}),
                     }));
     data.addConnection(1, 2);
-    data.addConnection(10, 11);
-    data.addConnection(11, 12);
+
+    data.add(createLargeCreature());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1300,8 +993,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
@@ -1313,13 +1005,9 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
     data.addConnection(1, 2);
     
     // Create a large creature with same lineage
-    std::vector<CellDescription> targetCells;
-    for (int j = 0; j < 10; ++j) {
-        for (int i = 0; i < 10; ++i) {
-            targetCells.emplace_back(CellDescription().id(10 + i + j * 10).pos({95.0f + i, 80.0f + j}));
-        }
-    }
-    data.addCreature(CreatureDescription().id(1).lineageId(42).cells(targetCells));
+    auto creatureData = createLargeCreature();
+    creatureData._creatures.front()._lineageId = 42;
+    data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1333,23 +1021,21 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
 {
-    auto data = Description()
-                    .addCreature(CreatureDescription().id(0).lineageId(42).cells({
-                        CellDescription()
-                            .id(1)
-                            .pos({100.0f, 100.0f})
-                            .frontAngle(0.0f)
-                            .cellType(SensorDescription().autoTriggerInterval(3).mode(
-                                DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_SameLineage))),
-                        CellDescription().id(2).pos({101.0f, 100.0f}),
-                    }))
-                    .addCreature(CreatureDescription().id(1).lineageId(99).cells({
-                        // Different lineage
-                        CellDescription().id(10).pos({100.0f, 50.0f}),
-                        CellDescription().id(11).pos({101.0f, 50.0f}),
-                    }));
+    auto data = Description().addCreature(CreatureDescription().id(0).lineageId(42).cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(
+                SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_SameLineage))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    }));
     data.addConnection(1, 2);
-    data.addConnection(10, 11);
+
+    // Create a large creature with different lineage
+    auto creatureData = createLargeCreature();
+    creatureData._creatures.front()._lineageId = 41;
+    data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1357,8 +1043,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
@@ -1370,13 +1055,9 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
     data.addConnection(1, 2);
     
     // Create a large creature with different lineage
-    std::vector<CellDescription> targetCells;
-    for (int j = 0; j < 10; ++j) {
-        for (int i = 0; i < 10; ++i) {
-            targetCells.emplace_back(CellDescription().id(10 + i + j * 10).pos({95.0f + i, 80.0f + j}));
-        }
-    }
-    data.addCreature(CreatureDescription().id(1).lineageId(99).cells(targetCells));
+    auto creatureData = createLargeCreature();
+    creatureData._creatures.front()._lineageId = 41;
+    data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1390,23 +1071,21 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
 {
-    auto data = Description()
-                    .addCreature(CreatureDescription().id(0).lineageId(42).cells({
-                        CellDescription()
-                            .id(1)
-                            .pos({100.0f, 100.0f})
-                            .frontAngle(0.0f)
-                            .cellType(SensorDescription().autoTriggerInterval(3).mode(
-                                DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_OtherLineage))),
-                        CellDescription().id(2).pos({101.0f, 100.0f}),
-                    }))
-                    .addCreature(CreatureDescription().id(1).lineageId(42).cells({
-                        // Same lineage
-                        CellDescription().id(10).pos({100.0f, 50.0f}),
-                        CellDescription().id(11).pos({101.0f, 50.0f}),
-                    }));
+    auto data = Description().addCreature(CreatureDescription().id(0).lineageId(42).cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(
+                SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_OtherLineage))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    }));
     data.addConnection(1, 2);
-    data.addConnection(10, 11);
+
+    // Create a large creature with same lineage
+    auto creatureData = createLargeCreature();
+    creatureData._creatures.front()._lineageId = 42;
+    data.add(std::move(creatureData));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1414,8 +1093,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_ignoreStructureCells)
@@ -1428,7 +1106,9 @@ TEST_F(SensorTests, detectCreature_ignoreStructureCells)
 
     // Add structure cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({100.0f + i, 50.0f}).cellType(StructureCellDescription()));
+        for (int j = 0; j < 10; ++j) {
+            data._cells.emplace_back(CellDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).cellType(StructureCellDescription()));
+        }
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1437,8 +1117,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_ignoreFreeCells)
@@ -1451,7 +1130,9 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
 
     // Add free cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
-        data._cells.emplace_back(CellDescription().id(100 + i).pos({100.0f + i, 50.0f}).cellType(FreeCellDescription()));
+        for (int j = 0; j < 10; ++j) {
+            data._cells.emplace_back(CellDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).cellType(FreeCellDescription()));
+        }
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1460,8 +1141,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    EXPECT_FALSE(actualSensor._signal.has_value());
 }
 
 TEST_F(SensorTests, detectCreature_ignoreSameCreature)
@@ -1469,34 +1149,17 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
     auto data = Description().addCreature(CreatureDescription().id(0).cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
         CellDescription().id(2).pos({101.0f, 100.0f}),
-        CellDescription().id(3).pos({100.0f, 50.0f}),  // Same creature
+        CellDescription().id(3).pos({102.0f, 50.0f}),
+        CellDescription().id(4).pos({103.0f, 50.0f}),
+        CellDescription().id(5).pos({104.0f, 50.0f}),
+        CellDescription().id(6).pos({105.0f, 50.0f}),
+        CellDescription().id(7).pos({106.0f, 50.0f}),
+        CellDescription().id(8).pos({107.0f, 50.0f}),
+        CellDescription().id(9).pos({108.0f, 50.0f}),
+        CellDescription().id(10).pos({110.0f, 50.0f}),
     }));
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Should not detect own creature cells
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
-}
-
-TEST_F(SensorTests, detectCreature_rayBlockedByStructureCells)
-{
-    auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 110.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 110.0f}),
-    }));
-    data.addConnection(1, 2);
-    data.add(createLargeCreature(), false);
-
-    // Add structure cells blocking the ray
-    for (int i = 0; i < 30; ++i) {
-        data._cells.emplace_back(CellDescription().id(200 + i).pos({85.0f + i, 100.0f}).cellType(StructureCellDescription()));
+    for (int i = 0; i < 9; ++i) {
+        data.addConnection(1 + i, 2 + i);
     }
 
     _simulationFacade->setSimulationData(data);
@@ -1505,7 +1168,49 @@ TEST_F(SensorTests, detectCreature_rayBlockedByStructureCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getCellRef(1);
 
-    EXPECT_TRUE(actualSensor._signal.has_value());
-    // Structure cells should block detection
-    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal->_channels[Channels::SensorFoundResult]));
+    // Should not detect own creature cells
+    EXPECT_FALSE(actualSensor._signal.has_value());
+}
+
+/**
+ * Tests for SensorMode_Telemetry (mode-specific tests)
+ */
+TEST_F(SensorTests, telemetry_allOutputs)
+{
+    // Test with a cell that has energy and velocity to verify all telemetry outputs
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .vel({0.1f, 0.05f})  // Moving with both x and y components
+            .energy(100.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(TelemetryDescription())),
+    });
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualSensor = _simulationFacade->getSimulationData().getCellRef(1);
+    
+    ASSERT_TRUE(actualSensor._signal.has_value());
+    
+    // Verify cell energy channel is populated and within expected range
+    // Formula: 1.0 - 1.0 / pow(energy + 1.0, 0.1)
+    // For energy=100: 1.0 - 1.0 / pow(101, 0.1) ≈ 0.36
+    auto energySignal = actualSensor._signal->_channels[Channels::SensorTelemetryCellEnergy];
+    EXPECT_TRUE(energySignal > 0.3f);
+    EXPECT_TRUE(energySignal < 0.4f);
+    
+    // Verify velocity angle channel is populated
+    // Range: [-1.0, 1.0] representing angle relative to front angle
+    auto velAngle = actualSensor._signal->_channels[Channels::SensorTelemetryCellVelAngle];
+    EXPECT_TRUE(velAngle >= -1.0f);
+    EXPECT_TRUE(velAngle <= 1.0f);
+    
+    // Verify velocity strength channel is populated and within expected range
+    // Formula: min(log(1.0 + vel * 50) / 1.5, 1.0)
+    // For vel ≈ 0.112: log(1 + 5.6) / 1.5 ≈ 0.63
+    auto velStrength = actualSensor._signal->_channels[Channels::SensorTelemetryCellVelStrength];
+    EXPECT_TRUE(velStrength > 0.5f);
+    EXPECT_TRUE(velStrength < 0.7f);
 }

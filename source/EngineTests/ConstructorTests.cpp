@@ -318,6 +318,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, emptyGenome)
@@ -346,6 +347,7 @@ TEST_F(ConstructorTests, emptyGenome)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, emptyGene)
@@ -374,6 +376,7 @@ TEST_F(ConstructorTests, emptyGene)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, nodeIndexOutOfRange)
@@ -406,6 +409,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, geneIndexOutOfRange)
@@ -438,6 +442,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, insufficientEnergy)
@@ -466,6 +471,113 @@ TEST_F(ConstructorTests, insufficientEnergy)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
+}
+
+TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
+{
+    auto data = Description().addCreature(
+        CreatureDescription().id(0).cells({
+            CellDescription()
+                .id(0)
+                .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
+                .pos({100.0f, 100.0f}),  // Not enough energy
+            CellDescription().id(1).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        }),
+        GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription()})}));
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(2, creature._cells.size());
+    ASSERT_EQ(2, creature._numCells);
+
+    auto hostCell = actualData.getCellRef(0);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
+    EXPECT_EQ(0, hostConstructor._currentBranch);
+    ASSERT_TRUE(hostCell._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, hostCell._signal->_channels[Channels::ConstructorSuccess]));
+}
+
+TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
+{
+    auto data = Description().addCreature(
+        CreatureDescription().id(0).cells({
+            CellDescription()
+                .id(0)
+                .energy(getConstructorEnergy())
+                .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
+                .pos({100.0f, 100.0f}),
+            CellDescription().id(1).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        }),
+        GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription()})}));
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(3, creature._cells.size());
+    ASSERT_EQ(3, creature._numCells);
+
+    auto hostCell = actualData.getCellRef(0);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
+    EXPECT_EQ(1, hostConstructor._currentBranch);
+    ASSERT_TRUE(hostCell._signal.has_value());
+    EXPECT_TRUE(approxCompare(1.0f, hostCell._signal->_channels[Channels::ConstructorSuccess]));
+}
+
+TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
+{
+    auto data = Description().addCreature(
+        CreatureDescription().id(0).cells({
+            CellDescription()
+                .id(0)
+                .energy(getConstructorEnergy())
+                .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
+                .pos({100.0f, 100.0f}),
+            CellDescription().id(1).pos({101.0f, 100.0f}),
+        }),
+        GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription()})}));
+    data.addConnection(0, 1);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(2, creature._cells.size());
+    ASSERT_EQ(2, creature._numCells);
+
+    auto hostCell = actualData.getCellRef(0);
+    auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
+    EXPECT_EQ(0, hostConstructor._currentNodeIndex);
+    EXPECT_EQ(0, hostConstructor._currentConcatenation);
+    EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
@@ -498,6 +610,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_F(ConstructorTests, insufficientSpace)
@@ -544,6 +657,7 @@ TEST_F(ConstructorTests, insufficientSpace)
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
@@ -620,6 +734,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
+    EXPECT_FALSE(hostCell._signal.has_value());
 }
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)

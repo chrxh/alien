@@ -21,6 +21,9 @@ struct DepotGenomeTO
     EnergyDistributionMode mode;
 };
 
+struct TelemetryGenomeTO
+{};
+
 struct DetectEnergyGenomeTO
 {
     float minDensity;
@@ -45,6 +48,7 @@ struct DetectCreatureGenomeTO
 
 union SensorModeGenomeTO
 {
+    TelemetryGenomeTO telemetry;
     DetectEnergyGenomeTO detectEnergy;
     DetectStructureGenomeTO detectStructure;
     DetectFreeCellGenomeTO detectFreeCell;
@@ -149,6 +153,9 @@ struct DetonatorGenomeTO
     int32_t countdown;
 };
 
+struct DigestorGenomeTO
+{};
+
 union CellTypeDataGenomeTO
 {
     BaseGenomeTO base;
@@ -162,6 +169,7 @@ union CellTypeDataGenomeTO
     DefenderGenomeTO defender;
     ReconnectorGenomeTO reconnector;
     DetonatorGenomeTO detonator;
+    DigestorGenomeTO digestor;
 };
 
 struct SignalRestrictionGenomeTO

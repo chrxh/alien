@@ -76,6 +76,7 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Base},
         CellParameter{CellType_Depot},
         CellParameter{CellType_Constructor},
+        CellParameter{CellType_Sensor, std::nullopt, SensorMode_Telemetry},
         CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectEnergy},
         CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectStructure},
         CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectFreeCell},
@@ -91,7 +92,8 @@ INSTANTIATE_TEST_SUITE_P(
         CellParameter{CellType_Muscle, MuscleMode_DirectMovement},
         CellParameter{CellType_Defender},
         CellParameter{CellType_Reconnector},
-        CellParameter{CellType_Detonator}));
+        CellParameter{CellType_Detonator},
+        CellParameter{CellType_Digestor}));
 
 TEST_P(DataTransferTests_AllCellTypes, cellsWithoutCreature)
 {

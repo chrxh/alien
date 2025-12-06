@@ -241,6 +241,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
     result._vel = RealVector2D(cellTO.vel.x, cellTO.vel.y);
     result._energy = cellTO.energy;
+    result._rawEnergy = cellTO.rawEnergy;
     result._stiffness = cellTO.stiffness;
     std::vector<ConnectionDescription> connections;
     for (int i = 0; i < cellTO.numConnections; ++i) {
@@ -312,7 +313,10 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         sensor._minRange = cellTO.cellTypeData.sensor.minRange;
         sensor._maxRange = cellTO.cellTypeData.sensor.maxRange;
 
-        if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+        if (cellTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+            TelemetryDescription telemetry;
+            sensor._mode = telemetry;
+        } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyDescription detectEnergy;
             detectEnergy._minDensity = cellTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensor._mode = detectEnergy;
@@ -451,6 +455,10 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         detonator._countdown = cellTO.cellTypeData.detonator.countdown;
         result._cellType = detonator;
     } break;
+    case CellType_Digestor: {
+        DigestorDescription digestor;
+        result._cellType = digestor;
+    } break;
     }
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, cellTO.neuralNetworkDataIndex);
@@ -514,7 +522,10 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         sensorDesc._minRange = nodeTO->cellTypeData.sensor.minRange;
         sensorDesc._maxRange = nodeTO->cellTypeData.sensor.maxRange;
 
-        if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+        if (nodeTO->cellTypeData.sensor.mode == SensorMode_Telemetry) {
+            TelemetryGenomeDescription telemetry;
+            sensorDesc._mode = telemetry;
+        } else if (nodeTO->cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyGenomeDescription detectEnergy;
             detectEnergy._minDensity = nodeTO->cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensorDesc._mode = detectEnergy;
@@ -616,6 +627,10 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         DetonatorGenomeDescription detonatorDesc;
         detonatorDesc._countdown = nodeTO->cellTypeData.detonator.countdown;
         nodeDesc._cellType = detonatorDesc;
+    } break;
+    case CellTypeGenome_Digestor: {
+        DigestorGenomeDescription digestorDesc;
+        nodeDesc._cellType = digestorDesc;
     } break;
     }
     return nodeDesc;
@@ -762,7 +777,10 @@ void DescriptionConverterService::convertGenomeToTO(
                 sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
 
-                if (sensorTO.mode == SensorMode_DetectEnergy) {
+                if (sensorTO.mode == SensorMode_Telemetry) {
+                    //auto const& telemetryDesc = std::get<TelemetryGenomeDescription>(sensorDesc._mode);
+                    //auto& telemetryTO = sensorTO.modeData.telemetry;
+                } else if (sensorTO.mode == SensorMode_DetectEnergy) {
                     auto const& detectEnergyDesc = std::get<DetectEnergyGenomeDescription>(sensorDesc._mode);
                     auto& detectEnergyTO = sensorTO.modeData.detectEnergy;
                     detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
@@ -850,6 +868,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto& detonatorTO = nodeTO.cellTypeData.detonator;
                 detonatorTO.countdown = detonatorDesc._countdown;
             } break;
+            case CellTypeGenome_Digestor: {
+            } break;
             }
         }
     }
@@ -909,6 +929,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.vel = {cellDesc._vel.x, cellDesc._vel.y};
     cellTO.energy = cellDesc._energy;
     checkAndCorrectInvalidEnergy(cellTO.energy);
+    cellTO.rawEnergy = cellDesc._rawEnergy;
     cellTO.stiffness = cellDesc._stiffness;
     cellTO.cellState = cellDesc._cellState;
     cellTO.cellType = cellDesc.getCellType();
@@ -961,7 +982,10 @@ void DescriptionConverterService::convertCellToTO(
         sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
         sensorTO.mode = sensorDesc.getMode();
 
-        if (sensorTO.mode == SensorMode_DetectEnergy) {
+        if (sensorTO.mode == SensorMode_Telemetry) {
+            //auto const& telemetryDesc = std::get<TelemetryDescription>(sensorDesc._mode);
+            //TelemetryTO& telemetryTO = sensorTO.modeData.telemetry;
+        } else if (sensorTO.mode == SensorMode_DetectEnergy) {
             auto const& detectEnergyDesc = std::get<DetectEnergyDescription>(sensorDesc._mode);
             DetectEnergyTO& detectEnergyTO = sensorTO.modeData.detectEnergy;
             detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
@@ -1072,6 +1096,8 @@ void DescriptionConverterService::convertCellToTO(
         DetonatorTO& detonatorTO = cellTO.cellTypeData.detonator;
         detonatorTO.state = detonatorDesc._state;
         detonatorTO.countdown = detonatorDesc._countdown;
+    } break;
+    case CellType_Digestor: {
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

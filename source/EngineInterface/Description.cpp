@@ -30,7 +30,9 @@ SignalDescription::SignalDescription()
 
 SensorMode SensorDescription::getMode() const
 {
-    if (std::holds_alternative<DetectEnergyDescription>(_mode)) {
+    if (std::holds_alternative<TelemetryDescription>(_mode)) {
+        return SensorMode_Telemetry;
+    } else if (std::holds_alternative<DetectEnergyDescription>(_mode)) {
         return SensorMode_DetectEnergy;
     } else if (std::holds_alternative<DetectStructureDescription>(_mode)) {
         return SensorMode_DetectStructure;
@@ -104,6 +106,8 @@ CellType CellDescription::getCellType() const
         return CellType_Reconnector;
     } else if (std::holds_alternative<DetonatorDescription>(_cellType)) {
         return CellType_Detonator;
+    } else if (std::holds_alternative<DigestorDescription>(_cellType)) {
+        return CellType_Digestor;
     }
     CHECK(false);
 }
