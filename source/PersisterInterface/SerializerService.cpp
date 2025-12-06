@@ -346,6 +346,10 @@ namespace cereal
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
 
+        // Note: data._mode is a variant that contains nested genome descriptions.
+        // Currently serialized directly with ar(). For better backward compatibility,
+        // consider using: serializeOptionalNested(task, ar, data._mode, defaultObject._mode);
+        // See docs/SerializeOptionalNestedUsage.md for details.
         ar(data._mode);
     }
     SPLIT_SERIALIZATION(SensorGenomeDescription)
@@ -523,6 +527,11 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
+        // Note: Multiple nested objects serialized directly with ar().
+        // For better backward compatibility, consider using serializeOptionalNested for each:
+        // serializeOptionalNested(task, ar, data._neuralNetwork, defaultObject._neuralNetwork);
+        // serializeOptionalNested(task, ar, data._cellType, defaultObject._cellType);
+        // serializeOptionalNested(task, ar, data._signalRestriction, defaultObject._signalRestriction);
         ar(data._neuralNetwork, data._cellType, data._signalRestriction);
     }
     SPLIT_SERIALIZATION(NodeDescription)
