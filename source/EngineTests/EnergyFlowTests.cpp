@@ -424,7 +424,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlowsToDigestor)
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         // Make the last cell a Digestor
         if (i == 19) {
-            cell.cellType(DigestorDescription().rawEnergyConductivity(0.5f));
+            cell.cellType(DigestorDescription());
         }
         data._cells.emplace_back(cell);
         if (i > 0) {
@@ -487,7 +487,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlowsWithHighConductivity)
     auto lastCellLow = actualDataLow.getCellRef(10);
     auto lastCellHigh = actualDataHigh.getCellRef(10);
     
-    EXPECT_TRUE(lastCellHigh._rawEnergy > lastCellLow._rawEnergy);
+    EXPECT_TRUE(lastCellHigh._rawEnergy > lastCellLow._rawEnergy + NEAR_ZERO);
     
     // Energy conservation
     EXPECT_TRUE(approxCompare(getEnergy(dataLowConductivity), getEnergy(actualDataLow)));
@@ -501,7 +501,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlowsBetweenDigestors)
     for (int i = 0; i < 10; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         // Make all cells Digestors
-        cell.cellType(DigestorDescription().rawEnergyConductivity(0.5f));
+        cell.cellType(DigestorDescription());
         data._cells.emplace_back(cell);
         if (i > 0) {
             data.addConnection(i, i + 1);
@@ -527,18 +527,18 @@ TEST_F(EnergyFlowTests, rawEnergyFlowsMixedCellTypes)
 {
     // Test raw energy flow in a chain with mixed cell types
     Description data;
-    for (int i = 0; i < 15; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
-        // Make cells 5, 10, 15 Digestors
-        if ((i + 1) % 5 == 0) {
-            cell.cellType(DigestorDescription().rawEnergyConductivity(0.5f));
+    for (int i = 0; i < 11; ++i) {
+        auto cell = CellDescription().id(i).pos({100.0f + toFloat(i), 100.0f});
+        // Make cells 0 and 10 Digestors
+        if (i % 10 == 0) {
+            cell.cellType(DigestorDescription());
         }
         data._cells.emplace_back(cell);
         if (i > 0) {
-            data.addConnection(i, i + 1);
+            data.addConnection(i, i - 1);
         }
     }
-    data._cells.at(0)._rawEnergy = 100.0f;
+    data._cells.at(5)._rawEnergy = 100.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -546,15 +546,12 @@ TEST_F(EnergyFlowTests, rawEnergyFlowsMixedCellTypes)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Digestor cells should have more raw energy than non-Digestor cells
-    auto digestorCell1 = actualData.getCellRef(5);
-    auto digestorCell2 = actualData.getCellRef(10);
-    auto digestorCell3 = actualData.getCellRef(15);
-    auto normalCell1 = actualData.getCellRef(2);
-    auto normalCell2 = actualData.getCellRef(7);
-    
-    EXPECT_TRUE(digestorCell1._rawEnergy > normalCell1._rawEnergy);
-    EXPECT_TRUE(digestorCell2._rawEnergy > normalCell2._rawEnergy);
-    EXPECT_TRUE(digestorCell3._rawEnergy > 10.0f);
-    
+    for (int i = 0; i < 10; ++i) {
+        if (i % 10 == 0) {
+            EXPECT_TRUE(actualData.getCellRef(i)._rawEnergy > 25.0f);
+        } else {
+            EXPECT_TRUE(actualData.getCellRef(i)._rawEnergy < 5.0f);
+        }
+    }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
