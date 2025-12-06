@@ -109,7 +109,6 @@ protected:
                     NodeDescription(),
                     NodeDescription().cellType(muscleDesc),
                     NodeDescription().cellType(muscleDesc),
-                    NodeDescription().cellType(muscleDesc),
                     NodeDescription(),
                     NodeDescription(),
                     NodeDescription(),
@@ -401,15 +400,20 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(11, creature._cells.size());
+    ASSERT_EQ(10, creature._cells.size());
 
     auto& cells = creature._cells;
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
     // Check front angles
-    EXPECT_TRUE(approxCompareAngles(0.0f, cells.at(0)._frontAngle.value()));
-    for (int i = 1; i < 11; ++i) {
-        EXPECT_TRUE(approxCompareAngles(180.0f, cells.at(i)._frontAngle.value()));
+    auto first = true;
+    for (auto const& cell : cells) {
+        if (first) {
+            EXPECT_TRUE(approxCompareAngles(0.0f, cell._frontAngle.value()));
+        } else {
+            EXPECT_TRUE(approxCompareAngles(180.0f, cell._frontAngle.value()));
+        }
+        first = false;
     }
 }
 
@@ -457,12 +461,12 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(11, creature._cells.size());
+        ASSERT_EQ(10, creature._cells.size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
-        movementDirection = Math::getNormalized(cells.at(3)._pos - cells.at(0)._pos);
+        movementDirection = Math::getNormalized(cells.back()._pos - cells.front()._pos);
         if (direction == Direction::Backward) {
             movementDirection = -movementDirection;
         }
@@ -478,7 +482,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(11, creature._cells.size());
+        ASSERT_EQ(10, creature._cells.size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });

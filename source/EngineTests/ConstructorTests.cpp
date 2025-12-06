@@ -280,6 +280,16 @@ protected:
                 return false;
             }
         } break;
+        case CellType_Digestor: {
+            if (nodeType != CellTypeGenome_Digestor) {
+                return false;
+            }
+            auto const& dDigestor = std::get<DigestorDescription>(cell._cellType);
+            auto const& nodeDigestor = std::get<DigestorGenomeDescription>(node._cellType);
+            if (dDigestor._rawEnergyConductivity != nodeDigestor._rawEnergyConductivity) {
+                return false;
+            }
+        } break;
         default:
             return false;
         }
