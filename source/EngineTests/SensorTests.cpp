@@ -589,7 +589,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     data.addConnection(1, 2);
 
     // Add target
-    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8, false);
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -605,8 +605,8 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     actualData.clear();
     actualData._cells.emplace_back(sensorCell);
     actualData._cells.emplace_back(auxCell);
-    addDetectionTargets(actualData, GetParam(), {120.0f, 30.0f}, 8, false);
-    addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 8, true);  // Add a closer target which should be ignored
+    addDetectionTargets(actualData, GetParam(), {120.0f, 30.0f}, 10, false);
+    addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 10, true);  // Add a closer target which should be ignored
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved, should be relocated via tracking
@@ -643,7 +643,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     data.addConnection(1, 2);
 
     // Add target
-    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 8, false);
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2);
@@ -659,8 +659,8 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     actualData.clear();
     actualData._cells.emplace_back(sensorCell);
     actualData._cells.emplace_back(auxCell);
-    addDetectionTargets(actualData, GetParam(), {120.0f, 80.0f}, 8, false);
-    addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 8, true);  // Add a closer target which should matched by initial scan
+    addDetectionTargets(actualData, GetParam(), {120.0f, 80.0f}, 10, false);
+    addDetectionTargets(actualData, GetParam(), {100.0f, 120.0f}, 10, true);  // Add a closer target which should matched by initial scan
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved, should be relocated via tracking
@@ -674,6 +674,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     // Angle should be roughly +90 degrees (+0.5 normalized)
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] > 0.3f);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorAngle] < 0.7f);
+    printf("AAAAA: %f\n", actualSensor._signal->_channels[Channels::SensorAngle]);
     EXPECT_TRUE(actualSensor._signal->_channels[Channels::SensorDistance] > 0.8f);
 
     // Verify lastMatch position was updated
