@@ -18,6 +18,7 @@ public:
         std::optional<MuscleMode> muscleMode;
         std::optional<SensorMode> sensorMode;
     };
+    std::vector<CellParameter> getAllCellParameters() const;
     CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
     ParticleDescription createNonDefaultParticleDescription() const;
 
@@ -27,6 +28,7 @@ public:
         std::optional<MuscleMode> muscleMode;
         std::optional<SensorMode> sensorMode;
     };
+    std::vector<NodeParameter> getAllNodeParameters() const;
     NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
     std::pair<CreatureDescription, GenomeDescription> createNonDefaultCreatureDescription(NodeParameter nodeParameter) const;
 

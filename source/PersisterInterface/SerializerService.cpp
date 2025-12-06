@@ -207,6 +207,8 @@ namespace
     auto constexpr Id_ReconnectorGenome_RestrictToCreatures = 1;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
+
+    auto constexpr Id_DigestorGenome_RawEnergyConductivity = 0;
 }
 
 namespace cereal
@@ -468,6 +470,7 @@ namespace cereal
     {
         DigestorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_DigestorGenome_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DigestorGenomeDescription)
@@ -668,6 +671,8 @@ namespace
 
     auto constexpr Id_Detonator_State = 0;
     auto constexpr Id_Detonator_Countdown = 1;
+
+    auto constexpr Id_Digestor_RawEnergyConductivity = 0;
 }
 
 namespace cereal
@@ -998,6 +1003,7 @@ namespace cereal
     {
         DigestorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Digestor_RawEnergyConductivity, data._rawEnergyConductivity, defaultObject._rawEnergyConductivity);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DigestorDescription)

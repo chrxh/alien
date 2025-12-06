@@ -154,7 +154,9 @@ struct DetonatorGenomeTO
 };
 
 struct DigestorGenomeTO
-{};
+{
+    float rawEnergyConductivity;  // Between 0 and 1
+};
 
 union CellTypeDataGenomeTO
 {

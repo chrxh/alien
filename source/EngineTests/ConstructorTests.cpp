@@ -280,6 +280,16 @@ protected:
                 return false;
             }
         } break;
+        case CellType_Digestor: {
+            if (nodeType != CellTypeGenome_Digestor) {
+                return false;
+            }
+            auto const& dDigestor = std::get<DigestorDescription>(cell._cellType);
+            auto const& nodeDigestor = std::get<DigestorGenomeDescription>(node._cellType);
+            if (dDigestor._rawEnergyConductivity != nodeDigestor._rawEnergyConductivity) {
+                return false;
+            }
+        } break;
         default:
             return false;
         }
@@ -669,26 +679,7 @@ class ConstructorTests_AllNodeTypes
 INSTANTIATE_TEST_SUITE_P(
     ConstructorTests_AllNodeTypes,
     ConstructorTests_AllNodeTypes,
-    ::testing::Values(
-        NodeParameter{CellTypeGenome_Base},
-        NodeParameter{CellTypeGenome_Depot},
-        NodeParameter{CellTypeGenome_Constructor},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectEnergy},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectStructure},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectFreeCell},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectCreature},
-        NodeParameter{CellTypeGenome_Generator},
-        NodeParameter{CellTypeGenome_Attacker},
-        NodeParameter{CellTypeGenome_Injector},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AngleBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoCrawling},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualCrawling},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_DirectMovement},
-        NodeParameter{CellTypeGenome_Defender},
-        NodeParameter{CellTypeGenome_Reconnector},
-        NodeParameter{CellTypeGenome_Detonator}));
+    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0)
 {

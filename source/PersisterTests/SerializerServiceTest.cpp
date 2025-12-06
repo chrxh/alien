@@ -48,30 +48,7 @@ class SerializerServiceTests_AllCellTypes
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllCellTypes,
     SerializerServiceTests_AllCellTypes,
-    ::testing::Values(
-        CellParameter{CellType_Structure},
-        CellParameter{CellType_Free},
-        CellParameter{CellType_Base},
-        CellParameter{CellType_Depot},
-        CellParameter{CellType_Constructor},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_Telemetry},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectEnergy},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectStructure},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectFreeCell},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectCreature},
-        CellParameter{CellType_Generator},
-        CellParameter{CellType_Attacker},
-        CellParameter{CellType_Injector},
-        CellParameter{CellType_Muscle, MuscleMode_AutoBending},
-        CellParameter{CellType_Muscle, MuscleMode_ManualBending},
-        CellParameter{CellType_Muscle, MuscleMode_AngleBending},
-        CellParameter{CellType_Muscle, MuscleMode_AutoCrawling},
-        CellParameter{CellType_Muscle, MuscleMode_ManualCrawling},
-        CellParameter{CellType_Muscle, MuscleMode_DirectMovement},
-        CellParameter{CellType_Defender},
-        CellParameter{CellType_Reconnector},
-        CellParameter{CellType_Detonator},
-        CellParameter{CellType_Digestor}));
+    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllCellParameters()));
 
 TEST_P(SerializerServiceTests_AllCellTypes, cellWithoutCreature)
 {
@@ -92,28 +69,7 @@ class SerializerServiceTests_AllNodeTypes
 INSTANTIATE_TEST_SUITE_P(
     SerializerServiceTests_AllNodeTypes,
     SerializerServiceTests_AllNodeTypes,
-    ::testing::Values(
-        NodeParameter{CellTypeGenome_Base},
-        NodeParameter{CellTypeGenome_Depot},
-        NodeParameter{CellTypeGenome_Constructor},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_Telemetry},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectEnergy},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectStructure},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectFreeCell},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectCreature},
-        NodeParameter{CellTypeGenome_Generator},
-        NodeParameter{CellTypeGenome_Attacker},
-        NodeParameter{CellTypeGenome_Injector},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AngleBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoCrawling},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualCrawling},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_DirectMovement},
-        NodeParameter{CellTypeGenome_Defender},
-        NodeParameter{CellTypeGenome_Reconnector},
-        NodeParameter{CellTypeGenome_Detonator},
-        NodeParameter{CellTypeGenome_Digestor}));
+    ::testing::ValuesIn(DescriptionTestDataFactory::get().getAllNodeParameters()));
 
 TEST_P(SerializerServiceTests_AllNodeTypes, cellWithCreature)
 {

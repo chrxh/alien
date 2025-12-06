@@ -160,6 +160,7 @@ namespace
                         nodeTO.cellTypeData.detonator.countdown = node.cellTypeData.detonator.countdown;
                         break;
                     case CellTypeGenome_Digestor:
+                        nodeTO.cellTypeData.digestor.rawEnergyConductivity = node.cellTypeData.digestor.rawEnergyConductivity;
                         break;
                     }
                 }
@@ -367,6 +368,7 @@ namespace
             cellTO.cellTypeData.detonator.countdown = cell->cellTypeData.detonator.countdown;
         } break;
         case CellType_Digestor: {
+            cellTO.cellTypeData.digestor.rawEnergyConductivity = cell->cellTypeData.digestor.rawEnergyConductivity;
         } break;
         }
     }
