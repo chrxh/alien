@@ -937,45 +937,79 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         auto i = data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
 
-        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
-        auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        // Flow of usable energy
+        {
+            auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+            auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
 
-        auto needsEnergy = [](Cell* cell) {
-            return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
-                && cell->cellType == CellType_Constructor && cell->creature
-                && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, *cell->creature->genome);
-        };
-        auto lowEnergy = [&](Cell* cell) { return cell->usableEnergy < cellNormalEnergy; };
+            auto needsEnergy = [](Cell* cell) {
+                return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
+                    && cell->cellType == CellType_Constructor && cell->creature
+                    && !ConstructorHelper::isFinished(cell->cellTypeData.constructor, *cell->creature->genome);
+            };
+            auto lowEnergy = [&](Cell* cell) { return cell->usableEnergy < cellNormalEnergy; };
 
-        auto cellNeedsEnergy = needsEnergy(cell);
-        auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
-        auto connectedCellLowEnergy = lowEnergy(cell);
+            auto cellNeedsEnergy = needsEnergy(cell);
+            auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
+            auto connectedCellLowEnergy = lowEnergy(cell);
 
-        auto flow = 0.0f;
-        if (connectedCellLowEnergy) {
-            if (cell->usableEnergy > connectedCell->usableEnergy) {
-                flow = (cell->usableEnergy - connectedCell->usableEnergy) / 2;
-            }
-        } else {
-            if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
+            auto flow = 0.0f;
+            if (connectedCellLowEnergy) {
                 if (cell->usableEnergy > connectedCell->usableEnergy) {
                     flow = (cell->usableEnergy - connectedCell->usableEnergy) / 2;
                 }
+            } else {
+                if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
+                    if (cell->usableEnergy > connectedCell->usableEnergy) {
+                        flow = (cell->usableEnergy - connectedCell->usableEnergy) / 2;
+                    }
+                }
+                if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
+                    if (cell->usableEnergy > cellNormalEnergy) {
+                        flow = cell->usableEnergy - cellNormalEnergy;
+                    }
+                }
             }
-            if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
-                if (cell->usableEnergy > cellNormalEnergy) {
-                    flow = cell->usableEnergy - cellNormalEnergy;
+
+            if (flow > 0) {
+                flow = min(2.0f, flow);
+                auto orig = atomicAdd(&cell->usableEnergy, -flow);
+                if (orig < cellMinEnergy) {
+                    atomicAdd(&cell->usableEnergy, flow);
+                } else {
+                    atomicAdd(&connectedCell->usableEnergy, flow);
                 }
             }
         }
 
-        if (flow > 0) {
-            flow = min(2.0f, flow);
-            auto orig = atomicAdd(&cell->usableEnergy, -flow);
-            if (orig < cellMinEnergy) {
-                atomicAdd(&cell->usableEnergy, flow);
-            } else {
-                atomicAdd(&connectedCell->usableEnergy, flow);
+        // Flow of raw energy
+        {
+            auto needsEnergy = [](Cell* cell) {
+                return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
+                    && cell->cellType == CellType_Digestor;
+            };
+
+            auto cellNeedsEnergy = needsEnergy(cell);
+            auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
+
+            auto flow = 0.0f;
+            if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
+                if (cell->rawEnergy > connectedCell->rawEnergy) {
+                    flow = (cell->rawEnergy - connectedCell->rawEnergy) / 2;
+                }
+            }
+            if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
+                flow = cell->rawEnergy;
+            }
+
+            if (flow > 0) {
+                flow = min(2.0f, flow);
+                auto orig = atomicAdd(&cell->rawEnergy, -flow);
+                if (orig < cellMinEnergy) {
+                    atomicAdd(&cell->rawEnergy, flow);
+                } else {
+                    atomicAdd(&connectedCell->rawEnergy, flow);
+                }
             }
         }
     }
