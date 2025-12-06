@@ -168,9 +168,9 @@ namespace
     auto constexpr Id_ConstructorGenome_ConstructionAngle = 3;
     auto constexpr Id_ConstructorGenome_ProvideEnergy = 4;
 
+    auto constexpr Id_SensorGenome_AutoTriggerInterval = 0;
     auto constexpr Id_SensorGenome_MinRange = 1;
     auto constexpr Id_SensorGenome_MaxRange = 2;
-    auto constexpr Id_SensorGenome_AutoTriggerInterval = 2;
 
     auto constexpr Id_SensorModeGenome_DetectEnergy_MinDensity = 0;
 

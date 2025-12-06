@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <iostream>
-
 #include <EngineTestData/DescriptionTestDataFactory.h>
 
 #include <PersisterInterface/SerializerService.h>
@@ -19,32 +17,11 @@ public:
     void testSerializationAndDeserialization(Description const& data)
     {
         DeserializedSimulation deserializedSimulationBefore{.mainData = data};
-        
-        // Debug output for sensor genome
-        if (!deserializedSimulationBefore.mainData._genomes.empty() && 
-            !deserializedSimulationBefore.mainData._genomes[0]._genes.empty() &&
-            !deserializedSimulationBefore.mainData._genomes[0]._genes[0]._nodes.empty()) {
-            auto& node = deserializedSimulationBefore.mainData._genomes[0]._genes[0]._nodes[0];
-            if (auto* sensorDesc = std::get_if<SensorGenomeDescription>(&node._cellType)) {
-                std::cout << "Before: SensorGenome mode index = " << sensorDesc->_mode.index() << std::endl;
-            }
-        }
-        
         SerializedSimulation serializedSimulation;
         _serializerService->serializeSimulationToStrings(serializedSimulation, deserializedSimulationBefore);
 
         DeserializedSimulation deserializedSimulationAfter;
         _serializerService->deserializeSimulationFromStrings(deserializedSimulationAfter, serializedSimulation);
-
-        // Debug output for sensor genome
-        if (!deserializedSimulationAfter.mainData._genomes.empty() && 
-            !deserializedSimulationAfter.mainData._genomes[0]._genes.empty() &&
-            !deserializedSimulationAfter.mainData._genomes[0]._genes[0]._nodes.empty()) {
-            auto& node = deserializedSimulationAfter.mainData._genomes[0]._genes[0]._nodes[0];
-            if (auto* sensorDesc = std::get_if<SensorGenomeDescription>(&node._cellType)) {
-                std::cout << "After: SensorGenome mode index = " << sensorDesc->_mode.index() << std::endl;
-            }
-        }
 
         EXPECT_TRUE(_descriptionTestDataFactory->compare(deserializedSimulationBefore.mainData, deserializedSimulationAfter.mainData));
     }
