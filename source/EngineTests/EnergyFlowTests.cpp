@@ -17,7 +17,7 @@ public:
     ~EnergyFlowTests() = default;
 };
 
-TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
+TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
 {
     Description data;
     for (int i = 0; i < 20; ++i) {
@@ -40,7 +40,7 @@ TEST_F(EnergyFlowTests, energyFlowsLeadsEqualDistribution)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
+TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 {
 
     auto data = Description().addCreature(
@@ -81,7 +81,7 @@ TEST_F(EnergyFlowTests, energyFlowsToActiveConstructor)
     }
 }
 
-TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
+TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
 {
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
@@ -127,7 +127,7 @@ TEST_F(EnergyFlowTests, energyFlowsToClosestActiveConstructor)
     }
 }
 
-TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
+TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
 {
 
     auto data = Description().addCreature(
@@ -161,7 +161,7 @@ TEST_F(EnergyFlowTests, energyFlowsNotToFinishedConstructor)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, energyFlowsBranches)
+TEST_F(EnergyFlowTests, usableEnergyFlowsBranches)
 {
     auto data = Description().cells({
         CellDescription().id(0).pos({100.0f, 99.0f}).usableEnergy(100.0f),
@@ -194,7 +194,7 @@ TEST_F(EnergyFlowTests, energyFlowsBranches)
     }
 }
 
-TEST_F(EnergyFlowTests, energyFlowsNotToConstructorUnderConstruction)
+TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
 {
     auto genome = GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription()})});
 
@@ -231,7 +231,7 @@ TEST_F(EnergyFlowTests, energyFlowsNotToConstructorUnderConstruction)
     EXPECT_TRUE(abs(cell2._usableEnergy - normalCellEnergy) < 1.0f);
 }
 
-TEST_F(EnergyFlowTests, energyFlowsEquallyToActiveConstructors)
+TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
 {
     auto genome = GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription()})});
 
@@ -267,7 +267,7 @@ TEST_F(EnergyFlowTests, energyFlowsEquallyToActiveConstructors)
     EXPECT_TRUE(abs(cell2._usableEnergy - actualEnergy / 2) < 1.0f);
 }
 
-TEST_F(EnergyFlowTests, energyFlowsPrioritizeLowEnergyCell)
+TEST_F(EnergyFlowTests, usableEnergyFlowsPrioritizeLowEnergyCell)
 {
     // Test that energy flows preferentially to cells with low energy (below normal energy threshold)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -300,7 +300,7 @@ TEST_F(EnergyFlowTests, energyFlowsPrioritizeLowEnergyCell)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, energyFlowsEqualizeLowEnergyCells)
+TEST_F(EnergyFlowTests, usableEnergyFlowsEqualizeLowEnergyCells)
 {
     // Test that when connected cell has low energy, energy flows to equalize
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -328,7 +328,7 @@ TEST_F(EnergyFlowTests, energyFlowsEqualizeLowEnergyCells)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, energyFlowsFromHighToLowEnergyInChain)
+TEST_F(EnergyFlowTests, usableEnergyFlowsFromHighToLowEnergyInChain)
 {
     // Test energy flow prioritization in a chain with one low energy cell
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
@@ -357,7 +357,7 @@ TEST_F(EnergyFlowTests, energyFlowsFromHighToLowEnergyInChain)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, energyFlowsMultipleLowEnergyCells)
+TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
 {
     // Test that multiple low energy cells all receive energy
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
