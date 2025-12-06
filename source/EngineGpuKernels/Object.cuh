@@ -264,6 +264,11 @@ struct Detonator
     int32_t countdown;
 };
 
+struct Digestor
+{
+    float rawEnergyConductivity;  // Between 0 and 1
+};
+
 union CellTypeData
 {
     Base base;
@@ -277,6 +282,7 @@ union CellTypeData
     Defender defender;
     Reconnector reconnector;
     Detonator detonator;
+    Digestor digestor;
 };
 
 struct SignalRestriction

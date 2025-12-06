@@ -238,7 +238,9 @@ struct DetonatorTO
 };
 
 struct DigestorTO
-{};
+{
+    float rawEnergyConductivity;  // Between 0 and 1
+};
 
 union CellTypeDataTO
 {

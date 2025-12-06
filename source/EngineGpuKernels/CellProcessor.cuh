@@ -1003,9 +1003,13 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
             }
 
             if (flow > 0) {
-                flow = min(2.0f, flow);
+                auto maxFlow = 0.5f;
+                if (cell->cellType == CellType_Digestor) {
+                    maxFlow *= 1.0f + cell->cellTypeData.digestor.rawEnergyConductivity * cudaSimulationParameters.maxRawEnergyConductivity.value[cell->color];
+                }
+                flow = min(maxFlow, flow);
                 auto orig = atomicAdd(&cell->rawEnergy, -flow);
-                if (orig < cellMinEnergy) {
+                if (orig < 0) {
                     atomicAdd(&cell->rawEnergy, flow);
                 } else {
                     atomicAdd(&connectedCell->rawEnergy, flow);

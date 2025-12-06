@@ -170,6 +170,9 @@ struct SimulationParameters
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
     BaseParameter<bool> attackerDestroyCells = {true};
 
+    // Cell type: Digestor
+    BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {7.0f, 7.0f, 7.0f, 7.0f, 7.0f, 7.0f, 7.0f};
+
     // Cell type: Constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};
     BaseParameter<bool> constructorCompletenessCheck = {false};
