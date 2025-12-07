@@ -604,6 +604,13 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
                 }),
             ParameterGroupSpec()
+                .name("Cell type: Digestor")
+                .parameters({
+                    ParameterSpec()
+                        .name("Max raw energy conductivity")
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(1.0f).format("%.3f")),
+                }),
+            ParameterGroupSpec()
                 .name("Cell type: Constructor")
                 .parameters({
                     ParameterSpec()
