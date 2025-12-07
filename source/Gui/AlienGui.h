@@ -23,7 +23,7 @@ struct TreeNodeStackElement
 
 struct TreeNodeInfo
 {
-    std::chrono::steady_clock::time_point invisibleTimepoint;
+    std::chrono::steady_clock::time_point startBlinkingTimepoint;
     bool isEmpty = false;
 };
 
@@ -397,6 +397,7 @@ public:
         MEMBER(TreeNodeParameters, std::string, name, "");
         MEMBER(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
         MEMBER(TreeNodeParameters, bool, defaultOpen, true);
+        MEMBER(TreeNodeParameters, bool, startBlinking, false);
         MEMBER(TreeNodeParameters, bool, visible, true);
         MEMBER(TreeNodeParameters, bool, blinkWhenActivated, false);
         MEMBER(TreeNodeParameters, std::optional<std::string>, highlightedSubString, std::nullopt);

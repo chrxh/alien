@@ -1467,17 +1467,15 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
 
     auto id = ImGui::GetID(parameters._name.c_str());
 
-    if (!parameters._visible) {
-        _treeNodeStack.emplace_back(0.0f, id, false);
-        _treeNodeInfoById.insert_or_assign(id, TreeNodeInfo{.invisibleTimepoint = std::chrono::steady_clock::now(), .isEmpty = false});
-        return false;
+    if (parameters._startBlinking) {
+        _treeNodeInfoById.insert_or_assign(id, TreeNodeInfo{.startBlinkingTimepoint = std::chrono::steady_clock::now(), .isEmpty = false});
     }
 
-    TreeNodeInfo info = _treeNodeInfoById.contains(id) ? _treeNodeInfoById.at(id) : TreeNodeInfo();
     int highlightCountdown = 0;
-    if (parameters._blinkWhenActivated) {
+    if (_treeNodeInfoById.contains(id)) {
+        TreeNodeInfo info = _treeNodeInfoById.contains(id) ? _treeNodeInfoById.at(id) : TreeNodeInfo();
         highlightCountdown = std::max(
-            0, toInt(1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - info.invisibleTimepoint).count()));
+            0, toInt(1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - info.startBlinkingTimepoint).count()));
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
@@ -1537,9 +1535,6 @@ void AlienGui::EndTreeNode()
 {
     TreeNodeStackElement stackElement = _treeNodeStack.back();
     _treeNodeStack.pop_back();
-
-    _treeNodeInfoById[stackElement.treeNodeId].isEmpty =
-        stackElement.treeNodeStartCursorPosY != 0 && stackElement.treeNodeStartCursorPosY == ImGui::GetCursorPosY();
 
     if (stackElement.isOpen) {
         ImGui::TreePop();
