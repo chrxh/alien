@@ -23,8 +23,8 @@ struct TreeNodeStackElement
 
 struct TreeNodeInfo
 {
-    std::chrono::steady_clock::time_point startBlinkingTimepoint;
-    bool isEmpty = false;
+    bool isOpen = false;
+    std::optional<std::chrono::steady_clock::time_point> startBlinkingTimepoint;
 };
 
 class AlienGui
@@ -514,7 +514,6 @@ private:
         std::optional<std::string> const& infoLabel = std::nullopt,
         std::optional<std::string> const& highlightedSubString = std::nullopt);
 
-    static std::vector<TreeNodeStackElement> _treeNodeStack;
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
 
     static std::unordered_set<unsigned int> _basicSilderExpanded;

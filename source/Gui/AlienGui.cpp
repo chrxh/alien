@@ -29,7 +29,7 @@ namespace
 }
 
 std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
-std::vector<TreeNodeStackElement> AlienGui::_treeNodeStack;
+//std::vector<TreeNodeStackElement> AlienGui::_treeNodeStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
 std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedOutput;
@@ -1463,19 +1463,21 @@ bool AlienGui::CollapseButton(bool collapsed)
 
 bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
 {
-    CHECK(_treeNodeStack.size() < 10);
-
     auto id = ImGui::GetID(parameters._name.c_str());
+    ImGui::PushID(id);
+    id = ImGui::GetID("");
 
+    auto& treeNodeInfo = _treeNodeInfoById[id];
     if (parameters._startBlinking) {
-        _treeNodeInfoById.insert_or_assign(id, TreeNodeInfo{.startBlinkingTimepoint = std::chrono::steady_clock::now(), .isEmpty = false});
+        treeNodeInfo.startBlinkingTimepoint = std::chrono::steady_clock::now();
     }
 
     int highlightCountdown = 0;
-    if (_treeNodeInfoById.contains(id)) {
-        TreeNodeInfo info = _treeNodeInfoById.contains(id) ? _treeNodeInfoById.at(id) : TreeNodeInfo();
+    if (treeNodeInfo.startBlinkingTimepoint.has_value()) {
         highlightCountdown = std::max(
-            0, toInt(1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - info.startBlinkingTimepoint).count()));
+            0,
+            toInt(
+                1000 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - treeNodeInfo.startBlinkingTimepoint.value()).count()));
         if (highlightCountdown > 0) {
             ImGui::SetScrollHereY();
         }
@@ -1527,18 +1529,18 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGui::PopFont();
     ImGui::PopStyleColor(3);
 
-    _treeNodeStack.emplace_back(ImGui::GetCursorPosY(), id, result);
+    treeNodeInfo.isOpen = result;
     return result;
 }
 
 void AlienGui::EndTreeNode()
 {
-    TreeNodeStackElement stackElement = _treeNodeStack.back();
-    _treeNodeStack.pop_back();
+    auto id = ImGui::GetID("");
 
-    if (stackElement.isOpen) {
+    if (_treeNodeInfoById.at(id).isOpen) {
         ImGui::TreePop();
     }
+    ImGui::PopID();
 }
 
 bool AlienGui::Button(ButtonParameters const& parameters)
