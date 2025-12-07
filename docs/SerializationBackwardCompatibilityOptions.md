@@ -253,27 +253,49 @@ void loadSave(SerializationTask task, Archive& ar, SensorModeGenomeDescription& 
 
 ## Recommendation
 
-### For Current Codebase: **Option 4 (Optional Serialization with Has-Value Flags)**
+### ✅ **IMPLEMENTED: Option 2 (Use Cereal's Optional Serialization with Versioning)**
 
 **Rationale**:
-1. **Minimal disruption**: Doesn't require expanding VariantData or changing existing serialization
-2. **Forward-looking**: New nested structures can use this pattern immediately
-3. **Clear semantics**: Explicit about what's optional vs. required
-4. **No exceptions**: Clean error handling without performance overhead
+1. **Uses cereal idioms**: Leverages cereal's built-in versioning system
+2. **Less custom code**: Works with cereal's standard mechanisms
+3. **Self-documenting**: Version numbers make it clear when fields were added
+4. **Integrates with LoadSave**: Combined with existing LoadSave map pattern for primitives
 
-**Implementation Strategy**:
-1. Create helper functions to reduce boilerplate:
-   ```cpp
-   template <class Archive, typename T>
-   void serializeOptional(Archive& ar, SerializationTask task, T& data, T const& defaultValue);
-   ```
+**Implementation**:
+The implementation uses cereal's versioned `serialize` function for structures with nested data, while keeping the LoadSave map pattern for primitive fields. This provides backward compatibility for both primitive and nested fields.
 
-2. Apply to new nested structures going forward
-3. Gradually migrate existing nested structures as they need changes
+```cpp
+template <class Archive>
+void serialize(Archive& ar, SensorGenomeDescription& data, std::uint32_t const version)
+{
+    SensorGenomeDescription defaultObject;
+    SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
+    auto auxiliaries = getLoadSaveMap(task, ar);
+    // ... LoadSave map for primitive fields
+    processLoadSaveMap(task, ar, auxiliaries);
+    
+    // Version 1: Added _mode field
+    if (version >= 1) {
+        ar(data._mode);
+    } else if (task == SerializationTask::Load) {
+        data._mode = defaultObject._mode;
+    }
+}
+CEREAL_CLASS_VERSION(SensorGenomeDescription, 1);
+```
 
-**For Future Major Version: Consider Option 5 (Recursive LoadSave Maps)**
+**Structures Converted**:
+- SensorGenomeDescription
+- MuscleGenomeDescription  
+- NodeDescription
+- GeneDescription
+- GenomeDescription
+- SensorDescription
+- MuscleDescription
+- CellDescription
+- CreatureDescription
 
-If a major serialization format change is planned, Option 5 provides the best long-term solution with maximum backward compatibility at all levels.
+All structures with nested data now use versioned serialization with `CEREAL_CLASS_VERSION` macros.
 
 ---
 

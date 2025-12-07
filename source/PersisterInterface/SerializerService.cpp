@@ -116,32 +116,6 @@ namespace cereal
         }
     }
 
-    /**
-     * Serialize a nested structure with backward compatibility support.
-     * Writes a presence flag before the data, allowing old versions to use default values.
-     * 
-     * @param task Save or Load operation
-     * @param ar Archive for serialization
-     * @param data The data to serialize/deserialize
-     * @param defaultValue Default value to use if data is not present in stream
-     */
-    template <class Archive, typename T>
-    void serializeOptionalNested(SerializationTask task, Archive& ar, T& data, T const& defaultValue)
-    {
-        if (task == SerializationTask::Save) {
-            bool hasData = true;
-            ar(hasData, data);
-        } else {
-            bool hasData = false;
-            ar(hasData);
-            if (hasData) {
-                ar(data);
-            } else {
-                data = defaultValue;
-            }
-        }
-    }
-
     template <class Archive>
     void serialize(Archive& ar, IntVector2D& data)
     {
@@ -337,22 +311,29 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectCreatureGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SensorGenomeDescription& data)
+    void serialize(Archive& ar, SensorGenomeDescription& data, std::uint32_t const version)
     {
         SensorGenomeDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorGenome_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_SensorGenome_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_SensorGenome_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        // Note: data._mode is a variant that contains nested genome descriptions.
-        // Currently serialized directly with ar(). For better backward compatibility,
-        // consider using: serializeOptionalNested(task, ar, data._mode, defaultObject._mode);
-        // See docs/SerializeOptionalNestedUsage.md for details.
-        ar(data._mode);
+        // Version 1: Added _mode field
+        if (version >= 1) {
+            ar(data._mode);
+        } else if (task == SerializationTask::Load) {
+            data._mode = defaultObject._mode;
+        }
     }
-    SPLIT_SERIALIZATION(SensorGenomeDescription)
+}
+
+CEREAL_CLASS_VERSION(SensorGenomeDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GeneratorGenomeDescription& data)
@@ -454,15 +435,26 @@ namespace cereal
     SPLIT_SERIALIZATION(DirectMovementGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, MuscleGenomeDescription& data)
+    void serialize(Archive& ar, MuscleGenomeDescription& data, std::uint32_t const version)
     {
         MuscleGenomeDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._mode);
+        // Version 1: Added _mode field
+        if (version >= 1) {
+            ar(data._mode);
+        } else if (task == SerializationTask::Load) {
+            data._mode = defaultObject._mode;
+        }
     }
-    SPLIT_SERIALIZATION(MuscleGenomeDescription)
+}
+
+CEREAL_CLASS_VERSION(MuscleGenomeDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DefenderGenomeDescription& data)
@@ -518,28 +510,37 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalRestrictionGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, NodeDescription& data)
+    void serialize(Archive& ar, NodeDescription& data, std::uint32_t const version)
     {
         NodeDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Node_ReferenceAngle, data._referenceAngle, defaultObject._referenceAngle);
         loadSave(task, auxiliaries, Id_Node_Color, data._color, defaultObject._color);
         loadSave(task, auxiliaries, Id_Node_NumAdditionalConnections, data._numAdditionalConnections, defaultObject._numAdditionalConnections);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        // Note: Multiple nested objects serialized directly with ar().
-        // For better backward compatibility, consider using serializeOptionalNested for each:
-        // serializeOptionalNested(task, ar, data._neuralNetwork, defaultObject._neuralNetwork);
-        // serializeOptionalNested(task, ar, data._cellType, defaultObject._cellType);
-        // serializeOptionalNested(task, ar, data._signalRestriction, defaultObject._signalRestriction);
-        ar(data._neuralNetwork, data._cellType, data._signalRestriction);
+        // Version 1: Added nested structures
+        if (version >= 1) {
+            ar(data._neuralNetwork, data._cellType, data._signalRestriction);
+        } else if (task == SerializationTask::Load) {
+            data._neuralNetwork = defaultObject._neuralNetwork;
+            data._cellType = defaultObject._cellType;
+            data._signalRestriction = defaultObject._signalRestriction;
+        }
     }
-    SPLIT_SERIALIZATION(NodeDescription)
+}
+
+CEREAL_CLASS_VERSION(NodeDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, GeneDescription& data)
+    void serialize(Archive& ar, GeneDescription& data, std::uint32_t const version)
     {
         GeneDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Gene_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Gene_Shape, data._shape, defaultObject._shape);
@@ -551,23 +552,44 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Gene_NumRepetitions, data._numConcatenations, defaultObject._numConcatenations);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._nodes);
+        // Version 1: Added _nodes field
+        if (version >= 1) {
+            ar(data._nodes);
+        } else if (task == SerializationTask::Load) {
+            data._nodes = defaultObject._nodes;
+        }
     }
-    SPLIT_SERIALIZATION(GeneDescription)
+}
+
+CEREAL_CLASS_VERSION(GeneDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, GenomeDescription& data)
+    void serialize(Archive& ar, GenomeDescription& data, std::uint32_t const version)
     {
         GenomeDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Genome_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Genome_Name, data._name, defaultObject._name);
         loadSave(task, auxiliaries, Id_Genome_FrontAngle, data._frontAngle, defaultObject._frontAngle);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._genes);
+        // Version 1: Added _genes field
+        if (version >= 1) {
+            ar(data._genes);
+        } else if (task == SerializationTask::Load) {
+            data._genes = defaultObject._genes;
+        }
     }
-    SPLIT_SERIALIZATION(GenomeDescription)
+}
+
+CEREAL_CLASS_VERSION(GenomeDescription, 1);
+
+namespace cereal
+{
 }
 
 /************************************************************************/
@@ -859,18 +881,30 @@ namespace cereal
     SPLIT_SERIALIZATION(SensorLastMatchDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SensorDescription& data)
+    void serialize(Archive& ar, SensorDescription& data, std::uint32_t const version)
     {
         SensorDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Sensor_AutoTriggerInterval, data._autoTriggerInterval, defaultObject._autoTriggerInterval);
         loadSave(task, auxiliaries, Id_Sensor_MinRange, data._minRange, defaultObject._minRange);
         loadSave(task, auxiliaries, Id_Sensor_MaxRange, data._maxRange, defaultObject._maxRange);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._mode, data._lastMatch);
+        // Version 1: Added nested structures
+        if (version >= 1) {
+            ar(data._mode, data._lastMatch);
+        } else if (task == SerializationTask::Load) {
+            data._mode = defaultObject._mode;
+            data._lastMatch = defaultObject._lastMatch;
+        }
     }
-    SPLIT_SERIALIZATION(SensorDescription)
+}
+
+CEREAL_CLASS_VERSION(SensorDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, GeneratorDescription& data)
@@ -989,17 +1023,28 @@ namespace cereal
     SPLIT_SERIALIZATION(DirectMovementDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, MuscleDescription& data)
+    void serialize(Archive& ar, MuscleDescription& data, std::uint32_t const version)
     {
         MuscleDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementX, data._lastMovementX, defaultObject._lastMovementX);
         loadSave(task, auxiliaries, Id_Muscle_LastMovementY, data._lastMovementY, defaultObject._lastMovementY);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._mode);
+        // Version 1: Added _mode field
+        if (version >= 1) {
+            ar(data._mode);
+        } else if (task == SerializationTask::Load) {
+            data._mode = defaultObject._mode;
+        }
     }
-    SPLIT_SERIALIZATION(MuscleDescription)
+}
+
+CEREAL_CLASS_VERSION(MuscleDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DefenderDescription& data)
@@ -1044,9 +1089,10 @@ namespace cereal
     SPLIT_SERIALIZATION(DigestorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
+    void serialize(Archive& ar, CellDescription& data, std::uint32_t const version)
     {
         CellDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Cell_Energy, data._usableEnergy, defaultObject._usableEnergy);
@@ -1071,14 +1117,29 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
+        // Version 1: Added nested structures
+        if (version >= 1) {
+            ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
+        } else if (task == SerializationTask::Load) {
+            data._connections = defaultObject._connections;
+            data._cellType = defaultObject._cellType;
+            data._signal = defaultObject._signal;
+            data._signalRestriction = defaultObject._signalRestriction;
+            data._neuralNetwork = defaultObject._neuralNetwork;
+        }
     }
-    SPLIT_SERIALIZATION(CellDescription)
+}
+
+CEREAL_CLASS_VERSION(CellDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CreatureDescription& data)
+    void serialize(Archive& ar, CreatureDescription& data, std::uint32_t const version)
     {
         CreatureDescription defaultObject;
+        SerializationTask task = Archive::is_loading::value ? SerializationTask::Load : SerializationTask::Save;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Creature_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
@@ -1087,12 +1148,21 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
-
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._cells);
+        // Version 1: Added _cells field
+        if (version >= 1) {
+            ar(data._cells);
+        } else if (task == SerializationTask::Load) {
+            data._cells = defaultObject._cells;
+        }
     }
-    SPLIT_SERIALIZATION(CreatureDescription)
+}
+
+CEREAL_CLASS_VERSION(CreatureDescription, 1);
+
+namespace cereal
+{
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)
