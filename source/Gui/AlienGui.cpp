@@ -1540,9 +1540,8 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
 void AlienGui::EndTreeNode()
 {
     // Retrieve the ID from the stack
-    if (_treeNodeIdStack.empty()) {
-        return;  // Safety check
-    }
+    CHECK(!_treeNodeIdStack.empty());
+
     auto id = _treeNodeIdStack.back();
     _treeNodeIdStack.pop_back();
 
