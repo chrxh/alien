@@ -4,6 +4,7 @@
 #include "ConstructorProcessor.cuh"
 #include "DepotProcessor.cuh"
 #include "DetonatorProcessor.cuh"
+#include "DigestorProcessor.cuh"
 #include "ForceFieldKernels.cuh"
 #include "GeneratorProcessor.cuh"
 #include "InjectorProcessor.cuh"
@@ -176,6 +177,11 @@ __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, Simul
 __global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics)
 {
     DetonatorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_digestor(SimulationData data, SimulationStatistics statistics)
+{
+    DigestorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
