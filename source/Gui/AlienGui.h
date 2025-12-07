@@ -398,8 +398,7 @@ public:
         MEMBER(TreeNodeParameters, TreeNodeRank, rank, TreeNodeRank::Default);
         MEMBER(TreeNodeParameters, bool, defaultOpen, true);
         MEMBER(TreeNodeParameters, bool, startBlinking, false);
-        MEMBER(TreeNodeParameters, bool, visible, true);
-        MEMBER(TreeNodeParameters, bool, blinkWhenActivated, false);
+        MEMBER(TreeNodeParameters, bool, enableBlinking, false);
         MEMBER(TreeNodeParameters, std::optional<std::string>, highlightedSubString, std::nullopt);
     };
     static bool BeginTreeNode(TreeNodeParameters const& parameters);
@@ -515,7 +514,7 @@ private:
         std::optional<std::string> const& highlightedSubString = std::nullopt);
 
     static std::unordered_map<unsigned int, TreeNodeInfo> _treeNodeInfoById;
-    static std::vector<ImGuiID> _treeNodeIdStack;
+    static std::vector<unsigned int> _treeNodeIdStack;
 
     static std::unordered_set<unsigned int> _basicSilderExpanded;
 

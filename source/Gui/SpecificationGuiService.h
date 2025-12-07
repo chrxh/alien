@@ -86,4 +86,6 @@ private:
 
 private:
     mutable Cache<ParametersFilter, ParametersSpec, 10000> _specCache;
+
+    mutable std::unordered_map<unsigned int, bool> _visibilityById;
 };

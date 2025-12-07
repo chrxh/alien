@@ -39,25 +39,30 @@ void SpecificationGuiService::createWidgetsForParameters(
                 continue;
             }
             auto isExpertSettings = groupSpec._expertToggle != nullptr;
-            auto isGroupVisibleActive = true;
+            auto visibility = true;
             auto name = groupSpec._name;
             if (isExpertSettings) {
-                isGroupVisibleActive = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
+                visibility = *evaluationService.getExpertToggleRef(groupSpec._expertToggle, parameters);
                 name = "Expert settings: " + name;
             }
-            if (isGroupVisibleActive) {
-                ImGui::PushID(name.c_str());
+            ImGui::PushID(name.c_str());
+
+            auto id = ImGui::GetID("");
+            auto lastVisibility = _visibilityById.contains(id) ? _visibilityById.at(id) : true;
+            auto visibilityChanged = visibility != lastVisibility;
+            _visibilityById.insert_or_assign(id, visibility);
+
+            if (visibility) {
                 auto padding = ImGui::GetStyle().FramePadding;
                 if (table.getCurrentColumn() > 0) {
                     ImGui::Dummy({padding.x, 0});
-
                     ImGui::SameLine();
                     ImGui::BeginGroup();
                 }
                 if (AlienGui::BeginTreeNode(AlienGui::TreeNodeParameters()
                                                 .name(name)
-                                                //.visible(isGroupVisibleActive)
-                                                .blinkWhenActivated(isExpertSettings)
+                                                .startBlinking(visibilityChanged)
+                                                .enableBlinking(isExpertSettings)
                                                 .highlightedSubString(filter.containedText))) {
                     createWidgetsForParameterGroup(groupSpec._parameters, true, parameters, origParameters, orderNumber, filter);
                 }
@@ -65,11 +70,11 @@ void SpecificationGuiService::createWidgetsForParameters(
                 if (table.getCurrentColumn() > 0) {
                     ImGui::EndGroup();
                 }
-                ImGui::PopID();
                 ImGui::Dummy({0, padding.y});
 
                 table.next();
             }
+            ImGui::PopID();
 
             //if (isGroupVisibleActive) {
             //    table.next();
