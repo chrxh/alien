@@ -29,7 +29,7 @@ namespace
 }
 
 std::unordered_set<unsigned int> AlienGui::_basicSilderExpanded;
-//std::vector<TreeNodeStackElement> AlienGui::_treeNodeStack;
+std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
 std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedOutput;
@@ -1530,12 +1530,20 @@ bool AlienGui::BeginTreeNode(TreeNodeParameters const& parameters)
     ImGui::PopStyleColor(3);
 
     treeNodeInfo.isOpen = result;
+    
+    // Store the ID on the stack so EndTreeNode can retrieve it
+    _treeNodeIdStack.push_back(id);
+    
     return result;
 }
 
 void AlienGui::EndTreeNode()
 {
-    auto id = ImGui::GetID("");
+    // Retrieve the ID from the stack
+    CHECK(!_treeNodeIdStack.empty());
+
+    auto id = _treeNodeIdStack.back();
+    _treeNodeIdStack.pop_back();
 
     if (_treeNodeInfoById.at(id).isOpen) {
         ImGui::TreePop();
