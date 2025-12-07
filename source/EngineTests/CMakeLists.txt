@@ -9,6 +9,7 @@ PUBLIC
     DepotTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
+    DigestorTests.cpp
     EnergyFlowTests.cpp
     EnergyParticleTests.cpp
     FrontAngleUpdateTests.cpp
