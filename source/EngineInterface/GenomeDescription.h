@@ -214,6 +214,16 @@ struct DigestorGenomeDescription
     auto operator<=>(DigestorGenomeDescription const&) const = default;
 
     MEMBER(DigestorGenomeDescription, float, rawEnergyConductivity, 0.5f);  // Between 0 and 1
+
+    float getRawEnergyConversionRate() const
+    {
+        return 1 - _rawEnergyConductivity;
+    }
+    DigestorGenomeDescription& setRawEnergyConversionRate(float value)
+    {
+        _rawEnergyConductivity = 1 - value;
+        return *this;
+    }
 };
 
 using CellTypeGenomeDescription = std::variant<

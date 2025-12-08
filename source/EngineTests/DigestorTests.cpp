@@ -29,7 +29,7 @@ public:
 TEST_F(DigestorTests, conversion_noEnergyConversion)
 {
     auto data = Description().cells({
-        CellDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().rawEnergyConversionRate(0.0f)).rawEnergy(100.0f),
+        CellDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -48,7 +48,7 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
 TEST_F(DigestorTests, conversion_highEnergyConversionRate)
 {
     auto data = Description().cells({
-        CellDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().rawEnergyConversionRate(1.0f)).rawEnergy(100.0f),
+        CellDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f),
     });
 
     _simulationFacade->setSimulationData(data);

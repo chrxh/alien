@@ -294,7 +294,8 @@ struct DigestorDescription
 
     MEMBER(DigestorDescription, float, rawEnergyConductivity, 0.5f);    // Between 0 and 1
 
-    DigestorDescription& rawEnergyConversionRate(float value)
+    float getRawEnergyConversionRate() const { return 1 - _rawEnergyConductivity; }
+    DigestorDescription& setRawEnergyConversionRate(float value)
     {
         _rawEnergyConductivity = 1 - value;
         return *this;

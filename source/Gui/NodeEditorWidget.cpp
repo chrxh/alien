@@ -452,6 +452,18 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::InputInt(AlienGui::InputIntParameters().name("Countdown").textWidth(rightColumnWidth), detonator._countdown);
 
             AlienGui::EndIndent();
+        } else if (nodeType == CellTypeGenome_Digestor) {
+            AlienGui::BeginIndent();
+            auto& digestor = std::get<DigestorGenomeDescription>(node._cellType);
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Raw energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
+                &digestor._rawEnergyConductivity);
+            auto rawEnergyConversionRate = digestor.getRawEnergyConversionRate();
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("Raw energy conversion rate").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
+                &rawEnergyConversionRate);
+            digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
+            AlienGui::EndIndent();
         }
     }
     ImGui::EndChild();

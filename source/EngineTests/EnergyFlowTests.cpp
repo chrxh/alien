@@ -12,7 +12,15 @@ class EnergyFlowTests : public IntegrationTestFramework
 public:
     EnergyFlowTests()
         : IntegrationTestFramework()
-    {}
+    {
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+            _parameters.maxRawEnergyConversion.value[i] = 0;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
 
     ~EnergyFlowTests() = default;
 };
