@@ -75,6 +75,8 @@ namespace
             return ReconnectorGenomeDescription();
         case CellTypeGenome_Detonator:
             return DetonatorGenomeDescription();
+        case CellTypeGenome_Digestor:
+            return DigestorGenomeDescription();
         default:
             CHECK(false);
         }

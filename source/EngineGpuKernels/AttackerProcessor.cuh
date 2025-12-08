@@ -151,27 +151,29 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 else {
                     atomicAdd(&otherCell->usableEnergy, energyToTransfer);
                 }
-            } else if (energyToTransfer < -NEAR_ZERO) {
-                auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
-                if (origEnergy >= baseValue - (energyDelta + energyToTransfer)) {
-                    energyDelta += energyToTransfer;
-                }
-                // Revert
-                else {
-                    atomicAdd(&otherCell->usableEnergy, energyToTransfer);
-                }
             }
+            //else if (energyToTransfer < -NEAR_ZERO) {
+            //    auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
+            //    if (origEnergy >= baseValue - (energyDelta + energyToTransfer)) {
+            //        energyDelta += energyToTransfer;
+            //    }
+            //    // Revert
+            //    else {
+            //        atomicAdd(&otherCell->usableEnergy, energyToTransfer);
+            //    }
+            //}
         });
 
         if (energyDelta > NEAR_ZERO) {
-            atomicAdd(&cell->usableEnergy, energyDelta);
-            //distributeEnergy(data, cell, energyDelta);
-        } else {
-            auto origEnergy = atomicAdd(&cell->usableEnergy, energyDelta);
-            if (origEnergy + energyDelta < 0) {
-                atomicAdd(&someOtherCell->usableEnergy, -energyDelta);  //revert
-            }
+            atomicAdd(&cell->rawEnergy, energyDelta);
         }
+        //else {
+        //    auto origEnergy = atomicAdd(&cell->rawEnergy, energyDelta);
+        //    if (origEnergy + energyDelta < 0) {
+        //        atomicAdd(&someOtherCell->usableEnergy, energyDelta);  //revert
+        //        atomicAdd(&cell->rawEnergy, -energyDelta);
+        //    }
+        //}
 
         // Radiation
         auto cellTypeWeaponEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);

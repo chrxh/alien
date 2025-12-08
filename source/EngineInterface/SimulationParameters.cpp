@@ -609,6 +609,9 @@ ParametersSpec const& SimulationParameters::getSpec()
                     ParameterSpec()
                         .name("Max raw energy conductivity")
                         .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(1.0f).format("%.3f")),
+                    ParameterSpec()
+                        .name("Max raw energy conversion")
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f")),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Constructor")

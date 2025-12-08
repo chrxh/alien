@@ -172,6 +172,7 @@ struct SimulationParameters
 
     // Cell type: Digestor
     BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {7.0f, 7.0f, 7.0f, 7.0f, 7.0f, 7.0f, 7.0f};
+    BaseParameter<ColorVector<float>> maxRawEnergyConversion = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
     // Cell type: Constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};

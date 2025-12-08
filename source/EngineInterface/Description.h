@@ -293,6 +293,12 @@ struct DigestorDescription
     auto operator<=>(DigestorDescription const&) const = default;
 
     MEMBER(DigestorDescription, float, rawEnergyConductivity, 0.5f);    // Between 0 and 1
+
+    DigestorDescription& rawEnergyConversionRate(float value)
+    {
+        _rawEnergyConductivity = 1 - value;
+        return *this;
+    }
 };
 
 using CellTypeDescription = std::variant<

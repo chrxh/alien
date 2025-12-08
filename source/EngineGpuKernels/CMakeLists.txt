@@ -30,6 +30,7 @@ add_library(EngineGpuKernels
     DensityMap.cuh
     DepotProcessor.cuh
     DetonatorProcessor.cuh
+    DigestorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
     EditKernelsService.cu

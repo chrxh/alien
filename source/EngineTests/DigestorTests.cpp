@@ -25,3 +25,42 @@ public:
 
     ~DigestorTests() = default;
 };
+
+TEST_F(DigestorTests, conversion_noEnergyConversion)
+{
+    auto data = Description().cells({
+        CellDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().rawEnergyConversionRate(0.0f)).rawEnergy(100.0f),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto origDigestor = data.getCellRef(0);
+    auto actualDigestor = actualData.getCellRef(0);
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    EXPECT_TRUE(approxCompare(actualDigestor._rawEnergy, origDigestor._rawEnergy));
+    EXPECT_TRUE(approxCompare(actualDigestor._usableEnergy, origDigestor._usableEnergy));
+}
+
+TEST_F(DigestorTests, conversion_highEnergyConversionRate)
+{
+    auto data = Description().cells({
+        CellDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().rawEnergyConversionRate(1.0f)).rawEnergy(100.0f),
+    });
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto origDigestor = data.getCellRef(0);
+    auto actualDigestor = actualData.getCellRef(0);
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    EXPECT_TRUE(actualDigestor._rawEnergy < origDigestor._rawEnergy - NEAR_ZERO);
+    EXPECT_TRUE(actualDigestor._usableEnergy > origDigestor._usableEnergy + NEAR_ZERO);
+}
+
