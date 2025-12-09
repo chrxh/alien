@@ -398,66 +398,78 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, rawEnergyFlowsEqualDistribution)
+TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_nonDigestor)
 {
-    // Test that raw energy equalizes between non-Digestor cells
-    Description data;
-    for (int i = 0; i < 20; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
-        data._cells.emplace_back(cell);
-        if (i > 0) {
-            data.addConnection(i, i + 1);
-        }
-    }
-    data._cells.at(0)._rawEnergy = 100.0f;
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).rawEnergy(100.0f),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2000);
+    _simulationFacade->calcTimesteps(100);
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Raw energy should have distributed across all cells
-    for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualData.getCellRef(i + 1)._rawEnergy > 2.0f);
-        EXPECT_TRUE(actualData.getCellRef(i + 1)._rawEnergy < 8.0f);
-    }
+    EXPECT_TRUE(approxCompare(100.0f, actualData.getCellRef(1)._rawEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, actualData.getCellRef(2)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, rawEnergyFlowsToDigestor)
+TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_digestor)
 {
-    // Test that raw energy flows to Digestor cells
-    Description data;
-    for (int i = 0; i < 20; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
-        // Make the last cell a Digestor
-        if (i == 19) {
-            cell.cellType(DigestorDescription());
-        }
-        data._cells.emplace_back(cell);
-        if (i > 0) {
-            data.addConnection(i, i + 1);
-        }
-    }
-    data._cells.at(0)._rawEnergy = 100.0f;
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).rawEnergy(10.0f),
+        CellDescription().id(2).cellType(DigestorDescription()).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2000);
+    _simulationFacade->calcTimesteps(100);
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    // The Digestor cell should have accumulated most of the raw energy
-    EXPECT_TRUE(actualData.getCellRef(20)._rawEnergy > 80.0f);
-    
-    // Other cells should have very little raw energy
-    for (int i = 1; i < 20; ++i) {
-        EXPECT_TRUE(actualData.getCellRef(i)._rawEnergy < 5.0f);
-    }
-    
+    EXPECT_TRUE(approxCompare(0.0f, actualData.getCellRef(1)._rawEnergy));
+    EXPECT_TRUE(approxCompare(10.0f, actualData.getCellRef(2)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
-TEST_F(EnergyFlowTests, rawEnergyFlowsWithHighConductivity)
+TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_nonDigestor)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).cellType(DigestorDescription()).pos({100.0f, 100.0f}).rawEnergy(10.0f),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(100);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(10.0f, actualData.getCellRef(1)._rawEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, actualData.getCellRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_digestor)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).cellType(DigestorDescription().rawEnergyConductivity(0.7f)).pos({100.0f, 100.0f}).rawEnergy(10.0f),
+        CellDescription().id(2).cellType(DigestorDescription().rawEnergyConductivity(0.3f)).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(3.0f, actualData.getCellRef(1)._rawEnergy));
+    EXPECT_TRUE(approxCompare(7.0f, actualData.getCellRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}
+
+TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
 {
     // Test that higher rawEnergyConductivity increases flow rate
     Description dataLowConductivity;
@@ -500,66 +512,4 @@ TEST_F(EnergyFlowTests, rawEnergyFlowsWithHighConductivity)
     // Energy conservation
     EXPECT_TRUE(approxCompare(getEnergy(dataLowConductivity), getEnergy(actualDataLow)));
     EXPECT_TRUE(approxCompare(getEnergy(dataHighConductivity), getEnergy(actualDataHigh)));
-}
-
-TEST_F(EnergyFlowTests, rawEnergyFlowsBetweenDigestors)
-{
-    // Test that raw energy equalizes between two Digestor cells
-    Description data;
-    for (int i = 0; i < 10; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
-        // Make all cells Digestors
-        cell.cellType(DigestorDescription());
-        data._cells.emplace_back(cell);
-        if (i > 0) {
-            data.addConnection(i, i + 1);
-        }
-    }
-    data._cells.at(0)._rawEnergy = 100.0f;
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2000);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    // Raw energy should have equalized across all Digestor cells
-    for (int i = 0; i < 10; ++i) {
-        EXPECT_TRUE(actualData.getCellRef(i + 1)._rawEnergy > 5.0f);
-        EXPECT_TRUE(actualData.getCellRef(i + 1)._rawEnergy < 15.0f);
-    }
-    
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-}
-
-TEST_F(EnergyFlowTests, rawEnergyFlowsMixedCellTypes)
-{
-    // Test raw energy flow in a chain with mixed cell types
-    Description data;
-    for (int i = 0; i < 11; ++i) {
-        auto cell = CellDescription().id(i).pos({100.0f + toFloat(i), 100.0f});
-        // Make cells 0 and 10 Digestors
-        if (i % 10 == 0) {
-            cell.cellType(DigestorDescription());
-        }
-        data._cells.emplace_back(cell);
-        if (i > 0) {
-            data.addConnection(i, i - 1);
-        }
-    }
-    data._cells.at(5)._rawEnergy = 100.0f;
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(2000);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    // Digestor cells should have more raw energy than non-Digestor cells
-    for (int i = 0; i < 10; ++i) {
-        if (i % 10 == 0) {
-            EXPECT_TRUE(actualData.getCellRef(i)._rawEnergy > 25.0f);
-        } else {
-            EXPECT_TRUE(actualData.getCellRef(i)._rawEnergy < 5.0f);
-        }
-    }
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

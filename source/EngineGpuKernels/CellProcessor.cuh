@@ -984,29 +984,33 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
 
         // Flow of raw energy
         {
-            auto needsEnergy = [](Cell* cell) {
-                return (cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
-                    && cell->cellType == CellType_Digestor;
-            };
+            if ((cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
+                && (connectedCell->cellState == CellState_Ready || connectedCell->cellState == CellState_Detaching
+                    || connectedCell->cellState == CellState_Reviving)) {
 
-            auto cellNeedsEnergy = needsEnergy(cell);
-            auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
+                auto flow = 0.0f;
+                auto maxFlow = 0.0f;
+                if (connectedCell->cellType == CellType_Digestor) {
+                    maxFlow += connectedCell->cellTypeData.digestor.rawEnergyConductivity
+                        * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedCell->color];
+                    if (cell->cellType == CellType_Digestor) {
+                        maxFlow += cell->cellTypeData.digestor.rawEnergyConductivity * cudaSimulationParameters.maxRawEnergyConductivity.value[cell->color];
 
-            auto flow = 0.0f;
-            if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
-                if (cell->rawEnergy > connectedCell->rawEnergy) {
-                    flow = (cell->rawEnergy - connectedCell->rawEnergy) / 2;
+                        auto cellConversionRate = 1.0f - cell->cellTypeData.digestor.rawEnergyConductivity;
+                        auto connectedCellConversionRate = 1.0f - connectedCell->cellTypeData.digestor.rawEnergyConductivity;
+                        if (cellConversionRate == 0 && connectedCellConversionRate == 0) {
+                            cellConversionRate = 1;
+                            connectedCellConversionRate = 1;
+                        }
+
+                        auto targetEnergy =
+                            (cell->rawEnergy + connectedCell->rawEnergy) * cellConversionRate / (cellConversionRate + connectedCellConversionRate);
+                        flow = max(cell->rawEnergy - targetEnergy, 0.0f);
+                    } else {
+                        flow = cell->rawEnergy;
+                    }
                 }
-            }
-            if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
-                flow = cell->rawEnergy;
-            }
 
-            if (flow > 0) {
-                auto maxFlow = 0.5f;
-                if (cell->cellType == CellType_Digestor) {
-                    maxFlow *= 1.0f + cell->cellTypeData.digestor.rawEnergyConductivity * cudaSimulationParameters.maxRawEnergyConductivity.value[cell->color];
-                }
                 flow = min(maxFlow, flow);
                 auto orig = atomicAdd(&cell->rawEnergy, -flow);
                 if (orig < 0) {
