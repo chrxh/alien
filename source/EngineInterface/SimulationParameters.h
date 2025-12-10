@@ -169,10 +169,12 @@ struct SimulationParameters
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
             {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
     BaseParameter<bool> attackerDestroyCells = {true};
+    static float constexpr maxRawEnergyThresholdForAttacking = 2.0f;
 
     // Cell type: Digestor
     BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
-    BaseParameter<ColorVector<float>> maxRawEnergyConversion = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    BaseParameter<ColorVector<float>> maxRawEnergyConversion = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
+    static float constexpr maxRawEnergyThresholdForConduction = 100.0f;
 
     // Cell type: Constructor
     BaseParameter<ColorVector<float>> constructorConnectingCellDistance = {{2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f, 2.5f}};

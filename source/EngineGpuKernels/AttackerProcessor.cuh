@@ -39,12 +39,11 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+    if (SignalProcessor::isManuallyTriggered(data, cell) && cell->rawEnergy < SimulationParameters::maxRawEnergyThresholdForAttacking) {
         float energyDelta = 0;
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
         auto baseValue = cudaSimulationParameters.attackerDestroyCells.value ? cellMinEnergy * 0.1f : cellMinEnergy;
 
-        Cell* someOtherCell = nullptr;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
             if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
                 return;
@@ -134,7 +133,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            someOtherCell = otherCell;
             if (energyToTransfer > NEAR_ZERO) {
 
                 // Notify attacked cell
@@ -152,28 +150,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                     atomicAdd(&otherCell->usableEnergy, energyToTransfer);
                 }
             }
-            //else if (energyToTransfer < -NEAR_ZERO) {
-            //    auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
-            //    if (origEnergy >= baseValue - (energyDelta + energyToTransfer)) {
-            //        energyDelta += energyToTransfer;
-            //    }
-            //    // Revert
-            //    else {
-            //        atomicAdd(&otherCell->usableEnergy, energyToTransfer);
-            //    }
-            //}
         });
 
         if (energyDelta > NEAR_ZERO) {
             atomicAdd(&cell->rawEnergy, energyDelta);
         }
-        //else {
-        //    auto origEnergy = atomicAdd(&cell->rawEnergy, energyDelta);
-        //    if (origEnergy + energyDelta < 0) {
-        //        atomicAdd(&someOtherCell->usableEnergy, energyDelta);  //revert
-        //        atomicAdd(&cell->rawEnergy, -energyDelta);
-        //    }
-        //}
 
         // Radiation
         auto cellTypeWeaponEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);

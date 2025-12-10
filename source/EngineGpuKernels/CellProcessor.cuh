@@ -986,7 +986,8 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         {
             if ((cell->cellState == CellState_Ready || cell->cellState == CellState_Detaching || cell->cellState == CellState_Reviving)
                 && (connectedCell->cellState == CellState_Ready || connectedCell->cellState == CellState_Detaching
-                    || connectedCell->cellState == CellState_Reviving)) {
+                    || connectedCell->cellState == CellState_Reviving)
+                && connectedCell->rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
 
                 auto flow = 0.0f;
                 auto maxFlow = 0.0f;

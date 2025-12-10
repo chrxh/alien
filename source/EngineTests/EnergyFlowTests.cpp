@@ -513,3 +513,29 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
     EXPECT_TRUE(approxCompare(getEnergy(dataLowConductivity), getEnergy(actualDataLow)));
     EXPECT_TRUE(approxCompare(getEnergy(dataHighConductivity), getEnergy(actualDataHigh)));
 }
+
+TEST_F(EnergyFlowTests, rawEnergyFlow_exceedRawEnergyThreshold)
+{
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .cellType(DigestorDescription().rawEnergyConductivity(0.7f))
+            .pos({100.0f, 100.0f})
+            .rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction * 2),
+        CellDescription()
+            .id(2)
+            .cellType(DigestorDescription().rawEnergyConductivity(0.3f))
+            .pos({101.0f, 100.0f})
+            .rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction + NEAR_ZERO),
+    });
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(5);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(SimulationParameters::maxRawEnergyThresholdForConduction * 2, actualData.getCellRef(1)._rawEnergy));
+    EXPECT_TRUE(approxCompare(SimulationParameters::maxRawEnergyThresholdForConduction + NEAR_ZERO, actualData.getCellRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+}

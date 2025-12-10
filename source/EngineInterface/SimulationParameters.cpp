@@ -608,7 +608,7 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Max raw energy conductivity")
-                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(1.0f).format("%.3f")),
+                        .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConductivity).min(0.0f).max(3.0f).format("%.3f")),
                     ParameterSpec()
                         .name("Max raw energy conversion")
                         .reference(FloatSpec().member(&SimulationParameters::maxRawEnergyConversion).min(0.0f).max(1.0f).format("%.3f")),
