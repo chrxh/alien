@@ -775,8 +775,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& sensorDesc = std::get<SensorGenomeDescription>(nodeDesc._cellType);
                 auto& sensorTO = nodeTO.cellTypeData.sensor;
                 sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
-                sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange);
-                sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
+                sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
+                sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
                 sensorTO.mode = sensorDesc.getMode();
 
                 if (sensorTO.mode == SensorMode_Telemetry) {
@@ -983,8 +983,8 @@ void DescriptionConverterService::convertCellToTO(
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellType);
         SensorTO& sensorTO = cellTO.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
-        sensorTO.minRange = static_cast<int8_t>(sensorDesc._minRange);
-        sensorTO.maxRange = static_cast<int8_t>(sensorDesc._maxRange);
+        sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
+        sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
         sensorTO.mode = sensorDesc.getMode();
 
         if (sensorTO.mode == SensorMode_Telemetry) {
