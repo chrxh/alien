@@ -1074,11 +1074,13 @@ namespace cereal
     SPLIT_SERIALIZATION(ParticleDescription)
 
     template <class Archive>
-    void serialize(Archive& ar, Description& description)
+    void serialize(Archive& ar, Description& description, std::uint32_t const version)
     {
         ar(description._cells, description._particles, description._creatures, description._genomes);
     }
 }
+
+CEREAL_CLASS_VERSION(Description, 1)
 
 bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& filename, DeserializedSimulation const& data) const
 {
