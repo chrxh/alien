@@ -450,7 +450,7 @@ struct Description
     void clear();
     bool isEmpty() const;
 
-    void add(Description&& other, bool assignNewIds = true);
+    Description& add(Description&& other, bool assignNewIds = true);
 
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids

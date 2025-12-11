@@ -265,7 +265,7 @@ bool Description::isEmpty() const
     return numCells == 0 && _particles.empty();
 }
 
-void Description::add(Description&& other, bool assignNewIds /*= true*/)
+Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
 {
     if (assignNewIds) {
         other.assignNewIds();
@@ -274,6 +274,7 @@ void Description::add(Description&& other, bool assignNewIds /*= true*/)
     _particles.insert(_particles.end(), other._particles.begin(), other._particles.end());
     _creatures.insert(_creatures.end(), other._creatures.begin(), other._creatures.end());
     _genomes.insert(_genomes.end(), other._genomes.begin(), other._genomes.end());
+    return *this;
 }
 
 bool Description::hasUniqueIds() const

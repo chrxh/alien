@@ -2,11 +2,15 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
+#include <ImFileDialog.h>
+
 #include <Fonts/IconsFontAwesome5.h>
 
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/GenomeDescriptionInfoService.h>
+#include <EngineInterface/NumberGenerator.h>
+#include <EngineInterface/SimulationFacade.h>
 
 #include <PersisterInterface/SerializerService.h>
 
@@ -20,9 +24,6 @@
 #include "GenomeTabWidget.h"
 #include "GenomeWindowEditData.h"
 #include "OverlayController.h"
-
-#include <ImFileDialog.h>
-#include <EngineInterface/SimulationFacade.h>
 
 void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, GenomeDescription const& genome, bool openEditorIfClosed)
 {
@@ -281,18 +282,17 @@ void GenomeEditorWindow::onCreateSeed()
     auto tab = _tabs.at(_selectedTabIndex);
     auto genome = tab->getGenomeDescription();
 
-    auto parameter = _SimulationFacade::get()->getSimulationParameters();
-    auto numNodes = GenomeDescriptionInfoService::get().getNumberOfNodes(genome);
-
     Description seed;
     seed.addCreature(
-        CreatureDescription().cells({
-            CellDescription()
-                .pos(pos)
-                .stiffness(1.0f)
-                .color(EditorModel::get().getDefaultColorCode())
-                .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)),
-        }),
+        CreatureDescription()
+            .lineageId(toInt(NumberGenerator::get().createId() % 0x80000000))
+            .cells({
+                CellDescription()
+                    .pos(pos)
+                    .stiffness(1.0f)
+                    .color(EditorModel::get().getDefaultColorCode())
+                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)),
+            }),
         genome);
 
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(seed));
