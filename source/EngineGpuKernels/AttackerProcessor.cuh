@@ -41,10 +41,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     if (SignalProcessor::isManuallyTriggered(data, cell) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
         auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
-            if (otherCell->creature != nullptr) {
+            if (otherCell->creature == nullptr) {
                 return;
             }
-            if (otherCell->creature->id == cell->creature->id) {
+            if (cell->isSameCreature(otherCell)) {
                 return;
             }
             // Do not attack direct offspring
