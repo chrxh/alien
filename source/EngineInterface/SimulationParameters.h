@@ -160,7 +160,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
     BaseParameter<ColorVector<float>> attackerRadius = {{1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f}};
     static float constexpr attackerMaxRawEnergyThreshold = 2.0f;
-    static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Cell type: Digestor
     BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};

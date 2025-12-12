@@ -21,7 +21,6 @@ private:
 
     __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell);
     __inline__ __device__ static int countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static bool isHomogene(Cell* cell);
 };
 
 /************************************************************************/
@@ -40,9 +39,16 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     if (SignalProcessor::isManuallyTriggered(data, cell) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
-        float energyDelta = 0;
+        auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
-            if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
+            if (otherCell->creature != nullptr) {
+                return;
+            }
+            if (otherCell->creature->id == cell->creature->id) {
+                return;
+            }
+            // Do not attack direct offspring
+            if (otherCell->creature->ancestorId == cell->creature->id) {
                 return;
             }
             if (otherCell->fixed) {
@@ -60,24 +66,16 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             // Evaluate defender strength
             auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
-            float defendStrength =
+            auto defendStrength =
                 numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength.value[color] + 1.0f, numDefenderCells);
             energyToTransfer /= defendStrength;
-
-            // Evaluate color inhomogeneity factor
-            if (!isHomogene(otherCell)) {
-                energyToTransfer *= cudaSimulationParameters.attackerColorInhomogeneityFactor;
-            }
 
             // Evaluate food chain color matrix
             energyToTransfer *= ParameterCalculator::calcParameter(cudaSimulationParameters.attackerFoodChainColorMatrix, data, cell->pos, color, otherColor);
 
-            if (abs(energyToTransfer) < NEAR_ZERO) {
-                return;
-            }
-
             if (energyToTransfer > NEAR_ZERO) {
 
+                // Only attack other cells which are in a visible cone with respect to the attack cell
                 if (existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
                     return;
                 }
@@ -88,9 +86,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 otherCell->eventCounter = 10;
                 otherCell->eventPos = cell->pos;
 
+                // Absorb energy from attacked cell
                 auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
                 if (origEnergy > energyToTransfer) {
-                    energyDelta += energyToTransfer;
+                    sumEnergyToTransfer += energyToTransfer;
                 }
                 // Revert
                 else {
@@ -99,8 +98,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
         });
 
-        if (energyDelta > NEAR_ZERO) {
-            atomicAdd(&cell->rawEnergy, energyDelta);
+        // Energy gain
+        if (sumEnergyToTransfer > NEAR_ZERO) {
+            atomicAdd(&cell->rawEnergy, sumEnergyToTransfer);
+
+            cell->event = CellEvent_Attacking;
+            cell->eventCounter = 6;
+            statistics.incNumAttacks(cell->color);
         }
 
         // Radiation
@@ -110,13 +114,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // Output
-        cell->signal.channels[Channels::AttackerSuccess] = min(1.0f, max(0.0f, energyDelta / 10));
-
-        if (energyDelta > NEAR_ZERO) {
-            cell->event = CellEvent_Attacking;
-            cell->eventCounter = 6;
-            statistics.incNumAttacks(cell->color);
-        }
+        cell->signal.channels[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
     }
 }
 
@@ -158,22 +156,4 @@ __inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(Simulati
         }
     }
     return result;
-}
-
-__inline__ __device__ bool AttackerProcessor::isHomogene(Cell* cell)
-{
-    int color = cell->color;
-    for (int i = 0; i < cell->numConnections; ++i) {
-        auto otherCell = cell->connections[i].cell;
-        if (color != otherCell->color) {
-            return false;
-        }
-        for (int j = 0; j < otherCell->numConnections; ++j) {
-            auto otherOtherCell = otherCell->connections[j].cell;
-            if (color != otherOtherCell->color) {
-                return false;
-            }
-        }
-    }
-    return true;
 }
