@@ -272,7 +272,6 @@ struct SignalRestrictionTO
 
 struct SignalTO
 {
-    bool active;
     float channels[MAX_CHANNELS];
 };
 

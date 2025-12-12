@@ -37,12 +37,14 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     __shared__ Signal signal;
+    __shared__ SignalState signalState;
     if (0 == threadIdx.x) {
         signal = cell->signal;
+        signalState = cell->signalState;
     }
     __syncthreads();
 
-    if (!signal.active) {
+    if (signalState == SignalState_Inactive) {
         return;
     }
 

@@ -482,7 +482,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     routingRestriction._openingAngle = cellTO.signalRestriction.openingAngle;
     result._signalRestriction = routingRestriction;
     result._signalState = cellTO.signalState;
-    if (cellTO.signal.active) {
+    if (cellTO.signalState != SignalState_Inactive) {
         SignalDescription signal;
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             signal._channels[i] = cellTO.signal.channels[i];
@@ -1142,8 +1142,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
     cellTO.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
     cellTO.signalState = cellDesc._signalState;
-    cellTO.signal.active = cellDesc._signal.has_value();
-    if (cellTO.signal.active) {
+    if (cellDesc._signal.has_value()) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.signal.channels[i] = cellDesc._signal->_channels[i];
         }

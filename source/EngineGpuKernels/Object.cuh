@@ -299,7 +299,6 @@ struct SignalRestriction
 
 struct Signal
 {
-    bool active;
     float channels[MAX_CHANNELS];
 };
 
@@ -368,6 +367,7 @@ struct Cell
 
     // Process data
     Signal futureSignal;
+    SignalState futureSignalState;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
     bool headCell;
