@@ -65,7 +65,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->cellState == CellState_Constructing || connectedCell->signalState == SignalState_Inactive) {
+            if (connectedCell->cellState == CellState_Constructing || connectedCell->signalState != SignalState_Active) {
                 continue;
             }
             int skip = false;
@@ -155,7 +155,7 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
 
 __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Cell* cell)
 {
-    if (cell->signalState == SignalState_Inactive) {
+    if (cell->signalState != SignalState_Active) {
         return false;
     }
     if (abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {

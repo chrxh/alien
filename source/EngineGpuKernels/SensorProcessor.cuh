@@ -88,7 +88,7 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
     if (threadIdx.x == 0) {
 
         // Create signal if not already existing
-        if (cell->signalState == SignalState_Inactive) {
+        if (cell->signalState != SignalState_Active) {
             SignalProcessor::createEmptySignal(cell);
         }
 
@@ -192,7 +192,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
             // Create signal if not already existing
-            if (cell->signalState == SignalState_Inactive) {
+            if (cell->signalState != SignalState_Active) {
                 SignalProcessor::createEmptySignal(cell);
             }
 
@@ -284,7 +284,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
             // Create signal if not already existing
-            if (cell->signalState == SignalState_Inactive) {
+            if (cell->signalState != SignalState_Active) {
                 SignalProcessor::createEmptySignal(cell);
             }
 

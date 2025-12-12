@@ -44,7 +44,7 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     }
     __syncthreads();
 
-    if (signalState == SignalState_Inactive) {
+    if (signalState != SignalState_Active) {
         return;
     }
 
