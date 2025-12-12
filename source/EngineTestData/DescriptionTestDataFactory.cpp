@@ -222,7 +222,11 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         return GeneratorDescription().autoTriggerInterval(60).alternationInterval(3).numPulses(5);
     }
     case CellType_Attacker:
-        return AttackerDescription();
+        return AttackerDescription()
+            .minNumCells(4)
+            .maxNumCells(15)
+            .restrictToColor(1)
+            .restrictToLineage(DetectCreatureLineageRestriction_OtherLineage);
     case CellType_Injector:
         return InjectorDescription().counter(15);
     case CellType_Muscle: {
@@ -332,7 +336,11 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Generator:
         return GeneratorGenomeDescription().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
     case CellTypeGenome_Attacker:
-        return AttackerGenomeDescription();
+        return AttackerGenomeDescription()
+            .minNumCells(5)
+            .maxNumCells(18)
+            .restrictToColor(2)
+            .restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
     case CellTypeGenome_Injector:
         return InjectorGenomeDescription();
     case CellTypeGenome_Muscle: {
