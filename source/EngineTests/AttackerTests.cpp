@@ -18,7 +18,7 @@ public:
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
             _parameters.attackerStrength.value[i] = 0.5f;
-            _parameters.attackerRadius.value[i] = 1.6f;
+            _parameters.attackerRadius.value[i] = 2.5f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
@@ -40,10 +40,12 @@ protected:
     // Helper to create a target creature at a given position
     Description createTargetCreature(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f, bool fixed = false)
     {
-        return Description().addCreature(CreatureDescription().id(creatureId).cells({
+        auto data = Description().addCreature(CreatureDescription().id(creatureId).cells({
             CellDescription().id(100).pos(pos).color(color).usableEnergy(usableEnergy).fixed(fixed),
             CellDescription().id(101).pos({pos.x + 1.0f, pos.y}).color(color).usableEnergy(usableEnergy).fixed(fixed),
         }));
+        data.addConnection(100, 101);
+        return data;
     }
 };
 
@@ -57,7 +59,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 1.0f);  // Below 2.0f threshold
 
     // Add target creature within attack radius
-    data.add(createTargetCreature({100.0f, 100.5f}));
+    data.add(createTargetCreature({100.0f, 101.5f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
@@ -75,7 +77,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_atThreshold)
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 2.0f);  // At 2.0f threshold
 
     // Add target creature within attack radius
-    data.add(createTargetCreature({100.0f, 100.5f}));
+    data.add(createTargetCreature({100.0f, 101.5f}), false);
 
     auto origTarget = data.getCellRef(100);
 
@@ -95,7 +97,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 5.0f);  // Above 2.0f threshold
 
     // Add target creature within attack radius
-    data.add(createTargetCreature({100.0f, 100.5f}));
+    data.add(createTargetCreature({100.0f, 101.5f}), false);
 
     auto origTarget = data.getCellRef(100);
 
@@ -120,7 +122,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 100.5f}, 2, 1));  // Color 1 target
+    data.add(createTargetCreature({100.0f, 101.5f}, 2, 1), false);       // Color 1 target
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -139,7 +141,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 100.5f}, 2, 1));  // Color 1 target
+    data.add(createTargetCreature({100.0f, 101.5f}, 2, 1), false);       // Color 1 target
 
     auto origTarget = data.getCellRef(100);
 
@@ -160,7 +162,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_halfStrength)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 100.5f}, 2, 1));  // Color 1 target
+    data.add(createTargetCreature({100.0f, 101.5f}, 2, 1), false);       // Color 1 target
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -181,7 +183,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_halfStrength)
 TEST_F(AttackerTests, outputSignal_successfulAttack)
 {
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
-    data.add(createTargetCreature({100.0f, 100.5f}));
+    data.add(createTargetCreature({100.0f, 101.5f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -221,8 +223,8 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
     auto data = Description().addCreature(CreatureDescription().id(1).cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription()),
         CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
-        CellDescription().id(3).pos({100.0f, 100.5f}).usableEnergy(100.0f),  // Same creature, in attack range
-        CellDescription().id(4).pos({100.5f, 100.5f}).usableEnergy(100.0f),  // Same creature, in attack range
+        CellDescription().id(3).pos({100.0f, 101.5f}).usableEnergy(100.0f),  // Same creature, in attack range
+        CellDescription().id(4).pos({100.5f, 101.5f}).usableEnergy(100.0f),  // Same creature, in attack range
     }));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -255,9 +257,10 @@ TEST_F(AttackerTests, noAttackOnOffspring)
 
     // Create offspring creature with ancestorId pointing to parent
     data._creatures.emplace_back(CreatureDescription().id(2).ancestorId(parentId).cells({
-        CellDescription().id(100).pos({100.0f, 100.5f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({100.5f, 100.5f}).usableEnergy(100.0f),
+        CellDescription().id(100).pos({100.0f, 101.5f}).usableEnergy(100.0f),
+        CellDescription().id(101).pos({100.5f, 101.5f}).usableEnergy(100.0f),
     }));
+    data.addConnection(100, 101);
 
     auto origCell = data.getCellRef(100);
 
@@ -277,7 +280,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
 
     // Create unrelated creature (no ancestorId relationship)
-    data.add(createTargetCreature({100.0f, 100.5f}, 999));
+    data.add(createTargetCreature({100.0f, 101.5f}, 999), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -296,7 +299,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
 TEST_F(AttackerTests, noAttackOnFixedCells)
 {
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
-    data.add(createTargetCreature({100.0f, 100.5f}, 2, 0, 100.0f, true));  // fixed=true
+    data.add(createTargetCreature({100.0f, 101.5f}, 2, 0, 100.0f, true), false);  // fixed=true
 
     auto origTarget = data.getCellRef(100);
 
@@ -313,7 +316,7 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
 TEST_F(AttackerTests, attackOnNonFixedCells)
 {
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
-    data.add(createTargetCreature({100.0f, 100.5f}, 2, 0, 100.0f, false));  // fixed=false
+    data.add(createTargetCreature({100.0f, 101.5f}, 2, 0, 100.0f, false), false);  // fixed=false
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -336,8 +339,8 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription()),
         CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
         // Create a connection that crosses the ray path to target at (100, 99)
-        CellDescription().id(3).pos({99.0f, 99.5f}),
-        CellDescription().id(4).pos({101.0f, 99.5f}),
+        CellDescription().id(3).pos({99.0f, 99.0f}),
+        CellDescription().id(4).pos({101.0f, 99.0f}),
     }));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -345,7 +348,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     data.addConnection(1, 4);
 
     // Add target creature below (ray to target is blocked by connection 3-4)
-    data.add(createTargetCreature({100.0f, 99.0f}));
+    data.add(createTargetCreature({100.0f, 98.0f}), false);
 
     auto origTarget = data.getCellRef(100);
 
@@ -366,13 +369,13 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
 
     // Create a different creature with connections that would cross the ray path
     data._creatures.emplace_back(CreatureDescription().id(3).cells({
-        CellDescription().id(50).pos({99.0f, 99.5f}),
-        CellDescription().id(51).pos({101.0f, 99.5f}),
+        CellDescription().id(50).pos({99.0f, 99.0f}),
+        CellDescription().id(51).pos({101.0f, 99.0f}),
     }));
     data.addConnection(50, 51);
 
     // Add target creature below
-    data.add(createTargetCreature({100.0f, 99.0f}));
+    data.add(createTargetCreature({100.0f, 98.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -399,7 +402,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     data.addConnection(3, 4);
 
     // Add target creature at a position not blocked by connections
-    data.add(createTargetCreature({100.0f, 100.5f}));
+    data.add(createTargetCreature({100.0f, 101.5f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);

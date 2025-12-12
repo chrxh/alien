@@ -39,6 +39,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     if (SignalProcessor::isManuallyTriggered(data, cell) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
+
         auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
             if (otherCell->creature == nullptr) {
@@ -54,7 +55,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (otherCell->fixed) {
                 return;
             }
-
             // Only attack cells with energy above base value
             auto energyToTransfer = atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[cell->color];
             if (energyToTransfer < 0) {

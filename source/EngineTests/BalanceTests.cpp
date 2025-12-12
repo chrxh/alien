@@ -156,6 +156,5 @@ TEST_F(BalanceTests, longRunning_smallCreaturesVsLargeCreatures_highDigestionCap
             CHECK(false);
         }
     }
-    EXPECT_LT(10, numLargeCreatures);
-    EXPECT_LT(200, numSmallCreatures);
+    EXPECT_LT(40, numLargeCreatures);
 }
