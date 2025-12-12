@@ -122,7 +122,26 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
 __inline__ __device__ bool AttackerProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell)
 {
-    return false;
+    auto result = false;
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](Cell* nearCell) {
+        if (result) {
+            return;
+        }
+        if (nearCell == cell) {
+            return;
+        }
+        if (!cell->isSameCreature(nearCell)) {
+            return;
+        }
+        for (int i = 0; i < nearCell->numConnections; ++i) {
+            auto connectedNearCell = nearCell->connections[i].cell;
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, otherCell->pos)) {
+                result = true;
+                return;
+            }
+        }
+    });
+    return result;
 }
 
 __inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)
