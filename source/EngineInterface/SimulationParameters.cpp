@@ -594,14 +594,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Attack radius")
                         .reference(FloatSpec().member(&SimulationParameters::attackerRadius).min(0.0f).max(3.0f))
                         .description("The maximum distance over which an attacker cell can attack another cell."),
-                    ParameterSpec()
-                        .name("Complex creature protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerComplexCreatureProtection).min(0.0f).max(20.0f).format("%.2f"))
-                        .description("The larger this parameter is, the less energy can be gained by attacking creatures with more complex genomes."),
-                    ParameterSpec()
-                        .name("Destroy cells")
-                        .reference(BoolSpec().member(&SimulationParameters::attackerDestroyCells))
-                        .description("If activated, the attacker cell is able to destroy other cells. If deactivated, it only damages them."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Digestor")
@@ -754,38 +746,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .name("Low velocity penalty")
                         .reference(FloatSpec().member(&SimulationParameters::radiationAbsorptionLowVelocityPenalty).min(0.0f).max(1.0f).format("%.2f"))
                         .description("When this parameter is increased, slowly moving cells will absorb less energy from an incoming energy particle."),
-                }),
-            ParameterGroupSpec()
-                .name("Advanced attacker control")
-                .expertToggle(&SimulationParameters::advancedAttackerControlToggle)
-                .parameters({
-                    ParameterSpec()
-                        .name("Same mutant protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerSameMutantProtection).min(0.0f).max(1.0f).format("%.2f"))
-                        .description("The larger this parameter is, the less energy can be gained by attacking creatures with the same mutation id."),
-                    ParameterSpec()
-                        .name("New complex mutant protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerNewComplexMutantProtection).min(0.0f).max(1.0f))
-                        .description("A high value protects new mutants with equal or greater genome complexity from being attacked."),
-                    ParameterSpec()
-                        .name("Sensor detection factor")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerSensorDetectionFactor).min(0.0f).max(1.0f))
-                        .description(
-                            "This parameter controls whether the target must be previously detected with sensors in order to be attacked. The larger this "
-                            "value is, the less energy can be gained during the attack if the target has not already been detected. For this purpose, the "
-                            "attacker cell searches for connected (or connected-connected) sensor cells to see which cell networks they have detected last "
-                            "time and "
-                            "compares them with the attacked target."),
-                    ParameterSpec()
-                        .name("Geometry deviation protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerGeometryDeviationProtection).min(0.0f).max(5.0f))
-                        .description(
-                            "The larger this value is, the less energy a cell can gain from an attack if the local geometry of the attacked cell does not "
-                            "match the attacking cell."),
-                    ParameterSpec()
-                        .name("Connections mismatch protection")
-                        .reference(FloatSpec().member(&SimulationParameters::attackerConnectionsMismatchProtection).min(0.0f).max(1.0f))
-                        .description("The larger this parameter is, the more difficult it is to attack cells that contain more connections."),
                 }),
             ParameterGroupSpec()
                 .name("Cell age limiter")

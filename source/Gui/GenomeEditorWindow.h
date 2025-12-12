@@ -29,6 +29,9 @@ private:
 
     void onOpenGenome();
     void onSaveGenome();
+    void onCloneGenome();
+    void onCopyGenome();
+    void onPasteGenome();
     void onInjectGenome();
     void onCreateSeed();
     void onScheduleAddCreatureTab(uint64_t creatureId, GenomeDescription const& genome);

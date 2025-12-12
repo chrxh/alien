@@ -103,7 +103,7 @@ public:
 };
 
 // Test that small creatures dominates if large creatures have few digestion capabilities
-TEST_F(BalanceTests, smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
+TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
 {
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 200000;
@@ -132,7 +132,7 @@ TEST_F(BalanceTests, smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
 }
 
 // Test that large creatures dominates if large creatures have high digestion capabilities
-TEST_F(BalanceTests, smallCreaturesVsLargeCreatures_highDigestionCapabilities)
+TEST_F(BalanceTests, longRunning_smallCreaturesVsLargeCreatures_highDigestionCapabilities)
 {
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 200000;

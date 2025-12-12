@@ -118,16 +118,17 @@ void GenomeEditorWindow::processToolbar()
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_CLONE).tooltip("Clone genome"))) {
+        onCloneGenome();
     }
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters().text(ICON_FA_COPY).tooltip("Copy genome to clipboard"))) {
-        _copiedGenome = getCurrentGenome();
+        onCopyGenome();
     }
 
     ImGui::SameLine();
     if (AlienGui::ToolbarButton(
             AlienGui::ToolbarButtonParameters().text(ICON_FA_PASTE).tooltip("Paste genome from clipboard").disabled(!_copiedGenome.has_value()))) {
-        _tabs.at(_selectedTabIndex)->setGenomeDescription(_copiedGenome.value());
+        onPasteGenome();
     }
 
     ImGui::SameLine();
@@ -258,6 +259,21 @@ void GenomeEditorWindow::onSaveGenome()
             GenericMessageDialog::get().information("Save genome", "The selected file could not be saved.");
         }
     });
+}
+
+void GenomeEditorWindow::onCloneGenome()
+{
+    openTab(std::nullopt, getCurrentGenome(), false);
+}
+
+void GenomeEditorWindow::onCopyGenome()
+{
+    _copiedGenome = getCurrentGenome();
+}
+
+void GenomeEditorWindow::onPasteGenome()
+{
+    _tabs.at(_selectedTabIndex)->setGenomeDescription(_copiedGenome.value());
 }
 
 void GenomeEditorWindow::onInjectGenome()

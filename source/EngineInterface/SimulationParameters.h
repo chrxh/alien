@@ -159,17 +159,8 @@ struct SimulationParameters
             {1, 1, 1, 1, 1, 1, 1}}};
     BaseParameter<ColorVector<float>> attackerStrength = {{0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f, 0.05f}};
     BaseParameter<ColorVector<float>> attackerRadius = {{1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f, 1.6f}};
-    BaseLayerParameter<ColorMatrix<float>> attackerComplexCreatureProtection = {
-        .baseValue = {
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
-    BaseParameter<bool> attackerDestroyCells = {true};
-    static float constexpr maxRawEnergyThresholdForAttacking = 2.0f;
+    static float constexpr attackerMaxRawEnergyThreshold = 2.0f;
+    static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Cell type: Digestor
     BaseParameter<ColorVector<float>> maxRawEnergyConductivity = {3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f};
@@ -225,30 +216,6 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> radiationAbsorptionLowConnectionPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseParameter<ColorVector<float>> radiationAbsorptionHighVelocityPenalty = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     BaseLayerParameter<ColorVector<float>> radiationAbsorptionLowVelocityPenalty = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-
-    // Expert settings: Advanced attacker control
-    ExpertToggle advancedAttackerControlToggle = {false};
-    BaseParameter<ColorMatrix<float>> attackerSameMutantProtection = {
-        {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
-    BaseLayerParameter<ColorMatrix<float>> attackerNewComplexMutantProtection = {
-        .baseValue = {
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
-            {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}}};
-    BaseParameter<ColorVector<float>> attackerSensorDetectionFactor = {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseLayerParameter<ColorVector<float>> attackerGeometryDeviationProtection = {.baseValue = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
-    BaseLayerParameter<ColorVector<float>> attackerConnectionsMismatchProtection = {.baseValue = {0, 0, 0, 0, 0, 0, 0}};
-    static float constexpr attackerColorInhomogeneityFactor = 1.0f;
 
     // Expert settings: Cell age limiter
     ExpertToggle cellAgeLimiterToggle = {false};
