@@ -167,7 +167,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);
                 detonator._countdown = std::max(detonator._countdown, 1);
             }
-            // BaseGenomeDescription has no attributes to validate
+            // BaseGenomeDescription is the only cell type without attributes to validate
         }
     }
 }
