@@ -115,6 +115,11 @@ struct GeneratorGenomeDescription
 struct AttackerGenomeDescription
 {
     auto operator<=>(AttackerGenomeDescription const&) const = default;
+
+    MEMBER(AttackerGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(AttackerGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(AttackerGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackerGenomeDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
 };
 
 struct InjectorGenomeDescription
