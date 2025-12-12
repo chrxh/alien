@@ -139,14 +139,20 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
 
         auto simulationData = getSimulationDataPtrCopy();
         _simulationKernels->calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
-        syncAndCheck();
 
-        automaticResizeArrays();
-
+        uint64_t timestep;
         {
             std::lock_guard lock(_mutexForSimulationData);
             ++_cudaSimulationData->timestep;
+            timestep = _cudaSimulationData->timestep;
         }
+
+        // Only synchronize when necessary: every 10th timestep for array resize check
+        if (timestep % 10 == 0) {
+            syncAndCheck();
+            automaticResizeArrays();
+        }
+
         auto statistics = getStatisticsRawData();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
@@ -155,17 +161,12 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
         }
-        auto now = std::chrono::steady_clock::now();
-        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-            _lastStatisticsUpdateTime = now;
-            updateStatistics();
-        }
+        updateStatisticsIfNeeded();
     }
+    // Ensure final synchronization before returning
+    syncAndCheck();
     if (forceUpdateStatistics) {
-        auto now = std::chrono::steady_clock::now();
-        if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
-            updateStatistics();
-        }
+        updateStatisticsIfNeeded();
     }
 }
 
@@ -464,6 +465,15 @@ void _SimulationCudaFacade::updateStatistics()
         _statisticsData = _cudaSimulationStatistics->getStatistics();
     }
     StatisticsService::get().addDataPoint(_statisticsHistory, _statisticsData->timeline, getCurrentTimestep());
+}
+
+void _SimulationCudaFacade::updateStatisticsIfNeeded()
+{
+    auto now = std::chrono::steady_clock::now();
+    if (!_lastStatisticsUpdateTime || now - *_lastStatisticsUpdateTime > StatisticsUpdate) {
+        _lastStatisticsUpdateTime = now;
+        updateStatistics();
+    }
 }
 
 StatisticsHistory const& _SimulationCudaFacade::getStatisticsHistory() const

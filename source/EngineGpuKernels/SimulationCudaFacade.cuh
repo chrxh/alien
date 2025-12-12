@@ -121,6 +121,7 @@ private:
     void automaticResizeArrays();
     void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
+    void updateStatisticsIfNeeded();
 
     SimulationData getSimulationDataPtrCopy() const;
 
