@@ -364,6 +364,16 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     } break;
     case CellType_Attacker: {
         AttackerDescription attacker;
+        attacker._minNumCells = cellTO.cellTypeData.attacker.minNumCells > 0
+            ? std::make_optional(static_cast<int>(cellTO.cellTypeData.attacker.minNumCells))
+            : std::nullopt;
+        attacker._maxNumCells = cellTO.cellTypeData.attacker.maxNumCells > 0
+            ? std::make_optional(static_cast<int>(cellTO.cellTypeData.attacker.maxNumCells))
+            : std::nullopt;
+        attacker._restrictToColor = cellTO.cellTypeData.attacker.restrictToColor != 255
+            ? std::make_optional(static_cast<int>(cellTO.cellTypeData.attacker.restrictToColor))
+            : std::nullopt;
+        attacker._restrictToLineage = cellTO.cellTypeData.attacker.restrictToLineage;
         result._cellType = attacker;
     } break;
     case CellType_Injector: {
@@ -566,6 +576,16 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Attacker: {
         AttackerGenomeDescription attackerDesc;
+        attackerDesc._minNumCells = nodeTO->cellTypeData.attacker.minNumCells > 0
+            ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.minNumCells))
+            : std::nullopt;
+        attackerDesc._maxNumCells = nodeTO->cellTypeData.attacker.maxNumCells > 0
+            ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.maxNumCells))
+            : std::nullopt;
+        attackerDesc._restrictToColor = nodeTO->cellTypeData.attacker.restrictToColor != 255
+            ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.attacker.restrictToColor))
+            : std::nullopt;
+        attackerDesc._restrictToLineage = nodeTO->cellTypeData.attacker.restrictToLineage;
         nodeDesc._cellType = attackerDesc;
     } break;
     case CellTypeGenome_Injector: {
@@ -809,6 +829,12 @@ void DescriptionConverterService::convertGenomeToTO(
                 generatorTO.alternationInterval = generatorDesc._alternationInterval;
             } break;
             case CellTypeGenome_Attacker: {
+                auto const& attackerDesc = std::get<AttackerGenomeDescription>(nodeDesc._cellType);
+                auto& attackerTO = nodeTO.cellTypeData.attacker;
+                attackerTO.minNumCells = static_cast<uint32_t>(attackerDesc._minNumCells.value_or(0));
+                attackerTO.maxNumCells = static_cast<uint32_t>(attackerDesc._maxNumCells.value_or(0));
+                attackerTO.restrictToColor = static_cast<uint8_t>(attackerDesc._restrictToColor.value_or(255));
+                attackerTO.restrictToLineage = attackerDesc._restrictToLineage;
             } break;
             case CellTypeGenome_Injector: {
                 auto const& injectorDesc = std::get<InjectorGenomeDescription>(nodeDesc._cellType);
@@ -1023,8 +1049,12 @@ void DescriptionConverterService::convertCellToTO(
         generatorTO.numPulses = generatorDesc._numPulses;
     } break;
     case CellType_Attacker: {
-        //auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellType);
-        //AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
+        auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellType);
+        AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
+        attackerTO.minNumCells = static_cast<uint32_t>(attackerDesc._minNumCells.value_or(0));
+        attackerTO.maxNumCells = static_cast<uint32_t>(attackerDesc._maxNumCells.value_or(0));
+        attackerTO.restrictToColor = static_cast<uint8_t>(attackerDesc._restrictToColor.value_or(255));
+        attackerTO.restrictToLineage = attackerDesc._restrictToLineage;
     } break;
     case CellType_Injector: {
         auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellType);

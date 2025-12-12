@@ -90,7 +90,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                         auto& value = detectCreature._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-                    detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
+                    detectCreature._restrictToLineage =
+                        std::clamp(detectCreature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellTypeGenome_Generator) {
@@ -98,6 +99,22 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 generator._autoTriggerInterval = std::max(generator._autoTriggerInterval, 0);
                 generator._pulseType = std::clamp(generator._pulseType, 0, GeneratorPulseType_Count - 1);
                 generator._alternationInterval = std::max(generator._alternationInterval, 1);
+
+            } else if (nodeType == CellTypeGenome_Attacker) {
+                auto& attacker = std::get<AttackerGenomeDescription>(node._cellType);
+                if (attacker._minNumCells.has_value()) {
+                    auto& value = attacker._minNumCells.value();
+                    value = std::max(value, 0);
+                }
+                if (attacker._maxNumCells.has_value()) {
+                    auto& value = attacker._maxNumCells.value();
+                    value = std::max(value, 0);
+                }
+                if (attacker._restrictToColor.has_value()) {
+                    auto& value = attacker._restrictToColor.value();
+                    value = std::clamp(value, 0, MAX_COLORS - 1);
+                }
+                attacker._restrictToLineage = std::clamp(attacker._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
 
             } else if (nodeType == CellTypeGenome_Injector) {
                 auto& injector = std::get<InjectorGenomeDescription>(node._cellType);
@@ -150,7 +167,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);
                 detonator._countdown = std::max(detonator._countdown, 1);
             }
-            // BaseGenomeDescription and AttackerGenomeDescription have no attributes to validate
+            // BaseGenomeDescription is the only cell type without attributes to validate
         }
     }
 }

@@ -312,6 +312,21 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::EndIndent();
 
         } else if (nodeType == CellTypeGenome_Attacker) {
+
+            AlienGui::BeginIndent();
+
+            auto& attacker = std::get<AttackerGenomeDescription>(node._cellType);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(rightColumnWidth), attacker._minNumCells);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(rightColumnWidth), attacker._maxNumCells);
+            AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attacker._restrictToColor);
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
+                    .name("Restrict to lineage")
+                    .values({"No", "Same lineage", "Other lineage"})
+                    .textWidth(rightColumnWidth),
+                attacker._restrictToLineage);
+
+            AlienGui::EndIndent();
         } else if (nodeType == CellTypeGenome_Injector) {
 
             AlienGui::BeginIndent();

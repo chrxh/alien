@@ -159,6 +159,10 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.generator.alternationInterval = nodeTO.cellTypeData.generator.alternationInterval;
                 break;
             case CellTypeGenome_Attacker:
+                node.cellTypeData.attacker.minNumCells = nodeTO.cellTypeData.attacker.minNumCells;
+                node.cellTypeData.attacker.maxNumCells = nodeTO.cellTypeData.attacker.maxNumCells;
+                node.cellTypeData.attacker.restrictToColor = nodeTO.cellTypeData.attacker.restrictToColor;
+                node.cellTypeData.attacker.restrictToLineage = nodeTO.cellTypeData.attacker.restrictToLineage;
                 break;
             case CellTypeGenome_Injector:
                 node.cellTypeData.injector.mode = nodeTO.cellTypeData.injector.mode;
@@ -353,6 +357,10 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.generator.numPulses = cellTO.cellTypeData.generator.numPulses;
     } break;
     case CellType_Attacker: {
+        cell->cellTypeData.attacker.minNumCells = cellTO.cellTypeData.attacker.minNumCells;
+        cell->cellTypeData.attacker.maxNumCells = cellTO.cellTypeData.attacker.maxNumCells;
+        cell->cellTypeData.attacker.restrictToColor = cellTO.cellTypeData.attacker.restrictToColor;
+        cell->cellTypeData.attacker.restrictToLineage = cellTO.cellTypeData.attacker.restrictToLineage;
     } break;
     case CellType_Injector: {
         cell->cellTypeData.injector.mode = cellTO.cellTypeData.injector.mode;
@@ -658,6 +666,12 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     } break;
     case CellTypeGenome_Attacker: {
         cell->cellType = CellType_Attacker;
+        auto const& nodeAttacker = node->cellTypeData.attacker;
+        auto& attacker = cell->cellTypeData.attacker;
+        attacker.minNumCells = nodeAttacker.minNumCells;
+        attacker.maxNumCells = nodeAttacker.maxNumCells;
+        attacker.restrictToColor = nodeAttacker.restrictToColor;
+        attacker.restrictToLineage = nodeAttacker.restrictToLineage;
     } break;
     case CellTypeGenome_Injector: {
         cell->cellType = CellType_Injector;

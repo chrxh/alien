@@ -110,6 +110,10 @@ namespace
                         nodeTO.cellTypeData.generator.alternationInterval = node.cellTypeData.generator.alternationInterval;
                         break;
                     case CellTypeGenome_Attacker:
+                        nodeTO.cellTypeData.attacker.minNumCells = node.cellTypeData.attacker.minNumCells;
+                        nodeTO.cellTypeData.attacker.maxNumCells = node.cellTypeData.attacker.maxNumCells;
+                        nodeTO.cellTypeData.attacker.restrictToColor = node.cellTypeData.attacker.restrictToColor;
+                        nodeTO.cellTypeData.attacker.restrictToLineage = node.cellTypeData.attacker.restrictToLineage;
                         break;
                     case CellTypeGenome_Injector:
                         nodeTO.cellTypeData.injector.mode = node.cellTypeData.injector.mode;
@@ -305,6 +309,10 @@ namespace
             cellTO.cellTypeData.generator.numPulses = cell->cellTypeData.generator.numPulses;
         } break;
         case CellType_Attacker: {
+            cellTO.cellTypeData.attacker.minNumCells = cell->cellTypeData.attacker.minNumCells;
+            cellTO.cellTypeData.attacker.maxNumCells = cell->cellTypeData.attacker.maxNumCells;
+            cellTO.cellTypeData.attacker.restrictToColor = cell->cellTypeData.attacker.restrictToColor;
+            cellTO.cellTypeData.attacker.restrictToLineage = cell->cellTypeData.attacker.restrictToLineage;
         } break;
         case CellType_Injector: {
             cellTO.cellTypeData.injector.mode = cell->cellTypeData.injector.mode;

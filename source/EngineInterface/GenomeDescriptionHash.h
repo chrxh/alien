@@ -123,7 +123,27 @@ struct std::hash<GeneratorGenomeDescription>
 template <>
 struct std::hash<AttackerGenomeDescription>
 {
-    std::size_t operator()(AttackerGenomeDescription const& desc) const { return 1; }
+    std::size_t operator()(AttackerGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        if (desc._minNumCells) {
+            hash_combine(seed, *desc._minNumCells);
+        } else {
+            hash_combine(seed, -1);
+        }
+        if (desc._maxNumCells) {
+            hash_combine(seed, *desc._maxNumCells);
+        } else {
+            hash_combine(seed, -1);
+        }
+        if (desc._restrictToColor) {
+            hash_combine(seed, *desc._restrictToColor);
+        } else {
+            hash_combine(seed, -1);
+        }
+        hash_combine(seed, static_cast<int>(desc._restrictToLineage));
+        return seed;
+    }
 };
 
 template <>
