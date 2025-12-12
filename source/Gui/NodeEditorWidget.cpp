@@ -265,9 +265,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
                 auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Min num cells").textWidth(rightColumnWidth), detectCreature._minNumCells);
+                    AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), detectCreature._minNumCells);
                 AlienGui::InputOptionalInt(
-                    AlienGui::InputIntParameters().name("Max num cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
+                    AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), detectCreature._maxNumCells);
                 AlienGui::ComboOptionalColor(
                     AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), detectCreature._restrictToColor);
                 AlienGui::Combo(
@@ -316,8 +316,8 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             auto& attacker = std::get<AttackerGenomeDescription>(node._cellType);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min num cells").textWidth(rightColumnWidth), attacker._minNumCells);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max num cells").textWidth(rightColumnWidth), attacker._maxNumCells);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), attacker._minNumCells);
+            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), attacker._maxNumCells);
             AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attacker._restrictToColor);
             AlienGui::Combo(
                 AlienGui::ComboParameters()

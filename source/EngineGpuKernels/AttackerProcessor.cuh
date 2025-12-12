@@ -19,6 +19,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
+    __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell);
     __inline__ __device__ static int countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static bool isHomogene(Cell* cell);
 };
@@ -40,9 +41,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 {
     if (SignalProcessor::isManuallyTriggered(data, cell) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
         float energyDelta = 0;
-        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
-        auto baseValue = cellMinEnergy * 0.1f;
-
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
             if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
                 return;
@@ -52,7 +50,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             }
 
             // Only attack cells with energy above base value
-            auto energyToTransfer = (atomicAdd(&otherCell->usableEnergy, 0) - baseValue) * cudaSimulationParameters.attackerStrength.value[cell->color];
+            auto energyToTransfer = atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[cell->color];
             if (energyToTransfer < 0) {
                 return;
             }
@@ -80,14 +78,18 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
             if (energyToTransfer > NEAR_ZERO) {
 
+                if (existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+                    return;
+                }
+
                 // Notify attacked cell
-                atomicAdd(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
+                atomicExch(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
                 otherCell->event = CellEvent_Attacked;
                 otherCell->eventCounter = 10;
                 otherCell->eventPos = cell->pos;
 
                 auto origEnergy = atomicAdd(&otherCell->usableEnergy, -energyToTransfer);
-                if (origEnergy > baseValue + energyToTransfer) {
+                if (origEnergy > energyToTransfer) {
                     energyDelta += energyToTransfer;
                 }
                 // Revert
@@ -116,6 +118,11 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             statistics.incNumAttacks(cell->color);
         }
     }
+}
+
+__inline__ __device__ bool AttackerProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell)
+{
+    return false;
 }
 
 __inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)
