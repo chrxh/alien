@@ -81,7 +81,10 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // Notify attacked cell
-                atomicExch(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
+                if (!cell->signal.active) {
+                    SignalProcessor::createEmptySignal(otherCell);
+                }
+                atomicAdd(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
                 otherCell->event = CellEvent_Attacked;
                 otherCell->eventCounter = 10;
                 otherCell->eventPos = cell->pos;
@@ -113,7 +116,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             EnergyParticleProcessor::radiate(data, cell, cellTypeWeaponEnergyCost);
         }
 
-        // Output
+        // Output (signal is already present since attacker can only be manually triggered)
         cell->signal.channels[Channels::AttackerSuccess] = min(1.0f, max(0.0f, sumEnergyToTransfer / 10));
     }
 }
