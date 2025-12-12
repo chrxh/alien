@@ -1142,7 +1142,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
     cellTO.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
     cellTO.signalState = cellDesc._signalState;
-    if (cellDesc._signal.has_value()) {
+    if (cellDesc._signalState != SignalState_Inactive && cellDesc._signal.has_value()) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.signal.channels[i] = cellDesc._signal->_channels[i];
         }
