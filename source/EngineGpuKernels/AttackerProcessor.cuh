@@ -81,7 +81,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // Notify attacked cell
-                if (!cell->signal.active) {
+                if (!otherCell->signal.active) {
                     SignalProcessor::createEmptySignal(otherCell);
                 }
                 atomicAdd(&otherCell->signal.channels[Channels::AttackerNotify], 1.0f);
@@ -129,6 +129,9 @@ __inline__ __device__ bool AttackerProcessor::existsOwnIntersectingCellInBetween
             return;
         }
         if (nearCell == cell) {
+            return;
+        }
+        if (nearCell == otherCell) {
             return;
         }
         if (!cell->isSameCreature(nearCell)) {
