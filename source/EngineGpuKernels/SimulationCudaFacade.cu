@@ -166,7 +166,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
     // Ensure final synchronization before returning
     syncAndCheck();
     if (forceUpdateStatistics) {
-        updateStatisticsIfNeeded();
+        updateStatistics();
     }
 }
 
