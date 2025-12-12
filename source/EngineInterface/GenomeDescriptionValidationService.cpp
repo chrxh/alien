@@ -76,11 +76,11 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                         auto& value = detectFreeCell._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-            } else if (mode == SensorMode_DetectCreature) {
-                auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
-                if (detectCreature._minNumCells.has_value()) {
-                    auto& value = detectCreature._minNumCells.value();
-                    value = std::max(value, 0);
+                } else if (mode == SensorMode_DetectCreature) {
+                    auto& detectCreature = std::get<DetectCreatureGenomeDescription>(sensor._mode);
+                    if (detectCreature._minNumCells.has_value()) {
+                        auto& value = detectCreature._minNumCells.value();
+                        value = std::max(value, 0);
                     }
                     if (detectCreature._maxNumCells.has_value()) {
                         auto& value = detectCreature._maxNumCells.value();
@@ -90,7 +90,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                         auto& value = detectCreature._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-                    detectCreature._restrictToLineage = std::clamp(detectCreature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
+                    detectCreature._restrictToLineage =
+                        std::clamp(detectCreature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellTypeGenome_Generator) {
