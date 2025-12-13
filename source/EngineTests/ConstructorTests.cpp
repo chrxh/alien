@@ -2990,14 +2990,27 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
     }
 }
 
-TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitialStoredEnergy_sufficientEnergy)
+class ConstructorTests_ProvideEnergy
+    : public ConstructorTests
+    , public testing::WithParamInterface<ProvideEnergy>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    ConstructorTests_ProvideEnergy,
+    ConstructorTests_ProvideEnergy,
+    ::testing::Values(
+        ProvideEnergy_CellOnly,
+        ProvideEnergy_CellAndGene,
+        ProvideEnergy_FreeGeneration));
+
+TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnergy_sufficientEnergy)
 {
-    auto [provideEnergy, separation] = GetParam();
+    auto provideEnergy = GetParam();
 
     auto const InitialStoredUsableEnergy = 50.0f;
 
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(separation == Separation::Yes).nodes({
+        GeneDescription().separation(false).nodes({
             NodeDescription(),
             NodeDescription().cellType(DepotGenomeDescription().initialStoredUsableEnergy(InitialStoredUsableEnergy)),
             NodeDescription(),
@@ -3011,7 +3024,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitial
         if (provideEnergy == ProvideEnergy_FreeGeneration) {
             return normalCellEnergy;
         }
-        return normalCellEnergy * 2 + InitialStoredUsableEnergy + 1.0f;  // Extra energy for depot + margin
+
+        if (provideEnergy == ProvideEnergy_CellAndGene) {
+            return normalCellEnergy * (2 + 2) + 1.0f + InitialStoredUsableEnergy;   // Contains energy for all nodes in gene
+        } else {
+            return normalCellEnergy * 2 + InitialStoredUsableEnergy + 1.0f; // Contains energy for depot node in gene
+        }
     }();
 
     auto data = Description().addCreature(
@@ -3035,17 +3053,9 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitial
     ASSERT_EQ(0, actualData._cells.size());
 
     // For separation, offspring is in a separate creature
-    if (separation == Separation::Yes) {
-        ASSERT_EQ(2, actualData._creatures.size());
-        auto hostCreature = actualData.getCreatureRef(0);
-        ASSERT_EQ(1, hostCreature._cells.size());
-        auto newCreature = actualData.getOtherCreatureRef(0);
-        ASSERT_EQ(2, newCreature._cells.size());
-    } else {
-        ASSERT_EQ(1, actualData._creatures.size());
-        auto creature = actualData.getCreatureRef(0);
-        ASSERT_EQ(3, creature._cells.size());
-    }
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(3, creature._cells.size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
@@ -3053,11 +3063,14 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitial
     EXPECT_EQ(CellType_Depot, actualConstructedCell.getCellType());
     auto const& depot = std::get<DepotDescription>(actualConstructedCell._cellType);
     EXPECT_TRUE(approxCompare(InitialStoredUsableEnergy, depot._storedUsableEnergy));
+    if (provideEnergy != ProvideEnergy_FreeGeneration) {
+        EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    }
 }
 
-TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitialStoredEnergy_insufficientEnergy)
+TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnergy_insufficientEnergy)
 {
-    auto [provideEnergy, separation] = GetParam();
+    auto provideEnergy = GetParam();
 
     if (provideEnergy == ProvideEnergy_FreeGeneration) {
         GTEST_SKIP() << "Skipping test because FreeGeneration always has enough energy.";
@@ -3066,7 +3079,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitial
     auto const InitialStoredUsableEnergy = 50.0f;
 
     auto genome = GenomeDescription().genes({
-        GeneDescription().separation(separation == Separation::Yes).nodes({
+        GeneDescription().separation(false).nodes({
             NodeDescription(),
             NodeDescription().cellType(DepotGenomeDescription().initialStoredUsableEnergy(InitialStoredUsableEnergy)),
             NodeDescription(),
@@ -3098,18 +3111,12 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_depotWithInitial
 
     ASSERT_EQ(0, actualData._cells.size());
 
-    // For separation, there will still be 2 creatures (host and the one being constructed, which failed)
-    // But no new cell should be created
-    if (separation == Separation::Yes) {
-        ASSERT_EQ(2, actualData._creatures.size());
-        auto hostCreature = actualData.getCreatureRef(0);
-        ASSERT_EQ(1, hostCreature._cells.size());
-        auto newCreature = actualData.getOtherCreatureRef(0);
-        ASSERT_EQ(1, newCreature._cells.size());  // Only the previously constructed cell, no new cell
-    } else {
-        ASSERT_EQ(1, actualData._creatures.size());
-        auto creature = actualData.getCreatureRef(0);
-        ASSERT_EQ(2, creature._cells.size());  // Host + previously constructed, no new cell
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(2, creature._cells.size());  // Host + previously constructed, no new cell
+
+    if (provideEnergy != ProvideEnergy_FreeGeneration) {
+        EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     }
 }
 
