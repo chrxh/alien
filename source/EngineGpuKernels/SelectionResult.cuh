@@ -27,6 +27,7 @@ public:
     __device__ void reset()
     {
         _selectionShallowData->numCells = 0;
+        _selectionShallowData->numCreatures = 0;
         _selectionShallowData->numClusterCells = 0;
         _selectionShallowData->numParticles = 0;
 
@@ -59,6 +60,8 @@ public:
         atomicAdd(&_selectionShallowData->clusterCenterVelX, cell->vel.x);
         atomicAdd(&_selectionShallowData->clusterCenterVelY, cell->vel.y);
     }
+
+    __device__ void collectCreature() { atomicAdd(&_selectionShallowData->numCreatures, 1); }
 
     __device__ void collectParticle(Particle* particle, float2 refPos, BaseMap const& map)
     {

@@ -3,6 +3,7 @@
 struct SelectionShallowData
 {
     int numCells = 0;
+    int numCreatures = 0;
     int numClusterCells = 0;
     int numParticles = 0;
 
@@ -16,17 +17,10 @@ struct SelectionShallowData
     float clusterCenterVelX = 0;
     float clusterCenterVelY = 0;
 
-    bool compareNumbers(SelectionShallowData const& other) const
+    bool compareSizes(SelectionShallowData const& other) const
     {
-        return numCells == other.numCells && numClusterCells == other.numClusterCells && numParticles == other.numParticles;
+        return numCells == other.numCells && numCreatures == other.numCreatures && numClusterCells == other.numClusterCells && numParticles == other.numParticles;
     }
 
-    bool operator==(SelectionShallowData const& other) const
-    {
-        return numCells == other.numCells && numClusterCells == other.numClusterCells && numParticles == other.numParticles && centerPosX == other.centerPosX
-            && centerPosY == other.centerPosY && centerVelX == other.centerVelX && centerVelY == other.centerVelY
-            && clusterCenterPosX == other.clusterCenterPosX && clusterCenterPosY == other.clusterCenterPosY && clusterCenterVelX == other.clusterCenterVelX
-            && clusterCenterVelY == other.clusterCenterVelY;
-    }
-    bool operator!=(SelectionShallowData const& other) const { return !(*this == other); }
+    bool operator==(SelectionShallowData const& other) const = default;
 };

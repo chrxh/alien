@@ -59,7 +59,7 @@ void MultiplierWindow::processIntern()
     AlienGui::Separator();
     ImGui::BeginDisabled(
         EditorModel::get().isSelectionEmpty()
-        || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareNumbers(EditorModel::get().getSelectionShallowData())));
+        || (_selectionDataAfterMultiplication && _selectionDataAfterMultiplication->compareSizes(EditorModel::get().getSelectionShallowData())));
     if (AlienGui::Button("Build")) {
         onBuild();
     }
@@ -68,7 +68,7 @@ void MultiplierWindow::processIntern()
     ImGui::SameLine();
     ImGui::BeginDisabled(
         EditorModel::get().isSelectionEmpty() || !_selectionDataAfterMultiplication
-        || !_selectionDataAfterMultiplication->compareNumbers(EditorModel::get().getSelectionShallowData()));
+        || !_selectionDataAfterMultiplication->compareSizes(EditorModel::get().getSelectionShallowData()));
     if (AlienGui::Button("Undo")) {
         onUndo();
     }

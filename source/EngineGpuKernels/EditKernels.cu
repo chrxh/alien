@@ -10,8 +10,8 @@ __global__ void cudaColorSelectedCells(SimulationData data, unsigned char color,
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (0 != particle->selected) {
             particle->color = color;
@@ -297,8 +297,8 @@ __global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCell
 
 __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData updateData, SimulationData data)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (isSelected(cell, updateData.considerClusters)) {
             cell->pos = cell->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
@@ -307,8 +307,8 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (0 != particle->selected) {
             particle->pos = particle->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
@@ -407,18 +407,18 @@ __global__ void cudaProcessAddConnectionChanges(SimulationData data)
 
 __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (1 == cell->selected && data.cellMap.getDistance(pointData.pos, cell->pos) < pointData.radius) {
             atomicExch(result, 1);
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (1 == particle->selected && data.cellMap.getDistance(pointData.pos, particle->pos) < pointData.radius) {
             atomicExch(result, 1);
@@ -428,9 +428,9 @@ __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData
 
 __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (data.cellMap.getDistance(pos, cell->pos) < radius) {
             cell->selected = 1;
@@ -439,9 +439,9 @@ __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data)
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (data.particleMap.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1;
@@ -479,18 +479,18 @@ __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData
 
 __global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelection)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (!onlyClusterSelection || cell->selected == 2) {
             cell->selected = 0;
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (!onlyClusterSelection || particle->selected == 2) {
             particle->selected = 0;
@@ -500,8 +500,8 @@ __global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelecti
 
 __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (data.cellMap.getDistance(pos, cell->pos) < radius) {
             if (cell->selected == 0) {
@@ -512,8 +512,8 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (data.particleMap.getDistance(pos, particle->pos) < radius) {
             particle->selected = 1 - particle->selected;
@@ -523,9 +523,9 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
 
 __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
 
         if (0 != cell->selected) {
@@ -571,9 +571,9 @@ __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
         }
     }
     {
-        auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+        auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
-        for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+        for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
             auto const& particle = data.objects.particles.at(index);
             auto const& pos = particle->pos;
             auto distanceToSegment = Math::calcDistanceToLineSegment(applyData.startPos, applyData.endPos, pos, applyData.radius);
@@ -592,9 +592,9 @@ __global__ void cudaResetSelectionResult(SelectionResult result)
 
 __global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex)
 {
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (0 != cell->selected) {
             atomicMin(minCellPosYAndIndex, (static_cast<unsigned long long int>(abs(cell->pos.y)) << 32) | static_cast<unsigned long long int>(index));
@@ -602,22 +602,39 @@ __global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long l
     }
 }
 
-__global__ void cudaGetSelectionShallowData(SimulationData data, int refCellIndex, SelectionResult result)
+__global__ void cudaGetSelectionShallowData_step1(SimulationData data)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+        if (0 != cell->selected && cell->creature != nullptr) {
+            cell->creature->creatureIndex = 0;
+        }
+    }
+}
+
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result)
 {
     float2 refPos = refCellIndex != 0xffffffff ? data.objects.cells.at(refCellIndex)->pos : float2{0, 0};
 
-    auto const cellBlock = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    for (int index = cellBlock.startIndex; index <= cellBlock.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
         if (0 != cell->selected) {
             result.collectCell(cell, refPos, data.cellMap);
+            if (cell->creature != nullptr) {
+                if (alienAtomicExch64(&cell->creature->creatureIndex, 1llu) == 0llu) {
+                    result.collectCreature();
+                }
+            }
         }
     }
 
-    auto const particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
-    for (int index = particleBlock.startIndex; index <= particleBlock.endIndex; ++index) {
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto const& particle = data.objects.particles.at(index);
         if (0 != particle->selected) {
             result.collectParticle(particle, refPos, data.cellMap);
