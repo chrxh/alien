@@ -192,6 +192,11 @@ void _NodeEditorWidget::processNodeAttributes()
         }
         if (nodeType == CellTypeGenome_Base) {
         } else if (nodeType == CellTypeGenome_Depot) {
+            AlienGui::BeginIndent();
+            auto& depot = std::get<DepotGenomeDescription>(node._cellType);
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Max usable energy for storage").textWidth(rightColumnWidth), depot._maxUsableEnergyForStorage);
+            AlienGui::EndIndent();
         } else if (nodeType == CellTypeGenome_Constructor) {
 
             AlienGui::BeginIndent();

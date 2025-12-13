@@ -57,13 +57,21 @@ IntegrationTestFramework::~IntegrationTestFramework()
 
 double IntegrationTestFramework::getEnergy(Description const& data) const
 {
+    auto getDepotEnergy = [](CellDescription const& cell) -> double {
+        if (cell.getCellType() == CellType_Depot) {
+            auto const& depot = std::get<DepotDescription>(cell._cellType);
+            return depot._storedUsableEnergy;
+        }
+        return 0;
+    };
+
     double result = 0;
     for (auto const& cell : data._cells) {
-        result += cell._usableEnergy + cell._rawEnergy;
+        result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(cell);
     }
     for (auto const& creature : data._creatures) {
         for (auto const& cell : creature._cells) {
-            result += cell._usableEnergy + cell._rawEnergy;
+            result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(cell);
         }
     }
     for (auto const& particle : data._particles) {

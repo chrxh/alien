@@ -159,6 +159,7 @@ namespace
     auto constexpr Id_NeuralNetworkGenome_ActivationFunctions = 2;
 
     auto constexpr Id_DepotGenome_Mode = 0;
+    auto constexpr Id_DepotGenome_MaxUsableEnergyForStorage = 1;
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -245,6 +246,7 @@ namespace cereal
         DepotGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_DepotGenome_Mode, data._mode, defaultObject._mode);
+        loadSave(task, auxiliaries, Id_DepotGenome_MaxUsableEnergyForStorage, data._maxUsableEnergyForStorage, defaultObject._maxUsableEnergyForStorage);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DepotGenomeDescription)
@@ -679,6 +681,8 @@ namespace
     auto constexpr Id_SensorMode_DetectCreature_RestrictToLineage = 3;
 
     auto constexpr Id_Transmitter_Mode = 0;
+    auto constexpr Id_Transmitter_MaxUsableEnergyForStorage = 1;
+    auto constexpr Id_Transmitter_StoredUsableEnergy = 2;
 
     auto constexpr Id_Reconnector_RestrictToColor = 0;
     auto constexpr Id_Reconnector_RestrictToCreatures = 1;
@@ -753,6 +757,8 @@ namespace cereal
         DepotDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Transmitter_Mode, data._mode, defaultObject._mode);
+        loadSave(task, auxiliaries, Id_Transmitter_MaxUsableEnergyForStorage, data._maxUsableEnergyForStorage, defaultObject._maxUsableEnergyForStorage);
+        loadSave(task, auxiliaries, Id_Transmitter_StoredUsableEnergy, data._storedUsableEnergy, defaultObject._storedUsableEnergy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DepotDescription)
