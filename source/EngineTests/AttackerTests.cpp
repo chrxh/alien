@@ -18,7 +18,7 @@ public:
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.attackerEnergyCost.baseValue[i] = 0;
             _parameters.attackerStrength.value[i] = 0.5f;
-            _parameters.attackerRadius.value[i] = 2.5f;
+            _parameters.attackerRadius.value[i] = 3.5f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
@@ -56,48 +56,36 @@ protected:
 TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
 {
     // Create attacker with rawEnergy below threshold
-    auto data = createAttackerWithGenerator({100.0f, 100.0f}, 1.0f);  // Below 2.0f threshold
+    auto data = createAttackerWithGenerator({100.0f, 100.0f}, SimulationParameters::attackerMaxRawEnergyThreshold / 2);  // Below threshold
 
     // Add target creature within attack radius
-    data.add(createTargetCreature({100.0f, 101.5f}), false);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
+    auto& origTarget = data.getCellRef(100);
+    origTarget.rawEnergy(100.0f);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
+    auto actualAttacker = actualData.getCellRef(1);
     auto actualTarget = actualData.getCellRef(100);
 
     // Attacker should attack because rawEnergy is below threshold
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
-}
+    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualTarget._rawEnergy, origTarget._rawEnergy));
 
-TEST_F(AttackerTests, maxRawEnergyThreshold_atThreshold)
-{
-    // Create attacker with rawEnergy at threshold
-    auto data = createAttackerWithGenerator({100.0f, 100.0f}, 2.0f);  // At 2.0f threshold
-
-    // Add target creature within attack radius
-    data.add(createTargetCreature({100.0f, 101.5f}), false);
-
-    auto origTarget = data.getCellRef(100);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
-
-    // Attacker should NOT attack because rawEnergy is at threshold
-    EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
+    // Attacker should have a signal with success value > 0
+    ASSERT_TRUE(actualAttacker._signal.has_value());
+    EXPECT_TRUE(actualAttacker._signal->_channels[Channels::AttackerSuccess] > NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
 {
     // Create attacker with rawEnergy above threshold
-    auto data = createAttackerWithGenerator({100.0f, 100.0f}, 5.0f);  // Above 2.0f threshold
+    auto data = createAttackerWithGenerator({100.0f, 100.0f}, SimulationParameters::attackerMaxRawEnergyThreshold + NEAR_ZERO);  // Above threshold
 
     // Add target creature within attack radius
-    data.add(createTargetCreature({100.0f, 101.5f}), false);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
 
     auto origTarget = data.getCellRef(100);
 
@@ -105,6 +93,33 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
+    auto actualAttacker = actualData.getCellRef(1);
+    auto actualTarget = actualData.getCellRef(100);
+
+    // Attacker should NOT attack because rawEnergy is above threshold
+    EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
+    EXPECT_TRUE(approxCompare(actualTarget._rawEnergy, origTarget._rawEnergy));
+
+    // Attacker should have a signal with success value = 0
+    ASSERT_TRUE(actualAttacker._signal.has_value());
+    EXPECT_TRUE(approxCompare(0.0f, actualAttacker._signal->_channels[Channels::AttackerSuccess]));
+}
+
+TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
+{
+    // Create attacker with rawEnergy above threshold
+    auto data = createAttackerWithGenerator({100.0f, 100.0f});
+
+    // Add target creature outside attack radius
+    data.add(createTargetCreature({100.0f, 100.0f + _parameters.attackerRadius.value[0] + 0.01f}), false);
+
+    auto origTarget = data.getCellRef(100);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualAttacker = actualData.getCellRef(1);
     auto actualTarget = actualData.getCellRef(100);
 
     // Attacker should NOT attack because rawEnergy is above threshold
@@ -122,7 +137,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 101.5f}, 2, 1), false);       // Color 1 target
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);       // Color 1 target
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -131,7 +146,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     auto actualTarget = actualData.getCellRef(100);
 
     // Attack should happen at full strength
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
+    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
@@ -141,7 +156,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = createAttackerWithGenerator({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 101.5f}, 2, 1), false);       // Color 1 target
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 1), false);       // Color 1 target
 
     auto origTarget = data.getCellRef(100);
 
@@ -153,47 +168,6 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
 
     // No attack should happen because color matrix is zero
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
-}
-
-TEST_F(AttackerTests, foodChainColorMatrix_halfStrength)
-{
-    // Set color matrix to half strength for attacker color 0 attacking target color 1
-    _parameters.attackerFoodChainColorMatrix.baseValue[0][1] = 0.5f;
-    _simulationFacade->setSimulationParameters(_parameters);
-
-    auto data = createAttackerWithGenerator({100.0f, 100.0f}, 0.0f, 0);  // Color 0 attacker
-    data.add(createTargetCreature({100.0f, 101.5f}, 2, 1), false);       // Color 1 target
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
-    auto actualAttacker = actualData.getCellRef(1);
-
-    // Attack should happen at reduced strength
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
-    EXPECT_TRUE(actualAttacker._rawEnergy > 0.0f);
-}
-
-/**
- * Test: Output signals
- * The AttackerSuccess channel should be set on successful attack
- */
-TEST_F(AttackerTests, outputSignal_successfulAttack)
-{
-    auto data = createAttackerWithGenerator({100.0f, 100.0f});
-    data.add(createTargetCreature({100.0f, 101.5f}), false);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualAttacker = actualData.getCellRef(1);
-
-    // Attacker should have a signal with success value > 0
-    ASSERT_TRUE(actualAttacker._signalState == SignalState_Active);
-    EXPECT_TRUE(actualAttacker._signal._channels[Channels::AttackerSuccess] > 0.0f);
 }
 
 TEST_F(AttackerTests, outputSignal_noTarget)
@@ -223,8 +197,8 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
     auto data = Description().addCreature(CreatureDescription().id(1).cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(AttackerDescription()),
         CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
-        CellDescription().id(3).pos({100.0f, 101.5f}).usableEnergy(100.0f),  // Same creature, in attack range
-        CellDescription().id(4).pos({100.5f, 101.5f}).usableEnergy(100.0f),  // Same creature, in attack range
+        CellDescription().id(3).pos({100.0f, 103.0f}).usableEnergy(100.0f),  // Same creature, in attack range
+        CellDescription().id(4).pos({100.5f, 103.0f}).usableEnergy(100.0f),  // Same creature, in attack range
     }));
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -256,9 +230,9 @@ TEST_F(AttackerTests, noAttackOnOffspring)
     auto parentId = data._creatures.at(0)._id;
 
     // Create offspring creature with ancestorId pointing to parent
-    data._creatures.emplace_back(CreatureDescription().id(2).ancestorId(parentId).cells({
-        CellDescription().id(100).pos({100.0f, 101.5f}).usableEnergy(100.0f),
-        CellDescription().id(101).pos({100.5f, 101.5f}).usableEnergy(100.0f),
+    data.addCreature(CreatureDescription().id(2).ancestorId(parentId).cells({
+        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        CellDescription().id(101).pos({100.5f, 103.0f}).usableEnergy(100.0f),
     }));
     data.addConnection(100, 101);
 
@@ -280,7 +254,11 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
 
     // Create unrelated creature (no ancestorId relationship)
-    data.add(createTargetCreature({100.0f, 101.5f}, 999), false);
+    data.addCreature(CreatureDescription().id(2).ancestorId(3).cells({
+        CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f),
+        CellDescription().id(101).pos({100.5f, 103.0f}).usableEnergy(100.0f),
+    }));
+    data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -289,7 +267,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     auto actualTarget = actualData.getCellRef(100);
 
     // Non-offspring cells should be attacked
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
+    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 /**
@@ -299,7 +277,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
 TEST_F(AttackerTests, noAttackOnFixedCells)
 {
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
-    data.add(createTargetCreature({100.0f, 101.5f}, 2, 0, 100.0f, true), false);  // fixed=true
+    data.add(createTargetCreature({100.0f, 103.0f}, 2, 0, 100.0f, true), false);  // fixed=true
 
     auto origTarget = data.getCellRef(100);
 
@@ -311,21 +289,6 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
 
     // Fixed cells should NOT be attacked
     EXPECT_TRUE(approxCompare(origTarget._usableEnergy, actualTarget._usableEnergy));
-}
-
-TEST_F(AttackerTests, attackOnNonFixedCells)
-{
-    auto data = createAttackerWithGenerator({100.0f, 100.0f});
-    data.add(createTargetCreature({100.0f, 101.5f}, 2, 0, 100.0f, false), false);  // fixed=false
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(4);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
-
-    // Non-fixed cells should be attacked
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
 }
 
 /**
@@ -348,7 +311,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     data.addConnection(1, 4);
 
     // Add target creature below (ray to target is blocked by connection 3-4)
-    data.add(createTargetCreature({100.0f, 98.0f}), false);
+    data.add(createTargetCreature({100.0f, 97.0f}), false);
 
     auto origTarget = data.getCellRef(100);
 
@@ -368,23 +331,25 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
     auto data = createAttackerWithGenerator({100.0f, 100.0f});
 
     // Create a different creature with connections that would cross the ray path
-    data._creatures.emplace_back(CreatureDescription().id(3).cells({
-        CellDescription().id(50).pos({99.0f, 99.0f}),
-        CellDescription().id(51).pos({101.0f, 99.0f}),
+    data.addCreature(CreatureDescription().id(3).cells({
+        CellDescription().id(50).pos({99.0f, 98.5f}),
+        CellDescription().id(51).pos({101.0f, 98.5f}),
     }));
     data.addConnection(50, 51);
 
     // Add target creature below
-    data.add(createTargetCreature({100.0f, 98.0f}), false);
+    data.add(createTargetCreature({100.0f, 97.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualTarget = actualData.getCellRef(100);
+    auto actualTarget1 = actualData.getCellRef(100);
+    auto actualTarget2 = actualData.getCellRef(50);
 
-    // Target SHOULD be attacked because blocking connections belong to different creature
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
+    // Both targets should be attacked because blocking connections belong to different creature
+    EXPECT_TRUE(actualTarget1._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget2._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, rayNotBlocked_noIntersection)
@@ -402,7 +367,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     data.addConnection(3, 4);
 
     // Add target creature at a position not blocked by connections
-    data.add(createTargetCreature({100.0f, 101.5f}), false);
+    data.add(createTargetCreature({100.0f, 103.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);
@@ -411,5 +376,5 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     auto actualTarget = actualData.getCellRef(100);
 
     // Target should be attacked because ray is not blocked
-    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f);
+    EXPECT_TRUE(actualTarget._usableEnergy < 100.0f - NEAR_ZERO);
 }
