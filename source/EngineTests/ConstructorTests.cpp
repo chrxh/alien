@@ -24,7 +24,10 @@ public:
     ~ConstructorTests() = default;
 
 protected:
-    float getConstructorEnergy() const { return _parameters.normalCellEnergy.value[0] * 2.5f; }
+    float getConstructorEnergy() const
+    {
+        return _parameters.normalCellEnergy.value[0] * 3.5f;  // Provide enough energy
+    }
     float getOffspringDistance() const { return 1.0f + _parameters.constructorAdditionalOffspringDistance; }
 
     DescriptionTestDataFactory* _descriptionTestDataFactory;
