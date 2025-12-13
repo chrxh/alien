@@ -553,7 +553,7 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
     }
 }
 
-__global__ void cudaMarkUnwrapStartCells(SimulationData data, float2 refPos, float radius)
+__global__ void cudaInitUnwrapSelection(SimulationData data)
 {
     auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
@@ -565,13 +565,41 @@ __global__ void cudaMarkUnwrapStartCells(SimulationData data, float2 refPos, flo
         if (cell->selected == 1 || cell->selected == 2) {
             cell->tempValue.as_uint64 = 0;
             cell->shared1 = cell->pos;
-
-            // Mark cells within radius of refPos as starting points (already unwrapped)
-            if (data.cellMap.getDistance(refPos, cell->pos) <= radius) {
-                cell->tempValue.as_uint64 = 1;
-                cell->shared1 = cell->pos + data.cellMap.getCorrectionIncrement(refPos, cell->pos);
-            }
         }
+    }
+}
+
+__global__ void cudaFindClosestUnwrappedCell(SimulationData data, float2 refPos, unsigned long long int* minDistanceAndIndex)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+
+        // Only consider selected cells that are not yet unwrapped
+        if ((cell->selected == 1 || cell->selected == 2) && cell->tempValue.as_uint64 == 0) {
+            // Calculate distance to refPos (using periodic boundary)
+            auto distance = data.cellMap.getDistance(refPos, cell->pos);
+            // Encode distance (as fixed-point integer) and index into a single 64-bit value
+            // Use upper 32 bits for distance (as integer * 1000 for precision), lower 32 bits for index
+            auto distanceInt = static_cast<unsigned long long int>(distance * 1000.0f);
+            auto encodedValue = (distanceInt << 32) | static_cast<unsigned long long int>(index);
+            atomicMin(minDistanceAndIndex, encodedValue);
+        }
+    }
+}
+
+__global__ void cudaMarkUnwrapStartCell(SimulationData data, int cellIndex, float2 refPos)
+{
+    if (cellIndex < 0 || cellIndex >= data.objects.cells.getNumEntries()) {
+        return;
+    }
+
+    auto const& cell = data.objects.cells.at(cellIndex);
+    if ((cell->selected == 1 || cell->selected == 2) && cell->tempValue.as_uint64 == 0) {
+        cell->tempValue.as_uint64 = 1;
+        // Calculate the unwrapped position: shift cell position relative to refPos
+        cell->shared1 = cell->pos + data.cellMap.getCorrectionIncrement(refPos, cell->pos);
     }
 }
 
