@@ -50,7 +50,12 @@ TEST_F(DepotTests, positiveSignal_storeEnergy)
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(0.0f)).usableEnergy(initialUsableEnergy).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(0.0f))
+            .usableEnergy(initialUsableEnergy)
+            .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -71,7 +76,12 @@ TEST_F(DepotTests, negativeSignal_releaseEnergy)
     auto initialStoredEnergy = 50.0f;
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(initialStoredEnergy)).usableEnergy(normalCellEnergy).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(initialStoredEnergy))
+            .usableEnergy(normalCellEnergy)
+            .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -92,7 +102,12 @@ TEST_F(DepotTests, positiveSignal_usableEnergyBelowNormal_noStore)
     auto initialUsableEnergy = normalCellEnergy - 10.0f;
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(0.0f)).usableEnergy(initialUsableEnergy).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(0.0f))
+            .usableEnergy(initialUsableEnergy)
+            .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -111,7 +126,12 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(0.0f)).usableEnergy(normalCellEnergy).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(0.0f))
+            .usableEnergy(normalCellEnergy)
+            .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -129,11 +149,16 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
 TEST_F(DepotTests, positiveSignal_energyTransferCapped)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    // Provide much more energy than the transfer unit (2.0f)
+    // Provide much more energy than depotEnergyTransferUnit
     auto initialUsableEnergy = normalCellEnergy + 100.0f;
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(0.0f)).usableEnergy(initialUsableEnergy).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(0.0f))
+            .usableEnergy(initialUsableEnergy)
+            .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -143,7 +168,7 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     auto actualDepot = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    // Energy transfer should be capped at depotEnergyTransferUnit (2.0f)
+    // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(initialUsableEnergy - SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy));
 }
@@ -151,11 +176,16 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
 TEST_F(DepotTests, negativeSignal_energyTransferCapped)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    // Provide more stored energy than the transfer unit (2.0f)
+    // Provide more stored energy than depotEnergyTransferUnit
     auto initialStoredEnergy = 100.0f;
 
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(initialStoredEnergy)).usableEnergy(normalCellEnergy).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(initialStoredEnergy))
+            .usableEnergy(normalCellEnergy)
+            .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -165,8 +195,9 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     auto actualDepot = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    // Energy transfer should be capped at depotEnergyTransferUnit (2.0f)
-    EXPECT_TRUE(approxCompare(initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    // Energy transfer should be capped at depotEnergyTransferUnit
+    EXPECT_TRUE(approxCompare(
+        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(normalCellEnergy + SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy));
 }
 
@@ -175,9 +206,14 @@ TEST_F(DepotTests, signalBelowThreshold_noChange)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
-    // Signal magnitude is 0.05, which is below TRIGGER_THRESHOLD (0.1)
+    // Signal magnitude is 0.05, which is below TRIGGER_THRESHOLD
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(0.0f)).usableEnergy(initialUsableEnergy).signalAndState({0.05f, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(DepotDescription().storedUsableEnergy(0.0f))
+            .usableEnergy(initialUsableEnergy)
+            .signalAndState({0.05f, 0, 0, 0, 0, 0, 0, 0}),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -190,4 +226,3 @@ TEST_F(DepotTests, signalBelowThreshold_noChange)
     // No energy should have been stored since signal is below threshold
     EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
 }
-
