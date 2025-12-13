@@ -625,7 +625,7 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCe
         if (0 != cell->selected) {
             result.collectCell(cell, refPos, data.cellMap);
             if (cell->creature != nullptr) {
-                if (alienAtomicExch64(&cell->creature->creatureIndex, 1llu) == 0llu) {
+                if (alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
                 }
             }
