@@ -19,6 +19,7 @@ struct DepotGenome
 {
     EnergyDistributionMode mode;
     float maxUsableEnergyForStorage;
+    float initialStoredUsableEnergy;
 };
 
 struct TelemetryGenome

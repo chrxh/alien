@@ -301,7 +301,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
     case CellTypeGenome_Depot:
-        return DepotGenomeDescription().maxUsableEnergyForStorage(350.0f);
+        return DepotGenomeDescription().maxUsableEnergyForStorage(350.0f).initialStoredUsableEnergy(100.0f);
     case CellTypeGenome_Constructor:
         return ConstructorGenomeDescription()
             .autoTriggerInterval(45)
