@@ -264,7 +264,6 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     result._age = cellTO.age;
     result._color = cellTO.color;
     result._frontAngle = cellTO.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(cellTO.frontAngle) : std::nullopt;
-    result._detectedByCreatureId = cellTO.detectedByCreatureId;
     result._cellTriggered = cellTO.cellTriggered;
     result._nodeIndex = cellTO.nodeIndex;
     result._parentNodeIndex = cellTO.parentNodeIndex;
@@ -962,7 +961,6 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.stiffness = cellDesc._stiffness;
     cellTO.cellState = cellDesc._cellState;
     cellTO.cellType = cellDesc.getCellType();
-    cellTO.detectedByCreatureId = cellDesc._detectedByCreatureId;
     cellTO.cellTriggered = cellDesc._cellTriggered;
     cellTO.nodeIndex = cellDesc._nodeIndex;
     cellTO.parentNodeIndex = cellDesc._parentNodeIndex;

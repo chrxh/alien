@@ -377,7 +377,6 @@ struct CellDescription
     MEMBER(CellDescription, SignalDescription, signal, SignalDescription());    // For signalState == SignalState_Active
     MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
     MEMBER(CellDescription, int, activationTime, 0);
-    MEMBER(CellDescription, int, detectedByCreatureId, 0);  // Only the first 16 bits from the creature id
     MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
 
     // Process data

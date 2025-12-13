@@ -284,7 +284,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->color = cellTO.color;
     cell->frontAngle = cellTO.frontAngle;
     cell->activationTime = cellTO.activationTime;
-    cell->detectedByCreatureId = cellTO.detectedByCreatureId;
     cell->cellTriggered = cellTO.cellTriggered;
     cell->nodeIndex = cellTO.nodeIndex;
     cell->parentNodeIndex = cellTO.parentNodeIndex;
@@ -492,7 +491,6 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->signalRestriction.active = false;
     cell->signalState = 0;
     cell->density = 1.0f;
-    cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->cellTriggered = CellTriggered_No;
     cell->creature = nullptr;
@@ -537,7 +535,6 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    cell->signalRestriction.active = false;
 //    cell->signalState = 0;
 //    cell->density = 1.0f;
-//    cell->detectedByCreatureId = 0;
 //    cell->event = CellEvent_No;
 //    cell->cellTriggered = CellTriggered_No;
 //    return cell;
@@ -596,7 +593,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     cell->signalState = 0;
     cell->activationTime = 0;
     cell->cellTriggered = CellTriggered_No;
-    cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
     cell->selected = 0;
     cell->detached = 0;

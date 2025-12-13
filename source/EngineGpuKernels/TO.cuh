@@ -301,7 +301,6 @@ struct CellTO
     uint16_t geneIndex;
 
     // Process data
-    uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
     bool headCell;
 

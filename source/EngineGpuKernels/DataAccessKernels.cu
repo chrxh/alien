@@ -240,7 +240,6 @@ namespace
             cellTO.signal.channels[i] = cell->signal.channels[i];
         }
         cellTO.activationTime = cell->activationTime;
-        cellTO.detectedByCreatureId = cell->detectedByCreatureId;
         cellTO.cellTriggered = cell->cellTriggered;
         cellTO.nodeIndex = cell->nodeIndex;
         cellTO.parentNodeIndex = cell->parentNodeIndex;
