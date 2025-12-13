@@ -11,6 +11,7 @@ PUBLIC
     DepotTests.cpp
     DescriptionEditTests.cpp
     DetonatorTests.cpp
+    EditTests.cpp
     DigestorTests.cpp
     EnergyFlowTests.cpp
     EnergyParticleTests.cpp
