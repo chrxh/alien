@@ -42,7 +42,7 @@ TEST_F(DetonatorTests, doNothing)
 
     EXPECT_EQ(1, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_FALSE(actualDetonatorCell._signal.has_value());
+    EXPECT_FALSE(actualDetonatorCell._signalState == SignalState_Active);
     EXPECT_EQ(14, std::get<DetonatorDescription>(actualDetonatorCell._cellType)._countdown);
     EXPECT_EQ(DetonatorState_Ready, std::get<DetonatorDescription>(actualDetonatorCell._cellType)._state);
 }
@@ -64,7 +64,7 @@ TEST_F(DetonatorTests, activateDetonator)
 
     EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell._signal->_channels[0]));
+    EXPECT_TRUE(approxCompare(1.0f, actualDetonatorCell._signal._channels[0]));
     EXPECT_EQ(9, std::get<DetonatorDescription>(actualDetonatorCell._cellType)._countdown);
     EXPECT_EQ(DetonatorState_Activated, std::get<DetonatorDescription>(actualDetonatorCell._cellType)._state);
 }
@@ -86,7 +86,7 @@ TEST_F(DetonatorTests, explosion)
 
     EXPECT_EQ(2, actualData._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_FALSE(actualDetonatorCell._signal.has_value());
+    EXPECT_FALSE(actualDetonatorCell._signalState == SignalState_Active);
     EXPECT_EQ(0, std::get<DetonatorDescription>(actualDetonatorCell._cellType)._countdown);
     EXPECT_EQ(DetonatorState_Exploded, std::get<DetonatorDescription>(actualDetonatorCell._cellType)._state);
     EXPECT_TRUE(Math::length(actualOtherCell._vel) > NEAR_ZERO);

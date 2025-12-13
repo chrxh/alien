@@ -110,8 +110,8 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
         }
-        if (cell._signal.has_value()) {
-            previewCell._signal = SignalPreviewDescription().channels(cell._signal->_channels);
+        if (cell._signalState == SignalState_Active) {
+            previewCell._signal = SignalPreviewDescription().channels(cell._signal._channels);
         }
         if (cell.getCellType() == CellType_Constructor) {
             if (!genome._genes.empty()) {

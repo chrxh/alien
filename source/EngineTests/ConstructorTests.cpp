@@ -328,7 +328,7 @@ TEST_F(ConstructorTests, alreadyFinished)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, emptyGenome)
@@ -357,7 +357,7 @@ TEST_F(ConstructorTests, emptyGenome)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, emptyGene)
@@ -386,7 +386,7 @@ TEST_F(ConstructorTests, emptyGene)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, nodeIndexOutOfRange)
@@ -419,7 +419,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, geneIndexOutOfRange)
@@ -452,7 +452,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, insufficientEnergy)
@@ -481,7 +481,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
@@ -515,8 +515,8 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    ASSERT_TRUE(hostCell._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, hostCell._signal->_channels[Channels::ConstructorSuccess]));
+    ASSERT_TRUE(hostCell._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, hostCell._signal._channels[Channels::ConstructorSuccess]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
@@ -551,8 +551,8 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    ASSERT_TRUE(hostCell._signal.has_value());
-    EXPECT_TRUE(approxCompare(1.0f, hostCell._signal->_channels[Channels::ConstructorSuccess]));
+    ASSERT_TRUE(hostCell._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, hostCell._signal._channels[Channels::ConstructorSuccess]));
 }
 
 TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
@@ -587,7 +587,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
@@ -620,7 +620,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(1, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_F(ConstructorTests, insufficientSpace)
@@ -667,7 +667,7 @@ TEST_F(ConstructorTests, insufficientSpace)
     EXPECT_EQ(1, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
@@ -725,7 +725,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(0, hostConstructor._currentNodeIndex);
     EXPECT_EQ(0, hostConstructor._currentConcatenation);
     EXPECT_EQ(0, hostConstructor._currentBranch);
-    EXPECT_FALSE(hostCell._signal.has_value());
+    EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
 TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__branch_0_0__gene_0__preview)

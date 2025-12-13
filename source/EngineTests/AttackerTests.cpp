@@ -192,8 +192,8 @@ TEST_F(AttackerTests, outputSignal_successfulAttack)
     auto actualAttacker = actualData.getCellRef(1);
 
     // Attacker should have a signal with success value > 0
-    ASSERT_TRUE(actualAttacker._signal.has_value());
-    EXPECT_TRUE(actualAttacker._signal->_channels[Channels::AttackerSuccess] > 0.0f);
+    ASSERT_TRUE(actualAttacker._signalState == SignalState_Active);
+    EXPECT_TRUE(actualAttacker._signal._channels[Channels::AttackerSuccess] > 0.0f);
 }
 
 TEST_F(AttackerTests, outputSignal_noTarget)
@@ -208,8 +208,8 @@ TEST_F(AttackerTests, outputSignal_noTarget)
     auto actualAttacker = actualData.getCellRef(1);
 
     // Attacker may have signal from generator but AttackerSuccess should be 0
-    if (actualAttacker._signal.has_value()) {
-        EXPECT_TRUE(approxCompare(0.0f, actualAttacker._signal->_channels[Channels::AttackerSuccess]));
+    if (actualAttacker._signalState == SignalState_Active) {
+        EXPECT_TRUE(approxCompare(0.0f, actualAttacker._signal._channels[Channels::AttackerSuccess]));
     }
 }
 

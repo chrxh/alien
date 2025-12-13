@@ -57,7 +57,7 @@ public:
 //    auto origGeneratorCell = getCell(data, 2);
 //    auto actualGeneratorCell = getCell(actualData, 2);
 //
-//    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(0.0f, actualTransmitterCell1._signal._channels[0]));
 //    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
 //    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);
 //    EXPECT_TRUE(approxCompare(origGeneratorCell._energy, actualGeneratorCell._energy));
@@ -101,7 +101,7 @@ public:
 //    auto actualGeneratorCell = getCell(actualData, 2);
 //
 //    for (int i = 0; i < MAX_CHANNELS; ++i) {
-//        EXPECT_TRUE(approxCompare(signal._channels[i], actualTransmitterCell1._signal->_channels[i]));
+//        EXPECT_TRUE(approxCompare(signal._channels[i], actualTransmitterCell1._signal._channels[i]));
 //    }
 //    EXPECT_TRUE(actualTransmitterCell1._energy < origTransmitterCell1._energy - NEAR_ZERO);
 //    EXPECT_TRUE(actualTransmitterCell2._energy > origTransmitterCell2._energy + NEAR_ZERO);

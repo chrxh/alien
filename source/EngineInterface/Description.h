@@ -373,7 +373,7 @@ struct CellDescription
     // Cell type-specific data
     MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
     MEMBER(CellDescription, CellTypeDescription, cellType, BaseDescription());
-    MEMBER(CellDescription, std::optional<SignalDescription>, signal, std::nullopt);
+    MEMBER(CellDescription, SignalDescription, signal, SignalDescription());
     MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
     MEMBER(CellDescription, SignalState, signalState, 0);
     MEMBER(CellDescription, int, activationTime, 0);
