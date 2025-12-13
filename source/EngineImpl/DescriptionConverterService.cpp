@@ -512,6 +512,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     case CellTypeGenome_Depot: {
         DepotGenomeDescription depotDesc;
         depotDesc._maxUsableEnergyForStorage = nodeTO->cellTypeData.depot.maxUsableEnergyForStorage;
+        depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
     } break;
     case CellTypeGenome_Constructor: {
@@ -779,6 +780,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
                 depotTO.maxUsableEnergyForStorage = depotDesc._maxUsableEnergyForStorage;
+                depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
             case CellTypeGenome_Constructor: {
                 auto const& constructorDesc = std::get<ConstructorGenomeDescription>(nodeDesc._cellType);

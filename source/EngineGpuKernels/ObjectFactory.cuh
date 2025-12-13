@@ -126,6 +126,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 break;
             case CellTypeGenome_Depot:
                 node.cellTypeData.depot.maxUsableEnergyForStorage = nodeTO.cellTypeData.depot.maxUsableEnergyForStorage;
+                node.cellTypeData.depot.initialStoredUsableEnergy = nodeTO.cellTypeData.depot.initialStoredUsableEnergy;
                 break;
             case CellTypeGenome_Constructor:
                 node.cellTypeData.constructor.autoTriggerInterval = nodeTO.cellTypeData.constructor.autoTriggerInterval;
@@ -608,7 +609,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     case CellTypeGenome_Depot: {
         cell->cellType = CellType_Depot;
         cell->cellTypeData.depot.maxUsableEnergyForStorage = node->cellTypeData.depot.maxUsableEnergyForStorage;
-        cell->cellTypeData.depot.storedUsableEnergy = 0;
+        cell->cellTypeData.depot.storedUsableEnergy = node->cellTypeData.depot.initialStoredUsableEnergy;
     } break;
     case CellTypeGenome_Constructor: {
         cell->cellType = CellType_Constructor;

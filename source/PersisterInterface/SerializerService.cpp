@@ -160,6 +160,7 @@ namespace
 
     auto constexpr Id_DepotGenome_Mode = 0;
     auto constexpr Id_DepotGenome_MaxUsableEnergyForStorage = 1;
+    auto constexpr Id_DepotGenome_InitialStoredUsableEnergy = 2;
 
     auto constexpr Id_DefenderGenome_Mode = 0;
 
@@ -246,6 +247,7 @@ namespace cereal
         DepotGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_DepotGenome_MaxUsableEnergyForStorage, data._maxUsableEnergyForStorage, defaultObject._maxUsableEnergyForStorage);
+        loadSave(task, auxiliaries, Id_DepotGenome_InitialStoredUsableEnergy, data._initialStoredUsableEnergy, defaultObject._initialStoredUsableEnergy);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DepotGenomeDescription)

@@ -18,6 +18,7 @@ struct BaseGenome
 struct DepotGenome
 {
     float maxUsableEnergyForStorage;
+    float initialStoredUsableEnergy;
 };
 
 struct TelemetryGenome

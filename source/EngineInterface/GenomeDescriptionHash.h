@@ -39,6 +39,7 @@ struct std::hash<DepotGenomeDescription>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._maxUsableEnergyForStorage);
+        hash_combine(seed, desc._initialStoredUsableEnergy);
         return seed;
     }
 };
