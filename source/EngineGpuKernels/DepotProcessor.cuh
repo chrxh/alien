@@ -37,12 +37,12 @@ __device__ __inline__ void DepotProcessor::processCell(SimulationData& data, Sim
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
         auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
         if (cell->signal.channels[Channels::DepotActivation] > 0 && cell->usableEnergy > normalCellEnergy) {
-            auto energyToTransfer = max(min(cell->usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0);
+            auto energyToTransfer = max(min(cell->usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
             cell->usableEnergy -= energyToTransfer;
             cell->cellTypeData.depot.storedUsableEnergy += energyToTransfer;
         }
         if (cell->signal.channels[Channels::DepotActivation] < 0 && cell->cellTypeData.depot.storedUsableEnergy > 0) {
-            auto energyToTransfer = max(min(cell->cellTypeData.depot.storedUsableEnergy, SimulationParameters::depotEnergyTransferUnit), 0);
+            auto energyToTransfer = max(min(cell->cellTypeData.depot.storedUsableEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
             cell->usableEnergy += energyToTransfer;
             cell->cellTypeData.depot.storedUsableEnergy -= energyToTransfer;
         }
