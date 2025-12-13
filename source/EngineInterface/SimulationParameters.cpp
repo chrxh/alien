@@ -680,24 +680,6 @@ ParametersSpec const& SimulationParameters::getSpec()
                         .description("The maximum radius in which a sensor cell can detect mass concentrations."),
                 }),
             ParameterGroupSpec()
-                .name("Cell type: Transmitter")
-                .parameters({
-                    ParameterSpec()
-                        .name("Energy distribution radius")
-                        .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionRadius).min(0.0f).max(5.0f))
-                        .description(
-                            "The maximum distance over which a transmitter cell transfers its additional energy to nearby transmitter or constructor cells."),
-                    ParameterSpec()
-                        .name("Energy distribution Value")
-                        .reference(FloatSpec().member(&SimulationParameters::transmitterEnergyDistributionValue).min(0.0f).max(20.0f))
-                        .description(
-                            "The amount of energy which a transmitter cell can transfer to nearby transmitter or constructor cells or to connected cells."),
-                    ParameterSpec()
-                        .name("Same creature energy distribution")
-                        .reference(BoolSpec().member(&SimulationParameters::transmitterEnergyDistributionSameCreature))
-                        .description("If activated, the transmitter cells can only transfer energy to nearby cells belonging to the same creature."),
-                }),
-            ParameterGroupSpec()
                 .name("Cell type: Reconnector")
                 .parameters({
                     ParameterSpec()

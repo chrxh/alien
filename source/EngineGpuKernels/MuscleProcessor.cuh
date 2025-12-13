@@ -160,7 +160,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         }();
         bending.activation *= angleFactor * angleFactor * angleFactor;
 
-        bending.activationCountdown = cudaSimulationParameters.cellTypeMuscleActivationCountdown;
+        bending.activationCountdown = cudaSimulationParameters.muscleActivationCountdown;
     }
     if (bending.activationCountdown == 0) {
         return;
@@ -199,7 +199,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         auto forwardBackwardRatio = isLeftSide(cell) ? bending.forwardBackwardRatio : 1.0f - bending.forwardBackwardRatio;
 
         auto bendingInfo = getBendingInfo(cell);
-        auto activation = bending.activation * toFloat(bending.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
+        auto activation = bending.activation * toFloat(bending.activationCountdown) / cudaSimulationParameters.muscleActivationCountdown;
 
         // Change bending direction
         auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
@@ -439,7 +439,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     // Activation
     if (cell->signalState == SignalState_Active) {
         crawling.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
-        crawling.activationCountdown = cudaSimulationParameters.cellTypeMuscleActivationCountdown;
+        crawling.activationCountdown = cudaSimulationParameters.muscleActivationCountdown;
     }
     if (crawling.activationCountdown == 0) {
         return;
@@ -457,7 +457,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     if (SignalProcessor::isAutoTriggered(data, cell, AutoTriggerInterval)) {
 
         auto actualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
-        auto activation = crawling.activation * toFloat(crawling.activationCountdown) / cudaSimulationParameters.cellTypeMuscleActivationCountdown;
+        auto activation = crawling.activation * toFloat(crawling.activationCountdown) / cudaSimulationParameters.muscleActivationCountdown;
 
         // Change crawling direction
         auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));

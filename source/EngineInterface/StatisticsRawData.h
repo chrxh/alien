@@ -21,7 +21,7 @@ struct AccumulatedStatistics
     ColorVector<uint64_t> numAttacks = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numMuscleActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numDefenderActivities = {0, 0, 0, 0, 0, 0, 0};
-    ColorVector<uint64_t> numTransmitterActivities = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<uint64_t> numDepotActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numInjectionActivities = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numCompletedInjections = {0, 0, 0, 0, 0, 0, 0};
     ColorVector<uint64_t> numGeneratorPulses = {0, 0, 0, 0, 0, 0, 0};

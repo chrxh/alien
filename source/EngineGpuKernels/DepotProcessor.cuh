@@ -16,7 +16,6 @@ public:
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -35,112 +34,17 @@ __device__ __inline__ void DepotProcessor::process(SimulationData& data, Simulat
 
 __device__ __inline__ void DepotProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    distributeEnergy(data, statistics, cell);
-}
-
-__device__ __inline__ void DepotProcessor::distributeEnergy(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-{
-    //float energyDelta = 0;
-    //auto const& energyDistribution = cudaSimulationParameters.transmitterEnergyDistributionValue.value[cell->color];
-    //auto origEnergy = atomicAdd(&cell->energy, -energyDistribution);
-    //if (origEnergy > cudaSimulationParameters.normalCellEnergy.value[cell->color]) {
-    //    energyDelta = energyDistribution;
-    //} else {
-    //    atomicAdd(&cell->energy, energyDistribution);  //revert
-    //}
-    //for (int i = 0; i < cell->numConnections; ++i) {
-    //    auto connectedCell = cell->connections[i].cell;
-    //    if (connectedCell->cellType == CellType_Depot) {
-    //        continue;
-    //    }
-    //    if (connectedCell->cellType == CellType_Constructor) {
-    //        if (!ConstructorHelper::isFinished(connectedCell)) {
-    //            continue;
-    //        }
-    //    }
-    //    auto origEnergy = atomicAdd(&connectedCell->energy, -energyDistribution);
-    //    if (origEnergy > cudaSimulationParameters.normalCellEnergy.value[cell->color]) {
-    //        energyDelta += energyDistribution;
-    //    } else {
-    //        atomicAdd(&connectedCell->energy, energyDistribution);  //revert
-    //    }
-    //}
-
-    //if (energyDelta > NEAR_ZERO) {
-    //    statistics.incNumTransmitterActivities(cell->color);
-    //}
-
-    //if (cell->cellTypeData.depot.mode == EnergyDistributionMode_ConnectedCells) {
-    //    int numReceivers = cell->numConnections;
-    //    for (int i = 0; i < cell->numConnections; ++i) {
-    //        numReceivers += cell->connections[i].cell->numConnections;
-    //    }
-    //    float energyPerReceiver = energyDelta / (numReceivers + 1);
-
-    //    for (int i = 0; i < cell->numConnections; ++i) {
-    //        auto connectedCell = cell->connections[i].cell;
-    //        if (cudaSimulationParameters.transmitterEnergyDistributionSameCreature.value && connectedCell->creatureId != cell->creatureId) {
-    //            continue;
-    //        }
-    //        atomicAdd(&connectedCell->energy, energyPerReceiver);
-
-    //        energyDelta -= energyPerReceiver;
-    //        for (int i = 0; i < connectedCell->numConnections; ++i) {
-    //            auto connectedConnectedCell = connectedCell->connections[i].cell;
-    //            if (cudaSimulationParameters.transmitterEnergyDistributionSameCreature.value
-    //                && connectedConnectedCell->creatureId != cell->creatureId) {
-    //                continue;
-    //            }
-    //            atomicAdd(&connectedConnectedCell->energy, energyPerReceiver);
-    //            energyDelta -= energyPerReceiver;
-    //        }
-    //    }
-    //}
-    //if (cell->cellTypeData.depot.mode == EnergyDistributionMode_TransmittersAndConstructors) {
-    //    auto matchActiveConstructorFunc = [&](Cell* const& otherCell) {
-    //        if (otherCell->cellState != CellState_Ready) {
-    //            return false;
-    //        }
-    //        if (otherCell->cellType == CellType_Constructor) {
-    //            if (!ConstructorHelper::isFinished(otherCell)
-    //                && (!cudaSimulationParameters.transmitterEnergyDistributionSameCreature.value || otherCell->creatureId == cell->creatureId)
-    //                && otherCell->cellTypeData.constructor.isReady) {
-    //                return true;
-    //            }
-    //        }
-    //        return false;
-    //    };
-    //    auto matchSecondChoiceFunc = [&](Cell* const& otherCell) {
-    //        if (otherCell->cellState != CellState_Ready) {
-    //            return false;
-    //        }
-    //        if (!cudaSimulationParameters.transmitterEnergyDistributionSameCreature.value || otherCell->creatureId == cell->creatureId) {
-    //            if (otherCell->cellType == CellType_Depot) {
-    //                return true;
-    //            }
-    //            if (otherCell->cellType == CellType_Constructor && !otherCell->cellTypeData.constructor.isReady) {
-    //                return true;
-    //            }
-    //        }
-    //        return false;
-    //    };
-
-    //    Cell* receiverCells[20];
-    //    int numReceivers;
-    //    auto const& radius = cudaSimulationParameters.transmitterEnergyDistributionRadius.value[cell->color];
-    //    data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchActiveConstructorFunc);
-    //    if (numReceivers == 0) {
-    //        data.cellMap.getMatchingCells(receiverCells, 20, numReceivers, cell->pos, radius, cell->detached, matchSecondChoiceFunc);
-    //    }
-    //    float energyPerReceiver = energyDelta / (numReceivers + 1);
-
-    //    for (int i = 0; i < numReceivers; ++i) {
-    //        auto receiverCell = receiverCells[i];
-
-    //        atomicAdd(&receiverCell->energy, energyPerReceiver);
-    //        energyDelta -= energyPerReceiver;
-    //    }
-    //}
-
-    //atomicAdd(&cell->energy, energyDelta);
+    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+        auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+        if (cell->signal.channels[Channels::DepotActivation] > 0 && cell->usableEnergy > normalCellEnergy) {
+            auto energyToTransfer = max(min(cell->usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0);
+            cell->usableEnergy -= energyToTransfer;
+            cell->cellTypeData.depot.storedUsableEnergy += energyToTransfer;
+        }
+        if (cell->signal.channels[Channels::DepotActivation] < 0 && cell->cellTypeData.depot.storedUsableEnergy > 0) {
+            auto energyToTransfer = max(min(cell->cellTypeData.depot.storedUsableEnergy, SimulationParameters::depotEnergyTransferUnit), 0);
+            cell->usableEnergy += energyToTransfer;
+            cell->cellTypeData.depot.storedUsableEnergy -= energyToTransfer;
+        }
+    }
 }

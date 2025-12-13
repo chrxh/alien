@@ -191,16 +191,13 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> muscleMovementAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseParameter<ColorVector<float>> muscleCrawlingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
     BaseParameter<ColorVector<float>> muscleBendingAcceleration = {{1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}};
-    static float constexpr cellTypeMuscleThreshold = 0.2f;
-    static int constexpr cellTypeMuscleActivationCountdown = 10;
+    static int constexpr muscleActivationCountdown = 10;
 
     // Cell type: Sensor
     BaseParameter<ColorVector<float>> sensorRadius = {{255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f, 255.0f}};
 
-    // Cell type: Transmitter
-    BaseParameter<ColorVector<float>> transmitterEnergyDistributionRadius = {{3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f, 3.6f}};
-    BaseParameter<ColorVector<float>> transmitterEnergyDistributionValue = {{10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f, 10.0f}};
-    BaseParameter<bool> transmitterEnergyDistributionSameCreature = {true};
+    // Cell type: Depot
+    static float constexpr depotEnergyTransferUnit = 2.0f;
 
     // Cell type: Reconnector
     BaseParameter<ColorVector<float>> reconnectorRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};

@@ -102,6 +102,14 @@ namespace Channels
     auto constexpr GeneratorPulse = 0;
 }
 
+//*******************
+//* Depot constants *
+//*******************
+namespace Channels
+{
+    auto constexpr DepotActivation = 0;
+}
+
 //********************
 //* Sensor constants *
 //********************
