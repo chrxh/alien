@@ -359,9 +359,9 @@ struct Cell
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
+    SignalState signalState;  // For signalState == SignalState_Active
     Signal signal;
     SignalRestriction signalRestriction;
-    SignalState signalState;
     uint32_t activationTime;
     CellTriggered cellTriggered;
 

@@ -309,9 +309,9 @@ struct CellTO
     uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)
     CellType cellType;
     CellTypeDataTO cellTypeData;
-    SignalTO signal;
-    SignalRestrictionTO signalRestriction;
     SignalState signalState;
+    SignalTO signal;    // For signalState == SignalState_Active
+    SignalRestrictionTO signalRestriction;
     uint32_t activationTime;
     CellTriggered cellTriggered;
 
