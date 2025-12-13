@@ -175,7 +175,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Base:
         return BaseDescription();
     case CellType_Depot:
-        return DepotDescription();
+        return DepotDescription().maxUsableEnergyForStorage(300.0f).storedUsableEnergy(50.0f);
     case CellType_Constructor: {
         return ConstructorDescription()
             .autoTriggerInterval(50)
@@ -301,7 +301,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
     case CellTypeGenome_Depot:
-        return DepotGenomeDescription();
+        return DepotGenomeDescription().maxUsableEnergyForStorage(350.0f);
     case CellTypeGenome_Constructor:
         return ConstructorGenomeDescription()
             .autoTriggerInterval(45)

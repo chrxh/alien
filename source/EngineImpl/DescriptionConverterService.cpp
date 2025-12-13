@@ -287,6 +287,8 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     case CellType_Depot: {
         DepotDescription transmitter;
         transmitter._mode = cellTO.cellTypeData.depot.mode;
+        transmitter._maxUsableEnergyForStorage = cellTO.cellTypeData.depot.maxUsableEnergyForStorage;
+        transmitter._storedUsableEnergy = cellTO.cellTypeData.depot.storedUsableEnergy;
         result._cellType = transmitter;
     } break;
     case CellType_Constructor: {
@@ -511,6 +513,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     case CellTypeGenome_Depot: {
         DepotGenomeDescription depotDesc;
         depotDesc._mode = nodeTO->cellTypeData.depot.mode;
+        depotDesc._maxUsableEnergyForStorage = nodeTO->cellTypeData.depot.maxUsableEnergyForStorage;
         nodeDesc._cellType = depotDesc;
     } break;
     case CellTypeGenome_Constructor: {
@@ -778,6 +781,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
                 depotTO.mode = depotDesc._mode;
+                depotTO.maxUsableEnergyForStorage = depotDesc._maxUsableEnergyForStorage;
             } break;
             case CellTypeGenome_Constructor: {
                 auto const& constructorDesc = std::get<ConstructorGenomeDescription>(nodeDesc._cellType);
@@ -987,6 +991,8 @@ void DescriptionConverterService::convertCellToTO(
         auto const& transmitterDesc = std::get<DepotDescription>(cellDesc._cellType);
         DepotTO& transmitterTO = cellTO.cellTypeData.depot;
         transmitterTO.mode = transmitterDesc._mode;
+        transmitterTO.maxUsableEnergyForStorage = transmitterDesc._maxUsableEnergyForStorage;
+        transmitterTO.storedUsableEnergy = transmitterDesc._storedUsableEnergy;
     } break;
     case CellType_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellType);

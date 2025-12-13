@@ -35,7 +35,13 @@ struct std::hash<BaseGenomeDescription>
 template <>
 struct std::hash<DepotGenomeDescription>
 {
-    std::size_t operator()(DepotGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+    std::size_t operator()(DepotGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, static_cast<int>(desc._mode));
+        hash_combine(seed, desc._maxUsableEnergyForStorage);
+        return seed;
+    }
 };
 
 template <>
