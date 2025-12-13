@@ -27,7 +27,15 @@ public:
 
     __inline__ __device__ Creature* cloneCreature(Creature* creature);
 
-    __inline__ __device__ Cell* createCellFromNode(uint64_t& cellIndex, Creature* creature, int geneIndex, int nodeIndex, int parentNodeIndex, float2 pos, float2 vel, float energy);
+    __inline__ __device__ Cell* createCellFromNode(
+        uint64_t& cellIndex,
+        Creature* creature,
+        int geneIndex,
+        int nodeIndex,
+        int parentNodeIndex,
+        float2 pos,
+        float2 vel,
+        float energy);
     __inline__ __device__ Creature* createEmptyCreature();
     __inline__ __device__ Gene* createEmptyGenes(int numGenes);
     __inline__ __device__ Node* createEmptyNodes(int numNodes);

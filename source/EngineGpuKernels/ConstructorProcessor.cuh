@@ -6,6 +6,7 @@
 #include "ConstructorHelper.cuh"
 #include "CudaShapeGenerator.cuh"
 #include "Genome.cuh"
+#include "GenomeProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationCudaFacade.cuh"
@@ -35,7 +36,8 @@ private:
         // Construction data
         Cell* lastConstructionCell;
         float angle;
-        float energy;
+        float cellEnergy;
+        float depotEnergy;
         int numAdditionalConnections;  // -1 = none
         int requiredNodeId1;           // -1 = none
         int requiredNodeId2;           // -1 = none
@@ -278,22 +280,22 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
     result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
     result.angle = result.node->referenceAngle;
-    result.energy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
+    result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[cell->color];
     if (result.node->cellType == CellTypeGenome_Constructor) {
         auto const& constructorNode = result.node->cellTypeData.constructor;
         if (constructor.provideEnergy == ProvideEnergy_CellAndGene && constructorNode.geneIndex < result.creature->genome->numGenes) {
             auto& referencedGene = result.creature->genome->genes[constructorNode.geneIndex];
             if (!referencedGene.separation) {
-                int numCells;
+                auto requiredEnergyForNodes = GenomeProcessor::getRequiredEnergyForNodes(&referencedGene);
                 if (!ConstructorHelper::hasInfiniteConcatenations(&referencedGene)) {
-                    numCells = referencedGene.numNodes * referencedGene.numBranches * referencedGene.numConcatenations;
+                    result.cellEnergy += requiredEnergyForNodes * referencedGene.numBranches * referencedGene.numConcatenations;
                 } else {
-                    numCells = referencedGene.numNodes;
+                    result.cellEnergy += requiredEnergyForNodes;
                 }
-                result.energy *= (1.0f + toFloat(numCells));
             }
         }
     }
+    result.depotEnergy = result.node->cellType == CellTypeGenome_Depot ? result.node->cellTypeData.depot.initialStoredUsableEnergy : 0.0f;
     result.numAdditionalConnections = result.node->numAdditionalConnections;
 
     CudaShapeGenerator shapeGenerator;
@@ -774,7 +776,7 @@ __inline__ __device__ Cell* ConstructorProcessor::constructCellIntern(
         hostCell->nodeIndex,
         posOfNewCell,
         hostCell->vel,
-        constructionData.energy);
+        constructionData.cellEnergy);
     result->frontAngleId = hostCell->frontAngleId;
 
     constructor.lastConstructedCellId = result->id;
@@ -821,17 +823,18 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
         return true;
     }
 
+    auto requiredEnergy = constructionData.cellEnergy + constructionData.depotEnergy;
     auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[hostCell->color];
 
-    if (cudaSimulationParameters.externalEnergyControlToggle.value && hostCell->usableEnergy < constructionData.energy + normalCellEnergy
+    if (cudaSimulationParameters.externalEnergyControlToggle.value && hostCell->usableEnergy < requiredEnergy + normalCellEnergy
         && cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color] > 0) {
         auto externalEnergyPortion = [&] {
             if (cudaSimulationParameters.externalEnergyInflowOnlyForNonSelfReplicators.value) {
                 return !constructionData.isSeparation && !ConstructorHelper::isFinished(hostCell->cellTypeData.constructor, *constructionData.creature->genome)
-                    ? constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color]
+                    ? requiredEnergy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color]
                     : 0.0f;
             } else {
-                return constructionData.energy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color];
+                return requiredEnergy * cudaSimulationParameters.externalEnergyInflowFactor.value[hostCell->color];
             }
         }();
 
@@ -861,19 +864,19 @@ __inline__ __device__ bool ConstructorProcessor::checkAndReduceHostEnergy(Simula
     }();
 
     auto energyNeededFromHost =
-        max(0.0f, constructionData.energy - normalCellEnergy) + min(constructionData.energy, normalCellEnergy) * (1.0f - externalEnergyConditionalInflowFactor);
+        max(0.0f, requiredEnergy - normalCellEnergy) + min(requiredEnergy, normalCellEnergy) * (1.0f - externalEnergyConditionalInflowFactor);
 
     if (externalEnergyConditionalInflowFactor < 1.0f && hostCell->usableEnergy < normalCellEnergy + energyNeededFromHost) {
         return false;
     }
-    auto energyNeededFromExternalSource = constructionData.energy - energyNeededFromHost;
+    auto energyNeededFromExternalSource = requiredEnergy - energyNeededFromHost;
     auto orig = atomicAdd(data.externalEnergy, -energyNeededFromExternalSource);
     if (orig < energyNeededFromExternalSource) {
         atomicAdd(data.externalEnergy, energyNeededFromExternalSource);
-        if (hostCell->usableEnergy < normalCellEnergy + constructionData.energy) {
+        if (hostCell->usableEnergy < normalCellEnergy + requiredEnergy) {
             return false;
         }
-        hostCell->usableEnergy -= constructionData.energy;
+        hostCell->usableEnergy -= requiredEnergy;
     } else {
         hostCell->usableEnergy -= energyNeededFromHost;
     }

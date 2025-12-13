@@ -44,6 +44,7 @@ add_library(EngineGpuKernels
     GarbageCollectorKernelsService.cuh
     GeneratorProcessor.cuh
     Genome.cuh
+    GenomeProcessor.cuh
     GenomeTO.cuh
     GeometryKernels.cu
     GeometryKernels.cuh
