@@ -332,11 +332,3 @@ enum SignalOrigin_
     SignalOrigin_Unknown,
     SignalOrigin_Sensor,
 };
-
-using EnergyDistributionMode = int;
-enum EnergyDistributionMode_
-{
-    EnergyDistributionMode_ConnectedCells,
-    EnergyDistributionMode_TransmittersAndConstructors,
-    EnergyDistributionMode_Count,
-};

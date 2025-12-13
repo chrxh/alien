@@ -39,7 +39,6 @@ struct BaseTO
 
 struct DepotTO
 {
-    EnergyDistributionMode mode;
     float maxUsableEnergyForStorage;
     float storedUsableEnergy;
 };

@@ -125,7 +125,6 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
             case CellTypeGenome_Base:
                 break;
             case CellTypeGenome_Depot:
-                node.cellTypeData.depot.mode = nodeTO.cellTypeData.depot.mode;
                 node.cellTypeData.depot.maxUsableEnergyForStorage = nodeTO.cellTypeData.depot.maxUsableEnergyForStorage;
                 node.cellTypeData.depot.initialStoredUsableEnergy = nodeTO.cellTypeData.depot.initialStoredUsableEnergy;
                 break;
@@ -313,7 +312,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     case CellType_Base: {
     } break;
     case CellType_Depot: {
-        cell->cellTypeData.depot.mode = cellTO.cellTypeData.depot.mode;
         cell->cellTypeData.depot.maxUsableEnergyForStorage = cellTO.cellTypeData.depot.maxUsableEnergyForStorage;
         cell->cellTypeData.depot.storedUsableEnergy = cellTO.cellTypeData.depot.storedUsableEnergy;
     } break;
@@ -610,7 +608,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     } break;
     case CellTypeGenome_Depot: {
         cell->cellType = CellType_Depot;
-        cell->cellTypeData.depot.mode = node->cellTypeData.depot.mode;
         cell->cellTypeData.depot.maxUsableEnergyForStorage = node->cellTypeData.depot.maxUsableEnergyForStorage;
         cell->cellTypeData.depot.storedUsableEnergy = node->cellTypeData.depot.initialStoredUsableEnergy;
     } break;

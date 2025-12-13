@@ -36,7 +36,6 @@ struct DepotGenomeDescription
 {
     auto operator<=>(DepotGenomeDescription const&) const = default;
 
-    MEMBER(DepotGenomeDescription, EnergyDistributionMode, mode, EnergyDistributionMode_TransmittersAndConstructors);
     MEMBER(DepotGenomeDescription, float, maxUsableEnergyForStorage, 200.0f);
     MEMBER(DepotGenomeDescription, float, initialStoredUsableEnergy, 0.0f);
 };

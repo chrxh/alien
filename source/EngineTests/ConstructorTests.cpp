@@ -27,275 +27,6 @@ protected:
     float getConstructorEnergy() const { return _parameters.normalCellEnergy.value[0] * 2.5f; }
     float getOffspringDistance() const { return 1.0f + _parameters.constructorAdditionalOffspringDistance; }
 
-    bool compare(CellDescription const& cell, NodeDescription const& node)
-    {
-        if (cell._color != node._color) {
-            return false;
-        }
-        if (!cell._neuralNetwork.has_value()) {
-            return false;
-        }
-        for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-            if (cell._neuralNetwork->_weights[i] != node._neuralNetwork._weights[i]) {
-                return false;
-            }
-        }
-        for (int i = 0; i < MAX_CHANNELS; ++i) {
-            if (cell._neuralNetwork->_biases[i] != node._neuralNetwork._biases[i]) {
-                return false;
-            }
-            if (cell._neuralNetwork->_activationFunctions[i] != node._neuralNetwork._activationFunctions[i]) {
-                return false;
-            }
-        }
-        if (cell._signalRestriction._active != node._signalRestriction._active) {
-            return false;
-        }
-        if (cell._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
-            return false;
-        }
-        if (cell._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
-            return false;
-        }
-
-        auto nodeType = node.getCellType();
-        switch (cell.getCellType()) {
-        case CellType_Base: {
-            if (nodeType != CellTypeGenome_Base) {
-                return false;
-            }
-        } break;
-        case CellType_Depot: {
-            if (nodeType != CellTypeGenome_Depot) {
-                return false;
-            }
-            auto const& depot = std::get<DepotDescription>(cell._cellType);
-            auto const& nodeDepot = std::get<DepotGenomeDescription>(node._cellType);
-            if (depot._mode != nodeDepot._mode) {
-                return false;
-            }
-        } break;
-        case CellType_Constructor: {
-            if (nodeType != CellTypeGenome_Constructor) {
-                return false;
-            }
-            auto const& constructor = std::get<ConstructorDescription>(cell._cellType);
-            auto const& nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellType);
-            if (constructor._autoTriggerInterval != nodeConstructor._autoTriggerInterval) {
-                return false;
-            }
-            if (constructor._geneIndex != nodeConstructor._geneIndex) {
-                return false;
-            }
-            if (constructor._constructionActivationTime != nodeConstructor._constructionActivationTime) {
-                return false;
-            }
-        } break;
-        case CellType_Sensor: {
-            if (nodeType != CellTypeGenome_Sensor) {
-                return false;
-            }
-            auto const& sensor = std::get<SensorDescription>(cell._cellType);
-            auto const& nodeSensor = std::get<SensorGenomeDescription>(node._cellType);
-            if (sensor._autoTriggerInterval != nodeSensor._autoTriggerInterval) {
-                return false;
-            }
-            if (sensor._minRange != nodeSensor._minRange) {
-                return false;
-            }
-            if (sensor._maxRange != nodeSensor._maxRange) {
-                return false;
-            }
-            // Compare modes
-            if (sensor.getMode() != nodeSensor.getMode()) {
-                return false;
-            }
-            // Compare mode-specific data
-            switch (sensor.getMode()) {
-            case SensorMode_DetectEnergy: {
-                auto const& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
-                auto const& nodeDetectEnergy = std::get<DetectEnergyGenomeDescription>(nodeSensor._mode);
-                if (detectEnergy._minDensity != nodeDetectEnergy._minDensity) {
-                    return false;
-                }
-            } break;
-            case SensorMode_DetectStructure: {
-                // No fields to compare
-            } break;
-            case SensorMode_DetectFreeCell: {
-                auto const& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
-                auto const& nodeDetectFreeCell = std::get<DetectFreeCellGenomeDescription>(nodeSensor._mode);
-                if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
-                    return false;
-                }
-                if (detectFreeCell._restrictToColor != nodeDetectFreeCell._restrictToColor) {
-                    return false;
-                }
-            } break;
-            case SensorMode_DetectCreature: {
-                auto const& detectCreature = std::get<DetectCreatureDescription>(sensor._mode);
-                auto const& nodeDetectCreature = std::get<DetectCreatureGenomeDescription>(nodeSensor._mode);
-                if (detectCreature._minNumCells != nodeDetectCreature._minNumCells) {
-                    return false;
-                }
-                if (detectCreature._maxNumCells != nodeDetectCreature._maxNumCells) {
-                    return false;
-                }
-                if (detectCreature._restrictToColor != nodeDetectCreature._restrictToColor) {
-                    return false;
-                }
-                if (detectCreature._restrictToLineage != nodeDetectCreature._restrictToLineage) {
-                    return false;
-                }
-            } break;
-            }
-        } break;
-        case CellType_Generator: {
-            if (nodeType != CellTypeGenome_Generator) {
-                return false;
-            }
-            auto const& generator = std::get<GeneratorDescription>(cell._cellType);
-            auto const& nodeGenerator = std::get<GeneratorGenomeDescription>(node._cellType);
-            if (generator._autoTriggerInterval != nodeGenerator._autoTriggerInterval) {
-                return false;
-            }
-            if (generator._pulseType != nodeGenerator._pulseType) {
-                return false;
-            }
-            if (generator._alternationInterval != nodeGenerator._alternationInterval) {
-                return false;
-            }
-        } break;
-        case CellType_Attacker: {
-            if (nodeType != CellTypeGenome_Attacker) {
-                return false;
-            }
-        } break;
-        case CellType_Injector: {
-            if (nodeType != CellTypeGenome_Injector) {
-                return false;
-            }
-            auto const& injector = std::get<InjectorDescription>(cell._cellType);
-            auto const& nodeInjector = std::get<InjectorGenomeDescription>(node._cellType);
-            if (injector._mode != nodeInjector._mode) {
-                return false;
-            }
-        } break;
-        case CellType_Muscle: {
-            if (nodeType != CellTypeGenome_Muscle) {
-                return false;
-            }
-            auto const& muscle = std::get<MuscleDescription>(cell._cellType);
-            auto const& nodeMuscle = std::get<MuscleGenomeDescription>(node._cellType);
-            if (muscle.getMode() != nodeMuscle.getMode()) {
-                return false;
-            }
-            switch (muscle.getMode()) {
-            case MuscleMode_AutoBending: {
-                auto const& autoBending = std::get<AutoBendingDescription>(muscle._mode);
-                auto const& nodeAutoBending = std::get<AutoBendingGenomeDescription>(nodeMuscle._mode);
-                if (autoBending._maxAngleDeviation != nodeAutoBending._maxAngleDeviation) {
-                    return false;
-                }
-                if (autoBending._forwardBackwardRatio != nodeAutoBending._forwardBackwardRatio) {
-                    return false;
-                }
-            } break;
-            case MuscleMode_ManualBending: {
-                auto const& manualBending = std::get<ManualBendingDescription>(muscle._mode);
-                auto const& nodeManualBending = std::get<ManualBendingGenomeDescription>(nodeMuscle._mode);
-                if (manualBending._maxAngleDeviation != nodeManualBending._maxAngleDeviation) {
-                    return false;
-                }
-                if (manualBending._forwardBackwardRatio != nodeManualBending._forwardBackwardRatio) {
-                    return false;
-                }
-            } break;
-            case MuscleMode_AngleBending: {
-                auto const& angleBending = std::get<AngleBendingDescription>(muscle._mode);
-                auto const& nodeAngleBending = std::get<AngleBendingGenomeDescription>(nodeMuscle._mode);
-                if (angleBending._maxAngleDeviation != nodeAngleBending._maxAngleDeviation) {
-                    return false;
-                }
-                if (angleBending._attractionRepulsionRatio != nodeAngleBending._attractionRepulsionRatio) {
-                    return false;
-                }
-            } break;
-            case MuscleMode_AutoCrawling: {
-                auto const& autoCrawling = std::get<AutoCrawlingDescription>(muscle._mode);
-                auto const& nodeAutoCrawling = std::get<AutoCrawlingGenomeDescription>(nodeMuscle._mode);
-                if (autoCrawling._maxDistanceDeviation != nodeAutoCrawling._maxDistanceDeviation) {
-                    return false;
-                }
-                if (autoCrawling._forwardBackwardRatio != nodeAutoCrawling._forwardBackwardRatio) {
-                    return false;
-                }
-            } break;
-            case MuscleMode_ManualCrawling: {
-                auto const& manualCrawling = std::get<ManualCrawlingDescription>(muscle._mode);
-                auto const& nodeManualCrawling = std::get<ManualCrawlingGenomeDescription>(nodeMuscle._mode);
-                if (manualCrawling._maxDistanceDeviation != nodeManualCrawling._maxDistanceDeviation) {
-                    return false;
-                }
-                if (manualCrawling._forwardBackwardRatio != nodeManualCrawling._forwardBackwardRatio) {
-                    return false;
-                }
-            } break;
-            case MuscleMode_DirectMovement: {
-            } break;
-            default:
-                return false;
-            }
-        } break;
-        case CellType_Defender: {
-            if (nodeType != CellTypeGenome_Defender) {
-                return false;
-            }
-            auto const& defender = std::get<DefenderDescription>(cell._cellType);
-            auto const& nodeDefender = std::get<DefenderGenomeDescription>(node._cellType);
-            if (defender._mode != nodeDefender._mode) {
-                return false;
-            }
-        } break;
-        case CellType_Reconnector: {
-            if (nodeType != CellTypeGenome_Reconnector) {
-                return false;
-            }
-            auto const& reconnector = std::get<ReconnectorDescription>(cell._cellType);
-            auto const& nodeReconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
-            if (reconnector._restrictToColor != nodeReconnector._restrictToColor) {
-                return false;
-            }
-            if (reconnector._restrictToCreatures != nodeReconnector._restrictToCreatures) {
-                return false;
-            }
-        } break;
-        case CellType_Detonator: {
-            if (nodeType != CellTypeGenome_Detonator) {
-                return false;
-            }
-            auto const& detonator = std::get<DetonatorDescription>(cell._cellType);
-            auto const& nodeDetonator = std::get<DetonatorGenomeDescription>(node._cellType);
-            if (detonator._countdown != nodeDetonator._countdown) {
-                return false;
-            }
-        } break;
-        case CellType_Digestor: {
-            if (nodeType != CellTypeGenome_Digestor) {
-                return false;
-            }
-            auto const& dDigestor = std::get<DigestorDescription>(cell._cellType);
-            auto const& nodeDigestor = std::get<DigestorGenomeDescription>(node._cellType);
-            if (dDigestor._rawEnergyConductivity != nodeDigestor._rawEnergyConductivity) {
-                return false;
-            }
-        } break;
-        default:
-            return false;
-        }
-        return true;
-    }
-
     DescriptionTestDataFactory* _descriptionTestDataFactory;
 };
 
@@ -718,7 +449,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_TRUE(newCell._headCell);
     EXPECT_EQ(FrontAngleId, newCell._frontAngleId);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
-    EXPECT_TRUE(compare(newCell, randomNode));
+    EXPECT_TRUE(_descriptionTestDataFactory->compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -761,7 +492,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
-    EXPECT_TRUE(compare(newCell, randomNode));
+    EXPECT_TRUE(_descriptionTestDataFactory->compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -802,7 +533,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
-    EXPECT_TRUE(compare(newCell, randomNode));
+    EXPECT_TRUE(_descriptionTestDataFactory->compare(newCell, randomNode));
     EXPECT_FALSE(actualData.hasConnection(hostCell._id, newCell._id));
 
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);

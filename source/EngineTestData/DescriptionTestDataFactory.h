@@ -35,6 +35,7 @@ public:
     bool compare(Description left, Description right) const;
     bool compare(CellDescription left, CellDescription right) const;
     bool compare(ParticleDescription left, ParticleDescription right) const;
+    bool compare(CellDescription const& cell, NodeDescription const& node) const;
 
 private:
     CellTypeDescription createNonDefaultCellTypeDescription(CellParameter cellParameter) const;

@@ -286,7 +286,6 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
-        transmitter._mode = cellTO.cellTypeData.depot.mode;
         transmitter._maxUsableEnergyForStorage = cellTO.cellTypeData.depot.maxUsableEnergyForStorage;
         transmitter._storedUsableEnergy = cellTO.cellTypeData.depot.storedUsableEnergy;
         result._cellType = transmitter;
@@ -512,7 +511,6 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Depot: {
         DepotGenomeDescription depotDesc;
-        depotDesc._mode = nodeTO->cellTypeData.depot.mode;
         depotDesc._maxUsableEnergyForStorage = nodeTO->cellTypeData.depot.maxUsableEnergyForStorage;
         depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
@@ -781,7 +779,6 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellTypeGenome_Depot: {
                 auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
-                depotTO.mode = depotDesc._mode;
                 depotTO.maxUsableEnergyForStorage = depotDesc._maxUsableEnergyForStorage;
                 depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
@@ -990,11 +987,10 @@ void DescriptionConverterService::convertCellToTO(
         cellTO.cellTypeData.base = baseTO;
     } break;
     case CellType_Depot: {
-        auto const& transmitterDesc = std::get<DepotDescription>(cellDesc._cellType);
-        DepotTO& transmitterTO = cellTO.cellTypeData.depot;
-        transmitterTO.mode = transmitterDesc._mode;
-        transmitterTO.maxUsableEnergyForStorage = transmitterDesc._maxUsableEnergyForStorage;
-        transmitterTO.storedUsableEnergy = transmitterDesc._storedUsableEnergy;
+        auto const& depotDesc = std::get<DepotDescription>(cellDesc._cellType);
+        DepotTO& depotTO = cellTO.cellTypeData.depot;
+        depotTO.maxUsableEnergyForStorage = depotDesc._maxUsableEnergyForStorage;
+        depotTO.storedUsableEnergy = depotDesc._storedUsableEnergy;
     } break;
     case CellType_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellType);

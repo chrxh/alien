@@ -372,7 +372,7 @@ void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
             case CellType_Base: {
             } break;
             case CellType_Depot: {
-                processTransmitterContent(std::get<DepotDescription>(cell._cellType));
+                processDepotContent(std::get<DepotDescription>(cell._cellType));
             } break;
             case CellType_Constructor: {
                 processConstructorContent(std::get<ConstructorDescription>(cell._cellType));
@@ -626,16 +626,9 @@ void _InspectorWindow::processDefenderContent(DefenderDescription& defender)
     }
 }
 
-void _InspectorWindow::processTransmitterContent(DepotDescription& transmitter)
+void _InspectorWindow::processDepotContent(DepotDescription& transmitter)
 {
-    if (ImGui::TreeNodeEx("Properties###transmitter", TreeNodeFlags)) {
-        AlienGui::Combo(
-            AlienGui::ComboParameters()
-                .name("Energy distribution")
-                .values({"Connected cells", "Transmitters and Constructors"})
-                .tooltip(Const::GenomeTransmitterEnergyDistributionTooltip)
-                .textWidth(CellTypeTextWidth),
-            transmitter._mode);
+    if (ImGui::TreeNodeEx("Properties###depot", TreeNodeFlags)) {
         ImGui::TreePop();
     }
 }

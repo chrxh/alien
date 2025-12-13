@@ -76,7 +76,6 @@ namespace
                     case CellTypeGenome_Base:
                         break;
                     case CellTypeGenome_Depot:
-                        nodeTO.cellTypeData.depot.mode = node.cellTypeData.depot.mode;
                         nodeTO.cellTypeData.depot.maxUsableEnergyForStorage = node.cellTypeData.depot.maxUsableEnergyForStorage;
                         break;
                     case CellTypeGenome_Constructor:
@@ -266,7 +265,6 @@ namespace
         case CellType_Base: {
         } break;
         case CellType_Depot: {
-            cellTO.cellTypeData.depot.mode = cell->cellTypeData.depot.mode;
             cellTO.cellTypeData.depot.maxUsableEnergyForStorage = cell->cellTypeData.depot.maxUsableEnergyForStorage;
             cellTO.cellTypeData.depot.storedUsableEnergy = cell->cellTypeData.depot.storedUsableEnergy;
         } break;
