@@ -8,6 +8,7 @@ _EditKernelsService::_EditKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _cudaRolloutResult);
+    memoryManager.acquireMemory(1, _cudaUnwrapResult);
     memoryManager.acquireMemory(1, _cudaSwitchResult);
     memoryManager.acquireMemory(1, _cudaUpdateResult);
     memoryManager.acquireMemory(1, _cudaRemoveResult);
@@ -26,6 +27,7 @@ _EditKernelsService::~_EditKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_cudaRolloutResult);
+    memoryManager.freeMemory(_cudaUnwrapResult);
     memoryManager.freeMemory(_cudaSwitchResult);
     memoryManager.freeMemory(_cudaUpdateResult);
     memoryManager.freeMemory(_cudaRemoveResult);
@@ -292,6 +294,22 @@ void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, Simu
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaRolloutResult));
+}
+
+void _EditKernelsService::unwrapSelection(CudaSettings const& gpuSettings, SimulationData const& data, float2 const& refPos)
+{
+    // Mark cells near refPos as starting points for unwrapping
+    // Use a small radius to find the initial cells in the connected component
+    KERNEL_CALL(cudaMarkUnwrapStartCells, data, refPos, 1.5f);
+    cudaDeviceSynchronize();
+
+    // Propagate unwrapping through connected cells until no more changes
+    do {
+        setValueToDevice(_cudaUnwrapResult, 0);
+        KERNEL_CALL(cudaUnwrapSelectionStep, data, _cudaUnwrapResult);
+        cudaDeviceSynchronize();
+
+    } while (1 == copyToHost(_cudaUnwrapResult));
 }
 
 void _EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)

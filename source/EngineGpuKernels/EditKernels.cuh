@@ -48,6 +48,8 @@ __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData
 __global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelection);
 __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data);
 __global__ void cudaRolloutSelectionStep(SimulationData data, int* result);
+__global__ void cudaMarkUnwrapStartCells(SimulationData data, float2 refPos, float radius);
+__global__ void cudaUnwrapSelectionStep(SimulationData data, int* result);
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
 __global__ void cudaResetSelectionResult(SelectionResult result);
 __global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex);

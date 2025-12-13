@@ -553,6 +553,68 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
     }
 }
 
+__global__ void cudaMarkUnwrapStartCells(SimulationData data, float2 refPos, float radius)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+
+        // Initialize all selected cells: tempValue.as_uint64 = 0 means not yet unwrapped
+        // After unwrapping, tempValue.as_uint64 = 1 means unwrapped, and shared1 holds the unwrapped position
+        if (cell->selected == 1 || cell->selected == 2) {
+            cell->tempValue.as_uint64 = 0;
+            cell->shared1 = cell->pos;
+
+            // Mark cells within radius of refPos as starting points (already unwrapped)
+            if (data.cellMap.getDistance(refPos, cell->pos) <= radius) {
+                cell->tempValue.as_uint64 = 1;
+                cell->shared1 = cell->pos + data.cellMap.getCorrectionIncrement(refPos, cell->pos);
+            }
+        }
+    }
+}
+
+__global__ void cudaUnwrapSelectionStep(SimulationData data, int* result)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+
+        // Only process selected cells that have already been unwrapped
+        if ((cell->selected == 1 || cell->selected == 2) && cell->tempValue.as_uint64 == 1) {
+            auto currentCell = cell;
+
+            // Propagate unwrapping to connected cells (heuristics similar to cudaRolloutSelectionStep)
+            for (int i = 0; i < 30; ++i) {
+                bool found = false;
+                for (int j = 0; j < currentCell->numConnections; ++j) {
+                    auto connectedCell = currentCell->connections[j].cell;
+                    // Check if connected cell is selected and not yet unwrapped
+                    if ((connectedCell->selected == 1 || connectedCell->selected == 2) && connectedCell->tempValue.as_uint64 == 0) {
+                        // Atomically mark as unwrapped to prevent race conditions
+                        auto oldValue = atomicCAS(reinterpret_cast<unsigned long long int*>(&connectedCell->tempValue.as_uint64), 0ull, 1ull);
+                        if (oldValue == 0) {
+                            // Calculate the unwrapped position based on the current cell's unwrapped position
+                            auto delta = connectedCell->pos - currentCell->pos;
+                            data.cellMap.correctDirection(delta);
+                            connectedCell->shared1 = currentCell->shared1 + delta;
+                            currentCell = connectedCell;
+                            found = true;
+                            atomicExch(result, 1);
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    break;
+                }
+            }
+        }
+    }
+}
+
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData)
 {
     {

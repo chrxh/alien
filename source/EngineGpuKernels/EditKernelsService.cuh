@@ -35,6 +35,7 @@ public:
     void applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);
 
     void rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data);
+    void unwrapSelection(CudaSettings const& gpuSettings, SimulationData const& data, float2 const& refPos);
 
     void applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data);
 
@@ -43,6 +44,7 @@ private:
 
     // Gpu memory
     int* _cudaRolloutResult;
+    int* _cudaUnwrapResult;
     int* _cudaSwitchResult;
     int* _cudaUpdateResult;
     int* _cudaRemoveResult;
