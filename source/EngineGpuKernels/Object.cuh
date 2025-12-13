@@ -299,7 +299,6 @@ struct SignalRestriction
 
 struct Signal
 {
-    bool active;
     float channels[MAX_CHANNELS];
 };
 
@@ -360,14 +359,15 @@ struct Cell
     NeuralNetwork* neuralNetwork;  // Not used for structure and base cells
     CellType cellType;
     CellTypeData cellTypeData;
+    SignalState signalState;  // For signalState == SignalState_Active
     Signal signal;
     SignalRestriction signalRestriction;
-    SignalState signalState;
     uint32_t activationTime;
     CellTriggered cellTriggered;
 
     // Process data
     Signal futureSignal;
+    SignalState futureSignalState;
     uint16_t detectedByCreatureId;  // Only the first 16 bits from the creature id
     uint32_t frontAngleId;
     bool headCell;

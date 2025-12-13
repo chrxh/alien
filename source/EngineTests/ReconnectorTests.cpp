@@ -39,9 +39,9 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //
 //    EXPECT_EQ(2, actualData._cells.size());
-//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal._channels[0]) < NEAR_ZERO);
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(approxCompare(0.0f, actualReconnectorCell._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(0.0f, actualReconnectorCell._signal._channels[0]));
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //}
 //
@@ -65,7 +65,7 @@ public:
 //
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(2, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(1, actualTargetCell._connections.size());
 //    EXPECT_TRUE(actualData.hasConnection(1, 3));
@@ -91,7 +91,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal._channels[0]) < NEAR_ZERO);
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(0, actualTargetCell._connections.size());
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -117,7 +117,7 @@ public:
 //
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(2, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(1, actualTargetCell._connections.size());
 //    EXPECT_TRUE(actualData.hasConnection(1, 3));
@@ -146,7 +146,7 @@ public:
 //
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(2, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(1, actualTargetCell._connections.size());
 //    EXPECT_TRUE(actualData.hasConnection(1, 3));
@@ -174,7 +174,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal._channels[0]) < NEAR_ZERO);
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(0, actualTargetCell._connections.size());
 //}
@@ -203,7 +203,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(2, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(1, actualTargetCell._connections.size());
 //    EXPECT_TRUE(actualData.hasConnection(1, 3));
@@ -234,7 +234,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal._channels[0]) < NEAR_ZERO);
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(0, actualTargetCell._connections.size());
 //}
@@ -258,7 +258,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(2, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(1, actualTargetCell._connections.size());
 //    EXPECT_TRUE(actualData.hasConnection(1, 3));
@@ -284,7 +284,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal._channels[0]) < NEAR_ZERO);
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(0, actualTargetCell._connections.size());
 //}
@@ -308,7 +308,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(2, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(1, actualTargetCell._connections.size());
 //    EXPECT_TRUE(actualData.hasConnection(1, 3));
@@ -334,7 +334,7 @@ public:
 //    auto actualReconnectorCell = actualData.getCellRef(1);
 //    auto actualTargetCell = actualData.getCellRef(3);
 //
-//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal->_channels[0]) < NEAR_ZERO);
+//    EXPECT_TRUE(std::abs(actualReconnectorCell._signal._channels[0]) < NEAR_ZERO);
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //    EXPECT_EQ(0, actualTargetCell._connections.size());
 //}
@@ -456,7 +456,7 @@ public:
 //    auto actualTargetCell1 = actualData.getCellRef(3);
 //    auto actualTargetCell2 = actualData.getCellRef(4);
 //
-//    EXPECT_TRUE(actualReconnectorCell._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualReconnectorCell._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_EQ(1, actualReconnectorCell._connections.size());
 //    EXPECT_TRUE(actualTargetCell1._connections.empty());
 //    EXPECT_TRUE(actualTargetCell2._connections.empty());

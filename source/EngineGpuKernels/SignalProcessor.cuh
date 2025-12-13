@@ -54,7 +54,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
             continue;
         }
 
-        cell->futureSignal.active = false;
+        cell->futureSignalState = SignalState_Inactive;
         if (cell->signalState != SignalState_Inactive) {
             continue;
         }
@@ -65,7 +65,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->cellState == CellState_Constructing || !connectedCell->signal.active) {
+            if (connectedCell->cellState == CellState_Constructing || connectedCell->signalState != SignalState_Active) {
                 continue;
             }
             int skip = false;
@@ -92,7 +92,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
                 }
             }
 
-            cell->futureSignal.active = true;
+            cell->futureSignalState = SignalState_Active;
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 cell->futureSignal.channels[k] += connectedCell->signal.channels[k];
             }
@@ -111,8 +111,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             continue;
         }
 
-        cell->signal.active = cell->futureSignal.active;
-        if (cell->signal.active) {
+        if (cell->futureSignalState != SignalState_Inactive) {
             cell->cellTriggered = CellTriggered_Yes;
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
@@ -126,7 +125,6 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 
 __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
 {
-    cell->signal.active = true;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }
@@ -157,10 +155,10 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
 
 __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& data, Cell* cell)
 {
-    if (!cell->signal.active) {
+    if (cell->signalState != SignalState_Active) {
         return false;
     }
-    if (cell->signal.active && abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {
+    if (abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {
         return false;
     }
     return true;

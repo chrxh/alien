@@ -510,7 +510,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
     auto cell2 = getPreviewCell(result.description, 0, 1);
 
     EXPECT_EQ(SignalState_Active, cell1._signalState);
-    EXPECT_TRUE(cell1._signal.has_value());
+    EXPECT_TRUE(cell1._signalState == SignalState_Active);
     EXPECT_EQ(signal, cell1._signal->_channels);
     EXPECT_EQ(SignalState_Fading, cell2._signalState);
 }

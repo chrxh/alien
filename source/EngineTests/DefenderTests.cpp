@@ -66,7 +66,7 @@
 //    auto actualTarget = getCell(actualData, 3);
 //
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(actualAttacker._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualAttacker._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_LT(origTarget._energy, actualTarget._energy + 0.1f);
 //}
 //
@@ -102,7 +102,7 @@
 //    auto actualTarget = getCell(actualData, 3);
 //
 //    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-//    EXPECT_TRUE(actualAttacker._signal->_channels[0] > NEAR_ZERO);
+//    EXPECT_TRUE(actualAttacker._signal._channels[0] > NEAR_ZERO);
 //    EXPECT_GT(origTarget._energy, actualTarget._energy + 0.1f);
 //}
 //
@@ -146,7 +146,7 @@
 //    auto origInjector = getCell(data, 1);
 //    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellType);
 //
-//    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjectorFunc._counter);
 //    EXPECT_EQ(origInjectorFunc._genome, actualTargetFunc._genome);
 //}
@@ -194,7 +194,7 @@
 //    auto origInjector = getCell(data, 1);
 //    auto origInjectorFunc = std::get<InjectorDescription>(origInjector._cellType);
 //
-//    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualInjector._signal._channels[0]));
 //    EXPECT_EQ(4, actualInjectorFunc._counter);
 //    EXPECT_EQ(origTargetFunc._genome, actualTargetFunc._genome);
 //}

@@ -56,7 +56,7 @@
 //    auto actualInjector = std::get<InjectorDescription>(actualCell._cellType);
 //
 //    EXPECT_EQ(2, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(0.0f, actualCell._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(0.0f, actualCell._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjector._counter);
 //}
 //
@@ -94,7 +94,7 @@
 //    auto origTargetConstructor = std::get<ConstructorDescription>(origTargetCell._cellType);
 //
 //    EXPECT_EQ(3, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal._channels[0]));
 //    EXPECT_EQ(1, actualInjector._counter);
 //    EXPECT_EQ(origTargetConstructor._genome, actualTargetConstructor._genome);
 //    EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
@@ -133,7 +133,7 @@
 //    auto origInjector = std::get<InjectorDescription>(origCell._cellType);
 //
 //    EXPECT_EQ(3, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjector._counter);
 //    EXPECT_EQ(origInjector._genome, actualTargetConstructor._genome);
 //    EXPECT_FALSE(actualTargetConstructor.isGenomeInherited());
@@ -176,7 +176,7 @@
 //    auto origTargetConstructor = std::get<ConstructorDescription>(origTargetCell._cellType);
 //
 //    EXPECT_EQ(3, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(0.0f, actualCell._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(0.0f, actualCell._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjector._counter);
 //    EXPECT_EQ(origTargetConstructor._genome, actualTargetConstructor._genome);
 //    EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
@@ -227,7 +227,7 @@
 //
 //
 //    EXPECT_EQ(4, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal->_channels[0]));
+//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal._channels[0]));
 //    EXPECT_EQ(0, actualInjector._counter);
 //    EXPECT_EQ(actualInjector._genome, actualTargetConstructor._genome);
 //    EXPECT_EQ(origOtherConstructor._genome, actualOtherConstructor._genome);

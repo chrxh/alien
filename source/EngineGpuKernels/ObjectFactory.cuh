@@ -297,7 +297,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
 
     cell->signalState = cellTO.signalState;
-    cell->signal.active = cellTO.signal.active;
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = cellTO.signal.channels[i];
     }
@@ -492,7 +491,6 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->activationTime = 0;
     cell->signalRestriction.active = false;
     cell->signalState = 0;
-    cell->signal.active = false;
     cell->density = 1.0f;
     cell->detectedByCreatureId = 0;
     cell->event = CellEvent_No;
@@ -538,7 +536,6 @@ __inline__ __device__ Creature* ObjectFactory::cloneCreature(Creature* creature)
 //    cell->activationTime = 0;
 //    cell->signalRestriction.active = false;
 //    cell->signalState = 0;
-//    cell->signal.active = false;
 //    cell->density = 1.0f;
 //    cell->detectedByCreatureId = 0;
 //    cell->event = CellEvent_No;
@@ -597,7 +594,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     cell->signalRestriction.baseAngle = node->signalRestriction.baseAngle;
     cell->signalRestriction.openingAngle = node->signalRestriction.openingAngle;
     cell->signalState = 0;
-    cell->signal.active = false;
     cell->activationTime = 0;
     cell->cellTriggered = CellTriggered_No;
     cell->detectedByCreatureId = 0;

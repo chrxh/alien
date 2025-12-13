@@ -29,7 +29,7 @@ TEST_F(SignalTests, noSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_FALSE(generator._signal.has_value());
+    EXPECT_FALSE(generator._signalState == SignalState_Active);
 }
 
 TEST_F(SignalTests, forwardSignal)
@@ -47,11 +47,11 @@ TEST_F(SignalTests, forwardSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
 
     auto cell2 = actualData.getCellRef(2);
-    EXPECT_TRUE(cell2._signal.has_value());
-    EXPECT_EQ(signal, cell2._signal->_channels);
+    EXPECT_TRUE(cell2._signalState == SignalState_Active);
+    EXPECT_EQ(signal, cell2._signal._channels);
     EXPECT_EQ(1, cell1._signalState);
     EXPECT_EQ(2, cell2._signalState);
 }
@@ -71,11 +71,11 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     auto actualData = _simulationFacade->getPreviewData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
 
     auto cell2 = actualData.getCellRef(2);
-    EXPECT_TRUE(cell2._signal.has_value());
-    EXPECT_EQ(signal, cell2._signal->_channels);
+    EXPECT_TRUE(cell2._signalState == SignalState_Active);
+    EXPECT_EQ(signal, cell2._signal._channels);
     EXPECT_EQ(1, cell1._signalState);
     EXPECT_EQ(2, cell2._signalState);
 }
@@ -93,7 +93,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
 }
 
 TEST_F(SignalTests, vanishSignal_relaxationNeeded)
@@ -111,7 +111,7 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
 }
 
 TEST_F(SignalTests, mergeSignals)
@@ -132,19 +132,19 @@ TEST_F(SignalTests, mergeSignals)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
 
     auto cell2 = actualData.getCellRef(2);
-    EXPECT_TRUE(cell2._signal.has_value());
+    EXPECT_TRUE(cell2._signalState == SignalState_Active);
 
     auto cell3 = actualData.getCellRef(3);
-    EXPECT_FALSE(cell3._signal.has_value());
+    EXPECT_FALSE(cell3._signalState == SignalState_Active);
 
     std::vector<float> sumSignal(signal1.size());
     for (size_t i = 0; i < signal1.size(); ++i) {
         sumSignal[i] = signal1[i] + signal2[i];
     }
-    EXPECT_TRUE(approxCompare(sumSignal, cell2._signal->_channels));
+    EXPECT_TRUE(approxCompare(sumSignal, cell2._signal._channels));
     EXPECT_EQ(1, cell1._signalState);
     EXPECT_EQ(2, cell2._signalState);
     EXPECT_EQ(1, cell3._signalState);
@@ -167,17 +167,17 @@ TEST_F(SignalTests, forkSignals)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_TRUE(cell1._signal.has_value());
-    EXPECT_TRUE(approxCompare(signal, cell1._signal->_channels));
+    EXPECT_TRUE(cell1._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(signal, cell1._signal._channels));
     EXPECT_EQ(2, cell1._signalState);
 
     auto cell2 = actualData.getCellRef(2);
-    EXPECT_FALSE(cell2._signal.has_value());
+    EXPECT_FALSE(cell2._signalState == SignalState_Active);
     EXPECT_EQ(1, cell2._signalState);
 
     auto cell3 = actualData.getCellRef(3);
-    EXPECT_TRUE(cell3._signal.has_value());
-    EXPECT_TRUE(approxCompare(signal, cell3._signal->_channels));
+    EXPECT_TRUE(cell3._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(signal, cell3._signal._channels));
     EXPECT_EQ(2, cell3._signalState);
 }
 
@@ -212,16 +212,16 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
     EXPECT_EQ(0, cell1._signalState);
 
     auto cell2 = actualData.getCellRef(2);
-    EXPECT_FALSE(cell2._signal.has_value());
+    EXPECT_FALSE(cell2._signalState == SignalState_Active);
     EXPECT_EQ(1, cell2._signalState);
 
     auto cell3 = actualData.getCellRef(3);
-    EXPECT_TRUE(cell3._signal.has_value());
-    EXPECT_TRUE(approxCompare(signal, cell3._signal->_channels));
+    EXPECT_TRUE(cell3._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(signal, cell3._signal._channels));
     EXPECT_EQ(2, cell3._signalState);
 }
 
@@ -243,11 +243,11 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell1 = actualData.getCellRef(1);
-    EXPECT_FALSE(cell1._signal.has_value());
+    EXPECT_FALSE(cell1._signalState == SignalState_Active);
 
     auto cell2 = actualData.getCellRef(2);
-    EXPECT_FALSE(cell2._signal.has_value());
+    EXPECT_FALSE(cell2._signalState == SignalState_Active);
 
     auto cell3 = actualData.getCellRef(3);
-    EXPECT_FALSE(cell3._signal.has_value());
+    EXPECT_FALSE(cell3._signalState == SignalState_Active);
 }

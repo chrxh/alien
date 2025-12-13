@@ -29,7 +29,7 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
 
         auto& generator = cell->cellTypeData.generator;
         if (SignalProcessor::isAutoTriggered(data, cell, max(1, generator.autoTriggerInterval))) {
-            if (!cell->signal.active) {
+            if (cell->signalState != SignalState_Active) {
                 SignalProcessor::createEmptySignal(cell);
             }
             statistics.incNumGeneratorPulses(cell->color);

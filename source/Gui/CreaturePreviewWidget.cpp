@@ -523,8 +523,6 @@ void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreview
             if (editedCell._signalState == SignalState_Active) {
                 auto signalDesc = SignalDescription().channels(editedCell._signal.value()._channels);
                 cell._signal = signalDesc;
-            } else {
-                cell._signal.reset();
             }
         }
     });

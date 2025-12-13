@@ -482,12 +482,10 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     routingRestriction._openingAngle = cellTO.signalRestriction.openingAngle;
     result._signalRestriction = routingRestriction;
     result._signalState = cellTO.signalState;
-    if (cellTO.signal.active) {
-        SignalDescription signal;
+    if (cellTO.signalState == SignalState_Active) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            signal._channels[i] = cellTO.signal.channels[i];
+            result._signal._channels[i] = cellTO.signal.channels[i];
         }
-        result._signal = signal;
     }
     result._activationTime = cellTO.activationTime;
     return result;
@@ -1142,10 +1140,9 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
     cellTO.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
     cellTO.signalState = cellDesc._signalState;
-    cellTO.signal.active = cellDesc._signal.has_value();
-    if (cellTO.signal.active) {
+    if (cellDesc._signalState == SignalState_Active) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            cellTO.signal.channels[i] = cellDesc._signal->_channels[i];
+            cellTO.signal.channels[i] = cellDesc._signal._channels[i];
         }
     }
     cellTO.activationTime = cellDesc._activationTime;

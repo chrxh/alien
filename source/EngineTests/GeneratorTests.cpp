@@ -29,7 +29,7 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_FALSE(generator._signal.has_value());
+    EXPECT_FALSE(generator._signalState == SignalState_Active);
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
@@ -45,8 +45,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    ASSERT_TRUE(generator._signal.has_value());
-    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
+    ASSERT_TRUE(generator._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
@@ -61,8 +61,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
     auto actualData = _simulationFacade->getPreviewData();
 
     auto generator = actualData.getCellRef(1);
-    ASSERT_TRUE(generator._signal.has_value());
-    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
+    ASSERT_TRUE(generator._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
@@ -78,8 +78,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_TRUE(generator._signal.has_value());
-    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
+    EXPECT_TRUE(generator._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
@@ -95,7 +95,7 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_FALSE(generator._signal.has_value());
+    EXPECT_FALSE(generator._signalState == SignalState_Active);
 }
 
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
@@ -111,8 +111,8 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_TRUE(generator._signal.has_value());
-    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
+    EXPECT_TRUE(generator._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
@@ -128,8 +128,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_TRUE(generator._signal.has_value());
-    EXPECT_EQ(-1.0f, generator._signal->_channels.at(0));
+    EXPECT_TRUE(generator._signalState == SignalState_Active);
+    EXPECT_EQ(-1.0f, generator._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
@@ -147,8 +147,8 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getCellRef(1);
-    EXPECT_TRUE(generator._signal.has_value());
-    EXPECT_EQ(1.0f, generator._signal->_channels.at(0));
+    EXPECT_TRUE(generator._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_triangularNetwork)
@@ -170,16 +170,16 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
         auto actualData = _simulationFacade->getSimulationData();
 
         auto generator = actualData.getCellRef(1);
-        EXPECT_TRUE(generator._signal.has_value());
-        EXPECT_TRUE(approxCompare(1.0f, generator._signal->_channels.at(0)));
+        EXPECT_TRUE(generator._signalState == SignalState_Active);
+        EXPECT_TRUE(approxCompare(1.0f, generator._signal._channels.at(0)));
         EXPECT_EQ(2, generator._signalState);
 
         auto base1 = actualData.getCellRef(2);
-        EXPECT_FALSE(base1._signal.has_value());
+        EXPECT_FALSE(base1._signalState == SignalState_Active);
         EXPECT_EQ(0, base1._signalState);
 
         auto base2 = actualData.getCellRef(3);
-        EXPECT_FALSE(base2._signal.has_value());
+        EXPECT_FALSE(base2._signalState == SignalState_Active);
         EXPECT_EQ(0, base2._signalState);
     }
 }

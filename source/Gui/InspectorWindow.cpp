@@ -341,10 +341,10 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                 ImGui::TreePop();
             }
         }
-        if (cell._signal.has_value()) {
+        if (cell._signalState == SignalState_Active) {
             if (ImGui::TreeNodeEx("Signals", TreeNodeFlags)) {
                 int index = 0;
-                for (auto& channel : cell._signal->_channels) {
+                for (auto& channel : cell._signal._channels) {
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Channel #" + std::to_string(index)).format("%.3f").step(0.1f).textWidth(SignalTextWidth),
                         channel);
