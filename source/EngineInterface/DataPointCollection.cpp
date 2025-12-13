@@ -40,7 +40,7 @@ DataPointCollection DataPointCollection::operator+(DataPointCollection const& ot
     result.numAttacks = numAttacks + other.numAttacks;
     result.numMuscleActivities = numMuscleActivities + other.numMuscleActivities;
     result.numDefenderActivities = numDefenderActivities + other.numDefenderActivities;
-    result.numTransmitterActivities = numTransmitterActivities + other.numTransmitterActivities;
+    result.numDepotActivities = numDepotActivities + other.numDepotActivities;
     result.numInjectionActivities = numInjectionActivities + other.numInjectionActivities;
     result.numCompletedInjections = numCompletedInjections + other.numCompletedInjections;
     result.numGeneratorPulses = numGeneratorPulses + other.numGeneratorPulses;
@@ -73,7 +73,7 @@ DataPointCollection DataPointCollection::operator/(double divisor) const
     result.numAttacks = numAttacks / divisor;
     result.numMuscleActivities = numMuscleActivities / divisor;
     result.numDefenderActivities = numDefenderActivities / divisor;
-    result.numTransmitterActivities = numTransmitterActivities / divisor;
+    result.numDepotActivities = numDepotActivities / divisor;
     result.numInjectionActivities = numInjectionActivities / divisor;
     result.numCompletedInjections = numCompletedInjections / divisor;
     result.numGeneratorPulses = numGeneratorPulses / divisor;

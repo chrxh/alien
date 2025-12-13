@@ -57,7 +57,6 @@ struct Base
 
 struct Depot
 {
-    EnergyDistributionMode mode;
     float maxUsableEnergyForStorage;
     float storedUsableEnergy;
 };

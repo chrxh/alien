@@ -51,7 +51,6 @@ struct DepotDescription
 {
     auto operator<=>(DepotDescription const&) const = default;
 
-    MEMBER(DepotDescription, EnergyDistributionMode, mode, EnergyDistributionMode_TransmittersAndConstructors);
     MEMBER(DepotDescription, float, maxUsableEnergyForStorage, 200.0f);
     MEMBER(DepotDescription, float, storedUsableEnergy, 0.0f);
 };

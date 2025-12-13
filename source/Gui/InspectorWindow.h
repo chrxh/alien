@@ -36,7 +36,7 @@ private:
     void processInjectorContent(InjectorDescription& injector);
     void processAttackerContent(AttackerDescription& attacker);
     void processDefenderContent(DefenderDescription& defender);
-    void processTransmitterContent(DepotDescription& transmitter);
+    void processDepotContent(DepotDescription& transmitter);
     void processMuscleContent(MuscleDescription& muscle);
     void processSensorContent(SensorDescription& sensor);
     void processReconnectorContent(ReconnectorDescription& reconnector);

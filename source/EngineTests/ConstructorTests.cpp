@@ -71,7 +71,7 @@ protected:
             }
             auto const& depot = std::get<DepotDescription>(cell._cellType);
             auto const& nodeDepot = std::get<DepotGenomeDescription>(node._cellType);
-            if (depot._mode != nodeDepot._mode) {
+            if (depot._maxUsableEnergyForStorage != nodeDepot._maxUsableEnergyForStorage) {
                 return false;
             }
         } break;
@@ -168,6 +168,20 @@ protected:
         } break;
         case CellType_Attacker: {
             if (nodeType != CellTypeGenome_Attacker) {
+                return false;
+            }
+            auto const& attacker = std::get<AttackerDescription>(cell._cellType);
+            auto const& nodeAttacker = std::get<AttackerGenomeDescription>(node._cellType);
+            if (attacker._minNumCells != nodeAttacker._minNumCells) {
+                return false;
+            }
+            if (attacker._maxNumCells != nodeAttacker._maxNumCells) {
+                return false;
+            }
+            if (attacker._restrictToColor != nodeAttacker._restrictToColor) {
+                return false;
+            }
+            if (attacker._restrictToLineage != nodeAttacker._restrictToLineage) {
                 return false;
             }
         } break;

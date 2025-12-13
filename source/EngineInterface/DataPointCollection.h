@@ -32,7 +32,7 @@ struct DataPointCollection
     DataPoint numAttacks;
     DataPoint numMuscleActivities;
     DataPoint numDefenderActivities;
-    DataPoint numTransmitterActivities;
+    DataPoint numDepotActivities;
     DataPoint numInjectionActivities;
     DataPoint numCompletedInjections;
     DataPoint numGeneratorPulses;

@@ -117,7 +117,7 @@ DataPointCollection StatisticsConverterService::convert(
         getDataPointForProcessProperty(data.accumulated.numMuscleActivities, lastDataValue.accumulated.numMuscleActivities, numNonFreeCells, deltaTimesteps);
     result.numDefenderActivities = getDataPointForProcessProperty(
         data.accumulated.numDefenderActivities, lastDataValue.accumulated.numDefenderActivities, numNonFreeCells, deltaTimesteps);
-    result.numTransmitterActivities = getDataPointForProcessProperty(
+    result.numDepotActivities = getDataPointForProcessProperty(
         data.accumulated.numTransmitterActivities, lastDataValue.accumulated.numTransmitterActivities, numNonFreeCells, deltaTimesteps);
     result.numInjectionActivities = getDataPointForProcessProperty(
         data.accumulated.numInjectionActivities, lastDataValue.accumulated.numInjectionActivities, numNonFreeCells, deltaTimesteps);
