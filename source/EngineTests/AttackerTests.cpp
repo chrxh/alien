@@ -75,8 +75,8 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
     EXPECT_TRUE(approxCompare(actualTarget._rawEnergy, origTarget._rawEnergy));
 
     // Attacker should have a signal with success value > 0
-    ASSERT_TRUE(actualAttacker._signal.has_value());
-    EXPECT_TRUE(actualAttacker._signal->_channels[Channels::AttackerSuccess] > NEAR_ZERO);
+    ASSERT_TRUE(actualAttacker._signalState == SignalState_Active);
+    EXPECT_TRUE(actualAttacker._signal._channels[Channels::AttackerSuccess] > NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
@@ -101,8 +101,8 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     EXPECT_TRUE(approxCompare(actualTarget._rawEnergy, origTarget._rawEnergy));
 
     // Attacker should have a signal with success value = 0
-    ASSERT_TRUE(actualAttacker._signal.has_value());
-    EXPECT_TRUE(approxCompare(0.0f, actualAttacker._signal->_channels[Channels::AttackerSuccess]));
+    ASSERT_TRUE(actualAttacker._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, actualAttacker._signal._channels[Channels::AttackerSuccess]));
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
