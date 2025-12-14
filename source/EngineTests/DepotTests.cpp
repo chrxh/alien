@@ -135,7 +135,6 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = createDepotWithNegativeGenerator(normalCellEnergy, 0.0f);
-    auto origDepot = data.getCellRef(1);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
@@ -145,7 +144,7 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // No energy should have been released since storedUsableEnergy was 0
-    EXPECT_TRUE(approxCompare(origDepot._usableEnergy, actualDepot._usableEnergy));
+    EXPECT_TRUE(approxCompare(normalCellEnergy, actualDepot._usableEnergy));
     EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
 }
 
