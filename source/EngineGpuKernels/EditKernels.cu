@@ -560,46 +560,104 @@ __global__ void cudaInitUnwrapSelection(SimulationData data)
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
 
-        // Initialize all selected cells: tempValue.as_uint64 = 0 means not yet unwrapped
-        // After unwrapping, tempValue.as_uint64 = 1 means unwrapped, and shared1 holds the unwrapped position
+        // Initialize all selected cells for cluster-based unwrapping
+        // clusterIndex: used to identify connected components (initialized to self)
+        // tempValue.as_uint64: 0 = not yet unwrapped, 1 = unwrapped
+        // shared1: will hold the unwrapped position
+        // shared2: stores (distance, nearestCellIndex) for cluster heads
         if (cell->selected == 1 || cell->selected == 2) {
-            cell->tempValue.as_uint64 = 0;
+            cell->clusterIndex = index;
+            cell->tempValue.as_uint64 = 0;  // Not unwrapped yet
             cell->shared1 = cell->pos;
+            // Use reinterpret_cast to store uint64 in shared2 (two floats = 8 bytes = 64 bits)
+            *reinterpret_cast<unsigned long long int*>(&cell->shared2) = 0xffffffffffffffffull;  // Max distance initially
         }
     }
 }
 
-__global__ void cudaFindClosestUnwrappedCell(SimulationData data, float2 refPos, unsigned long long int* minDistanceAndIndex)
+__global__ void cudaFindUnwrapClusters(SimulationData data, int* result)
+{
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto currentCell = data.objects.cells.at(index);
+
+        // Only process selected cells
+        if (currentCell->selected != 1 && currentCell->selected != 2) {
+            continue;
+        }
+
+        // Propagate minimum clusterIndex through connected selected cells (similar to ClusterProcessor)
+        for (int i = 0; i < 30; ++i) {
+            bool found = false;
+            for (int j = 0; j < currentCell->numConnections; ++j) {
+                auto candidateCell = currentCell->connections[j].cell;
+                // Only consider connected selected cells
+                if (candidateCell->selected != 1 && candidateCell->selected != 2) {
+                    continue;
+                }
+                auto cellTag = currentCell->clusterIndex;
+                auto origTag = atomicMin(&candidateCell->clusterIndex, cellTag);
+                if (cellTag < origTag) {
+                    currentCell = candidateCell;
+                    found = true;
+                    atomicExch(result, 1);
+                    break;
+                }
+            }
+            if (!found) {
+                break;
+            }
+        }
+    }
+}
+
+__global__ void cudaFindNearestInCluster(SimulationData data, float2 refPos)
 {
     auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
         auto const& cell = data.objects.cells.at(index);
 
-        // Only consider selected cells that are not yet unwrapped
-        if ((cell->selected == 1 || cell->selected == 2) && cell->tempValue.as_uint64 == 0) {
-            // Calculate distance to refPos (using periodic boundary)
-            auto distance = data.cellMap.getDistance(refPos, cell->pos);
-            // Encode distance (as fixed-point integer) and index into a single 64-bit value
-            // Use upper 32 bits for distance (as integer * 1000 for precision), lower 32 bits for index
-            auto distanceInt = static_cast<unsigned long long int>(distance * 1000.0f);
-            auto encodedValue = (distanceInt << 32) | static_cast<unsigned long long int>(index);
-            atomicMin(minDistanceAndIndex, encodedValue);
+        // Only process selected cells
+        if (cell->selected != 1 && cell->selected != 2) {
+            continue;
         }
+
+        // Calculate distance to refPos (using periodic boundary)
+        auto distance = data.cellMap.getDistance(refPos, cell->pos);
+
+        // Encode distance and index into 64-bit value (upper 32 bits: distance * 1000, lower 32 bits: index)
+        auto distanceInt = static_cast<unsigned long long int>(distance * 1000.0f);
+        auto encodedValue = (distanceInt << 32) | static_cast<unsigned long long int>(index);
+
+        // Get the cluster head cell and atomically update if this cell is closer
+        // We store the encoded value in shared2 (reinterpreted as uint64)
+        auto clusterHead = data.objects.cells.at(cell->clusterIndex);
+        atomicMin(reinterpret_cast<unsigned long long int*>(&clusterHead->shared2), encodedValue);
     }
 }
 
-__global__ void cudaMarkUnwrapStartCell(SimulationData data, int cellIndex, float2 refPos)
+__global__ void cudaMarkUnwrapStartCells(SimulationData data, float2 refPos)
 {
-    if (cellIndex < 0 || cellIndex >= data.objects.cells.getNumEntries()) {
-        return;
-    }
+    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
 
-    auto const& cell = data.objects.cells.at(cellIndex);
-    if ((cell->selected == 1 || cell->selected == 2) && cell->tempValue.as_uint64 == 0) {
-        cell->tempValue.as_uint64 = 1;
-        // Calculate the unwrapped position: shift cell position relative to refPos
-        cell->shared1 = cell->pos + data.cellMap.getCorrectionIncrement(refPos, cell->pos);
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+        auto const& cell = data.objects.cells.at(index);
+
+        // Only process selected cells that are cluster heads (clusterIndex == self)
+        if ((cell->selected != 1 && cell->selected != 2) || cell->clusterIndex != static_cast<uint32_t>(index)) {
+            continue;
+        }
+
+        // This is a cluster head - get the nearest cell index from shared2
+        auto encodedValue = *reinterpret_cast<unsigned long long int*>(&cell->shared2);
+        auto nearestCellIndex = static_cast<int>(encodedValue & 0xffffffff);
+
+        // Mark the nearest cell as unwrapped with position relative to refPos
+        auto nearestCell = data.objects.cells.at(nearestCellIndex);
+        nearestCell->tempValue.as_uint64 = 1;  // Mark as unwrapped
+        nearestCell->shared1 = nearestCell->pos + data.cellMap.getCorrectionIncrement(refPos, nearestCell->pos);
     }
 }
 

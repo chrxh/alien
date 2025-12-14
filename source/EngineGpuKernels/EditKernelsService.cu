@@ -298,39 +298,31 @@ void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, Simu
 
 void _EditKernelsService::unwrapSelection(CudaSettings const& gpuSettings, SimulationData const& data, float2 const& refPos)
 {
-    // Step 1: Initialize all selected cells for unwrapping
+    // Step 1: Initialize all selected cells (clusterIndex, tempValue, shared1, shared2)
     KERNEL_CALL(cudaInitUnwrapSelection, data);
     cudaDeviceSynchronize();
 
-    // Step 2: Process all connected components
-    // For each iteration: find the closest unprocessed cell, mark it as start, propagate through its component
-    bool hasMoreComponents = true;
-    while (hasMoreComponents) {
-        // Find the closest unprocessed selected cell to refPos
-        setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
-        KERNEL_CALL(cudaFindClosestUnwrappedCell, data, refPos, _cudaMinCellPosYAndIndex);
+    // Step 2: Find connected components among selected cells using cluster propagation
+    do {
+        setValueToDevice(_cudaUnwrapResult, 0);
+        KERNEL_CALL(cudaFindUnwrapClusters, data, _cudaUnwrapResult);
         cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUnwrapResult));
 
-        auto minDistanceAndIndex = copyToHost(_cudaMinCellPosYAndIndex);
-        if (minDistanceAndIndex == 0xffffffffffffffffull) {
-            // No more unprocessed cells
-            hasMoreComponents = false;
-        } else {
-            // Extract cell index from the encoded value (lower 32 bits)
-            auto closestCellIndex = static_cast<int>(minDistanceAndIndex & 0xffffffff);
+    // Step 3: Find the nearest cell to refPos in each cluster
+    KERNEL_CALL(cudaFindNearestInCluster, data, refPos);
+    cudaDeviceSynchronize();
 
-            // Mark this cell as the starting point for unwrapping
-            KERNEL_CALL_1_1(cudaMarkUnwrapStartCell, data, closestCellIndex, refPos);
-            cudaDeviceSynchronize();
+    // Step 4: Mark the starting cells (nearest in each cluster) as unwrapped
+    KERNEL_CALL(cudaMarkUnwrapStartCells, data, refPos);
+    cudaDeviceSynchronize();
 
-            // Propagate unwrapping through connected cells in this component
-            do {
-                setValueToDevice(_cudaUnwrapResult, 0);
-                KERNEL_CALL(cudaUnwrapSelectionStep, data, _cudaUnwrapResult);
-                cudaDeviceSynchronize();
-            } while (1 == copyToHost(_cudaUnwrapResult));
-        }
-    }
+    // Step 5: Propagate unwrapping through connected cells in all components
+    do {
+        setValueToDevice(_cudaUnwrapResult, 0);
+        KERNEL_CALL(cudaUnwrapSelectionStep, data, _cudaUnwrapResult);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUnwrapResult));
 }
 
 void _EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)
