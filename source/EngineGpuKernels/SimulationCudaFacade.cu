@@ -143,7 +143,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         checkAndProcessSimulationParameterChanges();
 
         auto simulationData = getSimulationDataPtrCopy();
-        _simulationKernels->calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
+        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
         syncAndCheck();
 
         automaticResizeArrays();
@@ -259,7 +259,7 @@ void _SimulationCudaFacade::addAndSelectSimulationData(TO const& to)
     auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
-    _selectionKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     DataAccessKernelsService::get().addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, true);
     syncAndCheck();
     updateStatistics();
@@ -359,25 +359,25 @@ void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)
 
 void _SimulationCudaFacade::switchSelection(PointSelectionData const& pointData)
 {
-    _selectionKernels->switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    SelectionKernelsService::get().switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::swapSelection(PointSelectionData const& pointData)
 {
-    _selectionKernels->swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    SelectionKernelsService::get().swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
 {
-    _selectionKernels->setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
+    SelectionKernelsService::get().setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
     syncAndCheck();
 }
 
 SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    _selectionKernels->getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
+    SelectionKernelsService::get().getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
@@ -392,7 +392,7 @@ void _SimulationCudaFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionD
 
 void _SimulationCudaFacade::removeSelection()
 {
-    _selectionKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 
     updateStatistics();
@@ -400,7 +400,7 @@ void _SimulationCudaFacade::removeSelection()
 
 void _SimulationCudaFacade::updateSelection()
 {
-    _selectionKernels->updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
@@ -459,7 +459,7 @@ StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
 
 void _SimulationCudaFacade::updateStatistics()
 {
-    _statisticsKernels->updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
     {
@@ -543,7 +543,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
     auto startTimepoint = std::chrono::steady_clock::now();
     do {
 
-        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+        SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;
@@ -560,7 +560,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
 
     auto startTimepoint = std::chrono::steady_clock::now();
     for (int i = 0; i < numSteps; ++i) {
-        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+        SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;
@@ -806,7 +806,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
         _newSimulationParameters.reset();
 
         if (_cudaSimulationData) {
-            _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy());
+            SimulationKernelsService::get().prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy());
         }
     }
 }
