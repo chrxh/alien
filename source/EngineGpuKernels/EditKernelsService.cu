@@ -8,6 +8,7 @@ _EditKernelsService::_EditKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _cudaRolloutResult);
+    memoryManager.acquireMemory(1, _cudaUnwrapResult);
     memoryManager.acquireMemory(1, _cudaSwitchResult);
     memoryManager.acquireMemory(1, _cudaUpdateResult);
     memoryManager.acquireMemory(1, _cudaRemoveResult);
@@ -26,6 +27,7 @@ _EditKernelsService::~_EditKernelsService()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_cudaRolloutResult);
+    memoryManager.freeMemory(_cudaUnwrapResult);
     memoryManager.freeMemory(_cudaSwitchResult);
     memoryManager.freeMemory(_cudaUpdateResult);
     memoryManager.freeMemory(_cudaRemoveResult);
@@ -292,6 +294,35 @@ void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, Simu
         cudaDeviceSynchronize();
 
     } while (1 == copyToHost(_cudaRolloutResult));
+}
+
+void _EditKernelsService::unwrapSelection(CudaSettings const& gpuSettings, SimulationData const& data, float2 const& refPos)
+{
+    // Step 1: Initialize all selected cells (clusterIndex, tempValue, shared1, shared2)
+    KERNEL_CALL(cudaInitUnwrapSelection, data);
+    cudaDeviceSynchronize();
+
+    // Step 2: Find connected components among selected cells using cluster propagation
+    do {
+        setValueToDevice(_cudaUnwrapResult, 0);
+        KERNEL_CALL(cudaFindUnwrapClusters, data, _cudaUnwrapResult);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUnwrapResult));
+
+    // Step 3: Find the nearest cell to refPos in each cluster
+    KERNEL_CALL(cudaFindNearestInCluster, data, refPos);
+    cudaDeviceSynchronize();
+
+    // Step 4: Mark the starting cells (nearest in each cluster) as unwrapped
+    KERNEL_CALL(cudaMarkUnwrapStartCells, data, refPos);
+    cudaDeviceSynchronize();
+
+    // Step 5: Propagate unwrapping through connected cells in all components
+    do {
+        setValueToDevice(_cudaUnwrapResult, 0);
+        KERNEL_CALL(cudaUnwrapSelectionStep, data, _cudaUnwrapResult);
+        cudaDeviceSynchronize();
+    } while (1 == copyToHost(_cudaUnwrapResult));
 }
 
 void _EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)
