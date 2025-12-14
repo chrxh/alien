@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/ArraySizesForGpu.h>
 #include <EngineInterface/ArraySizesForTO.h>
 #include <EngineInterface/CudaSettings.h>
@@ -10,11 +12,13 @@
 #include "Definitions.cuh"
 #include "Macros.cuh"
 
-class _DataAccessKernelsService
+class DataAccessKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(DataAccessKernelsService);
+
 public:
-    _DataAccessKernelsService();
-    ~_DataAccessKernelsService();
+    void init();
+    void shutdown();
 
     ArraySizesForTO estimateCapacityNeededForTO(CudaSettings const& gpuSettings, SimulationData const& data);
     void getData(CudaSettings const& gpuSettings, SimulationData const& data, int2 const& rectUpperLeft, int2 const& rectLowerRight, TO const& to);
@@ -28,13 +32,11 @@ public:
     void clearData(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    GarbageCollectorKernelsService _garbageCollectorKernels;
-    EditKernelsService _editKernels;
-    SelectionKernelsService _selectionKernels;
+    DataAccessKernelsService() = default;
 
     // Gpu memory
-    Cell** _cudaCellArray;
-    ArraySizesForGpu* _arraySizesGPU;
-    ArraySizesForTO* _arraySizesTO;
-    bool* _foundResult;
+    Cell** _cudaCellArray = nullptr;
+    ArraySizesForGpu* _arraySizesGPU = nullptr;
+    ArraySizesForTO* _arraySizesTO = nullptr;
+    bool* _foundResult = nullptr;
 };

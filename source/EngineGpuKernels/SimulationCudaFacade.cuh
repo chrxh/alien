@@ -149,13 +149,4 @@ private:
     std::shared_ptr<SimulationStatistics> _cudaSimulationStatistics;
     std::shared_ptr<SimulationStatistics> _cudaPreviewStatistics;
     MaxAgeBalancer _maxAgeBalancer;
-
-    SimulationKernelsService _simulationKernels;
-    DataAccessKernelsService _dataAccessKernels;
-    GarbageCollectorKernelsService _garbageCollectorKernels;
-    GeometryKernelsService _geometryKernels;
-    EditKernelsService _editKernels;
-    SelectionKernelsService _selectionKernels;
-    StatisticsKernelsService _statisticsKernels;
-    TestKernelsService _testKernels;
 };

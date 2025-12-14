@@ -1,17 +1,17 @@
 ﻿#include "DebugKernels.cuh"
 #include "GarbageCollectorKernelsService.cuh"
 
-_GarbageCollectorKernelsService::_GarbageCollectorKernelsService()
+void GarbageCollectorKernelsService::init()
 {
     CudaMemoryManager::getInstance().acquireMemory<bool>(1, _cudaBool);
 }
 
-_GarbageCollectorKernelsService::~_GarbageCollectorKernelsService()
+void GarbageCollectorKernelsService::shutdown()
 {
     CudaMemoryManager::getInstance().freeMemory(_cudaBool);
 }
 
-void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& data)
+void GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaCleanupMaps, data);
 
@@ -37,12 +37,12 @@ void _GarbageCollectorKernelsService::cleanupAfterTimestep(CudaSettings const& g
     }
 }
 
-void _GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& data)
+void GarbageCollectorKernelsService::cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL(cudaCleanupMaps, data);
 }
 
-void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)
+void GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.objects.particles, data.tempObjects.particles);
@@ -62,7 +62,7 @@ void _GarbageCollectorKernelsService::cleanupAfterDataManipulation(CudaSettings 
     KERNEL_CALL_1_1(cudaSwapHeaps, data);
 }
 
-void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings, SimulationData const& data)
+void GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaPreparePointerArraysForCleanup, data);
     KERNEL_CALL(cudaCleanupPointerArray<Particle*>, data.objects.particles, data.tempObjects.particles);
@@ -80,7 +80,7 @@ void _GarbageCollectorKernelsService::copyArrays(CudaSettings const& gpuSettings
     KERNEL_CALL(cudaCleanupDependentCellData, data.tempObjects.cells, data.tempObjects.heap);
 }
 
-void _GarbageCollectorKernelsService::swapArrays(CudaSettings const& gpuSettings, SimulationData const& data)
+void GarbageCollectorKernelsService::swapArrays(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     KERNEL_CALL_1_1(cudaSwapPointerArrays, data);
     KERNEL_CALL_1_1(cudaSwapHeaps, data);

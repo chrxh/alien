@@ -7,9 +7,12 @@
 #include "SimulationKernelsService.cuh"
 #include "SimulationStatistics.cuh"
 
-_SimulationKernelsService::_SimulationKernelsService()
+void SimulationKernelsService::init()
 {
-    _garbageCollector = std::make_shared<_GarbageCollectorKernelsService>();
+}
+
+void SimulationKernelsService::shutdown()
+{
 }
 
 namespace
@@ -21,7 +24,7 @@ namespace
     }
 }
 
-void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
+void SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
@@ -95,10 +98,10 @@ void _SimulationKernelsService::calcTimestep(SettingsForSimulation const& settin
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
     KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
-    _garbageCollector->cleanupAfterTimestep(settings.cudaSettings, data);
+    GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
 }
 
-void _SimulationKernelsService::calcTimestepForPreview(
+void SimulationKernelsService::calcTimestepForPreview(
     SettingsForSimulation const& settings,
     SimulationData const& data,
     SimulationStatistics const& statistics,
@@ -137,7 +140,7 @@ void _SimulationKernelsService::calcTimestepForPreview(
         }
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
 
-        _garbageCollector->cleanupAfterTimestepForPreview(settings.cudaSettings, data);
+        GarbageCollectorKernelsService::get().cleanupAfterTimestepForPreview(settings.cudaSettings, data);
 
     } else {
         KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
@@ -199,17 +202,17 @@ void _SimulationKernelsService::calcTimestepForPreview(
         //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, data);
         //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, data);
 
-        _garbageCollector->cleanupAfterTimestep(settings.cudaSettings, data);
+        GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
     }
 }
 
-void _SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
+void SimulationKernelsService::prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& data)
 {
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL(cudaResetDensity, data);
 }
 
-bool _SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
+bool SimulationKernelsService::isRigidityUpdateEnabled(SettingsForSimulation const& settings) const
 {
     for (int i = 0; i < settings.simulationParameters.numLayers; ++i) {
         if (settings.simulationParameters.rigidity.layerValues[i].value != 0) {

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/CudaSettings.h>
 
 #include "Base.cuh"
@@ -7,11 +9,13 @@
 #include "GarbageCollectorKernels.cuh"
 #include "Macros.cuh"
 
-class _GarbageCollectorKernelsService
+class GarbageCollectorKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GarbageCollectorKernelsService);
+
 public:
-    _GarbageCollectorKernelsService();
-    ~_GarbageCollectorKernelsService();
+    void init();
+    void shutdown();
 
     void cleanupAfterTimestep(CudaSettings const& gpuSettings, SimulationData const& simulationData);
     void cleanupAfterTimestepForPreview(CudaSettings const& gpuSettings, SimulationData const& simulationData);
@@ -20,6 +24,8 @@ public:
     void swapArrays(CudaSettings const& gpuSettings, SimulationData const& simulationData);
 
 private:
+    GarbageCollectorKernelsService() = default;
+
     //gpu memory
-    bool* _cudaBool;
+    bool* _cudaBool = nullptr;
 };

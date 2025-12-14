@@ -1,14 +1,19 @@
 ﻿#pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/SettingsForSimulation.h>
 
 #include "Definitions.cuh"
 #include "Macros.cuh"
 
-class _SimulationKernelsService
+class SimulationKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationKernelsService);
+
 public:
-    _SimulationKernelsService();
+    void init();
+    void shutdown();
 
     void calcTimestep(SettingsForSimulation const& settings, SimulationData const& simulationData, SimulationStatistics const& statistics);
     void calcTimestepForPreview(
@@ -19,7 +24,7 @@ public:
     void prepareForSimulationParametersChanges(SettingsForSimulation const& settings, SimulationData const& simulationData);
 
 private:
-    bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
+    SimulationKernelsService() = default;
 
-    GarbageCollectorKernelsService _garbageCollector;
+    bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
 };
