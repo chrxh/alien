@@ -159,32 +159,40 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
+    auto origGenerator = data.getCellRef(2);
+
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
+    auto actualGenerator = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
-    EXPECT_TRUE(approxCompare(initialUsableEnergy - SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialUsableEnergy + origGenerator._usableEnergy - SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy + actualGenerator._usableEnergy));
 }
 
 TEST_F(DepotTests, negativeSignal_energyTransferCapped)
 {
-    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto origDepotEnergy = _parameters.normalCellEnergy.value[0];
     // Provide more stored energy than depotEnergyTransferUnit
     auto initialStoredEnergy = 100.0f;
 
-    auto data = createDepotWithNegativeGenerator(normalCellEnergy, initialStoredEnergy);
+    auto data = createDepotWithNegativeGenerator(origDepotEnergy, initialStoredEnergy);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
+    auto origGenerator = data.getCellRef(2);
+
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
+    auto actualGenerator = actualData.getCellRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(
         initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
-    EXPECT_TRUE(approxCompare(normalCellEnergy + SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy));
+    EXPECT_TRUE(approxCompare(
+        origDepotEnergy + origGenerator._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
+        actualDepot._usableEnergy + actualGenerator._usableEnergy));
 }
