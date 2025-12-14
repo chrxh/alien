@@ -40,6 +40,9 @@ using GeometryKernelsService = std::shared_ptr<_GeometryKernelsService>;
 class _EditKernelsService;
 using EditKernelsService = std::shared_ptr<_EditKernelsService>;
 
+class _SelectionKernelsService;
+using SelectionKernelsService = std::shared_ptr<_SelectionKernelsService>;
+
 class _StatisticsKernelsService;
 using StatisticsKernelsService = std::shared_ptr<_StatisticsKernelsService>;
 

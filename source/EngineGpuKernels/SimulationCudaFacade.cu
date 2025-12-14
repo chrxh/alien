@@ -32,6 +32,8 @@
 #include "Objects.cuh"
 #include "SelectionResult.cuh"
 #include "SimulationCudaFacade.cuh"
+
+#include "SelectionKernelsService.cuh"
 #include "SimulationData.cuh"
 #include "SimulationKernelsService.cuh"
 #include "SimulationParametersUpdateService.cuh"
@@ -84,6 +86,7 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
     _geometryKernels = std::make_shared<_GeometryKernelsService>();
     _editKernels = std::make_shared<_EditKernelsService>();
+    _selectionKernels = std::make_shared<_SelectionKernelsService>();
     _statisticsKernels = std::make_shared<_StatisticsKernelsService>();
     _testKernels = std::make_shared<_TestKernelsService>();
 
@@ -254,7 +257,7 @@ void _SimulationCudaFacade::addAndSelectSimulationData(TO const& to)
     auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
-    _editKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    _selectionKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, true);
     syncAndCheck();
     updateStatistics();
@@ -354,24 +357,25 @@ void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)
 
 void _SimulationCudaFacade::switchSelection(PointSelectionData const& pointData)
 {
-    _editKernels->switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    _selectionKernels->switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::swapSelection(PointSelectionData const& pointData)
 {
-    _editKernels->swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    _selectionKernels->swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
 {
-    _editKernels->setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
+    _selectionKernels->setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
+    syncAndCheck();
 }
 
 SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    _editKernels->getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
+    _selectionKernels->getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
@@ -386,7 +390,7 @@ void _SimulationCudaFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionD
 
 void _SimulationCudaFacade::removeSelection()
 {
-    _editKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    _selectionKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 
     updateStatistics();
@@ -394,7 +398,7 @@ void _SimulationCudaFacade::removeSelection()
 
 void _SimulationCudaFacade::updateSelection()
 {
-    _editKernels->updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    _selectionKernels->updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 

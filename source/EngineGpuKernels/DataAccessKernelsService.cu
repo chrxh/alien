@@ -3,11 +3,13 @@
 #include "DebugKernels.cuh"
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
+#include "SelectionKernelsService.cuh"
 
 _DataAccessKernelsService::_DataAccessKernelsService()
 {
     _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
     _editKernels = std::make_shared<_EditKernelsService>();
+    _selectionKernels = std::make_shared<_SelectionKernelsService>();
 
     CudaMemoryManager::getInstance().acquireMemory(1, _cudaCellArray);
     CudaMemoryManager::getInstance().acquireMemory(1, _arraySizesGPU);
@@ -114,7 +116,7 @@ void _DataAccessKernelsService::addData(CudaSettings const& gpuSettings, Simulat
     KERNEL_CALL(cudaSetCellAndParticleDataFromTO, data, to, _cudaCellArray, selectData);
     _garbageCollectorKernels->cleanupAfterDataManipulation(gpuSettings, data);
     if (selectData) {
-        _editKernels->rolloutSelection(gpuSettings, data);
+        _selectionKernels->rolloutSelection(gpuSettings, data);
     }
 }
 

@@ -155,6 +155,7 @@ private:
     GarbageCollectorKernelsService _garbageCollectorKernels;
     GeometryKernelsService _geometryKernels;
     EditKernelsService _editKernels;
+    SelectionKernelsService _selectionKernels;
     StatisticsKernelsService _statisticsKernels;
     TestKernelsService _testKernels;
 };

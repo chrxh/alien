@@ -30,6 +30,7 @@ public:
 private:
     GarbageCollectorKernelsService _garbageCollectorKernels;
     EditKernelsService _editKernels;
+    SelectionKernelsService _selectionKernels;
 
     // Gpu memory
     Cell** _cudaCellArray;

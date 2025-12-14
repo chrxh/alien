@@ -71,6 +71,10 @@ add_library(EngineGpuKernels
     Physics.cuh
     PreprocessedSimulationData.cuh
     ReconnectorProcessor.cuh
+    SelectionKernels.cu
+    SelectionKernels.cuh
+    SelectionKernelsService.cu
+    SelectionKernelsService.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
     SignalProcessor.cuh

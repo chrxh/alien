@@ -12,13 +12,6 @@ public:
     _EditKernelsService();
     ~_EditKernelsService();
 
-    void removeSelection(CudaSettings const& gpuSettings, SimulationData const& data);
-    void swapSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
-    void switchSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
-    void setSelection(CudaSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData);
-    void updateSelection(CudaSettings const& gpuSettings, SimulationData const& data);
-
-    void getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
     void shallowUpdateSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData);
     void removeSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
     void relaxSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
@@ -34,12 +27,11 @@ public:
 
     void applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData);
 
-    void rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data);
-
     void applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:
     GarbageCollectorKernelsService _garbageCollector;
+    SelectionKernelsService _selectionService;
 
     // Gpu memory
     int* _cudaRolloutResult;

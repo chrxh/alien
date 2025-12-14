@@ -1,8 +1,11 @@
-﻿#include "DataAccessKernels.cuh"
+﻿#include "EditKernelsService.cuh"
+
+#include "DataAccessKernels.cuh"
 #include "EditKernels.cuh"
-#include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
+#include "SelectionKernelsService.cuh"
 #include "SimulationKernels.cuh"
+#include "SelectionKernels.cuh"
 
 _EditKernelsService::_EditKernelsService()
 {
@@ -20,6 +23,7 @@ _EditKernelsService::_EditKernelsService()
     memoryManager.acquireMemory(1, _creaturePtr);
     memoryManager.acquireMemory(1, _result);
     _garbageCollector = std::make_shared<_GarbageCollectorKernelsService>();
+    _selectionService = std::make_shared<_SelectionKernelsService>();
 }
 
 _EditKernelsService::~_EditKernelsService()
@@ -36,55 +40,6 @@ _EditKernelsService::~_EditKernelsService()
     memoryManager.freeMemory(_genomePtr);
     memoryManager.freeMemory(_creaturePtr);
     memoryManager.freeMemory(_result);
-}
-
-void _EditKernelsService::removeSelection(CudaSettings const& gpuSettings, SimulationData const& data)
-{
-    KERNEL_CALL(cudaRemoveSelection, data, false);
-}
-
-void _EditKernelsService::swapSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
-{
-    KERNEL_CALL(cudaRemoveSelection, data, true);
-    KERNEL_CALL(cudaSwapSelection, switchData.pos, switchData.radius, data);
-    rolloutSelection(gpuSettings, data);
-}
-
-void _EditKernelsService::switchSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData)
-{
-    setValueToDevice(_cudaSwitchResult, 0);
-
-    KERNEL_CALL(cudaExistsSelection, switchData, data, _cudaSwitchResult);
-    cudaDeviceSynchronize();
-
-    if (0 == copyToHost(_cudaSwitchResult)) {
-        KERNEL_CALL(cudaSetSelection, switchData.pos, switchData.radius, data);
-        rolloutSelection(gpuSettings, data);
-    }
-}
-
-void _EditKernelsService::setSelection(CudaSettings const& gpuSettings, SimulationData const& data, AreaSelectionData const& setData)
-{
-    KERNEL_CALL(cudaSetSelection, setData, data);
-    rolloutSelection(gpuSettings, data);
-}
-
-void _EditKernelsService::updateSelection(CudaSettings const& gpuSettings, SimulationData const& data)
-{
-    KERNEL_CALL(cudaRemoveSelection, data, true);
-    rolloutSelection(gpuSettings, data);
-}
-
-void _EditKernelsService::getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
-{
-    KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
-    setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
-    KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
-    cudaDeviceSynchronize();
-    auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
-    KERNEL_CALL(cudaGetSelectionShallowData_step1, data);
-    KERNEL_CALL(cudaGetSelectionShallowData_step2, data, refCellIndex, selectionResult);
-    KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult, data.cellMap);
 }
 
 void _EditKernelsService::shallowUpdateSelectedObjects(
@@ -153,7 +108,7 @@ void _EditKernelsService::shallowUpdateSelectedObjects(
 
         } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat
 
-        updateSelection(gpuSettings, data);
+        _selectionService->updateSelection(gpuSettings, data);
     }
 }
 
@@ -234,7 +189,7 @@ void _EditKernelsService::reconnect(CudaSettings const& gpuSettings, SimulationD
 
     } while (1 == copyToHost(_cudaUpdateResult) && --counter > 0);  //due to locking not all necessary connections may be established at first => repeat
 
-    updateSelection(gpuSettings, data);
+    _selectionService->updateSelection(gpuSettings, data);
 }
 
 void _EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, SimulationData const& data, TO const& changeTO)
@@ -282,16 +237,6 @@ void _EditKernelsService::setDetached(CudaSettings const& gpuSettings, Simulatio
 void _EditKernelsService::applyForce(CudaSettings const& gpuSettings, SimulationData const& data, ApplyForceData const& applyData)
 {
     KERNEL_CALL(cudaApplyForce, data, applyData);
-}
-
-void _EditKernelsService::rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data)
-{
-    do {
-        setValueToDevice(_cudaRolloutResult, 0);
-        KERNEL_CALL(cudaRolloutSelectionStep, data, _cudaRolloutResult);
-        cudaDeviceSynchronize();
-
-    } while (1 == copyToHost(_cudaRolloutResult));
 }
 
 void _EditKernelsService::applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data)

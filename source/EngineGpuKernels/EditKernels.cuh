@@ -42,17 +42,6 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
 __global__ void cudaPrepareConnectionChanges(SimulationData data);
 __global__ void cudaProcessDeleteConnectionChanges(SimulationData data);
 __global__ void cudaProcessAddConnectionChanges(SimulationData data);
-__global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result);
-__global__ void cudaSetSelection(float2 pos, float radius, SimulationData data);
-__global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData data);
-__global__ void cudaRemoveSelection(SimulationData data, bool onlyClusterSelection);
-__global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data);
-__global__ void cudaRolloutSelectionStep(SimulationData data, int* result);
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
-__global__ void cudaResetSelectionResult(SelectionResult result);
-__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex);
-__global__ void cudaGetSelectionShallowData_step1(SimulationData data);
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result);
-__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
 __global__ void cudaSetDetached(SimulationData data, bool value);
 __global__ void cudaApplyCataclysm(SimulationData data);
