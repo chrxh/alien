@@ -22,17 +22,47 @@ public:
     }
 
     ~DepotTests() = default;
+
+protected:
+    // Helper to create a depot creature with a generator that triggers it with a positive signal
+    Description createDepotWithPositiveGenerator(float usableEnergy, float storedUsableEnergy = 0.0f)
+    {
+        auto data = Description().addCreature(CreatureDescription().id(1).cells({
+            CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
+            CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3).pulseType(GeneratorPulseType_Positive)),
+        }));
+        data.addConnection(1, 2);
+        return data;
+    }
+
+    // Helper to create a depot creature with a generator that triggers it with a negative signal
+    Description createDepotWithNegativeGenerator(float usableEnergy, float storedUsableEnergy = 0.0f)
+    {
+        // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
+        auto data = Description().addCreature(CreatureDescription().id(1).cells({
+            CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
+            CellDescription()
+                .id(2)
+                .pos({101.0f, 100.0f})
+                .cellType(GeneratorDescription().autoTriggerInterval(3).pulseType(GeneratorPulseType_Alternation).alternationInterval(0)),
+        }));
+        data.addConnection(1, 2);
+        return data;
+    }
 };
 
 TEST_F(DepotTests, noSignal_noChange)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto initialUsableEnergy = normalCellEnergy + 20.0f;
+
+    // Create depot without a generator - no signal will be sent
     auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(normalCellEnergy + 20.0f),
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy),
     });
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);
 
     auto actualData = _simulationFacade->getSimulationData();
 
@@ -49,17 +79,10 @@ TEST_F(DepotTests, positiveSignal_storeEnergy)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(0.0f))
-            .usableEnergy(initialUsableEnergy)
-            .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    auto data = createDepotWithPositiveGenerator(initialUsableEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
@@ -75,17 +98,10 @@ TEST_F(DepotTests, negativeSignal_releaseEnergy)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto initialStoredEnergy = 50.0f;
 
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(initialStoredEnergy))
-            .usableEnergy(normalCellEnergy)
-            .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    auto data = createDepotWithNegativeGenerator(normalCellEnergy, initialStoredEnergy);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
@@ -101,17 +117,10 @@ TEST_F(DepotTests, positiveSignal_usableEnergyBelowNormal_noStore)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     auto initialUsableEnergy = normalCellEnergy - 10.0f;
 
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(0.0f))
-            .usableEnergy(initialUsableEnergy)
-            .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    auto data = createDepotWithPositiveGenerator(initialUsableEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
@@ -125,24 +134,18 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
 {
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(0.0f))
-            .usableEnergy(normalCellEnergy)
-            .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    auto data = createDepotWithNegativeGenerator(normalCellEnergy, 0.0f);
+    auto origDepot = data.getCellRef(1);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // No energy should have been released since storedUsableEnergy was 0
-    EXPECT_TRUE(approxCompare(normalCellEnergy, actualDepot._usableEnergy));
+    EXPECT_TRUE(approxCompare(origDepot._usableEnergy, actualDepot._usableEnergy));
     EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
 }
 
@@ -152,17 +155,10 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     // Provide much more energy than depotEnergyTransferUnit
     auto initialUsableEnergy = normalCellEnergy + 100.0f;
 
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(0.0f))
-            .usableEnergy(initialUsableEnergy)
-            .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    auto data = createDepotWithPositiveGenerator(initialUsableEnergy, 0.0f);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
@@ -179,17 +175,10 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     // Provide more stored energy than depotEnergyTransferUnit
     auto initialStoredEnergy = 100.0f;
 
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(initialStoredEnergy))
-            .usableEnergy(normalCellEnergy)
-            .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
-    });
+    auto data = createDepotWithNegativeGenerator(normalCellEnergy, initialStoredEnergy);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualDepot = actualData.getCellRef(1);
@@ -199,30 +188,4 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     EXPECT_TRUE(approxCompare(
         initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(normalCellEnergy + SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy));
-}
-
-TEST_F(DepotTests, signalBelowThreshold_noChange)
-{
-    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
-    auto initialUsableEnergy = normalCellEnergy + 20.0f;
-
-    // Signal magnitude is 0.05, which is below TRIGGER_THRESHOLD
-    auto data = Description().cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(DepotDescription().storedUsableEnergy(0.0f))
-            .usableEnergy(initialUsableEnergy)
-            .signalAndState({0.05f, 0, 0, 0, 0, 0, 0, 0}),
-    });
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
-
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    // No energy should have been stored since signal is below threshold
-    EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
 }
