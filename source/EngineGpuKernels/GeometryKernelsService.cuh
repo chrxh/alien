@@ -1,18 +1,21 @@
 ﻿#pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/GeometryBuffers.h>
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"
 #include "Definitions.cuh"
-#include "GarbageCollectorKernelsService.cuh"
 #include "Macros.cuh"
 
-class _GeometryKernelsService
+class GeometryKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(GeometryKernelsService);
+
 public:
-    _GeometryKernelsService();
-    ~_GeometryKernelsService();
+    void init();
+    void shutdown();
 
     void correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
     void restorePositions(SettingsForSimulation const& settings, SimulationData data);
@@ -20,11 +23,13 @@ public:
     void extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData, RealRect const& visibleWorldRect);
 
 private:
-    uint64_t* _numLineIndices;
-    uint64_t* _numTriangleIndices;
-    uint64_t* _numSelectedConnectionVertices;
-    uint64_t* _numSelectedObjects;
-    uint64_t* _numAttackEventVertices;
-    uint64_t* _numDetonationEventVertices;
-    uint64_t* _numLocations;
+    GeometryKernelsService() = default;
+
+    uint64_t* _numLineIndices = nullptr;
+    uint64_t* _numTriangleIndices = nullptr;
+    uint64_t* _numSelectedConnectionVertices = nullptr;
+    uint64_t* _numSelectedObjects = nullptr;
+    uint64_t* _numAttackEventVertices = nullptr;
+    uint64_t* _numDetonationEventVertices = nullptr;
+    uint64_t* _numLocations = nullptr;
 };

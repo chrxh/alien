@@ -25,6 +25,7 @@
 #include "EditKernels.cuh"
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernels.cuh"
+#include "GarbageCollectorKernelsService.cuh"
 #include "GeometryKernels.cuh"
 #include "GeometryKernelsService.cuh"
 #include "Map.cuh"
@@ -81,14 +82,14 @@ _SimulationCudaFacade::_SimulationCudaFacade(uint64_t timestep, SettingsForSimul
     _cudaPreviewStatistics->init();
     _cudaSelectionResult->init();
 
-    _simulationKernels = std::make_shared<_SimulationKernelsService>();
-    _dataAccessKernels = std::make_shared<_DataAccessKernelsService>();
-    _garbageCollectorKernels = std::make_shared<_GarbageCollectorKernelsService>();
-    _geometryKernels = std::make_shared<_GeometryKernelsService>();
-    _editKernels = std::make_shared<_EditKernelsService>();
-    _selectionKernels = std::make_shared<_SelectionKernelsService>();
-    _statisticsKernels = std::make_shared<_StatisticsKernelsService>();
-    _testKernels = std::make_shared<_TestKernelsService>();
+    GarbageCollectorKernelsService::get().init();
+    SelectionKernelsService::get().init();
+    StatisticsKernelsService::get().init();
+    TestKernelsService::get().init();
+    GeometryKernelsService::get().init();
+    EditKernelsService::get().init();
+    DataAccessKernelsService::get().init();
+    SimulationKernelsService::get().init();
 
     // Default array sizes for empty simulation (will be resized later if not sufficient)
     _cudaSimulationData->resizeObjectsAndTempObjects({100000, 100000, 10000000});
@@ -105,13 +106,14 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     _cudaSimulationStatistics->free();
     _cudaSelectionResult->free();
 
-    _simulationKernels.reset();
-    _dataAccessKernels.reset();
-    _garbageCollectorKernels.reset();
-    _geometryKernels.reset();
-    _editKernels.reset();
-    _statisticsKernels.reset();
-    _testKernels.reset();
+    SimulationKernelsService::get().shutdown();
+    DataAccessKernelsService::get().shutdown();
+    EditKernelsService::get().shutdown();
+    GeometryKernelsService::get().shutdown();
+    TestKernelsService::get().shutdown();
+    StatisticsKernelsService::get().shutdown();
+    SelectionKernelsService::get().shutdown();
+    GarbageCollectorKernelsService::get().shutdown();
 
     _cudaTOProvider.reset();
     _collectionTOProvider.reset();
@@ -125,13 +127,13 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
 
-    _geometryKernels->correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
-    auto numRenderObjects = _geometryKernels->getNumRenderObjects(_settings, simulationData, visibleWorldRect);
+    GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
+    auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     geometryBuffers->updateNumObjects(numRenderObjects);
     _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
-    _geometryKernels->extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
-    _geometryKernels->restorePositions(_settings, simulationData);
+    GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+    GeometryKernelsService::get().restorePositions(_settings, simulationData);
     syncAndCheck();
 }
 
@@ -141,7 +143,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         checkAndProcessSimulationParameterChanges();
 
         auto simulationData = getSimulationDataPtrCopy();
-        _simulationKernels->calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
+        SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
         syncAndCheck();
 
         automaticResizeArrays();
@@ -172,7 +174,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
 void _SimulationCudaFacade::applyCataclysm(int power)
 {
     for (int i = 0; i < power; ++i) {
-        _editKernels->applyCataclysm(_settings.cudaSettings, getSimulationDataPtrCopy());
+        EditKernelsService::get().applyCataclysm(_settings.cudaSettings, getSimulationDataPtrCopy());
         syncAndCheck();
         resizeArraysIfNecessary();
     }
@@ -181,7 +183,7 @@ void _SimulationCudaFacade::applyCataclysm(int power)
 TO _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
+    DataAccessKernelsService::get().getData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideNewUnmanagedDataTO(cudaTO.capacities);
@@ -193,7 +195,7 @@ TO _SimulationCudaFacade::getSimulationData(int2 const& rectUpperLeft, int2 cons
 TO _SimulationCudaFacade::getSelectedSimulationData(bool includeClusters)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getSelectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters, cudaTO);
+    DataAccessKernelsService::get().getSelectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -216,7 +218,7 @@ TO _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint64_t> entit
     }
 
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getInspectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), ids, cudaTO);
+    DataAccessKernelsService::get().getInspectedData(_settings.cudaSettings, getSimulationDataPtrCopy(), ids, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -228,7 +230,7 @@ TO _SimulationCudaFacade::getInspectedSimulationData(std::vector<uint64_t> entit
 TO _SimulationCudaFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& rectLowerRight)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    _dataAccessKernels->getOverlayData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
+    DataAccessKernelsService::get().getOverlayData(_settings.cudaSettings, getSimulationDataPtrCopy(), rectUpperLeft, rectLowerRight, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -240,7 +242,7 @@ TO _SimulationCudaFacade::getOverlayData(int2 const& rectUpperLeft, int2 const& 
 TO _SimulationCudaFacade::getGenomeOfCreature(uint64_t creatureId, bool& found)
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(estimateCapacityNeededForTO());
-    found = _dataAccessKernels->getGenomeOfCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), creatureId, cudaTO);
+    found = DataAccessKernelsService::get().getGenomeOfCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), creatureId, cudaTO);
     syncAndCheck();
 
     auto to = _collectionTOProvider->provideDataTO(cudaTO.capacities);
@@ -254,11 +256,11 @@ void _SimulationCudaFacade::addAndSelectSimulationData(TO const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
+    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
-    _selectionKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
-    _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, true);
+    SelectionKernelsService::get().removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    DataAccessKernelsService::get().addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, true);
     syncAndCheck();
     updateStatistics();
 }
@@ -268,11 +270,11 @@ void _SimulationCudaFacade::setSimulationData(TO const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto sizeDelta = _dataAccessKernels->estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
+    auto sizeDelta = DataAccessKernelsService::get().estimateCapacityNeededForGpu(_settings.cudaSettings, cudaTO);
     resizeArraysIfNecessary(sizeDelta);
 
-    _dataAccessKernels->clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
-    _dataAccessKernels->addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, false);
+    DataAccessKernelsService::get().clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
+    DataAccessKernelsService::get().addData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO, false);
     syncAndCheck();
 
     updateStatistics();
@@ -280,7 +282,7 @@ void _SimulationCudaFacade::setSimulationData(TO const& to)
 
 void _SimulationCudaFacade::removeSelectedObjects(bool includeClusters)
 {
-    _editKernels->removeSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().removeSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 
     updateStatistics();
@@ -288,7 +290,7 @@ void _SimulationCudaFacade::removeSelectedObjects(bool includeClusters)
 
 void _SimulationCudaFacade::relaxSelectedObjects(bool includeClusters)
 {
-    _editKernels->relaxSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().relaxSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
@@ -299,25 +301,25 @@ Ids _SimulationCudaFacade::getMaxIds() const
 
 void _SimulationCudaFacade::uniformVelocitiesForSelectedObjects(bool includeClusters)
 {
-    _editKernels->uniformVelocities(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().uniformVelocities(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::makeSticky(bool includeClusters)
 {
-    _editKernels->makeSticky(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().makeSticky(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::removeStickiness(bool includeClusters)
 {
-    _editKernels->removeStickiness(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
+    EditKernelsService::get().removeStickiness(_settings.cudaSettings, getSimulationDataPtrCopy(), includeClusters);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setBarrier(bool value, bool includeClusters)
 {
-    _editKernels->setBarrier(_settings.cudaSettings, getSimulationDataPtrCopy(), value, includeClusters);
+    EditKernelsService::get().setBarrier(_settings.cudaSettings, getSimulationDataPtrCopy(), value, includeClusters);
     syncAndCheck();
 }
 
@@ -326,7 +328,7 @@ void _SimulationCudaFacade::changeInspectedSimulationData(TO const& changeTO)
     auto cudaTO = _cudaTOProvider->provideDataTO(changeTO.capacities);
     copyDataTOtoGpu(cudaTO, changeTO);
 
-    _editKernels->changeSimulationData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
+    EditKernelsService::get().changeSimulationData(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
@@ -339,7 +341,7 @@ bool _SimulationCudaFacade::changeCreature(TO const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    auto result = _editKernels->changeCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
+    auto result = EditKernelsService::get().changeCreature(_settings.cudaSettings, getSimulationDataPtrCopy(), cudaTO);
     syncAndCheck();
 
     updateStatistics();
@@ -351,38 +353,38 @@ bool _SimulationCudaFacade::changeCreature(TO const& to)
 
 void _SimulationCudaFacade::applyForce(ApplyForceData const& applyData)
 {
-    _editKernels->applyForce(_settings.cudaSettings, getSimulationDataPtrCopy(), applyData);
+    EditKernelsService::get().applyForce(_settings.cudaSettings, getSimulationDataPtrCopy(), applyData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::switchSelection(PointSelectionData const& pointData)
 {
-    _selectionKernels->switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    SelectionKernelsService::get().switchSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::swapSelection(PointSelectionData const& pointData)
 {
-    _selectionKernels->swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
+    SelectionKernelsService::get().swapSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), pointData);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
 {
-    _selectionKernels->setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
+    SelectionKernelsService::get().setSelection(_settings.cudaSettings, getSimulationDataPtrCopy(), selectionData);
     syncAndCheck();
 }
 
 SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    _selectionKernels->getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
+    SelectionKernelsService::get().getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }
 
 void _SimulationCudaFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionData const& shallowUpdateData)
 {
-    _editKernels->shallowUpdateSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), shallowUpdateData);
+    EditKernelsService::get().shallowUpdateSelectedObjects(_settings.cudaSettings, getSimulationDataPtrCopy(), shallowUpdateData);
     syncAndCheck();
 
     updateStatistics();
@@ -390,7 +392,7 @@ void _SimulationCudaFacade::shallowUpdateSelectedObjects(ShallowUpdateSelectionD
 
 void _SimulationCudaFacade::removeSelection()
 {
-    _selectionKernels->removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().removeSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 
     updateStatistics();
@@ -398,13 +400,13 @@ void _SimulationCudaFacade::removeSelection()
 
 void _SimulationCudaFacade::updateSelection()
 {
-    _selectionKernels->updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
+    SelectionKernelsService::get().updateSelection(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::colorSelectedObjects(unsigned char color, bool includeClusters)
 {
-    _editKernels->colorSelectedCells(_settings.cudaSettings, getSimulationDataPtrCopy(), color, includeClusters);
+    EditKernelsService::get().colorSelectedCells(_settings.cudaSettings, getSimulationDataPtrCopy(), color, includeClusters);
     syncAndCheck();
 
     updateStatistics();
@@ -412,13 +414,13 @@ void _SimulationCudaFacade::colorSelectedObjects(unsigned char color, bool inclu
 
 void _SimulationCudaFacade::reconnectSelectedObjects()
 {
-    _editKernels->reconnect(_settings.cudaSettings, getSimulationDataPtrCopy());
+    EditKernelsService::get().reconnect(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::setDetached(bool value)
 {
-    _editKernels->setDetached(_settings.cudaSettings, getSimulationDataPtrCopy(), value);
+    EditKernelsService::get().setDetached(_settings.cudaSettings, getSimulationDataPtrCopy(), value);
     syncAndCheck();
 }
 
@@ -442,7 +444,7 @@ void _SimulationCudaFacade::setSimulationParameters(SimulationParameters const& 
 
 ArraySizesForTO _SimulationCudaFacade::estimateCapacityNeededForTO() const
 {
-    return _dataAccessKernels->estimateCapacityNeededForTO(_settings.cudaSettings, getSimulationDataPtrCopy());
+    return DataAccessKernelsService::get().estimateCapacityNeededForTO(_settings.cudaSettings, getSimulationDataPtrCopy());
 }
 
 StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
@@ -457,7 +459,7 @@ StatisticsRawData _SimulationCudaFacade::getStatisticsRawData()
 
 void _SimulationCudaFacade::updateStatistics()
 {
-    _statisticsKernels->updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
+    StatisticsKernelsService::get().updateStatistics(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSimulationStatistics);
     syncAndCheck();
 
     {
@@ -499,7 +501,7 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 
 void _SimulationCudaFacade::clear()
 {
-    _dataAccessKernels->clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
+    DataAccessKernelsService::get().clearData(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
@@ -528,8 +530,8 @@ void _SimulationCudaFacade::newPreview(TO const& to)
     auto cudaTO = _cudaTOProvider->provideDataTO(to.capacities);
     copyDataTOtoGpu(cudaTO, to);
 
-    _dataAccessKernels->clearData(_settings.cudaSettings, *_cudaPreviewData);
-    _dataAccessKernels->addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
+    DataAccessKernelsService::get().clearData(_settings.cudaSettings, *_cudaPreviewData);
+    DataAccessKernelsService::get().addData(_settings.cudaSettings, *_cudaPreviewData, cudaTO, false);
     syncAndCheck();
 }
 
@@ -541,7 +543,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
     auto startTimepoint = std::chrono::steady_clock::now();
     do {
 
-        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+        SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;
@@ -558,7 +560,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
 
     auto startTimepoint = std::chrono::steady_clock::now();
     for (int i = 0; i < numSteps; ++i) {
-        _simulationKernels->calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
+        SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
         ++_cudaPreviewData->timestep;
@@ -581,7 +583,7 @@ void _SimulationCudaFacade::setCurrentTimestepForPreview(uint64_t timestep)
 TO _SimulationCudaFacade::getPreviewData()
 {
     auto cudaTO = _cudaTOProvider->provideDataTO(PreviewCapacityTO);
-    _dataAccessKernels->getData(
+    DataAccessKernelsService::get().getData(
         _settings.cudaSettings, *_cudaPreviewData, {-10, -10}, {_settingsForPreview.worldSizeX + 10, _settingsForPreview.worldSizeY + 10}, cudaTO);
     syncAndCheck();
 
@@ -594,7 +596,7 @@ TO _SimulationCudaFacade::getPreviewData()
 void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutationType)
 {
     checkAndProcessSimulationParameterChanges();
-    _testKernels->testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId, mutationType);
+    TestKernelsService::get().testOnly_mutate(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId, mutationType);
     syncAndCheck();
 
     resizeArraysIfNecessary();
@@ -603,28 +605,28 @@ void _SimulationCudaFacade::testOnly_mutate(uint64_t cellId, MutationType mutati
 void _SimulationCudaFacade::testOnly_mutationCheck(uint64_t cellId)
 {
     checkAndProcessSimulationParameterChanges();
-    _testKernels->testOnly_mutationCheck(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId);
+    TestKernelsService::get().testOnly_mutationCheck(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_createConnection(uint64_t cellId1, uint64_t cellId2)
 {
     checkAndProcessSimulationParameterChanges();
-    _testKernels->testOnly_createConnection(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId1, cellId2);
+    TestKernelsService::get().testOnly_createConnection(_settings.cudaSettings, getSimulationDataPtrCopy(), cellId1, cellId2);
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_cleanupAfterTimestep()
 {
     checkAndProcessSimulationParameterChanges();
-    _garbageCollectorKernels->cleanupAfterTimestep(_settings.cudaSettings, getSimulationDataPtrCopy());
+    GarbageCollectorKernelsService::get().cleanupAfterTimestep(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
 void _SimulationCudaFacade::testOnly_cleanupAfterDataManipulation()
 {
     checkAndProcessSimulationParameterChanges();
-    _garbageCollectorKernels->cleanupAfterDataManipulation(_settings.cudaSettings, getSimulationDataPtrCopy());
+    GarbageCollectorKernelsService::get().cleanupAfterDataManipulation(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
 }
 
@@ -638,7 +640,7 @@ void _SimulationCudaFacade::testOnly_resizeArrays(ArraySizesForGpu const& sizeDe
 bool _SimulationCudaFacade::testOnly_areArraysValid()
 {
     checkAndProcessSimulationParameterChanges();
-    auto result = _testKernels->testOnly_areArraysValid(_settings.cudaSettings, getSimulationDataPtrCopy());
+    auto result = TestKernelsService::get().testOnly_areArraysValid(_settings.cudaSettings, getSimulationDataPtrCopy());
     syncAndCheck();
     return result;
 }
@@ -768,12 +770,12 @@ void _SimulationCudaFacade::resizeArrays(ArraySizesForGpu const& sizeDelta)
     _cudaSimulationData->resizeTempObjects(sizeDelta);
 
     if (!_cudaSimulationData->isEmpty()) {
-        _garbageCollectorKernels->copyArrays(_settings.cudaSettings, getSimulationDataPtrCopy());
+        GarbageCollectorKernelsService::get().copyArrays(_settings.cudaSettings, getSimulationDataPtrCopy());
         syncAndCheck();
 
         _cudaSimulationData->resizeObjectsByMatchingTempObjects();
 
-        _garbageCollectorKernels->swapArrays(_settings.cudaSettings, getSimulationDataPtrCopy());
+        GarbageCollectorKernelsService::get().swapArrays(_settings.cudaSettings, getSimulationDataPtrCopy());
         syncAndCheck();
     } else {
         _cudaSimulationData->resizeObjectsByMatchingTempObjects();
@@ -804,7 +806,7 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
         _newSimulationParameters.reset();
 
         if (_cudaSimulationData) {
-            _simulationKernels->prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy());
+            SimulationKernelsService::get().prepareForSimulationParametersChanges(_settings, getSimulationDataPtrCopy());
         }
     }
 }

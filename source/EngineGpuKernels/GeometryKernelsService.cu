@@ -4,7 +4,7 @@
 #include "GeometryKernels.cuh"
 #include "GeometryKernelsService.cuh"
 
-_GeometryKernelsService::_GeometryKernelsService()
+void GeometryKernelsService::init()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _numLineIndices);
@@ -16,7 +16,7 @@ _GeometryKernelsService::_GeometryKernelsService()
     memoryManager.acquireMemory(1, _numLocations);
 }
 
-_GeometryKernelsService::~_GeometryKernelsService()
+void GeometryKernelsService::shutdown()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_numLineIndices);
@@ -28,7 +28,7 @@ _GeometryKernelsService::~_GeometryKernelsService()
     memoryManager.freeMemory(_numLocations);
 }
 
-void _GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
+void GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
 {
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
@@ -36,14 +36,14 @@ void _GeometryKernelsService::correctPositionsForRendering(SettingsForSimulation
     KERNEL_CALL(cudaCorrectPositionsForRendering, data, visibleTopLeft);
 }
 
-void _GeometryKernelsService::restorePositions(SettingsForSimulation const& settings, SimulationData data)
+void GeometryKernelsService::restorePositions(SettingsForSimulation const& settings, SimulationData data)
 {
     auto const& gpuSettings = settings.cudaSettings;
 
     KERNEL_CALL(cudaCorrectPositionsForRendering, data, float2{0, 0});
 }
 
-NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
+NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect)
 {
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
@@ -90,7 +90,7 @@ NumRenderObjects _GeometryKernelsService::getNumRenderObjects(SettingsForSimulat
     return result;
 }
 
-void _GeometryKernelsService::extractObjectData(
+void GeometryKernelsService::extractObjectData(
     SettingsForSimulation const& settings,
     SimulationData data,
     CudaGeometryBuffers& renderingData,

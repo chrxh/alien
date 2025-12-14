@@ -1,15 +1,19 @@
 #pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/MutationType.h>
 
 #include "Definitions.cuh"
 
-class _TestKernelsService
+class TestKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(TestKernelsService);
+
 public:
-    _TestKernelsService();
-    ~_TestKernelsService();
+    void init();
+    void shutdown();
 
     void testOnly_mutate(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t cellId, MutationType mutationType);
     void testOnly_mutationCheck(CudaSettings const& gpuSettings, SimulationData const& data, uint64_t cellId);
@@ -17,5 +21,7 @@ public:
     bool testOnly_areArraysValid(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    bool* _cudaBoolResult;
+    TestKernelsService() = default;
+
+    bool* _cudaBoolResult = nullptr;
 };

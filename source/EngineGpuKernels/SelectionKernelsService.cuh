@@ -1,16 +1,20 @@
 #pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-class _SelectionKernelsService
+class SelectionKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SelectionKernelsService);
+
 public:
-    _SelectionKernelsService();
-    ~_SelectionKernelsService();
+    void init();
+    void shutdown();
 
     void removeSelection(CudaSettings const& gpuSettings, SimulationData const& data);
     void swapSelection(CudaSettings const& gpuSettings, SimulationData const& data, PointSelectionData const& switchData);
@@ -23,10 +27,10 @@ public:
     void rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    GarbageCollectorKernelsService _garbageCollector;
+    SelectionKernelsService() = default;
 
     // Gpu memory
-    int* _cudaRolloutResult;
-    int* _cudaSwitchResult;
-    unsigned long long int* _cudaMinCellPosYAndIndex;
+    int* _cudaRolloutResult = nullptr;
+    int* _cudaSwitchResult = nullptr;
+    unsigned long long int* _cudaMinCellPosYAndIndex = nullptr;
 };

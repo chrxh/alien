@@ -1,7 +1,15 @@
 ﻿#include "StatisticsKernels.cuh"
 #include "StatisticsKernelsService.cuh"
 
-void _StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics)
+void StatisticsKernelsService::init()
+{
+}
+
+void StatisticsKernelsService::shutdown()
+{
+}
+
+void StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics)
 {
     KERNEL_CALL(cudaUpdateTimestepStatistics_substep1, data, simulationStatistics);
     KERNEL_CALL(cudaUpdateTimestepStatistics_substep2, data, simulationStatistics);

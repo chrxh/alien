@@ -1,16 +1,20 @@
 ﻿#pragma once
 
+#include <Base/Singleton.h>
+
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
 #include "Base.cuh"
 #include "Definitions.cuh"
 
-class _EditKernelsService
+class EditKernelsService
 {
+    MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(EditKernelsService);
+
 public:
-    _EditKernelsService();
-    ~_EditKernelsService();
+    void init();
+    void shutdown();
 
     void shallowUpdateSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData);
     void removeSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters);
@@ -30,19 +34,18 @@ public:
     void applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data);
 
 private:
-    GarbageCollectorKernelsService _garbageCollector;
-    SelectionKernelsService _selectionService;
+    EditKernelsService() = default;
 
     // Gpu memory
-    int* _cudaRolloutResult;
-    int* _cudaSwitchResult;
-    int* _cudaUpdateResult;
-    int* _cudaRemoveResult;
-    float2* _cudaCenter;
-    float2* _cudaVelocity;
-    int* _cudaNumEntities;
-    unsigned long long int* _cudaMinCellPosYAndIndex;
-    Genome** _genomePtr;
-    Creature** _creaturePtr;
-    bool* _result;
+    int* _cudaRolloutResult = nullptr;
+    int* _cudaSwitchResult = nullptr;
+    int* _cudaUpdateResult = nullptr;
+    int* _cudaRemoveResult = nullptr;
+    float2* _cudaCenter = nullptr;
+    float2* _cudaVelocity = nullptr;
+    int* _cudaNumEntities = nullptr;
+    unsigned long long int* _cudaMinCellPosYAndIndex = nullptr;
+    Genome** _genomePtr = nullptr;
+    Creature** _creaturePtr = nullptr;
+    bool* _result = nullptr;
 };
