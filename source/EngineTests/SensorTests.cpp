@@ -715,7 +715,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_insi
     actualData.clear();
     actualData._cells.emplace_back(sensorCell);
     actualData._cells.emplace_back(auxCell);
-    addDetectionTargets(actualData, GetParam(), {100.0f, 70.0f}, 10, false);
+    addDetectionTargets(actualData, GetParam(), {100.0f, 80.0f}, 10, false);
     _simulationFacade->setSimulationData(actualData);
 
     // Second scan - target has moved inside minRange, should NOT be found
@@ -776,7 +776,6 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     // Angle should be roughly +90 degrees (+0.5 normalized)
     EXPECT_TRUE(actualSensor._signal._channels[Channels::SensorAngle] > 0.3f);
     EXPECT_TRUE(actualSensor._signal._channels[Channels::SensorAngle] < 0.7f);
-    printf("AAAAA: %f\n", actualSensor._signal._channels[Channels::SensorAngle]);
     EXPECT_TRUE(actualSensor._signal._channels[Channels::SensorDistance] > 0.8f);
 
     // Verify lastMatch position was updated

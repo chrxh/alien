@@ -22,7 +22,8 @@ private:
         LocateMatch,
         RelocateLastMatch
     };
-    __inline__ __device__ static uint64_t getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType);
+    __inline__ __device__ static uint64_t
+    getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float const& absAngle, float const& distance, ScanType scanType);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -233,6 +234,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
         lookupResult = 0xffffffffffffffff;
         refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
     }
+    __syncthreads();
     
     auto centerScanPos = cell->cellTypeData.sensor.lastMatch.pos;
     for (int deltaY = -radius; deltaY < radius; ++deltaY) {
@@ -256,12 +258,6 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
         __shared__ float2 direction;
         if (threadIdx.x == 0) {
             unpack(distance, relAngle, density, creatureIdPart, lookupResult);
-            auto absAngle = relAngle + refAngle + cell->frontAngle;
-            auto targetPos = cell->cellTypeData.sensor.lastMatch.pos + Math::unitVectorOfAngle(absAngle) * distance;
-
-            auto delta = data.cellMap.getCorrectedDirection(targetPos - cell->pos);
-            distance = Math::length(delta);
-            direction = Math::getNormalized(delta);
         }
         __syncthreads();
 
@@ -278,10 +274,12 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
             }
         }
-        auto startRadius = toFloat(cell->cellTypeData.sensor.minRange);
-        auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
-        if (distance < startRadius || distance > endRadius) {
-            lookupResult = 0xffffffffffffffff;
+        if (threadIdx.x == 0) {
+            auto startRadius = toFloat(cell->cellTypeData.sensor.minRange);
+            auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
+            if (distance < startRadius || distance > endRadius) {
+                lookupResult = 0xffffffffffffffff;
+            }
         }
     }
     __syncthreads();
@@ -321,7 +319,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 }
 
 __inline__ __device__ uint64_t
-SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
+SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float const& absAngle, float const& distance, ScanType scanType)
 {
     auto const& mode = cell->cellTypeData.sensor.mode;
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
