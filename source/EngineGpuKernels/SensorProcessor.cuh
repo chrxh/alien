@@ -23,7 +23,7 @@ private:
         RelocateLastMatch
     };
     __inline__ __device__ static uint64_t
-    getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float const& absAngle, float const& distance, ScanType scanType);
+    getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -251,7 +251,6 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     }
     __syncthreads();
 
-    // Check if ray from sensor to match pos is blocked by structure
     if (lookupResult != 0xffffffffffffffff) {
         __shared__ float distance, relAngle, density;
         __shared__ uint16_t creatureIdPart;
@@ -261,6 +260,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
         }
         __syncthreads();
 
+        // Check if ray from sensor to match pos is blocked by structure
         if (distance >= ScanStep) {
             auto const partition = calcAllThreadsPartition(toInt(distance) / ScanStep);
             auto const& densityMap = data.preprocessedSimulationData.densityMap;
@@ -274,9 +274,12 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
             }
         }
+
+        // Check if match is outside scan range
         if (threadIdx.x == 0) {
             auto startRadius = toFloat(cell->cellTypeData.sensor.minRange);
             auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
+            printf("dist: %f, min: %f, max: %f\n", distance, startRadius, endRadius);
             if (distance < startRadius || distance > endRadius) {
                 lookupResult = 0xffffffffffffffff;
             }
@@ -319,8 +322,14 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 }
 
 __inline__ __device__ uint64_t
-SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float const& absAngle, float const& distance, ScanType scanType)
+SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
 {
+    if (scanType == ScanType::RelocateLastMatch) {
+        auto delta = data.cellMap.getCorrectedDirection(scanPos - cell->pos);
+        distance = Math::length(delta);
+        absAngle = Math::angleOfVector(delta);
+    }
+
     auto const& mode = cell->cellTypeData.sensor.mode;
     auto const& densityMap = data.preprocessedSimulationData.densityMap;
 
@@ -400,12 +409,9 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
             auto otherCell = data.cellMap.getFirst(scanPos);
             while (otherCell != nullptr) {
                 if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == sensor.lastMatch.creatureId) {
-                    auto delta = data.cellMap.getCorrectedDirection(otherCell->pos - cell->pos);
-                    auto distance = Math::length(delta);
-                    auto angle = Math::angleOfVector(delta);
                     auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
                     uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xffff) : 0;
-                    return pack(distance, angle - refAngle - cell->frontAngle, 1.0f, creatureIdPart);
+                    return pack(distance, absAngle - refAngle - cell->frontAngle, 1.0f, creatureIdPart);
                 }
                 otherCell = otherCell->nextCell;
             }

@@ -628,7 +628,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_outsideRange)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_aboveMaxRange)
 {
     // First scan - target is detected and position stored (within maxRange of 60)
     auto data = Description().cells({
@@ -679,7 +679,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_outs
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
-TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_insideMinRange)
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belowMinRange)
 {
     // First scan - target is detected and position stored (beyond minRange of 40)
     auto data = Description().cells({
