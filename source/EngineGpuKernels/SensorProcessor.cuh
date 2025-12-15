@@ -252,12 +252,13 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     }
     __syncthreads();
 
+    __shared__ float distance, absAngle, density;
+    __shared__ uint16_t creatureIdPart;
+    __shared__ float2 direction;
     if (lookupResult != 0xffffffffffffffff) {
-        __shared__ float distance, relAngle, density;
-        __shared__ uint16_t creatureIdPart;
-        __shared__ float2 direction;
         if (threadIdx.x == 0) {
-            unpack(distance, relAngle, density, creatureIdPart, lookupResult);
+            unpack(distance, absAngle, density, creatureIdPart, lookupResult);
+            direction = Math::unitVectorOfAngle(absAngle);
         }
         __syncthreads();
 
@@ -289,20 +290,13 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
     if (threadIdx.x == 0) {
         if (lookupResult != 0xffffffffffffffff) {
+
             // Create signal if not already existing
             if (cell->signalState != SignalState_Active) {
                 SignalProcessor::createEmptySignal(cell);
             }
 
-            float distance, absAngle, density;
-            uint16_t creatureIdPart;
-            unpack(distance, absAngle, density, creatureIdPart, lookupResult);
-
             auto targetPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
-            //auto delta = data.cellMap.getCorrectedDirection(targetPos - cell->pos);
-
-            //distance = Math::length(delta);
-            //absAngle = Math::angleOfVector(delta);
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - cell->frontAngle, -180.0f);
             writeSignal(cell->signal, relAngle, density, distance);
     
