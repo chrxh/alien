@@ -278,6 +278,11 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
             }
         }
+        auto startRadius = toFloat(cell->cellTypeData.sensor.minRange);
+        auto endRadius = min(cudaSimulationParameters.sensorRadius.value[cell->color], toFloat(cell->cellTypeData.sensor.maxRange));
+        if (distance < startRadius || distance > endRadius) {
+            lookupResult = 0xffffffffffffffff;
+        }
     }
     __syncthreads();
 
