@@ -707,7 +707,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Move the target to a position inside the sensor's minRange
-    // New position will be at ~(100, 70), distance from sensor ~30 (< minRange of 40)
+    // New position will be at ~(100, 80), distance from sensor ~20 (< minRange of 40)
     // But still within relocation search area (+-32 from last match at ~(100, 50))
     actualData = _simulationFacade->getSimulationData();
     auto sensorCell = actualData.getCellRef(1);
