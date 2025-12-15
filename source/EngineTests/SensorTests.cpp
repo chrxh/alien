@@ -679,6 +679,57 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_outs
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
+TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_insideMinRange)
+{
+    // First scan - target is detected and position stored (beyond minRange of 40)
+    auto data = Description().cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .frontAngle(0.0f)
+            .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam())).minRange(40)),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add target at distance ~50 (beyond minRange of 40)
+    addDetectionTargets(data, GetParam(), {100.0f, 50.0f}, 10, false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    CHECK(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
+
+    // Verify lastMatch was stored
+    auto sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    CHECK(sensorDesc._lastMatch.has_value());
+
+    // Move the target to a position inside the sensor's minRange
+    // New position will be at ~(100, 70), distance from sensor ~30 (< minRange of 40)
+    // But still within relocation search area (+-32 from last match at ~(100, 50))
+    actualData = _simulationFacade->getSimulationData();
+    auto sensorCell = actualData.getCellRef(1);
+    auto auxCell = actualData.getCellRef(2);
+    actualData.clear();
+    actualData._cells.emplace_back(sensorCell);
+    actualData._cells.emplace_back(auxCell);
+    addDetectionTargets(actualData, GetParam(), {100.0f, 70.0f}, 10, false);
+    _simulationFacade->setSimulationData(actualData);
+
+    // Second scan - target has moved inside minRange, should NOT be found
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_FALSE(actualSensor._signalState == SignalState_Active);
+
+    // Verify lastMatch was cleared
+    sensorDesc = std::get<SensorDescription>(actualSensor._cellType);
+    EXPECT_FALSE(sensorDesc._lastMatch.has_value());
+}
+
 TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forceInitialScan)
 {
     // First scan - target is detected and position stored
