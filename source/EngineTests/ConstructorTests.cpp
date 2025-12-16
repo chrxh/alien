@@ -587,26 +587,25 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
 TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__frontAngle_upperSide)
 {
-    Description data;
-    data.addCreature(
-        CreatureDescription().id(0).cells({
-            CellDescription()
-                .id(1)
-                .pos({10.0f, 10.0f})
-                .usableEnergy(getConstructorEnergy())
-                .cellType(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
-        }),
-        GenomeDescription().genes({
-            GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription().cellType(ConstructorGenomeDescription())}),
-        }));
-    data.addCreature(
-        CreatureDescription().id(1).cells({
-            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
-        }),
-        GenomeDescription().genes({
-            GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription().cellType(ConstructorGenomeDescription())}),
-        }));
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription().cellType(ConstructorGenomeDescription())}),
+    });
+    auto data = Description()
+                    .addCreature(
+                        CreatureDescription().id(0).cells({
+                            CellDescription()
+                                .id(1)
+                                .pos({10.0f, 10.0f})
+                                .usableEnergy(getConstructorEnergy())
+                                .cellType(ConstructorDescription().currentNodeIndex(2).geneIndex(0).lastConstructedCellId(2)),
+                        }),
+                        genome)
+                    .addCreature(
+                        CreatureDescription().id(1).cells({
+                            CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
+                            CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
+                        }),
+                        genome);
     data.addConnection(2, 3);
     data.addConnection(1, 2);
 
