@@ -33,6 +33,8 @@ public:
 
     void applyCataclysm(CudaSettings const& gpuSettings, SimulationData const& data);
 
+    void getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult);
+
 private:
     EditKernelsService() = default;
 

@@ -377,7 +377,7 @@ void _SimulationCudaFacade::setSelection(AreaSelectionData const& selectionData)
 
 SelectionShallowData _SimulationCudaFacade::getSelectionShallowData()
 {
-    SelectionKernelsService::get().getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
+    EditKernelsService::get().getSelectionShallowData(_settings.cudaSettings, getSimulationDataPtrCopy(), *_cudaSelectionResult);
     syncAndCheck();
     return _cudaSelectionResult->getSelectionShallowData();
 }

@@ -116,68 +116,6 @@ __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData
     }
 }
 
-__global__ void cudaResetSelectionResult(SelectionResult result)
-{
-    result.reset();
-}
-
-__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex)
-{
-    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto const& cell = data.objects.cells.at(index);
-        if (0 != cell->selected) {
-            atomicMin(minCellPosYAndIndex, (static_cast<unsigned long long int>(abs(cell->pos.y)) << 32) | static_cast<unsigned long long int>(index));
-        }
-    }
-}
-
-__global__ void cudaGetSelectionShallowData_step1(SimulationData data)
-{
-    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto const& cell = data.objects.cells.at(index);
-        if (0 != cell->selected && cell->creature != nullptr) {
-            cell->creature->creatureIndex = 0;
-        }
-    }
-}
-
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result)
-{
-    float2 refPos = refCellIndex != 0xffffffff ? data.objects.cells.at(refCellIndex)->pos : float2{0, 0};
-
-    auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
-
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
-        auto const& cell = data.objects.cells.at(index);
-        if (0 != cell->selected) {
-            result.collectCell(cell, refPos, data.cellMap);
-            if (cell->creature != nullptr) {
-                if (alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
-                    result.collectCreature();
-                }
-            }
-        }
-    }
-
-    auto const particlePartition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
-
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
-        auto const& particle = data.objects.particles.at(index);
-        if (0 != particle->selected) {
-            result.collectParticle(particle, refPos, data.cellMap);
-        }
-    }
-}
-
-__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map)
-{
-    result.finalize(map, !cudaSimulationParameters.borderlessRendering.value);
-}
-
 __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
 {
     auto const cellPartition = calcAllThreadsPartition(data.objects.cells.getNumEntries());

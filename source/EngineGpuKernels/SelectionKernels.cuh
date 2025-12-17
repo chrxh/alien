@@ -23,12 +23,5 @@ __global__ void cudaSwapSelection(float2 pos, float radius, SimulationData data)
 __global__ void cudaExistsSelection(PointSelectionData pointData, SimulationData data, int* result);
 __global__ void cudaSetSelection(float2 pos, float radius, SimulationData data);
 __global__ void cudaSetSelection(AreaSelectionData selectionData, SimulationData data);
-__global__ void cudaResetSelectionResult(SelectionResult result);
-
-__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex);
-
-__global__ void cudaGetSelectionShallowData_step1(SimulationData data);
-__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result);
-__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
 
 __global__ void cudaRolloutSelectionStep(SimulationData data, int* result);
