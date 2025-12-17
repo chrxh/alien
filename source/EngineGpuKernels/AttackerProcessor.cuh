@@ -3,6 +3,7 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
+#include "CellConnectionProcessor.cuh"
 #include "ConstantMemory.cuh"
 #include "Object.cuh"
 #include "ParameterCalculator.cuh"
@@ -19,8 +20,7 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell);
-    __inline__ __device__ static int countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -39,6 +39,13 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     if (SignalProcessor::isManuallyTriggered(data, cell) && cell->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
+
+        auto attackerEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
+        if (cell->usableEnergy - attackerEnergyCost < cellMinEnergy) {
+            cell->signal.channels[Channels::AttackerSuccess] = 0;
+            return;
+        }
 
         auto const& minNumCells = cell->cellTypeData.attacker.minNumCells;
         auto const& maxNumCells = cell->cellTypeData.attacker.maxNumCells;
@@ -101,7 +108,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             auto otherColor = calcMod(otherCell->color, MAX_COLORS);
 
             // Evaluate defender strength
-            auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
+            auto numDefenderCells = countDefenderCells(statistics, otherCell);
             auto defendStrength =
                 numDefenderCells == 0 ? 1.0f : powf(cudaSimulationParameters.defenderAntiAttackerStrength.value[color] + 1.0f, numDefenderCells);
             energyToTransfer /= defendStrength;
@@ -112,7 +119,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer > NEAR_ZERO) {
 
                 // Only attack other cells which are in a visible cone with respect to the attack cell
-                if (existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+                if (CellConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
                     return;
                 }
 
@@ -147,9 +154,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         }
 
         // Radiation
-        auto cellTypeWeaponEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, cell->pos, cell->color);
-        if (cellTypeWeaponEnergyCost > 0) {
-            EnergyParticleProcessor::radiate(data, cell, cellTypeWeaponEnergyCost);
+        if (attackerEnergyCost > 0) {
+            EnergyParticleProcessor::radiate(data, cell, attackerEnergyCost);
         }
 
         // Output (signal is already present since attacker can only be manually triggered)
@@ -157,34 +163,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     }
 }
 
-__inline__ __device__ bool AttackerProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell)
-{
-    auto result = false;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](Cell* nearCell) {
-        if (result) {
-            return;
-        }
-        if (nearCell == cell) {
-            return;
-        }
-        if (nearCell == otherCell) {
-            return;
-        }
-        if (!cell->isSameCreature(nearCell)) {
-            return;
-        }
-        for (int i = 0; i < nearCell->numConnections; ++i) {
-            auto connectedNearCell = nearCell->connections[i].cell;
-            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, otherCell->pos)) {
-                result = true;
-                return;
-            }
-        }
-    });
-    return result;
-}
-
-__inline__ __device__ int AttackerProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatistics& statistics, Cell* cell)
 {
     int result = 0;
     if (cell->cellType == CellType_Defender && cell->cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {

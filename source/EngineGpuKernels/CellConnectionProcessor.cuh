@@ -44,6 +44,8 @@ public:
     };
     __inline__ __device__ static ReferenceAndActualAngle calcLargestGapReferenceAndActualAngle(SimulationData& data, Cell* cell, float angleDeviation);
 
+    __inline__ __device__ static bool existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell);
+
 private:
     static int constexpr MaxOperationsPerCell = 30;
 
@@ -617,4 +619,31 @@ __inline__ __device__ void CellConnectionProcessor::scheduleOperationOnCell(Simu
         auto& origOperation = data.structuralOperations.at(origOperationIndex);
         origOperationIndex = atomicCAS(&origOperation.nextOperationIndex, -1, operationIndex);
     }
+}
+
+__inline__ __device__ bool CellConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Cell* cell, Cell* otherCell)
+{
+    auto result = false;
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](Cell* nearCell) {
+        if (result) {
+            return;
+        }
+        if (nearCell == cell) {
+            return;
+        }
+        if (nearCell == otherCell) {
+            return;
+        }
+        if (!cell->isSameCreature(nearCell)) {
+            return;
+        }
+        for (int i = 0; i < nearCell->numConnections; ++i) {
+            auto connectedNearCell = nearCell->connections[i].cell;
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, otherCell->pos)) {
+                result = true;
+                return;
+            }
+        }
+    });
+    return result;
 }
