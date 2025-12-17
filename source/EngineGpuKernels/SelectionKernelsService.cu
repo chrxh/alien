@@ -9,7 +9,6 @@ void SelectionKernelsService::init()
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.acquireMemory(1, _cudaRolloutResult);
     memoryManager.acquireMemory(1, _cudaSwitchResult);
-    memoryManager.acquireMemory(1, _cudaMinCellPosYAndIndex);
 }
 
 void SelectionKernelsService::shutdown()
@@ -17,7 +16,6 @@ void SelectionKernelsService::shutdown()
     auto& memoryManager = CudaMemoryManager::getInstance();
     memoryManager.freeMemory(_cudaRolloutResult);
     memoryManager.freeMemory(_cudaSwitchResult);
-    memoryManager.freeMemory(_cudaMinCellPosYAndIndex);
 }
 
 void SelectionKernelsService::removeSelection(CudaSettings const& gpuSettings, SimulationData const& data)
@@ -55,18 +53,6 @@ void SelectionKernelsService::updateSelection(CudaSettings const& gpuSettings, S
 {
     KERNEL_CALL(cudaRemoveSelection, data, true);
     rolloutSelection(gpuSettings, data);
-}
-
-void SelectionKernelsService::getSelectionShallowData(CudaSettings const& gpuSettings, SimulationData const& data, SelectionResult const& selectionResult)
-{
-    KERNEL_CALL_1_1(cudaResetSelectionResult, selectionResult);
-    setValueToDevice(_cudaMinCellPosYAndIndex, 0xffffffffffffffffull);
-    KERNEL_CALL(cudaCalcCellWithMinimalPosY, data, _cudaMinCellPosYAndIndex);
-    cudaDeviceSynchronize();
-    auto refCellIndex = static_cast<int>(copyToHost(_cudaMinCellPosYAndIndex) & 0xffffffff);
-    KERNEL_CALL(cudaGetSelectionShallowData_step1, data);
-    KERNEL_CALL(cudaGetSelectionShallowData_step2, data, refCellIndex, selectionResult);
-    KERNEL_CALL_1_1(cudaFinalizeSelectionResult, selectionResult, data.cellMap);
 }
 
 void SelectionKernelsService::rolloutSelection(CudaSettings const& gpuSettings, SimulationData const& data)

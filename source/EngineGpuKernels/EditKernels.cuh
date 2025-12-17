@@ -45,3 +45,9 @@ __global__ void cudaProcessAddConnectionChanges(SimulationData data);
 __global__ void cudaApplyForce(SimulationData data, ApplyForceData applyData);
 __global__ void cudaSetDetached(SimulationData data, bool value);
 __global__ void cudaApplyCataclysm(SimulationData data);
+
+__global__ void cudaResetSelectionResult(SelectionResult result);
+__global__ void cudaCalcCellWithMinimalPosY(SimulationData data, unsigned long long int* minCellPosYAndIndex);
+__global__ void cudaGetSelectionShallowData_step1(SimulationData data);
+__global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCellIndex, SelectionResult result);
+__global__ void cudaFinalizeSelectionResult(SelectionResult result, BaseMap map);
