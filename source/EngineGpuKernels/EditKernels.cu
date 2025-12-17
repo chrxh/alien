@@ -507,6 +507,9 @@ __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
         auto const& cell = data.objects.cells.at(index);
         if (0 != cell->selected && cell->creature != nullptr) {
             cell->creature->creatureIndex = 0;
+            if (cell->creature->genome != nullptr) {
+                cell->creature->genome->genomeIndex = 0;
+            }
         }
     }
 }
@@ -524,6 +527,11 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCe
             if (cell->creature != nullptr) {
                 if (alienAtomicExch64(&cell->creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
+                }
+                if (cell->creature->genome != nullptr) {
+                    if (alienAtomicExch64(&cell->creature->genome->genomeIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
+                        result.collectGenome();
+                    }
                 }
             }
         }

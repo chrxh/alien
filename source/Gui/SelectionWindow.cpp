@@ -48,6 +48,14 @@ void SelectionWindow::processIntern()
         ImGui::PopFont();
         table.next();
 
+        ImGui::Text("Genomes");
+        ImGui::PushFont(StyleRepository::get().getLargeFont());
+        ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
+        ImGui::TextUnformatted(StringHelper::format(selection.numGenomes).c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
+        table.next();
+
         ImGui::Text("Energy particles");
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);

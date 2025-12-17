@@ -28,6 +28,7 @@ public:
     {
         _selectionShallowData->numCells = 0;
         _selectionShallowData->numCreatures = 0;
+        _selectionShallowData->numGenomes = 0;
         _selectionShallowData->numClusterCells = 0;
         _selectionShallowData->numParticles = 0;
 
@@ -62,6 +63,8 @@ public:
     }
 
     __device__ void collectCreature() { atomicAdd(&_selectionShallowData->numCreatures, 1); }
+
+    __device__ void collectGenome() { atomicAdd(&_selectionShallowData->numGenomes, 1); }
 
     __device__ void collectParticle(Particle* particle, float2 refPos, BaseMap const& map)
     {
