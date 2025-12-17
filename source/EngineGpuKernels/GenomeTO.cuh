@@ -91,7 +91,7 @@ struct AttackerGenomeTO
 
 struct InjectorGenomeTO
 {
-    InjectorMode mode;
+    uint16_t geneIndex;
 };
 
 struct AutoBendingGenomeTO

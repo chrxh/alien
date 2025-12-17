@@ -174,7 +174,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.attacker.restrictToLineage = nodeTO.cellTypeData.attacker.restrictToLineage;
                 break;
             case CellTypeGenome_Injector:
-                node.cellTypeData.injector.mode = nodeTO.cellTypeData.injector.mode;
+                node.cellTypeData.injector.geneIndex = nodeTO.cellTypeData.injector.geneIndex;
                 break;
             case CellTypeGenome_Muscle:
                 node.cellTypeData.muscle.mode = nodeTO.cellTypeData.muscle.mode;
@@ -371,8 +371,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.attacker.restrictToLineage = cellTO.cellTypeData.attacker.restrictToLineage;
     } break;
     case CellType_Injector: {
-        cell->cellTypeData.injector.mode = cellTO.cellTypeData.injector.mode;
-        cell->cellTypeData.injector.counter = cellTO.cellTypeData.injector.counter;
+        cell->cellTypeData.injector.geneIndex = cellTO.cellTypeData.injector.geneIndex;
     } break;
     case CellType_Muscle: {
         cell->cellTypeData.muscle.mode = cellTO.cellTypeData.muscle.mode;
@@ -680,8 +679,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         cell->cellType = CellType_Injector;
         auto const& nodeInjector = node->cellTypeData.injector;
         auto& injector = cell->cellTypeData.injector;
-        injector.mode = nodeInjector.mode;
-        injector.counter = 0;
+        injector.geneIndex = nodeInjector.geneIndex;
     } break;
     case CellTypeGenome_Muscle: {
         cell->cellType = CellType_Muscle;

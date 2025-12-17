@@ -208,7 +208,7 @@ namespace
     auto constexpr Id_AttackerGenome_RestrictToColor = 2;
     auto constexpr Id_AttackerGenome_RestrictToLineage = 3;
 
-    auto constexpr Id_InjectorGenome_Mode = 0;
+    auto constexpr Id_InjectorGenome_GeneIndex = 0;
 
     auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
     auto constexpr Id_ReconnectorGenome_RestrictToCreatures = 1;
@@ -362,7 +362,7 @@ namespace cereal
     {
         InjectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_InjectorGenome_Mode, data._mode, defaultObject._mode);
+        loadSave(task, auxiliaries, Id_InjectorGenome_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(InjectorGenomeDescription)
@@ -651,8 +651,7 @@ namespace
     auto constexpr Id_MuscleMode_ManualCrawling_LastDistanceDelta = 4;
     auto constexpr Id_MuscleMode_ManualCrawling_ImpulseAlreadyApplied = 5;
 
-    auto constexpr Id_Injector_Mode = 0;
-    auto constexpr Id_Injector_Counter = 1;
+    auto constexpr Id_Injector_GeneIndex = 0;
 
     auto constexpr Id_Generator_AutoTriggerInterval = 0;
     auto constexpr Id_Generator_PulseType = 1;
@@ -887,8 +886,7 @@ namespace cereal
     {
         InjectorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Injector_Mode, data._mode, defaultObject._mode);
-        loadSave(task, auxiliaries, Id_Injector_Counter, data._counter, defaultObject._counter);
+        loadSave(task, auxiliaries, Id_Injector_GeneIndex, data._geneIndex, defaultObject._geneIndex);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(InjectorDescription)
