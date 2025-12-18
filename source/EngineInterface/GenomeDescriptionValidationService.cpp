@@ -119,7 +119,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
 
             } else if (nodeType == CellTypeGenome_Injector) {
                 auto& injector = std::get<InjectorGenomeDescription>(node._cellType);
-                injector._mode = std::clamp(injector._mode, 0, InjectorMode_Count - 1);
+                injector._geneIndex = std::max(injector._geneIndex, 0);
 
             } else if (nodeType == CellTypeGenome_Muscle) {
                 auto& muscle = std::get<MuscleGenomeDescription>(node._cellType);

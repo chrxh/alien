@@ -338,9 +338,9 @@ void _NodeEditorWidget::processNodeAttributes()
 
             AlienGui::BeginIndent();
 
-            // Mode
+            // Gene index
             auto& injector = std::get<InjectorGenomeDescription>(node._cellType);
-            AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::InjectorModeStrings).textWidth(rightColumnWidth), injector._mode);
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Gene index").textWidth(rightColumnWidth), injector._geneIndex);
 
             AlienGui::EndIndent();
 

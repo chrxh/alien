@@ -1,235 +1,220 @@
-//#include <gtest/gtest.h>
-//
-//#include <EngineInterface/DescriptionEditService.h>
-//#include <EngineInterface/Description.h>
-//#include <EngineInterface/SimulationFacade.h>
-//#include <EngineInterface/GenomeDescriptionConverterService.h>
-//
-//#include "IntegrationTestFramework.h"
-//
-//class InjectorTests : public IntegrationTestFramework
-//{
-//public:
-//    static SimulationParameters getParameters()
-//    {
-//        SimulationParameters result;
-//        result.innerFriction.value = 0;
-//        result.friction.baseValue = 1;
-//        for (int i = 0; i < MAX_COLORS; ++i) {
-//            result.radiationType1_strength.baseValue[i] = 0;
-//            result.radiationType2_strength.value[i] = 0;
-//            for (int j = 0; j < MAX_COLORS; ++j) {
-//                result.injectorInjectionTime.value[i][j] = 3;
-//            }
-//        }
-//        return result;
-//    }
-//    InjectorTests()
-//        : IntegrationTestFramework(getParameters())
-//    {}
-//
-//    ~InjectorTests() = default;
-//};
-//
-//TEST_F(InjectorTests, nothingFound)
-//{
-//    Description data;
-//    data.addCells(
-//        {CellDescription()
-//             .id(1)
-//             .pos({10.0f, 10.0f})
-//             .cellType(InjectorDescription().mode(InjectorMode_InjectAll)),
-//         CellDescription()
-//             .id(2)
-//             .pos({11.0f, 10.0f})
-//             .cellType(GeneratorDescription().autoTriggerInterval(1))
-//             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0})});
-//    data.addConnection(1, 2);
-//
-//    _simulationFacade->setSimulationData(data);
-//    for (int i = 0; i < 6 * 4; ++i) {
-//        _simulationFacade->calcTimesteps(1);
-//    }
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualCell = getCell(actualData, 1);
-//    auto actualInjector = std::get<InjectorDescription>(actualCell._cellType);
-//
-//    EXPECT_EQ(2, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(0.0f, actualCell._signal._channels[0]));
-//    EXPECT_EQ(0, actualInjector._counter);
-//}
-//
-//TEST_F(InjectorTests, matchButNoInjection)
-//{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
-//
-//    Description data;
-//    data.addCells(
-//        {CellDescription()
-//             .id(1)
-//             .pos({10.0f, 10.0f})
-//             .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
-//         CellDescription()
-//             .id(2)
-//             .pos({11.0f, 10.0f})
-//             .cellType(GeneratorDescription().autoTriggerInterval(1))
-//             .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription()
-//            .id(3)
-//            .pos({9.0f, 10.0f})
-//            .cellType(ConstructorDescription().numExpectedCells(1)),
-//    });
-//    data.addConnection(1, 2);
-//
-//    _simulationFacade->setSimulationData(data);
-//    _simulationFacade->calcTimesteps(1);
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualCell = getCell(actualData, 1);
-//    auto actualInjector = std::get<InjectorDescription>(actualCell._cellType);
-//    auto actualTargetCell = getCell(actualData, 3);
-//    auto actualTargetConstructor = std::get<ConstructorDescription>(actualTargetCell._cellType);
-//    auto origTargetCell = getCell(data, 3);
-//    auto origTargetConstructor = std::get<ConstructorDescription>(origTargetCell._cellType);
-//
-//    EXPECT_EQ(3, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal._channels[0]));
-//    EXPECT_EQ(1, actualInjector._counter);
-//    EXPECT_EQ(origTargetConstructor._genome, actualTargetConstructor._genome);
-//    EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
-//}
-//
-//TEST_F(InjectorTests, injection)
-//{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
-//
-//    Description data;
-//    data.cells() = {
-//        CellDescription()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
-//        CellDescription()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription().numExpectedCells(1)),
-//    });
-//    data.addConnection(1, 2);
-//
-//    _simulationFacade->setSimulationData(data);
-//    for (int i = 0; i < 1 + 6*3; ++i) {
-//        _simulationFacade->calcTimesteps(1);
-//    }
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualCell = getCell(actualData, 1);
-//    auto actualInjector = std::get<InjectorDescription>(actualCell._cellType);
-//    auto actualTargetCell = getCell(actualData, 3);
-//    auto actualTargetConstructor = std::get<ConstructorDescription>(actualTargetCell._cellType);
-//    auto origCell = getCell(data, 1);
-//    auto origInjector = std::get<InjectorDescription>(origCell._cellType);
-//
-//    EXPECT_EQ(3, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal._channels[0]));
-//    EXPECT_EQ(0, actualInjector._counter);
-//    EXPECT_EQ(origInjector._genome, actualTargetConstructor._genome);
-//    EXPECT_FALSE(actualTargetConstructor.isGenomeInherited());
-//}
-//
-//TEST_F(InjectorTests, injectOnlyEmptyCells_failed)
-//{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
-//    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
-//
-//    Description data;
-//    data.cells() = {
-//        CellDescription()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDescription().mode(InjectorMode_InjectOnlyEmptyCells).genome(genome)),
-//        CellDescription()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription()
-//            .id(3)
-//            .pos({9.0f, 10.0f})
-//            .cellType(ConstructorDescription().genome(otherGenome).numExpectedCells(2)),
-//    });
-//    data.addConnection(1, 2);
-//
-//    _simulationFacade->setSimulationData(data);
-//    for (int i = 0; i < 1 + 6 * 3; ++i) {
-//        _simulationFacade->calcTimesteps(1);
-//    }
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualCell = getCell(actualData, 1);
-//    auto actualInjector = std::get<InjectorDescription>(actualCell._cellType);
-//    auto actualTargetCell = getCell(actualData, 3);
-//    auto actualTargetConstructor = std::get<ConstructorDescription>(actualTargetCell._cellType);
-//    auto origTargetCell = getCell(data, 3);
-//    auto origTargetConstructor = std::get<ConstructorDescription>(origTargetCell._cellType);
-//
-//    EXPECT_EQ(3, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(0.0f, actualCell._signal._channels[0]));
-//    EXPECT_EQ(0, actualInjector._counter);
-//    EXPECT_EQ(origTargetConstructor._genome, actualTargetConstructor._genome);
-//    EXPECT_TRUE(actualTargetConstructor.isGenomeInherited());
-//}
-//
-//TEST_F(InjectorTests, injectOnlyEmptyCells_success)
-//{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
-//    auto otherGenome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription(), CellGenomeDescription()}));
-//
-//    Description data;
-//    data.cells() = {
-//        CellDescription()
-//            .id(1)
-//            .pos({10.0f, 10.0f})
-//            .cellType(InjectorDescription().mode(InjectorMode_InjectOnlyEmptyCells).genome(genome)),
-//        CellDescription()
-//            .id(2)
-//            .pos({11.0f, 10.0f})
-//            .cellType(GeneratorDescription().autoTriggerInterval(1))
-//            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription()
-//            .id(3)
-//            .pos({9.0f, 10.0f})
-//            .cellType(ConstructorDescription().genome(otherGenome)),
-//        CellDescription()
-//            .id(4)
-//            .pos({7.0f, 10.0f})
-//            .cellType(ConstructorDescription().numExpectedCells(2)),
-//    });
-//    data.addConnection(1, 2);
-//    data.addConnection(1, 3);
-//    data.addConnection(3, 4);
-//
-//    _simulationFacade->setSimulationData(data);
-//    for (int i = 0; i < 1; ++i) {
-//        _simulationFacade->calcTimesteps(1);
-//    }
-//
-//    auto actualData = _simulationFacade->getSimulationData();
-//    auto actualCell = getCell(actualData, 1);
-//    auto actualInjector = std::get<InjectorDescription>(actualCell._cellType);
-//
-//    auto actualTargetConstructor = std::get<ConstructorDescription>(getCell(actualData, 4)._cellType);
-//
-//    auto origOtherConstructor = std::get<ConstructorDescription>(getCell(data, 3)._cellType);
-//    auto actualOtherConstructor = std::get<ConstructorDescription>(getCell(actualData, 3)._cellType);
-//
-//
-//    EXPECT_EQ(4, actualData._cells.size());
-//    EXPECT_TRUE(approxCompare(1.0f, actualCell._signal._channels[0]));
-//    EXPECT_EQ(0, actualInjector._counter);
-//    EXPECT_EQ(actualInjector._genome, actualTargetConstructor._genome);
-//    EXPECT_EQ(origOtherConstructor._genome, actualOtherConstructor._genome);
-//    EXPECT_FALSE(actualTargetConstructor.isGenomeInherited());
-//}
+#include <gtest/gtest.h>
+
+#include <EngineInterface/Description.h>
+#include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/SimulationFacade.h>
+
+#include "IntegrationTestFramework.h"
+
+class InjectorTests : public IntegrationTestFramework
+{
+public:
+    InjectorTests()
+        : IntegrationTestFramework()
+    {
+        _parameters.innerFriction.value = 0;
+        _parameters.friction.baseValue = 0;
+        for (int i = 0; i < MAX_COLORS; ++i) {
+            _parameters.radiationType1_strength.baseValue[i] = 0;
+            _parameters.injectorEnergyCost.value[i] = 0;
+            _parameters.injectorRadius.value[i] = 3.5f;
+        }
+        _simulationFacade->setSimulationParameters(_parameters);
+    }
+
+    ~InjectorTests() = default;
+
+protected:
+    // Helper to create an injector creature with a generator that triggers it
+    Description createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
+    {
+        auto data = Description().addCreature(CreatureDescription().id(1).cells({
+            CellDescription().id(1).pos(injectorPos).color(injectorColor).cellType(InjectorDescription().geneIndex(geneIndex)),
+            CellDescription().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor).cellType(GeneratorDescription().autoTriggerInterval(3)),
+        }));
+        data.addConnection(1, 2);
+        return data;
+    }
+
+    // Helper to create a target creature with a constructor at a given position
+    Description createTargetCreatureWithConstructor(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f)
+    {
+        auto data = Description().addCreature(CreatureDescription().id(creatureId).cells({
+            CellDescription().id(100).pos(pos).color(color).usableEnergy(usableEnergy).cellType(ConstructorDescription()),
+            CellDescription().id(101).pos({pos.x + 1.0f, pos.y}).color(color).usableEnergy(usableEnergy),
+        }));
+        data.addConnection(100, 101);
+        return data;
+    }
+};
+
+/**
+ * Test: No target found
+ * The injector should not inject when there's no constructor cell in range
+ */
+TEST_F(InjectorTests, noTargetFound)
+{
+    auto data = createInjectorWithGenerator({100.0f, 100.0f});
+
+    // Add target creature with constructor outside injection radius
+    data.add(createTargetCreatureWithConstructor({100.0f, 104.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualInjector = actualData.getCellRef(1);
+
+    // Injector should have a signal with success value = 0
+    if (actualInjector._signalState == SignalState_Active) {
+        EXPECT_TRUE(approxCompare(0.0f, actualInjector._signal._channels[Channels::InjectorSuccess]));
+    }
+}
+
+/**
+ * Test: Successful injection
+ * The injector should inject its genome into a nearby constructor cell
+ */
+TEST_F(InjectorTests, successfulInjection)
+{
+    // Create injector with geneIndex=2
+    auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
+
+    // Add target creature with constructor within injection radius
+    data.add(createTargetCreatureWithConstructor({100.0f, 103.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualInjector = actualData.getCellRef(1);
+    auto actualTargetConstructor = std::get<ConstructorDescription>(actualData.getCellRef(100)._cellType);
+
+    // Injector should have a signal with success value > 0
+    ASSERT_TRUE(actualInjector._signalState == SignalState_Active);
+    EXPECT_TRUE(actualInjector._signal._channels[Channels::InjectorSuccess] > NEAR_ZERO);
+
+    // Target constructor should have the injector's geneIndex
+    EXPECT_EQ(2, actualTargetConstructor._geneIndex);
+}
+
+/**
+ * Test: No injection of own creature cells
+ * Cells belonging to the same creature should not be injected
+ */
+TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
+{
+    // Create a single creature with injector and constructor
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(InjectorDescription().geneIndex(3)),
+        CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
+        CellDescription().id(3).pos({100.0f, 103.0f}).cellType(ConstructorDescription().geneIndex(0)),  // Same creature
+    }));
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+
+    auto origConstructor = std::get<ConstructorDescription>(data.getCellRef(3)._cellType);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getCellRef(3)._cellType);
+
+    // Constructor's geneIndex should remain unchanged
+    EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
+}
+
+/**
+ * Test: No injection on fixed cells
+ * Cells with fixed=true should not be injected
+ */
+TEST_F(InjectorTests, noInjectionOnFixedCells)
+{
+    auto data = createInjectorWithGenerator({100.0f, 100.0f}, 3);
+
+    // Add target creature with fixed constructor
+    data.addCreature(CreatureDescription().id(2).cells({
+        CellDescription().id(100).pos({100.0f, 103.0f}).fixed(true).cellType(ConstructorDescription().geneIndex(0)),
+        CellDescription().id(101).pos({101.0f, 103.0f}).fixed(true),
+    }));
+    data.addConnection(100, 101);
+
+    auto origConstructor = std::get<ConstructorDescription>(data.getCellRef(100)._cellType);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getCellRef(100)._cellType);
+
+    // Constructor's geneIndex should remain unchanged
+    EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
+}
+
+/**
+ * Test: Injection blocked by own connections
+ * Injection should be blocked when same-creature cell connections cross the ray to the target
+ */
+TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
+{
+    // Create injector with connections that block the injection ray
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(InjectorDescription().geneIndex(3)),
+        CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
+        // Create a connection that crosses the ray path to target at (100, 97)
+        CellDescription().id(3).pos({99.0f, 99.0f}),
+        CellDescription().id(4).pos({101.0f, 99.0f}),
+    }));
+    data.addConnection(1, 2);
+    data.addConnection(1, 3);
+    data.addConnection(3, 4);
+    data.addConnection(1, 4);
+
+    // Add target creature below (ray to target is blocked by connection 3-4)
+    data.addCreature(CreatureDescription().id(2).cells({
+        CellDescription().id(100).pos({100.0f, 97.0f}).cellType(ConstructorDescription().geneIndex(0)),
+        CellDescription().id(101).pos({101.0f, 97.0f}),
+    }));
+    data.addConnection(100, 101);
+
+    auto origConstructor = std::get<ConstructorDescription>(data.getCellRef(100)._cellType);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getCellRef(100)._cellType);
+
+    // Constructor's geneIndex should remain unchanged because ray is blocked
+    EXPECT_EQ(origConstructor._geneIndex, actualConstructor._geneIndex);
+}
+
+/**
+ * Test: Injection resets construction progress
+ * After injection, the target constructor's currentNodeIndex and related fields should be reset
+ */
+TEST_F(InjectorTests, injectionResetsConstructionProgress)
+{
+    auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
+
+    // Add target creature with constructor that has some progress
+    data.addCreature(CreatureDescription().id(2).cells({
+        CellDescription().id(100).pos({100.0f, 103.0f}).cellType(ConstructorDescription().geneIndex(5).currentNodeIndex(3).currentConcatenation(2)),
+        CellDescription().id(101).pos({101.0f, 103.0f}),
+    }));
+    data.addConnection(100, 101);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualConstructor = std::get<ConstructorDescription>(actualData.getCellRef(100)._cellType);
+
+    // Constructor's geneIndex should be the injector's geneIndex
+    EXPECT_EQ(2, actualConstructor._geneIndex);
+
+    // Construction progress should be reset
+    EXPECT_EQ(0, actualConstructor._currentNodeIndex);
+    EXPECT_EQ(0, actualConstructor._currentConcatenation);
+}

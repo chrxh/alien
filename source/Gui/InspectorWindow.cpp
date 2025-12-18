@@ -589,18 +589,8 @@ void _InspectorWindow::processConstructorContent(ConstructorDescription& constru
 void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 {
     if (ImGui::TreeNodeEx("Properties###injector", TreeNodeFlags)) {
-        AlienGui::Combo(
-            AlienGui::ComboParameters()
-                .name("Mode")
-                .textWidth(CellTypeTextWidth)
-                .values({"Only empty cells", "All cells"})
-                .tooltip(Const::GenomeInjectorModeTooltip),
-            injector._mode);
-        ImGui::TreePop();
-    }
-    if (ImGui::TreeNodeEx("Process data", TreeNodeFlags)) {
         AlienGui::InputInt(
-            AlienGui::InputIntParameters().name("Counter").textWidth(CellTypeTextWidth).tooltip(Const::CellInjectorCounterTooltip), injector._counter);
+            AlienGui::InputIntParameters().name("Gene index").textWidth(CellTypeTextWidth), injector._geneIndex);
         ImGui::TreePop();
     }
 }

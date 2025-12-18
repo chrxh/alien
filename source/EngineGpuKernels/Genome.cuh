@@ -90,7 +90,7 @@ struct AttackerGenome
 
 struct InjectorGenome
 {
-    InjectorMode mode;
+    uint16_t geneIndex;
 };
 
 struct AutoBendingGenome

@@ -378,8 +378,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     } break;
     case CellType_Injector: {
         InjectorDescription injector;
-        injector._mode = cellTO.cellTypeData.injector.mode;
-        injector._counter = cellTO.cellTypeData.injector.counter;
+        injector._geneIndex = cellTO.cellTypeData.injector.geneIndex;
         result._cellType = injector;
     } break;
     case CellType_Muscle: {
@@ -589,7 +588,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Injector: {
         InjectorGenomeDescription injectorDesc;
-        injectorDesc._mode = nodeTO->cellTypeData.injector.mode;
+        injectorDesc._geneIndex = nodeTO->cellTypeData.injector.geneIndex;
         nodeDesc._cellType = injectorDesc;
     } break;
     case CellTypeGenome_Muscle: {
@@ -839,7 +838,7 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellTypeGenome_Injector: {
                 auto const& injectorDesc = std::get<InjectorGenomeDescription>(nodeDesc._cellType);
                 auto& injectorTO = nodeTO.cellTypeData.injector;
-                injectorTO.mode = injectorDesc._mode;
+                injectorTO.geneIndex = injectorDesc._geneIndex;
             } break;
             case CellTypeGenome_Muscle: {
                 auto const& muscleDesc = std::get<MuscleGenomeDescription>(nodeDesc._cellType);
@@ -1059,8 +1058,7 @@ void DescriptionConverterService::convertCellToTO(
     case CellType_Injector: {
         auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellType);
         InjectorTO& injectorTO = cellTO.cellTypeData.injector;
-        injectorTO.mode = injectorDesc._mode;
-        injectorTO.counter = injectorDesc._counter;
+        injectorTO.geneIndex = static_cast<uint16_t>(injectorDesc._geneIndex);
     } break;
     case CellType_Muscle: {
         auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellType);
