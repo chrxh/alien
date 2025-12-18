@@ -1,5 +1,6 @@
 #pragma once
 
+#include <variant>
 #include <vector>
 
 #include <Base/Singleton.h>
@@ -12,11 +13,16 @@ class DescriptionTestDataFactory
     MAKE_SINGLETON(DescriptionTestDataFactory);
 
 public:
+    struct MuscleModeWrapper { MuscleMode value; };
+    struct SensorModeWrapper { SensorMode value; };
+    struct ReconnectorModeWrapper { ReconnectorMode value; };
+
+    using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, ReconnectorModeWrapper>;
+
     struct CellParameter
     {
         CellType cellType;
-        std::optional<MuscleMode> muscleMode;
-        std::optional<SensorMode> sensorMode;
+        CellTypeMode mode = std::monostate{};
     };
     std::vector<CellParameter> getAllCellParameters() const;
     CellDescription createNonDefaultCellDescription(CellParameter cellParameter) const;
@@ -25,8 +31,7 @@ public:
     struct NodeParameter
     {
         CellTypeGenome cellTypeGenome;
-        std::optional<MuscleMode> muscleMode;
-        std::optional<SensorMode> sensorMode;
+        CellTypeMode mode = std::monostate{};
     };
     std::vector<NodeParameter> getAllNodeParameters() const;
     NodeDescription createNonDefaultNodeDescription(NodeParameter nodeParameter) const;
