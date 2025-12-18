@@ -318,6 +318,15 @@ namespace Const
     std::vector<std::string> const ReconnectorModeStrings = {"Structure", "Free cell", "Creature"};
 }
 
+using ReconnectCreatureLineageRestriction = int;
+enum ReconnectCreatureLineageRestriction_
+{
+    ReconnectCreatureLineageRestriction_No,
+    ReconnectCreatureLineageRestriction_SameLineage,
+    ReconnectCreatureLineageRestriction_OtherLineage,
+    ReconnectCreatureLineageRestriction_Count,
+};
+
 using CellEvent = uint8_t;
 enum CellEvent_
 {

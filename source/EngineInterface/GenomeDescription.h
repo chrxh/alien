@@ -219,7 +219,7 @@ struct ReconnectCreatureGenomeDescription
     MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
     MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectCreatureGenomeDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+    MEMBER(ReconnectCreatureGenomeDescription, ReconnectCreatureLineageRestriction, restrictToLineage, ReconnectCreatureLineageRestriction_No);
 };
 
 using ReconnectorModeGenomeDescription = std::variant<ReconnectStructureGenomeDescription, ReconnectFreeCellGenomeDescription, ReconnectCreatureGenomeDescription>;

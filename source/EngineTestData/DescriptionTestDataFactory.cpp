@@ -605,7 +605,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
+                ReconnectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeDescription();
@@ -712,7 +712,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureGenomeDescription().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
+                ReconnectCreatureGenomeDescription().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeGenomeDescription();

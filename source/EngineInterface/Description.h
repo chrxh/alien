@@ -296,7 +296,7 @@ struct ReconnectCreatureDescription
     MEMBER(ReconnectCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectCreatureDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+    MEMBER(ReconnectCreatureDescription, ReconnectCreatureLineageRestriction, restrictToLineage, ReconnectCreatureLineageRestriction_No);
 };
 
 using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeCellDescription, ReconnectCreatureDescription>;
