@@ -19,8 +19,8 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    //__inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    //__inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -38,99 +38,99 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    if (cell->signal.channels[0] >= TRIGGER_THRESHOLD) {
-        tryCreateConnection(data, statistics, cell);
-    } else if (cell->signal.channels[0] <= -TRIGGER_THRESHOLD) {
-        removeConnections(data, statistics, cell);
-    }
+    //if (cell->signal.channels[0] >= TRIGGER_THRESHOLD) {
+    //    tryCreateConnection(data, statistics, cell);
+    //} else if (cell->signal.channels[0] <= -TRIGGER_THRESHOLD) {
+    //    removeConnections(data, statistics, cell);
+    //}
 }
 
-__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-{
-    auto const& reconnector = cell->cellTypeData.reconnector;
-    Cell* closestCell = nullptr;
-    float closestDistance = 0;
-    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.reconnectorRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
-        if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
-            return;
-        }
-        if (otherCell->fixed) {
-            return;
-        }
-        if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
-            return;
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
-            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
-            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
-            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants) {
-            if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
-                return;
-            }
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId != otherCell->creature->lineageId)) {
-            return;
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId == otherCell->creature->lineageId
-                || cell->creature->lineageId == otherCell->creature->ancestorId)) {
-            return;
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
-            return;
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToStructures && otherCell->cellType != CellType_Structure) {
-            return;
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells >= cell->creature->numCells)) {
-            return;
-        }
-        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants
-            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells <= cell->creature->numCells)) {
-            return;
-        }
-        if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
-            return;
-        }
-        auto distance = data.cellMap.getDistance(cell->pos, otherCell->pos);
-        if (!closestCell || distance < closestDistance) {
-            closestCell = otherCell;
-            closestDistance = distance;
-        }
-    });
-
-    cell->signal.channels[0] = 0;
-    if (closestCell) {
-        SystemDoubleLock lock;
-        lock.init(&cell->locked, &closestCell->locked);
-        if (lock.tryLock()) {
-            if (cell->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
-                CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
-                cell->signal.channels[0] = 1;
-                statistics.incNumReconnectorCreated(cell->color);
-            }
-            lock.releaseLock();
-        }
-    }
-}
-
-__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-{
-    cell->signal.channels[0] = 0;
-    if (cell->tryLock()) {
-        for (int i = 0; i < cell->numConnections; ++i) {
-            auto connectedCell = cell->connections[i].cell;
-            if (connectedCell->creature == nullptr) {
-                continue;
-            }
-            if (connectedCell->creature->id != cell->creature->id) {
-                CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
-                cell->signal.channels[0] = 1;
-                statistics.incNumReconnectorRemoved(cell->color);
-            }
-        }
-        cell->releaseLock();
-    }
-}
+//__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+//{
+//    auto const& reconnector = cell->cellTypeData.reconnector;
+//    Cell* closestCell = nullptr;
+//    float closestDistance = 0;
+//    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.reconnectorRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
+//        if (otherCell->creature != nullptr && otherCell->creature->id == cell->creature->id) {
+//            return;
+//        }
+//        if (otherCell->fixed) {
+//            return;
+//        }
+//        if (reconnector.restrictToColor != 255 && otherCell->color != reconnector.restrictToColor) {
+//            return;
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
+//            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
+//            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
+//            || reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants) {
+//            if (otherCell->cellType == CellType_Free || otherCell->cellType == CellType_Structure) {
+//                return;
+//            }
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToSameMutants
+//            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId != otherCell->creature->lineageId)) {
+//            return;
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToOtherMutants
+//            && (cell->creature == nullptr || otherCell->creature == nullptr || cell->creature->lineageId == otherCell->creature->lineageId
+//                || cell->creature->lineageId == otherCell->creature->ancestorId)) {
+//            return;
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToFreeCells && otherCell->cellType != CellType_Free) {
+//            return;
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToStructures && otherCell->cellType != CellType_Structure) {
+//            return;
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToLessComplexMutants
+//            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells >= cell->creature->numCells)) {
+//            return;
+//        }
+//        if (reconnector.restrictToCreatures == ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants
+//            && (cell->creature == nullptr || otherCell->creature == nullptr || otherCell->creature->numCells <= cell->creature->numCells)) {
+//            return;
+//        }
+//        if (CellConnectionProcessor::isConnectedConnected(cell, otherCell)) {
+//            return;
+//        }
+//        auto distance = data.cellMap.getDistance(cell->pos, otherCell->pos);
+//        if (!closestCell || distance < closestDistance) {
+//            closestCell = otherCell;
+//            closestDistance = distance;
+//        }
+//    });
+//
+//    cell->signal.channels[0] = 0;
+//    if (closestCell) {
+//        SystemDoubleLock lock;
+//        lock.init(&cell->locked, &closestCell->locked);
+//        if (lock.tryLock()) {
+//            if (cell->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
+//                CellConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
+//                cell->signal.channels[0] = 1;
+//                statistics.incNumReconnectorCreated(cell->color);
+//            }
+//            lock.releaseLock();
+//        }
+//    }
+//}
+//
+//__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+//{
+//    cell->signal.channels[0] = 0;
+//    if (cell->tryLock()) {
+//        for (int i = 0; i < cell->numConnections; ++i) {
+//            auto connectedCell = cell->connections[i].cell;
+//            if (connectedCell->creature == nullptr) {
+//                continue;
+//            }
+//            if (connectedCell->creature->id != cell->creature->id) {
+//                CellConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
+//                cell->signal.channels[0] = 1;
+//                statistics.incNumReconnectorRemoved(cell->color);
+//            }
+//        }
+//        cell->releaseLock();
+//    }
+//}
