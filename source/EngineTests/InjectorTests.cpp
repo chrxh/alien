@@ -17,6 +17,7 @@ public:
         for (int i = 0; i < MAX_COLORS; ++i) {
             _parameters.radiationType1_strength.baseValue[i] = 0;
             _parameters.injectorEnergyCost.value[i] = 0;
+            _parameters.injectorRadius.value[i] = 3.5f;
         }
         _simulationFacade->setSimulationParameters(_parameters);
     }
@@ -54,7 +55,9 @@ protected:
 TEST_F(InjectorTests, noTargetFound)
 {
     auto data = createInjectorWithGenerator({100.0f, 100.0f});
-    // No target creature - nothing to inject
+
+    // Add target creature with constructor outside injection radius
+    data.add(createTargetCreatureWithConstructor({100.0f, 104.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(4);

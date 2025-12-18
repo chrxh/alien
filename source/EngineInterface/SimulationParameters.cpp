@@ -639,10 +639,10 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .parameters({
                     ParameterSpec()
                         .name("Energy cost")
-                        .reference(FloatSpec().member(&SimulationParameters::injectorEnergyCost).min(0).max(1000).logarithmic(true)),
+                        .reference(FloatSpec().member(&SimulationParameters::injectorEnergyCost).min(0.0f).max(1000.0f).logarithmic(true)),
                     ParameterSpec()
                         .name("Injection radius")
-                        .reference(FloatSpec().member(&SimulationParameters::injectorInjectionRadius).min(0.1f).max(4.0f))
+                        .reference(FloatSpec().member(&SimulationParameters::injectorRadius).min(0.1f).max(4.0f))
                         .description("The maximum distance over which an injector cell can infect another cell."),
                 }),
             ParameterGroupSpec()

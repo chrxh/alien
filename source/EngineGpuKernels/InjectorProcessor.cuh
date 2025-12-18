@@ -34,7 +34,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         Cell* injectedCell = nullptr;
         int numDefenders = 0;
-        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
+        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.injectorRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
             if (injectedCell != nullptr) {
                 return;
             }
@@ -50,12 +50,12 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (otherCell->cellType != CellType_Constructor) {
                 return;
             }
-            // Only inject to other cells which are in a visible cone with respect to the attack cell
+            // Only inject to other cells which are in a visible cone with respect to the injector cell
             if (CellConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
                 return;
             }
-            injectedCell = cell;
-            numDefenders = countDefenderCells(statistics, cell);
+            injectedCell = otherCell;
+            numDefenders = countDefenderCells(statistics, otherCell);
         });
 
         if (injectedCell) {
@@ -68,14 +68,14 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             ObjectFactory factory;
             factory.init(&data);
             auto cloneCreature = factory.cloneCreature(cell->creature);
-            cloneCreature->numCells = 0;
+            cloneCreature->numCells = 1;
             injectedCell->creature = cloneCreature;
             injectedCell->cellTypeData.constructor.geneIndex = cell->cellTypeData.injector.geneIndex;
             injectedCell->cellTypeData.constructor.currentNodeIndex = 0;
             injectedCell->cellTypeData.constructor.currentConcatenation = 0;
             injectedCell->cellTypeData.constructor.currentBranch = 0;
             injectedCell->cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-            cell->signal.channels[0] = 1;
+            cell->signal.channels[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {
                 EnergyParticleProcessor::radiate(data, cell, injectorEnergyCost);
