@@ -453,9 +453,29 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     } break;
     case CellType_Reconnector: {
         ReconnectorDescription reconnector;
-        reconnector._restrictToColor =
-            cellTO.cellTypeData.reconnector.restrictToColor != 255 ? std::make_optional(cellTO.cellTypeData.reconnector.restrictToColor) : std::nullopt;
-        reconnector._restrictToCreatures = cellTO.cellTypeData.reconnector.restrictToCreatures;
+        if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+            ReconnectStructureDescription reconnectStructure;
+            reconnector._mode = reconnectStructure;
+        } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+            ReconnectFreeCellDescription reconnectFreeCell;
+            reconnectFreeCell._restrictToColor = cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
+                : std::nullopt;
+            reconnector._mode = reconnectFreeCell;
+        } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+            ReconnectCreatureDescription reconnectCreature;
+            reconnectCreature._minNumCells = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells))
+                : std::nullopt;
+            reconnectCreature._maxNumCells = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
+                : std::nullopt;
+            reconnectCreature._restrictToColor = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor))
+                : std::nullopt;
+            reconnectCreature._restrictToLineage = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+            reconnector._mode = reconnectCreature;
+        }
         result._cellType = reconnector;
     } break;
     case CellType_Detonator: {
@@ -638,8 +658,29 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Reconnector: {
         ReconnectorGenomeDescription reconnectorDesc;
-        reconnectorDesc._restrictToColor = nodeTO->cellTypeData.reconnector.restrictToColor;
-        reconnectorDesc._restrictToCreatures = nodeTO->cellTypeData.reconnector.restrictToCreatures;
+        if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+            ReconnectStructureGenomeDescription reconnectStructure;
+            reconnectorDesc._mode = reconnectStructure;
+        } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+            ReconnectFreeCellGenomeDescription reconnectFreeCell;
+            reconnectFreeCell._restrictToColor = nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
+                : std::nullopt;
+            reconnectorDesc._mode = reconnectFreeCell;
+        } else if (nodeTO->cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+            ReconnectCreatureGenomeDescription reconnectCreature;
+            reconnectCreature._minNumCells = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells))
+                : std::nullopt;
+            reconnectCreature._maxNumCells = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
+                : std::nullopt;
+            reconnectCreature._restrictToColor = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor))
+                : std::nullopt;
+            reconnectCreature._restrictToLineage = nodeTO->cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+            reconnectorDesc._mode = reconnectCreature;
+        }
         nodeDesc._cellType = reconnectorDesc;
     } break;
     case CellTypeGenome_Detonator: {
@@ -887,8 +928,21 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellTypeGenome_Reconnector: {
                 auto const& reconnectorDesc = std::get<ReconnectorGenomeDescription>(nodeDesc._cellType);
                 auto& reconnectorTO = nodeTO.cellTypeData.reconnector;
-                reconnectorTO.restrictToColor = reconnectorDesc._restrictToColor.value_or(255);
-                reconnectorTO.restrictToCreatures = reconnectorDesc._restrictToCreatures;
+                reconnectorTO.mode = reconnectorDesc.getMode();
+                if (reconnectorTO.mode == ReconnectorMode_Structure) {
+                    // No data to copy
+                } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
+                    auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDescription>(reconnectorDesc._mode);
+                    auto& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
+                    reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
+                } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
+                    auto const& reconnectCreatureDesc = std::get<ReconnectCreatureGenomeDescription>(reconnectorDesc._mode);
+                    auto& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
+                    reconnectCreatureTO.minNumCells = static_cast<uint32_t>(reconnectCreatureDesc._minNumCells.value_or(0));
+                    reconnectCreatureTO.maxNumCells = static_cast<uint32_t>(reconnectCreatureDesc._maxNumCells.value_or(0));
+                    reconnectCreatureTO.restrictToColor = static_cast<uint8_t>(reconnectCreatureDesc._restrictToColor.value_or(255));
+                    reconnectCreatureTO.restrictToLineage = reconnectCreatureDesc._restrictToLineage;
+                }
             } break;
             case CellTypeGenome_Detonator: {
                 auto const& detonatorDesc = std::get<DetonatorGenomeDescription>(nodeDesc._cellType);
@@ -1121,8 +1175,21 @@ void DescriptionConverterService::convertCellToTO(
     case CellType_Reconnector: {
         auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellType);
         ReconnectorTO& reconnectorTO = cellTO.cellTypeData.reconnector;
-        reconnectorTO.restrictToColor = toUInt8(reconnectorDesc._restrictToColor.value_or(255));
-        reconnectorTO.restrictToCreatures = reconnectorDesc._restrictToCreatures;
+        reconnectorTO.mode = reconnectorDesc.getMode();
+        if (reconnectorTO.mode == ReconnectorMode_Structure) {
+            // No data to copy
+        } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
+            auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDescription>(reconnectorDesc._mode);
+            ReconnectFreeCellTO& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
+            reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
+        } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
+            auto const& reconnectCreatureDesc = std::get<ReconnectCreatureDescription>(reconnectorDesc._mode);
+            ReconnectCreatureTO& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
+            reconnectCreatureTO.minNumCells = static_cast<uint32_t>(reconnectCreatureDesc._minNumCells.value_or(0));
+            reconnectCreatureTO.maxNumCells = static_cast<uint32_t>(reconnectCreatureDesc._maxNumCells.value_or(0));
+            reconnectCreatureTO.restrictToColor = static_cast<uint8_t>(reconnectCreatureDesc._restrictToColor.value_or(255));
+            reconnectCreatureTO.restrictToLineage = reconnectCreatureDesc._restrictToLineage;
+        }
     } break;
     case CellType_Detonator: {
         auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellType);

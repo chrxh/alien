@@ -230,10 +230,33 @@ struct DefenderTO
     DefenderMode mode;
 };
 
-struct ReconnectorTO
+struct ReconnectStructureTO
+{};
+
+struct ReconnectFreeCellTO
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    ReconnectorRestrictToCreatures restrictToCreatures;
+};
+
+struct ReconnectCreatureTO
+{
+    uint32_t minNumCells;  // 0 = no restriction
+    uint32_t maxNumCells;  // 0 = no restriction
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    DetectCreatureLineageRestriction restrictToLineage;
+};
+
+union ReconnectorModeTO
+{
+    ReconnectStructureTO reconnectStructure;
+    ReconnectFreeCellTO reconnectFreeCell;
+    ReconnectCreatureTO reconnectCreature;
+};
+
+struct ReconnectorTO
+{
+    ReconnectorMode mode;
+    ReconnectorModeTO modeData;
 };
 
 struct DetonatorTO

@@ -119,6 +119,20 @@ namespace
             CHECK(false);
         }
     }
+
+    ReconnectorModeGenomeDescription createReconnectorModeGenomeDescription(ReconnectorMode mode)
+    {
+        switch (mode) {
+        case ReconnectorMode_Structure:
+            return ReconnectStructureGenomeDescription();
+        case ReconnectorMode_FreeCell:
+            return ReconnectFreeCellGenomeDescription();
+        case ReconnectorMode_Creature:
+            return ReconnectCreatureGenomeDescription();
+        default:
+            CHECK(false);
+        }
+    }
 }
 
 void _NodeEditorWidget::processNodeAttributes()
@@ -454,14 +468,39 @@ void _NodeEditorWidget::processNodeAttributes()
 
             AlienGui::BeginIndent();
 
-            // Restrict to color
+            // Mode selection
             auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
-            AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), reconnector._restrictToColor);
+            auto mode = reconnector.getMode();
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::ReconnectorModeStrings).textWidth(rightColumnWidth), mode)) {
+                reconnector._mode = createReconnectorModeGenomeDescription(mode);
+            }
 
-            // Restrict to mutants
-            AlienGui::Combo(
-                AlienGui::ComboParameters().name("Restrict to mutants").values(Const::ReconnectorRestrictToMutantStrings).textWidth(rightColumnWidth),
-                reconnector._restrictToCreatures);
+            // Mode-specific parameters
+            if (mode == ReconnectorMode_Structure) {
+                // No parameters
+            } else if (mode == ReconnectorMode_FreeCell) {
+                AlienGui::BeginIndent();
+                auto& freeCell = std::get<ReconnectFreeCellGenomeDescription>(reconnector._mode);
+                AlienGui::ComboOptionalColor(
+                    AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), freeCell._restrictToColor);
+                AlienGui::EndIndent();
+            } else if (mode == ReconnectorMode_Creature) {
+                AlienGui::BeginIndent();
+                auto& creature = std::get<ReconnectCreatureGenomeDescription>(reconnector._mode);
+                AlienGui::InputOptionalInt(
+                    AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), creature._minNumCells);
+                AlienGui::InputOptionalInt(
+                    AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), creature._maxNumCells);
+                AlienGui::ComboOptionalColor(
+                    AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), creature._restrictToColor);
+                AlienGui::Combo(
+                    AlienGui::ComboParameters()
+                        .name("Restrict to lineage")
+                        .values({"No", "Same lineage", "Other lineage"})
+                        .textWidth(rightColumnWidth),
+                    creature._restrictToLineage);
+                AlienGui::EndIndent();
+            }
 
             AlienGui::EndIndent();
 

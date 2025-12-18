@@ -210,8 +210,12 @@ namespace
 
     auto constexpr Id_InjectorGenome_GeneIndex = 0;
 
-    auto constexpr Id_ReconnectorGenome_RestrictToColor = 0;
-    auto constexpr Id_ReconnectorGenome_RestrictToCreatures = 1;
+    auto constexpr Id_ReconnectorModeGenome_FreeCell_RestrictToColor = 0;
+
+    auto constexpr Id_ReconnectorModeGenome_Creature_MinNumCells = 0;
+    auto constexpr Id_ReconnectorModeGenome_Creature_MaxNumCells = 1;
+    auto constexpr Id_ReconnectorModeGenome_Creature_RestrictToColor = 2;
+    auto constexpr Id_ReconnectorModeGenome_Creature_RestrictToLineage = 3;
 
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 
@@ -458,13 +462,45 @@ namespace cereal
     SPLIT_SERIALIZATION(DefenderGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ReconnectStructureGenomeDescription& data)
+    {
+        ReconnectStructureGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ReconnectStructureGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellGenomeDescription& data)
+    {
+        ReconnectFreeCellGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_ReconnectorModeGenome_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ReconnectFreeCellGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureGenomeDescription& data)
+    {
+        ReconnectCreatureGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_ReconnectorModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ReconnectCreatureGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectorGenomeDescription& data)
     {
         ReconnectorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_ReconnectorGenome_RestrictToCreatures, data._restrictToCreatures, defaultObject._restrictToCreatures);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(ReconnectorGenomeDescription)
 

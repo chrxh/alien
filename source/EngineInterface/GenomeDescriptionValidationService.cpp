@@ -158,11 +158,29 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
 
             } else if (nodeType == CellTypeGenome_Reconnector) {
                 auto& reconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
-                if (reconnector._restrictToColor.has_value()) {
-                    auto& value = reconnector._restrictToColor.value();
-                    value = std::clamp(value, 0, MAX_COLORS - 1);
+                auto reconnectorMode = reconnector.getMode();
+                if (reconnectorMode == ReconnectorMode_FreeCell) {
+                    auto& freeCell = std::get<ReconnectFreeCellGenomeDescription>(reconnector._mode);
+                    if (freeCell._restrictToColor.has_value()) {
+                        auto& value = freeCell._restrictToColor.value();
+                        value = std::clamp(value, 0, MAX_COLORS - 1);
+                    }
+                } else if (reconnectorMode == ReconnectorMode_Creature) {
+                    auto& creature = std::get<ReconnectCreatureGenomeDescription>(reconnector._mode);
+                    if (creature._minNumCells.has_value()) {
+                        auto& value = creature._minNumCells.value();
+                        value = std::max(value, 0);
+                    }
+                    if (creature._maxNumCells.has_value()) {
+                        auto& value = creature._maxNumCells.value();
+                        value = std::max(value, 0);
+                    }
+                    if (creature._restrictToColor.has_value()) {
+                        auto& value = creature._restrictToColor.value();
+                        value = std::clamp(value, 0, MAX_COLORS - 1);
+                    }
+                    creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
                 }
-                reconnector._restrictToCreatures = std::clamp(reconnector._restrictToCreatures, 0, ReconnectorRestrictToCreatures_Count - 1);
 
             } else if (nodeType == CellTypeGenome_Detonator) {
                 auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);

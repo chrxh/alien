@@ -211,8 +211,16 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.defender.mode = nodeTO.cellTypeData.defender.mode;
                 break;
             case CellTypeGenome_Reconnector:
-                node.cellTypeData.reconnector.restrictToColor = nodeTO.cellTypeData.reconnector.restrictToColor;
-                node.cellTypeData.reconnector.restrictToCreatures = nodeTO.cellTypeData.reconnector.restrictToCreatures;
+                node.cellTypeData.reconnector.mode = nodeTO.cellTypeData.reconnector.mode;
+                if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+                } else if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+                    node.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor = nodeTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+                } else if (nodeTO.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+                    node.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells = nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
+                    node.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells = nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
+                    node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor = nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+                    node.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage = nodeTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+                }
                 break;
             case CellTypeGenome_Detonator:
                 node.cellTypeData.detonator.countdown = nodeTO.cellTypeData.detonator.countdown;
@@ -419,8 +427,16 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.defender.mode = cellTO.cellTypeData.defender.mode;
     } break;
     case CellType_Reconnector: {
-        cell->cellTypeData.reconnector.restrictToColor = cellTO.cellTypeData.reconnector.restrictToColor;
-        cell->cellTypeData.reconnector.restrictToCreatures = cellTO.cellTypeData.reconnector.restrictToCreatures;
+        cell->cellTypeData.reconnector.mode = cellTO.cellTypeData.reconnector.mode;
+        if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+        } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+            cell->cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor = cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor;
+        } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+            cell->cellTypeData.reconnector.modeData.reconnectCreature.minNumCells = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells;
+            cell->cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells;
+            cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor;
+            cell->cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage = cellTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+        }
     } break;
     case CellType_Detonator: {
         cell->cellTypeData.detonator.state = cellTO.cellTypeData.detonator.state;
@@ -742,8 +758,16 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         cell->cellType = CellType_Reconnector;
         auto const& nodeReconnector = node->cellTypeData.reconnector;
         auto& reconnector = cell->cellTypeData.reconnector;
-        reconnector.restrictToColor = nodeReconnector.restrictToColor;
-        reconnector.restrictToCreatures = nodeReconnector.restrictToCreatures;
+        reconnector.mode = nodeReconnector.mode;
+        if (nodeReconnector.mode == ReconnectorMode_Structure) {
+        } else if (nodeReconnector.mode == ReconnectorMode_FreeCell) {
+            reconnector.modeData.reconnectFreeCell.restrictToColor = nodeReconnector.modeData.reconnectFreeCell.restrictToColor;
+        } else if (nodeReconnector.mode == ReconnectorMode_Creature) {
+            reconnector.modeData.reconnectCreature.minNumCells = nodeReconnector.modeData.reconnectCreature.minNumCells;
+            reconnector.modeData.reconnectCreature.maxNumCells = nodeReconnector.modeData.reconnectCreature.maxNumCells;
+            reconnector.modeData.reconnectCreature.restrictToColor = nodeReconnector.modeData.reconnectCreature.restrictToColor;
+            reconnector.modeData.reconnectCreature.restrictToLineage = nodeReconnector.modeData.reconnectCreature.restrictToLineage;
+        }
     } break;
     case CellTypeGenome_Detonator: {
         cell->cellType = CellType_Detonator;

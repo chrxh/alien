@@ -411,11 +411,36 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         auto const& reconnector = std::get<ReconnectorDescription>(cell._cellType);
         auto const& nodeReconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
-        if (reconnector._restrictToColor != nodeReconnector._restrictToColor) {
+        if (reconnector.getMode() != nodeReconnector.getMode()) {
             return false;
         }
-        if (reconnector._restrictToCreatures != nodeReconnector._restrictToCreatures) {
-            return false;
+        switch (reconnector.getMode()) {
+        case ReconnectorMode_Structure: {
+            // No fields to compare
+        } break;
+        case ReconnectorMode_FreeCell: {
+            auto const& freeCellMode = std::get<ReconnectFreeCellDescription>(reconnector._mode);
+            auto const& nodeFreeCellMode = std::get<ReconnectFreeCellGenomeDescription>(nodeReconnector._mode);
+            if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
+                return false;
+            }
+        } break;
+        case ReconnectorMode_Creature: {
+            auto const& creatureMode = std::get<ReconnectCreatureDescription>(reconnector._mode);
+            auto const& nodeCreatureMode = std::get<ReconnectCreatureGenomeDescription>(nodeReconnector._mode);
+            if (creatureMode._minNumCells != nodeCreatureMode._minNumCells) {
+                return false;
+            }
+            if (creatureMode._maxNumCells != nodeCreatureMode._maxNumCells) {
+                return false;
+            }
+            if (creatureMode._restrictToColor != nodeCreatureMode._restrictToColor) {
+                return false;
+            }
+            if (creatureMode._restrictToLineage != nodeCreatureMode._restrictToLineage) {
+                return false;
+            }
+        } break;
         }
     } break;
     case CellType_Detonator: {
@@ -565,7 +590,8 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Defender:
         return DefenderDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellType_Reconnector:
-        return ReconnectorDescription().restrictToColor(1).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
+        return ReconnectorDescription().mode(
+            ReconnectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(DetectCreatureLineageRestriction_SameLineage));
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
     case CellType_Digestor:
@@ -655,7 +681,8 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Defender:
         return DefenderGenomeDescription().mode(DefenderMode_DefendAgainstInjector);
     case CellTypeGenome_Reconnector:
-        return ReconnectorGenomeDescription().restrictToColor(4).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
+        return ReconnectorGenomeDescription().mode(
+            ReconnectCreatureGenomeDescription().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(DetectCreatureLineageRestriction_SameLineage));
     case CellTypeGenome_Detonator: {
         return DetonatorGenomeDescription().countdown(45);
     }
