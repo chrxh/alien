@@ -183,7 +183,7 @@ namespace Const
 //**********************
 namespace Channels
 {
-    auto constexpr AttackerSuccess = 2;
+    auto constexpr AttackerSuccess = 1;
     auto constexpr AttackerNotify = 7;
 }
 
@@ -208,7 +208,7 @@ namespace Const
 //*************************
 namespace Channels
 {
-    auto constexpr ConstructorSuccess = 0;
+    auto constexpr ConstructorSuccess = 1;
 }
 
 using ConstructorAngleAlignment = int;
@@ -272,6 +272,11 @@ enum GeneratorPulseType_
 //**********************
 //* Injector constants *
 //**********************
+namespace Channels
+{
+    auto constexpr InjectorSuccess = 1;
+}
+
 using InjectorMode = int;
 enum InjectorMode_
 {

@@ -155,7 +155,7 @@ struct std::hash<AttackerGenomeDescription>
 template <>
 struct std::hash<InjectorGenomeDescription>
 {
-    std::size_t operator()(InjectorGenomeDescription const& desc) const { return std::hash<int>{}(static_cast<int>(desc._mode)); }
+    std::size_t operator()(InjectorGenomeDescription const& desc) const { return std::hash<int>{}(desc._geneIndex); }
 };
 
 template <>

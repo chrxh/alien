@@ -325,7 +325,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         auto const& injector = std::get<InjectorDescription>(cell._cellType);
         auto const& nodeInjector = std::get<InjectorGenomeDescription>(node._cellType);
-        if (injector._mode != nodeInjector._mode) {
+        if (injector._geneIndex != nodeInjector._geneIndex) {
             return false;
         }
     } break;
@@ -511,7 +511,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             .restrictToColor(1)
             .restrictToLineage(DetectCreatureLineageRestriction_OtherLineage);
     case CellType_Injector:
-        return InjectorDescription().counter(15);
+        return InjectorDescription().geneIndex(3);
     case CellType_Muscle: {
         MuscleModeDescription muscleModeDesc;
         switch (muscleMode) {
@@ -625,7 +625,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             .restrictToColor(2)
             .restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
     case CellTypeGenome_Injector:
-        return InjectorGenomeDescription();
+        return InjectorGenomeDescription().geneIndex(3);
     case CellTypeGenome_Muscle: {
         MuscleModeGenomeDescription muscleModeDesc;
         switch (muscleMode) {

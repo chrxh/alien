@@ -127,7 +127,7 @@ struct InjectorGenomeDescription
 {
     auto operator<=>(InjectorGenomeDescription const&) const = default;
 
-    MEMBER(InjectorGenomeDescription, InjectorMode, mode, InjectorMode_InjectAll);
+    MEMBER(InjectorGenomeDescription, int, geneIndex, 0);
 };
 
 

@@ -638,15 +638,12 @@ ParametersSpec const& SimulationParameters::getSpec()
                 .name("Cell type: Injector")
                 .parameters({
                     ParameterSpec()
-                        .name("Injection radius")
-                        .reference(FloatSpec().member(&SimulationParameters::injectorInjectionRadius).min(0.1f).max(4.0f))
-                        .description("The maximum distance over which an injector cell can infect another cell."),
+                        .name("Energy cost")
+                        .reference(FloatSpec().member(&SimulationParameters::injectorEnergyCost).min(0.0f).max(1000.0f).logarithmic(true)),
                     ParameterSpec()
-                        .name("Injection time")
-                        .reference(IntSpec().member(&SimulationParameters::injectorInjectionTime).min(0).max(100000).logarithmic(true))
-                        .description(
-                            "The number of activations an injector cell requires to infect another cell. One activation usually takes 6 time steps. The row "
-                            "number determines the color of the injector cell, while the column number corresponds to the color of the infected cell."),
+                        .name("Injection radius")
+                        .reference(FloatSpec().member(&SimulationParameters::injectorRadius).min(0.1f).max(4.0f))
+                        .description("The maximum distance over which an injector cell can infect another cell."),
                 }),
             ParameterGroupSpec()
                 .name("Cell type: Muscle")

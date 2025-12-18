@@ -156,8 +156,7 @@ struct Attacker
 
 struct Injector
 {
-    InjectorMode mode;
-    uint32_t counter;
+    uint16_t geneIndex;
 };
 
 struct AutoBending

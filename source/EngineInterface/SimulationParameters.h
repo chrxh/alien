@@ -176,15 +176,8 @@ struct SimulationParameters
     BaseParameter<ColorVector<float>> defenderAntiInjectorStrength = {{0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f}};
 
     // Cell type: Injector
-    BaseParameter<ColorVector<float>> injectorInjectionRadius = {{3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f}};
-    BaseParameter<ColorMatrix<int>> injectorInjectionTime = {
-        {{3, 3, 3, 3, 3, 3, 3},
-         {3, 3, 3, 3, 3, 3, 3},
-         {3, 3, 3, 3, 3, 3, 3},
-         {3, 3, 3, 3, 3, 3, 3},
-         {3, 3, 3, 3, 3, 3, 3},
-         {3, 3, 3, 3, 3, 3, 3},
-         {3, 3, 3, 3, 3, 3, 3}}};
+    BaseParameter<ColorVector<float>> injectorEnergyCost = {{50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f, 50.0f}};
+    BaseParameter<ColorVector<float>> injectorRadius = {{3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f, 3.0f}};
 
     // Cell type: Muscle
     BaseParameter<ColorVector<float>> muscleEnergyCost = {{0, 0, 0, 0, 0, 0, 0}};

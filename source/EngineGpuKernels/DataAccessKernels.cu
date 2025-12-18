@@ -116,7 +116,7 @@ namespace
                         nodeTO.cellTypeData.attacker.restrictToLineage = node.cellTypeData.attacker.restrictToLineage;
                         break;
                     case CellTypeGenome_Injector:
-                        nodeTO.cellTypeData.injector.mode = node.cellTypeData.injector.mode;
+                        nodeTO.cellTypeData.injector.geneIndex = node.cellTypeData.injector.geneIndex;
                         break;
                     case CellTypeGenome_Muscle:
                         nodeTO.cellTypeData.muscle.mode = node.cellTypeData.muscle.mode;
@@ -314,8 +314,7 @@ namespace
             cellTO.cellTypeData.attacker.restrictToLineage = cell->cellTypeData.attacker.restrictToLineage;
         } break;
         case CellType_Injector: {
-            cellTO.cellTypeData.injector.mode = cell->cellTypeData.injector.mode;
-            cellTO.cellTypeData.injector.counter = cell->cellTypeData.injector.counter;
+            cellTO.cellTypeData.injector.geneIndex = cell->cellTypeData.injector.geneIndex;
         } break;
         case CellType_Muscle: {
             cellTO.cellTypeData.muscle.mode = cell->cellTypeData.muscle.mode;

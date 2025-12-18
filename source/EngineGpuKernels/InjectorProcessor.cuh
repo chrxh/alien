@@ -10,7 +10,7 @@ public:
 
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static int countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -28,116 +28,65 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
 
 __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    //if (abs(cell->signal.channels[0]) >= TRIGGER_THRESHOLD) {
+    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+        auto injectorEnergyCost = cudaSimulationParameters.injectorEnergyCost.value[cell->color];
+        auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, cell->pos, cell->color);
 
-    //    auto& injector = cell->cellTypeData.injector;
+        Cell* injectedCell = nullptr;
+        int numDefenders = 0;
+        data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.injectorRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
+            if (injectedCell != nullptr) {
+                return;
+            }
+            if (otherCell->creature == nullptr) {
+                return;
+            }
+            if (cell->isSameCreature(otherCell)) {
+                return;
+            }
+            if (otherCell->fixed) {
+                return;
+            }
+            if (otherCell->cellType != CellType_Constructor) {
+                return;
+            }
+            // Only inject to other cells which are in a visible cone with respect to the injector cell
+            if (CellConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+                return;
+            }
+            injectedCell = otherCell;
+            numDefenders = countDefenderCells(statistics, otherCell);
+        });
 
-    //    bool match = false;
-    //    bool injection = false;
+        if (injectedCell) {
+            injectorEnergyCost *= (1.0f + toFloat(numDefenders) * 0.5f);
+            if (cell->usableEnergy - injectorEnergyCost < cellMinEnergy) {
+                cell->signal.channels[Channels::InjectorSuccess] = 0;
+                return;
+            }
 
-    //    switch (injector.mode) {
-    //    case InjectorMode_InjectAll: {
-    //        data.cellMap.executeForEach(
-    //            cell->pos, cudaSimulationParameters.injectorInjectionRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
-    //                if (cell == otherCell) {
-    //                    return;
-    //                }
-    //                if (otherCell->cellType != CellType_Constructor && otherCell->cellType != CellType_Injector) {
-    //                    return;
-    //                }
-    //                //if (otherCell->cellState == CellState_UnderConstruction) {
-    //                //    return;
-    //                //}
-    //                if (otherCell->cellTypeData.constructor.currentNodeIndex != 0) {
-    //                    return;
-    //                }
-    //                if (!otherCell->tryLock()) {
-    //                    return;
-    //                }
-    //                match = true;
-    //                auto injectorDuration = cudaSimulationParameters.injectorInjectionTime.value[cell->color][otherCell->color];
+            ObjectFactory factory;
+            factory.init(&data);
+            auto cloneCreature = factory.cloneCreature(cell->creature);
+            cloneCreature->numCells = 1;
+            injectedCell->creature = cloneCreature;
+            injectedCell->cellTypeData.constructor.geneIndex = cell->cellTypeData.injector.geneIndex;
+            injectedCell->cellTypeData.constructor.currentNodeIndex = 0;
+            injectedCell->cellTypeData.constructor.currentConcatenation = 0;
+            injectedCell->cellTypeData.constructor.currentBranch = 0;
+            injectedCell->cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+            cell->signal.channels[Channels::InjectorSuccess] = 1;
 
-    //                auto numDefenderCells = countAndTrackDefenderCells(statistics, otherCell);
-    //                float defendStrength = numDefenderCells == 0
-    //                    ? 1.0f : powf(cudaSimulationParameters.defenderAntiInjectorStrength.value[cell->color] + 1.0f, numDefenderCells);
-    //                injectorDuration = toInt(toFloat(injectorDuration) * defendStrength);
-    //                if (injector.counter < injectorDuration) {
-    //                    otherCell->releaseLock();
-    //                    return;
-    //                }
+            if (injectorEnergyCost > 0) {
+                EnergyParticleProcessor::radiate(data, cell, injectorEnergyCost);
+            }
+        }
 
-    //                auto targetGenome = data.objects.heap.getRawSubArray(injector.genomeSize);
-    //                for (int i = 0; i < injector.genomeSize; ++i) {
-    //                    targetGenome[i] = injector.genome[i];
-    //                }
-
-    //                if (otherCell->cellType == CellType_Constructor) {
-    //                    otherCell->cellTypeData.constructor.genome = targetGenome;
-    //                    otherCell->cellTypeData.constructor.genomeSize = injector.genomeSize;
-    //                    otherCell->cellTypeData.constructor.numExpectedCells = 0;
-    //                } else {
-    //                    otherCell->cellTypeData.injector.genome = targetGenome;
-    //                    otherCell->cellTypeData.injector.genomeSize = injector.genomeSize;
-    //                }
-
-    //                injection = true;
-    //                otherCell->releaseLock();
-    //            });
-    //    } break;
-
-    //    case InjectorMode_InjectOnlyEmptyCells: {
-    //        data.cellMap.executeForEach(
-    //            cell->pos, cudaSimulationParameters.injectorInjectionRadius.value[cell->color], cell->detached, [&](Cell* const& otherCell) {
-    //                if (cell == otherCell) {
-    //                    return;
-    //                }
-    //                if (otherCell->cellType != CellType_Constructor && otherCell->cellType != CellType_Injector) {
-    //                    return;
-    //                }
-    //                auto otherGenomeSize = otherCell->cellType == CellType_Constructor ? otherCell->cellTypeData.constructor.genomeSize
-    //                                                                                           : otherCell->cellTypeData.injector.genomeSize;
-    //                if (otherGenomeSize > Const::GenomeHeaderSize) {
-    //                    return;
-    //                }
-    //                if (!otherCell->tryLock()) {
-    //                    return;
-    //                }
-    //                auto targetGenome = data.objects.heap.getRawSubArray(injector.genomeSize);
-    //                for (int i = 0; i < injector.genomeSize; ++i) {
-    //                    targetGenome[i] = injector.genome[i];
-    //                }
-    //                if (otherCell->cellType == CellType_Constructor) {
-    //                    otherCell->cellTypeData.constructor.genome = targetGenome;
-    //                    otherCell->cellTypeData.constructor.genomeSize = injector.genomeSize;
-    //                    otherCell->cellTypeData.constructor.numExpectedCells = 0;
-    //                } else {
-    //                    otherCell->cellTypeData.injector.genome = targetGenome;
-    //                    otherCell->cellTypeData.injector.genomeSize = injector.genomeSize;
-    //                }
-    //                match = true;
-    //                injection = true;
-    //                otherCell->releaseLock();
-    //            });
-    //    } break;
-    //    }
-
-    //    if (match) {
-    //        statistics.incNumInjectionActivities(cell->color);
-    //        if (injection) {
-    //            statistics.incNumCompletedInjections(cell->color);
-    //            injector.counter = 0;
-    //        } else {
-    //            ++injector.counter;
-    //        }
-    //        cell->signal.channels[0] = 1;
-    //    } else {
-    //        injector.counter = 0;
-    //        cell->signal.channels[0] = 0;
-    //    }
-    //}
+        cell->signal.channels[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
+    }
 }
 
-__inline__ __device__ int InjectorProcessor::countAndTrackDefenderCells(SimulationStatistics& statistics, Cell* cell)
+__inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatistics& statistics, Cell* cell)
 {
     int result = 0;
     for (int i = 0; i < cell->numConnections; ++i) {

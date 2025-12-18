@@ -167,8 +167,7 @@ struct InjectorDescription
     InjectorDescription();
     auto operator<=>(InjectorDescription const&) const = default;
 
-    MEMBER(InjectorDescription, InjectorMode, mode, InjectorMode_InjectAll);
-    MEMBER(InjectorDescription, int, counter, 0);
+    MEMBER(InjectorDescription, int, geneIndex, 0);
 };
 
 struct AutoBendingDescription
