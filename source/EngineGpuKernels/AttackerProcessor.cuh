@@ -75,8 +75,8 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (cell->isSameCreature(otherCell)) {
                 return;
             }
-            // Do not attack direct offspring (only applicable for Creature mode)
-            if (attackerMode == AttackerMode_Creature && otherCell->creature != nullptr && cell->creature != nullptr) {
+            // Do not attack direct offspring (only applicable for Creature mode since free cells have no ancestry)
+            if (attackerMode == AttackerMode_Creature && cell->creature != nullptr) {
                 if (otherCell->creature->ancestorId == cell->creature->id) {
                     return;
                 }
