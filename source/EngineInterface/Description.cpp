@@ -62,6 +62,18 @@ MuscleMode MuscleDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+ReconnectorMode ReconnectorDescription::getMode() const
+{
+    if (std::holds_alternative<ReconnectStructureDescription>(_mode)) {
+        return ReconnectorMode_Structure;
+    } else if (std::holds_alternative<ReconnectFreeCellDescription>(_mode)) {
+        return ReconnectorMode_FreeCell;
+    } else if (std::holds_alternative<ReconnectCreatureDescription>(_mode)) {
+        return ReconnectorMode_Creature;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 InjectorDescription::InjectorDescription() {}
 
 CellDescription::CellDescription(bool createIds)

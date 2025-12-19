@@ -64,6 +64,18 @@ MuscleMode MuscleGenomeDescription::getMode() const
     CHECK(false);
 }
 
+ReconnectorMode ReconnectorGenomeDescription::getMode() const
+{
+    if (std::holds_alternative<ReconnectStructureGenomeDescription>(_mode)) {
+        return ReconnectorMode_Structure;
+    } else if (std::holds_alternative<ReconnectFreeCellGenomeDescription>(_mode)) {
+        return ReconnectorMode_FreeCell;
+    } else if (std::holds_alternative<ReconnectCreatureGenomeDescription>(_mode)) {
+        return ReconnectorMode_Creature;
+    }
+    CHECK(false);
+}
+
 CellTypeGenome NodeDescription::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {

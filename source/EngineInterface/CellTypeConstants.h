@@ -304,24 +304,28 @@ enum DetonatorState_
 //*************************
 //* Reconnector constants *
 //*************************
-using ReconnectorRestrictToCreatures = int;
-enum ReconnectorRestrictToCreatures_
+using ReconnectorMode = int;
+enum ReconnectorMode_
 {
-    ReconnectorRestrictToCreatures_NoRestriction,
-    ReconnectorRestrictToCreatures_RestrictToSameMutants,
-    ReconnectorRestrictToCreatures_RestrictToOtherMutants,
-    ReconnectorRestrictToCreatures_RestrictToFreeCells,
-    ReconnectorRestrictToCreatures_RestrictToStructures,
-    ReconnectorRestrictToCreatures_RestrictToLessComplexMutants,
-    ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants,
-    ReconnectorRestrictToCreatures_Count,
+    ReconnectorMode_Structure,
+    ReconnectorMode_FreeCell,
+    ReconnectorMode_Creature,
+    ReconnectorMode_Count,
 };
 
 namespace Const
 {
-    std::vector<std::string> const ReconnectorRestrictToMutantStrings =
-        {"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"};
+    std::vector<std::string> const ReconnectorModeStrings = {"Structure", "Free cell", "Creature"};
 }
+
+using ReconnectCreatureLineageRestriction = int;
+enum ReconnectCreatureLineageRestriction_
+{
+    ReconnectCreatureLineageRestriction_No,
+    ReconnectCreatureLineageRestriction_SameLineage,
+    ReconnectCreatureLineageRestriction_OtherLineage,
+    ReconnectCreatureLineageRestriction_Count,
+};
 
 using CellEvent = uint8_t;
 enum CellEvent_

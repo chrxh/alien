@@ -12,22 +12,24 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Base},
         CellParameter{CellType_Depot},
         CellParameter{CellType_Constructor},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_Telemetry},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectEnergy},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectStructure},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectFreeCell},
-        CellParameter{CellType_Sensor, std::nullopt, SensorMode_DetectCreature},
+        CellParameter{CellType_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
+        CellParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
+        CellParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
+        CellParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
+        CellParameter{CellType_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
         CellParameter{CellType_Generator},
         CellParameter{CellType_Attacker},
         CellParameter{CellType_Injector},
-        CellParameter{CellType_Muscle, MuscleMode_AutoBending},
-        CellParameter{CellType_Muscle, MuscleMode_ManualBending},
-        CellParameter{CellType_Muscle, MuscleMode_AngleBending},
-        CellParameter{CellType_Muscle, MuscleMode_AutoCrawling},
-        CellParameter{CellType_Muscle, MuscleMode_ManualCrawling},
-        CellParameter{CellType_Muscle, MuscleMode_DirectMovement},
+        CellParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
+        CellParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_ManualBending}},
+        CellParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AngleBending}},
+        CellParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_AutoCrawling}},
+        CellParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_ManualCrawling}},
+        CellParameter{CellType_Muscle, MuscleModeWrapper{MuscleMode_DirectMovement}},
         CellParameter{CellType_Defender},
-        CellParameter{CellType_Reconnector},
+        CellParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Structure}},
+        CellParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_FreeCell}},
+        CellParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         CellParameter{CellType_Detonator},
         CellParameter{CellType_Digestor},
     };
@@ -79,22 +81,24 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Base},
         NodeParameter{CellTypeGenome_Depot},
         NodeParameter{CellTypeGenome_Constructor},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_Telemetry},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectEnergy},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectStructure},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectFreeCell},
-        NodeParameter{CellTypeGenome_Sensor, std::nullopt, SensorMode_DetectCreature},
+        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_Telemetry}},
+        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectEnergy}},
+        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectStructure}},
+        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectFreeCell}},
+        NodeParameter{CellTypeGenome_Sensor, SensorModeWrapper{SensorMode_DetectCreature}},
         NodeParameter{CellTypeGenome_Generator},
         NodeParameter{CellTypeGenome_Attacker},
         NodeParameter{CellTypeGenome_Injector},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AngleBending},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_AutoCrawling},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_ManualCrawling},
-        NodeParameter{CellTypeGenome_Muscle, MuscleMode_DirectMovement},
+        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_AutoBending}},
+        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_ManualBending}},
+        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_AngleBending}},
+        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_AutoCrawling}},
+        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_ManualCrawling}},
+        NodeParameter{CellTypeGenome_Muscle, MuscleModeWrapper{MuscleMode_DirectMovement}},
         NodeParameter{CellTypeGenome_Defender},
-        NodeParameter{CellTypeGenome_Reconnector},
+        NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Structure}},
+        NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_FreeCell}},
+        NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         NodeParameter{CellTypeGenome_Detonator},
         NodeParameter{CellTypeGenome_Digestor},
     };
@@ -411,11 +415,36 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         auto const& reconnector = std::get<ReconnectorDescription>(cell._cellType);
         auto const& nodeReconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
-        if (reconnector._restrictToColor != nodeReconnector._restrictToColor) {
+        if (reconnector.getMode() != nodeReconnector.getMode()) {
             return false;
         }
-        if (reconnector._restrictToCreatures != nodeReconnector._restrictToCreatures) {
-            return false;
+        switch (reconnector.getMode()) {
+        case ReconnectorMode_Structure: {
+            // No fields to compare
+        } break;
+        case ReconnectorMode_FreeCell: {
+            auto const& freeCellMode = std::get<ReconnectFreeCellDescription>(reconnector._mode);
+            auto const& nodeFreeCellMode = std::get<ReconnectFreeCellGenomeDescription>(nodeReconnector._mode);
+            if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
+                return false;
+            }
+        } break;
+        case ReconnectorMode_Creature: {
+            auto const& creatureMode = std::get<ReconnectCreatureDescription>(reconnector._mode);
+            auto const& nodeCreatureMode = std::get<ReconnectCreatureGenomeDescription>(nodeReconnector._mode);
+            if (creatureMode._minNumCells != nodeCreatureMode._minNumCells) {
+                return false;
+            }
+            if (creatureMode._maxNumCells != nodeCreatureMode._maxNumCells) {
+                return false;
+            }
+            if (creatureMode._restrictToColor != nodeCreatureMode._restrictToColor) {
+                return false;
+            }
+            if (creatureMode._restrictToLineage != nodeCreatureMode._restrictToLineage) {
+                return false;
+            }
+        } break;
         }
     } break;
     case CellType_Detonator: {
@@ -447,8 +476,9 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
 CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescription(CellParameter cellParameter) const
 {
     auto const& type = cellParameter.cellType;
-    auto muscleMode = cellParameter.muscleMode.value_or(MuscleMode_AutoBending);
-    auto sensorMode = cellParameter.sensorMode.value_or(SensorMode_DetectEnergy);
+    auto muscleMode = std::holds_alternative<MuscleModeWrapper>(cellParameter.mode) ? std::get<MuscleModeWrapper>(cellParameter.mode).value : MuscleMode_AutoBending;
+    auto sensorMode = std::holds_alternative<SensorModeWrapper>(cellParameter.mode) ? std::get<SensorModeWrapper>(cellParameter.mode).value : SensorMode_DetectEnergy;
+    auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(cellParameter.mode) ? std::get<ReconnectorModeWrapper>(cellParameter.mode).value : ReconnectorMode_Structure;
 
     switch (type) {
     case CellType_Structure:
@@ -564,8 +594,24 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     }
     case CellType_Defender:
         return DefenderDescription().mode(DefenderMode_DefendAgainstInjector);
-    case CellType_Reconnector:
-        return ReconnectorDescription().restrictToColor(1).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
+    case CellType_Reconnector: {
+        ReconnectorModeDescription reconnectorModeDesc;
+        switch (reconnectorMode) {
+        case ReconnectorMode_Structure:
+            reconnectorModeDesc = ReconnectStructureDescription();
+            break;
+        case ReconnectorMode_FreeCell:
+            reconnectorModeDesc = ReconnectFreeCellDescription().restrictToColor(2);
+            break;
+        case ReconnectorMode_Creature:
+            reconnectorModeDesc =
+                ReconnectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage);
+            break;
+        default:
+            reconnectorModeDesc = ReconnectorModeDescription();
+        }
+        return ReconnectorDescription().mode(reconnectorModeDesc);
+    }
     case CellType_Detonator:
         return DetonatorDescription().countdown(23);
     case CellType_Digestor:
@@ -578,8 +624,9 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
 CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGenomeDescription(NodeParameter cellParameter) const
 {
     auto const& type = cellParameter.cellTypeGenome;
-    auto muscleMode = cellParameter.muscleMode.value_or(MuscleMode_AutoBending);
-    auto sensorMode = cellParameter.sensorMode.value_or(SensorMode_DetectEnergy);
+    auto muscleMode = std::holds_alternative<MuscleModeWrapper>(cellParameter.mode) ? std::get<MuscleModeWrapper>(cellParameter.mode).value : MuscleMode_AutoBending;
+    auto sensorMode = std::holds_alternative<SensorModeWrapper>(cellParameter.mode) ? std::get<SensorModeWrapper>(cellParameter.mode).value : SensorMode_DetectEnergy;
+    auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(cellParameter.mode) ? std::get<ReconnectorModeWrapper>(cellParameter.mode).value : ReconnectorMode_Structure;
     switch (type) {
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
@@ -654,8 +701,24 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     }
     case CellTypeGenome_Defender:
         return DefenderGenomeDescription().mode(DefenderMode_DefendAgainstInjector);
-    case CellTypeGenome_Reconnector:
-        return ReconnectorGenomeDescription().restrictToColor(4).restrictToCreatures(ReconnectorRestrictToCreatures_RestrictToMoreComplexMutants);
+    case CellTypeGenome_Reconnector: {
+        ReconnectorModeGenomeDescription reconnectorModeDesc;
+        switch (reconnectorMode) {
+        case ReconnectorMode_Structure:
+            reconnectorModeDesc = ReconnectStructureGenomeDescription();
+            break;
+        case ReconnectorMode_FreeCell:
+            reconnectorModeDesc = ReconnectFreeCellGenomeDescription().restrictToColor(6);
+            break;
+        case ReconnectorMode_Creature:
+            reconnectorModeDesc =
+                ReconnectCreatureGenomeDescription().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage);
+            break;
+        default:
+            reconnectorModeDesc = ReconnectorModeGenomeDescription();
+        }
+        return ReconnectorGenomeDescription().mode(reconnectorModeDesc);
+    }
     case CellTypeGenome_Detonator: {
         return DetonatorGenomeDescription().countdown(45);
     }

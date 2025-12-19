@@ -719,16 +719,37 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
 void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconnector)
 {
     if (ImGui::TreeNodeEx("Properties###reconnector", TreeNodeFlags)) {
-        AlienGui::ComboOptionalColor(
-            AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
-            reconnector._restrictToColor);
+        // Mode selection
+        auto mode = reconnector.getMode();
         AlienGui::Combo(
-            AlienGui::ComboParameters()
-                .name("Restrict to mutants")
-                .values({"None", "Same mutants", "Other mutants", "Free cells", "Handcrafted cells", "Less complex mutants", "More complex mutants"})
-                .textWidth(CellTypeTextWidth)
-                .tooltip(Const::ReconnectorRestrictToCreaturesTooltip),
-            reconnector._restrictToCreatures);
+            AlienGui::ComboParameters().name("Mode").values(Const::ReconnectorModeStrings).textWidth(CellTypeTextWidth),
+            mode);
+        // Note: Mode cannot be changed in inspector - only viewing
+
+        // Mode-specific parameters
+        if (mode == ReconnectorMode_FreeCell) {
+            auto& freeCell = std::get<ReconnectFreeCellDescription>(reconnector._mode);
+            AlienGui::ComboOptionalColor(
+                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
+                freeCell._restrictToColor);
+        } else if (mode == ReconnectorMode_Creature) {
+            auto& creature = std::get<ReconnectCreatureDescription>(reconnector._mode);
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Min creature cells").textWidth(CellTypeTextWidth),
+                creature._minNumCells);
+            AlienGui::InputOptionalInt(
+                AlienGui::InputIntParameters().name("Max creature cells").textWidth(CellTypeTextWidth),
+                creature._maxNumCells);
+            AlienGui::ComboOptionalColor(
+                AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
+                creature._restrictToColor);
+            AlienGui::Combo(
+                AlienGui::ComboParameters()
+                    .name("Restrict to lineage")
+                    .values({"No", "Same lineage", "Other lineage"})
+                    .textWidth(CellTypeTextWidth),
+                creature._restrictToLineage);
+        }
 
         ImGui::TreePop();
     }

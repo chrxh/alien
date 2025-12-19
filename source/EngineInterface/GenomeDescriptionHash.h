@@ -252,9 +252,15 @@ struct std::hash<DefenderGenomeDescription>
 };
 
 template <>
-struct std::hash<ReconnectorGenomeDescription>
+struct std::hash<ReconnectStructureGenomeDescription>
 {
-    std::size_t operator()(ReconnectorGenomeDescription const& desc) const
+    std::size_t operator()(ReconnectStructureGenomeDescription const& desc) const { return 0; }
+};
+
+template <>
+struct std::hash<ReconnectFreeCellGenomeDescription>
+{
+    std::size_t operator()(ReconnectFreeCellGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
         if (desc._restrictToColor) {
@@ -262,9 +268,49 @@ struct std::hash<ReconnectorGenomeDescription>
         } else {
             hash_combine(seed, -1);
         }
-        hash_combine(seed, static_cast<int>(desc._restrictToCreatures));
         return seed;
     }
+};
+
+template <>
+struct std::hash<ReconnectCreatureGenomeDescription>
+{
+    std::size_t operator()(ReconnectCreatureGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        if (desc._minNumCells) {
+            hash_combine(seed, *desc._minNumCells);
+        } else {
+            hash_combine(seed, -1);
+        }
+        if (desc._maxNumCells) {
+            hash_combine(seed, *desc._maxNumCells);
+        } else {
+            hash_combine(seed, -1);
+        }
+        if (desc._restrictToColor) {
+            hash_combine(seed, *desc._restrictToColor);
+        } else {
+            hash_combine(seed, -1);
+        }
+        hash_combine(seed, static_cast<int>(desc._restrictToLineage));
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<ReconnectorModeGenomeDescription>
+{
+    std::size_t operator()(ReconnectorModeGenomeDescription const& desc) const
+    {
+        return variant_hasher<ReconnectStructureGenomeDescription, ReconnectFreeCellGenomeDescription, ReconnectCreatureGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<ReconnectorGenomeDescription>
+{
+    std::size_t operator()(ReconnectorGenomeDescription const& desc) const { return std::hash<ReconnectorModeGenomeDescription>{}(desc._mode); }
 };
 
 template <>

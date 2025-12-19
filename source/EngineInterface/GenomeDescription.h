@@ -200,12 +200,37 @@ struct DefenderGenomeDescription
     MEMBER(DefenderGenomeDescription, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
 };
 
+struct ReconnectStructureGenomeDescription
+{
+    auto operator<=>(ReconnectStructureGenomeDescription const&) const = default;
+};
+
+struct ReconnectFreeCellGenomeDescription
+{
+    auto operator<=>(ReconnectFreeCellGenomeDescription const&) const = default;
+
+    MEMBER(ReconnectFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct ReconnectCreatureGenomeDescription
+{
+    auto operator<=>(ReconnectCreatureGenomeDescription const&) const = default;
+
+    MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectCreatureGenomeDescription, ReconnectCreatureLineageRestriction, restrictToLineage, ReconnectCreatureLineageRestriction_No);
+};
+
+using ReconnectorModeGenomeDescription = std::variant<ReconnectStructureGenomeDescription, ReconnectFreeCellGenomeDescription, ReconnectCreatureGenomeDescription>;
+
 struct ReconnectorGenomeDescription
 {
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
-    MEMBER(ReconnectorGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectorGenomeDescription, ReconnectorRestrictToCreatures, restrictToCreatures, ReconnectorRestrictToCreatures_NoRestriction);
+    MEMBER(ReconnectorGenomeDescription, ReconnectorModeGenomeDescription, mode, ReconnectorModeGenomeDescription());
+
+    ReconnectorMode getMode() const;
 };
 
 struct DetonatorGenomeDescription

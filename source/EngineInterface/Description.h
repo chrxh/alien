@@ -277,12 +277,37 @@ struct DefenderDescription
     MEMBER(DefenderDescription, DefenderMode, mode, DefenderMode_DefendAgainstAttacker);
 };
 
+struct ReconnectStructureDescription
+{
+    auto operator<=>(ReconnectStructureDescription const&) const = default;
+};
+
+struct ReconnectFreeCellDescription
+{
+    auto operator<=>(ReconnectFreeCellDescription const&) const = default;
+
+    MEMBER(ReconnectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct ReconnectCreatureDescription
+{
+    auto operator<=>(ReconnectCreatureDescription const&) const = default;
+
+    MEMBER(ReconnectCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(ReconnectCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(ReconnectCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectCreatureDescription, ReconnectCreatureLineageRestriction, restrictToLineage, ReconnectCreatureLineageRestriction_No);
+};
+
+using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeCellDescription, ReconnectCreatureDescription>;
+
 struct ReconnectorDescription
 {
     auto operator<=>(ReconnectorDescription const&) const = default;
 
-    MEMBER(ReconnectorDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectorDescription, ReconnectorRestrictToCreatures, restrictToCreatures, ReconnectorRestrictToCreatures_NoRestriction);
+    MEMBER(ReconnectorDescription, ReconnectorModeDescription, mode, ReconnectorModeDescription());
+
+    ReconnectorMode getMode() const;
 };
 
 struct DetonatorDescription
