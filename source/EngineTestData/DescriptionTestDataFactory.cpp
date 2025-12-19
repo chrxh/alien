@@ -310,17 +310,33 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         auto const& attacker = std::get<AttackerDescription>(cell._cellType);
         auto const& nodeAttacker = std::get<AttackerGenomeDescription>(node._cellType);
-        if (attacker._minNumCells != nodeAttacker._minNumCells) {
+        if (attacker.getMode() != nodeAttacker.getMode()) {
             return false;
         }
-        if (attacker._maxNumCells != nodeAttacker._maxNumCells) {
-            return false;
-        }
-        if (attacker._restrictToColor != nodeAttacker._restrictToColor) {
-            return false;
-        }
-        if (attacker._restrictToLineage != nodeAttacker._restrictToLineage) {
-            return false;
+        switch (attacker.getMode()) {
+        case AttackerMode_FreeCell: {
+            auto const& freeCellMode = std::get<AttackFreeCellDescription>(attacker._mode);
+            auto const& nodeFreeCellMode = std::get<AttackFreeCellGenomeDescription>(nodeAttacker._mode);
+            if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
+                return false;
+            }
+        } break;
+        case AttackerMode_Creature: {
+            auto const& creatureMode = std::get<AttackCreatureDescription>(attacker._mode);
+            auto const& nodeCreatureMode = std::get<AttackCreatureGenomeDescription>(nodeAttacker._mode);
+            if (creatureMode._minNumCells != nodeCreatureMode._minNumCells) {
+                return false;
+            }
+            if (creatureMode._maxNumCells != nodeCreatureMode._maxNumCells) {
+                return false;
+            }
+            if (creatureMode._restrictToColor != nodeCreatureMode._restrictToColor) {
+                return false;
+            }
+            if (creatureMode._restrictToLineage != nodeCreatureMode._restrictToLineage) {
+                return false;
+            }
+        } break;
         }
     } break;
     case CellType_Injector: {
@@ -536,10 +552,11 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     }
     case CellType_Attacker:
         return AttackerDescription()
-            .minNumCells(4)
-            .maxNumCells(15)
-            .restrictToColor(1)
-            .restrictToLineage(DetectCreatureLineageRestriction_OtherLineage);
+            .mode(AttackCreatureDescription()
+                      .minNumCells(4)
+                      .maxNumCells(15)
+                      .restrictToColor(1)
+                      .restrictToLineage(LineageRestriction_OtherLineage));
     case CellType_Injector:
         return InjectorDescription().geneIndex(3);
     case CellType_Muscle: {
@@ -667,10 +684,11 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         return GeneratorGenomeDescription().autoTriggerInterval(55).pulseType(GeneratorPulseType_Alternation).alternationInterval(4);
     case CellTypeGenome_Attacker:
         return AttackerGenomeDescription()
-            .minNumCells(5)
-            .maxNumCells(18)
-            .restrictToColor(2)
-            .restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
+            .mode(AttackCreatureGenomeDescription()
+                      .minNumCells(5)
+                      .maxNumCells(18)
+                      .restrictToColor(2)
+                      .restrictToLineage(LineageRestriction_SameLineage));
     case CellTypeGenome_Injector:
         return InjectorGenomeDescription().geneIndex(3);
     case CellTypeGenome_Muscle: {

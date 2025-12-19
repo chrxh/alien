@@ -127,9 +127,24 @@ struct std::hash<GeneratorGenomeDescription>
 };
 
 template <>
-struct std::hash<AttackerGenomeDescription>
+struct std::hash<AttackFreeCellGenomeDescription>
 {
-    std::size_t operator()(AttackerGenomeDescription const& desc) const
+    std::size_t operator()(AttackFreeCellGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        if (desc._restrictToColor) {
+            hash_combine(seed, *desc._restrictToColor);
+        } else {
+            hash_combine(seed, -1);
+        }
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<AttackCreatureGenomeDescription>
+{
+    std::size_t operator()(AttackCreatureGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
         if (desc._minNumCells) {
@@ -149,6 +164,24 @@ struct std::hash<AttackerGenomeDescription>
         }
         hash_combine(seed, static_cast<int>(desc._restrictToLineage));
         return seed;
+    }
+};
+
+template <>
+struct std::hash<AttackerModeGenomeDescription>
+{
+    std::size_t operator()(AttackerModeGenomeDescription const& desc) const
+    {
+        return variant_hasher<AttackFreeCellGenomeDescription, AttackCreatureGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<AttackerGenomeDescription>
+{
+    std::size_t operator()(AttackerGenomeDescription const& desc) const
+    {
+        return std::hash<AttackerModeGenomeDescription>{}(desc._mode);
     }
 };
 

@@ -81,12 +81,29 @@ struct GeneratorGenomeTO
     uint32_t alternationInterval;  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
-struct AttackerGenomeTO
+struct AttackFreeCellGenomeTO
+{
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+};
+
+struct AttackCreatureGenomeTO
 {
     uint32_t minNumCells;  // 0 = no restriction
     uint32_t maxNumCells;  // 0 = no restriction
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
-    DetectCreatureLineageRestriction restrictToLineage;
+    LineageRestriction restrictToLineage;
+};
+
+union AttackerModeGenomeTO
+{
+    AttackFreeCellGenomeTO attackFreeCell;
+    AttackCreatureGenomeTO attackCreature;
+};
+
+struct AttackerGenomeTO
+{
+    AttackerMode mode;
+    AttackerModeGenomeTO modeData;
 };
 
 struct InjectorGenomeTO

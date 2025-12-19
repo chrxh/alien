@@ -76,6 +76,16 @@ ReconnectorMode ReconnectorGenomeDescription::getMode() const
     CHECK(false);
 }
 
+AttackerMode AttackerGenomeDescription::getMode() const
+{
+    if (std::holds_alternative<AttackFreeCellGenomeDescription>(_mode)) {
+        return AttackerMode_FreeCell;
+    } else if (std::holds_alternative<AttackCreatureGenomeDescription>(_mode)) {
+        return AttackerMode_Creature;
+    }
+    CHECK(false);
+}
+
 CellTypeGenome NodeDescription::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {

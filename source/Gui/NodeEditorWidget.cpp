@@ -120,6 +120,18 @@ namespace
         }
     }
 
+    AttackerModeGenomeDescription createAttackerModeGenomeDescription(AttackerMode mode)
+    {
+        switch (mode) {
+        case AttackerMode_FreeCell:
+            return AttackFreeCellGenomeDescription();
+        case AttackerMode_Creature:
+            return AttackCreatureGenomeDescription();
+        default:
+            CHECK(false);
+        }
+    }
+
     ReconnectorModeGenomeDescription createReconnectorModeGenomeDescription(ReconnectorMode mode)
     {
         switch (mode) {
@@ -337,15 +349,35 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
 
             auto& attacker = std::get<AttackerGenomeDescription>(node._cellType);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), attacker._minNumCells);
-            AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), attacker._maxNumCells);
-            AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attacker._restrictToColor);
-            AlienGui::Combo(
-                AlienGui::ComboParameters()
-                    .name("Restrict to lineage")
-                    .values({"No", "Same lineage", "Other lineage"})
-                    .textWidth(rightColumnWidth),
-                attacker._restrictToLineage);
+            auto mode = attacker.getMode();
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::AttackerModeStrings).textWidth(rightColumnWidth), mode)) {
+                attacker._mode = createAttackerModeGenomeDescription(mode);
+            }
+
+            if (mode == AttackerMode_FreeCell) {
+                AlienGui::BeginIndent();
+
+                auto& attackFreeCell = std::get<AttackFreeCellGenomeDescription>(attacker._mode);
+                AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackFreeCell._restrictToColor);
+
+                AlienGui::EndIndent();
+
+            } else if (mode == AttackerMode_Creature) {
+                AlienGui::BeginIndent();
+
+                auto& attackCreature = std::get<AttackCreatureGenomeDescription>(attacker._mode);
+                AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Min creature cells").textWidth(rightColumnWidth), attackCreature._minNumCells);
+                AlienGui::InputOptionalInt(AlienGui::InputIntParameters().name("Max creature cells").textWidth(rightColumnWidth), attackCreature._maxNumCells);
+                AlienGui::ComboOptionalColor(AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), attackCreature._restrictToColor);
+                AlienGui::Combo(
+                    AlienGui::ComboParameters()
+                        .name("Restrict to lineage")
+                        .values({"No", "Same lineage", "Other lineage"})
+                        .textWidth(rightColumnWidth),
+                    attackCreature._restrictToLineage);
+
+                AlienGui::EndIndent();
+            }
 
             AlienGui::EndIndent();
         } else if (nodeType == CellTypeGenome_Injector) {

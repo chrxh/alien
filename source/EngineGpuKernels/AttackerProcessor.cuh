@@ -47,22 +47,39 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             return;
         }
 
-        auto const& minNumCells = cell->cellTypeData.attacker.minNumCells;
-        auto const& maxNumCells = cell->cellTypeData.attacker.maxNumCells;
-        auto const& restrictToColor = cell->cellTypeData.attacker.restrictToColor;
-        auto const& restrictToLineage = cell->cellTypeData.attacker.restrictToLineage;
+        auto const& attackerMode = cell->cellTypeData.attacker.mode;
+
+        // Get restrictToColor based on mode
+        uint8_t restrictToColor = 255;  // Default: no restriction
+        if (attackerMode == AttackerMode_FreeCell) {
+            restrictToColor = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+        } else if (attackerMode == AttackerMode_Creature) {
+            restrictToColor = cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
+        }
 
         auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
-            if (otherCell->creature == nullptr) {
-                return;
+            // For Creature mode, only attack cells belonging to a creature
+            if (attackerMode == AttackerMode_Creature) {
+                if (otherCell->creature == nullptr) {
+                    return;
+                }
             }
+            // For FreeCell mode, only attack cells NOT belonging to a creature
+            if (attackerMode == AttackerMode_FreeCell) {
+                if (otherCell->creature != nullptr) {
+                    return;
+                }
+            }
+
             if (cell->isSameCreature(otherCell)) {
                 return;
             }
-            // Do not attack direct offspring
-            if (otherCell->creature->ancestorId == cell->creature->id) {
-                return;
+            // Do not attack direct offspring (only applicable for Creature mode)
+            if (attackerMode == AttackerMode_Creature && otherCell->creature != nullptr && cell->creature != nullptr) {
+                if (otherCell->creature->ancestorId == cell->creature->id) {
+                    return;
+                }
             }
             if (otherCell->fixed) {
                 return;
@@ -73,31 +90,39 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 return;
             }
 
-            // Filter by minimum number of cells in creature
-            if (minNumCells > 0 && otherCell->creature->numCells < minNumCells) {
-                return;
-            }
+            // Only apply creature-specific filters for Creature mode
+            if (attackerMode == AttackerMode_Creature) {
+                auto const& minNumCells = cell->cellTypeData.attacker.modeData.attackCreature.minNumCells;
+                auto const& maxNumCells = cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells;
+                auto const& restrictToLineage = cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
 
-            // Filter by maximum number of cells in creature
-            if (maxNumCells > 0 && otherCell->creature->numCells > maxNumCells) {
-                return;
-            }
-
-            // Filter by lineage restriction
-            if (restrictToLineage != DetectCreatureLineageRestriction_No) {
-                if (cell->creature == nullptr) {
+                // Filter by minimum number of cells in creature
+                if (minNumCells > 0 && otherCell->creature->numCells < minNumCells) {
                     return;
                 }
-                if (restrictToLineage == DetectCreatureLineageRestriction_SameLineage) {
-                    if (cell->creature->lineageId != otherCell->creature->lineageId) {
+
+                // Filter by maximum number of cells in creature
+                if (maxNumCells > 0 && otherCell->creature->numCells > maxNumCells) {
+                    return;
+                }
+
+                // Filter by lineage restriction
+                if (restrictToLineage != LineageRestriction_No) {
+                    if (cell->creature == nullptr) {
                         return;
                     }
-                } else if (restrictToLineage == DetectCreatureLineageRestriction_OtherLineage) {
-                    if (cell->creature->lineageId == otherCell->creature->lineageId) {
-                        return;
+                    if (restrictToLineage == LineageRestriction_SameLineage) {
+                        if (cell->creature->lineageId != otherCell->creature->lineageId) {
+                            return;
+                        }
+                    } else if (restrictToLineage == LineageRestriction_OtherLineage) {
+                        if (cell->creature->lineageId == otherCell->creature->lineageId) {
+                            return;
+                        }
                     }
                 }
             }
+
             // Only attack cells with energy above base value
             auto energyToTransfer = atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[cell->color];
             if (energyToTransfer < 0) {

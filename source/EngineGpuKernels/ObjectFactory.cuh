@@ -168,10 +168,15 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.generator.alternationInterval = nodeTO.cellTypeData.generator.alternationInterval;
                 break;
             case CellTypeGenome_Attacker:
-                node.cellTypeData.attacker.minNumCells = nodeTO.cellTypeData.attacker.minNumCells;
-                node.cellTypeData.attacker.maxNumCells = nodeTO.cellTypeData.attacker.maxNumCells;
-                node.cellTypeData.attacker.restrictToColor = nodeTO.cellTypeData.attacker.restrictToColor;
-                node.cellTypeData.attacker.restrictToLineage = nodeTO.cellTypeData.attacker.restrictToLineage;
+                node.cellTypeData.attacker.mode = nodeTO.cellTypeData.attacker.mode;
+                if (nodeTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
+                    node.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = nodeTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                } else if (nodeTO.cellTypeData.attacker.mode == AttackerMode_Creature) {
+                    node.cellTypeData.attacker.modeData.attackCreature.minNumCells = nodeTO.cellTypeData.attacker.modeData.attackCreature.minNumCells;
+                    node.cellTypeData.attacker.modeData.attackCreature.maxNumCells = nodeTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
+                    node.cellTypeData.attacker.modeData.attackCreature.restrictToColor = nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
+                    node.cellTypeData.attacker.modeData.attackCreature.restrictToLineage = nodeTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+                }
                 break;
             case CellTypeGenome_Injector:
                 node.cellTypeData.injector.geneIndex = nodeTO.cellTypeData.injector.geneIndex;
@@ -373,10 +378,15 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.generator.numPulses = cellTO.cellTypeData.generator.numPulses;
     } break;
     case CellType_Attacker: {
-        cell->cellTypeData.attacker.minNumCells = cellTO.cellTypeData.attacker.minNumCells;
-        cell->cellTypeData.attacker.maxNumCells = cellTO.cellTypeData.attacker.maxNumCells;
-        cell->cellTypeData.attacker.restrictToColor = cellTO.cellTypeData.attacker.restrictToColor;
-        cell->cellTypeData.attacker.restrictToLineage = cellTO.cellTypeData.attacker.restrictToLineage;
+        cell->cellTypeData.attacker.mode = cellTO.cellTypeData.attacker.mode;
+        if (cellTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
+            cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor = cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+        } else if (cellTO.cellTypeData.attacker.mode == AttackerMode_Creature) {
+            cell->cellTypeData.attacker.modeData.attackCreature.minNumCells = cellTO.cellTypeData.attacker.modeData.attackCreature.minNumCells;
+            cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells = cellTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells;
+            cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor = cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor;
+            cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage = cellTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+        }
     } break;
     case CellType_Injector: {
         cell->cellTypeData.injector.geneIndex = cellTO.cellTypeData.injector.geneIndex;
@@ -686,10 +696,15 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         cell->cellType = CellType_Attacker;
         auto const& nodeAttacker = node->cellTypeData.attacker;
         auto& attacker = cell->cellTypeData.attacker;
-        attacker.minNumCells = nodeAttacker.minNumCells;
-        attacker.maxNumCells = nodeAttacker.maxNumCells;
-        attacker.restrictToColor = nodeAttacker.restrictToColor;
-        attacker.restrictToLineage = nodeAttacker.restrictToLineage;
+        attacker.mode = nodeAttacker.mode;
+        if (nodeAttacker.mode == AttackerMode_FreeCell) {
+            attacker.modeData.attackFreeCell.restrictToColor = nodeAttacker.modeData.attackFreeCell.restrictToColor;
+        } else if (nodeAttacker.mode == AttackerMode_Creature) {
+            attacker.modeData.attackCreature.minNumCells = nodeAttacker.modeData.attackCreature.minNumCells;
+            attacker.modeData.attackCreature.maxNumCells = nodeAttacker.modeData.attackCreature.maxNumCells;
+            attacker.modeData.attackCreature.restrictToColor = nodeAttacker.modeData.attackCreature.restrictToColor;
+            attacker.modeData.attackCreature.restrictToLineage = nodeAttacker.modeData.attackCreature.restrictToLineage;
+        }
     } break;
     case CellTypeGenome_Injector: {
         cell->cellType = CellType_Injector;

@@ -113,14 +113,32 @@ struct GeneratorGenomeDescription
         20);  // Only for alternation type: 1 = alternate after each pulse, 2 = alternate after second pulse, etc.
 };
 
+struct AttackFreeCellGenomeDescription
+{
+    auto operator<=>(AttackFreeCellGenomeDescription const&) const = default;
+
+    MEMBER(AttackFreeCellGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct AttackCreatureGenomeDescription
+{
+    auto operator<=>(AttackCreatureGenomeDescription const&) const = default;
+
+    MEMBER(AttackCreatureGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(AttackCreatureGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(AttackCreatureGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackCreatureGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+};
+
+using AttackerModeGenomeDescription = std::variant<AttackFreeCellGenomeDescription, AttackCreatureGenomeDescription>;
+
 struct AttackerGenomeDescription
 {
     auto operator<=>(AttackerGenomeDescription const&) const = default;
 
-    MEMBER(AttackerGenomeDescription, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(AttackerGenomeDescription, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(AttackerGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(AttackerGenomeDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+    MEMBER(AttackerGenomeDescription, AttackerModeGenomeDescription, mode, AttackerModeGenomeDescription());
+
+    AttackerMode getMode() const;
 };
 
 struct InjectorGenomeDescription

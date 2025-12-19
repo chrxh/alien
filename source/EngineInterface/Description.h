@@ -152,14 +152,32 @@ struct GeneratorDescription
     MEMBER(GeneratorDescription, int, numPulses, 0);
 };
 
+struct AttackFreeCellDescription
+{
+    auto operator<=>(AttackFreeCellDescription const&) const = default;
+
+    MEMBER(AttackFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct AttackCreatureDescription
+{
+    auto operator<=>(AttackCreatureDescription const&) const = default;
+
+    MEMBER(AttackCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(AttackCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(AttackCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+};
+
+using AttackerModeDescription = std::variant<AttackFreeCellDescription, AttackCreatureDescription>;
+
 struct AttackerDescription
 {
     auto operator<=>(AttackerDescription const&) const = default;
 
-    MEMBER(AttackerDescription, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(AttackerDescription, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(AttackerDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(AttackerDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+    MEMBER(AttackerDescription, AttackerModeDescription, mode, AttackerModeDescription());
+
+    AttackerMode getMode() const;
 };
 
 struct InjectorDescription
