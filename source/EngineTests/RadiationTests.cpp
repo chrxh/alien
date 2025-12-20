@@ -17,7 +17,7 @@ public:
 
         // Set a very high radiation rate for all colors as requested
         for (int i = 0; i < MAX_COLORS; ++i) {
-            _parameters.radiationType1_strength.baseValue[i] = 0.01f;  // Very high radiation rate
+            _parameters.radiationType1_strength.baseValue[i] = 0.1f;  // Very high radiation rate
             _parameters.radiationType1_minimumAge.value[i] = 0;        // No minimum age requirement
         }
         _simulationFacade->setSimulationParameters(_parameters);

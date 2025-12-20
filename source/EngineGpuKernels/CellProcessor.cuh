@@ -851,7 +851,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
 
         if (cell->cellState == CellState_Dying || cell->cellState == CellState_Detaching) {
             auto cellDeathProbability = ParameterCalculator::calcParameter(cudaSimulationParameters.cellDeathProbability, data, cell->pos, cell->color);
-            if (data.primaryNumberGen.random() < cellDeathProbability) {
+            if (data.primaryNumberGen.random() <= cellDeathProbability) {
                 CellConnectionProcessor::scheduleDeleteCell(data, index);
             }
         }

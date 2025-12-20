@@ -143,3 +143,31 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     EXPECT_TRUE(approxCompare(cellEnergy, cell._usableEnergy));
     EXPECT_TRUE(approxCompare(particleEnergy, cell._rawEnergy));
 }
+
+TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
+{
+    _parameters.cellDeathProbability.baseValue[0] = 1.0f;  // Ensure cell will die instantly when below min energy   
+    _simulationFacade->setSimulationParameters(_parameters);
+
+    auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
+    auto depotEnergy = 100.0f;
+
+    auto data = Description().cells(
+        {CellDescription().id(1).pos({100.4f, 100.4f}).usableEnergy(cellEnergy).color(0).cellType(DepotDescription().storedUsableEnergy(depotEnergy))});
+
+    _simulationFacade->setSimulationData(data);
+
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    EXPECT_EQ(0, actualData._particles.size());
+    EXPECT_EQ(1, actualData._cells.size());
+
+    _simulationFacade->calcTimesteps(1);
+    actualData = _simulationFacade->getSimulationData();
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    EXPECT_EQ(1, actualData._particles.size());
+    EXPECT_EQ(0, actualData._cells.size());
+}
