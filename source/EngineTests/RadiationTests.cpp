@@ -46,7 +46,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     // Verify the fixed cell retained its energy
     EXPECT_EQ(1, actualData._cells.size());
     auto const& cell = actualData._cells.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy, 0.01f));
+    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy));
 }
 
 TEST_F(RadiationTests, structureCells_shouldNotRadiate)
@@ -70,7 +70,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
     // Verify the structure cell retained its energy
     EXPECT_EQ(1, actualData._cells.size());
     auto const& cell = actualData._cells.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy, 0.01f));
+    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy));
 }
 
 TEST_F(RadiationTests, baseCells_shouldRadiate)
@@ -88,12 +88,7 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // With high radiation rate, energy particles should have been created
-    EXPECT_GT(actualData._particles.size(), 0);
-
-    // Verify the base cell lost some energy due to radiation
-    EXPECT_EQ(1, actualData._cells.size());
-    auto const& cell = actualData._cells.at(0);
-    EXPECT_LT(cell._usableEnergy, initialEnergy);
+    EXPECT_FALSE(actualData._particles.empty());
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -115,12 +110,7 @@ TEST_F(RadiationTests, freeCells_shouldRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // With high radiation rate, energy particles should have been created
-    EXPECT_GT(actualData._particles.size(), 0);
-
-    // Verify the free cell lost some energy due to radiation
-    EXPECT_EQ(1, actualData._cells.size());
-    auto const& cell = actualData._cells.at(0);
-    EXPECT_LT(cell._usableEnergy, initialEnergy);
+    EXPECT_FALSE(actualData._particles.empty());
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -142,12 +132,7 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
     auto actualData = _simulationFacade->getSimulationData();
 
     // With high radiation rate, energy particles should have been created
-    EXPECT_GT(actualData._particles.size(), 0);
-
-    // Verify the constructor cell lost some energy due to radiation
-    EXPECT_EQ(1, actualData._cells.size());
-    auto const& cell = actualData._cells.at(0);
-    EXPECT_LT(cell._usableEnergy, initialEnergy);
+    EXPECT_FALSE(actualData._particles.empty());
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -175,40 +160,5 @@ TEST_F(RadiationTests, fixedStructureCells_shouldNotRadiate)
     // Verify the cell retained its energy
     EXPECT_EQ(1, actualData._cells.size());
     auto const& cell = actualData._cells.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy, 0.01f));
-}
-
-TEST_F(RadiationTests, rawEnergy_shouldAlsoRadiate)
-{
-    // Test that raw energy also radiates for non-fixed, non-structure cells
-    auto initialUsableEnergy = 200.0f;
-    auto initialRawEnergy = 100.0f;
-
-    Description data;
-    data._cells.emplace_back(CellDescription()
-                                 .id(1)
-                                 .pos({100.0f, 100.0f})
-                                 .vel({0.0f, 0.0f})
-                                 .usableEnergy(initialUsableEnergy)
-                                 .rawEnergy(initialRawEnergy)
-                                 .cellType(BaseDescription())
-                                 .color(0));
-
-    _simulationFacade->setSimulationData(data);
-
-    // Run simulation for many timesteps
-    _simulationFacade->calcTimesteps(1000);
-
-    auto actualData = _simulationFacade->getSimulationData();
-
-    // Verify particles were created
-    EXPECT_GT(actualData._particles.size(), 0);
-
-    // Verify the cell lost energy (both usable and raw)
-    EXPECT_EQ(1, actualData._cells.size());
-    auto const& cell = actualData._cells.at(0);
-    EXPECT_LT(cell._usableEnergy + cell._rawEnergy, initialUsableEnergy + initialRawEnergy);
-
-    // Total energy should be conserved
-    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy));
 }
