@@ -141,6 +141,12 @@ using DetectCreatureLineageRestriction = LineageRestriction;
 #define DetectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
 #define DetectCreatureLineageRestriction_Count LineageRestriction_Count
 
+using ReconnectCreatureLineageRestriction = LineageRestriction;
+#define ReconnectCreatureLineageRestriction_No LineageRestriction_No
+#define ReconnectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
+#define ReconnectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
+#define ReconnectCreatureLineageRestriction_Count LineageRestriction_Count
+
 using SensorMode = int;
 enum SensorMode_
 {
