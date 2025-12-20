@@ -190,7 +190,7 @@ namespace Const
 //**********************
 namespace Channels
 {
-    auto constexpr AttackerSuccess = 1;
+    auto constexpr AttackerSuccess = 2;
     auto constexpr AttackerNotify = 7;
 }
 
