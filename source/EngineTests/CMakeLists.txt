@@ -25,6 +25,7 @@ PUBLIC
     MuscleTests.cpp
     NeuronTests.cpp
     PhysicsTests.cpp
+    RadiationTests.cpp
     ReconnectorTests.cpp
     SensorTests.cpp
     SignalTests.cpp
