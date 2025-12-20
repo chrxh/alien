@@ -337,12 +337,11 @@ namespace Const
     std::vector<std::string> const ReconnectorModeStrings = {"Structure", "Free cell", "Creature"};
 }
 
-// Legacy aliases for backward compatibility
-using ReconnectCreatureLineageRestriction = LineageRestriction;
-#define ReconnectCreatureLineageRestriction_No LineageRestriction_No
-#define ReconnectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
-#define ReconnectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
-#define ReconnectCreatureLineageRestriction_Count LineageRestriction_Count
+namespace Channels
+{
+    auto constexpr ReconnectorSuccess = 2;
+}
+
 
 using CellEvent = uint8_t;
 enum CellEvent_
