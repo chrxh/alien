@@ -221,7 +221,7 @@ void _NodeEditorWidget::processNodeAttributes()
             AlienGui::BeginIndent();
             auto& depot = std::get<DepotGenomeDescription>(node._cellType);
             AlienGui::InputFloat(
-                AlienGui::InputFloatParameters().name("Max usable energy for storage").textWidth(rightColumnWidth), depot._maxUsableEnergyForStorage);
+                AlienGui::InputFloatParameters().name("Max usable energy for storage").textWidth(rightColumnWidth), depot._storageLimit);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters().name("Initial stored usable energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
             AlienGui::EndIndent();

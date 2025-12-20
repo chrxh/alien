@@ -39,7 +39,7 @@ struct BaseTO
 
 struct DepotTO
 {
-    float maxUsableEnergyForStorage;
+    float storageLimit;
     float storedUsableEnergy;
 };
 

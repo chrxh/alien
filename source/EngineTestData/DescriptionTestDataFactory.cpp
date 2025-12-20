@@ -209,7 +209,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         auto const& depot = std::get<DepotDescription>(cell._cellType);
         auto const& nodeDepot = std::get<DepotGenomeDescription>(node._cellType);
-        if (depot._maxUsableEnergyForStorage != nodeDepot._maxUsableEnergyForStorage) {
+        if (depot._storageLimit != nodeDepot._storageLimit) {
             return false;
         }
     } break;
@@ -504,7 +504,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Base:
         return BaseDescription();
     case CellType_Depot:
-        return DepotDescription().maxUsableEnergyForStorage(300.0f).storedUsableEnergy(50.0f);
+        return DepotDescription().storageLimit(300.0f).storedUsableEnergy(50.0f);
     case CellType_Constructor: {
         return ConstructorDescription()
             .autoTriggerInterval(50)
@@ -648,7 +648,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
     case CellTypeGenome_Depot:
-        return DepotGenomeDescription().maxUsableEnergyForStorage(350.0f).initialStoredUsableEnergy(100.0f);
+        return DepotGenomeDescription().storageLimit(350.0f).initialStoredUsableEnergy(100.0f);
     case CellTypeGenome_Constructor:
         return ConstructorGenomeDescription()
             .autoTriggerInterval(45)

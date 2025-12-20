@@ -57,7 +57,7 @@ struct Base
 
 struct Depot
 {
-    float maxUsableEnergyForStorage;
+    float storageLimit;
     float storedUsableEnergy;
 };
 

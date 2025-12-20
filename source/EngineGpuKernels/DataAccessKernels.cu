@@ -76,7 +76,7 @@ namespace
                     case CellTypeGenome_Base:
                         break;
                     case CellTypeGenome_Depot:
-                        nodeTO.cellTypeData.depot.maxUsableEnergyForStorage = node.cellTypeData.depot.maxUsableEnergyForStorage;
+                        nodeTO.cellTypeData.depot.storageLimit = node.cellTypeData.depot.storageLimit;
                         break;
                     case CellTypeGenome_Constructor:
                         nodeTO.cellTypeData.constructor.autoTriggerInterval = node.cellTypeData.constructor.autoTriggerInterval;
@@ -278,7 +278,7 @@ namespace
         case CellType_Base: {
         } break;
         case CellType_Depot: {
-            cellTO.cellTypeData.depot.maxUsableEnergyForStorage = cell->cellTypeData.depot.maxUsableEnergyForStorage;
+            cellTO.cellTypeData.depot.storageLimit = cell->cellTypeData.depot.storageLimit;
             cellTO.cellTypeData.depot.storedUsableEnergy = cell->cellTypeData.depot.storedUsableEnergy;
         } break;
         case CellType_Constructor: {

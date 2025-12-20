@@ -18,7 +18,7 @@ struct BaseGenomeTO
 
 struct DepotGenomeTO
 {
-    float maxUsableEnergyForStorage;
+    float storageLimit;
     float initialStoredUsableEnergy;
 };
 

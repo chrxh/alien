@@ -191,6 +191,7 @@ struct SimulationParameters
 
     // Cell type: Depot
     static float constexpr depotEnergyTransferUnit = 2.0f;
+    static float constexpr depotStorageLimit = 500.0f;
 
     // Cell type: Reconnector
     BaseParameter<ColorVector<float>> reconnectorRadius = {{2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f, 2.0f}};

@@ -286,7 +286,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
-        transmitter._maxUsableEnergyForStorage = cellTO.cellTypeData.depot.maxUsableEnergyForStorage;
+        transmitter._storageLimit = cellTO.cellTypeData.depot.storageLimit;
         transmitter._storedUsableEnergy = cellTO.cellTypeData.depot.storedUsableEnergy;
         result._cellType = transmitter;
     } break;
@@ -540,7 +540,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
     } break;
     case CellTypeGenome_Depot: {
         DepotGenomeDescription depotDesc;
-        depotDesc._maxUsableEnergyForStorage = nodeTO->cellTypeData.depot.maxUsableEnergyForStorage;
+        depotDesc._storageLimit = nodeTO->cellTypeData.depot.storageLimit;
         depotDesc._initialStoredUsableEnergy = nodeTO->cellTypeData.depot.initialStoredUsableEnergy;
         nodeDesc._cellType = depotDesc;
     } break;
@@ -839,7 +839,7 @@ void DescriptionConverterService::convertGenomeToTO(
             case CellTypeGenome_Depot: {
                 auto const& depotDesc = std::get<DepotGenomeDescription>(nodeDesc._cellType);
                 auto& depotTO = nodeTO.cellTypeData.depot;
-                depotTO.maxUsableEnergyForStorage = depotDesc._maxUsableEnergyForStorage;
+                depotTO.storageLimit = depotDesc._storageLimit;
                 depotTO.initialStoredUsableEnergy = depotDesc._initialStoredUsableEnergy;
             } break;
             case CellTypeGenome_Constructor: {
@@ -1071,7 +1071,7 @@ void DescriptionConverterService::convertCellToTO(
     case CellType_Depot: {
         auto const& depotDesc = std::get<DepotDescription>(cellDesc._cellType);
         DepotTO& depotTO = cellTO.cellTypeData.depot;
-        depotTO.maxUsableEnergyForStorage = depotDesc._maxUsableEnergyForStorage;
+        depotTO.storageLimit = depotDesc._storageLimit;
         depotTO.storedUsableEnergy = depotDesc._storedUsableEnergy;
     } break;
     case CellType_Constructor: {

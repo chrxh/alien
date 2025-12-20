@@ -42,8 +42,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
 
             if (nodeType == CellTypeGenome_Depot) {
                 auto& depot = std::get<DepotGenomeDescription>(node._cellType);
-                depot._maxUsableEnergyForStorage = std::clamp(depot._maxUsableEnergyForStorage, 0.0f, 1000.0f);
-                depot._initialStoredUsableEnergy = std::clamp(depot._initialStoredUsableEnergy, 0.0f, depot._maxUsableEnergyForStorage);
+                depot._storageLimit = std::clamp(depot._storageLimit, 0.0f, 1000.0f);
+                depot._initialStoredUsableEnergy = std::clamp(depot._initialStoredUsableEnergy, 0.0f, depot._storageLimit);
 
             } else if (nodeType == CellTypeGenome_Constructor) {
                 auto& constructor = std::get<ConstructorGenomeDescription>(node._cellType);

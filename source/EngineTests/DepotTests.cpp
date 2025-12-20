@@ -25,10 +25,14 @@ public:
 
 protected:
     // Helper to create a depot creature with a generator that triggers it with a positive signal
-    Description createDepotWithPositiveGenerator(float usableEnergy, float storedUsableEnergy = 0.0f)
+    Description createDepotWithPositiveGenerator(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 0.0f)
     {
         auto data = Description().addCreature(CreatureDescription().id(1).cells({
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
+            CellDescription()
+                .id(1)
+                .pos({100.0f, 100.0f})
+                .cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
+                .usableEnergy(usableEnergy),
             CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3).pulseType(GeneratorPulseType_Positive)),
         }));
         data.addConnection(1, 2);
@@ -169,6 +173,54 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(initialUsableEnergy + origGenerator._usableEnergy - SimulationParameters::depotEnergyTransferUnit, actualDepot._usableEnergy + actualGenerator._usableEnergy));
+}
+
+TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto initialUsableEnergy = normalCellEnergy + 100.0f;
+    auto storageLimit = 250.0f;
+    auto initialStoredUsableEnergy = storageLimit - SimulationParameters::depotEnergyTransferUnit / 2;
+
+    auto data = createDepotWithPositiveGenerator(initialUsableEnergy, initialStoredUsableEnergy, storageLimit);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
+
+    auto origGenerator = data.getCellRef(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualDepot = actualData.getCellRef(1);
+    auto actualGenerator = actualData.getCellRef(2);
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    // Energy should be capped at storageLimit
+    EXPECT_TRUE(approxCompare(storageLimit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+}
+
+TEST_F(DepotTests, positiveSignal_reachedStorageLimit2)
+{
+    auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
+    auto initialUsableEnergy = normalCellEnergy + 100.0f;
+    auto storageLimit = SimulationParameters::depotStorageLimit * 2;  // Cell allows more than parameter limit
+    auto initialStoredUsableEnergy = SimulationParameters::depotStorageLimit - SimulationParameters::depotEnergyTransferUnit / 2;
+
+    auto data = createDepotWithPositiveGenerator(initialUsableEnergy, initialStoredUsableEnergy, storageLimit);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(4);  // Wait for generator to trigger
+
+    auto origGenerator = data.getCellRef(2);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualDepot = actualData.getCellRef(1);
+    auto actualGenerator = actualData.getCellRef(2);
+
+    EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
+
+    // Energy should be capped at SimulationParameters::depotstorageLimit
+    EXPECT_TRUE(approxCompare(SimulationParameters::depotStorageLimit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
 }
 
 TEST_F(DepotTests, negativeSignal_energyTransferCapped)
