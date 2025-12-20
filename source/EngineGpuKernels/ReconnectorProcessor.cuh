@@ -118,9 +118,9 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 //    }
 }
 
-//
-//__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-//{
+
+__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
 //    cell->signal.channels[0] = 0;
 //    if (cell->tryLock()) {
 //        for (int i = 0; i < cell->numConnections; ++i) {
@@ -136,4 +136,4 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 //        }
 //        cell->releaseLock();
 //    }
-//}
+}
