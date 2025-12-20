@@ -49,14 +49,6 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         auto const& attackerMode = cell->cellTypeData.attacker.mode;
 
-        // Get restrictToColor based on mode
-        uint8_t restrictToColor = 255;  // Default: no restriction
-        if (attackerMode == AttackerMode_FreeCell) {
-            restrictToColor = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
-        } else if (attackerMode == AttackerMode_Creature) {
-            restrictToColor = cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
-        }
-
         auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
 
@@ -64,6 +56,13 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 if (otherCell->cellType != CellType_Free) {
                     return;
                 }
+
+                // Filter by color restriction
+                auto const& restrictToColor = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                    return;
+                }
+
             } else if (attackerMode == AttackerMode_Creature) {
                 if (otherCell->creature == nullptr) {
                     return;
@@ -84,6 +83,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
 
                 // Filter by color restriction
+                auto const& restrictToColor = cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
                 if (restrictToColor != 255 && otherCell->color != restrictToColor) {
                     return;
                 }
