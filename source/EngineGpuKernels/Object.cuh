@@ -511,6 +511,16 @@ struct Cell
         return getAngelSpan(connectionIndex1, connectionIndex2);
     }
 
+    __device__ __inline__ float getEnergy() const
+    {
+        auto result = usableEnergy + rawEnergy;
+        if (cellType == CellType_Depot) {
+            result += cellTypeData.depot.storedUsableEnergy;
+        }
+        return result;
+    }
+
+
     __device__ __inline__ void getLock()
     {
         while (1 == atomicExch(&locked, 1)) {

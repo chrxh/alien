@@ -124,7 +124,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
 
         auto const& cellColor = getCellColor(cell->color);
 
-        auto luminance = (cell->usableEnergy + cell->rawEnergy + 00.0f) / 300.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
+        auto luminance = cell->getEnergy() / 300.0f;  //1.0f - 50000.0f / (cell->energy * cell->energy + 50000.0f);
         auto white = luminance / 10.0f;
         if (cell->selected == 1) {
             luminance = (luminance + 0.1f) * 1.7f;
