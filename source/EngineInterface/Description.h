@@ -125,7 +125,7 @@ struct SensorDescription
     auto operator<=>(SensorDescription const&) const = default;
 
     MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
-    MEMBER(SensorDescription, SensorModeDescription, mode, SensorModeDescription());
+    MEMBER(SensorDescription, SensorModeDescription, mode, DetectCreatureDescription());
     MEMBER(SensorDescription, int, minRange, 0);
     MEMBER(SensorDescription, int, maxRange, 255);
 
@@ -175,7 +175,7 @@ struct AttackerDescription
 {
     auto operator<=>(AttackerDescription const&) const = default;
 
-    MEMBER(AttackerDescription, AttackerModeDescription, mode, AttackerModeDescription());
+    MEMBER(AttackerDescription, AttackerModeDescription, mode, AttackCreatureDescription());
 
     AttackerMode getMode() const;
 };
@@ -279,7 +279,7 @@ struct MuscleDescription
 {
     auto operator<=>(MuscleDescription const&) const = default;
 
-    MEMBER(MuscleDescription, MuscleModeDescription, mode, MuscleModeDescription());
+    MEMBER(MuscleDescription, MuscleModeDescription, mode, AutoBendingDescription());
 
     // Additional rendering data
     MEMBER(MuscleDescription, float, lastMovementX, 0.0f);
@@ -323,7 +323,7 @@ struct ReconnectorDescription
 {
     auto operator<=>(ReconnectorDescription const&) const = default;
 
-    MEMBER(ReconnectorDescription, ReconnectorModeDescription, mode, ReconnectorModeDescription());
+    MEMBER(ReconnectorDescription, ReconnectorModeDescription, mode, ReconnectCreatureDescription());
 
     ReconnectorMode getMode() const;
 };

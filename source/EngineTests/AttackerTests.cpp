@@ -870,9 +870,9 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     data.addConnection(1, 2);
 
     // Add a free cell (not part of a creature)
-    data.addCreature(CreatureDescription().id(2).cells({
+    data.cells({
         CellDescription().id(100).pos({100.0f, 103.0f}).usableEnergy(100.0f).cellType(FreeCellDescription()),
-    }));
+    });
 
     auto origTarget = data.getCellRef(100);
 

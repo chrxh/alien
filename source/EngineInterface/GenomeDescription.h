@@ -86,14 +86,19 @@ struct DetectCreatureGenomeDescription
     MEMBER(DetectCreatureGenomeDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
 };
 
-using SensorModeGenomeDescription = std::variant<TelemetryGenomeDescription, DetectEnergyGenomeDescription, DetectStructureGenomeDescription, DetectFreeCellGenomeDescription, DetectCreatureGenomeDescription>;
+using SensorModeGenomeDescription = std::variant<
+    TelemetryGenomeDescription,
+    DetectEnergyGenomeDescription,
+    DetectStructureGenomeDescription,
+    DetectFreeCellGenomeDescription,
+    DetectCreatureGenomeDescription>;
 
 struct SensorGenomeDescription
 {
     auto operator<=>(SensorGenomeDescription const&) const = default;
 
     MEMBER(SensorGenomeDescription, std::optional<int>, autoTriggerInterval, 10);  // std::nullopt = manual triggering
-    MEMBER(SensorGenomeDescription, SensorModeGenomeDescription, mode, SensorModeGenomeDescription());
+    MEMBER(SensorGenomeDescription, SensorModeGenomeDescription, mode, DetectCreatureGenomeDescription());
     MEMBER(SensorGenomeDescription, int, minRange, 0);
     MEMBER(SensorGenomeDescription, int, maxRange, 255);
 
@@ -136,7 +141,7 @@ struct AttackerGenomeDescription
 {
     auto operator<=>(AttackerGenomeDescription const&) const = default;
 
-    MEMBER(AttackerGenomeDescription, AttackerModeGenomeDescription, mode, AttackerModeGenomeDescription());
+    MEMBER(AttackerGenomeDescription, AttackerModeGenomeDescription, mode, AttackCreatureGenomeDescription());
 
     AttackerMode getMode() const;
 };
@@ -206,7 +211,7 @@ struct MuscleGenomeDescription
 {
     auto operator<=>(MuscleGenomeDescription const&) const = default;
 
-    MEMBER(MuscleGenomeDescription, MuscleModeGenomeDescription, mode, MuscleModeGenomeDescription());
+    MEMBER(MuscleGenomeDescription, MuscleModeGenomeDescription, mode, AutoBendingGenomeDescription());
 
     MuscleMode getMode() const;
 };
@@ -246,7 +251,7 @@ struct ReconnectorGenomeDescription
 {
     auto operator<=>(ReconnectorGenomeDescription const&) const = default;
 
-    MEMBER(ReconnectorGenomeDescription, ReconnectorModeGenomeDescription, mode, ReconnectorModeGenomeDescription());
+    MEMBER(ReconnectorGenomeDescription, ReconnectorModeGenomeDescription, mode, ReconnectCreatureGenomeDescription());
 
     ReconnectorMode getMode() const;
 };
