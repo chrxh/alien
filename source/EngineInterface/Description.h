@@ -107,7 +107,7 @@ struct DetectCreatureDescription
     MEMBER(DetectCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(DetectCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
     MEMBER(DetectCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(DetectCreatureDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+    MEMBER(DetectCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
 using SensorModeDescription = std::variant<TelemetryDescription, DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;
@@ -314,7 +314,7 @@ struct ReconnectCreatureDescription
     MEMBER(ReconnectCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
     MEMBER(ReconnectCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(ReconnectCreatureDescription, ReconnectCreatureLineageRestriction, restrictToLineage, ReconnectCreatureLineageRestriction_No);
+    MEMBER(ReconnectCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
 using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeCellDescription, ReconnectCreatureDescription>;

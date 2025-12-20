@@ -353,7 +353,7 @@ TEST_F(ReconnectorTests, creatureMode_maxNumCells_failed)
 TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
 {
     auto data = createReconnectorWithSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage), 1.0f, 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(LineageRestriction_SameLineage), 1.0f, 0, 5);
 
     // Add creature with same lineage
     data.addCreature(CreatureDescription().id(2).lineageId(5).cells({
@@ -373,7 +373,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_success)
 TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
 {
     auto data = createReconnectorWithSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage), 1.0f, 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(LineageRestriction_SameLineage), 1.0f, 0, 5);
 
     // Add creature with different lineage
     data.addCreature(CreatureDescription().id(2).lineageId(6).cells({
@@ -393,7 +393,7 @@ TEST_F(ReconnectorTests, creatureMode_sameLineage_failed)
 TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
 {
     auto data = createReconnectorWithSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(ReconnectCreatureLineageRestriction_OtherLineage), 1.0f, 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(LineageRestriction_OtherLineage), 1.0f, 0, 5);
 
     // Add creature with different lineage
     data.addCreature(CreatureDescription().id(2).lineageId(6).cells({
@@ -413,7 +413,7 @@ TEST_F(ReconnectorTests, creatureMode_otherLineage_success)
 TEST_F(ReconnectorTests, creatureMode_otherLineage_failed)
 {
     auto data = createReconnectorWithSignal(
-        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(ReconnectCreatureLineageRestriction_OtherLineage), 1.0f, 0, 5);
+        {100.0f, 100.0f}, ReconnectCreatureDescription().restrictToLineage(LineageRestriction_OtherLineage), 1.0f, 0, 5);
 
     // Add creature with same lineage
     data.addCreature(CreatureDescription().id(2).lineageId(5).cells({

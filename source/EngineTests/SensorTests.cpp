@@ -1157,7 +1157,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
 TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
 {
     auto data = Description().addCreature(CreatureDescription().id(0).lineageId(42).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_SameLineage))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(LineageRestriction_SameLineage))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
@@ -1185,7 +1185,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
             .cellType(
-                SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_SameLineage))),
+                SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(LineageRestriction_SameLineage))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
@@ -1207,7 +1207,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
 TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
 {
     auto data = Description().addCreature(CreatureDescription().id(0).lineageId(42).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_OtherLineage))),
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(LineageRestriction_OtherLineage))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
@@ -1235,7 +1235,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
             .pos({100.0f, 100.0f})
             .frontAngle(0.0f)
             .cellType(
-                SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(DetectCreatureLineageRestriction_OtherLineage))),
+                SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription().restrictToLineage(LineageRestriction_OtherLineage))),
         CellDescription().id(2).pos({101.0f, 100.0f}),
     }));
     data.addConnection(1, 2);
