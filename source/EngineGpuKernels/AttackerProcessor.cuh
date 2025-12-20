@@ -59,39 +59,35 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
-            // For Creature mode, only attack cells belonging to a creature
-            if (attackerMode == AttackerMode_Creature) {
+
+            if (attackerMode == AttackerMode_FreeCell) {
+                if (otherCell->cellType != CellType_Free) {
+                    return;
+                }
+            } else if (attackerMode == AttackerMode_Creature) {
                 if (otherCell->creature == nullptr) {
                     return;
                 }
-            }
-            // For FreeCell mode, only attack cells NOT belonging to a creature
-            if (attackerMode == AttackerMode_FreeCell) {
-                if (otherCell->creature != nullptr) {
+
+
+                if (cell->isSameCreature(otherCell)) {
                     return;
                 }
-            }
-
-            if (cell->isSameCreature(otherCell)) {
-                return;
-            }
-            // Do not attack direct offspring (only applicable for Creature mode since free cells have no ancestry)
-            if (attackerMode == AttackerMode_Creature && cell->creature != nullptr) {
-                if (otherCell->creature->ancestorId == cell->creature->id) {
+                // Do not attack direct offspring (only applicable for Creature mode since free cells have no ancestry)
+                if (cell->creature != nullptr) {
+                    if (otherCell->creature->ancestorId == cell->creature->id) {
+                        return;
+                    }
+                }
+                if (otherCell->fixed) {
                     return;
                 }
-            }
-            if (otherCell->fixed) {
-                return;
-            }
 
-            // Filter by color restriction
-            if (restrictToColor != 255 && otherCell->color != restrictToColor) {
-                return;
-            }
+                // Filter by color restriction
+                if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                    return;
+                }
 
-            // Only apply creature-specific filters for Creature mode
-            if (attackerMode == AttackerMode_Creature) {
                 auto const& minNumCells = cell->cellTypeData.attacker.modeData.attackCreature.minNumCells;
                 auto const& maxNumCells = cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells;
                 auto const& restrictToLineage = cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
