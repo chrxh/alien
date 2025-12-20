@@ -25,7 +25,7 @@ public:
 
 protected:
     // Helper to create a depot creature with a generator that triggers it with a positive signal
-    Description createDepotWithPositiveGenerator(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 0.0f)
+    Description createDepotWithPositiveGenerator(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
         auto data = Description().addCreature(CreatureDescription().id(1).cells({
             CellDescription()
