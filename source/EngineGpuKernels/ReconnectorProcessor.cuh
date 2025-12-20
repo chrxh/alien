@@ -19,8 +19,8 @@ public:
 private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    //__inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    //__inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -38,15 +38,17 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 
 __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    //if (cell->signal.channels[0] >= TRIGGER_THRESHOLD) {
-    //    tryCreateConnection(data, statistics, cell);
-    //} else if (cell->signal.channels[0] <= -TRIGGER_THRESHOLD) {
-    //    removeConnections(data, statistics, cell);
-    //}
+    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+        if (cell->signal.channels[Channels::CellTypeActivation] > 0) {
+            tryCreateConnection(data, statistics, cell);
+        } else {
+            removeConnections(data, statistics, cell);
+        }
+    }
 }
 
-//__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
-//{
+__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
 //    auto const& reconnector = cell->cellTypeData.reconnector;
 //    Cell* closestCell = nullptr;
 //    float closestDistance = 0;
@@ -114,7 +116,8 @@ __device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& dat
 //            lock.releaseLock();
 //        }
 //    }
-//}
+}
+
 //
 //__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 //{

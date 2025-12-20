@@ -34,9 +34,9 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
             }
             statistics.incNumGeneratorPulses(cell->color);
             if (generator.pulseType == GeneratorPulseType_Positive) {
-                cell->signal.channels[Channels::GeneratorPulse] += 1.0f;
+                cell->signal.channels[Channels::CellTypeActivation] += 1.0f;
             } else {
-                cell->signal.channels[Channels::GeneratorPulse] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
+                cell->signal.channels[Channels::CellTypeActivation] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
             }
             ++generator.numPulses;
             if (generator.alternationInterval > 0 && generator.numPulses == generator.alternationInterval * 2) {

@@ -158,7 +158,7 @@ __inline__ __device__ bool SignalProcessor::isManuallyTriggered(SimulationData& 
     if (cell->signalState != SignalState_Active) {
         return false;
     }
-    if (abs(cell->signal.channels[0]) < TRIGGER_THRESHOLD) {
+    if (abs(cell->signal.channels[Channels::CellTypeActivation]) < TRIGGER_THRESHOLD) {
         return false;
     }
     return true;

@@ -94,21 +94,21 @@ namespace Const
     std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
 }
 
+//***********
+//* General *
+//***********
+namespace Channels
+{
+    auto constexpr CellTypeActivation = 0;
+}
+
 //************************
 //* Generator constants *
 //************************
-namespace Channels
-{
-    auto constexpr GeneratorPulse = 0;
-}
 
 //*******************
 //* Depot constants *
 //*******************
-namespace Channels
-{
-    auto constexpr DepotActivation = 0;
-}
 
 //********************
 //* Sensor constants *
@@ -163,7 +163,6 @@ namespace Const
 //********************
 namespace Channels
 {
-    auto constexpr MuscleTrigger = 0;
     auto constexpr MuscleAngle = 1;
 }
 
