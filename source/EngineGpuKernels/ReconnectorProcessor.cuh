@@ -151,9 +151,6 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 
 __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    auto const& reconnector = cell->cellTypeData.reconnector;
-    auto const& reconnectorMode = reconnector.mode;
-
     cell->signal.channels[Channels::ReconnectorSuccess] = 0;
 
     if (cell->tryLock()) {
