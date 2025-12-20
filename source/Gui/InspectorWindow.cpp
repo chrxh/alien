@@ -598,6 +598,26 @@ void _InspectorWindow::processInjectorContent(InjectorDescription& injector)
 void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
 {
     if (ImGui::TreeNodeEx("Properties###attacker", TreeNodeFlags)) {
+        auto mode = attacker.getMode();
+        ImGui::Text("Mode: %s", Const::AttackerModeStrings.at(mode).c_str());
+
+        if (mode == AttackerMode_FreeCell) {
+            auto& attackFreeCell = std::get<AttackFreeCellDescription>(attacker._mode);
+            if (attackFreeCell._restrictToColor.has_value()) {
+                ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
+            }
+        } else if (mode == AttackerMode_Creature) {
+            auto& attackCreature = std::get<AttackCreatureDescription>(attacker._mode);
+            if (attackCreature._minNumCells.has_value()) {
+                ImGui::Text("Min creature cells: %d", *attackCreature._minNumCells);
+            }
+            if (attackCreature._maxNumCells.has_value()) {
+                ImGui::Text("Max creature cells: %d", *attackCreature._maxNumCells);
+            }
+            if (attackCreature._restrictToColor.has_value()) {
+                ImGui::Text("Restrict to color: %d", *attackCreature._restrictToColor);
+            }
+        }
         ImGui::TreePop();
     }
 }

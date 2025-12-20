@@ -125,14 +125,21 @@ namespace Channels
     auto constexpr SensorTelemetryCellVelStrength = 3;
 }
 
-using DetectCreatureLineageRestriction = int;
-enum DetectCreatureLineageRestriction_
+using LineageRestriction = int;
+enum LineageRestriction_
 {
-    DetectCreatureLineageRestriction_No,
-    DetectCreatureLineageRestriction_SameLineage,
-    DetectCreatureLineageRestriction_OtherLineage,
-    DetectCreatureLineageRestriction_Count,
+    LineageRestriction_No,
+    LineageRestriction_SameLineage,
+    LineageRestriction_OtherLineage,
+    LineageRestriction_Count,
 };
+
+// Legacy aliases for backward compatibility
+using DetectCreatureLineageRestriction = LineageRestriction;
+#define DetectCreatureLineageRestriction_No LineageRestriction_No
+#define DetectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
+#define DetectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
+#define DetectCreatureLineageRestriction_Count LineageRestriction_Count
 
 using SensorMode = int;
 enum SensorMode_
@@ -185,6 +192,19 @@ namespace Channels
 {
     auto constexpr AttackerSuccess = 1;
     auto constexpr AttackerNotify = 7;
+}
+
+using AttackerMode = int;
+enum AttackerMode_
+{
+    AttackerMode_FreeCell,
+    AttackerMode_Creature,
+    AttackerMode_Count,
+};
+
+namespace Const
+{
+    std::vector<std::string> const AttackerModeStrings = {"Free cell", "Creature"};
 }
 
 //**********************
@@ -318,14 +338,12 @@ namespace Const
     std::vector<std::string> const ReconnectorModeStrings = {"Structure", "Free cell", "Creature"};
 }
 
-using ReconnectCreatureLineageRestriction = int;
-enum ReconnectCreatureLineageRestriction_
-{
-    ReconnectCreatureLineageRestriction_No,
-    ReconnectCreatureLineageRestriction_SameLineage,
-    ReconnectCreatureLineageRestriction_OtherLineage,
-    ReconnectCreatureLineageRestriction_Count,
-};
+// Legacy aliases for backward compatibility
+using ReconnectCreatureLineageRestriction = LineageRestriction;
+#define ReconnectCreatureLineageRestriction_No LineageRestriction_No
+#define ReconnectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
+#define ReconnectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
+#define ReconnectCreatureLineageRestriction_Count LineageRestriction_Count
 
 using CellEvent = uint8_t;
 enum CellEvent_

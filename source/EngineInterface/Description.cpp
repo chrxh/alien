@@ -74,6 +74,16 @@ ReconnectorMode ReconnectorDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+AttackerMode AttackerDescription::getMode() const
+{
+    if (std::holds_alternative<AttackFreeCellDescription>(_mode)) {
+        return AttackerMode_FreeCell;
+    } else if (std::holds_alternative<AttackCreatureDescription>(_mode)) {
+        return AttackerMode_Creature;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 InjectorDescription::InjectorDescription() {}
 
 CellDescription::CellDescription(bool createIds)

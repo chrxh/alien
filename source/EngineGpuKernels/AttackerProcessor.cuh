@@ -47,57 +47,78 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             return;
         }
 
-        auto const& minNumCells = cell->cellTypeData.attacker.minNumCells;
-        auto const& maxNumCells = cell->cellTypeData.attacker.maxNumCells;
-        auto const& restrictToColor = cell->cellTypeData.attacker.restrictToColor;
-        auto const& restrictToLineage = cell->cellTypeData.attacker.restrictToLineage;
+        auto const& attackerMode = cell->cellTypeData.attacker.mode;
 
         auto sumEnergyToTransfer = 0.0f;
         data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](auto const& otherCell) {
-            if (otherCell->creature == nullptr) {
-                return;
-            }
-            if (cell->isSameCreature(otherCell)) {
-                return;
-            }
-            // Do not attack direct offspring
-            if (otherCell->creature->ancestorId == cell->creature->id) {
-                return;
-            }
-            if (otherCell->fixed) {
-                return;
-            }
 
-            // Filter by color restriction
-            if (restrictToColor != 255 && otherCell->color != restrictToColor) {
-                return;
-            }
-
-            // Filter by minimum number of cells in creature
-            if (minNumCells > 0 && otherCell->creature->numCells < minNumCells) {
-                return;
-            }
-
-            // Filter by maximum number of cells in creature
-            if (maxNumCells > 0 && otherCell->creature->numCells > maxNumCells) {
-                return;
-            }
-
-            // Filter by lineage restriction
-            if (restrictToLineage != DetectCreatureLineageRestriction_No) {
-                if (cell->creature == nullptr) {
+            if (attackerMode == AttackerMode_FreeCell) {
+                if (otherCell->cellType != CellType_Free) {
                     return;
                 }
-                if (restrictToLineage == DetectCreatureLineageRestriction_SameLineage) {
-                    if (cell->creature->lineageId != otherCell->creature->lineageId) {
-                        return;
-                    }
-                } else if (restrictToLineage == DetectCreatureLineageRestriction_OtherLineage) {
-                    if (cell->creature->lineageId == otherCell->creature->lineageId) {
+
+                // Filter by color restriction
+                auto const& restrictToColor = cell->cellTypeData.attacker.modeData.attackFreeCell.restrictToColor;
+                if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                    return;
+                }
+
+            } else if (attackerMode == AttackerMode_Creature) {
+                if (otherCell->creature == nullptr) {
+                    return;
+                }
+
+
+                if (cell->isSameCreature(otherCell)) {
+                    return;
+                }
+                // Do not attack direct offspring (only applicable for Creature mode since free cells have no ancestry)
+                if (cell->creature != nullptr) {
+                    if (otherCell->creature->ancestorId == cell->creature->id) {
                         return;
                     }
                 }
+                if (otherCell->fixed) {
+                    return;
+                }
+
+                // Filter by color restriction
+                auto const& restrictToColor = cell->cellTypeData.attacker.modeData.attackCreature.restrictToColor;
+                if (restrictToColor != 255 && otherCell->color != restrictToColor) {
+                    return;
+                }
+
+                auto const& minNumCells = cell->cellTypeData.attacker.modeData.attackCreature.minNumCells;
+                auto const& maxNumCells = cell->cellTypeData.attacker.modeData.attackCreature.maxNumCells;
+                auto const& restrictToLineage = cell->cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+
+                // Filter by minimum number of cells in creature
+                if (minNumCells > 0 && otherCell->creature->numCells < minNumCells) {
+                    return;
+                }
+
+                // Filter by maximum number of cells in creature
+                if (maxNumCells > 0 && otherCell->creature->numCells > maxNumCells) {
+                    return;
+                }
+
+                // Filter by lineage restriction
+                if (restrictToLineage != LineageRestriction_No) {
+                    if (cell->creature == nullptr) {
+                        return;
+                    }
+                    if (restrictToLineage == LineageRestriction_SameLineage) {
+                        if (cell->creature->lineageId != otherCell->creature->lineageId) {
+                            return;
+                        }
+                    } else if (restrictToLineage == LineageRestriction_OtherLineage) {
+                        if (cell->creature->lineageId == otherCell->creature->lineageId) {
+                            return;
+                        }
+                    }
+                }
             }
+
             // Only attack cells with energy above base value
             auto energyToTransfer = atomicAdd(&otherCell->usableEnergy, 0) * cudaSimulationParameters.attackerStrength.value[cell->color];
             if (energyToTransfer < 0) {

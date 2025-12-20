@@ -125,7 +125,7 @@ struct SensorDescription
     auto operator<=>(SensorDescription const&) const = default;
 
     MEMBER(SensorDescription, std::optional<int>, autoTriggerInterval, 100);  // std::nullopt = manual triggering, value must be >= 3
-    MEMBER(SensorDescription, SensorModeDescription, mode, SensorModeDescription());
+    MEMBER(SensorDescription, SensorModeDescription, mode, DetectCreatureDescription());
     MEMBER(SensorDescription, int, minRange, 0);
     MEMBER(SensorDescription, int, maxRange, 255);
 
@@ -152,14 +152,32 @@ struct GeneratorDescription
     MEMBER(GeneratorDescription, int, numPulses, 0);
 };
 
+struct AttackFreeCellDescription
+{
+    auto operator<=>(AttackFreeCellDescription const&) const = default;
+
+    MEMBER(AttackFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
+};
+
+struct AttackCreatureDescription
+{
+    auto operator<=>(AttackCreatureDescription const&) const = default;
+
+    MEMBER(AttackCreatureDescription, std::optional<int>, minNumCells, std::nullopt);
+    MEMBER(AttackCreatureDescription, std::optional<int>, maxNumCells, std::nullopt);
+    MEMBER(AttackCreatureDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+};
+
+using AttackerModeDescription = std::variant<AttackFreeCellDescription, AttackCreatureDescription>;
+
 struct AttackerDescription
 {
     auto operator<=>(AttackerDescription const&) const = default;
 
-    MEMBER(AttackerDescription, std::optional<int>, minNumCells, std::nullopt);
-    MEMBER(AttackerDescription, std::optional<int>, maxNumCells, std::nullopt);
-    MEMBER(AttackerDescription, std::optional<int>, restrictToColor, std::nullopt);
-    MEMBER(AttackerDescription, DetectCreatureLineageRestriction, restrictToLineage, DetectCreatureLineageRestriction_No);
+    MEMBER(AttackerDescription, AttackerModeDescription, mode, AttackCreatureDescription());
+
+    AttackerMode getMode() const;
 };
 
 struct InjectorDescription
@@ -261,7 +279,7 @@ struct MuscleDescription
 {
     auto operator<=>(MuscleDescription const&) const = default;
 
-    MEMBER(MuscleDescription, MuscleModeDescription, mode, MuscleModeDescription());
+    MEMBER(MuscleDescription, MuscleModeDescription, mode, AutoBendingDescription());
 
     // Additional rendering data
     MEMBER(MuscleDescription, float, lastMovementX, 0.0f);
@@ -305,7 +323,7 @@ struct ReconnectorDescription
 {
     auto operator<=>(ReconnectorDescription const&) const = default;
 
-    MEMBER(ReconnectorDescription, ReconnectorModeDescription, mode, ReconnectorModeDescription());
+    MEMBER(ReconnectorDescription, ReconnectorModeDescription, mode, ReconnectCreatureDescription());
 
     ReconnectorMode getMode() const;
 };

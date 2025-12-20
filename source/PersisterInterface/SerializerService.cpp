@@ -203,10 +203,12 @@ namespace
     auto constexpr Id_GeneratorGenome_PulseType = 1;
     auto constexpr Id_GeneratorGenome_AlternationInterval = 2;
 
-    auto constexpr Id_AttackerGenome_MinNumCells = 0;
-    auto constexpr Id_AttackerGenome_MaxNumCells = 1;
-    auto constexpr Id_AttackerGenome_RestrictToColor = 2;
-    auto constexpr Id_AttackerGenome_RestrictToLineage = 3;
+    auto constexpr Id_AttackerModeGenome_FreeCell_RestrictToColor = 0;
+
+    auto constexpr Id_AttackerModeGenome_Creature_MinNumCells = 0;
+    auto constexpr Id_AttackerModeGenome_Creature_MaxNumCells = 1;
+    auto constexpr Id_AttackerModeGenome_Creature_RestrictToColor = 2;
+    auto constexpr Id_AttackerModeGenome_Creature_RestrictToLineage = 3;
 
     auto constexpr Id_InjectorGenome_GeneIndex = 0;
 
@@ -349,15 +351,36 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneratorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AttackFreeCellGenomeDescription& data)
+    {
+        AttackFreeCellGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_AttackerModeGenome_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AttackFreeCellGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AttackCreatureGenomeDescription& data)
+    {
+        AttackCreatureGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_AttackerModeGenome_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AttackCreatureGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerGenomeDescription& data)
     {
         AttackerGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_AttackerGenome_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        loadSave(task, auxiliaries, Id_AttackerGenome_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        loadSave(task, auxiliaries, Id_AttackerGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_AttackerGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(AttackerGenomeDescription)
 
@@ -694,10 +717,12 @@ namespace
     auto constexpr Id_Generator_AlternationMode = 2;
     auto constexpr Id_Generator_NumPulses = 3;
 
-    auto constexpr Id_Attacker_MinNumCells = 0;
-    auto constexpr Id_Attacker_MaxNumCells = 1;
-    auto constexpr Id_Attacker_RestrictToColor = 2;
-    auto constexpr Id_Attacker_RestrictToLineage = 3;
+    auto constexpr Id_AttackerMode_FreeCell_RestrictToColor = 0;
+
+    auto constexpr Id_AttackerMode_Creature_MinNumCells = 0;
+    auto constexpr Id_AttackerMode_Creature_MaxNumCells = 1;
+    auto constexpr Id_AttackerMode_Creature_RestrictToColor = 2;
+    auto constexpr Id_AttackerMode_Creature_RestrictToLineage = 3;
 
     auto constexpr Id_Sensor_MinRange = 0;
     auto constexpr Id_Sensor_MaxRange = 1;
@@ -909,15 +934,36 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneratorDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AttackFreeCellDescription& data)
+    {
+        AttackFreeCellDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AttackFreeCellDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, AttackCreatureDescription& data)
+    {
+        AttackCreatureDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_AttackerMode_Creature_MinNumCells, data._minNumCells, defaultObject._minNumCells);
+        loadSave(task, auxiliaries, Id_AttackerMode_Creature_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
+        loadSave(task, auxiliaries, Id_AttackerMode_Creature_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_AttackerMode_Creature_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(AttackCreatureDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackerDescription& data)
     {
         AttackerDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Attacker_MinNumCells, data._minNumCells, defaultObject._minNumCells);
-        loadSave(task, auxiliaries, Id_Attacker_MaxNumCells, data._maxNumCells, defaultObject._maxNumCells);
-        loadSave(task, auxiliaries, Id_Attacker_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
-        loadSave(task, auxiliaries, Id_Attacker_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
     }
     SPLIT_SERIALIZATION(AttackerDescription)
 
