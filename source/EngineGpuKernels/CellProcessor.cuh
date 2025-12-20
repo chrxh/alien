@@ -791,6 +791,9 @@ __inline__ __device__ void CellProcessor::radiation(SimulationData& data)
         if (cell->fixed) {
             continue;
         }
+        if (cell->cellType == CellType_Structure) {
+            continue;
+        }
         if (data.primaryNumberGen.random() < cudaSimulationParameters.radiationProbability) {
 
             auto radiation1 = 0.0f;
