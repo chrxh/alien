@@ -368,14 +368,14 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
                     if (maxNumCells > 0 && otherCell->creature->numCells > maxNumCells) {
                         matches = false;
                     }
-                    if (matches && restrictToLineage != DetectCreatureLineageRestriction_No) {
+                    if (matches && restrictToLineage != LineageRestriction_No) {
                         if (cell->creature == nullptr || otherCell->creature == nullptr) {
                             matches = false;
-                        } else if (restrictToLineage == DetectCreatureLineageRestriction_SameLineage) {
+                        } else if (restrictToLineage == LineageRestriction_SameLineage) {
                             if (cell->creature->lineageId != otherCell->creature->lineageId) {
                                 matches = false;
                             }
-                        } else if (restrictToLineage == DetectCreatureLineageRestriction_OtherLineage) {
+                        } else if (restrictToLineage == LineageRestriction_OtherLineage) {
                             if (cell->creature->lineageId == otherCell->creature->lineageId) {
                                 matches = false;
                             }

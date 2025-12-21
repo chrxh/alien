@@ -534,7 +534,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc =
-                DetectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(DetectCreatureLineageRestriction_SameLineage);
+                DetectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
             sensorModeDesc = SensorModeDescription();
@@ -622,7 +622,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage);
+                ReconnectCreatureDescription().minNumCells(5).maxNumCells(20).restrictToColor(3).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeDescription();
@@ -672,7 +672,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc = DetectCreatureGenomeDescription().minNumCells(3).maxNumCells(15).restrictToColor(4).restrictToLineage(
-                DetectCreatureLineageRestriction_OtherLineage);
+                LineageRestriction_OtherLineage);
             break;
         default:
             sensorModeDesc = SensorModeGenomeDescription();
@@ -730,7 +730,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =
-                ReconnectCreatureGenomeDescription().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(ReconnectCreatureLineageRestriction_SameLineage);
+                ReconnectCreatureGenomeDescription().minNumCells(5).maxNumCells(20).restrictToColor(4).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
             reconnectorModeDesc = ReconnectorModeGenomeDescription();

@@ -139,7 +139,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
     // Activation
     if (cell->signalState == SignalState_Active) {
-        bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        bending.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::CellTypeActivation]));
         auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f;
         auto targetAngleRelToConnection0 = Math::getNormalizedAngle(targetAngle + cell->frontAngle, -180.0f);
 
@@ -304,7 +304,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto bendingInfo = getBendingInfo(cell);
-        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::CellTypeActivation]));
 
         // Change bending direction
         auto angleFromPrevious = alienAtomicRead(&bendingInfo.connection->angleFromPrevious);
@@ -387,7 +387,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto bendingInfo = getBendingInfo(cell);
-        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::CellTypeActivation]));
         auto targetAngle = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.f;
         auto targetAngleRelToConnection0 = Math::getNormalizedAngle(cell->frontAngle + targetAngle, -180.0f);
 
@@ -438,7 +438,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
 
     // Activation
     if (cell->signalState == SignalState_Active) {
-        crawling.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        crawling.activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::CellTypeActivation]));
         crawling.activationCountdown = cudaSimulationParameters.muscleActivationCountdown;
     }
     if (crawling.activationCountdown == 0) {
@@ -544,7 +544,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     if (SignalProcessor::isManuallyTriggered(data, cell)) {
 
         auto actualDistance = data.cellMap.getDistance(cell->connections[0].cell->pos, cell->pos);
-        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::CellTypeActivation]));
 
         // Calc min and max distance
         auto maxDistanceDeviation = max(0.0f, min(1.0f, crawling.maxDistanceDeviation));
@@ -612,7 +612,7 @@ __inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data,
         auto angle = Math::getNormalizedAngle(cell->frontAngle + max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleAngle])) * 180.0f, -180.0f);
         direction = Math::rotateClockwise(direction, angle);
 
-        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::MuscleTrigger]));
+        auto activation = max(-1.0f, min(1.0f, cell->signal.channels[Channels::CellTypeActivation]));
         direction = direction * cudaSimulationParameters.muscleMovementAcceleration.value[cell->color] * activation * 0.005f;
         cell->vel += direction;
         cell->cellTypeData.muscle.lastMovementX = direction.x;

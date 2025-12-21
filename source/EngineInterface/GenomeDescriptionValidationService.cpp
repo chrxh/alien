@@ -92,7 +92,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
                     detectCreature._restrictToLineage =
-                        std::clamp(detectCreature._restrictToLineage, 0, DetectCreatureLineageRestriction_Count - 1);
+                        std::clamp(detectCreature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellTypeGenome_Generator) {
@@ -189,7 +189,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                         auto& value = creature._restrictToColor.value();
                         value = std::clamp(value, 0, MAX_COLORS - 1);
                     }
-                    creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, ReconnectCreatureLineageRestriction_Count - 1);
+                    creature._restrictToLineage = std::clamp(creature._restrictToLineage, 0, LineageRestriction_Count - 1);
                 }
 
             } else if (nodeType == CellTypeGenome_Detonator) {

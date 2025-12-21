@@ -34,7 +34,7 @@ public:
                         NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
                         NodeDescription().cellType(ConstructorGenomeDescription()),
                         NodeDescription().cellType(
-                            SensorGenomeDescription().mode(DetectCreatureGenomeDescription().restrictToLineage(DetectCreatureLineageRestriction_OtherLineage))),
+                            SensorGenomeDescription().mode(DetectCreatureGenomeDescription().restrictToLineage(LineageRestriction_OtherLineage))),
                         NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
                         NodeDescription().cellType(AttackerGenomeDescription()),
                     }),
@@ -64,7 +64,7 @@ public:
                             NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
                             NodeDescription().cellType(ConstructorGenomeDescription()),
                             NodeDescription().cellType(SensorGenomeDescription().mode(
-                                DetectCreatureGenomeDescription().restrictToLineage(DetectCreatureLineageRestriction_OtherLineage))),
+                                DetectCreatureGenomeDescription().restrictToLineage(LineageRestriction_OtherLineage))),
                             NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
                             NodeDescription().cellType(AttackerGenomeDescription()),
                         }),

@@ -94,21 +94,21 @@ namespace Const
     std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
 }
 
+//***********
+//* General *
+//***********
+namespace Channels
+{
+    auto constexpr CellTypeActivation = 0;
+}
+
 //************************
 //* Generator constants *
 //************************
-namespace Channels
-{
-    auto constexpr GeneratorPulse = 0;
-}
 
 //*******************
 //* Depot constants *
 //*******************
-namespace Channels
-{
-    auto constexpr DepotActivation = 0;
-}
 
 //********************
 //* Sensor constants *
@@ -134,13 +134,6 @@ enum LineageRestriction_
     LineageRestriction_Count,
 };
 
-// Legacy aliases for backward compatibility
-using DetectCreatureLineageRestriction = LineageRestriction;
-#define DetectCreatureLineageRestriction_No LineageRestriction_No
-#define DetectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
-#define DetectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
-#define DetectCreatureLineageRestriction_Count LineageRestriction_Count
-
 using SensorMode = int;
 enum SensorMode_
 {
@@ -163,7 +156,6 @@ namespace Const
 //********************
 namespace Channels
 {
-    auto constexpr MuscleTrigger = 0;
     auto constexpr MuscleAngle = 1;
 }
 
@@ -338,12 +330,11 @@ namespace Const
     std::vector<std::string> const ReconnectorModeStrings = {"Structure", "Free cell", "Creature"};
 }
 
-// Legacy aliases for backward compatibility
-using ReconnectCreatureLineageRestriction = LineageRestriction;
-#define ReconnectCreatureLineageRestriction_No LineageRestriction_No
-#define ReconnectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
-#define ReconnectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
-#define ReconnectCreatureLineageRestriction_Count LineageRestriction_Count
+namespace Channels
+{
+    auto constexpr ReconnectorSuccess = 2;
+}
+
 
 using CellEvent = uint8_t;
 enum CellEvent_
