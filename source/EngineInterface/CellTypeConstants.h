@@ -134,13 +134,6 @@ enum LineageRestriction_
     LineageRestriction_Count,
 };
 
-// Legacy aliases for backward compatibility
-using DetectCreatureLineageRestriction = LineageRestriction;
-#define DetectCreatureLineageRestriction_No LineageRestriction_No
-#define DetectCreatureLineageRestriction_SameLineage LineageRestriction_SameLineage
-#define DetectCreatureLineageRestriction_OtherLineage LineageRestriction_OtherLineage
-#define DetectCreatureLineageRestriction_Count LineageRestriction_Count
-
 using SensorMode = int;
 enum SensorMode_
 {

@@ -120,10 +120,11 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
                 }
             }
 
-            // Check for own intersecting cells in between
-            if (CellConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
-                return;
-            }
+        }
+
+        // Check for own intersecting cells in between
+        if (CellConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+            return;
         }
 
         auto distance = data.cellMap.getDistance(cell->pos, otherCell->pos);
@@ -153,7 +154,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
 {
     cell->signal.channels[Channels::ReconnectorSuccess] = 0;
 
-    if (cell->tryLock()) {
+    if (!cell->tryLock()) {
         return;
     }
     for (int i = 0; i < cell->numConnections; ++i) {
