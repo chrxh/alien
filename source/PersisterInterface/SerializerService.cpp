@@ -235,7 +235,7 @@ namespace
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
     auto constexpr Id_SignalRecorderGenome_NumEntries = 1;
 
-    auto constexpr Id_SignalRetrievalGenome_NumEntries = 0;
+    auto constexpr Id_SignalStorageGenome_NumEntries = 0;
 }
 
 namespace cereal
@@ -584,14 +584,14 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalRecorderGenomeDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRetrievalGenomeDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, SignalStorageGenomeDescription& data)
     {
-        SignalRetrievalGenomeDescription defaultObject;
+        SignalStorageGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRetrievalGenome_NumEntries, data._numEntries, defaultObject._numEntries);
+        loadSave(task, auxiliaries, Id_SignalStorageGenome_NumEntries, data._numEntries, defaultObject._numEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRetrievalGenomeDescription)
+    SPLIT_SERIALIZATION(SignalStorageGenomeDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MemoryEntryGenomeDescription& data)
@@ -837,7 +837,7 @@ namespace
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
     auto constexpr Id_SignalRecorder_NumEntries = 1;
 
-    auto constexpr Id_SignalRetrieval_NumEntries = 0;
+    auto constexpr Id_SignalStorage_NumEntries = 0;
 }
 
 namespace cereal
@@ -1254,14 +1254,14 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalRecorderDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, SignalRetrievalDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, SignalStorageDescription& data)
     {
-        SignalRetrievalDescription defaultObject;
+        SignalStorageDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRetrieval_NumEntries, data._numEntries, defaultObject._numEntries);
+        loadSave(task, auxiliaries, Id_SignalStorage_NumEntries, data._numEntries, defaultObject._numEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(SignalRetrievalDescription)
+    SPLIT_SERIALIZATION(SignalStorageDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MemoryEntryDescription& data)

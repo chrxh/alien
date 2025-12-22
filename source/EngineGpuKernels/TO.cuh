@@ -299,7 +299,7 @@ struct SignalRecorderTO
     int numEntries;
 };
 
-struct SignalRetrievalTO
+struct SignalStorageTO
 {
     int numEntries;
 };
@@ -308,7 +308,7 @@ union MemoryModeDataTO
 {
     SignalDelayTO signalDelay;
     SignalRecorderTO signalRecorder;
-    SignalRetrievalTO signalRetrieval;
+    SignalStorageTO signalStorage;
 };
 
 struct MemoryEntryTO

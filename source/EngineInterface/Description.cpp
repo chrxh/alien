@@ -100,8 +100,8 @@ MemoryMode MemoryDescription::getMode() const
         return MemoryMode_SignalDelay;
     } else if (std::holds_alternative<SignalRecorderDescription>(_mode)) {
         return MemoryMode_SignalRecorder;
-    } else if (std::holds_alternative<SignalRetrievalDescription>(_mode)) {
-        return MemoryMode_SignalRetrieval;
+    } else if (std::holds_alternative<SignalStorageDescription>(_mode)) {
+        return MemoryMode_SignalStorage;
     }
     THROW_NOT_IMPLEMENTED();
 }

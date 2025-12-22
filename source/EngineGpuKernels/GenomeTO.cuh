@@ -216,7 +216,7 @@ struct SignalRecorderGenomeTO
     int numEntries;
 };
 
-struct SignalRetrievalGenomeTO
+struct SignalStorageGenomeTO
 {
     int numEntries;
 };
@@ -225,7 +225,7 @@ union MemoryModeDataGenomeTO
 {
     SignalDelayGenomeTO signalDelay;
     SignalRecorderGenomeTO signalRecorder;
-    SignalRetrievalGenomeTO signalRetrieval;
+    SignalStorageGenomeTO signalStorage;
 };
 
 struct MemoryEntryGenomeTO

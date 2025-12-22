@@ -102,8 +102,8 @@ MemoryMode MemoryGenomeDescription::getMode() const
         return MemoryMode_SignalDelay;
     } else if (std::holds_alternative<SignalRecorderGenomeDescription>(_mode)) {
         return MemoryMode_SignalRecorder;
-    } else if (std::holds_alternative<SignalRetrievalGenomeDescription>(_mode)) {
-        return MemoryMode_SignalRetrieval;
+    } else if (std::holds_alternative<SignalStorageGenomeDescription>(_mode)) {
+        return MemoryMode_SignalStorage;
     }
     CHECK(false);
 }

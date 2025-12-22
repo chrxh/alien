@@ -512,10 +512,10 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
             signalRecorder._numEntries = memoryTO.modeData.signalRecorder.numEntries;
             memory._mode = signalRecorder;
-        } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
-            SignalRetrievalDescription signalRetrieval;
-            signalRetrieval._numEntries = memoryTO.modeData.signalRetrieval.numEntries;
-            memory._mode = signalRetrieval;
+        } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            SignalStorageDescription signalStorage;
+            signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
+            memory._mode = signalStorage;
         }
         if (memoryTO.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
             auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
@@ -755,10 +755,10 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
             signalRecorder._numEntries = memoryTO.modeData.signalRecorder.numEntries;
             memoryDesc._mode = signalRecorder;
-        } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
-            SignalRetrievalGenomeDescription signalRetrieval;
-            signalRetrieval._numEntries = memoryTO.modeData.signalRetrieval.numEntries;
-            memoryDesc._mode = signalRetrieval;
+        } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            SignalStorageGenomeDescription signalStorage;
+            signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
+            memoryDesc._mode = signalStorage;
         }
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
             memoryDesc._memoryEntries[i]._timestamp = memoryTO.memoryEntries[i].timestamp;
@@ -1050,9 +1050,9 @@ void DescriptionConverterService::convertGenomeToTO(
                     auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
                     memoryTO.modeData.signalRecorder.numEntries = signalRecorderDesc._numEntries;
-                } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
-                    auto const& signalRetrievalDesc = std::get<SignalRetrievalGenomeDescription>(memoryDesc._mode);
-                    memoryTO.modeData.signalRetrieval.numEntries = signalRetrievalDesc._numEntries;
+                } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+                    auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
                 }
                 for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
                     memoryTO.memoryEntries[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
@@ -1328,9 +1328,9 @@ void DescriptionConverterService::convertCellToTO(
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
             memoryTO.modeData.signalRecorder.numEntries = signalRecorderDesc._numEntries;
-        } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
-            auto const& signalRetrievalDesc = std::get<SignalRetrievalDescription>(memoryDesc._mode);
-            memoryTO.modeData.signalRetrieval.numEntries = signalRetrievalDesc._numEntries;
+        } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
         }
         memoryTO.memoryEntriesDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);

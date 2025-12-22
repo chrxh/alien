@@ -345,7 +345,7 @@ enum MemoryMode_
 {
     MemoryMode_SignalDelay,
     MemoryMode_SignalRecorder,
-    MemoryMode_SignalRetrieval,
+    MemoryMode_SignalStorage,
     MemoryMode_Count,
 };
 

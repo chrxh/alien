@@ -296,14 +296,14 @@ struct SignalRecorderGenomeDescription
     MEMBER(SignalRecorderGenomeDescription, int, numEntries, 8);
 };
 
-struct SignalRetrievalGenomeDescription
+struct SignalStorageGenomeDescription
 {
-    auto operator<=>(SignalRetrievalGenomeDescription const&) const = default;
+    auto operator<=>(SignalStorageGenomeDescription const&) const = default;
 
-    MEMBER(SignalRetrievalGenomeDescription, int, numEntries, 8);
+    MEMBER(SignalStorageGenomeDescription, int, numEntries, 8);
 };
 
-using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalRetrievalGenomeDescription>;
+using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription>;
 
 struct MemoryEntryGenomeDescription
 {

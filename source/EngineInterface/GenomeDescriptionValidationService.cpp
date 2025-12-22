@@ -206,8 +206,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                     auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
                     signalRecorder._numEntries = std::max(signalRecorder._numEntries, 1);
-                } else if (memoryMode == MemoryMode_SignalRetrieval) {
-                    auto& signalRetrieval = std::get<SignalRetrievalGenomeDescription>(memory._mode);
+                } else if (memoryMode == MemoryMode_SignalStorage) {
+                    auto& signalRetrieval = std::get<SignalStorageGenomeDescription>(memory._mode);
                     signalRetrieval._numEntries = std::max(signalRetrieval._numEntries, 1);
                 }
             }

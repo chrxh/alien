@@ -326,7 +326,7 @@ struct SignalRecorder
     int numEntries;
 };
 
-struct SignalRetrieval
+struct SignalStorage
 {
     int numEntries;
 };
@@ -335,7 +335,7 @@ union MemoryModeData
 {
     SignalDelay signalDelay;
     SignalRecorder signalRecorder;
-    SignalRetrieval signalRetrieval;
+    SignalStorage signalStorage;
 };
 
 struct MemoryEntry

@@ -155,8 +155,8 @@ namespace
             return SignalDelayGenomeDescription();
         case MemoryMode_SignalRecorder:
             return SignalRecorderGenomeDescription();
-        case MemoryMode_SignalRetrieval:
-            return SignalRetrievalGenomeDescription();
+        case MemoryMode_SignalStorage:
+            return SignalStorageGenomeDescription();
         default:
             CHECK(false);
         }
@@ -600,9 +600,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Number of entries").textWidth(rightColumnWidth), signalRecorder._numEntries);
                 AlienGui::EndIndent();
-            } else if (mode == MemoryMode_SignalRetrieval) {
+            } else if (mode == MemoryMode_SignalStorage) {
                 AlienGui::BeginIndent();
-                auto& signalRetrieval = std::get<SignalRetrievalGenomeDescription>(memory._mode);
+                auto& signalRetrieval = std::get<SignalStorageGenomeDescription>(memory._mode);
                 AlienGui::InputInt(
                     AlienGui::InputIntParameters().name("Number of entries").textWidth(rightColumnWidth), signalRetrieval._numEntries);
                 AlienGui::EndIndent();

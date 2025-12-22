@@ -34,7 +34,7 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Digestor},
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
-        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRetrieval}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
     };
 }
 
@@ -106,7 +106,7 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Digestor},
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
-        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRetrieval}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
     };
 }
 
@@ -519,10 +519,10 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
                 return false;
             }
         } break;
-        case MemoryMode_SignalRetrieval: {
-            auto const& signalRetrieval = std::get<SignalRetrievalDescription>(memory._mode);
-            auto const& nodeSignalRetrieval = std::get<SignalRetrievalGenomeDescription>(nodeMemory._mode);
-            if (signalRetrieval._numEntries != nodeSignalRetrieval._numEntries) {
+        case MemoryMode_SignalStorage: {
+            auto const& signalStorage = std::get<SignalStorageDescription>(memory._mode);
+            auto const& nodeSignalStorage = std::get<SignalStorageGenomeDescription>(nodeMemory._mode);
+            if (signalStorage._numEntries != nodeSignalStorage._numEntries) {
                 return false;
             }
         } break;
@@ -698,13 +698,21 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderDescription().readOnly(false).numEntries(16);
             break;
-        case MemoryMode_SignalRetrieval:
-            memoryModeDesc = SignalRetrievalDescription().numEntries(12);
+        case MemoryMode_SignalStorage:
+            memoryModeDesc = SignalStorageDescription().numEntries(12);
             break;
         default:
             memoryModeDesc = MemoryModeDescription();
         }
-        return MemoryDescription().mode(memoryModeDesc);
+        auto memory = MemoryDescription().mode(memoryModeDesc);
+        // Set non-default memoryEntries
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            memory._memoryEntries[i]._timestamp = i + 1;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                memory._memoryEntries[i]._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.1f;
+            }
+        }
+        return memory;
     }
     default:
         return CellTypeDescription();
@@ -826,13 +834,21 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numEntries(16);
             break;
-        case MemoryMode_SignalRetrieval:
-            memoryModeDesc = SignalRetrievalGenomeDescription().numEntries(12);
+        case MemoryMode_SignalStorage:
+            memoryModeDesc = SignalStorageGenomeDescription().numEntries(12);
             break;
         default:
             memoryModeDesc = MemoryModeGenomeDescription();
         }
-        return MemoryGenomeDescription().mode(memoryModeDesc);
+        auto memory = MemoryGenomeDescription().mode(memoryModeDesc);
+        // Set non-default memoryEntries
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            memory._memoryEntries[i]._timestamp = i + 1;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                memory._memoryEntries[i]._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.1f;
+            }
+        }
+        return memory;
     }
     default:
         return CellTypeGenomeDescription();

@@ -187,8 +187,14 @@ namespace
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries = node.cellTypeData.memory.modeData.signalRecorder.numEntries;
-                        } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
-                            nodeTO.cellTypeData.memory.modeData.signalRetrieval.numEntries = node.cellTypeData.memory.modeData.signalRetrieval.numEntries;
+                        } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                            nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries = node.cellTypeData.memory.modeData.signalStorage.numEntries;
+                        }
+                        for (int k = 0; k < MAX_CELL_MEMORY_ENTRIES; ++k) {
+                            nodeTO.cellTypeData.memory.memoryEntries[k].timestamp = node.cellTypeData.memory.memoryEntries[k].timestamp;
+                            for (int l = 0; l < MAX_CHANNELS; ++l) {
+                                nodeTO.cellTypeData.memory.memoryEntries[k].channels[l] = node.cellTypeData.memory.memoryEntries[k].channels[l];
+                            }
                         }
                         break;
                     }
@@ -422,20 +428,16 @@ namespace
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries = cell->cellTypeData.memory.modeData.signalRecorder.numEntries;
-            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
-                cellTO.cellTypeData.memory.modeData.signalRetrieval.numEntries = cell->cellTypeData.memory.modeData.signalRetrieval.numEntries;
+            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                cellTO.cellTypeData.memory.modeData.signalStorage.numEntries = cell->cellTypeData.memory.modeData.signalStorage.numEntries;
             }
-            if (cell->cellTypeData.memory.memoryEntries != nullptr) {
-                int targetSize;  // not used
-                copyDataToHeap<int>(
-                    sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES,
-                    reinterpret_cast<uint8_t*>(cell->cellTypeData.memory.memoryEntries),
-                    targetSize,
-                    cellTO.cellTypeData.memory.memoryEntriesDataIndex,
-                    to);
-            } else {
-                cellTO.cellTypeData.memory.memoryEntriesDataIndex = VALUE_NOT_SET_UINT64;
-            }
+            int targetSize;  // not used
+            copyDataToHeap<int>(
+                sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES,
+                reinterpret_cast<uint8_t*>(cell->cellTypeData.memory.memoryEntries),
+                targetSize,
+                cellTO.cellTypeData.memory.memoryEntriesDataIndex,
+                to);
         } break;
         }
     }

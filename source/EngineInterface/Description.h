@@ -375,14 +375,14 @@ struct SignalRecorderDescription
     MEMBER(SignalRecorderDescription, int, numEntries, 8);
 };
 
-struct SignalRetrievalDescription
+struct SignalStorageDescription
 {
-    auto operator<=>(SignalRetrievalDescription const&) const = default;
+    auto operator<=>(SignalStorageDescription const&) const = default;
 
-    MEMBER(SignalRetrievalDescription, int, numEntries, 8);
+    MEMBER(SignalStorageDescription, int, numEntries, 8);
 };
 
-using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalRetrievalDescription>;
+using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription>;
 
 struct MemoryDescription
 {

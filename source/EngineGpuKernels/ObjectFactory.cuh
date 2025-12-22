@@ -241,8 +241,8 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
                     node.cellTypeData.memory.modeData.signalRecorder.numEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
-                } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
-                    node.cellTypeData.memory.modeData.signalRetrieval.numEntries = nodeTO.cellTypeData.memory.modeData.signalRetrieval.numEntries;
+                } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                    node.cellTypeData.memory.modeData.signalStorage.numEntries = nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries;
                 }
                 break;
             }
@@ -475,8 +475,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
             cell->cellTypeData.memory.modeData.signalRecorder.numEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
-        } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
-            cell->cellTypeData.memory.modeData.signalRetrieval.numEntries = cellTO.cellTypeData.memory.modeData.signalRetrieval.numEntries;
+        } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+            cell->cellTypeData.memory.modeData.signalStorage.numEntries = cellTO.cellTypeData.memory.modeData.signalStorage.numEntries;
         }
         if (cellTO.cellTypeData.memory.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
             copyDataToHeap(
@@ -841,8 +841,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
             memory.modeData.signalRecorder.numEntries = nodeMemory.modeData.signalRecorder.numEntries;
-        } else if (nodeMemory.mode == MemoryMode_SignalRetrieval) {
-            memory.modeData.signalRetrieval.numEntries = nodeMemory.modeData.signalRetrieval.numEntries;
+        } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
+            memory.modeData.signalStorage.numEntries = nodeMemory.modeData.signalStorage.numEntries;
         }
         // Allocate and copy memory entries from genome
         memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(MAX_CELL_MEMORY_ENTRIES);
