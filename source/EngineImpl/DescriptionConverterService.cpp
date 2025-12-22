@@ -515,13 +515,11 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
             memory._mode = signalStorage;
         }
-        if (memoryTO.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
-            auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
-            for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-                memory._memoryEntries[i]._timestamp = (*memoryEntriesTO)[i].timestamp;
-                for (int j = 0; j < MAX_CHANNELS; ++j) {
-                    memory._memoryEntries[i]._channels[j] = (*memoryEntriesTO)[i].channels[j];
-                }
+        auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            memory._memoryEntries[i]._timestamp = (*memoryEntriesTO)[i].timestamp;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                memory._memoryEntries[i]._channels[j] = (*memoryEntriesTO)[i].channels[j];
             }
         }
         result._cellType = memory;
