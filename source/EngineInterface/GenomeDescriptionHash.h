@@ -403,9 +403,29 @@ struct std::hash<MemoryModeGenomeDescription>
 };
 
 template <>
+struct std::hash<MemoryEntryGenomeDescription>
+{
+    std::size_t operator()(MemoryEntryGenomeDescription const& desc) const
+    {
+        std::size_t result = std::hash<int>{}(desc._timestamp);
+        for (auto const& channel : desc._channels) {
+            hash_combine(result, channel);
+        }
+        return result;
+    }
+};
+
+template <>
 struct std::hash<MemoryGenomeDescription>
 {
-    std::size_t operator()(MemoryGenomeDescription const& desc) const { return std::hash<MemoryModeGenomeDescription>{}(desc._mode); }
+    std::size_t operator()(MemoryGenomeDescription const& desc) const
+    {
+        std::size_t result = std::hash<MemoryModeGenomeDescription>{}(desc._mode);
+        for (auto const& entry : desc._memoryEntries) {
+            hash_combine(result, std::hash<MemoryEntryGenomeDescription>{}(entry));
+        }
+        return result;
+    }
 };
 
 template <>

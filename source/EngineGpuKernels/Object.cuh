@@ -338,10 +338,17 @@ union MemoryModeData
     SignalRetrieval signalRetrieval;
 };
 
+struct MemoryEntry
+{
+    int timestamp;
+    float channels[MAX_CHANNELS];
+};
+
 struct Memory
 {
     MemoryMode mode;
     MemoryModeData modeData;
+    MemoryEntry* memoryEntries;  // Pointer to MemoryEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 
 union CellTypeData

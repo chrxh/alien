@@ -228,10 +228,17 @@ union MemoryModeDataGenomeTO
     SignalRetrievalGenomeTO signalRetrieval;
 };
 
+struct MemoryEntryGenomeTO
+{
+    int timestamp;
+    float channels[MAX_CHANNELS];
+};
+
 struct MemoryGenomeTO
 {
     MemoryMode mode;
     MemoryModeDataGenomeTO modeData;
+    MemoryEntryGenomeTO memoryEntries[MAX_CELL_MEMORY_ENTRIES];
 };
 
 union CellTypeDataGenomeTO

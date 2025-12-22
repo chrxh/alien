@@ -353,6 +353,7 @@ struct DigestorDescription
 struct MemoryEntryDescription
 {
     MemoryEntryDescription();
+    auto operator<=>(MemoryEntryDescription const&) const = default;
 
     MEMBER(MemoryEntryDescription, int, timestamp, 0);
     MEMBER(MemoryEntryDescription, std::vector<float>, channels, {});

@@ -425,6 +425,17 @@ namespace
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
                 cellTO.cellTypeData.memory.modeData.signalRetrieval.numEntries = cell->cellTypeData.memory.modeData.signalRetrieval.numEntries;
             }
+            if (cell->cellTypeData.memory.memoryEntries != nullptr) {
+                int targetSize;  // not used
+                copyDataToHeap<int>(
+                    sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES,
+                    reinterpret_cast<uint8_t*>(cell->cellTypeData.memory.memoryEntries),
+                    targetSize,
+                    cellTO.cellTypeData.memory.memoryEntriesDataIndex,
+                    to);
+            } else {
+                cellTO.cellTypeData.memory.memoryEntriesDataIndex = VALUE_NOT_SET_UINT64;
+            }
         } break;
         }
     }
@@ -1001,6 +1012,9 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
         if (cell->neuralNetwork) {
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
+        if (cell->cellType == CellType_Memory && cell->cellTypeData.memory.memoryEntries) {
+            heapBytes += sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES + GpuMemoryAlignmentBytes;
+        }
         if (cell->creature) {
             auto const& creature = cell->creature;
             if (alienAtomicExch64(&creature->creatureIndex, static_cast<uint64_t>(0)) == VALUE_NOT_SET_UINT64) {
@@ -1042,6 +1056,9 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
             heapBytes += sizeof(Cell) + GpuMemoryAlignmentBytes;
             if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
+            }
+            if (cellTO.cellType == CellType_Memory && cellTO.cellTypeData.memory.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
+                heapBytes += sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES + GpuMemoryAlignmentBytes;
             }
         }
         alienAtomicAdd64(&arraySizes->heap, heapBytes);

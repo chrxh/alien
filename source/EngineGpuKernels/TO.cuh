@@ -311,10 +311,17 @@ union MemoryModeDataTO
     SignalRetrievalTO signalRetrieval;
 };
 
+struct MemoryEntryTO
+{
+    int timestamp;
+    float channels[MAX_CHANNELS];
+};
+
 struct MemoryTO
 {
     MemoryMode mode;
     MemoryModeDataTO modeData;
+    uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
 union CellTypeDataTO

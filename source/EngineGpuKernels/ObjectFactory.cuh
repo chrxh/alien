@@ -478,6 +478,15 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
             cell->cellTypeData.memory.modeData.signalRetrieval.numEntries = cellTO.cellTypeData.memory.modeData.signalRetrieval.numEntries;
         }
+        if (cellTO.cellTypeData.memory.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
+            copyDataToHeap(
+                sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES,
+                cellTO.cellTypeData.memory.memoryEntriesDataIndex,
+                to.heap,
+                reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries));
+        } else {
+            cell->cellTypeData.memory.memoryEntries = nullptr;
+        }
     } break;
     }
 }
@@ -834,6 +843,14 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             memory.modeData.signalRecorder.numEntries = nodeMemory.modeData.signalRecorder.numEntries;
         } else if (nodeMemory.mode == MemoryMode_SignalRetrieval) {
             memory.modeData.signalRetrieval.numEntries = nodeMemory.modeData.signalRetrieval.numEntries;
+        }
+        // Allocate and copy memory entries from genome
+        memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(MAX_CELL_MEMORY_ENTRIES);
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            memory.memoryEntries[i].timestamp = nodeMemory.memoryEntries[i].timestamp;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                memory.memoryEntries[i].channels[j] = nodeMemory.memoryEntries[i].channels[j];
+            }
         }
     } break;
     }

@@ -517,6 +517,15 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             signalRetrieval._numEntries = memoryTO.modeData.signalRetrieval.numEntries;
             memory._mode = signalRetrieval;
         }
+        if (memoryTO.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
+            auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
+            for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+                memory._memoryEntries[i]._timestamp = (*memoryEntriesTO)[i].timestamp;
+                for (int j = 0; j < MAX_CHANNELS; ++j) {
+                    memory._memoryEntries[i]._channels[j] = (*memoryEntriesTO)[i].channels[j];
+                }
+            }
+        }
         result._cellType = memory;
     } break;
     }
@@ -750,6 +759,12 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
             SignalRetrievalGenomeDescription signalRetrieval;
             signalRetrieval._numEntries = memoryTO.modeData.signalRetrieval.numEntries;
             memoryDesc._mode = signalRetrieval;
+        }
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            memoryDesc._memoryEntries[i]._timestamp = memoryTO.memoryEntries[i].timestamp;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                memoryDesc._memoryEntries[i]._channels[j] = memoryTO.memoryEntries[i].channels[j];
+            }
         }
         nodeDesc._cellType = memoryDesc;
     } break;
@@ -1039,6 +1054,12 @@ void DescriptionConverterService::convertGenomeToTO(
                     auto const& signalRetrievalDesc = std::get<SignalRetrievalGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalRetrieval.numEntries = signalRetrievalDesc._numEntries;
                 }
+                for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+                    memoryTO.memoryEntries[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
+                    for (int j = 0; j < MAX_CHANNELS; ++j) {
+                        memoryTO.memoryEntries[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
+                    }
+                }
             } break;
             }
         }
@@ -1310,6 +1331,15 @@ void DescriptionConverterService::convertCellToTO(
         } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
             auto const& signalRetrievalDesc = std::get<SignalRetrievalDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRetrieval.numEntries = signalRetrievalDesc._numEntries;
+        }
+        memoryTO.memoryEntriesDataIndex = heap.size();
+        heap.resize(heap.size() + sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
+        auto memoryEntriesTO = reinterpret_cast<MemoryEntryTO*>(heap.data() + heap.size() - sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            memoryEntriesTO[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                memoryEntriesTO[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
+            }
         }
     } break;
     }

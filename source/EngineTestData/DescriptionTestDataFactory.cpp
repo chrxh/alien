@@ -527,6 +527,16 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             }
         } break;
         }
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            if (memory._memoryEntries[i]._timestamp != nodeMemory._memoryEntries[i]._timestamp) {
+                return false;
+            }
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                if (memory._memoryEntries[i]._channels[j] != nodeMemory._memoryEntries[i]._channels[j]) {
+                    return false;
+                }
+            }
+        }
     } break;
     default:
         return false;

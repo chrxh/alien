@@ -305,11 +305,22 @@ struct SignalRetrievalGenomeDescription
 
 using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalRetrievalGenomeDescription>;
 
+struct MemoryEntryGenomeDescription
+{
+    MemoryEntryGenomeDescription();
+    auto operator<=>(MemoryEntryGenomeDescription const&) const = default;
+
+    MEMBER(MemoryEntryGenomeDescription, int, timestamp, 0);
+    MEMBER(MemoryEntryGenomeDescription, std::vector<float>, channels, {});
+};
+
 struct MemoryGenomeDescription
 {
+    MemoryGenomeDescription();
     auto operator<=>(MemoryGenomeDescription const&) const = default;
 
     MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());
+    MEMBER(MemoryGenomeDescription, std::vector<MemoryEntryGenomeDescription>, memoryEntries, {});
 
     MemoryMode getMode() const;
 };

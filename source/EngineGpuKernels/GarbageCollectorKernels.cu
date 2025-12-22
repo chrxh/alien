@@ -76,6 +76,12 @@ __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap)
         if (cell->neuralNetwork) {
             copyAndAssignNewHeapData(reinterpret_cast<uint8_t*&>(cell->neuralNetwork), sizeof(*cell->neuralNetwork), newHeap);
         }
+        if (cell->cellType == CellType_Memory && cell->cellTypeData.memory.memoryEntries) {
+            copyAndAssignNewHeapData(
+                reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries),
+                sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES,
+                newHeap);
+        }
     }
 }
 
