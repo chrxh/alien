@@ -350,12 +350,20 @@ struct DigestorDescription
     }
 };
 
+struct MemoryEntryDescription
+{
+    MemoryEntryDescription();
+
+    MEMBER(MemoryEntryDescription, int, timestamp, 0);
+    MEMBER(MemoryEntryDescription, std::vector<float>, channels, {});
+};
+
 struct SignalDelayDescription
 {
     auto operator<=>(SignalDelayDescription const&) const = default;
 
-    MEMBER(SignalDelayDescription, int, delayWithRecording, 15);  // In time steps
-    MEMBER(SignalDelayDescription, int, delayWithoutRecording, 0);  // In time steps
+    MEMBER(SignalDelayDescription, int, delayWithRecording, 15);  // Time steps
+    MEMBER(SignalDelayDescription, int, delayWithoutRecording, 0);  // Time steps
 };
 
 struct SignalRecorderDescription
@@ -377,9 +385,11 @@ using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorde
 
 struct MemoryDescription
 {
+    MemoryDescription();
     auto operator<=>(MemoryDescription const&) const = default;
 
     MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());
+    MEMBER(MemoryDescription, std::vector<MemoryEntryDescription>, memoryEntries, {});
 
     MemoryMode getMode() const;
 };

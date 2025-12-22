@@ -74,6 +74,11 @@ ReconnectorMode ReconnectorDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+MemoryEntryDescription::MemoryEntryDescription()
+{
+    _channels.resize(MAX_CHANNELS, 0);
+}
+
 AttackerMode AttackerDescription::getMode() const
 {
     if (std::holds_alternative<AttackFreeCellDescription>(_mode)) {
@@ -82,6 +87,11 @@ AttackerMode AttackerDescription::getMode() const
         return AttackerMode_Creature;
     }
     THROW_NOT_IMPLEMENTED();
+}
+
+MemoryDescription::MemoryDescription()
+{
+    _memoryEntries.resize(MAX_CELL_MEMORY_ENTRIES, MemoryEntryDescription());
 }
 
 MemoryMode MemoryDescription::getMode() const
