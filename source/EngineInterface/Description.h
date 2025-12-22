@@ -350,6 +350,38 @@ struct DigestorDescription
     }
 };
 
+struct SignalDelayDescription
+{
+    auto operator<=>(SignalDelayDescription const&) const = default;
+
+    MEMBER(SignalDelayDescription, int, delayWithRecording, 15);  // In time steps
+    MEMBER(SignalDelayDescription, int, delayWithoutRecording, 0);  // In time steps
+};
+
+struct SignalRecorderDescription
+{
+    auto operator<=>(SignalRecorderDescription const&) const = default;
+
+    MEMBER(SignalRecorderDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderDescription, int, numEntries, 8);
+};
+
+struct SignalRetrievalDescription
+{
+    auto operator<=>(SignalRetrievalDescription const&) const = default;
+
+    MEMBER(SignalRetrievalDescription, int, numEntries, 8);
+};
+
+using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalRetrievalDescription>;
+
+struct MemoryDescription
+{
+    auto operator<=>(MemoryDescription const&) const = default;
+
+    MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());
+};
+
 using CellTypeDescription = std::variant<
     StructureCellDescription,
     FreeCellDescription,
