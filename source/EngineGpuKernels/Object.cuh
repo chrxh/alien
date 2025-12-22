@@ -314,8 +314,35 @@ struct Digestor
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelay
+{
+    int delayWithRecording;
+    int delayWithoutRecording;
+};
+
+struct SignalRecorder
+{
+    bool readOnly;
+    int numEntries;
+};
+
+struct SignalRetrieval
+{
+    int numEntries;
+};
+
+union MemoryModeData
+{
+    SignalDelay signalDelay;
+    SignalRecorder signalRecorder;
+    SignalRetrieval signalRetrieval;
+};
+
 struct Memory
-{};
+{
+    MemoryMode mode;
+    MemoryModeData modeData;
+};
 
 union CellTypeData
 {

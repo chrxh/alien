@@ -32,7 +32,9 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         CellParameter{CellType_Detonator},
         CellParameter{CellType_Digestor},
-        CellParameter{CellType_Memory},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRetrieval}},
     };
 }
 
@@ -102,7 +104,9 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         NodeParameter{CellTypeGenome_Detonator},
         NodeParameter{CellTypeGenome_Digestor},
-        NodeParameter{CellTypeGenome_Memory},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRetrieval}},
     };
 }
 
@@ -489,6 +493,40 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         if (nodeType != CellTypeGenome_Memory) {
             return false;
         }
+        auto const& memory = std::get<MemoryDescription>(cell._cellType);
+        auto const& nodeMemory = std::get<MemoryGenomeDescription>(node._cellType);
+        if (memory.getMode() != nodeMemory.getMode()) {
+            return false;
+        }
+        switch (memory.getMode()) {
+        case MemoryMode_SignalDelay: {
+            auto const& signalDelay = std::get<SignalDelayDescription>(memory._mode);
+            auto const& nodeSignalDelay = std::get<SignalDelayGenomeDescription>(nodeMemory._mode);
+            if (signalDelay._delayWithRecording != nodeSignalDelay._delayWithRecording) {
+                return false;
+            }
+            if (signalDelay._delayWithoutRecording != nodeSignalDelay._delayWithoutRecording) {
+                return false;
+            }
+        } break;
+        case MemoryMode_SignalRecorder: {
+            auto const& signalRecorder = std::get<SignalRecorderDescription>(memory._mode);
+            auto const& nodeSignalRecorder = std::get<SignalRecorderGenomeDescription>(nodeMemory._mode);
+            if (signalRecorder._readOnly != nodeSignalRecorder._readOnly) {
+                return false;
+            }
+            if (signalRecorder._numEntries != nodeSignalRecorder._numEntries) {
+                return false;
+            }
+        } break;
+        case MemoryMode_SignalRetrieval: {
+            auto const& signalRetrieval = std::get<SignalRetrievalDescription>(memory._mode);
+            auto const& nodeSignalRetrieval = std::get<SignalRetrievalGenomeDescription>(nodeMemory._mode);
+            if (signalRetrieval._numEntries != nodeSignalRetrieval._numEntries) {
+                return false;
+            }
+        } break;
+        }
     } break;
     default:
         return false;
@@ -502,6 +540,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     auto muscleMode = std::holds_alternative<MuscleModeWrapper>(cellParameter.mode) ? std::get<MuscleModeWrapper>(cellParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode = std::holds_alternative<SensorModeWrapper>(cellParameter.mode) ? std::get<SensorModeWrapper>(cellParameter.mode).value : SensorMode_DetectEnergy;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(cellParameter.mode) ? std::get<ReconnectorModeWrapper>(cellParameter.mode).value : ReconnectorMode_Structure;
+    auto memoryMode = std::holds_alternative<MemoryModeWrapper>(cellParameter.mode) ? std::get<MemoryModeWrapper>(cellParameter.mode).value : MemoryMode_SignalDelay;
 
     switch (type) {
     case CellType_Structure:
@@ -640,8 +679,23 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         return DetonatorDescription().countdown(23);
     case CellType_Digestor:
         return DigestorDescription().rawEnergyConductivity(0.7f);
-    case CellType_Memory:
-        return MemoryDescription();
+    case CellType_Memory: {
+        MemoryModeDescription memoryModeDesc;
+        switch (memoryMode) {
+        case MemoryMode_SignalDelay:
+            memoryModeDesc = SignalDelayDescription().delayWithRecording(20).delayWithoutRecording(5);
+            break;
+        case MemoryMode_SignalRecorder:
+            memoryModeDesc = SignalRecorderDescription().readOnly(false).numEntries(16);
+            break;
+        case MemoryMode_SignalRetrieval:
+            memoryModeDesc = SignalRetrievalDescription().numEntries(12);
+            break;
+        default:
+            memoryModeDesc = MemoryModeDescription();
+        }
+        return MemoryDescription().mode(memoryModeDesc);
+    }
     default:
         return CellTypeDescription();
     }
@@ -653,6 +707,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     auto muscleMode = std::holds_alternative<MuscleModeWrapper>(cellParameter.mode) ? std::get<MuscleModeWrapper>(cellParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode = std::holds_alternative<SensorModeWrapper>(cellParameter.mode) ? std::get<SensorModeWrapper>(cellParameter.mode).value : SensorMode_DetectEnergy;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(cellParameter.mode) ? std::get<ReconnectorModeWrapper>(cellParameter.mode).value : ReconnectorMode_Structure;
+    auto memoryMode = std::holds_alternative<MemoryModeWrapper>(cellParameter.mode) ? std::get<MemoryModeWrapper>(cellParameter.mode).value : MemoryMode_SignalDelay;
     switch (type) {
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
@@ -753,7 +808,21 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         return DigestorGenomeDescription().rawEnergyConductivity(0.8f);
     }
     case CellTypeGenome_Memory: {
-        return MemoryGenomeDescription();
+        MemoryModeGenomeDescription memoryModeDesc;
+        switch (memoryMode) {
+        case MemoryMode_SignalDelay:
+            memoryModeDesc = SignalDelayGenomeDescription().delayWithRecording(20).delayWithoutRecording(5);
+            break;
+        case MemoryMode_SignalRecorder:
+            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numEntries(16);
+            break;
+        case MemoryMode_SignalRetrieval:
+            memoryModeDesc = SignalRetrievalGenomeDescription().numEntries(12);
+            break;
+        default:
+            memoryModeDesc = MemoryModeGenomeDescription();
+        }
+        return MemoryGenomeDescription().mode(memoryModeDesc);
     }
     default:
         return CellTypeGenomeDescription();

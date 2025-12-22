@@ -380,6 +380,8 @@ struct MemoryDescription
     auto operator<=>(MemoryDescription const&) const = default;
 
     MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());
+
+    MemoryMode getMode() const;
 };
 
 using CellTypeDescription = std::variant<

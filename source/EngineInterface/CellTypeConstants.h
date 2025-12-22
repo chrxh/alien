@@ -337,6 +337,23 @@ namespace Channels
     auto constexpr ReconnectorSuccess = 2;
 }
 
+//********************
+//* Memory constants *
+//********************
+using MemoryMode = int;
+enum MemoryMode_
+{
+    MemoryMode_SignalDelay,
+    MemoryMode_SignalRecorder,
+    MemoryMode_SignalRetrieval,
+    MemoryMode_Count,
+};
+
+namespace Const
+{
+    std::vector<std::string> const MemoryModeStrings = {"Signal delay", "Signal recorder", "Signal retrieval"};
+}
+
 
 using CellEvent = uint8_t;
 enum CellEvent_

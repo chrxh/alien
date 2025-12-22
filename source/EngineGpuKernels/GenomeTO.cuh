@@ -204,8 +204,35 @@ struct DigestorGenomeTO
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelayGenomeTO
+{
+    int delayWithRecording;
+    int delayWithoutRecording;
+};
+
+struct SignalRecorderGenomeTO
+{
+    bool readOnly;
+    int numEntries;
+};
+
+struct SignalRetrievalGenomeTO
+{
+    int numEntries;
+};
+
+union MemoryModeDataGenomeTO
+{
+    SignalDelayGenomeTO signalDelay;
+    SignalRecorderGenomeTO signalRecorder;
+    SignalRetrievalGenomeTO signalRetrieval;
+};
+
 struct MemoryGenomeTO
-{};
+{
+    MemoryMode mode;
+    MemoryModeDataGenomeTO modeData;
+};
 
 union CellTypeDataGenomeTO
 {

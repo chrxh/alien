@@ -234,6 +234,16 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.digestor.rawEnergyConductivity = nodeTO.cellTypeData.digestor.rawEnergyConductivity;
                 break;
             case CellTypeGenome_Memory:
+                node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
+                if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                    node.cellTypeData.memory.modeData.signalDelay.delayWithRecording = nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
+                    node.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
+                } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
+                    node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
+                    node.cellTypeData.memory.modeData.signalRecorder.numEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
+                } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
+                    node.cellTypeData.memory.modeData.signalRetrieval.numEntries = nodeTO.cellTypeData.memory.modeData.signalRetrieval.numEntries;
+                }
                 break;
             }
         }
@@ -458,6 +468,16 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.digestor.rawEnergyConductivity = cellTO.cellTypeData.digestor.rawEnergyConductivity;
     } break;
     case CellType_Memory: {
+        cell->cellTypeData.memory.mode = cellTO.cellTypeData.memory.mode;
+        if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+            cell->cellTypeData.memory.modeData.signalDelay.delayWithRecording = cellTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
+            cell->cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = cellTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
+        } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
+            cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
+            cell->cellTypeData.memory.modeData.signalRecorder.numEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
+        } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
+            cell->cellTypeData.memory.modeData.signalRetrieval.numEntries = cellTO.cellTypeData.memory.modeData.signalRetrieval.numEntries;
+        }
     } break;
     }
 }
@@ -803,6 +823,18 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     } break;
     case CellTypeGenome_Memory: {
         cell->cellType = CellType_Memory;
+        auto const& nodeMemory = node->cellTypeData.memory;
+        auto& memory = cell->cellTypeData.memory;
+        memory.mode = nodeMemory.mode;
+        if (nodeMemory.mode == MemoryMode_SignalDelay) {
+            memory.modeData.signalDelay.delayWithRecording = nodeMemory.modeData.signalDelay.delayWithRecording;
+            memory.modeData.signalDelay.delayWithoutRecording = nodeMemory.modeData.signalDelay.delayWithoutRecording;
+        } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
+            memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
+            memory.modeData.signalRecorder.numEntries = nodeMemory.modeData.signalRecorder.numEntries;
+        } else if (nodeMemory.mode == MemoryMode_SignalRetrieval) {
+            memory.modeData.signalRetrieval.numEntries = nodeMemory.modeData.signalRetrieval.numEntries;
+        }
     } break;
     }
     return cell;
