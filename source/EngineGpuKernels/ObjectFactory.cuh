@@ -233,6 +233,8 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
             case CellTypeGenome_Digestor:
                 node.cellTypeData.digestor.rawEnergyConductivity = nodeTO.cellTypeData.digestor.rawEnergyConductivity;
                 break;
+            case CellTypeGenome_Memory:
+                break;
             }
         }
     }
@@ -454,6 +456,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     } break;
     case CellType_Digestor: {
         cell->cellTypeData.digestor.rawEnergyConductivity = cellTO.cellTypeData.digestor.rawEnergyConductivity;
+    } break;
+    case CellType_Memory: {
     } break;
     }
 }
@@ -796,6 +800,9 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto const& nodeDigestor = node->cellTypeData.digestor;
         auto& digestor = cell->cellTypeData.digestor;
         digestor.rawEnergyConductivity = nodeDigestor.rawEnergyConductivity;
+    } break;
+    case CellTypeGenome_Memory: {
+        cell->cellType = CellType_Memory;
     } break;
     }
     return cell;

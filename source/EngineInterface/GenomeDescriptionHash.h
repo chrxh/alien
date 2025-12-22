@@ -359,6 +359,12 @@ struct std::hash<DigestorGenomeDescription>
 };
 
 template <>
+struct std::hash<MemoryGenomeDescription>
+{
+    std::size_t operator()(MemoryGenomeDescription const& desc) const { return 0; }
+};
+
+template <>
 struct std::hash<CellTypeGenomeDescription>
 {
     std::size_t operator()(CellTypeGenomeDescription const& desc) const
@@ -375,7 +381,8 @@ struct std::hash<CellTypeGenomeDescription>
             DefenderGenomeDescription,
             ReconnectorGenomeDescription,
             DetonatorGenomeDescription,
-            DigestorGenomeDescription>{}(desc);
+            DigestorGenomeDescription,
+            MemoryGenomeDescription>{}(desc);
     }
 };
 

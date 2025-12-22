@@ -8,6 +8,7 @@
 #include "ForceFieldKernels.cuh"
 #include "GeneratorProcessor.cuh"
 #include "InjectorProcessor.cuh"
+#include "MemoryProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "NeuronProcessor.cuh"
 #include "EnergyParticleProcessor.cuh"
@@ -182,6 +183,11 @@ __global__ void cudaNextTimestep_cellType_detonator(SimulationData data, Simulat
 __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, SimulationStatistics statistics)
 {
     DigestorProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics)
+{
+    MemoryProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)

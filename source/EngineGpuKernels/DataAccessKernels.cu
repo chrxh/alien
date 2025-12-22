@@ -179,6 +179,8 @@ namespace
                     case CellTypeGenome_Digestor:
                         nodeTO.cellTypeData.digestor.rawEnergyConductivity = node.cellTypeData.digestor.rawEnergyConductivity;
                         break;
+                    case CellTypeGenome_Memory:
+                        break;
                     }
                 }
             }
@@ -401,6 +403,8 @@ namespace
         } break;
         case CellType_Digestor: {
             cellTO.cellTypeData.digestor.rawEnergyConductivity = cell->cellTypeData.digestor.rawEnergyConductivity;
+        } break;
+        case CellType_Memory: {
         } break;
         }
     }

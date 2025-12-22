@@ -204,6 +204,9 @@ struct DigestorGenomeTO
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct MemoryGenomeTO
+{};
+
 union CellTypeDataGenomeTO
 {
     BaseGenomeTO base;
@@ -218,6 +221,7 @@ union CellTypeDataGenomeTO
     ReconnectorGenomeTO reconnector;
     DetonatorGenomeTO detonator;
     DigestorGenomeTO digestor;
+    MemoryGenomeTO memory;
 };
 
 struct SignalRestrictionGenomeTO

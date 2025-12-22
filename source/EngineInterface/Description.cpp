@@ -130,6 +130,8 @@ CellType CellDescription::getCellType() const
         return CellType_Detonator;
     } else if (std::holds_alternative<DigestorDescription>(_cellType)) {
         return CellType_Digestor;
+    } else if (std::holds_alternative<MemoryDescription>(_cellType)) {
+        return CellType_Memory;
     }
     CHECK(false);
 }

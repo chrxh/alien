@@ -203,6 +203,9 @@ struct DigestorGenome
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct MemoryGenome
+{};
+
 union CellTypeDataGenome
 {
     BaseGenome base;
@@ -217,6 +220,7 @@ union CellTypeDataGenome
     ReconnectorGenome reconnector;
     DetonatorGenome detonator;
     DigestorGenome digestor;
+    MemoryGenome memory;
 };
 
 struct SignalRestrictionGenome

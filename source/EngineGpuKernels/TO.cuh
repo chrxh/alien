@@ -287,6 +287,9 @@ struct DigestorTO
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct MemoryTO
+{};
+
 union CellTypeDataTO
 {
     BaseTO base;
@@ -301,6 +304,7 @@ union CellTypeDataTO
     ReconnectorTO reconnector;
     DetonatorTO detonator;
     DigestorTO digestor;
+    MemoryTO memory;
 };
 
 struct SignalRestrictionTO

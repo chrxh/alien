@@ -24,13 +24,14 @@ enum CellType_
     CellType_Reconnector,
     CellType_Detonator,
     CellType_Digestor,
+    CellType_Memory,
     CellType_Count,
 };
 
 namespace Const
 {
     std::vector<std::string> const CellTypeStrings =
-        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor"};
+        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory"};
 }
 
 using CellTypeGenome = int;
@@ -48,13 +49,14 @@ enum CellTypeGenome_
     CellTypeGenome_Reconnector,
     CellTypeGenome_Detonator,
     CellTypeGenome_Digestor,
+    CellTypeGenome_Memory,
     CellTypeGenome_Count,
 };
 
 namespace Const
 {
     std::vector<std::string> const CellTypeGenomeStrings =
-        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor"};
+        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory"};
 }
 
 using CellState = int;

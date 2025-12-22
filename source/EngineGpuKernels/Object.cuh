@@ -314,6 +314,9 @@ struct Digestor
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct Memory
+{};
+
 union CellTypeData
 {
     Base base;
@@ -328,6 +331,7 @@ union CellTypeData
     Reconnector reconnector;
     Detonator detonator;
     Digestor digestor;
+    Memory memory;
 };
 
 struct SignalRestriction

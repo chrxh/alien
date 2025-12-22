@@ -32,6 +32,7 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         CellParameter{CellType_Detonator},
         CellParameter{CellType_Digestor},
+        CellParameter{CellType_Memory},
     };
 }
 
@@ -101,6 +102,7 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         NodeParameter{CellTypeGenome_Detonator},
         NodeParameter{CellTypeGenome_Digestor},
+        NodeParameter{CellTypeGenome_Memory},
     };
 }
 
@@ -483,6 +485,11 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             return false;
         }
     } break;
+    case CellType_Memory: {
+        if (nodeType != CellTypeGenome_Memory) {
+            return false;
+        }
+    } break;
     default:
         return false;
     }
@@ -633,6 +640,8 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         return DetonatorDescription().countdown(23);
     case CellType_Digestor:
         return DigestorDescription().rawEnergyConductivity(0.7f);
+    case CellType_Memory:
+        return MemoryDescription();
     default:
         return CellTypeDescription();
     }
@@ -742,6 +751,9 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     }
     case CellTypeGenome_Digestor: {
         return DigestorGenomeDescription().rawEnergyConductivity(0.8f);
+    }
+    case CellTypeGenome_Memory: {
+        return MemoryGenomeDescription();
     }
     default:
         return CellTypeGenomeDescription();

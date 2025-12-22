@@ -77,6 +77,8 @@ namespace
             return DetonatorGenomeDescription();
         case CellTypeGenome_Digestor:
             return DigestorGenomeDescription();
+        case CellTypeGenome_Memory:
+            return MemoryGenomeDescription();
         default:
             CHECK(false);
         }
@@ -557,6 +559,8 @@ void _NodeEditorWidget::processNodeAttributes()
                 &rawEnergyConversionRate);
             digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
             AlienGui::EndIndent();
+        } else if (nodeType == CellTypeGenome_Memory) {
+            // Memory cell type has no parameters
         }
     }
     ImGui::EndChild();

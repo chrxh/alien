@@ -112,6 +112,8 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Detonator;
     } else if (std::holds_alternative<DigestorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Digestor;
+    } else if (std::holds_alternative<MemoryGenomeDescription>(_cellType)) {
+        return CellTypeGenome_Memory;
     }
     CHECK(false);
 }

@@ -280,6 +280,11 @@ struct DigestorGenomeDescription
     }
 };
 
+struct MemoryGenomeDescription
+{
+    auto operator<=>(MemoryGenomeDescription const&) const = default;
+};
+
 using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
@@ -292,7 +297,8 @@ using CellTypeGenomeDescription = std::variant<
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription,
-    DigestorGenomeDescription>;
+    DigestorGenomeDescription,
+    MemoryGenomeDescription>;
 
 struct SignalRestrictionGenomeDescription
 {

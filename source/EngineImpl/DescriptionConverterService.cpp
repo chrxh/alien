@@ -499,6 +499,10 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         digestor._rawEnergyConductivity = cellTO.cellTypeData.digestor.rawEnergyConductivity;
         result._cellType = digestor;
     } break;
+    case CellType_Memory: {
+        MemoryDescription memory;
+        result._cellType = memory;
+    } break;
     }
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, cellTO.neuralNetworkDataIndex);
@@ -712,6 +716,10 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         DigestorGenomeDescription digestorDesc;
         digestorDesc._rawEnergyConductivity = nodeTO->cellTypeData.digestor.rawEnergyConductivity;
         nodeDesc._cellType = digestorDesc;
+    } break;
+    case CellTypeGenome_Memory: {
+        MemoryGenomeDescription memoryDesc;
+        nodeDesc._cellType = memoryDesc;
     } break;
     }
     return nodeDesc;
@@ -983,6 +991,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto& digestorTO = nodeTO.cellTypeData.digestor;
                 digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
             } break;
+            case CellTypeGenome_Memory: {
+            } break;
             }
         }
     }
@@ -1237,6 +1247,8 @@ void DescriptionConverterService::convertCellToTO(
         auto const& digestorDesc = std::get<DigestorDescription>(cellDesc._cellType);
         DigestorTO& digestorTO = cellTO.cellTypeData.digestor;
         digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
+    } break;
+    case CellType_Memory: {
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;
