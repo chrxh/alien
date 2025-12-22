@@ -190,11 +190,14 @@ namespace
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                             nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries = node.cellTypeData.memory.modeData.signalStorage.numEntries;
                         }
-                        for (int k = 0; k < MAX_CELL_MEMORY_ENTRIES; ++k) {
-                            nodeTO.cellTypeData.memory.memoryEntries[k].timestamp = node.cellTypeData.memory.memoryEntries[k].timestamp;
-                            for (int l = 0; l < MAX_CHANNELS; ++l) {
-                                nodeTO.cellTypeData.memory.memoryEntries[k].channels[l] = node.cellTypeData.memory.memoryEntries[k].channels[l];
-                            }
+                        {
+                            int targetSize;  // not used
+                            copyDataToHeap<int>(
+                                sizeof(MemoryEntryGenome) * MAX_CELL_MEMORY_ENTRIES,
+                                reinterpret_cast<uint8_t*>(node.cellTypeData.memory.memoryEntries),
+                                targetSize,
+                                nodeTO.cellTypeData.memory.memoryEntriesDataIndex,
+                                to);
                         }
                         break;
                     }
@@ -1025,7 +1028,13 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
                     ++numGenomes;
                     numGenes += creature->genome->numGenes;
                     for (int i = 0, j = creature->genome->numGenes; i < j; ++i) {
-                        numNodes += creature->genome->genes[i].numNodes;
+                        auto& gene = creature->genome->genes[i];
+                        numNodes += gene.numNodes;
+                        for (int k = 0; k < gene.numNodes; ++k) {
+                            if (gene.nodes[k].cellType == CellTypeGenome_Memory) {
+                                heapBytes += sizeof(MemoryEntryGenome) * MAX_CELL_MEMORY_ENTRIES + GpuMemoryAlignmentBytes;
+                            }
+                        }
                     }
                 }
             }
@@ -1047,7 +1056,8 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
             &arraySizes->heap,
             *to.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *to.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes)
                 + *to.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *to.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
-                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes) + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
+                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes) + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes)
+                + *to.heapSize);  // heap contains genome memory entries
     }
 
     {

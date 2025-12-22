@@ -159,7 +159,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
     for (auto const& genome : description._genomes) {
-        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, genome, genomeTOIndexById);
+        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
@@ -211,14 +211,12 @@ TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, Geno
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
-    std::vector<CellTO> cellTOs;
-    std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
 
     auto wrapper = CreatureDescription().id(creatureId).genomeId(genome._id);
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
-    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, genome, genomeTOIndexById);
+    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     convertCreatureToTO(creatureTOs, wrapper, genomeTOIndexById, creatureTOIndexById);
@@ -550,7 +548,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
 }
 
 
-NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const* nodeTO) const
+NodeDescription DescriptionConverterService::createNodeDescription(TO const& to, NodeTO const* nodeTO) const
 {
     NodeDescription nodeDesc;
     nodeDesc._referenceAngle = nodeTO->referenceAngle;
@@ -760,10 +758,11 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
             signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
             memoryDesc._mode = signalStorage;
         }
+        auto const& memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO const*>(to.heap + memoryTO.memoryEntriesDataIndex);
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            memoryDesc._memoryEntries[i]._timestamp = memoryTO.memoryEntries[i].timestamp;
+            memoryDesc._memoryEntries[i]._timestamp = memoryEntriesTO[i].timestamp;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memoryDesc._memoryEntries[i]._channels[j] = memoryTO.memoryEntries[i].channels[j];
+                memoryDesc._memoryEntries[i]._channels[j] = memoryEntriesTO[i].channels[j];
             }
         }
         nodeDesc._cellType = memoryDesc;
@@ -800,7 +799,7 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
         CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
         for (int k = 0; k < geneTO->numNodes; ++k) {
             auto nodeTO = to.nodes + geneTO->nodeArrayIndex + k;
-            geneDesc._nodes.emplace_back(createNodeDescription(nodeTO));
+            geneDesc._nodes.emplace_back(createNodeDescription(to, nodeTO));
         }
 
         result._genes.emplace_back(geneDesc);
@@ -841,6 +840,7 @@ void DescriptionConverterService::convertGenomeToTO(
     std::vector<GenomeTO>& genomeTOs,
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
+    std::vector<uint8_t>& heap,
     GenomeDescription const& genome,
     std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const
 {
@@ -1054,10 +1054,13 @@ void DescriptionConverterService::convertGenomeToTO(
                     auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
                 }
+                memoryTO.memoryEntriesDataIndex = heap.size();
+                heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * MAX_CELL_MEMORY_ENTRIES);
+                auto memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
                 for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-                    memoryTO.memoryEntries[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
+                    memoryEntriesTO[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
                     for (int j = 0; j < MAX_CHANNELS; ++j) {
-                        memoryTO.memoryEntries[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
+                        memoryEntriesTO[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
                     }
                 }
             } break;

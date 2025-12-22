@@ -244,6 +244,17 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                     node.cellTypeData.memory.modeData.signalStorage.numEntries = nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries;
                 }
+                {
+                    auto memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntryGenome>(MAX_CELL_MEMORY_ENTRIES);
+                    node.cellTypeData.memory.memoryEntries = memoryEntries;
+                    auto const& entriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.memoryEntriesDataIndex);
+                    for (int k = 0; k < MAX_CELL_MEMORY_ENTRIES; ++k) {
+                        memoryEntries[k].timestamp = entriesTO[k].timestamp;
+                        for (int l = 0; l < MAX_CHANNELS; ++l) {
+                            memoryEntries[k].channels[l] = entriesTO[k].channels[l];
+                        }
+                    }
+                }
                 break;
             }
         }

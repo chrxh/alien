@@ -237,7 +237,7 @@ struct MemoryGenome
 {
     MemoryMode mode;
     MemoryModeDataGenome modeData;
-    MemoryEntryGenome memoryEntries[MAX_CELL_MEMORY_ENTRIES];
+    MemoryEntryGenome* memoryEntries;  // Pointer to heap memory
 };
 
 union CellTypeDataGenome

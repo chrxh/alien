@@ -238,7 +238,7 @@ struct MemoryGenomeTO
 {
     MemoryMode mode;
     MemoryModeDataGenomeTO modeData;
-    MemoryEntryGenomeTO memoryEntries[MAX_CELL_MEMORY_ENTRIES];
+    uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
 union CellTypeDataGenomeTO
