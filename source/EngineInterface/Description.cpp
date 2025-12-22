@@ -84,6 +84,18 @@ AttackerMode AttackerDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+MemoryMode MemoryDescription::getMode() const
+{
+    if (std::holds_alternative<SignalDelayDescription>(_mode)) {
+        return MemoryMode_SignalDelay;
+    } else if (std::holds_alternative<SignalRecorderDescription>(_mode)) {
+        return MemoryMode_SignalRecorder;
+    } else if (std::holds_alternative<SignalRetrievalDescription>(_mode)) {
+        return MemoryMode_SignalRetrieval;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 InjectorDescription::InjectorDescription() {}
 
 CellDescription::CellDescription(bool createIds)
@@ -130,6 +142,8 @@ CellType CellDescription::getCellType() const
         return CellType_Detonator;
     } else if (std::holds_alternative<DigestorDescription>(_cellType)) {
         return CellType_Digestor;
+    } else if (std::holds_alternative<MemoryDescription>(_cellType)) {
+        return CellType_Memory;
     }
     CHECK(false);
 }

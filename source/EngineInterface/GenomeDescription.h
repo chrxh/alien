@@ -280,6 +280,40 @@ struct DigestorGenomeDescription
     }
 };
 
+struct SignalDelayGenomeDescription
+{
+    auto operator<=>(SignalDelayGenomeDescription const&) const = default;
+
+    MEMBER(SignalDelayGenomeDescription, int, delayWithRecording, 15);
+    MEMBER(SignalDelayGenomeDescription, int, delayWithoutRecording, 0);
+};
+
+struct SignalRecorderGenomeDescription
+{
+    auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
+
+    MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderGenomeDescription, int, numEntries, 8);
+};
+
+struct SignalRetrievalGenomeDescription
+{
+    auto operator<=>(SignalRetrievalGenomeDescription const&) const = default;
+
+    MEMBER(SignalRetrievalGenomeDescription, int, numEntries, 8);
+};
+
+using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalRetrievalGenomeDescription>;
+
+struct MemoryGenomeDescription
+{
+    auto operator<=>(MemoryGenomeDescription const&) const = default;
+
+    MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());
+
+    MemoryMode getMode() const;
+};
+
 using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
@@ -292,7 +326,8 @@ using CellTypeGenomeDescription = std::variant<
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription,
-    DigestorGenomeDescription>;
+    DigestorGenomeDescription,
+    MemoryGenomeDescription>;
 
 struct SignalRestrictionGenomeDescription
 {

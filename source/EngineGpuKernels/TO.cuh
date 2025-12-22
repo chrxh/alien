@@ -287,6 +287,36 @@ struct DigestorTO
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelayTO
+{
+    int delayWithRecording;
+    int delayWithoutRecording;
+};
+
+struct SignalRecorderTO
+{
+    bool readOnly;
+    int numEntries;
+};
+
+struct SignalRetrievalTO
+{
+    int numEntries;
+};
+
+union MemoryModeDataTO
+{
+    SignalDelayTO signalDelay;
+    SignalRecorderTO signalRecorder;
+    SignalRetrievalTO signalRetrieval;
+};
+
+struct MemoryTO
+{
+    MemoryMode mode;
+    MemoryModeDataTO modeData;
+};
+
 union CellTypeDataTO
 {
     BaseTO base;
@@ -301,6 +331,7 @@ union CellTypeDataTO
     ReconnectorTO reconnector;
     DetonatorTO detonator;
     DigestorTO digestor;
+    MemoryTO memory;
 };
 
 struct SignalRestrictionTO

@@ -359,6 +359,56 @@ struct std::hash<DigestorGenomeDescription>
 };
 
 template <>
+struct std::hash<SignalDelayGenomeDescription>
+{
+    std::size_t operator()(SignalDelayGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._delayWithRecording);
+        hash_combine(seed, desc._delayWithoutRecording);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<SignalRecorderGenomeDescription>
+{
+    std::size_t operator()(SignalRecorderGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._readOnly);
+        hash_combine(seed, desc._numEntries);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<SignalRetrievalGenomeDescription>
+{
+    std::size_t operator()(SignalRetrievalGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._numEntries);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<MemoryModeGenomeDescription>
+{
+    std::size_t operator()(MemoryModeGenomeDescription const& desc) const
+    {
+        return variant_hasher<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalRetrievalGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<MemoryGenomeDescription>
+{
+    std::size_t operator()(MemoryGenomeDescription const& desc) const { return std::hash<MemoryModeGenomeDescription>{}(desc._mode); }
+};
+
+template <>
 struct std::hash<CellTypeGenomeDescription>
 {
     std::size_t operator()(CellTypeGenomeDescription const& desc) const
@@ -375,7 +425,8 @@ struct std::hash<CellTypeGenomeDescription>
             DefenderGenomeDescription,
             ReconnectorGenomeDescription,
             DetonatorGenomeDescription,
-            DigestorGenomeDescription>{}(desc);
+            DigestorGenomeDescription,
+            MemoryGenomeDescription>{}(desc);
     }
 };
 

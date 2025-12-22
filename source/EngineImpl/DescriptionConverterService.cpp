@@ -499,6 +499,26 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         digestor._rawEnergyConductivity = cellTO.cellTypeData.digestor.rawEnergyConductivity;
         result._cellType = digestor;
     } break;
+    case CellType_Memory: {
+        MemoryDescription memory;
+        auto const& memoryTO = cellTO.cellTypeData.memory;
+        if (memoryTO.mode == MemoryMode_SignalDelay) {
+            SignalDelayDescription signalDelay;
+            signalDelay._delayWithRecording = memoryTO.modeData.signalDelay.delayWithRecording;
+            signalDelay._delayWithoutRecording = memoryTO.modeData.signalDelay.delayWithoutRecording;
+            memory._mode = signalDelay;
+        } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+            SignalRecorderDescription signalRecorder;
+            signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._numEntries = memoryTO.modeData.signalRecorder.numEntries;
+            memory._mode = signalRecorder;
+        } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
+            SignalRetrievalDescription signalRetrieval;
+            signalRetrieval._numEntries = memoryTO.modeData.signalRetrieval.numEntries;
+            memory._mode = signalRetrieval;
+        }
+        result._cellType = memory;
+    } break;
     }
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, cellTO.neuralNetworkDataIndex);
@@ -712,6 +732,26 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         DigestorGenomeDescription digestorDesc;
         digestorDesc._rawEnergyConductivity = nodeTO->cellTypeData.digestor.rawEnergyConductivity;
         nodeDesc._cellType = digestorDesc;
+    } break;
+    case CellTypeGenome_Memory: {
+        MemoryGenomeDescription memoryDesc;
+        auto const& memoryTO = nodeTO->cellTypeData.memory;
+        if (memoryTO.mode == MemoryMode_SignalDelay) {
+            SignalDelayGenomeDescription signalDelay;
+            signalDelay._delayWithRecording = memoryTO.modeData.signalDelay.delayWithRecording;
+            signalDelay._delayWithoutRecording = memoryTO.modeData.signalDelay.delayWithoutRecording;
+            memoryDesc._mode = signalDelay;
+        } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+            SignalRecorderGenomeDescription signalRecorder;
+            signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._numEntries = memoryTO.modeData.signalRecorder.numEntries;
+            memoryDesc._mode = signalRecorder;
+        } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
+            SignalRetrievalGenomeDescription signalRetrieval;
+            signalRetrieval._numEntries = memoryTO.modeData.signalRetrieval.numEntries;
+            memoryDesc._mode = signalRetrieval;
+        }
+        nodeDesc._cellType = memoryDesc;
     } break;
     }
     return nodeDesc;
@@ -983,6 +1023,23 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto& digestorTO = nodeTO.cellTypeData.digestor;
                 digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
             } break;
+            case CellTypeGenome_Memory: {
+                auto const& memoryDesc = std::get<MemoryGenomeDescription>(nodeDesc._cellType);
+                auto& memoryTO = nodeTO.cellTypeData.memory;
+                memoryTO.mode = memoryDesc.getMode();
+                if (memoryTO.mode == MemoryMode_SignalDelay) {
+                    auto const& signalDelayDesc = std::get<SignalDelayGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalDelay.delayWithRecording = signalDelayDesc._delayWithRecording;
+                    memoryTO.modeData.signalDelay.delayWithoutRecording = signalDelayDesc._delayWithoutRecording;
+                } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+                    auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+                    memoryTO.modeData.signalRecorder.numEntries = signalRecorderDesc._numEntries;
+                } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
+                    auto const& signalRetrievalDesc = std::get<SignalRetrievalGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalRetrieval.numEntries = signalRetrievalDesc._numEntries;
+                }
+            } break;
             }
         }
     }
@@ -1237,6 +1294,23 @@ void DescriptionConverterService::convertCellToTO(
         auto const& digestorDesc = std::get<DigestorDescription>(cellDesc._cellType);
         DigestorTO& digestorTO = cellTO.cellTypeData.digestor;
         digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
+    } break;
+    case CellType_Memory: {
+        auto const& memoryDesc = std::get<MemoryDescription>(cellDesc._cellType);
+        auto& memoryTO = cellTO.cellTypeData.memory;
+        memoryTO.mode = memoryDesc.getMode();
+        if (memoryTO.mode == MemoryMode_SignalDelay) {
+            auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalDelay.delayWithRecording = signalDelayDesc._delayWithRecording;
+            memoryTO.modeData.signalDelay.delayWithoutRecording = signalDelayDesc._delayWithoutRecording;
+        } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+            auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+            memoryTO.modeData.signalRecorder.numEntries = signalRecorderDesc._numEntries;
+        } else if (memoryTO.mode == MemoryMode_SignalRetrieval) {
+            auto const& signalRetrievalDesc = std::get<SignalRetrievalDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalRetrieval.numEntries = signalRetrievalDesc._numEntries;
+        }
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

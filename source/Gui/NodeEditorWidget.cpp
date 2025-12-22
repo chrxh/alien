@@ -77,6 +77,8 @@ namespace
             return DetonatorGenomeDescription();
         case CellTypeGenome_Digestor:
             return DigestorGenomeDescription();
+        case CellTypeGenome_Memory:
+            return MemoryGenomeDescription();
         default:
             CHECK(false);
         }
@@ -141,6 +143,20 @@ namespace
             return ReconnectFreeCellGenomeDescription();
         case ReconnectorMode_Creature:
             return ReconnectCreatureGenomeDescription();
+        default:
+            CHECK(false);
+        }
+    }
+
+    MemoryModeGenomeDescription createMemoryModeGenomeDescription(MemoryMode mode)
+    {
+        switch (mode) {
+        case MemoryMode_SignalDelay:
+            return SignalDelayGenomeDescription();
+        case MemoryMode_SignalRecorder:
+            return SignalRecorderGenomeDescription();
+        case MemoryMode_SignalRetrieval:
+            return SignalRetrievalGenomeDescription();
         default:
             CHECK(false);
         }
@@ -556,6 +572,42 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::SliderFloatParameters().name("Raw energy conversion rate").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                 &rawEnergyConversionRate);
             digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
+            AlienGui::EndIndent();
+        } else if (nodeType == CellTypeGenome_Memory) {
+
+            AlienGui::BeginIndent();
+
+            // Mode selection
+            auto& memory = std::get<MemoryGenomeDescription>(node._cellType);
+            auto mode = memory.getMode();
+            if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MemoryModeStrings).textWidth(rightColumnWidth), mode)) {
+                memory._mode = createMemoryModeGenomeDescription(mode);
+            }
+
+            // Mode-specific parameters
+            if (mode == MemoryMode_SignalDelay) {
+                AlienGui::BeginIndent();
+                auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Delay with recording").textWidth(rightColumnWidth), signalDelay._delayWithRecording);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Delay without recording").textWidth(rightColumnWidth), signalDelay._delayWithoutRecording);
+                AlienGui::EndIndent();
+            } else if (mode == MemoryMode_SignalRecorder) {
+                AlienGui::BeginIndent();
+                auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Number of entries").textWidth(rightColumnWidth), signalRecorder._numEntries);
+                AlienGui::EndIndent();
+            } else if (mode == MemoryMode_SignalRetrieval) {
+                AlienGui::BeginIndent();
+                auto& signalRetrieval = std::get<SignalRetrievalGenomeDescription>(memory._mode);
+                AlienGui::InputInt(
+                    AlienGui::InputIntParameters().name("Number of entries").textWidth(rightColumnWidth), signalRetrieval._numEntries);
+                AlienGui::EndIndent();
+            }
+
             AlienGui::EndIndent();
         }
     }

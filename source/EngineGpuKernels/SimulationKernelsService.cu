@@ -76,6 +76,7 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     KERNEL_CALL(cudaNextTimestep_cellType_reconnector, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellType_detonator, data, statistics);
     KERNEL_CALL(cudaNextTimestep_cellType_digestor, data, statistics);
+    KERNEL_CALL(cudaNextTimestep_cellType_memory, data, statistics);
 
     if (considerInnerFriction) {
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, 16, data);

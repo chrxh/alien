@@ -380,6 +380,8 @@ struct MemoryDescription
     auto operator<=>(MemoryDescription const&) const = default;
 
     MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());
+
+    MemoryMode getMode() const;
 };
 
 using CellTypeDescription = std::variant<
@@ -396,7 +398,8 @@ using CellTypeDescription = std::variant<
     DefenderDescription,
     ReconnectorDescription,
     DetonatorDescription,
-    DigestorDescription>;
+    DigestorDescription,
+    MemoryDescription>;
 
 struct SignalRestrictionDescription
 {

@@ -179,6 +179,18 @@ namespace
                     case CellTypeGenome_Digestor:
                         nodeTO.cellTypeData.digestor.rawEnergyConductivity = node.cellTypeData.digestor.rawEnergyConductivity;
                         break;
+                    case CellTypeGenome_Memory:
+                        nodeTO.cellTypeData.memory.mode = node.cellTypeData.memory.mode;
+                        if (node.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                            nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording = node.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
+                            nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = node.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
+                        } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
+                            nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
+                            nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries = node.cellTypeData.memory.modeData.signalRecorder.numEntries;
+                        } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
+                            nodeTO.cellTypeData.memory.modeData.signalRetrieval.numEntries = node.cellTypeData.memory.modeData.signalRetrieval.numEntries;
+                        }
+                        break;
                     }
                 }
             }
@@ -401,6 +413,18 @@ namespace
         } break;
         case CellType_Digestor: {
             cellTO.cellTypeData.digestor.rawEnergyConductivity = cell->cellTypeData.digestor.rawEnergyConductivity;
+        } break;
+        case CellType_Memory: {
+            cellTO.cellTypeData.memory.mode = cell->cellTypeData.memory.mode;
+            if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                cellTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording = cell->cellTypeData.memory.modeData.signalDelay.delayWithRecording;
+                cellTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = cell->cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
+            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
+                cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
+                cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries = cell->cellTypeData.memory.modeData.signalRecorder.numEntries;
+            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRetrieval) {
+                cellTO.cellTypeData.memory.modeData.signalRetrieval.numEntries = cell->cellTypeData.memory.modeData.signalRetrieval.numEntries;
+            }
         } break;
         }
     }

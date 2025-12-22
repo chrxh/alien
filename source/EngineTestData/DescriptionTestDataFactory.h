@@ -16,8 +16,9 @@ public:
     struct MuscleModeWrapper { MuscleMode value; };
     struct SensorModeWrapper { SensorMode value; };
     struct ReconnectorModeWrapper { ReconnectorMode value; };
+    struct MemoryModeWrapper { MemoryMode value; };
 
-    using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, ReconnectorModeWrapper>;
+    using CellTypeMode = std::variant<std::monostate, MuscleModeWrapper, SensorModeWrapper, ReconnectorModeWrapper, MemoryModeWrapper>;
 
     struct CellParameter
     {

@@ -86,6 +86,18 @@ AttackerMode AttackerGenomeDescription::getMode() const
     CHECK(false);
 }
 
+MemoryMode MemoryGenomeDescription::getMode() const
+{
+    if (std::holds_alternative<SignalDelayGenomeDescription>(_mode)) {
+        return MemoryMode_SignalDelay;
+    } else if (std::holds_alternative<SignalRecorderGenomeDescription>(_mode)) {
+        return MemoryMode_SignalRecorder;
+    } else if (std::holds_alternative<SignalRetrievalGenomeDescription>(_mode)) {
+        return MemoryMode_SignalRetrieval;
+    }
+    CHECK(false);
+}
+
 CellTypeGenome NodeDescription::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {
@@ -112,6 +124,8 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Detonator;
     } else if (std::holds_alternative<DigestorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Digestor;
+    } else if (std::holds_alternative<MemoryGenomeDescription>(_cellType)) {
+        return CellTypeGenome_Memory;
     }
     CHECK(false);
 }
