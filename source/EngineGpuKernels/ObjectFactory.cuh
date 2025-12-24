@@ -249,7 +249,6 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.memory.memoryEntries = memoryEntries;
                     auto const& entriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.memoryEntriesDataIndex);
                     for (int k = 0; k < MAX_CELL_MEMORY_ENTRIES; ++k) {
-                        memoryEntries[k].timestamp = entriesTO[k].timestamp;
                         for (int l = 0; l < MAX_CHANNELS; ++l) {
                             memoryEntries[k].channels[l] = entriesTO[k].channels[l];
                         }
@@ -858,7 +857,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         // Allocate and copy memory entries from genome
         memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(MAX_CELL_MEMORY_ENTRIES);
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            memory.memoryEntries[i].timestamp = nodeMemory.memoryEntries[i].timestamp;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 memory.memoryEntries[i].channels[j] = nodeMemory.memoryEntries[i].channels[j];
             }

@@ -407,7 +407,7 @@ struct std::hash<MemoryEntryGenomeDescription>
 {
     std::size_t operator()(MemoryEntryGenomeDescription const& desc) const
     {
-        std::size_t result = std::hash<int>{}(desc._timestamp);
+        std::size_t result = 0;
         for (auto const& channel : desc._channels) {
             hash_combine(result, channel);
         }

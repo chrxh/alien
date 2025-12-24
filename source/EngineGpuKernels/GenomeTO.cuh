@@ -230,7 +230,6 @@ union MemoryModeDataGenomeTO
 
 struct MemoryEntryGenomeTO
 {
-    int timestamp;
     float channels[MAX_CHANNELS];
 };
 

@@ -517,7 +517,6 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         }
         auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            memory._memoryEntries[i]._timestamp = (*memoryEntriesTO)[i].timestamp;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 memory._memoryEntries[i]._channels[j] = (*memoryEntriesTO)[i].channels[j];
             }
@@ -758,7 +757,6 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         }
         auto const& memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO const*>(to.heap + memoryTO.memoryEntriesDataIndex);
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            memoryDesc._memoryEntries[i]._timestamp = memoryEntriesTO[i].timestamp;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 memoryDesc._memoryEntries[i]._channels[j] = memoryEntriesTO[i].channels[j];
             }
@@ -1056,7 +1054,6 @@ void DescriptionConverterService::convertGenomeToTO(
                 heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * MAX_CELL_MEMORY_ENTRIES);
                 auto memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
                 for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-                    memoryEntriesTO[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
                     for (int j = 0; j < MAX_CHANNELS; ++j) {
                         memoryEntriesTO[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
                     }
@@ -1337,7 +1334,6 @@ void DescriptionConverterService::convertCellToTO(
         heap.resize(heap.size() + sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
         auto memoryEntriesTO = reinterpret_cast<MemoryEntryTO*>(heap.data() + heap.size() - sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            memoryEntriesTO[i].timestamp = memoryDesc._memoryEntries[i]._timestamp;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 memoryEntriesTO[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
             }

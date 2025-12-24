@@ -310,7 +310,6 @@ struct MemoryEntryGenomeDescription
     MemoryEntryGenomeDescription();
     auto operator<=>(MemoryEntryGenomeDescription const&) const = default;
 
-    MEMBER(MemoryEntryGenomeDescription, int, timestamp, 0);
     MEMBER(MemoryEntryGenomeDescription, std::vector<float>, channels, {});
 };
 

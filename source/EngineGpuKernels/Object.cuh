@@ -340,7 +340,6 @@ union MemoryModeData
 
 struct MemoryEntry
 {
-    int timestamp;
     float channels[MAX_CHANNELS];
 };
 
