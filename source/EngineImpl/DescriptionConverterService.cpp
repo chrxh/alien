@@ -23,6 +23,28 @@ namespace
         return reinterpret_cast<T*>(&heap[sourceIndex]);
     }
 
+    // Helper function to copy memory entries from TO to Description
+    template <typename TOEntry, typename DescEntry>
+    void copyMemoryEntriesToDescription(TOEntry const* entriesTO, std::vector<DescEntry>& entriesDesc)
+    {
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                entriesDesc[i]._channels[j] = entriesTO[i].channels[j];
+            }
+        }
+    }
+
+    // Helper function to copy memory entries from Description to TO
+    template <typename DescEntry, typename TOEntry>
+    void copyMemoryEntriesToTO(std::vector<DescEntry> const& entriesDesc, TOEntry* entriesTO)
+    {
+        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                entriesTO[i].channels[j] = entriesDesc[i]._channels[j];
+            }
+        }
+    }
+
     void stringToChar64(std::string const& source, Char64& target)
     {
         size_t length = std::min(source.length(), size_t(63));  // Leave space for null terminator
@@ -516,11 +538,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             memory._mode = signalStorage;
         }
         auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memory._memoryEntries[i]._channels[j] = (*memoryEntriesTO)[i].channels[j];
-            }
-        }
+        copyMemoryEntriesToDescription(*memoryEntriesTO, memory._memoryEntries);
         result._cellType = memory;
     } break;
     }
@@ -756,11 +774,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             memoryDesc._mode = signalStorage;
         }
         auto const& memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO const*>(to.heap + memoryTO.memoryEntriesDataIndex);
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memoryDesc._memoryEntries[i]._channels[j] = memoryEntriesTO[i].channels[j];
-            }
-        }
+        copyMemoryEntriesToDescription(memoryEntriesTO, memoryDesc._memoryEntries);
         nodeDesc._cellType = memoryDesc;
     } break;
     }
@@ -1053,11 +1067,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 memoryTO.memoryEntriesDataIndex = heap.size();
                 heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * MAX_CELL_MEMORY_ENTRIES);
                 auto memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
-                for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-                    for (int j = 0; j < MAX_CHANNELS; ++j) {
-                        memoryEntriesTO[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
-                    }
-                }
+                copyMemoryEntriesToTO(memoryDesc._memoryEntries, memoryEntriesTO);
             } break;
             }
         }
@@ -1333,11 +1343,7 @@ void DescriptionConverterService::convertCellToTO(
         memoryTO.memoryEntriesDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
         auto memoryEntriesTO = reinterpret_cast<MemoryEntryTO*>(heap.data() + heap.size() - sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memoryEntriesTO[i].channels[j] = memoryDesc._memoryEntries[i]._channels[j];
-            }
-        }
+        copyMemoryEntriesToTO(memoryDesc._memoryEntries, memoryEntriesTO);
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

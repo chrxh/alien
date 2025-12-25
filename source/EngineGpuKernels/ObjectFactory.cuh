@@ -488,15 +488,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
             cell->cellTypeData.memory.modeData.signalStorage.numEntries = cellTO.cellTypeData.memory.modeData.signalStorage.numEntries;
         }
-        if (cellTO.cellTypeData.memory.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
-            copyDataToHeap(
-                sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES,
-                cellTO.cellTypeData.memory.memoryEntriesDataIndex,
-                to.heap,
-                reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries));
-        } else {
-            cell->cellTypeData.memory.memoryEntries = nullptr;
-        }
+        copyDataToHeap(
+            sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES,
+            cellTO.cellTypeData.memory.memoryEntriesDataIndex,
+            to.heap,
+            reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries));
     } break;
     }
 }

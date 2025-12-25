@@ -76,7 +76,7 @@ __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap)
         if (cell->neuralNetwork) {
             copyAndAssignNewHeapData(reinterpret_cast<uint8_t*&>(cell->neuralNetwork), sizeof(*cell->neuralNetwork), newHeap);
         }
-        if (cell->cellType == CellType_Memory && cell->cellTypeData.memory.memoryEntries) {
+        if (cell->cellType == CellType_Memory) {
             copyAndAssignNewHeapData(
                 reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries),
                 sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES,
@@ -163,10 +163,18 @@ __global__ void cudaCleanupGenomesStep1(Array<Cell*> cells, Heap newHeap)
                     auto newNodes = newHeap.getTypedSubArray<Node>(gene->numNodes);
                     newGene->nodes = newNodes;
 
-                    for (int i = 0, j = gene->numNodes; i < j; ++i) {
-                        auto const& node = &gene->nodes[i];
-                        auto newNode = &newNodes[i];
+                    for (int k = 0, l = gene->numNodes; k < l; ++k) {
+                        auto const& node = &gene->nodes[k];
+                        auto newNode = &newNodes[k];
                         *newNode = *node;
+
+                        // Copy dependent node data for memory cell type
+                        if (node->cellType == CellTypeGenome_Memory) {
+                            copyAndAssignNewHeapData(
+                                reinterpret_cast<uint8_t*&>(newNode->cellTypeData.memory.memoryEntries),
+                                sizeof(MemoryEntryGenome) * MAX_CELL_MEMORY_ENTRIES,
+                                newHeap);
+                        }
                     }
                 }
 

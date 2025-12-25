@@ -2,6 +2,7 @@
 
 #include <EngineInterface/Description.h>
 #include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GenomeDescription.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -47,6 +48,30 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep)
                                          .vel({numberGen.getRandomFloat(-1.0f, 1.0f), numberGen.getRandomFloat(-1.0f, 1.0f)})
                                          .energy(numberGen.getRandomFloat(0.0f, 100.0f)));
     }
+    _simulationFacade->setSimulationData(data);
+
+    switch (cleanupAction) {
+    case CleanupAction::CleanupAfterTimestep:
+        _simulationFacade->testOnly_cleanupAfterTimestep();
+    case CleanupAction::CleanupAfterDataManipulation:
+        _simulationFacade->testOnly_cleanupAfterDataManipulation();
+    case CleanupAction::ResizeArrays:
+        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
+    }
+    EXPECT_TRUE(_simulationFacade->testOnly_areArraysValid());
+}
+
+TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupCreatureWithGenomeContainingMemoryNodes)
+{
+    auto cleanupAction = GetParam();
+
+    // Create a genome with memory cell type nodes that have memory entries
+    auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({
+        NodeDescription().cellType(MemoryGenomeDescription().mode(SignalDelayGenomeDescription())),
+        NodeDescription().cellType(MemoryGenomeDescription().mode(SignalRecorderGenomeDescription())),
+        NodeDescription().cellType(MemoryGenomeDescription().mode(SignalStorageGenomeDescription()))})});
+
+    auto data = Description().addCreature(CreatureDescription().cells({CellDescription().pos({100.0f, 100.0f})}), genome);
     _simulationFacade->setSimulationData(data);
 
     switch (cleanupAction) {

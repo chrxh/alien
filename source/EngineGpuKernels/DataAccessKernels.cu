@@ -1056,8 +1056,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
             &arraySizes->heap,
             *to.numCells * (sizeof(Cell) + GpuMemoryAlignmentBytes) + *to.numParticles * (sizeof(Particle) + GpuMemoryAlignmentBytes)
                 + *to.numCreatures * (sizeof(Creature) + GpuMemoryAlignmentBytes) + *to.numGenomes * (sizeof(Genome) + GpuMemoryAlignmentBytes)
-                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes) + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes)
-                + *to.heapSize);  // heap contains genome memory entries
+                + *to.numGenes * (sizeof(Gene) + GpuMemoryAlignmentBytes) + *to.numNodes * (sizeof(Node) + GpuMemoryAlignmentBytes));
     }
 
     {
@@ -1069,8 +1068,21 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
             if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }
-            if (cellTO.cellType == CellType_Memory && cellTO.cellTypeData.memory.memoryEntriesDataIndex != VALUE_NOT_SET_UINT64) {
+            if (cellTO.cellType == CellType_Memory) {
                 heapBytes += sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES + GpuMemoryAlignmentBytes;
+            }
+        }
+        alienAtomicAdd64(&arraySizes->heap, heapBytes);
+    }
+
+    // Count genome memory entries bytes by iterating through nodes
+    {
+        auto partition = calcAllThreadsPartition(*to.numNodes);
+        uint64_t heapBytes = 0;
+        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            auto& nodeTO = to.nodes[index];
+            if (nodeTO.cellType == CellTypeGenome_Memory) {
+                heapBytes += sizeof(MemoryEntryGenome) * MAX_CELL_MEMORY_ENTRIES + GpuMemoryAlignmentBytes;
             }
         }
         alienAtomicAdd64(&arraySizes->heap, heapBytes);
