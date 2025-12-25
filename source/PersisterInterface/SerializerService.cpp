@@ -593,6 +593,15 @@ namespace cereal
     SPLIT_SERIALIZATION(SignalStorageGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalIntegratorGenomeDescription& data)
+    {
+        SignalIntegratorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalIntegratorGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MemoryEntryGenomeDescription& data)
     {
         MemoryEntryGenomeDescription defaultObject;
@@ -1259,6 +1268,15 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalStorageDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalIntegratorDescription& data)
+    {
+        SignalIntegratorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalIntegratorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, MemoryEntryDescription& data)

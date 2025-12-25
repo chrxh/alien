@@ -221,11 +221,15 @@ struct SignalStorageGenomeTO
     int numEntries;
 };
 
+struct SignalIntegratorGenomeTO
+{};
+
 union MemoryModeDataGenomeTO
 {
     SignalDelayGenomeTO signalDelay;
     SignalRecorderGenomeTO signalRecorder;
     SignalStorageGenomeTO signalStorage;
+    SignalIntegratorGenomeTO signalIntegrator;
 };
 
 struct MemoryEntryGenomeTO
@@ -238,6 +242,7 @@ struct MemoryGenomeTO
     MemoryMode mode;
     MemoryModeDataGenomeTO modeData;
     uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
+    uint8_t numMemoryEntries;
 };
 
 union CellTypeDataGenomeTO

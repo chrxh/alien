@@ -220,11 +220,15 @@ struct SignalStorageGenome
     int numEntries;
 };
 
+struct SignalIntegratorGenome
+{};
+
 union MemoryModeDataGenome
 {
     SignalDelayGenome signalDelay;
     SignalRecorderGenome signalRecorder;
     SignalStorageGenome signalStorage;
+    SignalIntegratorGenome signalIntegrator;
 };
 
 struct MemoryEntryGenome
@@ -237,6 +241,7 @@ struct MemoryGenome
     MemoryMode mode;
     MemoryModeDataGenome modeData;
     MemoryEntryGenome* memoryEntries;  // Pointer to heap memory
+    uint8_t numMemoryEntries;
 };
 
 union CellTypeDataGenome

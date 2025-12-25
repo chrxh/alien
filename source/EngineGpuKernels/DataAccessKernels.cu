@@ -181,6 +181,7 @@ namespace
                         break;
                     case CellTypeGenome_Memory:
                         nodeTO.cellTypeData.memory.mode = node.cellTypeData.memory.mode;
+                        nodeTO.cellTypeData.memory.numMemoryEntries = node.cellTypeData.memory.numMemoryEntries;
                         if (node.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                             nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording = node.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
                             nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = node.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
@@ -189,6 +190,8 @@ namespace
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries = node.cellTypeData.memory.modeData.signalRecorder.numEntries;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                             nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries = node.cellTypeData.memory.modeData.signalStorage.numEntries;
+                        } else if (node.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                            // Empty struct, no data to copy
                         }
                         {
                             int targetSize;  // not used
@@ -425,6 +428,7 @@ namespace
         } break;
         case CellType_Memory: {
             cellTO.cellTypeData.memory.mode = cell->cellTypeData.memory.mode;
+            cellTO.cellTypeData.memory.numMemoryEntries = cell->cellTypeData.memory.numMemoryEntries;
             if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                 cellTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording = cell->cellTypeData.memory.modeData.signalDelay.delayWithRecording;
                 cellTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = cell->cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
@@ -433,6 +437,8 @@ namespace
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries = cell->cellTypeData.memory.modeData.signalRecorder.numEntries;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                 cellTO.cellTypeData.memory.modeData.signalStorage.numEntries = cell->cellTypeData.memory.modeData.signalStorage.numEntries;
+            } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                // Empty struct, no data to copy
             }
             int targetSize;  // not used
             copyDataToHeap<int>(

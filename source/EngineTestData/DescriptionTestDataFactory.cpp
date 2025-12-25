@@ -35,6 +35,7 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
     };
 }
 
@@ -107,6 +108,7 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
     };
 }
 
@@ -526,6 +528,9 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
                 return false;
             }
         } break;
+        case MemoryMode_SignalIntegrator: {
+            // Empty struct, no data to compare
+        } break;
         }
         for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
             for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -698,6 +703,9 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         case MemoryMode_SignalStorage:
             memoryModeDesc = SignalStorageDescription().numEntries(12);
             break;
+        case MemoryMode_SignalIntegrator:
+            memoryModeDesc = SignalIntegratorDescription();
+            break;
         default:
             memoryModeDesc = MemoryModeDescription();
         }
@@ -832,6 +840,9 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             break;
         case MemoryMode_SignalStorage:
             memoryModeDesc = SignalStorageGenomeDescription().numEntries(12);
+            break;
+        case MemoryMode_SignalIntegrator:
+            memoryModeDesc = SignalIntegratorGenomeDescription();
             break;
         default:
             memoryModeDesc = MemoryModeGenomeDescription();

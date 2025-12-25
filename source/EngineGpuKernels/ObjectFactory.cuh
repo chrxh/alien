@@ -235,6 +235,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 break;
             case CellTypeGenome_Memory:
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
+                node.cellTypeData.memory.numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
                 if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                     node.cellTypeData.memory.modeData.signalDelay.delayWithRecording = nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
                     node.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
@@ -243,6 +244,8 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.memory.modeData.signalRecorder.numEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                     node.cellTypeData.memory.modeData.signalStorage.numEntries = nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries;
+                } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                    // Empty struct, no data to copy
                 }
                 {
                     auto memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntryGenome>(MAX_CELL_MEMORY_ENTRIES);
@@ -479,6 +482,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     } break;
     case CellType_Memory: {
         cell->cellTypeData.memory.mode = cellTO.cellTypeData.memory.mode;
+        cell->cellTypeData.memory.numMemoryEntries = cellTO.cellTypeData.memory.numMemoryEntries;
         if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
             cell->cellTypeData.memory.modeData.signalDelay.delayWithRecording = cellTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
             cell->cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = cellTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
@@ -487,6 +491,8 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.memory.modeData.signalRecorder.numEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
             cell->cellTypeData.memory.modeData.signalStorage.numEntries = cellTO.cellTypeData.memory.modeData.signalStorage.numEntries;
+        } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+            // Empty struct, no data to copy
         }
         copyDataToHeap(
             sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES,
@@ -841,6 +847,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto const& nodeMemory = node->cellTypeData.memory;
         auto& memory = cell->cellTypeData.memory;
         memory.mode = nodeMemory.mode;
+        memory.numMemoryEntries = nodeMemory.numMemoryEntries;
         if (nodeMemory.mode == MemoryMode_SignalDelay) {
             memory.modeData.signalDelay.delayWithRecording = nodeMemory.modeData.signalDelay.delayWithRecording;
             memory.modeData.signalDelay.delayWithoutRecording = nodeMemory.modeData.signalDelay.delayWithoutRecording;
@@ -849,6 +856,8 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             memory.modeData.signalRecorder.numEntries = nodeMemory.modeData.signalRecorder.numEntries;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
             memory.modeData.signalStorage.numEntries = nodeMemory.modeData.signalStorage.numEntries;
+        } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
+            // Empty struct, no data to copy
         }
         // Allocate and copy memory entries from genome
         memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(MAX_CELL_MEMORY_ENTRIES);

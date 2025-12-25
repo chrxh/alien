@@ -331,11 +331,15 @@ struct SignalStorage
     int numEntries;
 };
 
+struct SignalIntegrator
+{};
+
 union MemoryModeData
 {
     SignalDelay signalDelay;
     SignalRecorder signalRecorder;
     SignalStorage signalStorage;
+    SignalIntegrator signalIntegrator;
 };
 
 struct MemoryEntry
@@ -348,6 +352,7 @@ struct Memory
     MemoryMode mode;
     MemoryModeData modeData;
     MemoryEntry* memoryEntries;  // Pointer to MemoryEntry[MAX_CELL_MEMORY_ENTRIES] in heap
+    uint8_t numMemoryEntries;
 };
 
 union CellTypeData

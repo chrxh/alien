@@ -303,7 +303,12 @@ struct SignalStorageGenomeDescription
     MEMBER(SignalStorageGenomeDescription, int, numEntries, 8);
 };
 
-using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription>;
+struct SignalIntegratorGenomeDescription
+{
+    auto operator<=>(SignalIntegratorGenomeDescription const&) const = default;
+};
+
+using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>;
 
 struct MemoryEntryGenomeDescription
 {

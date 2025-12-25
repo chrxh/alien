@@ -381,7 +381,12 @@ struct SignalStorageDescription
     MEMBER(SignalStorageDescription, int, numEntries, 8);
 };
 
-using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription>;
+struct SignalIntegratorDescription
+{
+    auto operator<=>(SignalIntegratorDescription const&) const = default;
+};
+
+using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription, SignalIntegratorDescription>;
 
 struct MemoryDescription
 {

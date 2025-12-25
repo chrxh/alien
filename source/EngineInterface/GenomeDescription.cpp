@@ -104,6 +104,8 @@ MemoryMode MemoryGenomeDescription::getMode() const
         return MemoryMode_SignalRecorder;
     } else if (std::holds_alternative<SignalStorageGenomeDescription>(_mode)) {
         return MemoryMode_SignalStorage;
+    } else if (std::holds_alternative<SignalIntegratorGenomeDescription>(_mode)) {
+        return MemoryMode_SignalIntegrator;
     }
     CHECK(false);
 }

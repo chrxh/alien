@@ -536,6 +536,9 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             SignalStorageDescription signalStorage;
             signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
             memory._mode = signalStorage;
+        } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+            SignalIntegratorDescription signalIntegrator;
+            memory._mode = signalIntegrator;
         }
         auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
         copyMemoryEntriesToDescription(*memoryEntriesTO, memory._memoryEntries);
@@ -772,6 +775,9 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             SignalStorageGenomeDescription signalStorage;
             signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
             memoryDesc._mode = signalStorage;
+        } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+            SignalIntegratorGenomeDescription signalIntegrator;
+            memoryDesc._mode = signalIntegrator;
         }
         auto const& memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO const*>(to.heap + memoryTO.memoryEntriesDataIndex);
         copyMemoryEntriesToDescription(memoryEntriesTO, memoryDesc._memoryEntries);
@@ -1063,6 +1069,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
                     auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
+                } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+                    // Empty struct, no data to copy
                 }
                 memoryTO.memoryEntriesDataIndex = heap.size();
                 heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * MAX_CELL_MEMORY_ENTRIES);
@@ -1339,6 +1347,8 @@ void DescriptionConverterService::convertCellToTO(
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
             memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
+        } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+            // Empty struct, no data to copy
         }
         memoryTO.memoryEntriesDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);

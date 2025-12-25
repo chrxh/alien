@@ -394,11 +394,17 @@ struct std::hash<SignalStorageGenomeDescription>
 };
 
 template <>
+struct std::hash<SignalIntegratorGenomeDescription>
+{
+    std::size_t operator()(SignalIntegratorGenomeDescription const& desc) const { return 0; }
+};
+
+template <>
 struct std::hash<MemoryModeGenomeDescription>
 {
     std::size_t operator()(MemoryModeGenomeDescription const& desc) const
     {
-        return variant_hasher<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription>{}(desc);
+        return variant_hasher<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>{}(desc);
     }
 };
 

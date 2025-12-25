@@ -102,6 +102,8 @@ MemoryMode MemoryDescription::getMode() const
         return MemoryMode_SignalRecorder;
     } else if (std::holds_alternative<SignalStorageDescription>(_mode)) {
         return MemoryMode_SignalStorage;
+    } else if (std::holds_alternative<SignalIntegratorDescription>(_mode)) {
+        return MemoryMode_SignalIntegrator;
     }
     THROW_NOT_IMPLEMENTED();
 }
