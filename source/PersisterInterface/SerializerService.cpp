@@ -226,6 +226,8 @@ namespace
     auto constexpr Id_MemoryEntryGenome_Channels = 0;
 
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
+
+    auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
 }
 
 namespace cereal
@@ -584,6 +586,7 @@ namespace cereal
     {
         SignalIntegratorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalIntegratorGenomeDescription)
@@ -822,6 +825,8 @@ namespace
     auto constexpr Id_MemoryEntry_Channels = 0;
 
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
+
+    auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
 }
 
 namespace cereal
@@ -1248,6 +1253,7 @@ namespace cereal
     {
         SignalIntegratorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalIntegratorDescription)

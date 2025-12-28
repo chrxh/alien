@@ -392,7 +392,12 @@ struct std::hash<SignalStorageGenomeDescription>
 template <>
 struct std::hash<SignalIntegratorGenomeDescription>
 {
-    std::size_t operator()(SignalIntegratorGenomeDescription const& desc) const { return 0; }
+    std::size_t operator()(SignalIntegratorGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._newSignalWeight);
+        return seed;
+    }
 };
 
 template <>

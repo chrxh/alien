@@ -218,7 +218,9 @@ struct SignalStorageGenomeTO
 };
 
 struct SignalIntegratorGenomeTO
-{};
+{
+    float newSignalWeight;  // Between 0 and 1
+};
 
 union MemoryModeDataGenomeTO
 {

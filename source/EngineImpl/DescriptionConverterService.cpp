@@ -535,6 +535,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             memory._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorDescription signalIntegrator;
+            signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memory._mode = signalIntegrator;
         }
         auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO>(to.heap, memoryTO.memoryEntriesDataIndex);
@@ -770,6 +771,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             memoryDesc._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorGenomeDescription signalIntegrator;
+            signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memoryDesc._mode = signalIntegrator;
         }
         auto const& memoryEntriesTO = getFromHeap<MemoryEntryGenomeTO>(to.heap, memoryTO.memoryEntriesDataIndex);
@@ -1057,6 +1059,8 @@ void DescriptionConverterService::convertGenomeToTO(
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
                 } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+                    auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
                 }
                 memoryTO.numMemoryEntries = toInt(memoryDesc._memoryEntries.size());
                 memoryTO.memoryEntriesDataIndex = heap.size();
@@ -1324,14 +1328,14 @@ void DescriptionConverterService::convertCellToTO(
         auto& memoryTO = cellTO.cellTypeData.memory;
         memoryTO.mode = memoryDesc.getMode();
         if (memoryTO.mode == MemoryMode_SignalDelay) {
-            auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
-            // Empty struct, no data to copy
+            auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
         }
         memoryTO.numMemoryEntries = toInt(memoryDesc._memoryEntries.size());
         memoryTO.memoryEntriesDataIndex = heap.size();

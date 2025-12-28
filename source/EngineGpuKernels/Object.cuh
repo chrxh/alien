@@ -328,7 +328,9 @@ struct SignalStorage
 };
 
 struct SignalIntegrator
-{};
+{
+    float newSignalWeight;  // Between 0 and 1
+};
 
 union MemoryModeData
 {

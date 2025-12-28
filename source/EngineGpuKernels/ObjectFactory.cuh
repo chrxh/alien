@@ -241,6 +241,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                    node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
                 }
                 auto const& numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
                 auto memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntryGenome>(numMemoryEntries);
@@ -482,7 +483,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
-            // Empty struct, no data to copy
+            cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
         }
         copyDataToHeap(
             sizeof(MemoryEntryTO) * cellTO.cellTypeData.memory.numMemoryEntries,
@@ -843,6 +844,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
         } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
+            memory.modeData.signalIntegrator.newSignalWeight = nodeMemory.modeData.signalIntegrator.newSignalWeight;
         }
         memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(nodeMemory.numMemoryEntries);
         for (int i = 0, j = nodeMemory.numMemoryEntries; i < j; ++i) {

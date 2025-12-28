@@ -514,6 +514,11 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         case MemoryMode_SignalStorage: {
         } break;
         case MemoryMode_SignalIntegrator: {
+            auto const& signalIntegrator = std::get<SignalIntegratorDescription>(memory._mode);
+            auto const& nodeSignalIntegrator = std::get<SignalIntegratorGenomeDescription>(nodeMemory._mode);
+            if (signalIntegrator._newSignalWeight != nodeSignalIntegrator._newSignalWeight) {
+                return false;
+            }
         } break;
         }
         if (memory._memoryEntries.size() != nodeMemory._memoryEntries.size()) {
@@ -691,7 +696,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = SignalStorageDescription();
             break;
         case MemoryMode_SignalIntegrator:
-            memoryModeDesc = SignalIntegratorDescription();
+            memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);
             break;
         default:
             memoryModeDesc = MemoryModeDescription();
@@ -830,7 +835,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             memoryModeDesc = SignalStorageGenomeDescription();
             break;
         case MemoryMode_SignalIntegrator:
-            memoryModeDesc = SignalIntegratorGenomeDescription();
+            memoryModeDesc = SignalIntegratorGenomeDescription().newSignalWeight(0.8f);
             break;
         default:
             memoryModeDesc = MemoryModeGenomeDescription();

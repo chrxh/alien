@@ -203,6 +203,8 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
+                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);
+                    signalIntegrator._newSignalWeight = std::clamp(signalIntegrator._newSignalWeight, 0.0f, 1.0f);
                 }
             }
         }
