@@ -139,10 +139,17 @@ void _GenomeTabWidget::convertToDraftTab()
     _specificEditData = DraftData{};
 }
 
-void _GenomeTabWidget::resetChanges()
+void _GenomeTabWidget::resetOriginal()
 {
     auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
     simulatedCreatureData.origGenome = _editData->genome;
+    simulatedCreatureData.changesMade = false;
+}
+
+void _GenomeTabWidget::resetChanges()
+{
+    auto& simulatedCreatureData = std::get<CreatureData>(_specificEditData);
+    _editData->genome = simulatedCreatureData.origGenome;
     simulatedCreatureData.changesMade = false;
 }
 

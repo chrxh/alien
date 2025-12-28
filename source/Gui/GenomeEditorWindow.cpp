@@ -44,7 +44,7 @@ void GenomeEditorWindow::openTab(std::optional<uint64_t> const& creatureId, Geno
     }
     if (tabIndex) {
         _tabIndexToSelect = *tabIndex;
-        _tabs.at(*tabIndex)->resetChanges();
+        _tabs.at(*tabIndex)->resetOriginal();
     } else {
         if (creatureId.has_value()) {
             onScheduleAddCreatureTab(creatureId.value(), genome);
@@ -132,6 +132,13 @@ void GenomeEditorWindow::processToolbar()
     }
 
     ImGui::SameLine();
+    auto hasCreaturesGenomeChanged = _tabs.at(_selectedTabIndex)->hasCreaturesGenomeBeChanged();
+    if (AlienGui::ToolbarButton(
+            AlienGui::ToolbarButtonParameters().text(ICON_FA_UNDO).tooltip("Revert changes on creature").disabled(!hasCreaturesGenomeChanged))) {
+        _tabs.at(_selectedTabIndex)->resetChanges();
+    }
+
+    ImGui::SameLine();
     AlienGui::ToolbarSeparator();
 
     ImGui::SameLine();
@@ -146,7 +153,7 @@ void GenomeEditorWindow::processToolbar()
     if (AlienGui::ToolbarButton(AlienGui::ToolbarButtonParameters()
                                     .text(ICON_FA_SYRINGE)
                                     .tooltip("Inject the current genome to the creature in the simulation")
-                                    .disabled(!_tabs.at(_selectedTabIndex)->hasCreaturesGenomeBeChanged()))) {
+                                    .disabled(!hasCreaturesGenomeChanged))) {
         onInjectGenome();
     }
 

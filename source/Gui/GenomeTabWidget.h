@@ -38,6 +38,7 @@ public:
 
     bool isEmpty() const;
     void convertToDraftTab();
+    void resetOriginal();
     void resetChanges();
 
 private:
