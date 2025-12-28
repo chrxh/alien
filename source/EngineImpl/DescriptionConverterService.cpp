@@ -525,6 +525,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         auto const& memoryTO = cellTO.cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             SignalDelayDescription signalDelay;
+            signalDelay._newSignalWeight = memoryTO.modeData.signalDelay.newSignalWeight;
             memory._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderDescription signalRecorder;
@@ -760,6 +761,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         auto const& memoryTO = nodeTO->cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             SignalDelayGenomeDescription signalDelay;
+            signalDelay._newSignalWeight = memoryTO.modeData.signalDelay.newSignalWeight;
             memoryDesc._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderGenomeDescription signalRecorder;
@@ -1052,6 +1054,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto& memoryTO = nodeTO.cellTypeData.memory;
                 memoryTO.mode = memoryDesc.getMode();
                 if (memoryTO.mode == MemoryMode_SignalDelay) {
+                    auto const& signalDelayDesc = std::get<SignalDelayGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalDelay.newSignalWeight = signalDelayDesc._newSignalWeight;
                 } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
                     auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
@@ -1325,6 +1329,7 @@ void DescriptionConverterService::convertCellToTO(
         memoryTO.mode = memoryDesc.getMode();
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalDelay.newSignalWeight = signalDelayDesc._newSignalWeight;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;

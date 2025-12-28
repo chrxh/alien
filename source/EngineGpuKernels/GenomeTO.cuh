@@ -206,6 +206,7 @@ struct DigestorGenomeTO
 
 struct SignalDelayGenomeTO
 {
+    float newSignalWeight;  // Between 0 and 1
 };
 
 struct SignalRecorderGenomeTO

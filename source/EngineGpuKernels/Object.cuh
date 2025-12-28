@@ -316,6 +316,7 @@ struct Digestor
 
 struct SignalDelay
 {
+    float newSignalWeight;  // Between 0 and 1
 };
 
 struct SignalRecorder

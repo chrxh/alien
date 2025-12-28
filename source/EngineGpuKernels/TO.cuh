@@ -289,6 +289,7 @@ struct DigestorTO
 
 struct SignalDelayTO
 {
+    float newSignalWeight;  // Between 0 and 1
 };
 
 struct SignalRecorderTO

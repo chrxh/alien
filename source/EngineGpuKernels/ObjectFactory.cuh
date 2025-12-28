@@ -237,6 +237,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
                 node.cellTypeData.memory.numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
                 if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                    node.cellTypeData.memory.modeData.signalDelay.newSignalWeight = nodeTO.cellTypeData.memory.modeData.signalDelay.newSignalWeight;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
@@ -478,6 +479,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.memory.mode = cellTO.cellTypeData.memory.mode;
         cell->cellTypeData.memory.numMemoryEntries = cellTO.cellTypeData.memory.numMemoryEntries;
         if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+            cell->cellTypeData.memory.modeData.signalDelay.newSignalWeight = cellTO.cellTypeData.memory.modeData.signalDelay.newSignalWeight;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
@@ -839,6 +841,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         memory.mode = nodeMemory.mode;
         memory.numMemoryEntries = nodeMemory.numMemoryEntries;
         if (nodeMemory.mode == MemoryMode_SignalDelay) {
+            memory.modeData.signalDelay.newSignalWeight = nodeMemory.modeData.signalDelay.newSignalWeight;
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
