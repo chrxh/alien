@@ -205,7 +205,6 @@ struct DigestorGenome
 
 struct SignalDelayGenome
 {
-    float newSignalWeight;  // Between 0 and 1
 };
 
 struct SignalRecorderGenome
@@ -218,7 +217,9 @@ struct SignalStorageGenome
 };
 
 struct SignalIntegratorGenome
-{};
+{
+    float newSignalWeight;  // Between 0 and 1
+};
 
 union MemoryModeDataGenome
 {

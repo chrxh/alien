@@ -361,8 +361,6 @@ struct MemoryEntryDescription
 struct SignalDelayDescription
 {
     auto operator<=>(SignalDelayDescription const&) const = default;
-
-    MEMBER(SignalDelayDescription, float, newSignalWeight, 1.0f);  // Between 0 and 1
 };
 
 struct SignalRecorderDescription
@@ -380,6 +378,8 @@ struct SignalStorageDescription
 struct SignalIntegratorDescription
 {
     auto operator<=>(SignalIntegratorDescription const&) const = default;
+
+    MEMBER(SignalIntegratorDescription, float, newSignalWeight, 1.0f);  // Between 0 and 1
 };
 
 using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription, SignalIntegratorDescription>;

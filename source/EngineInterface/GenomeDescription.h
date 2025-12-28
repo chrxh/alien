@@ -283,8 +283,6 @@ struct DigestorGenomeDescription
 struct SignalDelayGenomeDescription
 {
     auto operator<=>(SignalDelayGenomeDescription const&) const = default;
-
-    MEMBER(SignalDelayGenomeDescription, float, newSignalWeight, 1.0f);  // Between 0 and 1
 };
 
 struct SignalRecorderGenomeDescription
@@ -302,6 +300,8 @@ struct SignalStorageGenomeDescription
 struct SignalIntegratorGenomeDescription
 {
     auto operator<=>(SignalIntegratorGenomeDescription const&) const = default;
+
+    MEMBER(SignalIntegratorGenomeDescription, float, newSignalWeight, 1.0f);  // Between 0 and 1
 };
 
 using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>;

@@ -200,11 +200,11 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 auto& memory = std::get<MemoryGenomeDescription>(node._cellType);
                 auto memoryMode = memory.getMode();
                 if (memoryMode == MemoryMode_SignalDelay) {
-                    auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
-                    signalDelay._newSignalWeight = std::clamp(signalDelay._newSignalWeight, 0.0f, 1.0f);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
+                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);
+                    signalIntegrator._newSignalWeight = std::clamp(signalIntegrator._newSignalWeight, 0.0f, 1.0f);
                 }
             }
         }

@@ -503,11 +503,6 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         switch (memory.getMode()) {
         case MemoryMode_SignalDelay: {
-            auto const& signalDelay = std::get<SignalDelayDescription>(memory._mode);
-            auto const& nodeSignalDelay = std::get<SignalDelayGenomeDescription>(nodeMemory._mode);
-            if (signalDelay._newSignalWeight != nodeSignalDelay._newSignalWeight) {
-                return false;
-            }
         } break;
         case MemoryMode_SignalRecorder: {
             auto const& signalRecorder = std::get<SignalRecorderDescription>(memory._mode);
@@ -519,6 +514,11 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         case MemoryMode_SignalStorage: {
         } break;
         case MemoryMode_SignalIntegrator: {
+            auto const& signalIntegrator = std::get<SignalIntegratorDescription>(memory._mode);
+            auto const& nodeSignalIntegrator = std::get<SignalIntegratorGenomeDescription>(nodeMemory._mode);
+            if (signalIntegrator._newSignalWeight != nodeSignalIntegrator._newSignalWeight) {
+                return false;
+            }
         } break;
         }
         if (memory._memoryEntries.size() != nodeMemory._memoryEntries.size()) {
@@ -687,7 +687,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         MemoryModeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayDescription().newSignalWeight(0.75f);
+            memoryModeDesc = SignalDelayDescription();
             break;
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderDescription().readOnly(false);
@@ -696,7 +696,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = SignalStorageDescription();
             break;
         case MemoryMode_SignalIntegrator:
-            memoryModeDesc = SignalIntegratorDescription();
+            memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);
             break;
         default:
             memoryModeDesc = MemoryModeDescription();
@@ -826,7 +826,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         MemoryModeGenomeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayGenomeDescription().newSignalWeight(0.8f);
+            memoryModeDesc = SignalDelayGenomeDescription();
             break;
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false);
@@ -835,7 +835,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             memoryModeDesc = SignalStorageGenomeDescription();
             break;
         case MemoryMode_SignalIntegrator:
-            memoryModeDesc = SignalIntegratorGenomeDescription();
+            memoryModeDesc = SignalIntegratorGenomeDescription().newSignalWeight(0.8f);
             break;
         default:
             memoryModeDesc = MemoryModeGenomeDescription();

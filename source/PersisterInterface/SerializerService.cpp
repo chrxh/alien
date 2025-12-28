@@ -227,7 +227,7 @@ namespace
 
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
 
-    auto constexpr Id_SignalDelayGenome_NewSignalWeight = 0;
+    auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
 }
 
 namespace cereal
@@ -558,7 +558,6 @@ namespace cereal
     {
         SignalDelayGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalDelayGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayGenomeDescription)
@@ -587,6 +586,7 @@ namespace cereal
     {
         SignalIntegratorGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalIntegratorGenomeDescription)
@@ -826,7 +826,7 @@ namespace
 
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
 
-    auto constexpr Id_SignalDelay_NewSignalWeight = 0;
+    auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
 }
 
 namespace cereal
@@ -1225,7 +1225,6 @@ namespace cereal
     {
         SignalDelayDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalDelay_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayDescription)
@@ -1254,6 +1253,7 @@ namespace cereal
     {
         SignalIntegratorDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalIntegratorDescription)

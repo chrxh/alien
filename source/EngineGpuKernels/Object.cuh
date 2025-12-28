@@ -316,7 +316,6 @@ struct Digestor
 
 struct SignalDelay
 {
-    float newSignalWeight;  // Between 0 and 1
 };
 
 struct SignalRecorder
@@ -329,7 +328,9 @@ struct SignalStorage
 };
 
 struct SignalIntegrator
-{};
+{
+    float newSignalWeight;  // Between 0 and 1
+};
 
 union MemoryModeData
 {
