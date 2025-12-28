@@ -107,6 +107,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 {
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 200000;
+    _parameters.attackerRadius.value[0] = 4.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().add(createSmallCreatureSeed()).add(createLargeCreatureSeed(DigestionCapability::Low));
@@ -136,6 +137,7 @@ TEST_F(BalanceTests, longRunning_smallCreaturesVsLargeCreatures_highDigestionCap
 {
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 200000;
+    _parameters.attackerRadius.value[0] = 4.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto data = Description().add(createSmallCreatureSeed()).add(createLargeCreatureSeed(DigestionCapability::High));
