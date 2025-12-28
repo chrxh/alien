@@ -289,32 +289,40 @@ struct DigestorTO
 
 struct SignalDelayTO
 {
-    int delayWithRecording;
-    int delayWithoutRecording;
 };
 
 struct SignalRecorderTO
 {
     bool readOnly;
-    int numEntries;
 };
 
-struct SignalRetrievalTO
+struct SignalStorageTO
 {
-    int numEntries;
 };
+
+struct SignalIntegratorTO
+{};
 
 union MemoryModeDataTO
 {
     SignalDelayTO signalDelay;
     SignalRecorderTO signalRecorder;
-    SignalRetrievalTO signalRetrieval;
+    SignalStorageTO signalStorage;
+    SignalIntegratorTO signalIntegrator;
+};
+
+struct MemoryEntryTO
+{
+    float channels[MAX_CHANNELS];
 };
 
 struct MemoryTO
 {
     MemoryMode mode;
     MemoryModeDataTO modeData;
+
+    uint8_t numMemoryEntries;
+    uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
 union CellTypeDataTO

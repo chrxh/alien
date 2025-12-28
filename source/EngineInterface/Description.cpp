@@ -89,19 +89,16 @@ AttackerMode AttackerDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
-MemoryDescription::MemoryDescription()
-{
-    _memoryEntries.resize(MAX_CELL_MEMORY_ENTRIES, MemoryEntryDescription());
-}
-
 MemoryMode MemoryDescription::getMode() const
 {
     if (std::holds_alternative<SignalDelayDescription>(_mode)) {
         return MemoryMode_SignalDelay;
     } else if (std::holds_alternative<SignalRecorderDescription>(_mode)) {
         return MemoryMode_SignalRecorder;
-    } else if (std::holds_alternative<SignalRetrievalDescription>(_mode)) {
-        return MemoryMode_SignalRetrieval;
+    } else if (std::holds_alternative<SignalStorageDescription>(_mode)) {
+        return MemoryMode_SignalStorage;
+    } else if (std::holds_alternative<SignalIntegratorDescription>(_mode)) {
+        return MemoryMode_SignalIntegrator;
     }
     THROW_NOT_IMPLEMENTED();
 }

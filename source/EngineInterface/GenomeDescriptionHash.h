@@ -364,8 +364,6 @@ struct std::hash<SignalDelayGenomeDescription>
     std::size_t operator()(SignalDelayGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._delayWithRecording);
-        hash_combine(seed, desc._delayWithoutRecording);
         return seed;
     }
 };
@@ -377,20 +375,24 @@ struct std::hash<SignalRecorderGenomeDescription>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._readOnly);
-        hash_combine(seed, desc._numEntries);
         return seed;
     }
 };
 
 template <>
-struct std::hash<SignalRetrievalGenomeDescription>
+struct std::hash<SignalStorageGenomeDescription>
 {
-    std::size_t operator()(SignalRetrievalGenomeDescription const& desc) const
+    std::size_t operator()(SignalStorageGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._numEntries);
         return seed;
     }
+};
+
+template <>
+struct std::hash<SignalIntegratorGenomeDescription>
+{
+    std::size_t operator()(SignalIntegratorGenomeDescription const& desc) const { return 0; }
 };
 
 template <>
@@ -398,14 +400,34 @@ struct std::hash<MemoryModeGenomeDescription>
 {
     std::size_t operator()(MemoryModeGenomeDescription const& desc) const
     {
-        return variant_hasher<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalRetrievalGenomeDescription>{}(desc);
+        return variant_hasher<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<MemoryEntryGenomeDescription>
+{
+    std::size_t operator()(MemoryEntryGenomeDescription const& desc) const
+    {
+        std::size_t result = 0;
+        for (auto const& channel : desc._channels) {
+            hash_combine(result, channel);
+        }
+        return result;
     }
 };
 
 template <>
 struct std::hash<MemoryGenomeDescription>
 {
-    std::size_t operator()(MemoryGenomeDescription const& desc) const { return std::hash<MemoryModeGenomeDescription>{}(desc._mode); }
+    std::size_t operator()(MemoryGenomeDescription const& desc) const
+    {
+        std::size_t result = std::hash<MemoryModeGenomeDescription>{}(desc._mode);
+        for (auto const& entry : desc._memoryEntries) {
+            hash_combine(result, std::hash<MemoryEntryGenomeDescription>{}(entry));
+        }
+        return result;
+    }
 };
 
 template <>

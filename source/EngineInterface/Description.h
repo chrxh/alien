@@ -353,17 +353,14 @@ struct DigestorDescription
 struct MemoryEntryDescription
 {
     MemoryEntryDescription();
+    auto operator<=>(MemoryEntryDescription const&) const = default;
 
-    MEMBER(MemoryEntryDescription, int, timestamp, 0);
     MEMBER(MemoryEntryDescription, std::vector<float>, channels, {});
 };
 
 struct SignalDelayDescription
 {
     auto operator<=>(SignalDelayDescription const&) const = default;
-
-    MEMBER(SignalDelayDescription, int, delayWithRecording, 15);  // Time steps
-    MEMBER(SignalDelayDescription, int, delayWithoutRecording, 0);  // Time steps
 };
 
 struct SignalRecorderDescription
@@ -371,21 +368,22 @@ struct SignalRecorderDescription
     auto operator<=>(SignalRecorderDescription const&) const = default;
 
     MEMBER(SignalRecorderDescription, bool, readOnly, true);
-    MEMBER(SignalRecorderDescription, int, numEntries, 8);
 };
 
-struct SignalRetrievalDescription
+struct SignalStorageDescription
 {
-    auto operator<=>(SignalRetrievalDescription const&) const = default;
-
-    MEMBER(SignalRetrievalDescription, int, numEntries, 8);
+    auto operator<=>(SignalStorageDescription const&) const = default;
 };
 
-using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalRetrievalDescription>;
+struct SignalIntegratorDescription
+{
+    auto operator<=>(SignalIntegratorDescription const&) const = default;
+};
+
+using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription, SignalIntegratorDescription>;
 
 struct MemoryDescription
 {
-    MemoryDescription();
     auto operator<=>(MemoryDescription const&) const = default;
 
     MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());

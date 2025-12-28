@@ -155,8 +155,8 @@ namespace
             return SignalDelayGenomeDescription();
         case MemoryMode_SignalRecorder:
             return SignalRecorderGenomeDescription();
-        case MemoryMode_SignalRetrieval:
-            return SignalRetrievalGenomeDescription();
+        case MemoryMode_SignalStorage:
+            return SignalStorageGenomeDescription();
         default:
             CHECK(false);
         }
@@ -586,26 +586,13 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Mode-specific parameters
             if (mode == MemoryMode_SignalDelay) {
-                AlienGui::BeginIndent();
-                auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Delay with recording").textWidth(rightColumnWidth), signalDelay._delayWithRecording);
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Delay without recording").textWidth(rightColumnWidth), signalDelay._delayWithoutRecording);
-                AlienGui::EndIndent();
             } else if (mode == MemoryMode_SignalRecorder) {
                 AlienGui::BeginIndent();
                 auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Number of entries").textWidth(rightColumnWidth), signalRecorder._numEntries);
                 AlienGui::EndIndent();
-            } else if (mode == MemoryMode_SignalRetrieval) {
-                AlienGui::BeginIndent();
-                auto& signalRetrieval = std::get<SignalRetrievalGenomeDescription>(memory._mode);
-                AlienGui::InputInt(
-                    AlienGui::InputIntParameters().name("Number of entries").textWidth(rightColumnWidth), signalRetrieval._numEntries);
-                AlienGui::EndIndent();
+            } else if (mode == MemoryMode_SignalStorage) {
+            } else if (mode == MemoryMode_SignalIntegrator) {
             }
 
             AlienGui::EndIndent();

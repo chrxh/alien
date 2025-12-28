@@ -345,13 +345,14 @@ enum MemoryMode_
 {
     MemoryMode_SignalDelay,
     MemoryMode_SignalRecorder,
-    MemoryMode_SignalRetrieval,
+    MemoryMode_SignalStorage,
+    MemoryMode_SignalIntegrator,
     MemoryMode_Count,
 };
 
 namespace Const
 {
-    std::vector<std::string> const MemoryModeStrings = {"Signal delay", "Signal recorder", "Signal retrieval"};
+    std::vector<std::string> const MemoryModeStrings = {"Signal delay", "Signal recorder", "Signal retrieval", "Signal integrator"};
 }
 
 

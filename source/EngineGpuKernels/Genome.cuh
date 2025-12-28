@@ -205,32 +205,40 @@ struct DigestorGenome
 
 struct SignalDelayGenome
 {
-    int delayWithRecording;
-    int delayWithoutRecording;
 };
 
 struct SignalRecorderGenome
 {
     bool readOnly;
-    int numEntries;
 };
 
-struct SignalRetrievalGenome
+struct SignalStorageGenome
 {
-    int numEntries;
 };
+
+struct SignalIntegratorGenome
+{};
 
 union MemoryModeDataGenome
 {
     SignalDelayGenome signalDelay;
     SignalRecorderGenome signalRecorder;
-    SignalRetrievalGenome signalRetrieval;
+    SignalStorageGenome signalStorage;
+    SignalIntegratorGenome signalIntegrator;
+};
+
+struct MemoryEntryGenome
+{
+    float channels[MAX_CHANNELS];
 };
 
 struct MemoryGenome
 {
     MemoryMode mode;
     MemoryModeDataGenome modeData;
+
+    uint8_t numMemoryEntries;
+    MemoryEntryGenome* memoryEntries;  // Pointer to heap memory
 };
 
 union CellTypeDataGenome
