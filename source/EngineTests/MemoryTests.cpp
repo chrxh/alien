@@ -58,41 +58,10 @@ TEST_F(MemoryTests, signalIntegrator_firstSignal_storesSignalInMemory)
     EXPECT_TRUE(approxCompare(signal, memory._memoryEntries[0]._channels));
 }
 
+
 TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
 {
     // Setup: First signal stored, then second signal integrates
-    std::vector<float> firstSignal = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    std::vector<float> secondSignal = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    float newSignalWeight = 0.5f;
-
-    // Create memory cell with first signal already stored
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
-        CellDescription()
-            .id(1)
-            .pos({100.0f, 100.0f})
-            .cellType(MemoryDescription()
-                          .mode(SignalIntegratorDescription().newSignalWeight(newSignalWeight))
-                          .memoryEntries({MemoryEntryDescription().channels(firstSignal)})),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(secondSignal),
-    }));
-    data.addConnection(1, 2);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    // Expected: (1-0.5)*firstSignal + 0.5*secondSignal = 0.5*1.0 + 0.5*0.0 = 0.5
-    auto memoryCell = actualData.getCellRef(1);
-    auto& memory = std::get<MemoryDescription>(memoryCell._cellType);
-    EXPECT_EQ(1u, memory._memoryEntries.size());
-
-    std::vector<float> expectedSignal = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    EXPECT_TRUE(approxCompare(expectedSignal, memory._memoryEntries[0]._channels));
-}
-
-TEST_F(MemoryTests, signalIntegrator_outputSignalMatchesIntegratedValue)
-{
-    // After integration, the cell's output signal should match the integrated value
     std::vector<float> storedSignal = {0.8f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> incomingSignal = {0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float newSignalWeight = 0.25f;
@@ -112,8 +81,11 @@ TEST_F(MemoryTests, signalIntegrator_outputSignalMatchesIntegratedValue)
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    // Expected: (1-0.25)*0.8 + 0.25*0.2 = 0.6 + 0.05 = 0.65
     auto memoryCell = actualData.getCellRef(1);
+    auto& memory = std::get<MemoryDescription>(memoryCell._cellType);
+    EXPECT_EQ(1u, memory._memoryEntries.size());
+
+    // Expected: (1-0.25)*0.8 + 0.25*0.2 = 0.6 + 0.05 = 0.65
     std::vector<float> expectedSignal = {0.65f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     EXPECT_TRUE(approxCompare(expectedSignal, memoryCell._signal._channels));
 }
