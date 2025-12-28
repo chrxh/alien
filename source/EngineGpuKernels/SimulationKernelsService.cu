@@ -7,12 +7,39 @@
 #include "SimulationKernelsService.cuh"
 #include "SimulationStatistics.cuh"
 
+// =============================================================================
+// CUDA 13 Performance Optimization Notes
+// =============================================================================
+// See docs/CUDA13_PERFORMANCE_OPTIMIZATION_EVALUATION.md for detailed analysis.
+//
+// High-priority optimization opportunities:
+// 1. CUDA Graphs: Capture the kernel launch sequence to reduce CPU overhead
+//    - The calcTimestep() method launches 35-40 kernels per timestep
+//    - Graph capture could reduce launch overhead by 5-15%
+//
+// 2. Warp-Level Reductions: Use __shfl_down_sync before atomics
+//    - Heavy atomic usage in physics kernels (force accumulation)
+//    - Could improve physics kernel performance by 15-25%
+//
+// 3. Cooperative Groups: Enhanced synchronization in NeuronProcessor
+//    - tile_partition and cg::reduce for efficient reductions
+//    - Could improve neural network processing by 10-20%
+//
+// 4. Thread Block Clusters (CUDA 13): Cross-SM synchronization
+//    - Could merge the 3 cudaFindClusterIteration calls into one kernel
+//    - Potential 20-30% improvement for rigidity calculations
+// =============================================================================
+
 void SimulationKernelsService::init()
 {
+    // CUDA 13 Optimization: Initialize CUDA Graph structures here
+    // Future: Create graph templates for different simulation modes
 }
 
 void SimulationKernelsService::shutdown()
 {
+    // CUDA 13 Optimization: Destroy CUDA Graph structures here
+    // Future: Clean up graph instances and execution graphs
 }
 
 namespace
@@ -26,6 +53,11 @@ namespace
 
 void SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
+    // CUDA 13 Optimization: Consider capturing this entire kernel sequence as a CUDA Graph
+    // Benefits: Reduces kernel launch overhead (~5-15% performance gain)
+    // Implementation: Use cudaStreamBeginCapture/cudaStreamEndCapture for graph capture
+    // Note: Conditional branches (motion type, force fields, rigidity) require graph conditionals
+    
     auto const gpuSettings = settings.cudaSettings;
     KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
@@ -34,6 +66,9 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     bool considerInnerFriction = (data.timestep % 3 == 0);
     bool considerRigidityUpdate = (data.timestep % 3 == 0);
 
+    // === Physics Phase ===
+    // CUDA 13 Optimization: Physics kernels use heavy atomics for force accumulation
+    // Consider warp-level reductions (__shfl_down_sync) before atomicAdd operations
     KERNEL_CALL(cudaNextTimestep_physics_init, data);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);
     if (settings.simulationParameters.motionType.value == MotionType_Fluid) {
@@ -51,7 +86,10 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, 16, data, calcAngularForces);
     KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, 16, data);
 
-    // Signal processing
+    // === Signal Processing Phase ===
+    // CUDA 13 Optimization: Neural network processing uses shared memory and atomicAdd_block
+    // Consider using Cooperative Groups with tile_partition for efficient reductions
+    // See NeuronProcessor.cuh for implementation details
     KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, data);
     KERNEL_CALL(cudaNextTimestep_signal_updateSignals, data);
     KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
@@ -82,6 +120,10 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     }
     KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
 
+    // === Rigidity Calculations ===
+    // CUDA 13 Optimization: The 3 cudaFindClusterIteration calls could be merged using
+    // Thread Block Clusters for cross-SM synchronization (potential 20-30% improvement)
+    // Alternative: Use Cooperative Groups grid-wide sync with cudaLaunchCooperativeKernel
     if (considerRigidityUpdate && isRigidityUpdateEnabled(settings)) {
         KERNEL_CALL(cudaInitClusterData, data);
         KERNEL_CALL(cudaFindClusterIteration, data);  //3 iterations should provide a good approximation
