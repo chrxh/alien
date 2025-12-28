@@ -27,6 +27,7 @@ namespace
     template <typename TOEntry, typename DescEntry>
     void copyMemoryEntriesToDescription(std::vector<DescEntry>& target, TOEntry const* source, int numEntries)
     {
+        target.resize(numEntries);
         for (int i = 0; i < numEntries; ++i) {
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 target[i]._channels[j] = source[i].channels[j];
