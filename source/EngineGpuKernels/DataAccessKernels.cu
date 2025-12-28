@@ -427,7 +427,8 @@ namespace
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
-                // Empty struct, no data to copy
+                cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
+                    cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
             }
             int targetSize;  // not used
             copyDataToHeap<int>(
