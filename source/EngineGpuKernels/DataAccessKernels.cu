@@ -187,6 +187,8 @@ namespace
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
+                            nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
+                                node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
                         }
                         int targetSize;  // not used
                         copyDataToHeap<int>(
@@ -427,7 +429,8 @@ namespace
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
-                // Empty struct, no data to copy
+                cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
+                    cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
             }
             int targetSize;  // not used
             copyDataToHeap<int>(
