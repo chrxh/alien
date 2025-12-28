@@ -593,6 +593,12 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::EndIndent();
             } else if (mode == MemoryMode_SignalStorage) {
             } else if (mode == MemoryMode_SignalIntegrator) {
+                AlienGui::BeginIndent();
+                auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);
+                AlienGui::SliderFloat(
+                    AlienGui::SliderFloatParameters().name("New signal weight").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
+                    &signalIntegrator._newSignalWeight);
+                AlienGui::EndIndent();
             }
 
             AlienGui::EndIndent();
