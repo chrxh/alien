@@ -447,8 +447,8 @@ struct Cell
     CellTriggered cellTriggered;
 
     // Process data
-    Signal futureSignal;
     SignalState futureSignalState;
+    Signal futureSignal;
     uint32_t frontAngleId;
     bool headCell;
 
