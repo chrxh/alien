@@ -31,5 +31,19 @@ __device__ __inline__ void MemoryProcessor::process(SimulationData& data, Simula
 
 __device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    // Placeholder implementation - to be filled in with actual memory cell logic
+    auto& memory = cell->cellTypeData.memory;
+
+    if (memory.mode == MemoryMode_SignalIntegrator) {
+        // SignalIntegrator mode: integrate incoming signal with stored memory using weighted average
+        // newStoredValue = newSignalWeight * incomingSignal + (1 - newSignalWeight) * oldStoredValue
+        if (cell->signalState == SignalState_Active && memory.numMemoryEntries > 0) {
+            float newSignalWeight = memory.modeData.signalIntegrator.newSignalWeight;
+            float oldSignalWeight = 1.0f - newSignalWeight;
+
+            auto& entry = memory.memoryEntries[0];
+            for (int i = 0; i < MAX_CHANNELS; ++i) {
+                entry.channels[i] = newSignalWeight * cell->signal.channels[i] + oldSignalWeight * entry.channels[i];
+            }
+        }
+    }
 }
