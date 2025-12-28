@@ -89,11 +89,6 @@ AttackerMode AttackerDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
-MemoryDescription::MemoryDescription()
-{
-    _memoryEntries.resize(MAX_CELL_MEMORY_ENTRIES, MemoryEntryDescription());
-}
-
 MemoryMode MemoryDescription::getMode() const
 {
     if (std::holds_alternative<SignalDelayDescription>(_mode)) {

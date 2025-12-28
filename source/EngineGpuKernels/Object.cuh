@@ -316,19 +316,15 @@ struct Digestor
 
 struct SignalDelay
 {
-    int delayWithRecording;
-    int delayWithoutRecording;
 };
 
 struct SignalRecorder
 {
     bool readOnly;
-    int numEntries;
 };
 
 struct SignalStorage
 {
-    int numEntries;
 };
 
 struct SignalIntegrator
@@ -351,8 +347,9 @@ struct Memory
 {
     MemoryMode mode;
     MemoryModeData modeData;
-    MemoryEntry* memoryEntries;  // Pointer to MemoryEntry[MAX_CELL_MEMORY_ENTRIES] in heap
+
     uint8_t numMemoryEntries;
+    MemoryEntry* memoryEntries;  // Pointer to MemoryEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 
 union CellTypeData

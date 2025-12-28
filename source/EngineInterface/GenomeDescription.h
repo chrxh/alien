@@ -283,9 +283,6 @@ struct DigestorGenomeDescription
 struct SignalDelayGenomeDescription
 {
     auto operator<=>(SignalDelayGenomeDescription const&) const = default;
-
-    MEMBER(SignalDelayGenomeDescription, int, delayWithRecording, 15);
-    MEMBER(SignalDelayGenomeDescription, int, delayWithoutRecording, 0);
 };
 
 struct SignalRecorderGenomeDescription
@@ -293,14 +290,11 @@ struct SignalRecorderGenomeDescription
     auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
 
     MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
-    MEMBER(SignalRecorderGenomeDescription, int, numEntries, 8);
 };
 
 struct SignalStorageGenomeDescription
 {
     auto operator<=>(SignalStorageGenomeDescription const&) const = default;
-
-    MEMBER(SignalStorageGenomeDescription, int, numEntries, 8);
 };
 
 struct SignalIntegratorGenomeDescription
@@ -320,7 +314,6 @@ struct MemoryEntryGenomeDescription
 
 struct MemoryGenomeDescription
 {
-    MemoryGenomeDescription();
     auto operator<=>(MemoryGenomeDescription const&) const = default;
 
     MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());

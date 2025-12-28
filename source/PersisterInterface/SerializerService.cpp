@@ -223,18 +223,9 @@ namespace
 
     auto constexpr Id_DigestorGenome_RawEnergyConductivity = 0;
 
-    auto constexpr Id_MemoryGenome_Mode = 0;
-    auto constexpr Id_MemoryGenome_MemoryEntries = 1;
-
     auto constexpr Id_MemoryEntryGenome_Channels = 0;
 
-    auto constexpr Id_SignalDelayGenome_DelayWithRecording = 0;
-    auto constexpr Id_SignalDelayGenome_DelayWithoutRecording = 1;
-
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
-    auto constexpr Id_SignalRecorderGenome_NumEntries = 1;
-
-    auto constexpr Id_SignalStorageGenome_NumEntries = 0;
 }
 
 namespace cereal
@@ -565,8 +556,6 @@ namespace cereal
     {
         SignalDelayGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalDelayGenome_DelayWithRecording, data._delayWithRecording, defaultObject._delayWithRecording);
-        loadSave(task, auxiliaries, Id_SignalDelayGenome_DelayWithoutRecording, data._delayWithoutRecording, defaultObject._delayWithoutRecording);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayGenomeDescription)
@@ -577,7 +566,6 @@ namespace cereal
         SignalRecorderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
-        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumEntries, data._numEntries, defaultObject._numEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRecorderGenomeDescription)
@@ -587,7 +575,6 @@ namespace cereal
     {
         SignalStorageGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalStorageGenome_NumEntries, data._numEntries, defaultObject._numEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalStorageGenomeDescription)
@@ -832,18 +819,9 @@ namespace
 
     auto constexpr Id_Digestor_RawEnergyConductivity = 0;
 
-    auto constexpr Id_Memory_Mode = 0;
-    auto constexpr Id_Memory_MemoryEntries = 1;
-
     auto constexpr Id_MemoryEntry_Channels = 0;
 
-    auto constexpr Id_SignalDelay_DelayWithRecording = 0;
-    auto constexpr Id_SignalDelay_DelayWithoutRecording = 1;
-
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
-    auto constexpr Id_SignalRecorder_NumEntries = 1;
-
-    auto constexpr Id_SignalStorage_NumEntries = 0;
 }
 
 namespace cereal
@@ -1242,8 +1220,6 @@ namespace cereal
     {
         SignalDelayDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalDelay_DelayWithRecording, data._delayWithRecording, defaultObject._delayWithRecording);
-        loadSave(task, auxiliaries, Id_SignalDelay_DelayWithoutRecording, data._delayWithoutRecording, defaultObject._delayWithoutRecording);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayDescription)
@@ -1254,7 +1230,6 @@ namespace cereal
         SignalRecorderDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
-        loadSave(task, auxiliaries, Id_SignalRecorder_NumEntries, data._numEntries, defaultObject._numEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRecorderDescription)
@@ -1264,7 +1239,6 @@ namespace cereal
     {
         SignalStorageDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalStorage_NumEntries, data._numEntries, defaultObject._numEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalStorageDescription)

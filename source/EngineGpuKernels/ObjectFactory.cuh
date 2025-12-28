@@ -237,24 +237,18 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
                 node.cellTypeData.memory.numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
                 if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
-                    node.cellTypeData.memory.modeData.signalDelay.delayWithRecording = nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
-                    node.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = nodeTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
-                    node.cellTypeData.memory.modeData.signalRecorder.numEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
-                    node.cellTypeData.memory.modeData.signalStorage.numEntries = nodeTO.cellTypeData.memory.modeData.signalStorage.numEntries;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
-                    // Empty struct, no data to copy
                 }
-                {
-                    auto memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntryGenome>(MAX_CELL_MEMORY_ENTRIES);
-                    node.cellTypeData.memory.memoryEntries = memoryEntries;
-                    auto const& entriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.memoryEntriesDataIndex);
-                    for (int k = 0; k < MAX_CELL_MEMORY_ENTRIES; ++k) {
-                        for (int l = 0; l < MAX_CHANNELS; ++l) {
-                            memoryEntries[k].channels[l] = entriesTO[k].channels[l];
-                        }
+                auto const& numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
+                auto memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntryGenome>(numMemoryEntries);
+                node.cellTypeData.memory.memoryEntries = memoryEntries;
+                auto const& entriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.memoryEntriesDataIndex);
+                for (int k = 0; k < numMemoryEntries; ++k) {
+                    for (int l = 0; l < MAX_CHANNELS; ++l) {
+                        memoryEntries[k].channels[l] = entriesTO[k].channels[l];
                     }
                 }
                 break;
@@ -484,18 +478,14 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         cell->cellTypeData.memory.mode = cellTO.cellTypeData.memory.mode;
         cell->cellTypeData.memory.numMemoryEntries = cellTO.cellTypeData.memory.numMemoryEntries;
         if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
-            cell->cellTypeData.memory.modeData.signalDelay.delayWithRecording = cellTO.cellTypeData.memory.modeData.signalDelay.delayWithRecording;
-            cell->cellTypeData.memory.modeData.signalDelay.delayWithoutRecording = cellTO.cellTypeData.memory.modeData.signalDelay.delayWithoutRecording;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
-            cell->cellTypeData.memory.modeData.signalRecorder.numEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numEntries;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
-            cell->cellTypeData.memory.modeData.signalStorage.numEntries = cellTO.cellTypeData.memory.modeData.signalStorage.numEntries;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
             // Empty struct, no data to copy
         }
         copyDataToHeap(
-            sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES,
+            sizeof(MemoryEntryTO) * cellTO.cellTypeData.memory.numMemoryEntries,
             cellTO.cellTypeData.memory.memoryEntriesDataIndex,
             to.heap,
             reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries));
@@ -849,21 +839,15 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         memory.mode = nodeMemory.mode;
         memory.numMemoryEntries = nodeMemory.numMemoryEntries;
         if (nodeMemory.mode == MemoryMode_SignalDelay) {
-            memory.modeData.signalDelay.delayWithRecording = nodeMemory.modeData.signalDelay.delayWithRecording;
-            memory.modeData.signalDelay.delayWithoutRecording = nodeMemory.modeData.signalDelay.delayWithoutRecording;
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
-            memory.modeData.signalRecorder.numEntries = nodeMemory.modeData.signalRecorder.numEntries;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
-            memory.modeData.signalStorage.numEntries = nodeMemory.modeData.signalStorage.numEntries;
         } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
-            // Empty struct, no data to copy
         }
-        // Allocate and copy memory entries from genome
-        memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(MAX_CELL_MEMORY_ENTRIES);
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memory.memoryEntries[i].channels[j] = nodeMemory.memoryEntries[i].channels[j];
+        memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(nodeMemory.numMemoryEntries);
+        for (int i = 0, j = nodeMemory.numMemoryEntries; i < j; ++i) {
+            for (int k = 0; k < MAX_CHANNELS; ++k) {
+                memory.memoryEntries[i].channels[k] = nodeMemory.memoryEntries[i].channels[k];
             }
         }
     } break;

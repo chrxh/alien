@@ -206,19 +206,15 @@ struct DigestorGenomeTO
 
 struct SignalDelayGenomeTO
 {
-    int delayWithRecording;
-    int delayWithoutRecording;
 };
 
 struct SignalRecorderGenomeTO
 {
     bool readOnly;
-    int numEntries;
 };
 
 struct SignalStorageGenomeTO
 {
-    int numEntries;
 };
 
 struct SignalIntegratorGenomeTO
@@ -241,8 +237,9 @@ struct MemoryGenomeTO
 {
     MemoryMode mode;
     MemoryModeDataGenomeTO modeData;
-    uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
+
     uint8_t numMemoryEntries;
+    uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
 union CellTypeDataGenomeTO

@@ -361,9 +361,6 @@ struct MemoryEntryDescription
 struct SignalDelayDescription
 {
     auto operator<=>(SignalDelayDescription const&) const = default;
-
-    MEMBER(SignalDelayDescription, int, delayWithRecording, 15);  // Time steps
-    MEMBER(SignalDelayDescription, int, delayWithoutRecording, 0);  // Time steps
 };
 
 struct SignalRecorderDescription
@@ -371,14 +368,11 @@ struct SignalRecorderDescription
     auto operator<=>(SignalRecorderDescription const&) const = default;
 
     MEMBER(SignalRecorderDescription, bool, readOnly, true);
-    MEMBER(SignalRecorderDescription, int, numEntries, 8);
 };
 
 struct SignalStorageDescription
 {
     auto operator<=>(SignalStorageDescription const&) const = default;
-
-    MEMBER(SignalStorageDescription, int, numEntries, 8);
 };
 
 struct SignalIntegratorDescription
@@ -390,7 +384,6 @@ using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorde
 
 struct MemoryDescription
 {
-    MemoryDescription();
     auto operator<=>(MemoryDescription const&) const = default;
 
     MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());

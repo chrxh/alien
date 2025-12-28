@@ -35,7 +35,7 @@ INSTANTIATE_TEST_SUITE_P(
     GarbageCollectorTests_AllCleanupActions,
     ::testing::Values(CleanupAction::CleanupAfterTimestep, CleanupAction::CleanupAfterDataManipulation, CleanupAction::ResizeArrays));
 
-TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep)
+TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndParticles)
 {
     auto cleanupAction = GetParam();
 
@@ -61,17 +61,23 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep)
     EXPECT_TRUE(_simulationFacade->testOnly_areArraysValid());
 }
 
-TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupCreatureWithGenomeContainingMemoryNodes)
+TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCellsWithMemoryNodes)
 {
     auto cleanupAction = GetParam();
 
     // Create a genome with memory cell type nodes that have memory entries
     auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({
-        NodeDescription().cellType(MemoryGenomeDescription().mode(SignalDelayGenomeDescription())),
-        NodeDescription().cellType(MemoryGenomeDescription().mode(SignalRecorderGenomeDescription())),
-        NodeDescription().cellType(MemoryGenomeDescription().mode(SignalStorageGenomeDescription()))})});
+        NodeDescription().cellType(MemoryGenomeDescription().memoryEntries({MemoryEntryGenomeDescription()})),
+        NodeDescription().cellType(
+            MemoryGenomeDescription().memoryEntries({MemoryEntryGenomeDescription(), MemoryEntryGenomeDescription(), MemoryEntryGenomeDescription()})),
+    })});
 
-    auto data = Description().addCreature(CreatureDescription().cells({CellDescription().pos({100.0f, 100.0f})}), genome);
+    auto data = Description().addCreature(
+        CreatureDescription().cells({
+            CellDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().memoryEntries({MemoryEntryDescription()})),
+            CellDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().memoryEntries({MemoryEntryDescription(), MemoryEntryDescription()})),
+        }),
+        genome);
     _simulationFacade->setSimulationData(data);
 
     switch (cleanupAction) {

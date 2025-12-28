@@ -55,14 +55,25 @@ __global__ void cudaCleanupCellsStep2(Array<Cell*> cellPointers, Heap newHeap)
 
 namespace
 {
-    __device__ void copyAndAssignNewHeapData(uint8_t*& source, uint64_t numBytes, Heap& target)
+    __device__ void copyAndAssignNewHeapData(uint8_t*& data, uint64_t numBytes, Heap& heap)
     {
         if (numBytes > 0) {
-            uint8_t* bytes = target.getRawSubArray(numBytes);
+            uint8_t* bytes = heap.getRawSubArray(numBytes);
+            for (uint64_t i = 0; i < numBytes; ++i) {
+                bytes[i] = data[i];
+            }
+            data = bytes;
+        }
+    }
+
+    __device__ void copyAndAssignNewHeapData(uint8_t*& target, uint8_t* const& source, uint64_t numBytes, Heap& heap)
+    {
+        if (numBytes > 0) {
+            uint8_t* bytes = heap.getRawSubArray(numBytes);
             for (uint64_t i = 0; i < numBytes; ++i) {
                 bytes[i] = source[i];
             }
-            source = bytes;
+            target = bytes;
         }
     }
 }
@@ -79,7 +90,7 @@ __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap)
         if (cell->cellType == CellType_Memory) {
             copyAndAssignNewHeapData(
                 reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries),
-                sizeof(MemoryEntry) * MAX_CELL_MEMORY_ENTRIES,
+                sizeof(MemoryEntry) * cell->cellTypeData.memory.numMemoryEntries,
                 newHeap);
         }
     }
@@ -172,7 +183,8 @@ __global__ void cudaCleanupGenomesStep1(Array<Cell*> cells, Heap newHeap)
                         if (node->cellType == CellTypeGenome_Memory) {
                             copyAndAssignNewHeapData(
                                 reinterpret_cast<uint8_t*&>(newNode->cellTypeData.memory.memoryEntries),
-                                sizeof(MemoryEntryGenome) * MAX_CELL_MEMORY_ENTRIES,
+                                reinterpret_cast<uint8_t*&>(node->cellTypeData.memory.memoryEntries),
+                                sizeof(MemoryEntryGenome) * newNode->cellTypeData.memory.numMemoryEntries,
                                 newHeap);
                         }
                     }

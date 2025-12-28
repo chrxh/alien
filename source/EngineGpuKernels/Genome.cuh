@@ -205,19 +205,15 @@ struct DigestorGenome
 
 struct SignalDelayGenome
 {
-    int delayWithRecording;
-    int delayWithoutRecording;
 };
 
 struct SignalRecorderGenome
 {
     bool readOnly;
-    int numEntries;
 };
 
 struct SignalStorageGenome
 {
-    int numEntries;
 };
 
 struct SignalIntegratorGenome
@@ -240,8 +236,9 @@ struct MemoryGenome
 {
     MemoryMode mode;
     MemoryModeDataGenome modeData;
-    MemoryEntryGenome* memoryEntries;  // Pointer to heap memory
+
     uint8_t numMemoryEntries;
+    MemoryEntryGenome* memoryEntries;  // Pointer to heap memory
 };
 
 union CellTypeDataGenome

@@ -1,6 +1,7 @@
 #include "DescriptionTestDataFactory.h"
 
 #include <algorithm>
+#include <boost/range/combine.hpp>
 
 #include "TestHelper.h"
 
@@ -502,14 +503,6 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         switch (memory.getMode()) {
         case MemoryMode_SignalDelay: {
-            auto const& signalDelay = std::get<SignalDelayDescription>(memory._mode);
-            auto const& nodeSignalDelay = std::get<SignalDelayGenomeDescription>(nodeMemory._mode);
-            if (signalDelay._delayWithRecording != nodeSignalDelay._delayWithRecording) {
-                return false;
-            }
-            if (signalDelay._delayWithoutRecording != nodeSignalDelay._delayWithoutRecording) {
-                return false;
-            }
         } break;
         case MemoryMode_SignalRecorder: {
             auto const& signalRecorder = std::get<SignalRecorderDescription>(memory._mode);
@@ -517,24 +510,18 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             if (signalRecorder._readOnly != nodeSignalRecorder._readOnly) {
                 return false;
             }
-            if (signalRecorder._numEntries != nodeSignalRecorder._numEntries) {
-                return false;
-            }
         } break;
         case MemoryMode_SignalStorage: {
-            auto const& signalStorage = std::get<SignalStorageDescription>(memory._mode);
-            auto const& nodeSignalStorage = std::get<SignalStorageGenomeDescription>(nodeMemory._mode);
-            if (signalStorage._numEntries != nodeSignalStorage._numEntries) {
-                return false;
-            }
         } break;
         case MemoryMode_SignalIntegrator: {
-            // Empty struct, no data to compare
         } break;
         }
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                if (memory._memoryEntries[i]._channels[j] != nodeMemory._memoryEntries[i]._channels[j]) {
+        if (memory._memoryEntries.size() != nodeMemory._memoryEntries.size()) {
+            return false;
+        }
+        for (auto const& [entry, nodeEntry] : boost::combine(memory._memoryEntries, nodeMemory._memoryEntries)) {
+            for (auto const& [channel, nodeChannel] : boost::combine(entry._channels, nodeEntry._channels)) {
+                if (channel != nodeChannel) {
                     return false;
                 }
             }
@@ -695,13 +682,13 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         MemoryModeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayDescription().delayWithRecording(20).delayWithoutRecording(5);
+            memoryModeDesc = SignalDelayDescription();
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderDescription().readOnly(false).numEntries(16);
+            memoryModeDesc = SignalRecorderDescription().readOnly(false);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageDescription().numEntries(12);
+            memoryModeDesc = SignalStorageDescription();
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorDescription();
@@ -710,11 +697,12 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = MemoryModeDescription();
         }
         auto memory = MemoryDescription().mode(memoryModeDesc);
-        // Set non-default memoryEntries
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+        for (int i = 0; i < 10; ++i) {
+            MemoryEntryDescription entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memory._memoryEntries[i]._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.1f;
+                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
             }
+            memory._memoryEntries.emplace_back(entry);
         }
         return memory;
     }
@@ -833,13 +821,13 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         MemoryModeGenomeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayGenomeDescription().delayWithRecording(20).delayWithoutRecording(5);
+            memoryModeDesc = SignalDelayGenomeDescription();
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numEntries(16);
+            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageGenomeDescription().numEntries(12);
+            memoryModeDesc = SignalStorageGenomeDescription();
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorGenomeDescription();
@@ -848,11 +836,12 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             memoryModeDesc = MemoryModeGenomeDescription();
         }
         auto memory = MemoryGenomeDescription().mode(memoryModeDesc);
-        // Set non-default memoryEntries
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+        for (int i = 0; i < 5; ++i) {
+            MemoryEntryGenomeDescription entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
-                memory._memoryEntries[i]._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.1f;
+                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
             }
+            memory._memoryEntries.emplace_back(entry);
         }
         return memory;
     }

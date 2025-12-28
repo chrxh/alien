@@ -25,27 +25,27 @@ namespace
 
     // Helper function to copy memory entries from TO to Description
     template <typename TOEntry, typename DescEntry>
-    void copyMemoryEntriesToDescription(TOEntry const* entriesTO, std::vector<DescEntry>& entriesDesc)
+    void copyMemoryEntriesToDescription(std::vector<DescEntry>& target, TOEntry const* source, int numEntries)
     {
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
+        for (int i = 0; i < numEntries; ++i) {
             for (int j = 0; j < MAX_CHANNELS; ++j) {
-                entriesDesc[i]._channels[j] = entriesTO[i].channels[j];
+                target[i]._channels[j] = source[i].channels[j];
             }
         }
     }
 
     // Helper function to copy memory entries from Description to TO
     template <typename DescEntry, typename TOEntry>
-    void copyMemoryEntriesToTO(std::vector<DescEntry> const& entriesDesc, TOEntry* entriesTO)
+    void copyMemoryEntriesToTO(TOEntry* target, std::vector<DescEntry> const& source)
     {
-        for (int i = 0; i < MAX_CELL_MEMORY_ENTRIES; ++i) {
-            for (int j = 0; j < MAX_CHANNELS; ++j) {
-                entriesTO[i].channels[j] = entriesDesc[i]._channels[j];
+        for (int i = 0, j = toInt(source.size()); i < j; ++i) {
+            for (int k = 0; k < MAX_CHANNELS; ++k) {
+                target[i].channels[k] = source[i]._channels[k];
             }
         }
     }
 
-    void stringToChar64(std::string const& source, Char64& target)
+    void stringToChar64(Char64& target, std::string const& source)
     {
         size_t length = std::min(source.length(), size_t(63));  // Leave space for null terminator
         std::memcpy(target, source.c_str(), length);
@@ -524,24 +524,20 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         auto const& memoryTO = cellTO.cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             SignalDelayDescription signalDelay;
-            signalDelay._delayWithRecording = memoryTO.modeData.signalDelay.delayWithRecording;
-            signalDelay._delayWithoutRecording = memoryTO.modeData.signalDelay.delayWithoutRecording;
             memory._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderDescription signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
-            signalRecorder._numEntries = memoryTO.modeData.signalRecorder.numEntries;
             memory._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageDescription signalStorage;
-            signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
             memory._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorDescription signalIntegrator;
             memory._mode = signalIntegrator;
         }
-        auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO[MAX_CELL_MEMORY_ENTRIES]>(to.heap, memoryTO.memoryEntriesDataIndex);
-        copyMemoryEntriesToDescription(*memoryEntriesTO, memory._memoryEntries);
+        auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO>(to.heap, memoryTO.memoryEntriesDataIndex);
+        copyMemoryEntriesToDescription(memory._memoryEntries, memoryEntriesTO, memoryTO.numMemoryEntries);
         result._cellType = memory;
     } break;
     }
@@ -763,24 +759,20 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         auto const& memoryTO = nodeTO->cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             SignalDelayGenomeDescription signalDelay;
-            signalDelay._delayWithRecording = memoryTO.modeData.signalDelay.delayWithRecording;
-            signalDelay._delayWithoutRecording = memoryTO.modeData.signalDelay.delayWithoutRecording;
             memoryDesc._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderGenomeDescription signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
-            signalRecorder._numEntries = memoryTO.modeData.signalRecorder.numEntries;
             memoryDesc._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageGenomeDescription signalStorage;
-            signalStorage._numEntries = memoryTO.modeData.signalStorage.numEntries;
             memoryDesc._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorGenomeDescription signalIntegrator;
             memoryDesc._mode = signalIntegrator;
         }
-        auto const& memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO const*>(to.heap + memoryTO.memoryEntriesDataIndex);
-        copyMemoryEntriesToDescription(memoryEntriesTO, memoryDesc._memoryEntries);
+        auto const& memoryEntriesTO = getFromHeap<MemoryEntryGenomeTO>(to.heap, memoryTO.memoryEntriesDataIndex);
+        copyMemoryEntriesToDescription(memoryDesc._memoryEntries, memoryEntriesTO, memoryTO.numMemoryEntries);
         nodeDesc._cellType = memoryDesc;
     } break;
     }
@@ -869,7 +861,7 @@ void DescriptionConverterService::convertGenomeToTO(
     auto geneArrayStartIndex = geneTOs.size();
     geneTOs.resize(geneArrayStartIndex + genome._genes.size());
 
-    stringToChar64(genome._name, genomeTO.name);
+    stringToChar64(genomeTO.name, genome._name);
     genomeTO.id = genome._id;
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.numGenes = toInt(genome._genes.size());
@@ -879,7 +871,7 @@ void DescriptionConverterService::convertGenomeToTO(
     for (auto const& [geneIndex, geneDesc] : genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
-        stringToChar64(geneDesc._name, geneTO.name);
+        stringToChar64(geneTO.name, geneDesc._name);
         geneTO.shape = geneDesc._shape;
         geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
         geneTO.separation = geneDesc._separation;
@@ -1059,23 +1051,17 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto& memoryTO = nodeTO.cellTypeData.memory;
                 memoryTO.mode = memoryDesc.getMode();
                 if (memoryTO.mode == MemoryMode_SignalDelay) {
-                    auto const& signalDelayDesc = std::get<SignalDelayGenomeDescription>(memoryDesc._mode);
-                    memoryTO.modeData.signalDelay.delayWithRecording = signalDelayDesc._delayWithRecording;
-                    memoryTO.modeData.signalDelay.delayWithoutRecording = signalDelayDesc._delayWithoutRecording;
                 } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
                     auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
-                    memoryTO.modeData.signalRecorder.numEntries = signalRecorderDesc._numEntries;
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
-                    auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
-                    memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
                 } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
-                    // Empty struct, no data to copy
                 }
+                memoryTO.numMemoryEntries = toInt(memoryDesc._memoryEntries.size());
                 memoryTO.memoryEntriesDataIndex = heap.size();
-                heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * MAX_CELL_MEMORY_ENTRIES);
+                heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * memoryTO.numMemoryEntries);
                 auto memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
-                copyMemoryEntriesToTO(memoryDesc._memoryEntries, memoryEntriesTO);
+                copyMemoryEntriesToTO(memoryEntriesTO, memoryDesc._memoryEntries);
             } break;
             }
         }
@@ -1338,22 +1324,19 @@ void DescriptionConverterService::convertCellToTO(
         memoryTO.mode = memoryDesc.getMode();
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
-            memoryTO.modeData.signalDelay.delayWithRecording = signalDelayDesc._delayWithRecording;
-            memoryTO.modeData.signalDelay.delayWithoutRecording = signalDelayDesc._delayWithoutRecording;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
-            memoryTO.modeData.signalRecorder.numEntries = signalRecorderDesc._numEntries;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
-            memoryTO.modeData.signalStorage.numEntries = signalStorageDesc._numEntries;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             // Empty struct, no data to copy
         }
+        memoryTO.numMemoryEntries = toInt(memoryDesc._memoryEntries.size());
         memoryTO.memoryEntriesDataIndex = heap.size();
-        heap.resize(heap.size() + sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
-        auto memoryEntriesTO = reinterpret_cast<MemoryEntryTO*>(heap.data() + heap.size() - sizeof(MemoryEntryTO) * MAX_CELL_MEMORY_ENTRIES);
-        copyMemoryEntriesToTO(memoryDesc._memoryEntries, memoryEntriesTO);
+        heap.resize(heap.size() + sizeof(MemoryEntryTO) * memoryTO.numMemoryEntries);
+        auto memoryEntriesTO = reinterpret_cast<MemoryEntryTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
+        copyMemoryEntriesToTO(memoryEntriesTO, memoryDesc._memoryEntries);
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

@@ -200,18 +200,11 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 auto& memory = std::get<MemoryGenomeDescription>(node._cellType);
                 auto memoryMode = memory.getMode();
                 if (memoryMode == MemoryMode_SignalDelay) {
-                    auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
-                    signalDelay._delayWithRecording = std::max(signalDelay._delayWithRecording, 0);
-                    signalDelay._delayWithoutRecording = std::max(signalDelay._delayWithoutRecording, 0);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
-                    auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
-                    signalRecorder._numEntries = std::max(signalRecorder._numEntries, 1);
                 } else if (memoryMode == MemoryMode_SignalStorage) {
-                    auto& signalRetrieval = std::get<SignalStorageGenomeDescription>(memory._mode);
-                    signalRetrieval._numEntries = std::max(signalRetrieval._numEntries, 1);
+                } else if (memoryMode == MemoryMode_SignalIntegrator) {
                 }
             }
-            // BaseGenomeDescription is the only cell type without attributes to validate
         }
     }
 }

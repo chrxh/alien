@@ -91,11 +91,6 @@ MemoryEntryGenomeDescription::MemoryEntryGenomeDescription()
     _channels.resize(MAX_CHANNELS, 0);
 }
 
-MemoryGenomeDescription::MemoryGenomeDescription()
-{
-    _memoryEntries.resize(MAX_CELL_MEMORY_ENTRIES, MemoryEntryGenomeDescription());
-}
-
 MemoryMode MemoryGenomeDescription::getMode() const
 {
     if (std::holds_alternative<SignalDelayGenomeDescription>(_mode)) {
