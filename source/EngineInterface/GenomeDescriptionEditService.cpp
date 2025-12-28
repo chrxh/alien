@@ -336,12 +336,20 @@ namespace
         }
     }
 
+    void resetNames(GenomeDescription& genome)
+    {
+        genome._name.clear();
+        for (auto& gene : genome._genes) {
+            gene._name.clear();
+        }
+    }
+
     void resetUnusedGenes(GenomeDescription& genome, GeneIndicesForSubGenome const& geneIndices)
     {
         std::set<int> geneIndexSet(geneIndices.begin(), geneIndices.end());
-        for (int i = 0, size = genome._genes.size(); i < size; ++i) {
+        for (int i = 0, size = toInt(genome._genes.size()); i < size; ++i) {
             if (!geneIndexSet.contains(i)) {
-                genome._genes[i] = GeneDescription();
+                genome._genes.at(i) = GeneDescription();
             }
         }
     }
@@ -355,6 +363,7 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
     std::set<int> inspectedGeneIndices;
     castrate(genome, startGeneIndex, inspectedGeneIndices);
     adaptNodeAttributesForPreview(genome, detailSimulation);
+    resetNames(genome);
     if (!detailSimulation) {
         genome._frontAngle = 0;
     }
@@ -363,6 +372,5 @@ void GenomeDescriptionEditService::adaptDescriptionForPreview(GenomeDescription&
     }
 
     genome._genes.at(startGeneIndex)._separation = true;
-
     resetUnusedGenes(genome, geneIndices);
 }
