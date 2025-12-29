@@ -140,7 +140,7 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, data);
 }
 
-void SimulationKernelsService::captureTimestepGraph(
+cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
     CudaGraphConfig const& config,
     SettingsForSimulation const& settings,
     SimulationData const& data,
@@ -159,6 +159,7 @@ void SimulationKernelsService::captureTimestepGraph(
     CHECK_FOR_CUDA_ERROR(cudaGraphDestroy(graph));
 
     _graphCache[config] = graphExec;
+    return graphExec;
 }
 
 void SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
@@ -167,15 +168,17 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     auto config = buildGraphConfig(settings, data);
 
     // Check if we have a cached graph for this configuration
+    cudaGraphExec_t graphExec;
     auto it = _graphCache.find(config);
     if (it == _graphCache.end()) {
         // Capture a new graph for this configuration
-        captureTimestepGraph(config, settings, data, statistics);
-        it = _graphCache.find(config);
+        graphExec = captureTimestepGraph(config, settings, data, statistics);
+    } else {
+        graphExec = it->second;
     }
 
     // Execute the cached graph
-    CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(it->second, _stream));
+    CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
 
     // Wait for the graph to complete before garbage collection
     CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));

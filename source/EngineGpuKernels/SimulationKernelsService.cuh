@@ -66,7 +66,7 @@ private:
         SettingsForSimulation const& settings,
         SimulationData const& data) const;
 
-    void captureTimestepGraph(
+    cudaGraphExec_t captureTimestepGraph(
         CudaGraphConfig const& config,
         SettingsForSimulation const& settings,
         SimulationData const& data,
