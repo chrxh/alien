@@ -551,7 +551,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
 
 __global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
 {
-    PartitionData particleBlock = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    PartitionData particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = data.objects.particles.at(particleIndex);
@@ -859,7 +859,7 @@ __global__ void cudaResolveConnections(SimulationData data, TO to)
 
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access)
 {
-    PartitionData particleBlock = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    PartitionData particleBlock = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; ++particleIndex) {
         auto const& particle = data.objects.particles.at(particleIndex);
@@ -914,7 +914,7 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Cel
     }
     __syncthreads();
 
-    auto particlePartition = calcPartition(*to.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto particlePartition = calcAllThreadsPartition(*to.numParticles);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
         auto particle = factory.createParticleFromTO(to.particles[index]);
         if (selectNewData) {
@@ -948,7 +948,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
         }
     }
     {
-        auto const partition = calcPartition(*to.numParticles, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto const partition = calcAllThreadsPartition(*to.numParticles);
 
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& particle = to.particles[index];

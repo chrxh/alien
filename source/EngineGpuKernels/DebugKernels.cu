@@ -79,7 +79,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
 
 __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int location)
 {
-    auto partition = calcPartition(data.objects.particles.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+    auto partition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particles.at(particleIndex)) {
