@@ -13,7 +13,7 @@
 // Captures all runtime-varying parameters that affect kernel execution
 struct CudaGraphConfig
 {
-    int timestepMod3;           // data.timestep % 3 determines which optional kernels to run
+    int counterMod3;            // Not every kernel needs to be executed each time
     int motionType;             // MotionType_Fluid or MotionType_Collision
     bool hasLayers;             // settings.simulationParameters.numLayers > 0
     bool constructorCheck;      // settings.simulationParameters.constructorCompletenessCheck.value
@@ -22,22 +22,7 @@ struct CudaGraphConfig
     int numBlocks;              // gpuSettings.numBlocks
 
     bool operator==(CudaGraphConfig const& other) const = default;
-};
-
-struct CudaGraphConfigHash
-{
-    size_t operator()(CudaGraphConfig const& config) const
-    {
-        size_t h = 0;
-        h ^= std::hash<int>()(config.timestepMod3) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= std::hash<int>()(config.motionType) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= std::hash<bool>()(config.hasLayers) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= std::hash<bool>()(config.constructorCheck) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= std::hash<bool>()(config.rigidityEnabled) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= std::hash<int>()(config.fluidKernelThreads) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        h ^= std::hash<int>()(config.numBlocks) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        return h;
-    }
+    auto operator<=>(CudaGraphConfig const& other) const = default;
 };
 
 class SimulationKernelsService
@@ -62,9 +47,7 @@ private:
     bool isRigidityUpdateEnabled(SettingsForSimulation const& settings) const;
     int calcOptimalThreadsForFluidKernel(SimulationParameters const& parameters) const;
 
-    CudaGraphConfig buildGraphConfig(
-        SettingsForSimulation const& settings,
-        SimulationData const& data) const;
+    CudaGraphConfig buildGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, int counterMod3) const;
 
     cudaGraphExec_t captureTimestepGraph(
         CudaGraphConfig const& config,
@@ -79,5 +62,5 @@ private:
         SimulationStatistics const& statistics);
 
     cudaStream_t _stream = nullptr;
-    std::unordered_map<CudaGraphConfig, cudaGraphExec_t, CudaGraphConfigHash> _graphCache;
+    std::map<CudaGraphConfig, cudaGraphExec_t> _graphCache;
 };

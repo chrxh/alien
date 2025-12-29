@@ -96,3 +96,10 @@ void checkAndThrowError(T result, char const* const func, const char* const file
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }
+
+// Stream-based kernel launch macros for CUDA Graph capture
+#define STREAM_KERNEL_CALL(func, stream, numBlocks, ...) func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__)
+
+#define STREAM_KERNEL_CALL_1_1(func, stream, ...) func<<<1, 1, 0, stream>>>(__VA_ARGS__)
+
+#define STREAM_KERNEL_CALL_MOD(func, stream, numBlocks, threadsPerBlock, ...) func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__)

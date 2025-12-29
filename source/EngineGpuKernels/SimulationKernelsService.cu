@@ -32,12 +32,10 @@ int SimulationKernelsService::calcOptimalThreadsForFluidKernel(SimulationParamet
     return static_cast<int>(scanRectLength * scanRectLength);
 }
 
-CudaGraphConfig SimulationKernelsService::buildGraphConfig(
-    SettingsForSimulation const& settings,
-    SimulationData const& data) const
+CudaGraphConfig SimulationKernelsService::buildGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, int counterMod3) const
 {
     CudaGraphConfig config;
-    config.timestepMod3 = data.timestep % 3;
+    config.counterMod3 = counterMod3 % 3;
     config.motionType = settings.simulationParameters.motionType.value;
     config.hasLayers = settings.simulationParameters.numLayers > 0;
     config.constructorCheck = settings.simulationParameters.constructorCompletenessCheck.value;
@@ -47,16 +45,6 @@ CudaGraphConfig SimulationKernelsService::buildGraphConfig(
     return config;
 }
 
-// Stream-based kernel launch macros for CUDA Graph capture
-#define STREAM_KERNEL_CALL(func, stream, numBlocks, ...) \
-    func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__)
-
-#define STREAM_KERNEL_CALL_1_1(func, stream, ...) \
-    func<<<1, 1, 0, stream>>>(__VA_ARGS__)
-
-#define STREAM_KERNEL_CALL_MOD(func, stream, numBlocks, threadsPerBlock, ...) \
-    func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__)
-
 void SimulationKernelsService::launchTimestepKernels(
     CudaGraphConfig const& config,
     SettingsForSimulation const& settings,
@@ -64,9 +52,9 @@ void SimulationKernelsService::launchTimestepKernels(
     SimulationStatistics const& statistics)
 {
     auto numBlocks = config.numBlocks;
-    bool calcAngularForces = (config.timestepMod3 == 0);
-    bool considerInnerFriction = (config.timestepMod3 == 0);
-    bool considerRigidityUpdate = (config.timestepMod3 == 0);
+    bool calcAngularForces = (config.counterMod3 == 0);
+    bool considerInnerFriction = (config.counterMod3 == 0);
+    bool considerRigidityUpdate = (config.counterMod3 == 0);
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
 
@@ -138,6 +126,8 @@ void SimulationKernelsService::launchTimestepKernels(
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, data);
+
+    STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
 }
 
 cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
@@ -165,7 +155,9 @@ cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
 void SimulationKernelsService::calcTimestep(SettingsForSimulation const& settings, SimulationData const& data, SimulationStatistics const& statistics)
 {
     // Build configuration key for graph caching
-    auto config = buildGraphConfig(settings, data);
+    static int counterMod3 = 0;
+    counterMod3 = ++counterMod3 % 3;
+    auto config = buildGraphConfig(settings, data, counterMod3);
 
     // Check if we have a cached graph for this configuration
     cudaGraphExec_t graphExec;
@@ -195,13 +187,16 @@ void SimulationKernelsService::calcTimestepForPreview(
 {
     auto const gpuSettings = settings.cudaSettings;
 
+    static int counterMod3 = 0;
+    counterMod3 = ++counterMod3 % 3;
+
     if (!detailSimulation) {
 
         KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
         // Not all kernels need to be executed in each time step for performance reasons
-        bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
-        bool considerInnerFriction = (data.timestep % 3 == 0);
+        bool considerForcesFromAngleDifferences = counterMod3 == 0;
+        bool considerInnerFriction = counterMod3 == 0;
 
         KERNEL_CALL(cudaNextTimestep_physics_init, data);
         KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);
@@ -232,8 +227,8 @@ void SimulationKernelsService::calcTimestepForPreview(
         KERNEL_CALL_1_1(cudaNextTimestep_prepare, data);
 
         // Not all kernels need to be executed in each time step for performance reasons
-        bool considerForcesFromAngleDifferences = (data.timestep % 3 == 0);
-        bool considerInnerFriction = (data.timestep % 3 == 0);
+        bool considerForcesFromAngleDifferences = counterMod3 == 0;
+        bool considerInnerFriction = counterMod3 == 0;
 
         KERNEL_CALL(cudaNextTimestep_physics_init, data);
         KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, 64, data);

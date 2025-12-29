@@ -118,7 +118,6 @@ private:
     void syncAndCheck();
     void copyDataTOtoGpu(TO const& cudaTO, TO const& to);
     void copyDataTOtoHost(TO const& to, TO const& cudaTO);
-    void automaticResizeArrays();
     void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
 
@@ -135,6 +134,7 @@ private:
     SettingsForSimulation _settingsForPreview;
 
     mutable std::mutex _mutexForSimulationData;
+    uint64_t _simulationTimestep = 0;
     std::shared_ptr<SimulationData> _cudaSimulationData;  // std::shared_ptr to prevent include in header
     std::shared_ptr<SimulationData> _cudaPreviewData;
     std::shared_ptr<CudaGeometryBuffers> _cudaGeometryBuffers;

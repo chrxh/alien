@@ -226,6 +226,11 @@ __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData da
     EnergyParticleProcessor::transformation(data);
 }
 
+__global__ void cudaNextTimestep_incTimestep(SimulationData data)
+{
+    ++(*data.timestep);
+}
+
 __global__ void cudaInitClusterData(SimulationData data)
 {
     ClusterProcessor::initClusterData(data);

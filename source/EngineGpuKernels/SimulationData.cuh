@@ -18,7 +18,7 @@
 struct SimulationData
 {
     // Maps
-    uint64_t timestep;
+    uint64_t* timestep;
     int2 worldSize;
     CellMap cellMap;
     ParticleMap particleMap;
