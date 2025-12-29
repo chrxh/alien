@@ -55,7 +55,7 @@ __device__ __inline__ PartitionData calcPartition(uint64_t numEntities, uint64_t
     return result;
 }
 
-__device__ __inline__ PartitionData calcAllThreadsPartition(uint64_t numEntities)
+__device__ __inline__ PartitionData calcSystemThreadPartition(uint64_t numEntities)
 {
     return calcPartition(numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
 }

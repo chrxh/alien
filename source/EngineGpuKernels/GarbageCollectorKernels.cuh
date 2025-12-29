@@ -26,7 +26,7 @@ __global__ void cudaCheckIfCleanupIsNecessary(SimulationData data, bool* result)
 template <typename Entity>
 __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity> newEntityArray)
 {
-    auto partition = calcAllThreadsPartition(entityArray.getNumEntries());
+    auto partition = calcSystemThreadPartition(entityArray.getNumEntries());
 
     __shared__ int numEntities;
     if (0 == threadIdx.x) {

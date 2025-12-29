@@ -5,7 +5,7 @@
 __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         auto& cell = cells.at(index);
@@ -57,7 +57,7 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
     CUDA_CHECK(blockDim.x == 1 && gridDim.x == 1);
 
     auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
     Cell* cell1 = nullptr;
     Cell* cell2 = nullptr;
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
@@ -95,7 +95,7 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
 __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         if (auto& cell = cells.at(index)) {

@@ -34,7 +34,7 @@ public:
         if (threadIdx.x == 0 && blockIdx.x == 0) {
             _data->timeline.timestep = TimestepStatistics();
         }
-        auto partition = calcAllThreadsPartition(MutantToColorCountMapSize);
+        auto partition = calcSystemThreadPartition(MutantToColorCountMapSize);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             _mutantToMutantStatisticsMap[index].count = 0;
             _mutantToMutantStatisticsMap[index].numCells = 0;

@@ -20,7 +20,7 @@ private:
 __device__ __inline__ void InjectorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellTypeOperations[CellType_Injector];
-    auto partition = calcAllThreadsPartition(operations.getNumEntries());
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         processCell(data, statistics, operations.at(i).cell);
     }

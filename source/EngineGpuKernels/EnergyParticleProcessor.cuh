@@ -34,7 +34,7 @@ private:
 
 __inline__ __device__ void EnergyParticleProcessor::updateMap(SimulationData& data)
 {
-    auto partition = calcPartition(data.objects.particles.getNumOrigEntries(), blockIdx.x, gridDim.x);
+    auto partition = calcBlockPartition(data.objects.particles.getNumOrigEntries());
 
     Particle** particlePointers = &data.objects.particles.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
@@ -42,7 +42,7 @@ __inline__ __device__ void EnergyParticleProcessor::updateMap(SimulationData& da
 
 __inline__ __device__ void EnergyParticleProcessor::fillDensityMap(SimulationData& data)
 {
-    auto const partition = calcAllThreadsPartition(data.objects.particles.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
         data.preprocessedSimulationData.densityMap.addParticle(data.objects.particles.at(index));
     }
@@ -68,7 +68,7 @@ __inline__ __device__ void EnergyParticleProcessor::calcActiveSources(Simulation
 
 __inline__ __device__ void EnergyParticleProcessor::movement(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particles.at(particleIndex);
@@ -79,7 +79,7 @@ __inline__ __device__ void EnergyParticleProcessor::movement(SimulationData& dat
 
 __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particles.at(particleIndex);
@@ -165,7 +165,7 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
 
 __inline__ __device__ void EnergyParticleProcessor::splitting(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         auto& particle = data.objects.particles.at(particleIndex);
@@ -202,7 +202,7 @@ __inline__ __device__ void EnergyParticleProcessor::transformation(SimulationDat
     if (!cudaSimulationParameters.particleTransformationAllowed.value) {
         return;
     }
-    auto const partition = calcAllThreadsPartition(data.objects.particles.getNumOrigEntries());
+    auto const partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; ++particleIndex) {
         if (auto& particle = data.objects.particles.at(particleIndex)) {
 

@@ -194,7 +194,7 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition = calcAllThreadsPartition(_mapEntries.getNumEntries());
+        auto partition = calcSystemThreadPartition(_mapEntries.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
@@ -263,7 +263,7 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition = calcAllThreadsPartition(_mapEntries.getNumEntries());
+        auto partition = calcSystemThreadPartition(_mapEntries.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
