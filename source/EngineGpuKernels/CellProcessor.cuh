@@ -67,12 +67,8 @@ private:
 __inline__ __device__ void CellProcessor::init(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
-
-    for (int index = partition.startIndex; index <= partition.endIndex; index += 1) {
-    //auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
-
-    //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
+    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
 
         cell->shared1 = {0, 0};
