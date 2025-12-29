@@ -25,6 +25,21 @@ struct CudaGraphConfig
     auto operator<=>(CudaGraphConfig const& other) const = default;
 };
 
+// Configuration key for Preview CUDA Graph caching
+struct CudaGraphPreviewConfig
+{
+    int counterMod3;            // Not every kernel needs to be executed each time
+    bool detailSimulation;      // Whether detail simulation is enabled
+    int motionType;             // MotionType_Fluid or MotionType_Collision (only for detail)
+    bool hasLayers;             // settings.simulationParameters.numLayers > 0 (only for detail)
+    bool constructorCheck;      // settings.simulationParameters.constructorCompletenessCheck.value (only for detail)
+    int fluidKernelThreads;     // calcOptimalThreadsForFluidKernel result
+    int numBlocks;              // gpuSettings.numBlocks
+
+    bool operator==(CudaGraphPreviewConfig const& other) const = default;
+    auto operator<=>(CudaGraphPreviewConfig const& other) const = default;
+};
+
 class SimulationKernelsService
 {
     MAKE_SINGLETON_NO_DEFAULT_CONSTRUCTION(SimulationKernelsService);
@@ -61,6 +76,25 @@ private:
         SimulationData const& data,
         SimulationStatistics const& statistics);
 
+    CudaGraphPreviewConfig buildPreviewGraphConfig(
+        SettingsForSimulation const& settings,
+        SimulationData const& data,
+        int counterMod3,
+        bool detailSimulation) const;
+
+    cudaGraphExec_t capturePreviewGraph(
+        CudaGraphPreviewConfig const& config,
+        SettingsForSimulation const& settings,
+        SimulationData const& data,
+        SimulationStatistics const& statistics);
+
+    void launchPreviewKernels(
+        CudaGraphPreviewConfig const& config,
+        SettingsForSimulation const& settings,
+        SimulationData const& data,
+        SimulationStatistics const& statistics);
+
     cudaStream_t _stream = nullptr;
     std::map<CudaGraphConfig, cudaGraphExec_t> _graphCache;
+    std::map<CudaGraphPreviewConfig, cudaGraphExec_t> _previewGraphCache;
 };
