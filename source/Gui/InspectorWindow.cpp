@@ -220,11 +220,13 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                     AlienGui::InputText(
                         AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
                         creatureId);
-                    //AlienGui::InputInt(
-                    //    AlienGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellLineageIdTooltip), cell._lineageId);
-                    //AlienGui::InputFloat(
-                    //    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::NumCellsTooltip),
-                    //    cell._numCells);
+                }
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNodeEx("Genome", TreeNodeFlags)) {
+                if (genome.has_value()) {
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Node index").textWidth(BaseTabTextWidth), cell._nodeIndex);
                 }
                 ImGui::TreePop();
             }
