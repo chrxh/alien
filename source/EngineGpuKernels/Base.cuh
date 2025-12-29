@@ -70,6 +70,21 @@ __device__ __inline__ PartitionData calcThreadBlockPartition(uint64_t numEntitie
     return calcPartition(numEntities, threadIdx.x, blockDim.x);
 }
 
+
+struct PartitionDataNew
+{
+    int startIndex;
+    int endIndex;
+    int step;
+};
+
+__device__ __inline__ PartitionDataNew calcSystemThreadPartitionNew(uint64_t numEntities)
+{
+    return PartitionDataNew{
+        .startIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x), .endIndex = toInt(numEntities - 1), .step = toInt(blockDim.x * gridDim.x)};
+}
+
+
 __host__ __device__ __inline__ int2 toInt2(float2 const& p)
 {
     return {static_cast<int>(p.x), static_cast<int>(p.y)};
