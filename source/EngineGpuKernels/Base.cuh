@@ -55,19 +55,6 @@ __device__ __inline__ PartitionData calcSystemThreadPartition(uint64_t numEntiti
         .startIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x), .endIndex = toInt(numEntities - 1), .step = toInt(blockDim.x * gridDim.x)};
 }
 
-__device__ __inline__ PartitionData calcPartition(uint64_t numEntities, uint64_t index, uint64_t numIndices)
-{
-    PartitionData result;
-    int entitiesByDivisions = numEntities / numIndices;
-    int remainder = numEntities % numIndices;
-
-    int length = index < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
-    result.startIndex =
-        index < remainder ? (entitiesByDivisions + 1) * index : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (index - remainder);
-    result.endIndex = result.startIndex + length - 1;
-    return result;
-}
-
 __device__ __inline__ PartitionData calcBlockPartition(uint64_t numEntities)
 {
     PartitionData result;
