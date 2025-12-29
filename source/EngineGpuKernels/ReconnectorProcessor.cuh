@@ -31,7 +31,7 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
 {
     auto& operations = data.cellTypeOperations[CellType_Reconnector];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         processCell(data, result, operations.at(i).cell);
     }
 }

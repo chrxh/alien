@@ -266,7 +266,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
         if (distance >= ScanStep) {
             auto const partition = calcSystemThreadPartition(toInt(distance) / ScanStep);
             auto const& densityMap = data.preprocessedSimulationData.densityMap;
-            for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+            for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
                 auto scanDistance = toFloat(index) * ScanStep;
                 auto scanPos = data.cellMap.getCorrectedPosition(cell->pos + direction * scanDistance);
                 if (densityMap.getStructureDensity(scanPos) > 0) {

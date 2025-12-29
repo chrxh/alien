@@ -57,7 +57,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
 {
     auto& operations = data.cellTypeOperations[CellType_Muscle];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         processCell(data, statistics, operations.at(i).cell);
     }
 }

@@ -34,7 +34,7 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     }
     __syncthreads();
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (entityArray.at(index) != nullptr) {
             atomicAdd(&numEntities, 1);
         }
@@ -50,7 +50,7 @@ __global__ void cudaCleanupPointerArray(Array<Entity> entityArray, Array<Entity>
     }
     __syncthreads();
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& entity = entityArray.at(index);
         if (entity != nullptr) {
             int newIndex = atomicAdd(&numEntities, 1);

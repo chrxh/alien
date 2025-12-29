@@ -27,7 +27,7 @@ __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& dat
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         cell->clusterIndex = index;
         cell->clusterBoundaries = 0;
@@ -44,7 +44,7 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto currentCell = cells.at(index);
 
         //heuristics to cover connected cells
@@ -72,7 +72,7 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
         auto cluster = cells.at(cell->clusterIndex);
         if (cell->pos.x < data.worldSize.x / 3) {
@@ -89,7 +89,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
         auto cluster = cells.at(cell->clusterIndex);
         atomicAdd(&cluster->clusterVel.x, cell->vel.x);
@@ -116,7 +116,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
         auto cluster = cells.at(cell->clusterIndex);
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
@@ -144,7 +144,7 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
         auto cluster = cells.at(cell->clusterIndex);
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;

@@ -7,7 +7,7 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
     auto& cells = data.objects.cells;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         //if (cell->id == cellId) {
         //    switch (mutationType) {
@@ -60,7 +60,7 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
     Cell* cell1 = nullptr;
     Cell* cell2 = nullptr;
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->id == cellId1) {
             cell1 = cell;
@@ -97,7 +97,7 @@ __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
     auto& cells = data.objects.cells;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& cell = cells.at(index)) {
 
             bool isValid = true;
@@ -126,7 +126,7 @@ __global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
     //auto& cells = data.objects.cells;
     //auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
-    //for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
     //    auto& cell = cells.at(index);
     //    if (cell->id == cellId) {
     //        MutationProcessor::checkMutationsForCell(data, cell);

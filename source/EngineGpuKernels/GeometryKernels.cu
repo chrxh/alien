@@ -24,14 +24,14 @@ __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 vis
 {
     {
         auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& cell = data.objects.cells.at(index);
             correctPositionForRendering(cell->pos, visibleTopLeft, data.worldSize);
         }
     }
     {
         auto const& partition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.objects.particles.at(index);
             correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
         }
@@ -82,7 +82,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
 {
     // Process cells - each cell goes to its index position
     auto const& cellPartition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
-    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; ++index) {
+    for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& cell = data.objects.cells.at(index);
 
         int isInTriangleOrQuad = 0;
@@ -165,7 +165,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
 {
     auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
 
         // Cell index is just the array index (stored in tempValue)
@@ -209,7 +209,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             }
         }
     };
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
         if (cell->numConnections <= 1) {
             continue;
@@ -254,7 +254,7 @@ __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticl
 {
     // Process energy particles - each particle goes to its index position
     auto const& particlePartition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
-    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; ++index) {
+    for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
         auto const& particle = data.objects.particles.at(index);
         if (!particle) {
             continue;
@@ -442,7 +442,7 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
 {
     auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
         if (cell->selected == 0) {
             continue;
@@ -533,7 +533,7 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
 {
     auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
 
         // Only process cells that have been attacked and have attackVisualization enabled
@@ -569,7 +569,7 @@ __global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEv
 {
     auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
 
         // Only process cells that have detonation event
