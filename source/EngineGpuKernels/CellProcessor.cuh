@@ -373,7 +373,7 @@ __inline__ __device__ void CellProcessor::checkForces(SimulationData& data)
     auto& cells = data.objects.cells;
     auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
 
-    for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         cell->density = cell->shared2.x;
         if (cell->fixed) {
@@ -836,7 +836,7 @@ __inline__ __device__ void CellProcessor::decay(SimulationData& data)
     auto& cells = data.objects.cells;
     auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
 
-    for (auto index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->fixed) {
             continue;
