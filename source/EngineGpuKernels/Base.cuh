@@ -76,6 +76,12 @@ struct PartitionDataNew
     int startIndex;
     int endIndex;
     int step;
+
+    __inline__ __device__ int numElements() const
+    {
+        if (startIndex > endIndex) return 0;
+        return (endIndex - startIndex) / step + 1;
+    }
 };
 
 __device__ __inline__ PartitionDataNew calcSystemThreadPartitionNew(uint64_t numEntities)

@@ -28,9 +28,9 @@ public:
 __inline__ __device__ void SignalProcessor::collectCellTypeOperations(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
 
         if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free && cell->cellType != CellType_Base) {
@@ -46,9 +46,9 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
 __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
             continue;
@@ -103,9 +103,9 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
             continue;
