@@ -221,6 +221,8 @@ void SimulationKernelsService::calcTimestepForPreview(
         }
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
 
+        KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, data);
+
         GarbageCollectorKernelsService::get().cleanupAfterTimestepForPreview(settings.cudaSettings, data);
 
     } else {
@@ -276,6 +278,8 @@ void SimulationKernelsService::calcTimestepForPreview(
             KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, 16, data);
         }
         KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, 16, data);
+
+        KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, data);
 
         //KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, data);
         //KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, data);

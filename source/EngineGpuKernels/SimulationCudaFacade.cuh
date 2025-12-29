@@ -136,7 +136,10 @@ private:
     mutable std::mutex _mutexForSimulationData;
     uint64_t _simulationTimestep = 0;
     std::shared_ptr<SimulationData> _cudaSimulationData;  // std::shared_ptr to prevent include in header
+
+    uint64_t _previewTimestep = 0;
     std::shared_ptr<SimulationData> _cudaPreviewData;
+
     std::shared_ptr<CudaGeometryBuffers> _cudaGeometryBuffers;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaTOProvider _cudaTOProvider;

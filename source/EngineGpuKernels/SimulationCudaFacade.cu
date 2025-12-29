@@ -148,7 +148,7 @@ void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateSta
         SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
         {
             std::lock_guard lock(_mutexForSimulationData);
-            ++_simulationTimestep;
+            ++_simulationTimestep;  // SimulationData::timestep is already updated in the kernels
         }
         syncAndCheck();
 
@@ -500,7 +500,7 @@ void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 {
     {
         std::lock_guard lock(_mutexForSimulationData);
-        copyToDevice(_cudaSimulationData->timestep, &timestep);
+        copyToDevice(_cudaSimulationData->timestep, &timestep); // Update GPU timestep
         _simulationTimestep = timestep;
     }
     StatisticsService::get().resetTime(_statisticsHistory, timestep);
@@ -553,7 +553,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
         SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
-        ++_cudaPreviewData->timestep;
+        ++_previewTimestep; // SimulationData::timestep is already updated in the kernels
     } while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration);
 
     CHECK_FOR_CUDA_ERROR(
@@ -565,12 +565,11 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
-    auto startTimepoint = std::chrono::steady_clock::now();
     for (int i = 0; i < numSteps; ++i) {
         SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
-        ++_cudaPreviewData->timestep;
+        ++_previewTimestep; // SimulationData::timestep is already updated in the kernels
     }
 
     CHECK_FOR_CUDA_ERROR(
@@ -579,12 +578,13 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
 
 uint64_t _SimulationCudaFacade::getCurrentTimestepForPreview()
 {
-    return *_cudaPreviewData->timestep;
+    return _previewTimestep;
 }
 
 void _SimulationCudaFacade::setCurrentTimestepForPreview(uint64_t timestep)
 {
-    *_cudaPreviewData->timestep = timestep;
+    _previewTimestep = timestep;
+    copyToDevice(_cudaPreviewData->timestep, &timestep);    // Update GPU timestep
 }
 
 TO _SimulationCudaFacade::getPreviewData()
