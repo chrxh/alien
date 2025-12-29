@@ -104,7 +104,7 @@ public:
         }
         __syncthreads();
 
-        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
+        auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = cells[index];
             int2 posInt = {floorInt(cell->pos.x), floorInt(cell->pos.y)};
@@ -241,7 +241,7 @@ public:
         }
         __syncthreads();
 
-        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
+        auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& entity = entities[index];
             int2 posInt = {floorInt(entity->pos.x), floorInt(entity->pos.y)};
