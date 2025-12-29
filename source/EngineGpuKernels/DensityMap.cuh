@@ -44,7 +44,7 @@ public:
 
     __device__ __inline__ void clear()
     {
-        auto const partition = calcSystemThreadPartitionNew(_densityMapSize.x * _densityMapSize.y);
+        auto const partition = calcSystemThreadPartition(_densityMapSize.x * _densityMapSize.y);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             //_colorDensityMap[index] = 0;
             //_otherMutantDensityMap[index] = 0;

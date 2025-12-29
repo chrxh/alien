@@ -38,9 +38,22 @@ struct PartitionData
 {
     int startIndex;
     int endIndex;
+    int step;
 
-    __inline__ __device__ int numElements() const { return endIndex - startIndex + 1; }
+    __inline__ __device__ int numElements() const
+    {
+        if (startIndex > endIndex) {
+            return 0;
+        }
+        return (endIndex - startIndex) / step + 1;
+    }
 };
+
+__device__ __inline__ PartitionData calcSystemThreadPartition(uint64_t numEntities)
+{
+    return PartitionData{
+        .startIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x), .endIndex = toInt(numEntities - 1), .step = toInt(blockDim.x * gridDim.x)};
+}
 
 __device__ __inline__ PartitionData calcPartition(uint64_t numEntities, uint64_t index, uint64_t numIndices)
 {
@@ -55,41 +68,33 @@ __device__ __inline__ PartitionData calcPartition(uint64_t numEntities, uint64_t
     return result;
 }
 
-__device__ __inline__ PartitionData calcSystemThreadPartition(uint64_t numEntities)
-{
-    return calcPartition(numEntities, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-}
-
 __device__ __inline__ PartitionData calcBlockPartition(uint64_t numEntities)
 {
-    return calcPartition(numEntities, blockIdx.x, gridDim.x);
+    PartitionData result;
+    int entitiesByDivisions = numEntities / gridDim.x;
+    int remainder = numEntities % gridDim.x;
+
+    int length = blockIdx.x < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
+    result.startIndex = blockIdx.x < remainder ? (entitiesByDivisions + 1) * blockIdx.x
+                                               : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (blockIdx.x - remainder);
+    result.endIndex = result.startIndex + length - 1;
+    result.step = 1;
+    return result;
 }
 
 __device__ __inline__ PartitionData calcThreadBlockPartition(uint64_t numEntities)
 {
-    return calcPartition(numEntities, threadIdx.x, blockDim.x);
+    PartitionData result;
+    int entitiesByDivisions = numEntities / blockDim.x;
+    int remainder = numEntities % blockDim.x;
+
+    int length = threadIdx.x < remainder ? entitiesByDivisions + 1 : entitiesByDivisions;
+    result.startIndex = threadIdx.x < remainder ? (entitiesByDivisions + 1) * threadIdx.x
+                                                : (entitiesByDivisions + 1) * remainder + entitiesByDivisions * (threadIdx.x - remainder);
+    result.endIndex = result.startIndex + length - 1;
+    result.step = 1;
+    return result;
 }
-
-
-struct PartitionDataNew
-{
-    int startIndex;
-    int endIndex;
-    int step;
-
-    __inline__ __device__ int numElements() const
-    {
-        if (startIndex > endIndex) return 0;
-        return (endIndex - startIndex) / step + 1;
-    }
-};
-
-__device__ __inline__ PartitionDataNew calcSystemThreadPartitionNew(uint64_t numEntities)
-{
-    return PartitionDataNew{
-        .startIndex = toInt(blockIdx.x * blockDim.x + threadIdx.x), .endIndex = toInt(numEntities - 1), .step = toInt(blockDim.x * gridDim.x)};
-}
-
 
 __host__ __device__ __inline__ int2 toInt2(float2 const& p)
 {

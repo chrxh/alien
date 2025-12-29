@@ -137,7 +137,7 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(Simulatio
 
 __inline__ __device__ void CellConnectionProcessor::processAddOperations(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartitionNew(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
@@ -149,7 +149,7 @@ __inline__ __device__ void CellConnectionProcessor::processAddOperations(Simulat
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartitionNew(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
@@ -180,7 +180,7 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = data.objects.cells.at(index);

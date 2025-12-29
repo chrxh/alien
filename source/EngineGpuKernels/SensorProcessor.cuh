@@ -264,7 +264,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
         // Check if ray from sensor to match pos is blocked by structure
         if (distance >= ScanStep) {
-            auto const partition = calcSystemThreadPartitionNew(toInt(distance) / ScanStep);
+            auto const partition = calcSystemThreadPartition(toInt(distance) / ScanStep);
             auto const& densityMap = data.preprocessedSimulationData.densityMap;
             for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
                 auto scanDistance = toFloat(index) * ScanStep;

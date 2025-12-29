@@ -28,7 +28,7 @@ public:
 __inline__ __device__ void SignalProcessor::collectCellTypeOperations(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -46,7 +46,7 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
 __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -103,7 +103,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);

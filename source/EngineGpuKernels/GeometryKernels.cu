@@ -23,14 +23,14 @@ namespace
 __global__ void cudaCorrectPositionsForRendering(SimulationData data, float2 visibleTopLeft)
 {
     {
-        auto const& partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+        auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& cell = data.objects.cells.at(index);
             correctPositionForRendering(cell->pos, visibleTopLeft, data.worldSize);
         }
     }
     {
-        auto const& partition = calcSystemThreadPartitionNew(data.objects.particles.getNumEntries());
+        auto const& partition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = data.objects.particles.at(index);
             correctPositionForRendering(particle->pos, visibleTopLeft, data.worldSize);
@@ -81,7 +81,7 @@ namespace
 __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectData)
 {
     // Process cells - each cell goes to its index position
-    auto const& cellPartition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto const& cellPartition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& cell = data.objects.cells.at(index);
 
@@ -163,7 +163,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
 
 __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIndices, uint64_t* numLineIndices)
 {
-    auto const& partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
@@ -192,7 +192,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
 
 __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* triangleIndices, uint64_t* numTriangleIndices)
 {
-    auto const& partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
     auto addTriangle = [&](Cell* cell, uint64_t cellIndex, Cell* connectedCell, Cell* prevConnectedCell) {
         // Only add triangle once (avoid duplicates by checking ids)
@@ -253,7 +253,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
 __global__ void cudaExtractEnergyParticleData(SimulationData data, EnergyParticleVertexData* energyParticleData)
 {
     // Process energy particles - each particle goes to its index position
-    auto const& particlePartition = calcSystemThreadPartitionNew(data.objects.particles.getNumEntries());
+    auto const& particlePartition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
         auto const& particle = data.objects.particles.at(index);
         if (!particle) {
@@ -440,7 +440,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
 
 __global__ void cudaExtractSelectedConnectionData(SimulationData data, ConnectionArrowVertexData* connectionArrowData, uint64_t* numConnectionArrowVertices)
 {
-    auto const& partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
@@ -531,7 +531,7 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
 }
 __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVertexData* attackEventData, uint64_t* numAttackEventVertices)
 {
-    auto const& partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);
@@ -567,7 +567,7 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
 }
 __global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEventVertexData* detonationEventData, uint64_t* numDetonationEventVertices)
 {
-    auto const& partition = calcSystemThreadPartitionNew(data.objects.cells.getNumEntries());
+    auto const& partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& cell = data.objects.cells.at(index);

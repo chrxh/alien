@@ -61,7 +61,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
     };
     {
         auto& cells = data.objects.cells;
-        auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+        auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& cell = cells.at(index);
@@ -73,7 +73,7 @@ __global__ void cudaApplyForceFieldSettings(SimulationData data)
     }
     {
         auto& particles = data.objects.particles;
-        auto partition = calcSystemThreadPartitionNew(particles.getNumEntries());
+        auto partition = calcSystemThreadPartition(particles.getNumEntries());
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);
             particle->vel += calcResultingAcceleration(particle->pos);

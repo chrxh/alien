@@ -468,7 +468,7 @@ namespace
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -487,7 +487,7 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(int2 rectUpperLe
 __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeClusters, SimulationData data)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -505,7 +505,7 @@ __global__ void cudaPrepareSelectedCreaturesForConversionToTO(bool includeCluste
 __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityIds ids, SimulationData data)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -520,7 +520,7 @@ __global__ void cudaPrepareCreaturesAndGenomesForConversionToTO(InspectedEntityI
 __global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, SimulationData data)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -536,7 +536,7 @@ __global__ void cudaPrepareCreatureGenomeForConversionToTO(uint64_t creatureId, 
 __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
     auto const cellArrayStart = data.objects.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -551,7 +551,7 @@ __global__ void cudaGetSelectedCellDataWithoutConnections(SimulationData data, b
 
 __global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartitionNew(data.objects.particles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
         auto const& particle = data.objects.particles.at(particleIndex);
@@ -566,7 +566,7 @@ __global__ void cudaGetSelectedParticleData(SimulationData data, TO access)
 __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
     auto const heapStart = data.objects.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -596,7 +596,7 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
 
 __global__ void cudaGetInspectedParticleData(InspectedEntityIds ids, SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartitionNew(data.objects.particles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
         auto const& particle = data.objects.particles.at(particleIndex);
@@ -621,7 +621,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
 {
     {
         auto const& cells = data.objects.cells;
-        auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+        auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& cell = cells.at(index);
@@ -644,7 +644,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
     }
     {
         auto const& particles = data.objects.particles;
-        auto const partition = calcSystemThreadPartitionNew(particles.getNumEntries());
+        auto const partition = calcSystemThreadPartition(particles.getNumEntries());
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);
@@ -667,7 +667,7 @@ __global__ void cudaGetOverlayData(int2 rectUpperLeft, int2 rectLowerRight, Simu
 __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -687,7 +687,7 @@ __global__ void cudaGetGenomeData(int2 rectUpperLeft, int2 rectLowerRight, Simul
 __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -705,7 +705,7 @@ __global__ void cudaGetSelectedGenomeData(SimulationData data, bool includeClust
 __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -737,7 +737,7 @@ __global__ void cudaGetGenomeData(InspectedEntityIds ids, SimulationData data, T
 __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -757,7 +757,7 @@ __global__ void cudaGetCreatureData(int2 rectUpperLeft, int2 rectLowerRight, Sim
 __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClusters, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -775,7 +775,7 @@ __global__ void cudaGetSelectedCreatureData(SimulationData data, bool includeClu
 __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -807,7 +807,7 @@ __global__ void cudaGetCreatureData(InspectedEntityIds ids, SimulationData data,
 __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data, TO to, bool* found)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
@@ -826,7 +826,7 @@ __global__ void cudaGetGenomeOfCreature(uint64_t creatureId, SimulationData data
 __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO to)
 {
     auto const& cells = data.objects.cells;
-    auto const partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
     auto const heap = data.objects.heap.getArray();
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -845,7 +845,7 @@ __global__ void cudaGetCellDataWithoutConnections(int2 rectUpperLeft, int2 rectL
 
 __global__ void cudaResolveConnections(SimulationData data, TO to)
 {
-    auto const partition = calcSystemThreadPartitionNew(*to.numCells);
+    auto const partition = calcSystemThreadPartition(*to.numCells);
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cellTO = to.cells[index];
@@ -859,7 +859,7 @@ __global__ void cudaResolveConnections(SimulationData data, TO to)
 
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access)
 {
-    auto particleBlock = calcSystemThreadPartitionNew(data.objects.particles.getNumEntries());
+    auto particleBlock = calcSystemThreadPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = particleBlock.startIndex; particleIndex <= particleBlock.endIndex; particleIndex += particleBlock.step) {
         auto const& particle = data.objects.particles.at(particleIndex);
@@ -886,7 +886,7 @@ __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to)
     }
     __syncthreads();
 
-    auto partition = calcSystemThreadPartitionNew(*to.numGenomes);
+    auto partition = calcSystemThreadPartition(*to.numGenomes);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         factory.createGenomeFromTO(to, index);
     }
@@ -900,7 +900,7 @@ __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to)
     }
     __syncthreads();
 
-    auto partition = calcSystemThreadPartitionNew(*to.numCreatures);
+    auto partition = calcSystemThreadPartition(*to.numCreatures);
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         factory.createCreatureFromTO(to, index);
     }
@@ -914,7 +914,7 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Cel
     }
     __syncthreads();
 
-    auto particlePartition = calcSystemThreadPartitionNew(*to.numParticles);
+    auto particlePartition = calcSystemThreadPartition(*to.numParticles);
     for (int index = particlePartition.startIndex; index <= particlePartition.endIndex; index += particlePartition.step) {
         auto particle = factory.createParticleFromTO(to.particles[index]);
         if (selectNewData) {
@@ -922,7 +922,7 @@ __global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Cel
         }
     }
 
-    auto cellPartition = calcSystemThreadPartitionNew(*to.numCells);
+    auto cellPartition = calcSystemThreadPartition(*to.numCells);
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto cell = factory.createCellFromTO(to, index, *cellArray);
         if (selectNewData) {
@@ -935,7 +935,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
 {
     Ids maxIds;
     {
-        auto const partition = calcSystemThreadPartitionNew(*to.numCells);
+        auto const partition = calcSystemThreadPartition(*to.numCells);
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& cell = to.cells[index];
             maxIds.entityId = max(maxIds.entityId, cell.id);
@@ -948,7 +948,7 @@ __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to)
         }
     }
     {
-        auto const partition = calcSystemThreadPartitionNew(*to.numParticles);
+        auto const partition = calcSystemThreadPartition(*to.numParticles);
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& particle = to.particles[index];
@@ -984,7 +984,7 @@ __global__ void cudaClearData(SimulationData data)
 __global__ void cudaEstimateCapacityNeededForTO_step1(SimulationData data)
 {
     auto const& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->creature) {
@@ -1004,7 +1004,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
         arraySizes->particles = particles.getNumEntries();
     }
 
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
     uint64_t heapBytes = 0;
     uint64_t numCreatures = 0;
     uint64_t numGenomes = 0;
@@ -1059,7 +1059,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
     }
 
     {
-        auto partition = calcSystemThreadPartitionNew(*to.numCells);
+        auto partition = calcSystemThreadPartition(*to.numCells);
         uint64_t heapBytes = 0;
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& cellTO = to.cells[index];
@@ -1075,7 +1075,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
     }
 
     {
-        auto partition = calcSystemThreadPartitionNew(*to.numNodes);
+        auto partition = calcSystemThreadPartition(*to.numNodes);
         uint64_t heapBytes = 0;
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& nodeTO = to.nodes[index];

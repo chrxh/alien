@@ -3,7 +3,7 @@
 __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& cell = cells.at(index)) {
@@ -79,7 +79,7 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
 
 __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int location)
 {
-    auto partition = calcSystemThreadPartitionNew(data.objects.particles.getNumEntries());
+    auto partition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         if (auto& particle = data.objects.particles.at(particleIndex)) {
@@ -103,7 +103,7 @@ __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int
 __global__ void DEBUG_checkAngles(SimulationData data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcSystemThreadPartitionNew(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& cell = cells.at(index)) {

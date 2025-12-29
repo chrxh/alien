@@ -22,7 +22,7 @@ public:
 __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& operations = data.cellTypeOperations[CellType_Generator];
-    auto partition = calcSystemThreadPartitionNew(operations.getNumEntries());
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto const& operation = operations.at(i);
         auto const& cell = operation.cell;

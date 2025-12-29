@@ -112,7 +112,7 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
     auto& operations = data.cellTypeOperations[CellType_Constructor];
-    auto partition = calcSystemThreadPartitionNew(operations.getNumEntries());
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         processCell(data, statistics, operations.at(i).cell, isPreview);
     }
