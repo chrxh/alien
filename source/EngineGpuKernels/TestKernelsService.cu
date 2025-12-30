@@ -30,6 +30,6 @@ void TestKernelsService::testOnly_createConnection(CudaSettings const& gpuSettin
 bool TestKernelsService::testOnly_areArraysValid(CudaSettings const& gpuSettings, SimulationData const& data)
 {
     setValueToDevice(_cudaBoolResult, true);
-    KERNEL_CALL(cudaTestAreArraysValid, data, _cudaBoolResult);
+    KERNEL_CALL(cudaTestAreCellsValid, data, _cudaBoolResult);
     return copyToHost(_cudaBoolResult);
 }

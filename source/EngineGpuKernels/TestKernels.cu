@@ -102,7 +102,7 @@ namespace
     }
 }
 
-__global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
+__global__ void cudaTestAreCellsValid(SimulationData data, bool* result)
 {
     auto& cells = data.objects.cells;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
