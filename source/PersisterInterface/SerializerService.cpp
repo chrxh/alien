@@ -233,6 +233,7 @@ namespace
 
     auto constexpr Id_SignalDelay_Delay = 0;
     auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
+    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
 }
 
 namespace cereal
@@ -1233,6 +1234,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalDelay_Delay, data._delay, defaultObject._delay);
         loadSave(task, auxiliaries, Id_SignalDelay_NumMemoryEntriesInitialized, data._numMemoryEntriesInitialized, defaultObject._numMemoryEntriesInitialized);
+        loadSave(task, auxiliaries, Id_SignalDelay_RingBufferIndex, data._ringBufferIndex, defaultObject._ringBufferIndex);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayDescription)

@@ -75,25 +75,27 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
         memory.numMemoryEntries = signalDelay.delay;
         memory.memoryEntries = data.objects.heap.getTypedSubArray<MemoryEntry>(memory.numMemoryEntries);
         signalDelay.numMemoryEntriesInitialized = 0;
+        signalDelay.ringBufferIndex = 0;
     }
 
-    // Output the oldest memory entry
+    // Output the oldest memory entry (at ringBufferIndex)
     if (signalDelay.numMemoryEntriesInitialized == memory.numMemoryEntries) {
-        auto endIndex = memory.numMemoryEntries - 1;
+        auto oldestIndex = signalDelay.ringBufferIndex;
         for (int k = 0; k < MAX_CHANNELS; ++k) {
-            cell->signal.channels[k] = memory.memoryEntries[endIndex].channels[k];
+            cell->signal.channels[k] = memory.memoryEntries[oldestIndex].channels[k];
         }
     }
 
-    // Shift data in ring buffer
-    for (int i = memory.numMemoryEntries - 2; i >= 0; --i) {
-        for (int k = 0; k < MAX_CHANNELS; ++k) {
-            memory.memoryEntries[i + 1].channels[k] = memory.memoryEntries[i].channels[k];
-        }
-    }
-
-    // Store current signal in first entry
+    // Store current signal at ringBufferIndex (overwriting the oldest entry)
     for (int k = 0; k < MAX_CHANNELS; ++k) {
-        memory.memoryEntries[0].channels[k] = cell->signal.channels[k];
+        memory.memoryEntries[signalDelay.ringBufferIndex].channels[k] = cell->signal.channels[k];
+    }
+
+    // Advance the ring buffer index
+    signalDelay.ringBufferIndex = (signalDelay.ringBufferIndex + 1) % memory.numMemoryEntries;
+
+    // Track initialization progress
+    if (signalDelay.numMemoryEntriesInitialized < memory.numMemoryEntries) {
+        ++signalDelay.numMemoryEntriesInitialized;
     }
 }

@@ -482,6 +482,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
             cell->cellTypeData.memory.modeData.signalDelay.delay = cellTO.cellTypeData.memory.modeData.signalDelay.delay;
             cell->cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized = cellTO.cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized;
+            cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
@@ -845,6 +846,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         if (nodeMemory.mode == MemoryMode_SignalDelay) {
             memory.modeData.signalDelay.delay = nodeMemory.modeData.signalDelay.delay;
             memory.modeData.signalDelay.numMemoryEntriesInitialized = 0;
+            memory.modeData.signalDelay.ringBufferIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
