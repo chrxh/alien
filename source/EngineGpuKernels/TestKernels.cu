@@ -92,6 +92,16 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, 
     }
 }
 
+namespace
+{
+    template<typename Pointer>
+    __device__ bool isPointerValid(SimulationData const& data, Pointer pointer)
+    {
+        return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray())
+            && reinterpret_cast<uint64_t>(pointer) < reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity());
+    }
+}
+
 __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
 {
     auto& cells = data.objects.cells;
@@ -100,22 +110,20 @@ __global__ void cudaTestAreArraysValid(SimulationData data, bool* result)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& cell = cells.at(index)) {
 
-            bool isValid = true;
-            if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                || reinterpret_cast<uint64_t>(cell) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
-                *result = false;
-                isValid = false;
-            }
-
-            if (isValid) {
+            if (isPointerValid(data, cell)) {
                 for (int i = 0; i < cell->numConnections; ++i) {
                     auto connectingCell = cell->connections[i].cell;
-                    if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-                        || reinterpret_cast<uint64_t>(connectingCell)
-                            >= reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity())) {
-                        *result = false;
+                    *result &= isPointerValid(data, connectingCell);
+                }
+
+                if (cell->cellType == CellType_Memory) {
+                    if (cell->cellTypeData.memory.numMemoryEntries > 0) {
+                        auto memoryEntries = cell->cellTypeData.memory.memoryEntries;
+                        *result &= isPointerValid(data, memoryEntries);
                     }
                 }
+            } else {
+                *result = false;
             }
         }
     }
