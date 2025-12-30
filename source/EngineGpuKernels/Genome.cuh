@@ -205,6 +205,7 @@ struct DigestorGenome
 
 struct SignalDelayGenome
 {
+    uint8_t delay;
 };
 
 struct SignalRecorderGenome

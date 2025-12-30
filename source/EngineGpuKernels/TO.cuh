@@ -289,6 +289,8 @@ struct DigestorTO
 
 struct SignalDelayTO
 {
+    uint8_t delay;
+    uint8_t numMemoryEntriesInitialized;
 };
 
 struct SignalRecorderTO

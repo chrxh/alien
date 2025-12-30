@@ -225,9 +225,14 @@ namespace
 
     auto constexpr Id_MemoryEntryGenome_Channels = 0;
 
+    auto constexpr Id_SignalDelayGenome_Delay = 0;
+
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
 
     auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
+
+    auto constexpr Id_SignalDelay_Delay = 0;
+    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
 }
 
 namespace cereal
@@ -558,6 +563,7 @@ namespace cereal
     {
         SignalDelayGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalDelayGenome_Delay, data._delay, defaultObject._delay);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayGenomeDescription)
@@ -1225,6 +1231,8 @@ namespace cereal
     {
         SignalDelayDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalDelay_Delay, data._delay, defaultObject._delay);
+        loadSave(task, auxiliaries, Id_SignalDelay_NumMemoryEntriesInitialized, data._numMemoryEntriesInitialized, defaultObject._numMemoryEntriesInitialized);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDelayDescription)

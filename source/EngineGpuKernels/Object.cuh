@@ -316,6 +316,8 @@ struct Digestor
 
 struct SignalDelay
 {
+    uint8_t delay;
+    uint8_t numMemoryEntriesInitialized;
 };
 
 struct SignalRecorder

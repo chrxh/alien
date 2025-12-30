@@ -586,6 +586,10 @@ void _NodeEditorWidget::processNodeAttributes()
 
             // Mode-specific parameters
             if (mode == MemoryMode_SignalDelay) {
+                AlienGui::BeginIndent();
+                auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
+                AlienGui::InputInt(AlienGui::InputIntParameters().name("Delay").textWidth(rightColumnWidth), signalDelay._delay);
+                AlienGui::EndIndent();
             } else if (mode == MemoryMode_SignalRecorder) {
                 AlienGui::BeginIndent();
                 auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
