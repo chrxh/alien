@@ -86,12 +86,12 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
         }
     }
 
-    // Store current signal at ringBufferIndex (overwriting the oldest entry)
+    // Store current signal at ringBufferIndex (this position contains the oldest entry which we just output)
     for (int k = 0; k < MAX_CHANNELS; ++k) {
         memory.memoryEntries[signalDelay.ringBufferIndex].channels[k] = cell->signal.channels[k];
     }
 
-    // Advance the ring buffer index
+    // Advance the ring buffer index to point to the next oldest entry
     signalDelay.ringBufferIndex = (signalDelay.ringBufferIndex + 1) % memory.numMemoryEntries;
 
     // Track initialization progress
