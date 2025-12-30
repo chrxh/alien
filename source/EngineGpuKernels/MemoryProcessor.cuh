@@ -141,11 +141,11 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
     // State machine for recording/reading
     if (state == SignalStorageState_Idle) {
         // Check channel[0] to initiate recording or reading
-        if (cell->signal.channels[0] > 0) {
+        if (cell->signal.channels[0] > TRIGGER_THRESHOLD) {
             // Start recording - reset numRecorded to start fresh
             numRecorded = 0;
             state = SignalStorageState_Recording;
-        } else if (cell->signal.channels[0] < 0) {
+        } else if (cell->signal.channels[0] < TRIGGER_THRESHOLD) {
             // Start reading - reset currentReadIndex
             currentReadIndex = 0;
             state = SignalStorageState_Reading;
