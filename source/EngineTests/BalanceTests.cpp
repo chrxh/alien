@@ -133,7 +133,7 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
 }
 
 // Test that large creatures dominates if large creatures have high digestion capabilities
-TEST_F(BalanceTests, longRunning_smallCreaturesVsLargeCreatures_highDigestionCapabilities)
+TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionCapabilities)
 {
     _parameters.externalEnergyControlToggle.value = true;
     _parameters.externalEnergy.value = 200000;

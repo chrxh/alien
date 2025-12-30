@@ -96,3 +96,17 @@ void checkAndThrowError(T result, char const* const func, const char* const file
     } else { \
         func<<<gpuSettings.numBlocks, threadsPerBlock>>>(__VA_ARGS__); \
     }
+
+// Stream-based kernel launch macros for CUDA Graph capture
+// In debug mode, synchronize after each kernel for precise crash information
+#define STREAM_KERNEL_CALL(func, stream, numBlocks, ...) \
+    func<<<numBlocks, 8, 0, stream>>>(__VA_ARGS__); \
+    if (GlobalSettings::get().isDebugMode()) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(stream)); }
+
+#define STREAM_KERNEL_CALL_1_1(func, stream, ...) \
+    func<<<1, 1, 0, stream>>>(__VA_ARGS__); \
+    if (GlobalSettings::get().isDebugMode()) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(stream)); }
+
+#define STREAM_KERNEL_CALL_MOD(func, stream, numBlocks, threadsPerBlock, ...) \
+    func<<<numBlocks, threadsPerBlock, 0, stream>>>(__VA_ARGS__); \
+    if (GlobalSettings::get().isDebugMode()) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(stream)); }

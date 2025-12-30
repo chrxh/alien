@@ -257,11 +257,18 @@ void TemporalControlWindow::applySnapshot(Snapshot const& snapshot)
             parameters.maxCellAge.value[i] = origParameters.maxCellAge.value[i];
         }
     }
+    auto simRunning = _SimulationFacade::get()->isSimulationRunning();
+    if (simRunning) {
+        _SimulationFacade::get()->pauseSimulation();
+    }
     _SimulationFacade::get()->setCurrentTimestep(snapshot.timestep);
     _SimulationFacade::get()->setRealTime(snapshot.realTime);
     _SimulationFacade::get()->clear();
     _SimulationFacade::get()->setSimulationData(snapshot.data);
     _SimulationFacade::get()->setSimulationParameters(parameters);
+    if (simRunning) {
+        _SimulationFacade::get()->runSimulation();
+    }
 }
 
 void TemporalControlWindow::restorePosition(

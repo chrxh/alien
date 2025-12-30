@@ -139,23 +139,29 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
 
 void _SimulationCudaFacade::calcTimestep(uint64_t timesteps, bool forceUpdateStatistics)
 {
+    static int counter = 0;
+
     for (uint64_t i = 0; i < timesteps; ++i) {
         checkAndProcessSimulationParameterChanges();
 
         auto simulationData = getSimulationDataPtrCopy();
         SimulationKernelsService::get().calcTimestep(_settings, simulationData, *_cudaSimulationStatistics);
-        syncAndCheck();
-
-        automaticResizeArrays();
-
         {
             std::lock_guard lock(_mutexForSimulationData);
-            ++_cudaSimulationData->timestep;
+            ++_simulationTimestep;  // SimulationData::timestep is already updated in the kernels
         }
+        syncAndCheck();
+
+        //make check after every 10th call
+        if (++counter % 10 == 0) {
+            counter = 0;
+            resizeArraysIfNecessary();
+        }
+
         auto statistics = getStatisticsRawData();
         {
             std::lock_guard lock(_mutexForSimulationParameters);
-            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, statistics)) {
+            if (SimulationParametersUpdateService::get().updateSimulationParametersAfterTimestep(_settings, _maxAgeBalancer, simulationData, getCurrentTimestep(), statistics)) {
                 CHECK_FOR_CUDA_ERROR(
                     cudaMemcpyToSymbol(cudaSimulationParameters, &_settings.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
             }
@@ -487,14 +493,15 @@ void _SimulationCudaFacade::resetTimeIntervalStatistics()
 uint64_t _SimulationCudaFacade::getCurrentTimestep() const
 {
     std::lock_guard lock(_mutexForSimulationData);
-    return _cudaSimulationData->timestep;
+    return _simulationTimestep;
 }
 
 void _SimulationCudaFacade::setCurrentTimestep(uint64_t timestep)
 {
     {
         std::lock_guard lock(_mutexForSimulationData);
-        _cudaSimulationData->timestep = timestep;
+        copyToDevice(_cudaSimulationData->timestep, &timestep); // Update GPU timestep
+        _simulationTimestep = timestep;
     }
     StatisticsService::get().resetTime(_statisticsHistory, timestep);
 }
@@ -546,7 +553,7 @@ void _SimulationCudaFacade::calcTimestepsForPreview(std::chrono::milliseconds co
         SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
-        ++_cudaPreviewData->timestep;
+        ++_previewTimestep; // SimulationData::timestep is already updated in the kernels
     } while (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - startTimepoint) < duration);
 
     CHECK_FOR_CUDA_ERROR(
@@ -558,12 +565,11 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
     CHECK_FOR_CUDA_ERROR(
         cudaMemcpyToSymbol(cudaSimulationParameters, &_settingsForPreview.simulationParameters, sizeof(SimulationParameters), 0, cudaMemcpyHostToDevice));
 
-    auto startTimepoint = std::chrono::steady_clock::now();
     for (int i = 0; i < numSteps; ++i) {
         SimulationKernelsService::get().calcTimestepForPreview(_settingsForPreview, *_cudaPreviewData, *_cudaPreviewStatistics, detailSimulation);
         syncAndCheck();
 
-        ++_cudaPreviewData->timestep;
+        ++_previewTimestep; // SimulationData::timestep is already updated in the kernels
     }
 
     CHECK_FOR_CUDA_ERROR(
@@ -572,12 +578,13 @@ void _SimulationCudaFacade::calcTimestepsForPreview(int numSteps, bool detailSim
 
 uint64_t _SimulationCudaFacade::getCurrentTimestepForPreview()
 {
-    return _cudaPreviewData->timestep;
+    return _previewTimestep;
 }
 
 void _SimulationCudaFacade::setCurrentTimestepForPreview(uint64_t timestep)
 {
-    _cudaPreviewData->timestep = timestep;
+    _previewTimestep = timestep;
+    copyToDevice(_cudaPreviewData->timestep, &timestep);    // Update GPU timestep
 }
 
 TO _SimulationCudaFacade::getPreviewData()
@@ -750,19 +757,6 @@ void _SimulationCudaFacade::copyDataTOtoHost(TO const& to, TO const& cudaTO)
     copyToHost(to.heap, cudaTO.heap, *to.heapSize);
 }
 
-void _SimulationCudaFacade::automaticResizeArrays()
-{
-    uint64_t timestep;
-    {
-        std::lock_guard lock(_mutexForSimulationData);
-        timestep = _cudaSimulationData->timestep;
-    }
-    //make check after every 10th time step
-    if (timestep % 10 == 0) {
-        resizeArraysIfNecessary();
-    }
-}
-
 void _SimulationCudaFacade::resizeArrays(ArraySizesForGpu const& sizeDelta)
 {
     log(Priority::Important, "resize arrays");
@@ -813,6 +807,6 @@ void _SimulationCudaFacade::checkAndProcessSimulationParameterChanges()
 
 SimulationData _SimulationCudaFacade::getSimulationDataPtrCopy() const
 {
-    std::lock_guard lock(_mutexForSimulationData);
+    std::lock_guard lock(_mutexForSimulationData    );
     return *_cudaSimulationData;
 }

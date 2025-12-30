@@ -133,7 +133,7 @@ namespace
 struct GlobalSettingsImpl
 {
     boost::property_tree::ptree _tree;
-    bool _debugMode = true;
+    bool _debugMode = false;
 };
 
 

@@ -144,12 +144,12 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
     auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
     if (cell->creature != nullptr) {
         if (isPreview) {
-            return data.timestep % triggerInterval == 0;
+            return *data.timestep % triggerInterval == 0;
         } else {
-            return (data.timestep + cell->creature->id) % triggerInterval == 0;
+            return (*data.timestep + cell->creature->id) % triggerInterval == 0;
         }
     } else {
-        return data.timestep % triggerInterval == 0;
+        return *data.timestep % triggerInterval == 0;
     }
 }
 

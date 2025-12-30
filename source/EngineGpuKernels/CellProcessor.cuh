@@ -936,7 +936,7 @@ __inline__ __device__ void CellProcessor::performEnergyFlow(SimulationData& data
         //if (cell->cellState == CellState_Constructing || cell->cellState == CellState_Activating) {
         //    continue;
         //}
-        auto i = data.timestep % cell->numConnections;
+        auto i = *data.timestep % cell->numConnections;
         auto& connectedCell = cell->connections[i].cell;
 
         // Flow of usable energy

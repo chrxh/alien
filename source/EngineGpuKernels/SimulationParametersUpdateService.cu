@@ -43,6 +43,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
     SettingsForSimulation& settings,
     MaxAgeBalancer const& maxAgeBalancer,
     SimulationData const& simulationData,
+    uint64_t timestep,
     StatisticsRawData const& statistics)
 {
     auto result = false;
@@ -90,7 +91,7 @@ bool SimulationParametersUpdateService::updateSimulationParametersAfterTimestep(
         result = true;
     }
 
-    result |= maxAgeBalancer->balance(settings.simulationParameters, statistics, simulationData.timestep);
+    result |= maxAgeBalancer->balance(settings.simulationParameters, statistics, timestep);
 
     return result;
 }
