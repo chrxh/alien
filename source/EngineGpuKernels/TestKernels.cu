@@ -122,6 +122,57 @@ __global__ void cudaTestAreCellsValid(SimulationData data, bool* result)
                         *result &= isPointerValid(data, memoryEntries);
                     }
                 }
+
+                // Validate neural network pointer
+                if (cell->neuralNetwork != nullptr) {
+                    *result &= isPointerValid(data, cell->neuralNetwork);
+                }
+
+                // Validate creature pointer and its substructures
+                if (cell->creature != nullptr) {
+                    if (!isPointerValid(data, cell->creature)) {
+                        *result = false;
+                    } else {
+                        auto creature = cell->creature;
+
+                        // Validate genome pointer
+                        if (creature->genome != nullptr) {
+                            if (!isPointerValid(data, creature->genome)) {
+                                *result = false;
+                            } else {
+                                auto genome = creature->genome;
+
+                                // Validate genes pointer
+                                if (genome->numGenes > 0) {
+                                    if (!isPointerValid(data, genome->genes)) {
+                                        *result = false;
+                                    } else {
+                                        // Validate each gene's nodes pointer and memory node entries
+                                        for (int geneIdx = 0; geneIdx < genome->numGenes; ++geneIdx) {
+                                            auto& gene = genome->genes[geneIdx];
+                                            if (gene.numNodes > 0) {
+                                                if (!isPointerValid(data, gene.nodes)) {
+                                                    *result = false;
+                                                } else {
+                                                    // Validate memory entries for memory nodes
+                                                    for (int nodeIdx = 0; nodeIdx < gene.numNodes; ++nodeIdx) {
+                                                        auto& node = gene.nodes[nodeIdx];
+                                                        if (node.cellType == CellTypeGenome_Memory) {
+                                                            if (node.cellTypeData.memory.numMemoryEntries > 0) {
+                                                                auto memoryEntries = node.cellTypeData.memory.memoryEntries;
+                                                                *result &= isPointerValid(data, memoryEntries);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
                 *result = false;
             }
