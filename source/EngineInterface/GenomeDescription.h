@@ -283,6 +283,8 @@ struct DigestorGenomeDescription
 struct SignalDelayGenomeDescription
 {
     auto operator<=>(SignalDelayGenomeDescription const&) const = default;
+
+    MEMBER(SignalDelayGenomeDescription, int, delay, 10);
 };
 
 struct SignalRecorderGenomeDescription

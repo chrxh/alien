@@ -503,6 +503,11 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         }
         switch (memory.getMode()) {
         case MemoryMode_SignalDelay: {
+            auto const& signalDelay = std::get<SignalDelayDescription>(memory._mode);
+            auto const& nodeSignalDelay = std::get<SignalDelayGenomeDescription>(nodeMemory._mode);
+            if (signalDelay._delay != nodeSignalDelay._delay) {
+                return false;
+            }
         } break;
         case MemoryMode_SignalRecorder: {
             auto const& signalRecorder = std::get<SignalRecorderDescription>(memory._mode);
@@ -687,7 +692,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         MemoryModeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayDescription();
+            memoryModeDesc = SignalDelayDescription().delay(15).numMemoryEntriesInitialized(5);
             break;
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderDescription().readOnly(false);
@@ -826,7 +831,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         MemoryModeGenomeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayGenomeDescription();
+            memoryModeDesc = SignalDelayGenomeDescription().delay(20);
             break;
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false);

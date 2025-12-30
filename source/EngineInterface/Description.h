@@ -361,6 +361,9 @@ struct MemoryEntryDescription
 struct SignalDelayDescription
 {
     auto operator<=>(SignalDelayDescription const&) const = default;
+
+    MEMBER(SignalDelayDescription, int, delay, 10);
+    MEMBER(SignalDelayDescription, int, numMemoryEntriesInitialized, 0);
 };
 
 struct SignalRecorderDescription

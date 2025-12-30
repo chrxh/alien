@@ -183,6 +183,7 @@ namespace
                         nodeTO.cellTypeData.memory.mode = node.cellTypeData.memory.mode;
                         nodeTO.cellTypeData.memory.numMemoryEntries = node.cellTypeData.memory.numMemoryEntries;
                         if (node.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                            nodeTO.cellTypeData.memory.modeData.signalDelay.delay = node.cellTypeData.memory.modeData.signalDelay.delay;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
@@ -425,6 +426,8 @@ namespace
             cellTO.cellTypeData.memory.mode = cell->cellTypeData.memory.mode;
             cellTO.cellTypeData.memory.numMemoryEntries = cell->cellTypeData.memory.numMemoryEntries;
             if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
+                cellTO.cellTypeData.memory.modeData.signalDelay.delay = cell->cellTypeData.memory.modeData.signalDelay.delay;
+                cellTO.cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized = cell->cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {

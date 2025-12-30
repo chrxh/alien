@@ -364,6 +364,7 @@ struct std::hash<SignalDelayGenomeDescription>
     std::size_t operator()(SignalDelayGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
+        hash_combine(seed, desc._delay);
         return seed;
     }
 };
