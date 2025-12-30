@@ -61,79 +61,125 @@ void SimulationKernelsService::launchTimestepKernels(
     bool calcAngularForces = (config.counterMod3 == 0);
     bool considerInnerFriction = (config.counterMod3 == 0);
     bool considerRigidityUpdate = (config.counterMod3 == 0);
+    bool debugMode = GlobalSettings::get().isDebugMode();
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     if (config.motionType == MotionType_Fluid) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     } else {
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     }
 
     if (config.hasLayers) {
         STREAM_KERNEL_CALL(cudaApplyForceFieldSettings, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     }
 
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, calcAngularForces);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, calcAngularForces);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     // Signal processing
     STREAM_KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_signal_updateSignals, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     // Energy flow
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     // Cell type-specific functions
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     if (config.constructorCheck) {
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, _stream, numBlocks, data, statistics);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     }
 
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, _stream, numBlocks, 4, data, statistics, false);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_injector, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_attacker, _stream, numBlocks, 4, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_depot, _stream, numBlocks, 4, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_sensor, _stream, numBlocks, 64, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_reconnector, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_detonator, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_digestor, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_cellType_memory, _stream, numBlocks, data, statistics);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     if (considerInnerFriction) {
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     }
     STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     if (considerRigidityUpdate && config.rigidityEnabled) {
         STREAM_KERNEL_CALL(cudaInitClusterData, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaFindClusterIteration, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaFindClusterIteration, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaFindClusterIteration, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaFindClusterBoundaries, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaAccumulateClusterPosAndVel, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaAccumulateClusterAngularProp, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaApplyClusterData, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     }
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_structuralOperations_substep1, _stream, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep2, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep3, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep4, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     STREAM_KERNEL_CALL(cudaNextTimestep_structuralOperations_substep5, _stream, numBlocks, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
     STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
+    if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 }
 
 cudaGraphExec_t SimulationKernelsService::captureTimestepGraph(
@@ -165,21 +211,27 @@ void SimulationKernelsService::calcTimestep(SettingsForSimulation const& setting
     counterMod3 = ++counterMod3 % 3;
     auto config = buildGraphConfig(settings, data, counterMod3);
 
-    // Check if we have a cached graph for this configuration
-    cudaGraphExec_t graphExec;
-    auto it = _graphCache.find(config);
-    if (it == _graphCache.end()) {
-        // Capture a new graph for this configuration
-        graphExec = captureTimestepGraph(config, settings, data, statistics);
+    // In debug mode, bypass CUDA Graphs to get precise kernel crash information
+    if (GlobalSettings::get().isDebugMode()) {
+        launchTimestepKernels(config, settings, data, statistics);
+        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
     } else {
-        graphExec = it->second;
+        // Check if we have a cached graph for this configuration
+        cudaGraphExec_t graphExec;
+        auto it = _graphCache.find(config);
+        if (it == _graphCache.end()) {
+            // Capture a new graph for this configuration
+            graphExec = captureTimestepGraph(config, settings, data, statistics);
+        } else {
+            graphExec = it->second;
+        }
+
+        // Execute the cached graph
+        CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
+
+        // Wait for the graph to complete before garbage collection
+        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
     }
-
-    // Execute the cached graph
-    CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
-
-    // Wait for the graph to complete before garbage collection
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
 
     // Garbage collection cannot be part of the graph due to dynamic behavior
     GarbageCollectorKernelsService::get().cleanupAfterTimestep(settings.cudaSettings, data);
@@ -208,65 +260,102 @@ void SimulationKernelsService::launchPreviewKernels(
     auto numBlocks = config.numBlocks;
     bool considerForcesFromAngleDifferences = (config.counterMod3 == 0);
     bool considerInnerFriction = (config.counterMod3 == 0);
+    bool debugMode = GlobalSettings::get().isDebugMode();
 
     if (!config.detailSimulation) {
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         // Cell type-specific functions
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, _stream, numBlocks, 4, data, statistics, true);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
+            if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     } else {
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_prepare, _stream, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletVelocityUpdate, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         // Signal processing
         STREAM_KERNEL_CALL(cudaNextTimestep_signal_calcFutureSignals, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaNextTimestep_signal_updateSignals, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_signal_neuralNetworks, _stream, numBlocks, MAX_CHANNELS * MAX_CHANNELS, data, statistics);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         // Energy flow
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_energyFlow, _stream, numBlocks, 32, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         // Cell type-specific functions
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep1, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, _stream, numBlocks, 4, data, statistics, true);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         if (considerInnerFriction) {
             STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyInnerFriction, _stream, numBlocks, 16, data);
+            if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
         }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyFriction, _stream, numBlocks, 16, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
 
         STREAM_KERNEL_CALL_1_1(cudaNextTimestep_incTimestep, _stream, data);
+        if (debugMode) { CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream)); }
     }
 }
 
@@ -303,21 +392,27 @@ void SimulationKernelsService::calcTimestepForPreview(
     counterMod3 = ++counterMod3 % 3;
     auto config = buildPreviewGraphConfig(settings, data, counterMod3, detailSimulation);
 
-    // Check if we have a cached graph for this configuration
-    cudaGraphExec_t graphExec;
-    auto it = _previewGraphCache.find(config);
-    if (it == _previewGraphCache.end()) {
-        // Capture a new graph for this configuration
-        graphExec = capturePreviewGraph(config, settings, data, statistics);
+    // In debug mode, bypass CUDA Graphs to get precise kernel crash information
+    if (GlobalSettings::get().isDebugMode()) {
+        launchPreviewKernels(config, settings, data, statistics);
+        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
     } else {
-        graphExec = it->second;
+        // Check if we have a cached graph for this configuration
+        cudaGraphExec_t graphExec;
+        auto it = _previewGraphCache.find(config);
+        if (it == _previewGraphCache.end()) {
+            // Capture a new graph for this configuration
+            graphExec = capturePreviewGraph(config, settings, data, statistics);
+        } else {
+            graphExec = it->second;
+        }
+
+        // Execute the cached graph
+        CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
+
+        // Wait for the graph to complete before garbage collection
+        CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
     }
-
-    // Execute the cached graph
-    CHECK_FOR_CUDA_ERROR(cudaGraphLaunch(graphExec, _stream));
-
-    // Wait for the graph to complete before garbage collection
-    CHECK_FOR_CUDA_ERROR(cudaStreamSynchronize(_stream));
 
     // Garbage collection cannot be part of the graph due to dynamic behavior
     if (!detailSimulation) {
