@@ -698,10 +698,10 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = SignalDelayDescription().delay(15).numMemoryEntriesInitialized(5).ringBufferIndex(3);
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderDescription().readOnly(false).numRecordedMemoryEntries(3).currentReadIndex(1);
+            memoryModeDesc = SignalRecorderDescription().readOnly(false).state(SignalRecorderState_Recording).numRecordedMemoryEntries(3).currentReadIndex(1);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageDescription().state(SignalStorageState_Recording).numRecordedMemoryEntries(5).currentReadIndex(2);
+            memoryModeDesc = SignalStorageDescription();
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);

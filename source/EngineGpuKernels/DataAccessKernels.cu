@@ -432,12 +432,10 @@ namespace
                 cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
+                cellTO.cellTypeData.memory.modeData.signalRecorder.state = cell->cellTypeData.memory.modeData.signalRecorder.state;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = cell->cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.currentReadIndex = cell->cellTypeData.memory.modeData.signalRecorder.currentReadIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
-                cellTO.cellTypeData.memory.modeData.signalStorage.state = cell->cellTypeData.memory.modeData.signalStorage.state;
-                cellTO.cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries = cell->cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries;
-                cellTO.cellTypeData.memory.modeData.signalStorage.currentReadIndex = cell->cellTypeData.memory.modeData.signalStorage.currentReadIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                 cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
                     cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;

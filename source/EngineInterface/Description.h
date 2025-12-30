@@ -372,6 +372,7 @@ struct SignalRecorderDescription
     auto operator<=>(SignalRecorderDescription const&) const = default;
 
     MEMBER(SignalRecorderDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderDescription, SignalRecorderState, state, SignalRecorderState_Idle);
     MEMBER(SignalRecorderDescription, int, numRecordedMemoryEntries, 0);
     MEMBER(SignalRecorderDescription, int, currentReadIndex, 0);
 };
@@ -379,10 +380,6 @@ struct SignalRecorderDescription
 struct SignalStorageDescription
 {
     auto operator<=>(SignalStorageDescription const&) const = default;
-
-    MEMBER(SignalStorageDescription, SignalStorageState, state, SignalStorageState_Idle);
-    MEMBER(SignalStorageDescription, int, numRecordedMemoryEntries, 0);
-    MEMBER(SignalStorageDescription, int, currentReadIndex, 0);
 };
 
 struct SignalIntegratorDescription

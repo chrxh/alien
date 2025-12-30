@@ -310,14 +310,14 @@ TEST_F(MemoryTests, signalDelay_delayOf2_noOutputBeforeBufferFull)
 }
 
 //*****************
-//* SignalStorage *
+//* SignalRecorder *
 //*****************
 
-TEST_F(MemoryTests, signalStorage_positiveChannel0_startsRecording)
+TEST_F(MemoryTests, signalRecorder_positiveChannel0_startsRecording)
 {
     // Setup: memory with 5 entries, positive channel[0] should start recording
     std::vector<float> signal = {1.0f, 0.5f, -0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    auto memory = MemoryDescription().mode(SignalStorageDescription()).memoryEntries({
+    auto memory = MemoryDescription().mode(SignalRecorderDescription().readOnly(false)).memoryEntries({
         MemoryEntryDescription(),
         MemoryEntryDescription(),
         MemoryEntryDescription(),
@@ -336,20 +336,20 @@ TEST_F(MemoryTests, signalStorage_positiveChannel0_startsRecording)
 
     auto memoryCell = actualData.getCellRef(1);
     auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
-    auto& signalStorage = std::get<SignalStorageDescription>(memoryDesc._mode);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should be in recording state with 1 entry recorded
-    EXPECT_EQ(SignalStorageState_Recording, signalStorage._state);
-    EXPECT_EQ(1, signalStorage._numRecordedMemoryEntries);
+    EXPECT_EQ(SignalRecorderState_Recording, signalRecorder._state);
+    EXPECT_EQ(1, signalRecorder._numRecordedMemoryEntries);
     EXPECT_TRUE(approxCompare(signal, memoryDesc._memoryEntries[0]._channels));
 }
 
-TEST_F(MemoryTests, signalStorage_recordingCompletes_whenMemoryFull)
+TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
 {
     // Setup: memory with 2 entries
     std::vector<float> signal1 = {1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> signal2 = {0.5f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    auto memory = MemoryDescription().mode(SignalStorageDescription()).memoryEntries({
+    auto memory = MemoryDescription().mode(SignalRecorderDescription().readOnly(false)).memoryEntries({
         MemoryEntryDescription(),
         MemoryEntryDescription(),
     });
@@ -371,22 +371,22 @@ TEST_F(MemoryTests, signalStorage_recordingCompletes_whenMemoryFull)
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getCellRef(1);
     auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
-    auto& signalStorage = std::get<SignalStorageDescription>(memoryDesc._mode);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Recording should be complete, back to idle
-    EXPECT_EQ(SignalStorageState_Idle, signalStorage._state);
-    EXPECT_EQ(2, signalStorage._numRecordedMemoryEntries);
+    EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
+    EXPECT_EQ(2, signalRecorder._numRecordedMemoryEntries);
     EXPECT_TRUE(approxCompare(signal1, memoryDesc._memoryEntries[0]._channels));
     EXPECT_TRUE(approxCompare(signal2, memoryDesc._memoryEntries[1]._channels));
 }
 
-TEST_F(MemoryTests, signalStorage_negativeChannel0_startsReading)
+TEST_F(MemoryTests, signalRecorder_negativeChannel0_startsReading)
 {
     // Setup: memory with pre-recorded entries
     std::vector<float> storedSignal = {0.8f, 0.4f, 0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     auto memory = MemoryDescription()
-                      .mode(SignalStorageDescription().numRecordedMemoryEntries(2))
+                      .mode(SignalRecorderDescription().readOnly(false).numRecordedMemoryEntries(2))
                       .memoryEntries({
                           MemoryEntryDescription().channels(storedSignal),
                           MemoryEntryDescription().channels({0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}),
@@ -403,22 +403,22 @@ TEST_F(MemoryTests, signalStorage_negativeChannel0_startsReading)
 
     auto memoryCell = actualData.getCellRef(1);
     auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
-    auto& signalStorage = std::get<SignalStorageDescription>(memoryDesc._mode);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should be in reading state, output first stored signal
-    EXPECT_EQ(SignalStorageState_Reading, signalStorage._state);
-    EXPECT_EQ(1, signalStorage._currentReadIndex);
+    EXPECT_EQ(SignalRecorderState_Reading, signalRecorder._state);
+    EXPECT_EQ(1, signalRecorder._currentReadIndex);
     EXPECT_TRUE(approxCompare(storedSignal, memoryCell._signal._channels));
 }
 
-TEST_F(MemoryTests, signalStorage_readingCompletes_resetsToIdle)
+TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
 {
     // Setup: memory with 2 pre-recorded entries
     std::vector<float> storedSignal1 = {0.8f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> storedSignal2 = {0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     auto memory = MemoryDescription()
-                      .mode(SignalStorageDescription().numRecordedMemoryEntries(2))
+                      .mode(SignalRecorderDescription().readOnly(false).numRecordedMemoryEntries(2))
                       .memoryEntries({
                           MemoryEntryDescription().channels(storedSignal1),
                           MemoryEntryDescription().channels(storedSignal2),
@@ -441,21 +441,21 @@ TEST_F(MemoryTests, signalStorage_readingCompletes_resetsToIdle)
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getCellRef(1);
     auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
-    auto& signalStorage = std::get<SignalStorageDescription>(memoryDesc._mode);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Reading should be complete, back to idle
-    EXPECT_EQ(SignalStorageState_Idle, signalStorage._state);
-    EXPECT_EQ(0, signalStorage._currentReadIndex);
+    EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
+    EXPECT_EQ(0, signalRecorder._currentReadIndex);
     EXPECT_TRUE(approxCompare(storedSignal2, memoryCell._signal._channels));
 }
 
-TEST_F(MemoryTests, signalStorage_initialRecordedEntries_canBeRead)
+TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
 {
     // Test that memory cell with numRecordedMemoryEntries > 0 can be read immediately
     std::vector<float> storedSignal = {0.75f, 0.5f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     auto memory = MemoryDescription()
-                      .mode(SignalStorageDescription().numRecordedMemoryEntries(1))
+                      .mode(SignalRecorderDescription().readOnly(false).numRecordedMemoryEntries(1))
                       .memoryEntries({MemoryEntryDescription().channels(storedSignal)});
     auto data = Description().addCreature(CreatureDescription().id(1).cells({
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(memory),
@@ -472,12 +472,12 @@ TEST_F(MemoryTests, signalStorage_initialRecordedEntries_canBeRead)
     EXPECT_TRUE(approxCompare(storedSignal, memoryCell._signal._channels));
 }
 
-TEST_F(MemoryTests, signalStorage_stateTransition_ignoresChannel0DuringProcess)
+TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 {
     // Start recording, then send negative channel[0] - should continue recording, not switch to reading
     std::vector<float> signal1 = {1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> negativeSignal = {-1.0f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    auto memory = MemoryDescription().mode(SignalStorageDescription()).memoryEntries({
+    auto memory = MemoryDescription().mode(SignalRecorderDescription().readOnly(false)).memoryEntries({
         MemoryEntryDescription(),
         MemoryEntryDescription(),
         MemoryEntryDescription(),
@@ -500,9 +500,64 @@ TEST_F(MemoryTests, signalStorage_stateTransition_ignoresChannel0DuringProcess)
     actualData = _simulationFacade->getSimulationData();
     auto memoryCell = actualData.getCellRef(1);
     auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
-    auto& signalStorage = std::get<SignalStorageDescription>(memoryDesc._mode);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should still be recording, with 2 entries recorded (including the negative signal)
-    EXPECT_EQ(SignalStorageState_Recording, signalStorage._state);
-    EXPECT_EQ(2, signalStorage._numRecordedMemoryEntries);
+    EXPECT_EQ(SignalRecorderState_Recording, signalRecorder._state);
+    EXPECT_EQ(2, signalRecorder._numRecordedMemoryEntries);
+}
+
+TEST_F(MemoryTests, signalRecorder_readOnly_preventsRecording)
+{
+    // Setup: memory with readOnly = true, positive channel[0] should NOT start recording
+    std::vector<float> signal = {1.0f, 0.5f, -0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    auto memory = MemoryDescription().mode(SignalRecorderDescription().readOnly(true)).memoryEntries({
+        MemoryEntryDescription(),
+        MemoryEntryDescription(),
+        MemoryEntryDescription(),
+    });
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(memory),
+        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(signal),
+    }));
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
+
+    // Should remain in idle state because readOnly prevents recording
+    EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
+    EXPECT_EQ(0, signalRecorder._numRecordedMemoryEntries);
+}
+
+TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
+{
+    // Setup: memory with readOnly = true and pre-recorded entries - reading should work
+    std::vector<float> storedSignal = {0.75f, 0.5f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    auto memory = MemoryDescription()
+                      .mode(SignalRecorderDescription().readOnly(true).numRecordedMemoryEntries(1))
+                      .memoryEntries({MemoryEntryDescription().channels(storedSignal)});
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(memory),
+        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(triggerSignal),
+    }));
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
+    auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
+
+    // Reading should work even with readOnly = true
+    EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);  // Reading completes with only 1 entry
+    EXPECT_TRUE(approxCompare(storedSignal, memoryCell._signal._channels));
 }

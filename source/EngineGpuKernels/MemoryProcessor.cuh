@@ -17,7 +17,7 @@ private:
 
     __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -43,8 +43,8 @@ __device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, Si
         processDelay(data, statistics, cell);
     } else if (mode == MemoryMode_SignalIntegrator) {
         processIntegrator(data, statistics, cell);
-    } else if (mode == MemoryMode_SignalStorage) {
-        processSignalStorage(data, statistics, cell);
+    } else if (mode == MemoryMode_SignalRecorder) {
+        processSignalRecorder(data, statistics, cell);
     }
 }
 
@@ -115,18 +115,18 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto& memory = cell->cellTypeData.memory;
-    auto& signalStorage = memory.modeData.signalStorage;
+    auto& signalRecorder = memory.modeData.signalRecorder;
 
     if (memory.numMemoryEntries == 0) {
         return;
     }
 
-    auto& state = signalStorage.state;
-    auto& numRecorded = signalStorage.numRecordedMemoryEntries;
-    auto& currentReadIndex = signalStorage.currentReadIndex;
+    auto& state = signalRecorder.state;
+    auto& numRecorded = signalRecorder.numRecordedMemoryEntries;
+    auto& currentReadIndex = signalRecorder.currentReadIndex;
 
     // Validate and correct numRecorded if out of bounds
     if (numRecorded > memory.numMemoryEntries) {
@@ -139,20 +139,23 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
     }
 
     // State machine for recording/reading
-    if (state == SignalStorageState_Idle) {
+    if (state == SignalRecorderState_Idle) {
         // Check channel[0] to initiate recording or reading
-        if (cell->signal.channels[0] > TRIGGER_THRESHOLD) {
-            // Start recording - reset numRecorded to start fresh
-            numRecorded = 0;
-            state = SignalStorageState_Recording;
-        } else if (cell->signal.channels[0] < TRIGGER_THRESHOLD) {
+        if (cell->signal.channels[0] > 0) {
+            // Start recording only if not readOnly
+            if (!signalRecorder.readOnly) {
+                // Reset numRecorded to start fresh
+                numRecorded = 0;
+                state = SignalRecorderState_Recording;
+            }
+        } else if (cell->signal.channels[0] < 0) {
             // Start reading - reset currentReadIndex
             currentReadIndex = 0;
-            state = SignalStorageState_Reading;
+            state = SignalRecorderState_Reading;
         }
     }
 
-    if (state == SignalStorageState_Recording) {
+    if (state == SignalRecorderState_Recording) {
         // Record signal to memory at index numRecorded
         if (numRecorded < memory.numMemoryEntries) {
             for (int k = 0; k < MAX_CHANNELS; ++k) {
@@ -162,9 +165,9 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
         }
         // Recording complete when numRecorded reaches numMemoryEntries
         if (numRecorded >= memory.numMemoryEntries) {
-            state = SignalStorageState_Idle;
+            state = SignalRecorderState_Idle;
         }
-    } else if (state == SignalStorageState_Reading) {
+    } else if (state == SignalRecorderState_Reading) {
         // Read recorded memory entry at index currentReadIndex
         if (currentReadIndex < numRecorded) {
             for (int k = 0; k < MAX_CHANNELS; ++k) {
@@ -175,7 +178,7 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
         // Reading complete when currentReadIndex reaches numRecorded
         if (currentReadIndex >= numRecorded) {
             currentReadIndex = 0;
-            state = SignalStorageState_Idle;
+            state = SignalRecorderState_Idle;
         }
     }
 }

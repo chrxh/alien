@@ -486,12 +486,10 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
+            cell->cellTypeData.memory.modeData.signalRecorder.state = cellTO.cellTypeData.memory.modeData.signalRecorder.state;
             cell->cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
             cell->cellTypeData.memory.modeData.signalRecorder.currentReadIndex = cellTO.cellTypeData.memory.modeData.signalRecorder.currentReadIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
-            cell->cellTypeData.memory.modeData.signalStorage.state = cellTO.cellTypeData.memory.modeData.signalStorage.state;
-            cell->cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries = cellTO.cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries;
-            cell->cellTypeData.memory.modeData.signalStorage.currentReadIndex = cellTO.cellTypeData.memory.modeData.signalStorage.currentReadIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
             cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
         }
@@ -855,12 +853,10 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             memory.modeData.signalDelay.ringBufferIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
+            memory.modeData.signalRecorder.state = SignalRecorderState_Idle;
             memory.modeData.signalRecorder.numRecordedMemoryEntries = nodeMemory.modeData.signalRecorder.numRecordedMemoryEntries;
             memory.modeData.signalRecorder.currentReadIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
-            memory.modeData.signalStorage.state = SignalStorageState_Idle;
-            memory.modeData.signalStorage.numRecordedMemoryEntries = 0;
-            memory.modeData.signalStorage.currentReadIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
             memory.modeData.signalIntegrator.newSignalWeight = nodeMemory.modeData.signalIntegrator.newSignalWeight;
         }
