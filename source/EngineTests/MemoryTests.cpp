@@ -204,7 +204,7 @@ TEST_F(MemoryTests, signalDelay_delayOf2_outputsDelayedSignal)
     // Second signal
     std::vector<float> signal2 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getCellRef(2)._signal._channels = signal2;
+    actualData.getCellRef(2).signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -234,13 +234,13 @@ TEST_F(MemoryTests, signalDelay_delayOf3_outputsCorrectlyDelayedSignal)
 
     // Second signal
     auto actualData = _simulationFacade->getSimulationData();
-    actualData.getCellRef(2)._signal._channels = signal2;
+    actualData.getCellRef(2).signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
     // Third signal
     actualData = _simulationFacade->getSimulationData();
-    actualData.getCellRef(2)._signal._channels = signal3;
+    actualData.getCellRef(2).signalAndState(signal3);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -252,7 +252,7 @@ TEST_F(MemoryTests, signalDelay_delayOf3_outputsCorrectlyDelayedSignal)
     EXPECT_TRUE(approxCompare(signal1, memoryCell._signal._channels));
 
     // Fourth signal - should output signal2
-    actualData.getCellRef(2)._signal._channels = signal4;
+    actualData.getCellRef(2).signalAndState(signal4);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
@@ -281,7 +281,7 @@ TEST_F(MemoryTests, signalDelay_noOutputBeforeBufferFull)
     EXPECT_TRUE(approxCompare(signal1, memoryCell._signal._channels));
 
     // Second signal
-    actualData.getCellRef(2)._signal._channels = signal2;
+    actualData.getCellRef(2).signalAndState(signal2);
     _simulationFacade->setSimulationData(actualData);
     _simulationFacade->calcTimesteps(1);
 
