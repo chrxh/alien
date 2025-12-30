@@ -166,6 +166,9 @@ TEST_F(MemoryTests, signalDelay_firstSignal_storesSignalInMemory)
 
     // Verify the signal was stored at index 0
     EXPECT_TRUE(approxCompare(signal, memory._memoryEntries[0]._channels));
+
+    // Verify the output signal (buffer not full yet, so signal should be unchanged)
+    EXPECT_TRUE(approxCompare(signal, memoryCell._signal._channels));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf1_outputsSameCycleSignal)
@@ -184,6 +187,9 @@ TEST_F(MemoryTests, signalDelay_delayOf1_outputsSameCycleSignal)
 
     EXPECT_EQ(1, signalDelay._numMemoryEntriesInitialized);
     EXPECT_TRUE(approxCompare(signal, memory._memoryEntries[0]._channels));
+
+    // Verify the output signal
+    EXPECT_TRUE(approxCompare(signal, memoryCell._signal._channels));
 }
 
 TEST_F(MemoryTests, signalDelay_delayOf2_outputsDelayedSignal)
@@ -285,4 +291,7 @@ TEST_F(MemoryTests, signalDelay_noOutputBeforeBufferFull)
 
     // After second signal, buffer still not full
     EXPECT_EQ(2, signalDelay._numMemoryEntriesInitialized);
+
+    // Verify the output signal (buffer not full yet, so signal should be unchanged)
+    EXPECT_TRUE(approxCompare(signal2, memoryCell._signal._channels));
 }
