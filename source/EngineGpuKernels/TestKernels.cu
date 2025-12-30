@@ -100,9 +100,50 @@ namespace
         return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray())
             && reinterpret_cast<uint64_t>(pointer) < reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity());
     }
+
+    __device__ bool isGenomeValid(SimulationData const& data, Genome* genome)
+    {
+        if (genome != nullptr) {
+            if (!isPointerValid(data, genome)) {
+               return false;
+            } else {
+
+                // Validate genes pointer
+                if (genome->numGenes > 0) {
+                    if (!isPointerValid(data, genome->genes)) {
+                        return false;
+                    } else {
+                        // Validate each gene's nodes pointer and memory node entries
+                        for (int geneIdx = 0; geneIdx < genome->numGenes; ++geneIdx) {
+                            auto& gene = genome->genes[geneIdx];
+                            if (gene.numNodes > 0) {
+                                if (!isPointerValid(data, gene.nodes)) {
+                                    return false;
+                                } else {
+                                    // Validate memory entries for memory nodes
+                                    for (int nodeIdx = 0; nodeIdx < gene.numNodes; ++nodeIdx) {
+                                        auto& node = gene.nodes[nodeIdx];
+                                        if (node.cellType == CellTypeGenome_Memory) {
+                                            if (node.cellTypeData.memory.numMemoryEntries > 0) {
+                                                auto memoryEntries = node.cellTypeData.memory.memoryEntries;
+                                                if (!isPointerValid(data, memoryEntries)) {
+                                                    return false;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
 }
 
-__global__ void cudaTestAreCellsValid(SimulationData data, bool* result)
+__global__ void cudaTestArePointersValid(SimulationData data, bool* result)
 {
     auto& cells = data.objects.cells;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
@@ -120,6 +161,18 @@ __global__ void cudaTestAreCellsValid(SimulationData data, bool* result)
                     if (cell->cellTypeData.memory.numMemoryEntries > 0) {
                         auto memoryEntries = cell->cellTypeData.memory.memoryEntries;
                         *result &= isPointerValid(data, memoryEntries);
+                    }
+                }
+
+                if (cell->neuralNetwork != nullptr) {
+                    *result &= isPointerValid(data, cell->neuralNetwork);
+                }
+
+                if (cell->creature != nullptr) {
+                    if (!isPointerValid(data, cell->creature)) {
+                        *result = false;
+                    } else {
+                        *result &= isGenomeValid(data, cell->creature->genome);
                     }
                 }
             } else {

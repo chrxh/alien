@@ -127,7 +127,7 @@ public:
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
     virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
-    virtual bool testOnly_areArraysValid() = 0;
+    virtual bool testOnly_arePointersValid() = 0;
 
 protected:
     static SimulationFacade _instance;
