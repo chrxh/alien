@@ -474,7 +474,7 @@ CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 c
         }
         for (int j = 0; j < nearCell->numConnections; ++j) {
             auto const& connectedNearCell = nearCell->connections[j].cell;
-            if (Math::crossing(pos1, pos1, nearCell->pos, connectedNearCell->pos)) {
+            if (Math::crossing(pos1, pos2, nearCell->pos, connectedNearCell->pos)) {
                 nearCell->releaseLock();
                 result = true;
                 return;

@@ -455,13 +455,20 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     auto desiredDistance = constructionData.gene->connectionDistance;
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::getNormalized(posDelta) * (constructionSiteDistance - desiredDistance);
-
     if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance.value
         || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance.value) {
         return nullptr;
     }
 
     auto newCellPos = hostCell->pos + posDelta;
+    if (CellConnectionProcessor::existCrossingConnections(
+            data,
+            hostCell->pos,
+            constructionData.lastConstructionCell->pos,
+            cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
+            hostCell->detached)) {
+        return nullptr;
+    }
 
     Cell* cellsToConnect[MAX_CELL_BONDS];
     int numCellsToConnect;
