@@ -360,7 +360,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(3);
 
     // Second signal - should record and complete
     auto actualData = _simulationFacade->getSimulationData();
@@ -430,7 +430,7 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(3);
 
     // Second read - should read second entry and complete
     auto actualData = _simulationFacade->getSimulationData();
@@ -489,7 +489,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
+    _simulationFacade->calcTimesteps(3);
 
     // Send negative signal - should continue recording, not switch to reading
     auto actualData = _simulationFacade->getSimulationData();
