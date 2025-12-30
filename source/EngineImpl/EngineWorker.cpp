@@ -496,10 +496,10 @@ void EngineWorker::testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta)
     _simulationCudaFacade->testOnly_resizeArrays(sizeDelta);
 }
 
-bool EngineWorker::testOnly_areArraysValid()
+bool EngineWorker::testOnly_arePointersValid()
 {
     EngineWorkerGuard access(this);
-    return _simulationCudaFacade->testOnly_areArraysValid();
+    return _simulationCudaFacade->testOnly_arePointersValid();
 }
 
 void EngineWorker::resetTimeIntervalStatistics()

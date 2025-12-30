@@ -110,7 +110,7 @@ public:
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
-    bool testOnly_areArraysValid();
+    bool testOnly_arePointersValid();
 
 private:
     void initCuda();

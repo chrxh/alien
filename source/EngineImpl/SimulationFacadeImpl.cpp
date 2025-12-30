@@ -407,7 +407,7 @@ void _SimulationFacadeImpl::testOnly_resizeArrays(ArraySizesForGpu const& sizeDe
     _worker.testOnly_resizeArrays(sizeDelta);
 }
 
-bool _SimulationFacadeImpl::testOnly_areArraysValid()
+bool _SimulationFacadeImpl::testOnly_arePointersValid()
 {
-    return _worker.testOnly_areArraysValid();
+    return _worker.testOnly_arePointersValid();
 }
