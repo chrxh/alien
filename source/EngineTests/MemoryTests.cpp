@@ -26,22 +26,11 @@ public:
     ~MemoryTests() = default;
 
 protected:
-    // Helper to create a memory cell with a signal source cell sending a signal
-    Description createMemoryCellWithIncomingSignal(MemoryModeDescription const& mode, std::vector<float> const& signal)
-    {
-        auto data = Description().addCreature(CreatureDescription().id(1).cells({
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellType(MemoryDescription().mode(mode)),
-            CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(signal),
-        }));
-        data.addConnection(1, 2);
-        return data;
-    }
-
-    // Extended helper to create a memory cell with custom memory entries and settings
+    // Helper to create a memory cell with custom memory entries and settings
     Description createMemoryCellWithIncomingSignal(
         MemoryModeDescription const& mode,
         std::vector<float> const& signal,
-        std::vector<MemoryEntryDescription> const& memoryEntries)
+        std::vector<MemoryEntryDescription> const& memoryEntries = {})
     {
         auto data = Description().addCreature(CreatureDescription().id(1).cells({
             CellDescription().id(1).pos({100.0f, 100.0f}).cellType(MemoryDescription().mode(mode).memoryEntries(memoryEntries)),
