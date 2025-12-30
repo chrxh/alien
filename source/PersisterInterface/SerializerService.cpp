@@ -228,6 +228,7 @@ namespace
     auto constexpr Id_SignalDelayGenome_Delay = 0;
 
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
+    auto constexpr Id_SignalRecorderGenome_NumRecordedMemoryEntries = 1;
 
     auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
 
@@ -575,6 +576,7 @@ namespace cereal
         SignalRecorderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
+        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumRecordedMemoryEntries, data._numRecordedMemoryEntries, defaultObject._numRecordedMemoryEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRecorderGenomeDescription)
@@ -832,6 +834,11 @@ namespace
     auto constexpr Id_MemoryEntry_Channels = 0;
 
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
+    auto constexpr Id_SignalRecorder_NumRecordedMemoryEntries = 1;
+    auto constexpr Id_SignalRecorder_CurrentReadIndex = 2;
+
+    auto constexpr Id_SignalStorage_NumRecordedMemoryEntries = 0;
+    auto constexpr Id_SignalStorage_CurrentReadIndex = 1;
 
     auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
 }
@@ -1245,6 +1252,8 @@ namespace cereal
         SignalRecorderDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
+        loadSave(task, auxiliaries, Id_SignalRecorder_NumRecordedMemoryEntries, data._numRecordedMemoryEntries, defaultObject._numRecordedMemoryEntries);
+        loadSave(task, auxiliaries, Id_SignalRecorder_CurrentReadIndex, data._currentReadIndex, defaultObject._currentReadIndex);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRecorderDescription)
@@ -1254,6 +1263,8 @@ namespace cereal
     {
         SignalStorageDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalStorage_NumRecordedMemoryEntries, data._numRecordedMemoryEntries, defaultObject._numRecordedMemoryEntries);
+        loadSave(task, auxiliaries, Id_SignalStorage_CurrentReadIndex, data._currentReadIndex, defaultObject._currentReadIndex);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalStorageDescription)

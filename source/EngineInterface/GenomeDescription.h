@@ -292,6 +292,7 @@ struct SignalRecorderGenomeDescription
     auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
 
     MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderGenomeDescription, int, numRecordedMemoryEntries, 0);
 };
 
 struct SignalStorageGenomeDescription

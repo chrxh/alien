@@ -532,9 +532,13 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderDescription signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._numRecordedMemoryEntries = memoryTO.modeData.signalRecorder.numRecordedMemoryEntries;
+            signalRecorder._currentReadIndex = memoryTO.modeData.signalRecorder.currentReadIndex;
             memory._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageDescription signalStorage;
+            signalStorage._numRecordedMemoryEntries = memoryTO.modeData.signalStorage.numRecordedMemoryEntries;
+            signalStorage._currentReadIndex = memoryTO.modeData.signalStorage.currentReadIndex;
             memory._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorDescription signalIntegrator;
@@ -769,6 +773,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderGenomeDescription signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._numRecordedMemoryEntries = memoryTO.modeData.signalRecorder.numRecordedMemoryEntries;
             memoryDesc._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageGenomeDescription signalStorage;
@@ -1063,6 +1068,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
                     auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+                    memoryTO.modeData.signalRecorder.numRecordedMemoryEntries = signalRecorderDesc._numRecordedMemoryEntries;
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
                 } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
                     auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
@@ -1341,8 +1347,12 @@ void DescriptionConverterService::convertCellToTO(
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+            memoryTO.modeData.signalRecorder.numRecordedMemoryEntries = signalRecorderDesc._numRecordedMemoryEntries;
+            memoryTO.modeData.signalRecorder.currentReadIndex = signalRecorderDesc._currentReadIndex;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalStorage.numRecordedMemoryEntries = signalStorageDesc._numRecordedMemoryEntries;
+            memoryTO.modeData.signalStorage.currentReadIndex = signalStorageDesc._currentReadIndex;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
             memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;

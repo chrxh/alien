@@ -240,6 +240,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.memory.modeData.signalDelay.delay = nodeTO.cellTypeData.memory.modeData.signalDelay.delay;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
+                    node.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                     node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
@@ -485,7 +486,11 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
+            cell->cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
+            cell->cellTypeData.memory.modeData.signalRecorder.currentReadIndex = cellTO.cellTypeData.memory.modeData.signalRecorder.currentReadIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+            cell->cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries = cellTO.cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries;
+            cell->cellTypeData.memory.modeData.signalStorage.currentReadIndex = cellTO.cellTypeData.memory.modeData.signalStorage.currentReadIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
             cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
         }
@@ -849,7 +854,11 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             memory.modeData.signalDelay.ringBufferIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
+            memory.modeData.signalRecorder.numRecordedMemoryEntries = nodeMemory.modeData.signalRecorder.numRecordedMemoryEntries;
+            memory.modeData.signalRecorder.currentReadIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
+            memory.modeData.signalStorage.numRecordedMemoryEntries = 0;
+            memory.modeData.signalStorage.currentReadIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
             memory.modeData.signalIntegrator.newSignalWeight = nodeMemory.modeData.signalIntegrator.newSignalWeight;
         }

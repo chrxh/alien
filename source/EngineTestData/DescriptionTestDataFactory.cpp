@@ -515,6 +515,9 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             if (signalRecorder._readOnly != nodeSignalRecorder._readOnly) {
                 return false;
             }
+            if (signalRecorder._numRecordedMemoryEntries != nodeSignalRecorder._numRecordedMemoryEntries) {
+                return false;
+            }
         } break;
         case MemoryMode_SignalStorage: {
         } break;
@@ -695,10 +698,10 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = SignalDelayDescription().delay(15).numMemoryEntriesInitialized(5).ringBufferIndex(3);
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderDescription().readOnly(false);
+            memoryModeDesc = SignalRecorderDescription().readOnly(false).numRecordedMemoryEntries(3).currentReadIndex(1);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageDescription();
+            memoryModeDesc = SignalStorageDescription().numRecordedMemoryEntries(5).currentReadIndex(2);
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);
@@ -834,7 +837,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             memoryModeDesc = SignalDelayGenomeDescription().delay(20);
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false);
+            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numRecordedMemoryEntries(3);
             break;
         case MemoryMode_SignalStorage:
             memoryModeDesc = SignalStorageGenomeDescription();

@@ -324,10 +324,14 @@ struct SignalDelay
 struct SignalRecorder
 {
     bool readOnly;
+    uint8_t numRecordedMemoryEntries;
+    uint8_t currentReadIndex;
 };
 
 struct SignalStorage
 {
+    uint8_t numRecordedMemoryEntries;
+    uint8_t currentReadIndex;
 };
 
 struct SignalIntegrator

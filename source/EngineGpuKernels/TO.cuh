@@ -297,10 +297,14 @@ struct SignalDelayTO
 struct SignalRecorderTO
 {
     bool readOnly;
+    uint8_t numRecordedMemoryEntries;
+    uint8_t currentReadIndex;
 };
 
 struct SignalStorageTO
 {
+    uint8_t numRecordedMemoryEntries;
+    uint8_t currentReadIndex;
 };
 
 struct SignalIntegratorTO

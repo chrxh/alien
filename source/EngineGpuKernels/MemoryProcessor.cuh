@@ -17,6 +17,7 @@ private:
 
     __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -42,6 +43,8 @@ __device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, Si
         processDelay(data, statistics, cell);
     } else if (mode == MemoryMode_SignalIntegrator) {
         processIntegrator(data, statistics, cell);
+    } else if (mode == MemoryMode_SignalStorage) {
+        processSignalStorage(data, statistics, cell);
     }
 }
 
@@ -109,5 +112,40 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     // Track initialization progress
     if (signalDelay.numMemoryEntriesInitialized < memory.numMemoryEntries) {
         ++signalDelay.numMemoryEntriesInitialized;
+    }
+}
+
+__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    auto& memory = cell->cellTypeData.memory;
+    auto& signalStorage = memory.modeData.signalStorage;
+
+    if (memory.numMemoryEntries == 0) {
+        return;
+    }
+
+    auto& numRecorded = signalStorage.numRecordedMemoryEntries;
+    auto& currentReadIndex = signalStorage.currentReadIndex;
+
+    if (cell->signal.channels[0] > 0) {
+        // Record signal to memory at index numRecordedMemoryEntries
+        if (numRecorded < memory.numMemoryEntries) {
+            for (int k = 0; k < MAX_CHANNELS; ++k) {
+                memory.memoryEntries[numRecorded].channels[k] = cell->signal.channels[k];
+            }
+            ++numRecorded;
+        }
+    } else if (cell->signal.channels[0] < 0) {
+        // Read recorded memory entry at index currentReadIndex
+        if (currentReadIndex < numRecorded) {
+            for (int k = 0; k < MAX_CHANNELS; ++k) {
+                cell->signal.channels[k] = memory.memoryEntries[currentReadIndex].channels[k];
+            }
+            ++currentReadIndex;
+        }
+        // After reaching numRecordedMemoryEntries, reset currentReadIndex for next read cycle
+        if (currentReadIndex >= numRecorded) {
+            currentReadIndex = 0;
+        }
     }
 }

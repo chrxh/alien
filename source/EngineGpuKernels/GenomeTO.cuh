@@ -212,6 +212,7 @@ struct SignalDelayGenomeTO
 struct SignalRecorderGenomeTO
 {
     bool readOnly;
+    uint8_t numRecordedMemoryEntries;
 };
 
 struct SignalStorageGenomeTO
