@@ -537,6 +537,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             memory._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageDescription signalStorage;
+            signalStorage._state = memoryTO.modeData.signalStorage.state;
             signalStorage._numRecordedMemoryEntries = memoryTO.modeData.signalStorage.numRecordedMemoryEntries;
             signalStorage._currentReadIndex = memoryTO.modeData.signalStorage.currentReadIndex;
             memory._mode = signalStorage;
@@ -1351,6 +1352,7 @@ void DescriptionConverterService::convertCellToTO(
             memoryTO.modeData.signalRecorder.currentReadIndex = signalRecorderDesc._currentReadIndex;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalStorage.state = signalStorageDesc._state;
             memoryTO.modeData.signalStorage.numRecordedMemoryEntries = signalStorageDesc._numRecordedMemoryEntries;
             memoryTO.modeData.signalStorage.currentReadIndex = signalStorageDesc._currentReadIndex;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {

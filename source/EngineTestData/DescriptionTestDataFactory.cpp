@@ -701,7 +701,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = SignalRecorderDescription().readOnly(false).numRecordedMemoryEntries(3).currentReadIndex(1);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageDescription().numRecordedMemoryEntries(5).currentReadIndex(2);
+            memoryModeDesc = SignalStorageDescription().state(SignalStorageState_Recording).numRecordedMemoryEntries(5).currentReadIndex(2);
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);

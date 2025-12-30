@@ -355,6 +355,14 @@ namespace Const
     std::vector<std::string> const MemoryModeStrings = {"Signal delay", "Signal recorder", "Signal retrieval", "Signal integrator"};
 }
 
+using SignalStorageState = uint8_t;
+enum SignalStorageState_
+{
+    SignalStorageState_Idle,
+    SignalStorageState_Recording,
+    SignalStorageState_Reading,
+};
+
 
 using CellEvent = uint8_t;
 enum CellEvent_

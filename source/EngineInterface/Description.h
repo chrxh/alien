@@ -380,6 +380,7 @@ struct SignalStorageDescription
 {
     auto operator<=>(SignalStorageDescription const&) const = default;
 
+    MEMBER(SignalStorageDescription, SignalStorageState, state, SignalStorageState_Idle);
     MEMBER(SignalStorageDescription, int, numRecordedMemoryEntries, 0);
     MEMBER(SignalStorageDescription, int, currentReadIndex, 0);
 };

@@ -330,6 +330,7 @@ struct SignalRecorder
 
 struct SignalStorage
 {
+    SignalStorageState state;
     uint8_t numRecordedMemoryEntries;
     uint8_t currentReadIndex;
 };

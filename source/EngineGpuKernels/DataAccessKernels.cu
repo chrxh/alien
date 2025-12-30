@@ -435,6 +435,7 @@ namespace
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = cell->cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.currentReadIndex = cell->cellTypeData.memory.modeData.signalRecorder.currentReadIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                cellTO.cellTypeData.memory.modeData.signalStorage.state = cell->cellTypeData.memory.modeData.signalStorage.state;
                 cellTO.cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries = cell->cellTypeData.memory.modeData.signalStorage.numRecordedMemoryEntries;
                 cellTO.cellTypeData.memory.modeData.signalStorage.currentReadIndex = cell->cellTypeData.memory.modeData.signalStorage.currentReadIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {

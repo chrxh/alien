@@ -837,8 +837,9 @@ namespace
     auto constexpr Id_SignalRecorder_NumRecordedMemoryEntries = 1;
     auto constexpr Id_SignalRecorder_CurrentReadIndex = 2;
 
-    auto constexpr Id_SignalStorage_NumRecordedMemoryEntries = 0;
-    auto constexpr Id_SignalStorage_CurrentReadIndex = 1;
+    auto constexpr Id_SignalStorage_State = 0;
+    auto constexpr Id_SignalStorage_NumRecordedMemoryEntries = 1;
+    auto constexpr Id_SignalStorage_CurrentReadIndex = 2;
 
     auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
 }
@@ -1263,6 +1264,7 @@ namespace cereal
     {
         SignalStorageDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalStorage_State, data._state, defaultObject._state);
         loadSave(task, auxiliaries, Id_SignalStorage_NumRecordedMemoryEntries, data._numRecordedMemoryEntries, defaultObject._numRecordedMemoryEntries);
         loadSave(task, auxiliaries, Id_SignalStorage_CurrentReadIndex, data._currentReadIndex, defaultObject._currentReadIndex);
         processLoadSaveMap(task, ar, auxiliaries);
