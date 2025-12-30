@@ -70,6 +70,10 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     auto& memory = cell->cellTypeData.memory;
     auto& signalDelay = memory.modeData.signalDelay;
 
+    if (signalDelay.delay == 0) {
+        return;
+    }
+
     // Initialize memory if necessary
     if (memory.numMemoryEntries != signalDelay.delay) {
         memory.numMemoryEntries = signalDelay.delay;
@@ -78,17 +82,25 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
         signalDelay.ringBufferIndex = 0;
     }
 
-    // Output the oldest memory entry (at ringBufferIndex)
+    // Store output from the oldest memory entry (at ringBufferIndex)
+    Signal output;
     if (signalDelay.numMemoryEntriesInitialized == memory.numMemoryEntries) {
-        auto oldestIndex = signalDelay.ringBufferIndex;
+        auto ringBufferIndex = signalDelay.ringBufferIndex;
         for (int k = 0; k < MAX_CHANNELS; ++k) {
-            cell->signal.channels[k] = memory.memoryEntries[oldestIndex].channels[k];
+            output.channels[k] = memory.memoryEntries[ringBufferIndex].channels[k];
         }
     }
 
     // Store current signal at ringBufferIndex (this position contains the oldest entry which we just output)
     for (int k = 0; k < MAX_CHANNELS; ++k) {
         memory.memoryEntries[signalDelay.ringBufferIndex].channels[k] = cell->signal.channels[k];
+    }
+
+    // Write output
+    if (signalDelay.numMemoryEntriesInitialized == memory.numMemoryEntries) {
+        for (int k = 0; k < MAX_CHANNELS; ++k) {
+            cell->signal.channels[k] = output.channels[k];
+        }
     }
 
     // Advance the ring buffer index to point to the next oldest entry
