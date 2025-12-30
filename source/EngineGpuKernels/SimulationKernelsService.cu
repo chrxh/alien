@@ -1,5 +1,7 @@
 ﻿#include <EngineInterface/SpaceCalculator.h>
 
+#include <ranges>
+
 #include "DebugKernels.cuh"
 #include "ForceFieldKernels.cuh"
 #include "GarbageCollectorKernelsService.cuh"
@@ -15,14 +17,14 @@ void SimulationKernelsService::init()
 void SimulationKernelsService::shutdown()
 {
     // Destroy all cached graph executables
-    for (auto& pair : _graphCache) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(pair.second));
+    for (cudaGraphExec_t& graphExec : _graphCache | std::views::values) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
     }
     _graphCache.clear();
 
     // Destroy all cached preview graph executables
-    for (auto& pair : _previewGraphCache) {
-        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(pair.second));
+    for (cudaGraphExec_t& graphExec : _previewGraphCache | std::views::values) {
+        CHECK_FOR_CUDA_ERROR(cudaGraphExecDestroy(graphExec));
     }
     _previewGraphCache.clear();
 
