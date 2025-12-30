@@ -194,9 +194,6 @@ CudaGraphPreviewConfig SimulationKernelsService::buildPreviewGraphConfig(
     CudaGraphPreviewConfig config;
     config.counterMod3 = counterMod3;
     config.detailSimulation = detailSimulation;
-    config.motionType = detailSimulation ? settings.simulationParameters.motionType.value : MotionType_Fluid;
-    config.hasLayers = detailSimulation && settings.simulationParameters.numLayers > 0;
-    config.constructorCheck = detailSimulation && settings.simulationParameters.constructorCompletenessCheck.value;
     config.fluidKernelThreads = calcOptimalThreadsForFluidKernel(settings.simulationParameters);
     config.numBlocks = settings.cudaSettings.numBlocks;
     return config;
@@ -241,14 +238,7 @@ void SimulationKernelsService::launchPreviewKernels(
 
         STREAM_KERNEL_CALL(cudaNextTimestep_physics_init, _stream, numBlocks, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_fillMaps, _stream, numBlocks, 64, data);
-        if (config.motionType == MotionType_Fluid) {
-            STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
-        } else {
-            STREAM_KERNEL_CALL(cudaNextTimestep_physics_calcCollisionForces, _stream, numBlocks, data);
-        }
-        if (config.hasLayers) {
-            STREAM_KERNEL_CALL(cudaApplyForceFieldSettings, _stream, numBlocks, data);
-        }
+        STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcFluidForces, _stream, numBlocks, config.fluidKernelThreads, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_applyForces, _stream, numBlocks, 16, data);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_calcConnectionForces, _stream, numBlocks, 16, data, considerForcesFromAngleDifferences);
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_physics_verletPositionUpdate, _stream, numBlocks, 16, data);
@@ -268,9 +258,6 @@ void SimulationKernelsService::launchPreviewKernels(
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_prepare_substep2, _stream, numBlocks, data);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_generator, _stream, numBlocks, data, statistics);
 
-        if (config.constructorCheck) {
-            STREAM_KERNEL_CALL(cudaNextTimestep_cellType_constructor_completenessCheck, _stream, numBlocks, data, statistics);
-        }
         STREAM_KERNEL_CALL_MOD(cudaNextTimestep_cellType_constructor, _stream, numBlocks, 4, data, statistics, true);
         STREAM_KERNEL_CALL(cudaNextTimestep_cellType_muscle, _stream, numBlocks, data, statistics);
 

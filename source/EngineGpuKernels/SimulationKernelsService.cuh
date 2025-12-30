@@ -30,9 +30,6 @@ struct CudaGraphPreviewConfig
 {
     int counterMod3;            // Not every kernel needs to be executed each time
     bool detailSimulation;      // Whether detail simulation is enabled
-    int motionType;             // MotionType_Fluid or MotionType_Collision (only for detail)
-    bool hasLayers;             // settings.simulationParameters.numLayers > 0 (only for detail)
-    bool constructorCheck;      // settings.simulationParameters.constructorCompletenessCheck.value (only for detail)
     int fluidKernelThreads;     // calcOptimalThreadsForFluidKernel result
     int numBlocks;              // gpuSettings.numBlocks
 
