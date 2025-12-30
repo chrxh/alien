@@ -692,7 +692,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         MemoryModeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayDescription().delay(15).numMemoryEntriesInitialized(5);
+            memoryModeDesc = SignalDelayDescription().delay(15).numMemoryEntriesInitialized(5).ringBufferIndex(3);
             break;
         case MemoryMode_SignalRecorder:
             memoryModeDesc = SignalRecorderDescription().readOnly(false);

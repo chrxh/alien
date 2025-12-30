@@ -364,6 +364,7 @@ struct SignalDelayDescription
 
     MEMBER(SignalDelayDescription, int, delay, 10);
     MEMBER(SignalDelayDescription, int, numMemoryEntriesInitialized, 0);
+    MEMBER(SignalDelayDescription, int, ringBufferIndex, 0);
 };
 
 struct SignalRecorderDescription

@@ -428,6 +428,7 @@ namespace
             if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                 cellTO.cellTypeData.memory.modeData.signalDelay.delay = cell->cellTypeData.memory.modeData.signalDelay.delay;
                 cellTO.cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized = cell->cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized;
+                cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {

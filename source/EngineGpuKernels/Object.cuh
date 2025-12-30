@@ -318,6 +318,7 @@ struct SignalDelay
 {
     uint8_t delay;
     uint8_t numMemoryEntriesInitialized;
+    uint8_t ringBufferIndex;
 };
 
 struct SignalRecorder

@@ -527,6 +527,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             SignalDelayDescription signalDelay;
             signalDelay._delay = memoryTO.modeData.signalDelay.delay;
             signalDelay._numMemoryEntriesInitialized = memoryTO.modeData.signalDelay.numMemoryEntriesInitialized;
+            signalDelay._ringBufferIndex = memoryTO.modeData.signalDelay.ringBufferIndex;
             memory._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderDescription signalRecorder;
@@ -1336,6 +1337,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
             memoryTO.modeData.signalDelay.delay = signalDelayDesc._delay;
             memoryTO.modeData.signalDelay.numMemoryEntriesInitialized = signalDelayDesc._numMemoryEntriesInitialized;
+            memoryTO.modeData.signalDelay.ringBufferIndex = signalDelayDesc._ringBufferIndex;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
