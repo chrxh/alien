@@ -446,10 +446,10 @@ TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
 TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 {
     // Start recording, then send negative channel[0] - should continue recording, not switch to reading
-    std::vector<float> signal1 = {1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> positiveSignal = {1.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> negativeSignal = {-1.0f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries(3);
-    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(false), signal1, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(false), positiveSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3);
@@ -470,12 +470,12 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
     EXPECT_EQ(2, signalRecorder._numSavedSignalEntries);
 }
 
-TEST_F(MemoryTests, signalRecorder_readOnly_preventsRecording)
+TEST_F(MemoryTests, signalRecorder_readOnly_readingInsteadOfRecording)
 {
     // Setup: memory with readOnly = true, positive channel[0] should NOT start recording
     std::vector<float> signal = {1.0f, 0.5f, -0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries(3);
-    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(true), signal, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(true).numSavedSignalEntries(3), signal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -486,8 +486,8 @@ TEST_F(MemoryTests, signalRecorder_readOnly_preventsRecording)
     auto& signalRecorder = std::get<SignalRecorderDescription>(memoryDesc._mode);
 
     // Should remain in idle state because readOnly prevents recording
-    EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
-    EXPECT_EQ(0, signalRecorder._numSavedSignalEntries);
+    EXPECT_EQ(SignalRecorderState_Reading, signalRecorder._state);
+    EXPECT_EQ(3, signalRecorder._numSavedSignalEntries);
 }
 
 TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)

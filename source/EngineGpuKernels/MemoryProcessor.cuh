@@ -125,30 +125,29 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
     }
 
     auto& state = signalRecorder.state;
-    auto& numRecorded = signalRecorder.numSavedSignalEntries;
+    auto& numSavedSignalEntries = signalRecorder.numSavedSignalEntries;
     auto& numReadSignalEntries = signalRecorder.numReadSignalEntries;
 
     // Validate and correct numRecorded if out of bounds
-    if (numRecorded > memory.numSignalEntries) {
-        numRecorded = 0;
+    if (numSavedSignalEntries > memory.numSignalEntries) {
+        numSavedSignalEntries = 0;
     }
 
     // Validate and correct numReadSignalEntries if out of bounds
-    if (numReadSignalEntries >= numRecorded || numReadSignalEntries >= memory.numSignalEntries) {
+    if (numReadSignalEntries >= numSavedSignalEntries || numReadSignalEntries >= memory.numSignalEntries) {
         numReadSignalEntries = 0;
     }
 
     // State machine for recording/reading
     if (state == SignalRecorderState_Idle) {
         // Check channel[0] to initiate recording or reading
-        if (cell->signal.channels[0] > 0) {
-            // Start recording only if not readOnly
-            if (!signalRecorder.readOnly) {
-                // Reset numRecorded to start fresh
-                numRecorded = 0;
-                state = SignalRecorderState_Recording;
-            }
-        } else if (cell->signal.channels[0] < 0) {
+        if (cell->signal.channels[Channels::CellTypeActivation] > TRIGGER_THRESHOLD && !signalRecorder.readOnly) {
+            // Reset numRecorded to start fresh
+            numSavedSignalEntries = 0;
+            state = SignalRecorderState_Recording;
+        } else if (
+            cell->signal.channels[Channels::CellTypeActivation] < -TRIGGER_THRESHOLD
+            || (signalRecorder.readOnly && abs(cell->signal.channels[Channels::CellTypeActivation]) > TRIGGER_THRESHOLD)) {
             // Start reading - reset numReadSignalEntries
             numReadSignalEntries = 0;
             state = SignalRecorderState_Reading;
@@ -157,26 +156,26 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
 
     if (state == SignalRecorderState_Recording) {
         // Record signal to memory at index numRecorded
-        if (numRecorded < memory.numSignalEntries) {
+        if (numSavedSignalEntries < memory.numSignalEntries) {
             for (int k = 0; k < MAX_CHANNELS; ++k) {
-                memory.signalEntries[numRecorded].channels[k] = cell->signal.channels[k];
+                memory.signalEntries[numSavedSignalEntries].channels[k] = cell->signal.channels[k];
             }
-            ++numRecorded;
+            ++numSavedSignalEntries;
         }
         // Recording complete when numRecorded reaches numSignalEntries
-        if (numRecorded >= memory.numSignalEntries) {
+        if (numSavedSignalEntries >= memory.numSignalEntries) {
             state = SignalRecorderState_Idle;
         }
     } else if (state == SignalRecorderState_Reading) {
         // Read recorded memory entry at index numReadSignalEntries
-        if (numReadSignalEntries < numRecorded) {
+        if (numReadSignalEntries < numSavedSignalEntries) {
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 cell->signal.channels[k] = memory.signalEntries[numReadSignalEntries].channels[k];
             }
             ++numReadSignalEntries;
         }
         // Reading complete when numReadSignalEntries reaches numRecorded
-        if (numReadSignalEntries >= numRecorded) {
+        if (numReadSignalEntries >= numSavedSignalEntries) {
             numReadSignalEntries = 0;
             state = SignalRecorderState_Idle;
         }
