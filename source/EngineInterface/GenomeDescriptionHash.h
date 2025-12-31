@@ -376,7 +376,7 @@ struct std::hash<SignalRecorderGenomeDescription>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._readOnly);
-        hash_combine(seed, desc._numRecordedMemoryEntries);
+        hash_combine(seed, desc._numSavedSignalEntries);
         return seed;
     }
 };
@@ -412,9 +412,9 @@ struct std::hash<MemoryModeGenomeDescription>
 };
 
 template <>
-struct std::hash<MemoryEntryGenomeDescription>
+struct std::hash<SignalEntryGenomeDescription>
 {
-    std::size_t operator()(MemoryEntryGenomeDescription const& desc) const
+    std::size_t operator()(SignalEntryGenomeDescription const& desc) const
     {
         std::size_t result = 0;
         for (auto const& channel : desc._channels) {
@@ -430,8 +430,8 @@ struct std::hash<MemoryGenomeDescription>
     std::size_t operator()(MemoryGenomeDescription const& desc) const
     {
         std::size_t result = std::hash<MemoryModeGenomeDescription>{}(desc._mode);
-        for (auto const& entry : desc._memoryEntries) {
-            hash_combine(result, std::hash<MemoryEntryGenomeDescription>{}(entry));
+        for (auto const& entry : desc._signalEntries) {
+            hash_combine(result, std::hash<SignalEntryGenomeDescription>{}(entry));
         }
         return result;
     }

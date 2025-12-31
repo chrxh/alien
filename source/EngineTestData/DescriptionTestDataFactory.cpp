@@ -515,7 +515,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             if (signalRecorder._readOnly != nodeSignalRecorder._readOnly) {
                 return false;
             }
-            if (signalRecorder._numRecordedMemoryEntries != nodeSignalRecorder._numRecordedMemoryEntries) {
+            if (signalRecorder._numSavedSignalEntries != nodeSignalRecorder._numSavedSignalEntries) {
                 return false;
             }
         } break;
@@ -529,10 +529,10 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             }
         } break;
         }
-        if (memory._memoryEntries.size() != nodeMemory._memoryEntries.size()) {
+        if (memory._signalEntries.size() != nodeMemory._signalEntries.size()) {
             return false;
         }
-        for (auto const& [entry, nodeEntry] : boost::combine(memory._memoryEntries, nodeMemory._memoryEntries)) {
+        for (auto const& [entry, nodeEntry] : boost::combine(memory._signalEntries, nodeMemory._signalEntries)) {
             for (auto const& [channel, nodeChannel] : boost::combine(entry._channels, nodeEntry._channels)) {
                 if (channel != nodeChannel) {
                     return false;
@@ -695,10 +695,10 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         MemoryModeDescription memoryModeDesc;
         switch (memoryMode) {
         case MemoryMode_SignalDelay:
-            memoryModeDesc = SignalDelayDescription().delay(15).numMemoryEntriesInitialized(5).ringBufferIndex(3);
+            memoryModeDesc = SignalDelayDescription().delay(15).numSignalEntriesInitialized(5).ringBufferIndex(3);
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderDescription().readOnly(false).state(SignalRecorderState_Recording).numRecordedMemoryEntries(3).currentReadIndex(1);
+            memoryModeDesc = SignalRecorderDescription().readOnly(false).state(SignalRecorderState_Recording).numSavedSignalEntries(3).numReadSignalEntries(1);
             break;
         case MemoryMode_SignalStorage:
             memoryModeDesc = SignalStorageDescription();
@@ -711,11 +711,11 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         }
         auto memory = MemoryDescription().mode(memoryModeDesc);
         for (int i = 0; i < 10; ++i) {
-            MemoryEntryDescription entry;
+            SignalEntryDescription entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
             }
-            memory._memoryEntries.emplace_back(entry);
+            memory._signalEntries.emplace_back(entry);
         }
         return memory;
     }
@@ -837,7 +837,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             memoryModeDesc = SignalDelayGenomeDescription().delay(20);
             break;
         case MemoryMode_SignalRecorder:
-            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numRecordedMemoryEntries(3);
+            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numSavedSignalEntries(3);
             break;
         case MemoryMode_SignalStorage:
             memoryModeDesc = SignalStorageGenomeDescription();
@@ -850,11 +850,11 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         }
         auto memory = MemoryGenomeDescription().mode(memoryModeDesc);
         for (int i = 0; i < 5; ++i) {
-            MemoryEntryGenomeDescription entry;
+            SignalEntryGenomeDescription entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
                 entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
             }
-            memory._memoryEntries.emplace_back(entry);
+            memory._signalEntries.emplace_back(entry);
         }
         return memory;
     }

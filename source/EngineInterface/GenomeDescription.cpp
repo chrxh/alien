@@ -86,7 +86,7 @@ AttackerMode AttackerGenomeDescription::getMode() const
     CHECK(false);
 }
 
-MemoryEntryGenomeDescription::MemoryEntryGenomeDescription()
+SignalEntryGenomeDescription::SignalEntryGenomeDescription()
 {
     _channels.resize(MAX_CHANNELS, 0);
 }

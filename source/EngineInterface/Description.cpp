@@ -74,7 +74,7 @@ ReconnectorMode ReconnectorDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
-MemoryEntryDescription::MemoryEntryDescription()
+SignalEntryDescription::SignalEntryDescription()
 {
     _channels.resize(MAX_CHANNELS, 0);
 }

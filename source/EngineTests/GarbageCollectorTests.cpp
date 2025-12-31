@@ -67,15 +67,15 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
 
     // Create a genome with memory cell type nodes that have memory entries
     auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({
-        NodeDescription().cellType(MemoryGenomeDescription().memoryEntries({MemoryEntryGenomeDescription()})),
+        NodeDescription().cellType(MemoryGenomeDescription().signalEntries({SignalEntryGenomeDescription()})),
         NodeDescription().cellType(
-            MemoryGenomeDescription().memoryEntries({MemoryEntryGenomeDescription(), MemoryEntryGenomeDescription(), MemoryEntryGenomeDescription()})),
+            MemoryGenomeDescription().signalEntries({SignalEntryGenomeDescription(), SignalEntryGenomeDescription(), SignalEntryGenomeDescription()})),
     })});
 
     auto data = Description().addCreature(
         CreatureDescription().cells({
-            CellDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().memoryEntries({MemoryEntryDescription()})),
-            CellDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().memoryEntries({MemoryEntryDescription(), MemoryEntryDescription()})),
+            CellDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription()})),
+            CellDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()})),
         }),
         genome);
     _simulationFacade->setSimulationData(data);

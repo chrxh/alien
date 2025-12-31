@@ -235,23 +235,23 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 break;
             case CellTypeGenome_Memory:
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
-                node.cellTypeData.memory.numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
+                node.cellTypeData.memory.numSignalEntries = nodeTO.cellTypeData.memory.numSignalEntries;
                 if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                     node.cellTypeData.memory.modeData.signalDelay.delay = nodeTO.cellTypeData.memory.modeData.signalDelay.delay;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
-                    node.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
+                    node.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                     node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
                 }
-                auto const& numMemoryEntries = nodeTO.cellTypeData.memory.numMemoryEntries;
-                auto memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntryGenome>(numMemoryEntries);
-                node.cellTypeData.memory.memoryEntries = memoryEntries;
-                auto const& entriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.memoryEntriesDataIndex);
-                for (int k = 0; k < numMemoryEntries; ++k) {
+                auto const& numSignalEntries = nodeTO.cellTypeData.memory.numSignalEntries;
+                auto signalEntries = _data->objects.heap.getTypedSubArray<SignalEntryGenome>(numSignalEntries);
+                node.cellTypeData.memory.signalEntries = signalEntries;
+                auto const& entriesTO = reinterpret_cast<SignalEntryGenomeTO*>(to.heap + nodeTO.cellTypeData.memory.signalEntriesDataIndex);
+                for (int k = 0; k < numSignalEntries; ++k) {
                     for (int l = 0; l < MAX_CHANNELS; ++l) {
-                        memoryEntries[k].channels[l] = entriesTO[k].channels[l];
+                        signalEntries[k].channels[l] = entriesTO[k].channels[l];
                     }
                 }
                 break;
@@ -479,25 +479,25 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     } break;
     case CellType_Memory: {
         cell->cellTypeData.memory.mode = cellTO.cellTypeData.memory.mode;
-        cell->cellTypeData.memory.numMemoryEntries = cellTO.cellTypeData.memory.numMemoryEntries;
+        cell->cellTypeData.memory.numSignalEntries = cellTO.cellTypeData.memory.numSignalEntries;
         if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
             cell->cellTypeData.memory.modeData.signalDelay.delay = cellTO.cellTypeData.memory.modeData.signalDelay.delay;
-            cell->cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized = cellTO.cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized;
+            cell->cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = cellTO.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
             cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
             cell->cellTypeData.memory.modeData.signalRecorder.readOnly = cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
             cell->cellTypeData.memory.modeData.signalRecorder.state = cellTO.cellTypeData.memory.modeData.signalRecorder.state;
-            cell->cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numRecordedMemoryEntries;
-            cell->cellTypeData.memory.modeData.signalRecorder.currentReadIndex = cellTO.cellTypeData.memory.modeData.signalRecorder.currentReadIndex;
+            cell->cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries;
+            cell->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
             cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
         }
         copyDataToHeap(
-            sizeof(MemoryEntryTO) * cellTO.cellTypeData.memory.numMemoryEntries,
-            cellTO.cellTypeData.memory.memoryEntriesDataIndex,
+            sizeof(SignalEntryTO) * cellTO.cellTypeData.memory.numSignalEntries,
+            cellTO.cellTypeData.memory.signalEntriesDataIndex,
             to.heap,
-            reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries));
+            reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.signalEntries));
     } break;
     }
 }
@@ -846,24 +846,24 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto const& nodeMemory = node->cellTypeData.memory;
         auto& memory = cell->cellTypeData.memory;
         memory.mode = nodeMemory.mode;
-        memory.numMemoryEntries = nodeMemory.numMemoryEntries;
+        memory.numSignalEntries = nodeMemory.numSignalEntries;
         if (nodeMemory.mode == MemoryMode_SignalDelay) {
             memory.modeData.signalDelay.delay = nodeMemory.modeData.signalDelay.delay;
-            memory.modeData.signalDelay.numMemoryEntriesInitialized = 0;
+            memory.modeData.signalDelay.numSignalEntriesInitialized = 0;
             memory.modeData.signalDelay.ringBufferIndex = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalRecorder) {
             memory.modeData.signalRecorder.readOnly = nodeMemory.modeData.signalRecorder.readOnly;
             memory.modeData.signalRecorder.state = SignalRecorderState_Idle;
-            memory.modeData.signalRecorder.numRecordedMemoryEntries = nodeMemory.modeData.signalRecorder.numRecordedMemoryEntries;
-            memory.modeData.signalRecorder.currentReadIndex = 0;
+            memory.modeData.signalRecorder.numSavedSignalEntries = nodeMemory.modeData.signalRecorder.numSavedSignalEntries;
+            memory.modeData.signalRecorder.numReadSignalEntries = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
         } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
             memory.modeData.signalIntegrator.newSignalWeight = nodeMemory.modeData.signalIntegrator.newSignalWeight;
         }
-        memory.memoryEntries = _data->objects.heap.getTypedSubArray<MemoryEntry>(nodeMemory.numMemoryEntries);
-        for (int i = 0, j = nodeMemory.numMemoryEntries; i < j; ++i) {
+        memory.signalEntries = _data->objects.heap.getTypedSubArray<SignalEntry>(nodeMemory.numSignalEntries);
+        for (int i = 0, j = nodeMemory.numSignalEntries; i < j; ++i) {
             for (int k = 0; k < MAX_CHANNELS; ++k) {
-                memory.memoryEntries[i].channels[k] = nodeMemory.memoryEntries[i].channels[k];
+                memory.signalEntries[i].channels[k] = nodeMemory.signalEntries[i].channels[k];
             }
         }
     } break;
