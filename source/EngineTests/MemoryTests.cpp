@@ -511,3 +511,193 @@ TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
     EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);  // Reading completes with only 1 entry
     EXPECT_TRUE(approxCompare(storedSignal, memoryCell._signal._channels));
 }
+
+//******************
+//* SignalStorage *
+//******************
+
+TEST_F(MemoryTests, signalStorage_readWithPositiveInput_readsFromIndex)
+{
+    // Setup: memory with 3 entries, positive channel[0] with value 0.5 should read from index 1
+    std::vector<float> entry0 = {0.1f, 0.1f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry2 = {0.9f, 0.9f, 0.9f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should read from index 1
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+        SignalEntryDescription().channels(entry2),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(false), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    // With channel[0] = 0.5, index = 0.5 * (3 - 1) = 1
+    EXPECT_TRUE(approxCompare(entry1, memoryCell._signal._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_readWithZeroInput_readsFromIndex0)
+{
+    // Setup: channel[0] = 0 should read from index 0
+    std::vector<float> entry0 = {0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should read from index 0
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(false), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    EXPECT_TRUE(approxCompare(entry0, memoryCell._signal._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_readWithMaxInput_readsFromLastIndex)
+{
+    // Setup: channel[0] = 1.0 should read from last index
+    std::vector<float> entry0 = {0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry2 = {0.9f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should read from index 2
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+        SignalEntryDescription().channels(entry2),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(false), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    // With channel[0] = 1.0, index = 1.0 * (3 - 1) = 2
+    EXPECT_TRUE(approxCompare(entry2, memoryCell._signal._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_writeWithNegativeInput_writesToIndex)
+{
+    // Setup: channel[0] = -0.5 should write to index 1
+    std::vector<float> entry0 = {0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry2 = {0.9f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {-0.5f, 0.7f, 0.8f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should write to index 1
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+        SignalEntryDescription().channels(entry2),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(false), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
+
+    // Entry at index 1 should now contain the input signal
+    EXPECT_TRUE(approxCompare(inputSignal, memoryDesc._signalEntries[1]._channels));
+    // Other entries should be unchanged
+    EXPECT_TRUE(approxCompare(entry0, memoryDesc._signalEntries[0]._channels));
+    EXPECT_TRUE(approxCompare(entry2, memoryDesc._signalEntries[2]._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_readOnly_readsWithPositiveInput)
+{
+    // In read-only mode, positive input should still read
+    std::vector<float> entry0 = {0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should read from index 0.5 * 1 = 0
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(true), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    // With 2 entries and input 0.5, index = 0.5 * (2 - 1) = 0.5 -> 0
+    EXPECT_TRUE(approxCompare(entry0, memoryCell._signal._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_readOnly_readsWithNegativeInput)
+{
+    // In read-only mode, negative input should also read (not write)
+    std::vector<float> entry0 = {0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Negative, should still read
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(true), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
+
+    // With input = -1.0 and readOnly = true, index = abs(-1.0) * (2 - 1) = 1
+    EXPECT_TRUE(approxCompare(entry1, memoryCell._signal._channels));
+
+    // Memory should be unchanged (no write occurred)
+    EXPECT_TRUE(approxCompare(entry0, memoryDesc._signalEntries[0]._channels));
+    EXPECT_TRUE(approxCompare(entry1, memoryDesc._signalEntries[1]._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_singleEntry_alwaysAccessesIndex0)
+{
+    // With a single entry, any input should access index 0
+    std::vector<float> entry0 = {0.5f, 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {0.8f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(false), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    // With 1 entry, index = 0.8 * (1 - 1) = 0
+    EXPECT_TRUE(approxCompare(entry0, memoryCell._signal._channels));
+}
+
+TEST_F(MemoryTests, signalStorage_writeWithMaxNegativeInput_writesToLastIndex)
+{
+    // channel[0] = -1.0 should write to last index
+    std::vector<float> entry0 = {0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> entry1 = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> inputSignal = {-1.0f, 0.9f, 0.8f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should write to index 1
+    std::vector<SignalEntryDescription> signalEntries = {
+        SignalEntryDescription().channels(entry0),
+        SignalEntryDescription().channels(entry1),
+    };
+    auto data = createMemoryCellWithIncomingSignal(SignalStorageDescription().readOnly(false), inputSignal, signalEntries);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto memoryCell = actualData.getCellRef(1);
+    auto& memoryDesc = std::get<MemoryDescription>(memoryCell._cellType);
+
+    // Entry at index 1 should now contain the input signal
+    EXPECT_TRUE(approxCompare(inputSignal, memoryDesc._signalEntries[1]._channels));
+    // Entry at index 0 should be unchanged
+    EXPECT_TRUE(approxCompare(entry0, memoryDesc._signalEntries[0]._channels));
+}

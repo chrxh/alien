@@ -596,6 +596,10 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
                 AlienGui::EndIndent();
             } else if (mode == MemoryMode_SignalStorage) {
+                AlienGui::BeginIndent();
+                auto& signalStorage = std::get<SignalStorageGenomeDescription>(memory._mode);
+                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalStorage._readOnly);
+                AlienGui::EndIndent();
             } else if (mode == MemoryMode_SignalIntegrator) {
                 AlienGui::BeginIndent();
                 auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);

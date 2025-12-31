@@ -520,6 +520,11 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             }
         } break;
         case MemoryMode_SignalStorage: {
+            auto const& signalStorage = std::get<SignalStorageDescription>(memory._mode);
+            auto const& nodeSignalStorage = std::get<SignalStorageGenomeDescription>(nodeMemory._mode);
+            if (signalStorage._readOnly != nodeSignalStorage._readOnly) {
+                return false;
+            }
         } break;
         case MemoryMode_SignalIntegrator: {
             auto const& signalIntegrator = std::get<SignalIntegratorDescription>(memory._mode);
@@ -701,7 +706,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             memoryModeDesc = SignalRecorderDescription().readOnly(false).state(SignalRecorderState_Recording).numWrittenSignalEntries(3).numReadSignalEntries(1);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageDescription();
+            memoryModeDesc = SignalStorageDescription().readOnly(false);
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);
@@ -840,7 +845,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numWrittenSignalEntries(3);
             break;
         case MemoryMode_SignalStorage:
-            memoryModeDesc = SignalStorageGenomeDescription();
+            memoryModeDesc = SignalStorageGenomeDescription().readOnly(false);
             break;
         case MemoryMode_SignalIntegrator:
             memoryModeDesc = SignalIntegratorGenomeDescription().newSignalWeight(0.8f);

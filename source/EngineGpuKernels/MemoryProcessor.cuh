@@ -18,6 +18,7 @@ private:
     __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 };
 
 /************************************************************************/
@@ -45,6 +46,8 @@ __device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, Si
         processIntegrator(data, statistics, cell);
     } else if (mode == MemoryMode_SignalRecorder) {
         processSignalRecorder(data, statistics, cell);
+    } else if (mode == MemoryMode_SignalStorage) {
+        processSignalStorage(data, statistics, cell);
     }
 }
 
@@ -178,6 +181,47 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
         if (numReadSignalEntries >= numWrittenSignalEntries) {
             numReadSignalEntries = 0;
             state = SignalRecorderState_Idle;
+        }
+    }
+}
+
+__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+{
+    auto& memory = cell->cellTypeData.memory;
+    auto& signalStorage = memory.modeData.signalStorage;
+
+    if (memory.numSignalEntries == 0) {
+        return;
+    }
+
+    auto const& inputValue = cell->signal.channels[Channels::MemoryReadWriteAction];
+    auto const numSignalEntries = static_cast<int>(memory.numSignalEntries);
+
+    // Calculate the index based on |channel[0]| * (numSignalEntries - 1)
+    auto absInput = abs(inputValue);
+    auto index = static_cast<int>(absInput * static_cast<float>(numSignalEntries - 1));
+
+    // Clamp index between 0 and numSignalEntries - 1
+    if (index < 0) {
+        index = 0;
+    } else if (index >= numSignalEntries) {
+        index = numSignalEntries - 1;
+    }
+
+    if (signalStorage.readOnly) {
+        // In readonly mode, always read regardless of sign
+        for (int k = 0; k < MAX_CHANNELS; ++k) {
+            cell->signal.channels[k] = memory.signalEntries[index].channels[k];
+        }
+    } else if (inputValue >= 0) {
+        // Read mode: channel[0] >= 0
+        for (int k = 0; k < MAX_CHANNELS; ++k) {
+            cell->signal.channels[k] = memory.signalEntries[index].channels[k];
+        }
+    } else {
+        // Write mode: channel[0] < 0
+        for (int k = 0; k < MAX_CHANNELS; ++k) {
+            memory.signalEntries[index].channels[k] = cell->signal.channels[k];
         }
     }
 }

@@ -242,6 +242,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.memory.modeData.signalRecorder.readOnly = nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly;
                     node.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = nodeTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                    node.cellTypeData.memory.modeData.signalStorage.readOnly = nodeTO.cellTypeData.memory.modeData.signalStorage.readOnly;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                     node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
                 }
@@ -490,6 +491,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
             cell->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = cellTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+            cell->cellTypeData.memory.modeData.signalStorage.readOnly = cellTO.cellTypeData.memory.modeData.signalStorage.readOnly;
         } else if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
             cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight = cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
         }
@@ -857,6 +859,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             memory.modeData.signalRecorder.numWrittenSignalEntries = nodeMemory.modeData.signalRecorder.numWrittenSignalEntries;
             memory.modeData.signalRecorder.numReadSignalEntries = 0;
         } else if (nodeMemory.mode == MemoryMode_SignalStorage) {
+            memory.modeData.signalStorage.readOnly = nodeMemory.modeData.signalStorage.readOnly;
         } else if (nodeMemory.mode == MemoryMode_SignalIntegrator) {
             memory.modeData.signalIntegrator.newSignalWeight = nodeMemory.modeData.signalIntegrator.newSignalWeight;
         }

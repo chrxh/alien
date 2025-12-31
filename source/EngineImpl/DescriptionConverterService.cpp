@@ -538,6 +538,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             memory._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageDescription signalStorage;
+            signalStorage._readOnly = memoryTO.modeData.signalStorage.readOnly;
             memory._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorDescription signalIntegrator;
@@ -776,6 +777,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             memoryDesc._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageGenomeDescription signalStorage;
+            signalStorage._readOnly = memoryTO.modeData.signalStorage.readOnly;
             memoryDesc._mode = signalStorage;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             SignalIntegratorGenomeDescription signalIntegrator;
@@ -1069,6 +1071,8 @@ void DescriptionConverterService::convertGenomeToTO(
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
                     memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc._numWrittenSignalEntries;
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+                    auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalStorage.readOnly = signalStorageDesc._readOnly;
                 } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
                     auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
@@ -1350,6 +1354,8 @@ void DescriptionConverterService::convertCellToTO(
             memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc.numWrittenSignalEntries;
             memoryTO.modeData.signalRecorder.numReadSignalEntries = signalRecorderDesc._numReadSignalEntries;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalStorage.readOnly = signalStorageDesc._readOnly;
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
             memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;

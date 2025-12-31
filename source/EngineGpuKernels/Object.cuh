@@ -331,6 +331,7 @@ struct SignalRecorder
 
 struct SignalStorage
 {
+    bool readOnly;
 };
 
 struct SignalIntegrator

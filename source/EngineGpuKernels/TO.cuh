@@ -304,6 +304,7 @@ struct SignalRecorderTO
 
 struct SignalStorageTO
 {
+    bool readOnly;
 };
 
 struct SignalIntegratorTO

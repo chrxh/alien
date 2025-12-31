@@ -380,6 +380,8 @@ struct SignalRecorderDescription
 struct SignalStorageDescription
 {
     auto operator<=>(SignalStorageDescription const&) const = default;
+
+    MEMBER(SignalStorageDescription, bool, readOnly, true);
 };
 
 struct SignalIntegratorDescription
