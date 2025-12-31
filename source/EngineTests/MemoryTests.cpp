@@ -615,7 +615,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithPositiveInput)
     // In read-only mode, positive input should still read
     std::vector<float> entry0 = {0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> entry1 = {0.5f, 0.6f, 0.7f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-    std::vector<float> inputSignal = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};  // Should read from index 0.5 * 1 = 0
+    std::vector<float> inputSignal = {0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries = {
         SignalEntryDescription().channels(entry0),
         SignalEntryDescription().channels(entry1),
@@ -627,7 +627,7 @@ TEST_F(MemoryTests, signalStorage_readOnly_readsWithPositiveInput)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto memoryCell = actualData.getCellRef(1);
-    // With 2 entries and input 0.5, index = 0.5 * (2 - 1) = 0.5 -> 0
+    // With 2 entries and input 0.5, index = static_cast<int>(0.5 * (2 - 1)) = static_cast<int>(0.5) = 0
     EXPECT_TRUE(approxCompare(entry0, memoryCell._signal._channels));
 }
 
