@@ -300,7 +300,7 @@ struct SignalRecorderGenomeDescription
     auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
 
     MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
-    MEMBER(SignalRecorderGenomeDescription, int, numSavedSignalEntries, 0);
+    MEMBER(SignalRecorderGenomeDescription, int, numWrittenSignalEntries, 0);
 };
 
 struct SignalStorageGenomeDescription

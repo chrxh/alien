@@ -333,7 +333,7 @@ TEST_F(MemoryTests, signalRecorder_positiveChannel0_startsRecording)
 
     // Should be in recording state with 1 entry recorded
     EXPECT_EQ(SignalRecorderState_Recording, signalRecorder._state);
-    EXPECT_EQ(1, signalRecorder._numSavedSignalEntries);
+    EXPECT_EQ(1, signalRecorder._numWrittenSignalEntries);
     EXPECT_TRUE(approxCompare(signal, memoryDesc._signalEntries[0]._channels));
 }
 
@@ -361,7 +361,7 @@ TEST_F(MemoryTests, signalRecorder_recordingCompletes_whenMemoryFull)
 
     // Recording should be complete, back to idle
     EXPECT_EQ(SignalRecorderState_Idle, signalRecorder._state);
-    EXPECT_EQ(2, signalRecorder._numSavedSignalEntries);
+    EXPECT_EQ(2, signalRecorder._numWrittenSignalEntries);
     EXPECT_TRUE(approxCompare(signal1, memoryDesc._signalEntries[0]._channels));
     EXPECT_TRUE(approxCompare(signal2, memoryDesc._signalEntries[1]._channels));
 }
@@ -376,7 +376,7 @@ TEST_F(MemoryTests, signalRecorder_negativeChannel0_startsReading)
         SignalEntryDescription().channels({0.1f, 0.2f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}),
     };
     auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(false).numSavedSignalEntries(2), triggerSignal, signalEntries);
+        SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -403,7 +403,7 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
         SignalEntryDescription().channels(storedSignal2),
     };
     auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(false).numSavedSignalEntries(2), triggerSignal, signalEntries);
+        SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(2), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(3);
@@ -427,12 +427,12 @@ TEST_F(MemoryTests, signalRecorder_readingCompletes_resetsToIdle)
 
 TEST_F(MemoryTests, signalRecorder_initialRecordedEntries_canBeRead)
 {
-    // Test that memory cell with numSavedSignalEntries > 0 can be read immediately
+    // Test that memory cell with numWrittenSignalEntries > 0 can be read immediately
     std::vector<float> storedSignal = {0.75f, 0.5f, 0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries = {SignalEntryDescription().channels(storedSignal)};
     auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(false).numSavedSignalEntries(1), triggerSignal, signalEntries);
+        SignalRecorderDescription().readOnly(false).numWrittenSignalEntries(1), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -467,7 +467,7 @@ TEST_F(MemoryTests, signalRecorder_stateTransition_ignoresChannel0DuringProcess)
 
     // Should still be recording, with 2 entries recorded (including the negative signal)
     EXPECT_EQ(SignalRecorderState_Recording, signalRecorder._state);
-    EXPECT_EQ(2, signalRecorder._numSavedSignalEntries);
+    EXPECT_EQ(2, signalRecorder._numWrittenSignalEntries);
 }
 
 TEST_F(MemoryTests, signalRecorder_readOnly_readingInsteadOfRecording)
@@ -475,7 +475,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_readingInsteadOfRecording)
     // Setup: memory with readOnly = true, positive channel[0] should NOT start recording
     std::vector<float> signal = {1.0f, 0.5f, -0.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries(3);
-    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(true).numSavedSignalEntries(3), signal, signalEntries);
+    auto data = createMemoryCellWithIncomingSignal(SignalRecorderDescription().readOnly(true).numWrittenSignalEntries(3), signal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -487,7 +487,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_readingInsteadOfRecording)
 
     // Should remain in idle state because readOnly prevents recording
     EXPECT_EQ(SignalRecorderState_Reading, signalRecorder._state);
-    EXPECT_EQ(3, signalRecorder._numSavedSignalEntries);
+    EXPECT_EQ(3, signalRecorder._numWrittenSignalEntries);
 }
 
 TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
@@ -497,7 +497,7 @@ TEST_F(MemoryTests, signalRecorder_readOnly_allowsReading)
     std::vector<float> triggerSignal = {-1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<SignalEntryDescription> signalEntries = {SignalEntryDescription().channels(storedSignal)};
     auto data = createMemoryCellWithIncomingSignal(
-        SignalRecorderDescription().readOnly(true).numSavedSignalEntries(1), triggerSignal, signalEntries);
+        SignalRecorderDescription().readOnly(true).numWrittenSignalEntries(1), triggerSignal, signalEntries);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

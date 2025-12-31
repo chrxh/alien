@@ -206,7 +206,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                     signalDelay._delay = std::clamp(signalDelay._delay, 0, MAX_CELL_MEMORY_ENTRIES);
                 } else if (memoryMode == MemoryMode_SignalRecorder) {
                     auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
-                    signalRecorder._numSavedSignalEntries = std::clamp(signalRecorder._numSavedSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
+                    signalRecorder._numWrittenSignalEntries = std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
                 } else if (memoryMode == MemoryMode_SignalStorage) {
                 } else if (memoryMode == MemoryMode_SignalIntegrator) {
                     auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);

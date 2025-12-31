@@ -325,7 +325,7 @@ struct SignalRecorder
 {
     bool readOnly;
     SignalRecorderState state;
-    uint8_t numSavedSignalEntries;
+    uint8_t numWrittenSignalEntries;
     uint8_t numReadSignalEntries;
 };
 

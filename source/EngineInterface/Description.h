@@ -373,7 +373,7 @@ struct SignalRecorderDescription
 
     MEMBER(SignalRecorderDescription, bool, readOnly, true);
     MEMBER(SignalRecorderDescription, SignalRecorderState, state, SignalRecorderState_Idle);
-    MEMBER(SignalRecorderDescription, int, numSavedSignalEntries, 0);
+    MEMBER(SignalRecorderDescription, int, numWrittenSignalEntries, 0);
     MEMBER(SignalRecorderDescription, int, numReadSignalEntries, 0);
 };
 

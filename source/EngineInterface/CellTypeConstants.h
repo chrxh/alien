@@ -340,6 +340,11 @@ namespace Channels
 //********************
 //* Memory constants *
 //********************
+namespace Channels
+{
+    auto constexpr MemoryReadWriteAction = 0;
+}
+
 using MemoryMode = int;
 enum MemoryMode_
 {

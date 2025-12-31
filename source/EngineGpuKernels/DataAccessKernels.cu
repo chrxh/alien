@@ -186,7 +186,7 @@ namespace
                             nodeTO.cellTypeData.memory.modeData.signalDelay.delay = node.cellTypeData.memory.modeData.signalDelay.delay;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
-                            nodeTO.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries = node.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries;
+                            nodeTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = node.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                             nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
@@ -433,7 +433,7 @@ namespace
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.state = cell->cellTypeData.memory.modeData.signalRecorder.state;
-                cellTO.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries;
+                cellTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
