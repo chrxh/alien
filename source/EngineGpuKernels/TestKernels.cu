@@ -124,9 +124,9 @@ namespace
                                     for (int nodeIdx = 0; nodeIdx < gene.numNodes; ++nodeIdx) {
                                         auto& node = gene.nodes[nodeIdx];
                                         if (node.cellType == CellTypeGenome_Memory) {
-                                            if (node.cellTypeData.memory.numMemoryEntries > 0) {
-                                                auto memoryEntries = node.cellTypeData.memory.memoryEntries;
-                                                if (!isPointerValid(data, memoryEntries)) {
+                                            if (node.cellTypeData.memory.numSignalEntries > 0) {
+                                                auto signalEntries = node.cellTypeData.memory.signalEntries;
+                                                if (!isPointerValid(data, signalEntries)) {
                                                     return false;
                                                 }
                                             }
@@ -158,9 +158,9 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
                 }
 
                 if (cell->cellType == CellType_Memory) {
-                    if (cell->cellTypeData.memory.numMemoryEntries > 0) {
-                        auto memoryEntries = cell->cellTypeData.memory.memoryEntries;
-                        *result &= isPointerValid(data, memoryEntries);
+                    if (cell->cellTypeData.memory.numSignalEntries > 0) {
+                        auto signalEntries = cell->cellTypeData.memory.signalEntries;
+                        *result &= isPointerValid(data, signalEntries);
                     }
                 }
 

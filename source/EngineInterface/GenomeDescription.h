@@ -280,6 +280,14 @@ struct DigestorGenomeDescription
     }
 };
 
+struct SignalEntryGenomeDescription
+{
+    SignalEntryGenomeDescription();
+    auto operator<=>(SignalEntryGenomeDescription const&) const = default;
+
+    MEMBER(SignalEntryGenomeDescription, std::vector<float>, channels, {});
+};
+
 struct SignalDelayGenomeDescription
 {
     auto operator<=>(SignalDelayGenomeDescription const&) const = default;
@@ -292,6 +300,7 @@ struct SignalRecorderGenomeDescription
     auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
 
     MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderGenomeDescription, int, numSavedSignalEntries, 0);
 };
 
 struct SignalStorageGenomeDescription
@@ -308,20 +317,12 @@ struct SignalIntegratorGenomeDescription
 
 using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>;
 
-struct MemoryEntryGenomeDescription
-{
-    MemoryEntryGenomeDescription();
-    auto operator<=>(MemoryEntryGenomeDescription const&) const = default;
-
-    MEMBER(MemoryEntryGenomeDescription, std::vector<float>, channels, {});
-};
-
 struct MemoryGenomeDescription
 {
     auto operator<=>(MemoryGenomeDescription const&) const = default;
 
     MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());
-    MEMBER(MemoryGenomeDescription, std::vector<MemoryEntryGenomeDescription>, memoryEntries, {});
+    MEMBER(MemoryGenomeDescription, std::vector<SignalEntryGenomeDescription>, signalEntries, {});
 
     MemoryMode getMode() const;
 };

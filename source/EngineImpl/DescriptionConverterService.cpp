@@ -526,12 +526,15 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             SignalDelayDescription signalDelay;
             signalDelay._delay = memoryTO.modeData.signalDelay.delay;
-            signalDelay._numMemoryEntriesInitialized = memoryTO.modeData.signalDelay.numMemoryEntriesInitialized;
+            signalDelay._numSignalEntriesInitialized = memoryTO.modeData.signalDelay.numSignalEntriesInitialized;
             signalDelay._ringBufferIndex = memoryTO.modeData.signalDelay.ringBufferIndex;
             memory._mode = signalDelay;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderDescription signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._state = memoryTO.modeData.signalRecorder.state;
+            signalRecorder._numSavedSignalEntries = memoryTO.modeData.signalRecorder.numSavedSignalEntries;
+            signalRecorder._numReadSignalEntries = memoryTO.modeData.signalRecorder.numReadSignalEntries;
             memory._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageDescription signalStorage;
@@ -541,8 +544,8 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memory._mode = signalIntegrator;
         }
-        auto const& memoryEntriesTO = getFromHeap<MemoryEntryTO>(to.heap, memoryTO.memoryEntriesDataIndex);
-        copyMemoryEntriesToDescription(memory._memoryEntries, memoryEntriesTO, memoryTO.numMemoryEntries);
+        auto const& signalEntriesTO = getFromHeap<SignalEntryTO>(to.heap, memoryTO.signalEntriesDataIndex);
+        copyMemoryEntriesToDescription(memory._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         result._cellType = memory;
     } break;
     }
@@ -769,6 +772,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             SignalRecorderGenomeDescription signalRecorder;
             signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._numSavedSignalEntries = memoryTO.modeData.signalRecorder.numSavedSignalEntries;
             memoryDesc._mode = signalRecorder;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             SignalStorageGenomeDescription signalStorage;
@@ -778,8 +782,8 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memoryDesc._mode = signalIntegrator;
         }
-        auto const& memoryEntriesTO = getFromHeap<MemoryEntryGenomeTO>(to.heap, memoryTO.memoryEntriesDataIndex);
-        copyMemoryEntriesToDescription(memoryDesc._memoryEntries, memoryEntriesTO, memoryTO.numMemoryEntries);
+        auto const& signalEntriesTO = getFromHeap<SignalEntryGenomeTO>(to.heap, memoryTO.signalEntriesDataIndex);
+        copyMemoryEntriesToDescription(memoryDesc._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         nodeDesc._cellType = memoryDesc;
     } break;
     }
@@ -1063,16 +1067,17 @@ void DescriptionConverterService::convertGenomeToTO(
                 } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
                     auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+                    memoryTO.modeData.signalRecorder.numSavedSignalEntries = signalRecorderDesc._numSavedSignalEntries;
                 } else if (memoryTO.mode == MemoryMode_SignalStorage) {
                 } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
                     auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
                 }
-                memoryTO.numMemoryEntries = toInt(memoryDesc._memoryEntries.size());
-                memoryTO.memoryEntriesDataIndex = heap.size();
-                heap.resize(heap.size() + sizeof(MemoryEntryGenomeTO) * memoryTO.numMemoryEntries);
-                auto memoryEntriesTO = reinterpret_cast<MemoryEntryGenomeTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
-                copyMemoryEntriesToTO(memoryEntriesTO, memoryDesc._memoryEntries);
+                memoryTO.numSignalEntries = toInt(memoryDesc._signalEntries.size());
+                memoryTO.signalEntriesDataIndex = heap.size();
+                heap.resize(heap.size() + sizeof(SignalEntryGenomeTO) * memoryTO.numSignalEntries);
+                auto signalEntriesTO = reinterpret_cast<SignalEntryGenomeTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
+                copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
             } break;
             }
         }
@@ -1336,22 +1341,24 @@ void DescriptionConverterService::convertCellToTO(
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
             memoryTO.modeData.signalDelay.delay = signalDelayDesc._delay;
-            memoryTO.modeData.signalDelay.numMemoryEntriesInitialized = signalDelayDesc._numMemoryEntriesInitialized;
+            memoryTO.modeData.signalDelay.numSignalEntriesInitialized = signalDelayDesc._numSignalEntriesInitialized;
             memoryTO.modeData.signalDelay.ringBufferIndex = signalDelayDesc._ringBufferIndex;
         } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+            memoryTO.modeData.signalRecorder.state = signalRecorderDesc._state;
+            memoryTO.modeData.signalRecorder.numSavedSignalEntries = signalRecorderDesc._numSavedSignalEntries;
+            memoryTO.modeData.signalRecorder.numReadSignalEntries = signalRecorderDesc._numReadSignalEntries;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
-            auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
         } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
             auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
             memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
         }
-        memoryTO.numMemoryEntries = toInt(memoryDesc._memoryEntries.size());
-        memoryTO.memoryEntriesDataIndex = heap.size();
-        heap.resize(heap.size() + sizeof(MemoryEntryTO) * memoryTO.numMemoryEntries);
-        auto memoryEntriesTO = reinterpret_cast<MemoryEntryTO*>(heap.data() + memoryTO.memoryEntriesDataIndex);
-        copyMemoryEntriesToTO(memoryEntriesTO, memoryDesc._memoryEntries);
+        memoryTO.numSignalEntries = toInt(memoryDesc._signalEntries.size());
+        memoryTO.signalEntriesDataIndex = heap.size();
+        heap.resize(heap.size() + sizeof(SignalEntryTO) * memoryTO.numSignalEntries);
+        auto signalEntriesTO = reinterpret_cast<SignalEntryTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
+        copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

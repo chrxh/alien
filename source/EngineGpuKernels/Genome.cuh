@@ -211,6 +211,7 @@ struct SignalDelayGenome
 struct SignalRecorderGenome
 {
     bool readOnly;
+    uint8_t numSavedSignalEntries;
 };
 
 struct SignalStorageGenome
@@ -230,7 +231,7 @@ union MemoryModeDataGenome
     SignalIntegratorGenome signalIntegrator;
 };
 
-struct MemoryEntryGenome
+struct SignalEntryGenome
 {
     float channels[MAX_CHANNELS];
 };
@@ -240,8 +241,8 @@ struct MemoryGenome
     MemoryMode mode;
     MemoryModeDataGenome modeData;
 
-    uint8_t numMemoryEntries;
-    MemoryEntryGenome* memoryEntries;  // Pointer to heap memory
+    uint8_t numSignalEntries;
+    SignalEntryGenome* signalEntries;  // Pointer to heap memory
 };
 
 union CellTypeDataGenome

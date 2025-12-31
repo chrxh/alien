@@ -212,6 +212,7 @@ struct SignalDelayGenomeTO
 struct SignalRecorderGenomeTO
 {
     bool readOnly;
+    uint8_t numSavedSignalEntries;
 };
 
 struct SignalStorageGenomeTO
@@ -231,7 +232,7 @@ union MemoryModeDataGenomeTO
     SignalIntegratorGenomeTO signalIntegrator;
 };
 
-struct MemoryEntryGenomeTO
+struct SignalEntryGenomeTO
 {
     float channels[MAX_CHANNELS];
 };
@@ -241,8 +242,8 @@ struct MemoryGenomeTO
     MemoryMode mode;
     MemoryModeDataGenomeTO modeData;
 
-    uint8_t numMemoryEntries;
-    uint64_t memoryEntriesDataIndex;  // Heap index to MemoryEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
+    uint8_t numSignalEntries;
+    uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
 union CellTypeDataGenomeTO

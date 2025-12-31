@@ -317,13 +317,16 @@ struct Digestor
 struct SignalDelay
 {
     uint8_t delay;
-    uint8_t numMemoryEntriesInitialized;
+    uint8_t numSignalEntriesInitialized;
     uint8_t ringBufferIndex;
 };
 
 struct SignalRecorder
 {
     bool readOnly;
+    SignalRecorderState state;
+    uint8_t numSavedSignalEntries;
+    uint8_t numReadSignalEntries;
 };
 
 struct SignalStorage
@@ -343,7 +346,7 @@ union MemoryModeData
     SignalIntegrator signalIntegrator;
 };
 
-struct MemoryEntry
+struct SignalEntry
 {
     float channels[MAX_CHANNELS];
 };
@@ -353,8 +356,8 @@ struct Memory
     MemoryMode mode;
     MemoryModeData modeData;
 
-    uint8_t numMemoryEntries;
-    MemoryEntry* memoryEntries;  // Pointer to MemoryEntry[MAX_CELL_MEMORY_ENTRIES] in heap
+    uint8_t numSignalEntries;
+    SignalEntry* signalEntries;  // Pointer to SignalEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 
 union CellTypeData

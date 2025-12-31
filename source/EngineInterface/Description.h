@@ -350,12 +350,12 @@ struct DigestorDescription
     }
 };
 
-struct MemoryEntryDescription
+struct SignalEntryDescription
 {
-    MemoryEntryDescription();
-    auto operator<=>(MemoryEntryDescription const&) const = default;
+    SignalEntryDescription();
+    auto operator<=>(SignalEntryDescription const&) const = default;
 
-    MEMBER(MemoryEntryDescription, std::vector<float>, channels, {});
+    MEMBER(SignalEntryDescription, std::vector<float>, channels, {});
 };
 
 struct SignalDelayDescription
@@ -363,7 +363,7 @@ struct SignalDelayDescription
     auto operator<=>(SignalDelayDescription const&) const = default;
 
     MEMBER(SignalDelayDescription, int, delay, 10);
-    MEMBER(SignalDelayDescription, int, numMemoryEntriesInitialized, 0);
+    MEMBER(SignalDelayDescription, int, numSignalEntriesInitialized, 0);
     MEMBER(SignalDelayDescription, int, ringBufferIndex, 0);
 };
 
@@ -372,6 +372,9 @@ struct SignalRecorderDescription
     auto operator<=>(SignalRecorderDescription const&) const = default;
 
     MEMBER(SignalRecorderDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderDescription, SignalRecorderState, state, SignalRecorderState_Idle);
+    MEMBER(SignalRecorderDescription, int, numSavedSignalEntries, 0);
+    MEMBER(SignalRecorderDescription, int, numReadSignalEntries, 0);
 };
 
 struct SignalStorageDescription
@@ -393,7 +396,7 @@ struct MemoryDescription
     auto operator<=>(MemoryDescription const&) const = default;
 
     MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());
-    MEMBER(MemoryDescription, std::vector<MemoryEntryDescription>, memoryEntries, {});
+    MEMBER(MemoryDescription, std::vector<SignalEntryDescription>, signalEntries, {});
 
     MemoryMode getMode() const;
 };

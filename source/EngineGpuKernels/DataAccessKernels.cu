@@ -181,11 +181,12 @@ namespace
                         break;
                     case CellTypeGenome_Memory:
                         nodeTO.cellTypeData.memory.mode = node.cellTypeData.memory.mode;
-                        nodeTO.cellTypeData.memory.numMemoryEntries = node.cellTypeData.memory.numMemoryEntries;
+                        nodeTO.cellTypeData.memory.numSignalEntries = node.cellTypeData.memory.numSignalEntries;
                         if (node.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                             nodeTO.cellTypeData.memory.modeData.signalDelay.delay = node.cellTypeData.memory.modeData.signalDelay.delay;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
+                            nodeTO.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries = node.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                             nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
@@ -193,10 +194,10 @@ namespace
                         }
                         int targetSize;  // not used
                         copyDataToHeap<int>(
-                            sizeof(MemoryEntryGenome) * node.cellTypeData.memory.numMemoryEntries,
-                            reinterpret_cast<uint8_t*>(node.cellTypeData.memory.memoryEntries),
+                            sizeof(SignalEntryGenome) * node.cellTypeData.memory.numSignalEntries,
+                            reinterpret_cast<uint8_t*>(node.cellTypeData.memory.signalEntries),
                             targetSize,
-                            nodeTO.cellTypeData.memory.memoryEntriesDataIndex,
+                            nodeTO.cellTypeData.memory.signalEntriesDataIndex,
                             to);
                         break;
                     }
@@ -424,13 +425,16 @@ namespace
         } break;
         case CellType_Memory: {
             cellTO.cellTypeData.memory.mode = cell->cellTypeData.memory.mode;
-            cellTO.cellTypeData.memory.numMemoryEntries = cell->cellTypeData.memory.numMemoryEntries;
+            cellTO.cellTypeData.memory.numSignalEntries = cell->cellTypeData.memory.numSignalEntries;
             if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                 cellTO.cellTypeData.memory.modeData.signalDelay.delay = cell->cellTypeData.memory.modeData.signalDelay.delay;
-                cellTO.cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized = cell->cellTypeData.memory.modeData.signalDelay.numMemoryEntriesInitialized;
+                cellTO.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = cell->cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
                 cellTO.cellTypeData.memory.modeData.signalDelay.ringBufferIndex = cell->cellTypeData.memory.modeData.signalDelay.ringBufferIndex;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
                 cellTO.cellTypeData.memory.modeData.signalRecorder.readOnly = cell->cellTypeData.memory.modeData.signalRecorder.readOnly;
+                cellTO.cellTypeData.memory.modeData.signalRecorder.state = cell->cellTypeData.memory.modeData.signalRecorder.state;
+                cellTO.cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numSavedSignalEntries;
+                cellTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                 cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
@@ -438,10 +442,10 @@ namespace
             }
             int targetSize;  // not used
             copyDataToHeap<int>(
-                sizeof(MemoryEntry) * cell->cellTypeData.memory.numMemoryEntries,
-                reinterpret_cast<uint8_t*>(cell->cellTypeData.memory.memoryEntries),
+                sizeof(SignalEntry) * cell->cellTypeData.memory.numSignalEntries,
+                reinterpret_cast<uint8_t*>(cell->cellTypeData.memory.signalEntries),
                 targetSize,
-                cellTO.cellTypeData.memory.memoryEntriesDataIndex,
+                cellTO.cellTypeData.memory.signalEntriesDataIndex,
                 to);
         } break;
         }
@@ -1020,7 +1024,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
             heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
         }
         if (cell->cellType == CellType_Memory) {
-            heapBytes += sizeof(MemoryEntry) * cell->cellTypeData.memory.numMemoryEntries + GpuMemoryAlignmentBytes;
+            heapBytes += sizeof(SignalEntry) * cell->cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
         }
         if (cell->creature) {
             auto const& creature = cell->creature;
@@ -1035,7 +1039,7 @@ __global__ void cudaEstimateCapacityNeededForTO_step2(SimulationData data, Array
                         for (int k = 0; k < gene.numNodes; ++k) {
                             auto& node = gene.nodes[k];
                             if (node.cellType == CellTypeGenome_Memory) {
-                                heapBytes += sizeof(MemoryEntryGenome) * node.cellTypeData.memory.numMemoryEntries + GpuMemoryAlignmentBytes;
+                                heapBytes += sizeof(SignalEntryGenome) * node.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
                             }
                         }
                     }
@@ -1072,7 +1076,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
                 heapBytes += sizeof(NeuralNetwork) + GpuMemoryAlignmentBytes;
             }
             if (cellTO.cellType == CellType_Memory) {
-                heapBytes += sizeof(MemoryEntry) * cellTO.cellTypeData.memory.numMemoryEntries + GpuMemoryAlignmentBytes;
+                heapBytes += sizeof(SignalEntry) * cellTO.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
             }
         }
         alienAtomicAdd64(&arraySizes->heap, heapBytes);
@@ -1084,7 +1088,7 @@ __global__ void cudaEstimateCapacityNeededForGpu(TO to, ArraySizesForGpu* arrayS
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& nodeTO = to.nodes[index];
             if (nodeTO.cellType == CellTypeGenome_Memory) {
-                heapBytes += sizeof(MemoryEntryGenome) * nodeTO.cellTypeData.memory.numMemoryEntries + GpuMemoryAlignmentBytes;
+                heapBytes += sizeof(SignalEntryGenome) * nodeTO.cellTypeData.memory.numSignalEntries + GpuMemoryAlignmentBytes;
             }
         }
         alienAtomicAdd64(&arraySizes->heap, heapBytes);

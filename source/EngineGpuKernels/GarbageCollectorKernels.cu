@@ -89,8 +89,8 @@ __global__ void cudaCleanupDependentCellData(Array<Cell*> cells, Heap newHeap)
         }
         if (cell->cellType == CellType_Memory) {
             copyAndAssignNewHeapData(
-                reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.memoryEntries),
-                sizeof(MemoryEntry) * cell->cellTypeData.memory.numMemoryEntries,
+                reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.signalEntries),
+                sizeof(SignalEntry) * cell->cellTypeData.memory.numSignalEntries,
                 newHeap);
         }
     }
@@ -182,9 +182,9 @@ __global__ void cudaCleanupGenomesStep1(Array<Cell*> cells, Heap newHeap)
                         // Copy dependent node data for memory cell type
                         if (node->cellType == CellTypeGenome_Memory) {
                             copyAndAssignNewHeapData(
-                                reinterpret_cast<uint8_t*&>(newNode->cellTypeData.memory.memoryEntries),
-                                reinterpret_cast<uint8_t*&>(node->cellTypeData.memory.memoryEntries),
-                                sizeof(MemoryEntryGenome) * newNode->cellTypeData.memory.numMemoryEntries,
+                                reinterpret_cast<uint8_t*&>(newNode->cellTypeData.memory.signalEntries),
+                                reinterpret_cast<uint8_t*&>(node->cellTypeData.memory.signalEntries),
+                                sizeof(SignalEntryGenome) * newNode->cellTypeData.memory.numSignalEntries,
                                 newHeap);
                         }
                     }
