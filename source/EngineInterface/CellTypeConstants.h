@@ -122,7 +122,6 @@ namespace Channels
     auto constexpr SensorAngle = 1;
     auto constexpr SensorDensity = 2;
     auto constexpr SensorDistance = 3;
-    auto constexpr SensorNumCells = 4;
     auto constexpr SensorTelemetryCellEnergy = 1;
     auto constexpr SensorTelemetryCellVelAngle = 2;
     auto constexpr SensorTelemetryCellVelStrength = 3;
