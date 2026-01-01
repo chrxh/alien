@@ -1,6 +1,7 @@
 #include "AlienGui.h"
 
 #include <chrono>
+#include <ranges>
 
 #include <boost/algorithm/string.hpp>
 
@@ -33,6 +34,8 @@ std::vector<ImGuiID> AlienGui::_treeNodeIdStack;
 std::unordered_map<unsigned int, TreeNodeInfo> AlienGui::_treeNodeInfoById;
 std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedInput;
 std::unordered_map<unsigned int, int> AlienGui::_neuronSelectedOutput;
+std::unordered_map<unsigned int, int> AlienGui::_signalMemorySelection;
+
 int AlienGui::_rotationStartIndex = 0;
 bool* AlienGui::_menuButtonToggled = nullptr;
 bool AlienGui::_menuButtonToToggle = false;
@@ -1969,6 +1972,40 @@ void AlienGui::NeuronSelection(
     ImGui::EndChild();
 }
 
+void AlienGui::SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDescription>& entries)
+{
+    int numEntries = toInt(entries.size());
+    if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of signals").textWidth(parameters._textWidth), numEntries)) {
+        entries.resize(numEntries, SignalEntryGenomeDescription());
+    }
+    if (numEntries > 0) {
+        std::vector<std::string> entryTexts;
+        for (auto entry : std::views::iota(0, numEntries)) {
+            entryTexts.emplace_back(std::to_string(entry));
+        }
+        auto id = ImGui::GetID("");
+        auto selectedEntry = _signalMemorySelection.contains(id) ? _signalMemorySelection.at(id) : 0;
+        selectedEntry = std::min(selectedEntry, numEntries);
+
+        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit signal").values(entryTexts).textWidth(parameters._textWidth), selectedEntry);
+
+        _signalMemorySelection.insert_or_assign(id, selectedEntry);
+
+        ImGuiStyle& style = ImGui::GetStyle();
+        auto originalGrabMinSize = style.GrabMinSize;
+        style.GrabMinSize = scale(8.0f);
+
+        AlienGui::BeginIndent();
+        for (int i = 0; i < MAX_CHANNELS; ++i) {
+            AlienGui::SliderFloat(
+                AlienGui::SliderFloatParameters().name("#" + std::to_string(i)).format("%.3f").textWidth(parameters._textWidth).min(-2.0f).max(2.0f),
+                &entries.at(selectedEntry)._channels.at(i));
+        }
+        AlienGui::EndIndent();
+
+        style.GrabMinSize = originalGrabMinSize;
+    }
+}
 
 void AlienGui::DisabledField()
 {

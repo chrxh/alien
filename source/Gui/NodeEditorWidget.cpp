@@ -584,6 +584,9 @@ void _NodeEditorWidget::processNodeAttributes()
                 auto mode = memory.getMode();
                 if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::MemoryModeStrings).textWidth(rightColumnWidth), mode)) {
                     memory._mode = createMemoryModeGenomeDescription(mode);
+                    if (mode == MemoryMode_SignalRecorder || mode == MemoryMode_SignalStorage) {
+                        memory._signalEntries.resize(8, SignalEntryGenomeDescription());
+                    }
                 }
 
                 // Mode-specific parameters
@@ -596,36 +599,13 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::BeginIndent();
                     auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalRecorder._readOnly);
-                    int numEntries = toInt(memory._signalEntries.size());
-                    if (AlienGui::InputInt(AlienGui::InputIntParameters().name("Number of Entries").textWidth(rightColumnWidth), numEntries)) {
-                        memory._signalEntries.resize(numEntries);
-                    }
-                    if (numEntries > 0) {
-                        std::vector<std::string> entryTexts;
-                        for (auto entry : std::views::iota(0, numEntries)) {
-                            entryTexts.emplace_back(std::to_string(entry));
-                        }
-                        static int selectedEntry = 0;
-                        selectedEntry = std::min(selectedEntry, numEntries);
-
-                        AlienGui::Switcher(AlienGui::SwitcherParameters().name("Edit entry").values(entryTexts).textWidth(rightColumnWidth), selectedEntry);
-                        for (int i = 0; i < MAX_CHANNELS; ++i) {
-                            AlienGui::SliderFloat(
-                                AlienGui::SliderFloatParameters()
-                                    .name("Channel #" + std::to_string(i))
-                                    .format("%.3f")
-                                    .textWidth(rightColumnWidth)
-                                    .min(-2.0f)
-                                    .max(2.0f),
-                                &memory._signalEntries.at(selectedEntry)._channels.at(i));
-                        }
-                    }
-
+                    AlienGui::SignalMemoryEditor(AlienGui::SignalMemoryEditorParameters().textWidth(rightColumnWidth), memory._signalEntries);
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalStorage) {
                     AlienGui::BeginIndent();
                     auto& signalStorage = std::get<SignalStorageGenomeDescription>(memory._mode);
                     AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Read only").textWidth(rightColumnWidth), signalStorage._readOnly);
+                    AlienGui::SignalMemoryEditor(AlienGui::SignalMemoryEditorParameters().textWidth(rightColumnWidth), memory._signalEntries);
                     AlienGui::EndIndent();
                 } else if (mode == MemoryMode_SignalIntegrator) {
                     AlienGui::BeginIndent();
