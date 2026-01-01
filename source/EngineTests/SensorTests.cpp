@@ -1435,10 +1435,10 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_smallCreature)
     }));
     data.addConnection(1, 2);
 
-    // Create a target creature with 10 cells (less than 30, should give density < 0.5)
+    // Create a target creature with 15 cells (less than 30, should give density < 0.3)
     std::vector<CellDescription> targetCells;
-    for (int i = 0; i < 10; ++i) {
-        targetCells.emplace_back(CellDescription().id(10 + i).pos({100.0f + (i % 3), 90.0f + (i / 3)}));
+    for (int i = 0; i < 15; ++i) {
+        targetCells.emplace_back(CellDescription().id(10 + i).pos({98.0f + (i % 5), 90.0f + (i / 5)}));
     }
     data.addCreature(CreatureDescription().id(1).cells(targetCells));
 
@@ -1450,8 +1450,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_smallCreature)
 
     EXPECT_TRUE(actualSensor._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
-    // 10 cells should give density < 0.5
-    // Formula: 0.25 * log2(10/30) + 0.5 = 0.25 * log2(1/3) + 0.5 = 0.25 * (-1.585) + 0.5 ≈ 0.104
+    // 15 cells should give density < 0.5
     auto density = actualSensor._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(density > 0.0f);
     EXPECT_TRUE(density < 0.3f);
