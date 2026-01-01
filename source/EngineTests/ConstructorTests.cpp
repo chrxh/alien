@@ -2595,7 +2595,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
 {
-    _parameters.friction.baseValue = 0.01f;
+    _parameters.friction.baseValue = 0.05f;
     _simulationFacade->setSimulationParameters(_parameters);
 
     auto const ConstructionAngle = 8.0f;
