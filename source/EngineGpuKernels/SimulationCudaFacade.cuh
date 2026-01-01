@@ -110,7 +110,7 @@ public:
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
-    bool testOnly_areArraysValid();
+    bool testOnly_arePointersValid();
 
 private:
     void initCuda();
@@ -118,7 +118,6 @@ private:
     void syncAndCheck();
     void copyDataTOtoGpu(TO const& cudaTO, TO const& to);
     void copyDataTOtoHost(TO const& to, TO const& cudaTO);
-    void automaticResizeArrays();
     void resizeArrays(ArraySizesForGpu const& sizeDelta = ArraySizesForGpu());
     void checkAndProcessSimulationParameterChanges();
 
@@ -135,8 +134,12 @@ private:
     SettingsForSimulation _settingsForPreview;
 
     mutable std::mutex _mutexForSimulationData;
+    uint64_t _simulationTimestep = 0;
     std::shared_ptr<SimulationData> _cudaSimulationData;  // std::shared_ptr to prevent include in header
+
+    uint64_t _previewTimestep = 0;
     std::shared_ptr<SimulationData> _cudaPreviewData;
+
     std::shared_ptr<CudaGeometryBuffers> _cudaGeometryBuffers;
     std::shared_ptr<SelectionResult> _cudaSelectionResult;
     CudaTOProvider _cudaTOProvider;

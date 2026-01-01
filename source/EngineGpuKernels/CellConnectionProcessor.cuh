@@ -137,9 +137,9 @@ __inline__ __device__ void CellConnectionProcessor::scheduleDeleteCell(Simulatio
 
 __inline__ __device__ void CellConnectionProcessor::processAddOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::AddConnectionPair == operation.type) {
             lockAndtryAddConnections(data, operation.data.addConnection.cell, operation.data.addConnection.otherCell);
@@ -149,9 +149,9 @@ __inline__ __device__ void CellConnectionProcessor::processAddOperations(Simulat
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.structuralOperations.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.structuralOperations.getNumOrigEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::DelCell == operation.type) {
             auto cellIndex = operation.data.delCell.cellIndex;
@@ -180,9 +180,9 @@ __inline__ __device__ void CellConnectionProcessor::processDeleteCellOperations(
 
 __inline__ __device__ void CellConnectionProcessor::processDeleteConnectionOperations(SimulationData& data)
 {
-    auto partition = calcAllThreadsPartition(data.objects.cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(data.objects.cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = data.objects.cells.at(index);
         if (!cell) {
             continue;
@@ -474,7 +474,7 @@ CellConnectionProcessor::existCrossingConnections(SimulationData& data, float2 c
         }
         for (int j = 0; j < nearCell->numConnections; ++j) {
             auto const& connectedNearCell = nearCell->connections[j].cell;
-            if (Math::crossing(pos1, pos1, nearCell->pos, connectedNearCell->pos)) {
+            if (Math::crossing(pos1, pos2, nearCell->pos, connectedNearCell->pos)) {
                 nearCell->releaseLock();
                 result = true;
                 return;

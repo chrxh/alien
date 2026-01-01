@@ -74,12 +74,31 @@ ReconnectorMode ReconnectorDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+SignalEntryDescription::SignalEntryDescription()
+{
+    _channels.resize(MAX_CHANNELS, 0);
+}
+
 AttackerMode AttackerDescription::getMode() const
 {
     if (std::holds_alternative<AttackFreeCellDescription>(_mode)) {
         return AttackerMode_FreeCell;
     } else if (std::holds_alternative<AttackCreatureDescription>(_mode)) {
         return AttackerMode_Creature;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
+MemoryMode MemoryDescription::getMode() const
+{
+    if (std::holds_alternative<SignalDelayDescription>(_mode)) {
+        return MemoryMode_SignalDelay;
+    } else if (std::holds_alternative<SignalRecorderDescription>(_mode)) {
+        return MemoryMode_SignalRecorder;
+    } else if (std::holds_alternative<SignalStorageDescription>(_mode)) {
+        return MemoryMode_SignalStorage;
+    } else if (std::holds_alternative<SignalIntegratorDescription>(_mode)) {
+        return MemoryMode_SignalIntegrator;
     }
     THROW_NOT_IMPLEMENTED();
 }
@@ -130,6 +149,8 @@ CellType CellDescription::getCellType() const
         return CellType_Detonator;
     } else if (std::holds_alternative<DigestorDescription>(_cellType)) {
         return CellType_Digestor;
+    } else if (std::holds_alternative<MemoryDescription>(_cellType)) {
+        return CellType_Memory;
     }
     CHECK(false);
 }

@@ -11,6 +11,14 @@ AlienWindow::AlienWindow(std::string const& title, std::string const& settingsNo
 void AlienWindow::init()
 {
     _on = GlobalSettings::get().getValue(_settingsNode + ".active", _defaultOn);
+    _state = static_cast<WindowState>(GlobalSettings::get().getValue(_settingsNode + ".state", toInt(_state)));
+    _isFocused = GlobalSettings::get().getValue(_settingsNode + ".is focused", _isFocused);
+    _savedPos.x = GlobalSettings::get().getValue(_settingsNode + ".saved pos.x", _savedPos.x);
+    _savedPos.y = GlobalSettings::get().getValue(_settingsNode + ".saved pos.y", _savedPos.y);
+    _savedSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved size.x", _savedSize.x);
+    _savedSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved size.y", _savedSize.y);
+    _savedWindowMinSize.x = GlobalSettings::get().getValue(_settingsNode + ".saved window min size.x", _savedWindowMinSize.x);
+    _savedWindowMinSize.y = GlobalSettings::get().getValue(_settingsNode + ".saved window min size.y", _savedWindowMinSize.y);
     initIntern();
 }
 
@@ -73,6 +81,14 @@ void AlienWindow::shutdown()
 {
     shutdownIntern();
     GlobalSettings::get().setValue(_settingsNode + ".active", _on);
+    GlobalSettings::get().setValue(_settingsNode + ".state", toInt(_state));
+    GlobalSettings::get().setValue(_settingsNode + ".is focused", _isFocused);
+    GlobalSettings::get().setValue(_settingsNode + ".saved pos.x", _savedPos.x);
+    GlobalSettings::get().setValue(_settingsNode + ".saved pos.y", _savedPos.y);
+    GlobalSettings::get().setValue(_settingsNode + ".saved size.x",_savedSize.x);
+    GlobalSettings::get().setValue(_settingsNode + ".saved size.y",_savedSize.y);
+    GlobalSettings::get().setValue(_settingsNode + ".saved window min size.x", _savedWindowMinSize.x);
+    GlobalSettings::get().setValue(_settingsNode + ".saved window min size.y", _savedWindowMinSize.y);
 }
 
 ImGuiWindowFlags AlienWindow::returnFlagsAndConfigureNextWindow()

@@ -203,6 +203,49 @@ struct DigestorGenome
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelayGenome
+{
+    uint8_t delay;
+};
+
+struct SignalRecorderGenome
+{
+    bool readOnly;
+    uint8_t numWrittenSignalEntries;
+};
+
+struct SignalStorageGenome
+{
+    bool readOnly;
+};
+
+struct SignalIntegratorGenome
+{
+    float newSignalWeight;  // Between 0 and 1
+};
+
+union MemoryModeDataGenome
+{
+    SignalDelayGenome signalDelay;
+    SignalRecorderGenome signalRecorder;
+    SignalStorageGenome signalStorage;
+    SignalIntegratorGenome signalIntegrator;
+};
+
+struct SignalEntryGenome
+{
+    float channels[MAX_CHANNELS];
+};
+
+struct MemoryGenome
+{
+    MemoryMode mode;
+    MemoryModeDataGenome modeData;
+
+    uint8_t numSignalEntries;
+    SignalEntryGenome* signalEntries;  // Pointer to heap memory
+};
+
 union CellTypeDataGenome
 {
     BaseGenome base;
@@ -217,6 +260,7 @@ union CellTypeDataGenome
     ReconnectorGenome reconnector;
     DetonatorGenome detonator;
     DigestorGenome digestor;
+    MemoryGenome memory;
 };
 
 struct SignalRestrictionGenome

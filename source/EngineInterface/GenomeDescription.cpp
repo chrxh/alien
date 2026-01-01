@@ -86,6 +86,25 @@ AttackerMode AttackerGenomeDescription::getMode() const
     CHECK(false);
 }
 
+SignalEntryGenomeDescription::SignalEntryGenomeDescription()
+{
+    _channels.resize(MAX_CHANNELS, 0);
+}
+
+MemoryMode MemoryGenomeDescription::getMode() const
+{
+    if (std::holds_alternative<SignalDelayGenomeDescription>(_mode)) {
+        return MemoryMode_SignalDelay;
+    } else if (std::holds_alternative<SignalRecorderGenomeDescription>(_mode)) {
+        return MemoryMode_SignalRecorder;
+    } else if (std::holds_alternative<SignalStorageGenomeDescription>(_mode)) {
+        return MemoryMode_SignalStorage;
+    } else if (std::holds_alternative<SignalIntegratorGenomeDescription>(_mode)) {
+        return MemoryMode_SignalIntegrator;
+    }
+    CHECK(false);
+}
+
 CellTypeGenome NodeDescription::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {
@@ -112,6 +131,8 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Detonator;
     } else if (std::holds_alternative<DigestorGenomeDescription>(_cellType)) {
         return CellTypeGenome_Digestor;
+    } else if (std::holds_alternative<MemoryGenomeDescription>(_cellType)) {
+        return CellTypeGenome_Memory;
     }
     CHECK(false);
 }

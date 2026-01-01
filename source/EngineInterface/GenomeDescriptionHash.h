@@ -359,6 +359,86 @@ struct std::hash<DigestorGenomeDescription>
 };
 
 template <>
+struct std::hash<SignalDelayGenomeDescription>
+{
+    std::size_t operator()(SignalDelayGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._delay);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<SignalRecorderGenomeDescription>
+{
+    std::size_t operator()(SignalRecorderGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._readOnly);
+        hash_combine(seed, desc._numWrittenSignalEntries);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<SignalStorageGenomeDescription>
+{
+    std::size_t operator()(SignalStorageGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._readOnly);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<SignalIntegratorGenomeDescription>
+{
+    std::size_t operator()(SignalIntegratorGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._newSignalWeight);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<MemoryModeGenomeDescription>
+{
+    std::size_t operator()(MemoryModeGenomeDescription const& desc) const
+    {
+        return variant_hasher<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<SignalEntryGenomeDescription>
+{
+    std::size_t operator()(SignalEntryGenomeDescription const& desc) const
+    {
+        std::size_t result = 0;
+        for (auto const& channel : desc._channels) {
+            hash_combine(result, channel);
+        }
+        return result;
+    }
+};
+
+template <>
+struct std::hash<MemoryGenomeDescription>
+{
+    std::size_t operator()(MemoryGenomeDescription const& desc) const
+    {
+        std::size_t result = std::hash<MemoryModeGenomeDescription>{}(desc._mode);
+        for (auto const& entry : desc._signalEntries) {
+            hash_combine(result, std::hash<SignalEntryGenomeDescription>{}(entry));
+        }
+        return result;
+    }
+};
+
+template <>
 struct std::hash<CellTypeGenomeDescription>
 {
     std::size_t operator()(CellTypeGenomeDescription const& desc) const
@@ -375,7 +455,8 @@ struct std::hash<CellTypeGenomeDescription>
             DefenderGenomeDescription,
             ReconnectorGenomeDescription,
             DetonatorGenomeDescription,
-            DigestorGenomeDescription>{}(desc);
+            DigestorGenomeDescription,
+            MemoryGenomeDescription>{}(desc);
     }
 };
 

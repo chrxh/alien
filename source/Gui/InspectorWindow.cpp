@@ -220,11 +220,13 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                     AlienGui::InputText(
                         AlienGui::InputTextParameters().name("Creature id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true),
                         creatureId);
-                    //AlienGui::InputInt(
-                    //    AlienGui::InputIntParameters().name("Mutation id").textWidth(BaseTabTextWidth).tooltip(Const::CellLineageIdTooltip), cell._lineageId);
-                    //AlienGui::InputFloat(
-                    //    AlienGui::InputFloatParameters().name("Genome complexity").textWidth(BaseTabTextWidth).tooltip(Const::NumCellsTooltip),
-                    //    cell._numCells);
+                }
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNodeEx("Genome", TreeNodeFlags)) {
+                if (genome.has_value()) {
+                    AlienGui::InputInt(
+                        AlienGui::InputIntParameters().name("Node index").textWidth(BaseTabTextWidth), cell._nodeIndex);
                 }
                 ImGui::TreePop();
             }
@@ -546,11 +548,11 @@ void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
 void _InspectorWindow::processNeuronContent(CellDescription& cell)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
-        AlienGui::NeuronSelection(
-            AlienGui::NeuronSelectionParameters().rightMargin(0),
-            cell._neuralNetwork->_weights,
-            cell._neuralNetwork->_biases,
-            cell._neuralNetwork->_activationFunctions);
+        //AlienGui::NeuralNetEditor(
+        //    AlienGui::NeuralNetEditorParameters().rightMargin(0),
+        //    cell._neuralNetwork->_weights,
+        //    cell._neuralNetwork->_biases,
+        //    cell._neuralNetwork->_activationFunctions);
         ImGui::TreePop();
     }
 }

@@ -9,6 +9,7 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 #include <EngineInterface/EngineConstants.h>
+#include <EngineInterface/GenomeDescription.h>
 #include <EngineInterface/PreviewDescription.h>
 #include <EngineInterface/SimulationParametersTypes.h>
 
@@ -440,18 +441,11 @@ public:
     static void BeginIndent();
     static void EndIndent();
 
-    struct NeuronSelectionParameters
+    struct SignalMemoryEditorParameters
     {
-        MEMBER(NeuronSelectionParameters, std::string, name, "");
-        MEMBER(NeuronSelectionParameters, float, step, 0.05f);
-        MEMBER(NeuronSelectionParameters, std::string, format, "%.2f");
-        MEMBER(NeuronSelectionParameters, float, rightMargin, 0);
+        MEMBER(SignalMemoryEditorParameters, float, textWidth, 100);
     };
-    static void NeuronSelection(
-        NeuronSelectionParameters const& parameters,
-        std::vector<float>& weights,
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions);
+    static void SignalMemoryEditor(SignalMemoryEditorParameters const& parameters, std::vector<SignalEntryGenomeDescription>& entries);
 
     static void DisabledField();
 
@@ -522,6 +516,8 @@ private:
 
     static std::unordered_map<unsigned int, int> _neuronSelectedInput;
     static std::unordered_map<unsigned int, int> _neuronSelectedOutput;
+
+    static std::unordered_map<unsigned int, int> _signalMemorySelection;
 
     static bool _menuBarVisible;
     static bool* _menuButtonToggled;

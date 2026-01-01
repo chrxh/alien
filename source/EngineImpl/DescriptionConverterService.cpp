@@ -23,7 +23,30 @@ namespace
         return reinterpret_cast<T*>(&heap[sourceIndex]);
     }
 
-    void stringToChar64(std::string const& source, Char64& target)
+    // Helper function to copy memory entries from TO to Description
+    template <typename TOEntry, typename DescEntry>
+    void copyMemoryEntriesToDescription(std::vector<DescEntry>& target, TOEntry const* source, int numEntries)
+    {
+        target.resize(numEntries);
+        for (int i = 0; i < numEntries; ++i) {
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                target[i]._channels[j] = source[i].channels[j];
+            }
+        }
+    }
+
+    // Helper function to copy memory entries from Description to TO
+    template <typename DescEntry, typename TOEntry>
+    void copyMemoryEntriesToTO(TOEntry* target, std::vector<DescEntry> const& source)
+    {
+        for (int i = 0, j = toInt(source.size()); i < j; ++i) {
+            for (int k = 0; k < MAX_CHANNELS; ++k) {
+                target[i].channels[k] = source[i]._channels[k];
+            }
+        }
+    }
+
+    void stringToChar64(Char64& target, std::string const& source)
     {
         size_t length = std::min(source.length(), size_t(63));  // Leave space for null terminator
         std::memcpy(target, source.c_str(), length);
@@ -159,7 +182,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
     for (auto const& genome : description._genomes) {
-        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, genome, genomeTOIndexById);
+        convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
     }
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
@@ -211,14 +234,12 @@ TO DescriptionConverterService::convertDescriptionToTO(uint64_t creatureId, Geno
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
-    std::vector<CellTO> cellTOs;
-    std::vector<ParticleTO> particleTOs;
     std::vector<uint8_t> heap;
 
     auto wrapper = CreatureDescription().id(creatureId).genomeId(genome._id);
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
-    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, genome, genomeTOIndexById);
+    convertGenomeToTO(genomeTOs, geneTOs, nodeTOs, heap, genome, genomeTOIndexById);
 
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
     convertCreatureToTO(creatureTOs, wrapper, genomeTOIndexById, creatureTOIndexById);
@@ -499,6 +520,35 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         digestor._rawEnergyConductivity = cellTO.cellTypeData.digestor.rawEnergyConductivity;
         result._cellType = digestor;
     } break;
+    case CellType_Memory: {
+        MemoryDescription memory;
+        auto const& memoryTO = cellTO.cellTypeData.memory;
+        if (memoryTO.mode == MemoryMode_SignalDelay) {
+            SignalDelayDescription signalDelay;
+            signalDelay._delay = memoryTO.modeData.signalDelay.delay;
+            signalDelay._numSignalEntriesInitialized = memoryTO.modeData.signalDelay.numSignalEntriesInitialized;
+            signalDelay._ringBufferIndex = memoryTO.modeData.signalDelay.ringBufferIndex;
+            memory._mode = signalDelay;
+        } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+            SignalRecorderDescription signalRecorder;
+            signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._state = memoryTO.modeData.signalRecorder.state;
+            signalRecorder._numWrittenSignalEntries = memoryTO.modeData.signalRecorder.numWrittenSignalEntries;
+            signalRecorder._numReadSignalEntries = memoryTO.modeData.signalRecorder.numReadSignalEntries;
+            memory._mode = signalRecorder;
+        } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            SignalStorageDescription signalStorage;
+            signalStorage._readOnly = memoryTO.modeData.signalStorage.readOnly;
+            memory._mode = signalStorage;
+        } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+            SignalIntegratorDescription signalIntegrator;
+            signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
+            memory._mode = signalIntegrator;
+        }
+        auto const& signalEntriesTO = getFromHeap<SignalEntryTO>(to.heap, memoryTO.signalEntriesDataIndex);
+        copyMemoryEntriesToDescription(memory._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
+        result._cellType = memory;
+    } break;
     }
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, cellTO.neuralNetworkDataIndex);
@@ -521,7 +571,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
 }
 
 
-NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const* nodeTO) const
+NodeDescription DescriptionConverterService::createNodeDescription(TO const& to, NodeTO const* nodeTO) const
 {
     NodeDescription nodeDesc;
     nodeDesc._referenceAngle = nodeTO->referenceAngle;
@@ -713,6 +763,31 @@ NodeDescription DescriptionConverterService::createNodeDescription(NodeTO const*
         digestorDesc._rawEnergyConductivity = nodeTO->cellTypeData.digestor.rawEnergyConductivity;
         nodeDesc._cellType = digestorDesc;
     } break;
+    case CellTypeGenome_Memory: {
+        MemoryGenomeDescription memoryDesc;
+        auto const& memoryTO = nodeTO->cellTypeData.memory;
+        if (memoryTO.mode == MemoryMode_SignalDelay) {
+            SignalDelayGenomeDescription signalDelay;
+            signalDelay._delay = memoryTO.modeData.signalDelay.delay;
+            memoryDesc._mode = signalDelay;
+        } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+            SignalRecorderGenomeDescription signalRecorder;
+            signalRecorder._readOnly = memoryTO.modeData.signalRecorder.readOnly;
+            signalRecorder._numWrittenSignalEntries = memoryTO.modeData.signalRecorder.numWrittenSignalEntries;
+            memoryDesc._mode = signalRecorder;
+        } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            SignalStorageGenomeDescription signalStorage;
+            signalStorage._readOnly = memoryTO.modeData.signalStorage.readOnly;
+            memoryDesc._mode = signalStorage;
+        } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+            SignalIntegratorGenomeDescription signalIntegrator;
+            signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
+            memoryDesc._mode = signalIntegrator;
+        }
+        auto const& signalEntriesTO = getFromHeap<SignalEntryGenomeTO>(to.heap, memoryTO.signalEntriesDataIndex);
+        copyMemoryEntriesToDescription(memoryDesc._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
+        nodeDesc._cellType = memoryDesc;
+    } break;
     }
     return nodeDesc;
 }
@@ -745,7 +820,7 @@ GenomeDescription DescriptionConverterService::createGenomeDescription(TO const&
         CHECK(geneTO->nodeArrayIndex + geneTO->numNodes <= *to.numNodes);
         for (int k = 0; k < geneTO->numNodes; ++k) {
             auto nodeTO = to.nodes + geneTO->nodeArrayIndex + k;
-            geneDesc._nodes.emplace_back(createNodeDescription(nodeTO));
+            geneDesc._nodes.emplace_back(createNodeDescription(to, nodeTO));
         }
 
         result._genes.emplace_back(geneDesc);
@@ -786,6 +861,7 @@ void DescriptionConverterService::convertGenomeToTO(
     std::vector<GenomeTO>& genomeTOs,
     std::vector<GeneTO>& geneTOs,
     std::vector<NodeTO>& nodeTOs,
+    std::vector<uint8_t>& heap,
     GenomeDescription const& genome,
     std::unordered_map<uint64_t, uint64_t>& genomeTOIndexById) const
 {
@@ -798,7 +874,7 @@ void DescriptionConverterService::convertGenomeToTO(
     auto geneArrayStartIndex = geneTOs.size();
     geneTOs.resize(geneArrayStartIndex + genome._genes.size());
 
-    stringToChar64(genome._name, genomeTO.name);
+    stringToChar64(genomeTO.name, genome._name);
     genomeTO.id = genome._id;
     genomeTO.frontAngle = genome._frontAngle;
     genomeTO.numGenes = toInt(genome._genes.size());
@@ -808,7 +884,7 @@ void DescriptionConverterService::convertGenomeToTO(
     for (auto const& [geneIndex, geneDesc] : genome._genes | boost::adaptors::indexed(0)) {
         GeneTO& geneTO = geneTOs.at(geneArrayStartIndex + geneIndex);
 
-        stringToChar64(geneDesc._name, geneTO.name);
+        stringToChar64(geneTO.name, geneDesc._name);
         geneTO.shape = geneDesc._shape;
         geneTO.numBranches = static_cast<uint8_t>(geneDesc._numBranches);
         geneTO.separation = geneDesc._separation;
@@ -982,6 +1058,30 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& digestorDesc = std::get<DigestorGenomeDescription>(nodeDesc._cellType);
                 auto& digestorTO = nodeTO.cellTypeData.digestor;
                 digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
+            } break;
+            case CellTypeGenome_Memory: {
+                auto const& memoryDesc = std::get<MemoryGenomeDescription>(nodeDesc._cellType);
+                auto& memoryTO = nodeTO.cellTypeData.memory;
+                memoryTO.mode = memoryDesc.getMode();
+                if (memoryTO.mode == MemoryMode_SignalDelay) {
+                    auto const& signalDelayDesc = std::get<SignalDelayGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalDelay.delay = signalDelayDesc._delay;
+                } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+                    auto const& signalRecorderDesc = std::get<SignalRecorderGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+                    memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc._numWrittenSignalEntries;
+                } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+                    auto const& signalStorageDesc = std::get<SignalStorageGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalStorage.readOnly = signalStorageDesc._readOnly;
+                } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+                    auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
+                    memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
+                }
+                memoryTO.numSignalEntries = toInt(memoryDesc._signalEntries.size());
+                memoryTO.signalEntriesDataIndex = heap.size();
+                heap.resize(heap.size() + sizeof(SignalEntryGenomeTO) * memoryTO.numSignalEntries);
+                auto signalEntriesTO = reinterpret_cast<SignalEntryGenomeTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
+                copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
             } break;
             }
         }
@@ -1237,6 +1337,34 @@ void DescriptionConverterService::convertCellToTO(
         auto const& digestorDesc = std::get<DigestorDescription>(cellDesc._cellType);
         DigestorTO& digestorTO = cellTO.cellTypeData.digestor;
         digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
+    } break;
+    case CellType_Memory: {
+        auto const& memoryDesc = std::get<MemoryDescription>(cellDesc._cellType);
+        auto& memoryTO = cellTO.cellTypeData.memory;
+        memoryTO.mode = memoryDesc.getMode();
+        if (memoryTO.mode == MemoryMode_SignalDelay) {
+            auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalDelay.delay = signalDelayDesc._delay;
+            memoryTO.modeData.signalDelay.numSignalEntriesInitialized = signalDelayDesc._numSignalEntriesInitialized;
+            memoryTO.modeData.signalDelay.ringBufferIndex = signalDelayDesc._ringBufferIndex;
+        } else if (memoryTO.mode == MemoryMode_SignalRecorder) {
+            auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
+            memoryTO.modeData.signalRecorder.state = signalRecorderDesc._state;
+            memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc._numWrittenSignalEntries;
+            memoryTO.modeData.signalRecorder.numReadSignalEntries = signalRecorderDesc._numReadSignalEntries;
+        } else if (memoryTO.mode == MemoryMode_SignalStorage) {
+            auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalStorage.readOnly = signalStorageDesc._readOnly;
+        } else if (memoryTO.mode == MemoryMode_SignalIntegrator) {
+            auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
+            memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
+        }
+        memoryTO.numSignalEntries = toInt(memoryDesc._signalEntries.size());
+        memoryTO.signalEntriesDataIndex = heap.size();
+        heap.resize(heap.size() + sizeof(SignalEntryTO) * memoryTO.numSignalEntries);
+        auto signalEntriesTO = reinterpret_cast<SignalEntryTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
+        copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
     } break;
     }
     cellTO.signalRestriction.active = cellDesc._signalRestriction._active;

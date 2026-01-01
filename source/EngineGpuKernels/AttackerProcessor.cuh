@@ -30,8 +30,8 @@ private:
 __device__ __inline__ void AttackerProcessor::process(SimulationData& data, SimulationStatistics& result)
 {
     auto& operations = data.cellTypeOperations[CellType_Attacker];
-    auto partition = calcAllThreadsPartition(operations.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         processCell(data, result, operations.at(i).cell);
     }
 }

@@ -350,6 +350,59 @@ struct DigestorDescription
     }
 };
 
+struct SignalEntryDescription
+{
+    SignalEntryDescription();
+    auto operator<=>(SignalEntryDescription const&) const = default;
+
+    MEMBER(SignalEntryDescription, std::vector<float>, channels, {});
+};
+
+struct SignalDelayDescription
+{
+    auto operator<=>(SignalDelayDescription const&) const = default;
+
+    MEMBER(SignalDelayDescription, int, delay, 10);
+    MEMBER(SignalDelayDescription, int, numSignalEntriesInitialized, 0);
+    MEMBER(SignalDelayDescription, int, ringBufferIndex, 0);
+};
+
+struct SignalRecorderDescription
+{
+    auto operator<=>(SignalRecorderDescription const&) const = default;
+
+    MEMBER(SignalRecorderDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderDescription, SignalRecorderState, state, SignalRecorderState_Idle);
+    MEMBER(SignalRecorderDescription, int, numWrittenSignalEntries, 0);
+    MEMBER(SignalRecorderDescription, int, numReadSignalEntries, 0);
+};
+
+struct SignalStorageDescription
+{
+    auto operator<=>(SignalStorageDescription const&) const = default;
+
+    MEMBER(SignalStorageDescription, bool, readOnly, true);
+};
+
+struct SignalIntegratorDescription
+{
+    auto operator<=>(SignalIntegratorDescription const&) const = default;
+
+    MEMBER(SignalIntegratorDescription, float, newSignalWeight, 0.5f);  // Between 0 and 1
+};
+
+using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription, SignalIntegratorDescription>;
+
+struct MemoryDescription
+{
+    auto operator<=>(MemoryDescription const&) const = default;
+
+    MEMBER(MemoryDescription, MemoryModeDescription, mode, SignalDelayDescription());
+    MEMBER(MemoryDescription, std::vector<SignalEntryDescription>, signalEntries, {});
+
+    MemoryMode getMode() const;
+};
+
 using CellTypeDescription = std::variant<
     StructureCellDescription,
     FreeCellDescription,
@@ -364,7 +417,8 @@ using CellTypeDescription = std::variant<
     DefenderDescription,
     ReconnectorDescription,
     DetonatorDescription,
-    DigestorDescription>;
+    DigestorDescription,
+    MemoryDescription>;
 
 struct SignalRestrictionDescription
 {

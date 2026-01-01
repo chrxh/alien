@@ -1,6 +1,7 @@
 #include "DescriptionTestDataFactory.h"
 
 #include <algorithm>
+#include <boost/range/combine.hpp>
 
 #include "TestHelper.h"
 
@@ -32,6 +33,10 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         CellParameter{CellType_Detonator},
         CellParameter{CellType_Digestor},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
+        CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
     };
 }
 
@@ -101,6 +106,10 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Reconnector, ReconnectorModeWrapper{ReconnectorMode_Creature}},
         NodeParameter{CellTypeGenome_Detonator},
         NodeParameter{CellTypeGenome_Digestor},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalDelay}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
+        NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
     };
 }
 
@@ -483,6 +492,59 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             return false;
         }
     } break;
+    case CellType_Memory: {
+        if (nodeType != CellTypeGenome_Memory) {
+            return false;
+        }
+        auto const& memory = std::get<MemoryDescription>(cell._cellType);
+        auto const& nodeMemory = std::get<MemoryGenomeDescription>(node._cellType);
+        if (memory.getMode() != nodeMemory.getMode()) {
+            return false;
+        }
+        switch (memory.getMode()) {
+        case MemoryMode_SignalDelay: {
+            auto const& signalDelay = std::get<SignalDelayDescription>(memory._mode);
+            auto const& nodeSignalDelay = std::get<SignalDelayGenomeDescription>(nodeMemory._mode);
+            if (signalDelay._delay != nodeSignalDelay._delay) {
+                return false;
+            }
+        } break;
+        case MemoryMode_SignalRecorder: {
+            auto const& signalRecorder = std::get<SignalRecorderDescription>(memory._mode);
+            auto const& nodeSignalRecorder = std::get<SignalRecorderGenomeDescription>(nodeMemory._mode);
+            if (signalRecorder._readOnly != nodeSignalRecorder._readOnly) {
+                return false;
+            }
+            if (signalRecorder._numWrittenSignalEntries != nodeSignalRecorder._numWrittenSignalEntries) {
+                return false;
+            }
+        } break;
+        case MemoryMode_SignalStorage: {
+            auto const& signalStorage = std::get<SignalStorageDescription>(memory._mode);
+            auto const& nodeSignalStorage = std::get<SignalStorageGenomeDescription>(nodeMemory._mode);
+            if (signalStorage._readOnly != nodeSignalStorage._readOnly) {
+                return false;
+            }
+        } break;
+        case MemoryMode_SignalIntegrator: {
+            auto const& signalIntegrator = std::get<SignalIntegratorDescription>(memory._mode);
+            auto const& nodeSignalIntegrator = std::get<SignalIntegratorGenomeDescription>(nodeMemory._mode);
+            if (signalIntegrator._newSignalWeight != nodeSignalIntegrator._newSignalWeight) {
+                return false;
+            }
+        } break;
+        }
+        if (memory._signalEntries.size() != nodeMemory._signalEntries.size()) {
+            return false;
+        }
+        for (auto const& [entry, nodeEntry] : boost::combine(memory._signalEntries, nodeMemory._signalEntries)) {
+            for (auto const& [channel, nodeChannel] : boost::combine(entry._channels, nodeEntry._channels)) {
+                if (channel != nodeChannel) {
+                    return false;
+                }
+            }
+        }
+    } break;
     default:
         return false;
     }
@@ -495,6 +557,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     auto muscleMode = std::holds_alternative<MuscleModeWrapper>(cellParameter.mode) ? std::get<MuscleModeWrapper>(cellParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode = std::holds_alternative<SensorModeWrapper>(cellParameter.mode) ? std::get<SensorModeWrapper>(cellParameter.mode).value : SensorMode_DetectEnergy;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(cellParameter.mode) ? std::get<ReconnectorModeWrapper>(cellParameter.mode).value : ReconnectorMode_Structure;
+    auto memoryMode = std::holds_alternative<MemoryModeWrapper>(cellParameter.mode) ? std::get<MemoryModeWrapper>(cellParameter.mode).value : MemoryMode_SignalDelay;
 
     switch (type) {
     case CellType_Structure:
@@ -633,6 +696,34 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         return DetonatorDescription().countdown(23);
     case CellType_Digestor:
         return DigestorDescription().rawEnergyConductivity(0.7f);
+    case CellType_Memory: {
+        MemoryModeDescription memoryModeDesc;
+        switch (memoryMode) {
+        case MemoryMode_SignalDelay:
+            memoryModeDesc = SignalDelayDescription().delay(15).numSignalEntriesInitialized(5).ringBufferIndex(3);
+            break;
+        case MemoryMode_SignalRecorder:
+            memoryModeDesc = SignalRecorderDescription().readOnly(false).state(SignalRecorderState_Recording).numWrittenSignalEntries(3).numReadSignalEntries(1);
+            break;
+        case MemoryMode_SignalStorage:
+            memoryModeDesc = SignalStorageDescription().readOnly(false);
+            break;
+        case MemoryMode_SignalIntegrator:
+            memoryModeDesc = SignalIntegratorDescription().newSignalWeight(0.75f);
+            break;
+        default:
+            memoryModeDesc = MemoryModeDescription();
+        }
+        auto memory = MemoryDescription().mode(memoryModeDesc);
+        for (int i = 0; i < 10; ++i) {
+            SignalEntryDescription entry;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
+            }
+            memory._signalEntries.emplace_back(entry);
+        }
+        return memory;
+    }
     default:
         return CellTypeDescription();
     }
@@ -644,6 +735,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     auto muscleMode = std::holds_alternative<MuscleModeWrapper>(cellParameter.mode) ? std::get<MuscleModeWrapper>(cellParameter.mode).value : MuscleMode_AutoBending;
     auto sensorMode = std::holds_alternative<SensorModeWrapper>(cellParameter.mode) ? std::get<SensorModeWrapper>(cellParameter.mode).value : SensorMode_DetectEnergy;
     auto reconnectorMode = std::holds_alternative<ReconnectorModeWrapper>(cellParameter.mode) ? std::get<ReconnectorModeWrapper>(cellParameter.mode).value : ReconnectorMode_Structure;
+    auto memoryMode = std::holds_alternative<MemoryModeWrapper>(cellParameter.mode) ? std::get<MemoryModeWrapper>(cellParameter.mode).value : MemoryMode_SignalDelay;
     switch (type) {
     case CellTypeGenome_Base:
         return BaseGenomeDescription();
@@ -742,6 +834,34 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     }
     case CellTypeGenome_Digestor: {
         return DigestorGenomeDescription().rawEnergyConductivity(0.8f);
+    }
+    case CellTypeGenome_Memory: {
+        MemoryModeGenomeDescription memoryModeDesc;
+        switch (memoryMode) {
+        case MemoryMode_SignalDelay:
+            memoryModeDesc = SignalDelayGenomeDescription().delay(20);
+            break;
+        case MemoryMode_SignalRecorder:
+            memoryModeDesc = SignalRecorderGenomeDescription().readOnly(false).numWrittenSignalEntries(3);
+            break;
+        case MemoryMode_SignalStorage:
+            memoryModeDesc = SignalStorageGenomeDescription().readOnly(false);
+            break;
+        case MemoryMode_SignalIntegrator:
+            memoryModeDesc = SignalIntegratorGenomeDescription().newSignalWeight(0.8f);
+            break;
+        default:
+            memoryModeDesc = MemoryModeGenomeDescription();
+        }
+        auto memory = MemoryGenomeDescription().mode(memoryModeDesc);
+        for (int i = 0; i < 5; ++i) {
+            SignalEntryGenomeDescription entry;
+            for (int j = 0; j < MAX_CHANNELS; ++j) {
+                entry._channels[j] = static_cast<float>(i * MAX_CHANNELS + j) * 0.15f;
+            }
+            memory._signalEntries.emplace_back(entry);
+        }
+        return memory;
     }
     default:
         return CellTypeGenomeDescription();

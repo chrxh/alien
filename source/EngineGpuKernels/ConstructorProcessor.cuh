@@ -104,7 +104,7 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
 {
     //auto& operations = data.cellTypeOperations[CellType_Constructor];
     //auto partition = calcAllThreadsPartition(operations.getNumEntries());
-    //for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+    //for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
     //    completenessCheck(data, statistics, operations.at(i).cell);
     //}
 }
@@ -112,8 +112,8 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
 __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, SimulationStatistics& statistics, bool isPreview)
 {
     auto& operations = data.cellTypeOperations[CellType_Constructor];
-    auto partition = calcAllThreadsPartition(operations.getNumEntries());
-    for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
+    auto partition = calcSystemThreadPartition(operations.getNumEntries());
+    for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         processCell(data, statistics, operations.at(i).cell, isPreview);
     }
 }
@@ -455,13 +455,20 @@ __inline__ __device__ Cell* ConstructorProcessor::continueConstructionOnBranch(
     auto desiredDistance = constructionData.gene->connectionDistance;
     auto constructionSiteDistance = hostCell->getRefDistance(lastCell);
     posDelta = Math::getNormalized(posDelta) * (constructionSiteDistance - desiredDistance);
-
     if (Math::length(posDelta) <= cudaSimulationParameters.minCellDistance.value
         || constructionSiteDistance - desiredDistance < cudaSimulationParameters.minCellDistance.value) {
         return nullptr;
     }
 
     auto newCellPos = hostCell->pos + posDelta;
+    if (CellConnectionProcessor::existCrossingConnections(
+            data,
+            hostCell->pos,
+            constructionData.lastConstructionCell->pos,
+            cudaSimulationParameters.constructorConnectingCellDistance.value[hostCell->color],
+            hostCell->detached)) {
+        return nullptr;
+    }
 
     Cell* cellsToConnect[MAX_CELL_BONDS];
     int numCellsToConnect;

@@ -27,8 +27,7 @@ public:
 
     __device__ __inline__ void reset_system()
     {
-        auto const partition = calcPartition(
-            _numSections.x * _numSections.y, threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
+        auto const partition = calcAllThreadsPartition(_numSections.x * _numSections.y);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             _clusterListBySectionIndex.at(index).init();
         }
@@ -67,7 +66,7 @@ public:
                 __syncthreads();
 
                 if (numClusters > 0) {
-                    auto const partition = calcPartition(numClusters, threadIdx.x, blockDim.x);
+                    auto const partition = calcThreadBlockPartition(numClusters);
                     for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
                         auto const& cluster = clusterArray[index];
                         auto const distance = map.mapDistance(cluster->pos, pos);

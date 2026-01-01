@@ -28,9 +28,9 @@ public:
 __inline__ __device__ void SignalProcessor::collectCellTypeOperations(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
 
         if (cell->cellType != CellType_Structure && cell->cellType != CellType_Free && cell->cellType != CellType_Base) {
@@ -46,9 +46,9 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
 __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
             continue;
@@ -103,9 +103,9 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->cellType == CellType_Structure || cell->cellType == CellType_Free) {
             continue;
@@ -144,12 +144,12 @@ __inline__ __device__ bool SignalProcessor::isAutoTriggered(SimulationData& data
     auto triggerInterval = max(SignalState_Count, autoTriggerInterval);
     if (cell->creature != nullptr) {
         if (isPreview) {
-            return data.timestep % triggerInterval == 0;
+            return *data.timestep % triggerInterval == 0;
         } else {
-            return (data.timestep + cell->creature->id) % triggerInterval == 0;
+            return (*data.timestep + cell->creature->id) % triggerInterval == 0;
         }
     } else {
-        return data.timestep % triggerInterval == 0;
+        return *data.timestep % triggerInterval == 0;
     }
 }
 

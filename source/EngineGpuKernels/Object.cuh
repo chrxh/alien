@@ -314,6 +314,53 @@ struct Digestor
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelay
+{
+    uint8_t delay;
+    uint8_t numSignalEntriesInitialized;
+    uint8_t ringBufferIndex;
+};
+
+struct SignalRecorder
+{
+    bool readOnly;
+    SignalRecorderState state;
+    uint8_t numWrittenSignalEntries;
+    uint8_t numReadSignalEntries;
+};
+
+struct SignalStorage
+{
+    bool readOnly;
+};
+
+struct SignalIntegrator
+{
+    float newSignalWeight;  // Between 0 and 1
+};
+
+union MemoryModeData
+{
+    SignalDelay signalDelay;
+    SignalRecorder signalRecorder;
+    SignalStorage signalStorage;
+    SignalIntegrator signalIntegrator;
+};
+
+struct SignalEntry
+{
+    float channels[MAX_CHANNELS];
+};
+
+struct Memory
+{
+    MemoryMode mode;
+    MemoryModeData modeData;
+
+    uint8_t numSignalEntries;
+    SignalEntry* signalEntries;  // Pointer to SignalEntry[MAX_CELL_MEMORY_ENTRIES] in heap
+};
+
 union CellTypeData
 {
     Base base;
@@ -328,6 +375,7 @@ union CellTypeData
     Reconnector reconnector;
     Detonator detonator;
     Digestor digestor;
+    Memory memory;
 };
 
 struct SignalRestriction
@@ -406,8 +454,8 @@ struct Cell
     CellTriggered cellTriggered;
 
     // Process data
-    Signal futureSignal;
     SignalState futureSignalState;
+    Signal futureSignal;
     uint32_t frontAngleId;
     bool headCell;
 

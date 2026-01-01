@@ -104,7 +104,7 @@ public:
         }
         __syncthreads();
 
-        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
+        auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& cell = cells[index];
             int2 posInt = {floorInt(cell->pos.x), floorInt(cell->pos.y)};
@@ -194,8 +194,8 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition = calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto partition = calcSystemThreadPartition(_mapEntries.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
         }
@@ -241,7 +241,7 @@ public:
         }
         __syncthreads();
 
-        auto partition = calcPartition(numEntities, threadIdx.x, blockDim.x);
+        auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
             auto const& entity = entities[index];
             int2 posInt = {floorInt(entity->pos.x), floorInt(entity->pos.y)};
@@ -263,8 +263,8 @@ public:
 
     __device__ __inline__ void cleanup_system()
     {
-        auto partition = calcPartition(_mapEntries.getNumEntries(), threadIdx.x + blockIdx.x * blockDim.x, blockDim.x * gridDim.x);
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        auto partition = calcSystemThreadPartition(_mapEntries.getNumEntries());
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& mapEntry = _mapEntries.at(index);
             _map[mapEntry] = nullptr;
         }

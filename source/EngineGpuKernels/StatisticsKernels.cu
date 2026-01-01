@@ -9,9 +9,9 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
 {
     {
         auto& cells = data.objects.cells;
-        auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+        auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& cell = cells.at(index);
             statistics.incNumCells(cell->color);
             if (cell->cellType == CellType_Free) {
@@ -32,9 +32,9 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
     }
     {
         auto& particles = data.objects.particles;
-        auto const partition = calcAllThreadsPartition(particles.getNumEntries());
+        auto const partition = calcSystemThreadPartition(particles.getNumEntries());
 
-        for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& particle = particles.at(index);
             statistics.incNumParticles(particle->color);
             statistics.addEnergy(particle->color, particle->energy);
@@ -55,7 +55,7 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
         //auto numReplicators = toDouble(statistics.getNumReplicators());
         //auto averageNumCells = statistics.getSummedNumCells() / numReplicators;
 
-        //for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+        //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         //    auto& cell = cells.at(index);
         //if (cell->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(cell->cellTypeData.constructor)) {
         //    auto variance = toDouble(cell->numCells) - averageNumCells;
@@ -74,9 +74,9 @@ __global__ void cudaUpdateHistogramData_substep1(SimulationData data, Simulation
 __global__ void cudaUpdateHistogramData_substep2(SimulationData data, SimulationStatistics statistics)
 {
     auto& cells = data.objects.cells;
-    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->fixed) {
             continue;
@@ -88,10 +88,10 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
 __global__ void cudaUpdateHistogramData_substep3(SimulationData data, SimulationStatistics statistics)
 {
     auto& cells = data.objects.cells;
-    auto const partition = calcAllThreadsPartition(cells.getNumEntries());
+    auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     auto maxAge = statistics.getMaxValue();
-    for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
+    for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& cell = cells.at(index);
         if (cell->fixed) {
             continue;

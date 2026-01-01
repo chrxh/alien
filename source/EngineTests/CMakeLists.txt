@@ -22,6 +22,7 @@ PUBLIC
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h
     LayerParameterTests.cpp
+    MemoryTests.cpp
     MuscleTests.cpp
     NeuronTests.cpp
     PhysicsTests.cpp

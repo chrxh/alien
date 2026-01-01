@@ -5,6 +5,8 @@
 
 #include <Base/Math.h>
 
+#include "EngineConstants.h"
+
 void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& genome)
 {
     // Validate genome-level attributes
@@ -195,8 +197,27 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
             } else if (nodeType == CellTypeGenome_Detonator) {
                 auto& detonator = std::get<DetonatorGenomeDescription>(node._cellType);
                 detonator._countdown = std::max(detonator._countdown, 1);
+
+            } else if (nodeType == CellTypeGenome_Memory) {
+                auto& memory = std::get<MemoryGenomeDescription>(node._cellType);
+                auto memoryMode = memory.getMode();
+                if (memoryMode == MemoryMode_SignalDelay) {
+                    auto& signalDelay = std::get<SignalDelayGenomeDescription>(memory._mode);
+                    signalDelay._delay = std::clamp(signalDelay._delay, 0, MAX_CELL_MEMORY_ENTRIES);
+                } else if (memoryMode == MemoryMode_SignalRecorder) {
+                    auto& signalRecorder = std::get<SignalRecorderGenomeDescription>(memory._mode);
+                    signalRecorder._numWrittenSignalEntries = std::clamp(signalRecorder._numWrittenSignalEntries, 0, static_cast<int>(memory._signalEntries.size()));
+                } else if (memoryMode == MemoryMode_SignalStorage) {
+                } else if (memoryMode == MemoryMode_SignalIntegrator) {
+                    auto& signalIntegrator = std::get<SignalIntegratorGenomeDescription>(memory._mode);
+                    signalIntegrator._newSignalWeight = std::clamp(signalIntegrator._newSignalWeight, 0.0f, 1.0f);
+                }
+                // Validate number of memory entries
+                auto numEntries = memory._signalEntries.size();
+                if (numEntries > MAX_CELL_MEMORY_ENTRIES) {
+                    memory._signalEntries.resize(MAX_CELL_MEMORY_ENTRIES);
+                }
             }
-            // BaseGenomeDescription is the only cell type without attributes to validate
         }
     }
 }

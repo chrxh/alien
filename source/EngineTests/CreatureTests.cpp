@@ -94,8 +94,8 @@ protected:
     GenomeDescription createGenomeForCrawlingCreature(MuscleMode const& muscleMode, Direction direction, float frontAngle) const
     {
         auto muscleDesc = muscleMode == MuscleMode_AutoCrawling
-            ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f))
-            : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.8f : 0.2f));
+            ? MuscleGenomeDescription().mode(AutoCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f))
+            : MuscleGenomeDescription().mode(ManualCrawlingGenomeDescription().forwardBackwardRatio(direction == Direction::Forward ? 0.9f : 0.1f));
         auto generator = muscleMode == MuscleMode_AutoCrawling
             ? GeneratorGenomeDescription()
             : GeneratorGenomeDescription().pulseType(GeneratorPulseType_Alternation).autoTriggerInterval(15).alternationInterval(20);
@@ -442,10 +442,8 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Description().addCreature(
-
         CreatureDescription().cells(
             {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))}),
-
         genome);
 
     _simulationFacade->setSimulationData(data);

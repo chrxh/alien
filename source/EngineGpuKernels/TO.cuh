@@ -287,6 +287,53 @@ struct DigestorTO
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelayTO
+{
+    uint8_t delay;
+    uint8_t numSignalEntriesInitialized;
+    uint8_t ringBufferIndex;
+};
+
+struct SignalRecorderTO
+{
+    bool readOnly;
+    SignalRecorderState state;
+    uint8_t numWrittenSignalEntries;
+    uint8_t numReadSignalEntries;
+};
+
+struct SignalStorageTO
+{
+    bool readOnly;
+};
+
+struct SignalIntegratorTO
+{
+    float newSignalWeight;  // Between 0 and 1
+};
+
+union MemoryModeDataTO
+{
+    SignalDelayTO signalDelay;
+    SignalRecorderTO signalRecorder;
+    SignalStorageTO signalStorage;
+    SignalIntegratorTO signalIntegrator;
+};
+
+struct SignalEntryTO
+{
+    float channels[MAX_CHANNELS];
+};
+
+struct MemoryTO
+{
+    MemoryMode mode;
+    MemoryModeDataTO modeData;
+
+    uint8_t numSignalEntries;
+    uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryTO[MAX_CELL_MEMORY_ENTRIES]
+};
+
 union CellTypeDataTO
 {
     BaseTO base;
@@ -301,6 +348,7 @@ union CellTypeDataTO
     ReconnectorTO reconnector;
     DetonatorTO detonator;
     DigestorTO digestor;
+    MemoryTO memory;
 };
 
 struct SignalRestrictionTO

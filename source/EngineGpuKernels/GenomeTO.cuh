@@ -204,6 +204,49 @@ struct DigestorGenomeTO
     float rawEnergyConductivity;  // Between 0 and 1
 };
 
+struct SignalDelayGenomeTO
+{
+    uint8_t delay;
+};
+
+struct SignalRecorderGenomeTO
+{
+    bool readOnly;
+    uint8_t numWrittenSignalEntries;
+};
+
+struct SignalStorageGenomeTO
+{
+    bool readOnly;
+};
+
+struct SignalIntegratorGenomeTO
+{
+    float newSignalWeight;  // Between 0 and 1
+};
+
+union MemoryModeDataGenomeTO
+{
+    SignalDelayGenomeTO signalDelay;
+    SignalRecorderGenomeTO signalRecorder;
+    SignalStorageGenomeTO signalStorage;
+    SignalIntegratorGenomeTO signalIntegrator;
+};
+
+struct SignalEntryGenomeTO
+{
+    float channels[MAX_CHANNELS];
+};
+
+struct MemoryGenomeTO
+{
+    MemoryMode mode;
+    MemoryModeDataGenomeTO modeData;
+
+    uint8_t numSignalEntries;
+    uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
+};
+
 union CellTypeDataGenomeTO
 {
     BaseGenomeTO base;
@@ -218,6 +261,7 @@ union CellTypeDataGenomeTO
     ReconnectorGenomeTO reconnector;
     DetonatorGenomeTO detonator;
     DigestorGenomeTO digestor;
+    MemoryGenomeTO memory;
 };
 
 struct SignalRestrictionGenomeTO

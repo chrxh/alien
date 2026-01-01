@@ -2,6 +2,7 @@
 
 #include <EngineInterface/Description.h>
 #include <EngineInterface/DescriptionEditService.h>
+#include <EngineInterface/GenomeDescription.h>
 #include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
@@ -34,7 +35,7 @@ INSTANTIATE_TEST_SUITE_P(
     GarbageCollectorTests_AllCleanupActions,
     ::testing::Values(CleanupAction::CleanupAfterTimestep, CleanupAction::CleanupAfterDataManipulation, CleanupAction::ResizeArrays));
 
-TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep)
+TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_cellsAndParticles)
 {
     auto cleanupAction = GetParam();
 
@@ -57,5 +58,35 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep)
     case CleanupAction::ResizeArrays:
         _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
     }
-    EXPECT_TRUE(_simulationFacade->testOnly_areArraysValid());
+    EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
+}
+
+TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCellsWithMemoryNodes)
+{
+    auto cleanupAction = GetParam();
+
+    // Create a genome with memory cell type nodes that have memory entries
+    auto genome = GenomeDescription().genes({GeneDescription().separation(true).nodes({
+        NodeDescription().cellType(MemoryGenomeDescription().signalEntries({SignalEntryGenomeDescription()})),
+        NodeDescription().cellType(
+            MemoryGenomeDescription().signalEntries({SignalEntryGenomeDescription(), SignalEntryGenomeDescription(), SignalEntryGenomeDescription()})),
+    })});
+
+    auto data = Description().addCreature(
+        CreatureDescription().cells({
+            CellDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription()})),
+            CellDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()})),
+        }),
+        genome);
+    _simulationFacade->setSimulationData(data);
+
+    switch (cleanupAction) {
+    case CleanupAction::CleanupAfterTimestep:
+        _simulationFacade->testOnly_cleanupAfterTimestep();
+    case CleanupAction::CleanupAfterDataManipulation:
+        _simulationFacade->testOnly_cleanupAfterDataManipulation();
+    case CleanupAction::ResizeArrays:
+        _simulationFacade->testOnly_resizeArrays(ArraySizesForGpu{.cellArray = 1000, .particleArray = 1000, .heap = 1000000});
+    }
+    EXPECT_TRUE(_simulationFacade->testOnly_arePointersValid());
 }

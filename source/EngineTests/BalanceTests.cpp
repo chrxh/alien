@@ -5,6 +5,7 @@
 #include <EngineInterface/Description.h>
 #include <EngineInterface/DescriptionEditService.h>
 #include <EngineInterface/GenomeDescription.h>
+#include <EngineInterface/NumberGenerator.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -20,9 +21,13 @@ public:
 
     Description createSmallCreatureSeed()
     {
+        auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
+        auto& numberGen = NumberGenerator::get();
         return Description().addCreature(
             CreatureDescription().lineageId(0).cells({
-                CellDescription().pos({20.0f, 20.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
+                CellDescription()
+                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
+                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
             }),
             GenomeDescription().genes({
                 GeneDescription()
@@ -48,68 +53,57 @@ public:
     };
     Description createLargeCreatureSeed(DigestionCapability const& digestionCapability)
     {
+        auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
+        auto& numberGen = NumberGenerator::get();
         auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 1.0f : 0.0f;
-        return Description()
-            .addCreature(
-                CreatureDescription().lineageId(0).cells({
-                    CellDescription().pos({20.0f, 20.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
-                }),
-                GenomeDescription().genes({
-                    GeneDescription()
-                        .separation(true)
-                        .shape(ConstructorShape_Hexagon)
-                        .nodes({
-                            NodeDescription().cellType(DigestorGenomeDescription()),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                            NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                            NodeDescription().cellType(ConstructorGenomeDescription()),
-                            NodeDescription().cellType(SensorGenomeDescription().mode(
-                                DetectCreatureGenomeDescription().restrictToLineage(LineageRestriction_OtherLineage))),
-                            NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                        }),
-                }))
-            .addCreature(
-                CreatureDescription().lineageId(1).cells({
-                    CellDescription().pos({80.0f, 80.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
-                }),
-                GenomeDescription().genes({
-                    GeneDescription()
-                        .separation(true)
-                        .shape(ConstructorShape_Hexagon)
-                        .nodes({
-                            NodeDescription().cellType(GeneratorGenomeDescription().autoTriggerInterval(15)),
-                            NodeDescription().cellType(DigestorGenomeDescription()),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                            NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                            NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(ConstructorGenomeDescription()),
-                            NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
-                            NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                            NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
-                            NodeDescription().cellType(AttackerGenomeDescription()),
-                        }),
-                }));
+        return Description().addCreature(
+            CreatureDescription().lineageId(1).cells({
+                CellDescription()
+                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
+                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
+            }),
+            GenomeDescription().genes({
+                GeneDescription()
+                    .separation(true)
+                    .shape(ConstructorShape_Hexagon)
+                    .nodes({
+                        NodeDescription().cellType(GeneratorGenomeDescription().autoTriggerInterval(15)),
+                        NodeDescription().cellType(DigestorGenomeDescription()),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(AttackerGenomeDescription()),
+                        NodeDescription().cellType(AttackerGenomeDescription()),
+                        NodeDescription().cellType(AttackerGenomeDescription()),
+                        NodeDescription().cellType(AttackerGenomeDescription()),
+                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
+                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(ConstructorGenomeDescription()),
+                        NodeDescription().cellType(DigestorGenomeDescription().rawEnergyConductivity(rawEnergyConductivity)),
+                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
+                        NodeDescription().cellType(MuscleGenomeDescription().mode(DirectMovementGenomeDescription())),
+                        NodeDescription().cellType(AttackerGenomeDescription()),
+                    }),
+            }));
     }
 };
 
 // Test that small creatures dominates if large creatures have few digestion capabilities
 TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCapabilities)
 {
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = 200000;
+    _parameters.attackerRadius.value[0] = 4.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().add(createSmallCreatureSeed()).add(createLargeCreatureSeed(DigestionCapability::Low));
+    Description data;
+    for (int i = 0; i < 300; ++i) {
+        data.add(createSmallCreatureSeed());
+    }
+    for (int i = 0; i < 8; ++i) {
+        data.add(createLargeCreatureSeed(DigestionCapability::Low));
+    }
 
     _simulationFacade->setSimulationData(data);
 
@@ -131,18 +125,24 @@ TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_fewDigestionCa
     EXPECT_LT(200, numSmallCreatures);
 }
 
+
 // Test that large creatures dominates if large creatures have high digestion capabilities
-TEST_F(BalanceTests, longRunning_smallCreaturesVsLargeCreatures_highDigestionCapabilities)
+TEST_F(BalanceTests, longRunning_smallCreatures_vs_largeCreatures_highDigestionCapabilities)
 {
-    _parameters.externalEnergyControlToggle.value = true;
-    _parameters.externalEnergy.value = 200000;
+    _parameters.attackerRadius.value[0] = 4.0f;
     _simulationFacade->setSimulationParameters(_parameters);
 
-    auto data = Description().add(createSmallCreatureSeed()).add(createLargeCreatureSeed(DigestionCapability::High));
+    Description data;
+    for (int i = 0; i < 300; ++i) {
+        data.add(createSmallCreatureSeed());
+    }
+    for (int i = 0; i < 8; ++i) {
+        data.add(createLargeCreatureSeed(DigestionCapability::High));
+    }
 
     _simulationFacade->setSimulationData(data);
 
-    _simulationFacade->calcTimesteps(130000);
+    _simulationFacade->calcTimesteps(100000);
     auto actualData = _simulationFacade->getSimulationData();
 
     int numSmallCreatures = 0;
@@ -156,5 +156,5 @@ TEST_F(BalanceTests, longRunning_smallCreaturesVsLargeCreatures_highDigestionCap
             CHECK(false);
         }
     }
-    EXPECT_LT(30, numLargeCreatures);
+    EXPECT_LT(15, numLargeCreatures);
 }

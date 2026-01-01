@@ -24,7 +24,7 @@ private:
 __device__ __inline__ void NeuronProcessor::process(SimulationData& data, SimulationStatistics& statistics)
 {
     auto& cells = data.objects.cells;
-    auto partition = calcPartition(cells.getNumEntries(), blockIdx.x, gridDim.x);
+    auto partition = calcBlockPartition(cells.getNumEntries());
 
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto& cell = cells.at(i);

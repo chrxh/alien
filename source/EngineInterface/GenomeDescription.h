@@ -280,6 +280,55 @@ struct DigestorGenomeDescription
     }
 };
 
+struct SignalEntryGenomeDescription
+{
+    SignalEntryGenomeDescription();
+    auto operator<=>(SignalEntryGenomeDescription const&) const = default;
+
+    MEMBER(SignalEntryGenomeDescription, std::vector<float>, channels, {});
+};
+
+struct SignalDelayGenomeDescription
+{
+    auto operator<=>(SignalDelayGenomeDescription const&) const = default;
+
+    MEMBER(SignalDelayGenomeDescription, int, delay, 10);
+};
+
+struct SignalRecorderGenomeDescription
+{
+    auto operator<=>(SignalRecorderGenomeDescription const&) const = default;
+
+    MEMBER(SignalRecorderGenomeDescription, bool, readOnly, true);
+    MEMBER(SignalRecorderGenomeDescription, int, numWrittenSignalEntries, 0);
+};
+
+struct SignalStorageGenomeDescription
+{
+    auto operator<=>(SignalStorageGenomeDescription const&) const = default;
+
+    MEMBER(SignalStorageGenomeDescription, bool, readOnly, true);
+};
+
+struct SignalIntegratorGenomeDescription
+{
+    auto operator<=>(SignalIntegratorGenomeDescription const&) const = default;
+
+    MEMBER(SignalIntegratorGenomeDescription, float, newSignalWeight, 0.5f);  // Between 0 and 1
+};
+
+using MemoryModeGenomeDescription = std::variant<SignalDelayGenomeDescription, SignalRecorderGenomeDescription, SignalStorageGenomeDescription, SignalIntegratorGenomeDescription>;
+
+struct MemoryGenomeDescription
+{
+    auto operator<=>(MemoryGenomeDescription const&) const = default;
+
+    MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());
+    MEMBER(MemoryGenomeDescription, std::vector<SignalEntryGenomeDescription>, signalEntries, {});
+
+    MemoryMode getMode() const;
+};
+
 using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
@@ -292,7 +341,8 @@ using CellTypeGenomeDescription = std::variant<
     DefenderGenomeDescription,
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription,
-    DigestorGenomeDescription>;
+    DigestorGenomeDescription,
+    MemoryGenomeDescription>;
 
 struct SignalRestrictionGenomeDescription
 {

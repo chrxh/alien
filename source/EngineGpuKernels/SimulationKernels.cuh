@@ -29,6 +29,7 @@ __global__ void cudaNextTimestep_cellType_sensor(SimulationData data, Simulation
 __global__ void cudaNextTimestep_cellType_reconnector(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_detonator(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, SimulationStatistics statistics);
+__global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics);
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data);
 __global__ void cudaNextTimestep_physics_applyFriction(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep1(SimulationData data);
@@ -36,6 +37,7 @@ __global__ void cudaNextTimestep_structuralOperations_substep2(SimulationData da
 __global__ void cudaNextTimestep_structuralOperations_substep3(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep4(SimulationData data);
 __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData data);
+__global__ void cudaNextTimestep_incTimestep(SimulationData data);
 
 __global__ void cudaInitClusterData(SimulationData data);
 __global__ void cudaFindClusterIteration(SimulationData data);

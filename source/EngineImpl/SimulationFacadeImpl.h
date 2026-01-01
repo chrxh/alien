@@ -112,7 +112,7 @@ public:
     void testOnly_cleanupAfterTimestep() override;
     void testOnly_cleanupAfterDataManipulation() override;
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;
-    bool testOnly_areArraysValid() override;
+    bool testOnly_arePointersValid() override;
 
 private:
     bool _selectionNeedsUpdate = false;

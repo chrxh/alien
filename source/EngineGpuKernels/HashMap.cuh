@@ -21,7 +21,7 @@ public:
 
     __device__ __inline__ void reset_block()
     {
-        auto const threadBlock = calcPartition(_size, threadIdx.x, blockDim.x);
+        auto const threadBlock = calcThreadBlockPartition(_size);
         for (int i = threadBlock.startIndex; i <= threadBlock.endIndex; ++i) {
             _entries[i].setFree(0);
             _entries[i].initLock();

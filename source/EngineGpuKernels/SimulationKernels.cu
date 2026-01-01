@@ -8,6 +8,7 @@
 #include "ForceFieldKernels.cuh"
 #include "GeneratorProcessor.cuh"
 #include "InjectorProcessor.cuh"
+#include "MemoryProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "NeuronProcessor.cuh"
 #include "EnergyParticleProcessor.cuh"
@@ -184,6 +185,11 @@ __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, Simulati
     DigestorProcessor::process(data, statistics);
 }
 
+__global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics)
+{
+    MemoryProcessor::process(data, statistics);
+}
+
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)
 {
     CellProcessor::applyInnerFriction(data);
@@ -220,6 +226,11 @@ __global__ void cudaNextTimestep_structuralOperations_substep5(SimulationData da
     EnergyParticleProcessor::transformation(data);
 }
 
+__global__ void cudaNextTimestep_incTimestep(SimulationData data)
+{
+    ++(*data.timestep);
+}
+
 __global__ void cudaInitClusterData(SimulationData data)
 {
     ClusterProcessor::initClusterData(data);
@@ -253,13 +264,4 @@ __global__ void cudaApplyClusterData(SimulationData data)
 __global__ void cudaResetDensity(SimulationData data)
 {
     CellProcessor::resetDensity(data);
-}
-
-
-//This is the only calcKernel that uses dynamic parallelism.
-//When it is removed, performance drops by about 20% for unknown reasons.
-__global__ void nestedDummy() {}
-__global__ void dummy()
-{
-    nestedDummy<<<1, 1>>>();
 }

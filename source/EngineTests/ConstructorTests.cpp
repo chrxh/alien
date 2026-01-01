@@ -404,6 +404,41 @@ TEST_F(ConstructorTests, insufficientSpace)
     EXPECT_FALSE(hostCell._signalState == SignalState_Active);
 }
 
+TEST_F(ConstructorTests, crossingLinks)
+{
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription()}),
+    });
+
+    auto data = Description().addCreature(
+        CreatureDescription().id(0).cells({
+            CellDescription()
+                .id(10)
+                .pos({10.0f, 10.0f})
+                .usableEnergy(getConstructorEnergy())
+                .cellType(ConstructorDescription().currentNodeIndex(3).lastConstructedCellId(3)),
+            CellDescription().id(3).pos({10.0f, 10.0f + getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(2),
+            CellDescription().id(2).pos({9.0f, 9.0f + getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1),
+            CellDescription().id(1).pos({11.0f, 9.0f + getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(0),
+        }),
+        genome);
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 1);
+    data.addConnection(3, 10);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+
+    // No cell constructed
+    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(1, actualData._creatures.size());
+    auto creature = actualData.getCreatureRef(0);
+    ASSERT_EQ(4, creature._cells.size());
+}
+
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
 class ConstructorTests_AllNodeTypes
     : public ConstructorTests
@@ -2687,7 +2722,6 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
                 .pos({11.0f, 10.0f})
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(1).currentNodeIndex(2).lastConstructedCellId(8)),
-
             CellDescription().id(5).pos({10.0f, 9.0f - getOffspringDistance() - 1.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
             CellDescription().id(6).pos({10.0f, 9.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
             CellDescription().id(7).pos({11.0f + getOffspringDistance() + 1.0f, 10.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),

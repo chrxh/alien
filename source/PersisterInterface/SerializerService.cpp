@@ -222,6 +222,21 @@ namespace
     auto constexpr Id_DetonatorGenome_Countdown = 0;
 
     auto constexpr Id_DigestorGenome_RawEnergyConductivity = 0;
+
+    auto constexpr Id_SignalEntryGenome_Channels = 0;
+
+    auto constexpr Id_SignalDelayGenome_Delay = 0;
+
+    auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
+    auto constexpr Id_SignalRecorderGenome_NumSavedSignalEntries = 1;
+
+    auto constexpr Id_SignalStorageGenome_ReadOnly = 0;
+
+    auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
+
+    auto constexpr Id_SignalDelay_Delay = 0;
+    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
+    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
 }
 
 namespace cereal
@@ -548,6 +563,69 @@ namespace cereal
     SPLIT_SERIALIZATION(DigestorGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalDelayGenomeDescription& data)
+    {
+        SignalDelayGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalDelayGenome_Delay, data._delay, defaultObject._delay);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalDelayGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRecorderGenomeDescription& data)
+    {
+        SignalRecorderGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
+        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalRecorderGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalStorageGenomeDescription& data)
+    {
+        SignalStorageGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalStorageGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalStorageGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalIntegratorGenomeDescription& data)
+    {
+        SignalIntegratorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalIntegratorGenome_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalIntegratorGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalEntryGenomeDescription& data)
+    {
+        SignalEntryGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalEntryGenome_Channels, data._channels, defaultObject._channels);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalEntryGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MemoryGenomeDescription& data)
+    {
+        MemoryGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
+        ar(data._signalEntries);
+    }
+    SPLIT_SERIALIZATION(MemoryGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescription& data)
     {
         SignalRestrictionGenomeDescription defaultObject;
@@ -755,6 +833,17 @@ namespace
     auto constexpr Id_Detonator_Countdown = 1;
 
     auto constexpr Id_Digestor_RawEnergyConductivity = 0;
+
+    auto constexpr Id_SignalEntry_Channels = 0;
+
+    auto constexpr Id_SignalRecorder_ReadOnly = 0;
+    auto constexpr Id_SignalRecorder_State = 1;
+    auto constexpr Id_SignalRecorder_NumSavedSignalEntries = 2;
+    auto constexpr Id_SignalRecorder_NumReadSignalEntries = 3;
+
+    auto constexpr Id_SignalStorage_ReadOnly = 0;
+
+    auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
 }
 
 namespace cereal
@@ -1147,6 +1236,73 @@ namespace cereal
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(DigestorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalDelayDescription& data)
+    {
+        SignalDelayDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalDelay_Delay, data._delay, defaultObject._delay);
+        loadSave(task, auxiliaries, Id_SignalDelay_NumMemoryEntriesInitialized, data._numSignalEntriesInitialized, defaultObject._numSignalEntriesInitialized);
+        loadSave(task, auxiliaries, Id_SignalDelay_RingBufferIndex, data._ringBufferIndex, defaultObject._ringBufferIndex);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalDelayDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalRecorderDescription& data)
+    {
+        SignalRecorderDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
+        loadSave(task, auxiliaries, Id_SignalRecorder_State, data._state, defaultObject._state);
+        loadSave(task, auxiliaries, Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
+        loadSave(task, auxiliaries, Id_SignalRecorder_NumReadSignalEntries, data._numReadSignalEntries, defaultObject._numReadSignalEntries);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalRecorderDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalStorageDescription& data)
+    {
+        SignalStorageDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalStorage_ReadOnly, data._readOnly, defaultObject._readOnly);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalStorageDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalIntegratorDescription& data)
+    {
+        SignalIntegratorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalIntegrator_NewSignalWeight, data._newSignalWeight, defaultObject._newSignalWeight);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalIntegratorDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SignalEntryDescription& data)
+    {
+        SignalEntryDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalEntry_Channels, data._channels, defaultObject._channels);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SignalEntryDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, MemoryDescription& data)
+    {
+        MemoryDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
+        ar(data._signalEntries);
+    }
+    SPLIT_SERIALIZATION(MemoryDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
