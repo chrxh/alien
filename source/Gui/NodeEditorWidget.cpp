@@ -157,6 +157,8 @@ namespace
             return SignalRecorderGenomeDescription();
         case MemoryMode_SignalStorage:
             return SignalStorageGenomeDescription();
+        case MemoryMode_SignalIntegrator:
+            return SignalIntegratorGenomeDescription();
         default:
             CHECK(false);
         }
