@@ -430,7 +430,7 @@ __inline__ __device__ void SensorProcessor::writeSignal(Signal& signal, float an
 {
     signal.channels[Channels::SensorFoundResult] = 1;               // Something found
     signal.channels[Channels::SensorAngle] = angle / 180.0f;        // Angle: between -1.0 and 1.0
-    signal.channels[Channels::SensorDensity] = min(1.0f, density);  // Normalized density (1.0 = 64 cells in 8x8 region)
+    signal.channels[Channels::SensorMass] = min(1.0f, density);  // Normalized density (1.0 = 64 cells in 8x8 region)
     signal.channels[Channels::SensorDistance] = 1.0f - min(1.0f, distance / 256);  // Distance: 1 = close, 0 = far away
 }
 
