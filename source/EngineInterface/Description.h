@@ -388,7 +388,7 @@ struct SignalIntegratorDescription
 {
     auto operator<=>(SignalIntegratorDescription const&) const = default;
 
-    MEMBER(SignalIntegratorDescription, float, newSignalWeight, 1.0f);  // Between 0 and 1
+    MEMBER(SignalIntegratorDescription, float, newSignalWeight, 0.5f);  // Between 0 and 1
 };
 
 using MemoryModeDescription = std::variant<SignalDelayDescription, SignalRecorderDescription, SignalStorageDescription, SignalIntegratorDescription>;
