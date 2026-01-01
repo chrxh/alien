@@ -1351,7 +1351,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& signalRecorderDesc = std::get<SignalRecorderDescription>(memoryDesc._mode);
             memoryTO.modeData.signalRecorder.readOnly = signalRecorderDesc._readOnly;
             memoryTO.modeData.signalRecorder.state = signalRecorderDesc._state;
-            memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc.numWrittenSignalEntries;
+            memoryTO.modeData.signalRecorder.numWrittenSignalEntries = signalRecorderDesc._numWrittenSignalEntries;
             memoryTO.modeData.signalRecorder.numReadSignalEntries = signalRecorderDesc._numReadSignalEntries;
         } else if (memoryTO.mode == MemoryMode_SignalStorage) {
             auto const& signalStorageDesc = std::get<SignalStorageDescription>(memoryDesc._mode);

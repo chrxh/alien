@@ -578,7 +578,7 @@ namespace cereal
         SignalRecorderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
-        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumSavedSignalEntries, data._numSavedSignalEntries, defaultObject._numSavedSignalEntries);
+        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRecorderGenomeDescription)
@@ -1256,7 +1256,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
         loadSave(task, auxiliaries, Id_SignalRecorder_State, data._state, defaultObject._state);
-        loadSave(task, auxiliaries, Id_SignalRecorder_NumSavedSignalEntries, data._numSavedSignalEntries, defaultObject._numSavedSignalEntries);
+        loadSave(task, auxiliaries, Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
         loadSave(task, auxiliaries, Id_SignalRecorder_NumReadSignalEntries, data._numReadSignalEntries, defaultObject._numReadSignalEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }

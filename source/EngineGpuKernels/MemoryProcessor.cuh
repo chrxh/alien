@@ -195,11 +195,11 @@ __device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData&
     }
 
     auto const& inputValue = cell->signal.channels[Channels::MemoryReadWriteAction];
-    auto const numSignalEntries = static_cast<int>(memory.numSignalEntries);
+    auto const numSignalEntries = toInt(memory.numSignalEntries);
 
     // Calculate the index based on |channel[0]| * (numSignalEntries - 1)
     auto absInput = abs(inputValue);
-    auto index = static_cast<int>(absInput * static_cast<float>(numSignalEntries - 1));
+    auto index = toInt(absInput * toFloat(numSignalEntries - 1) + 0.5f);
 
     // Clamp index between 0 and numSignalEntries - 1
     if (index < 0) {
