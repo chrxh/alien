@@ -206,19 +206,24 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - cell->frontAngle, -180.0f);
 
-            // For DetectCreature mode, density contains numCells - convert to signal
+            auto matchPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
+            data.cellMap.correctPosition(matchPos);
+
+            // For DetectCreature mode, look up the creature at match position to get numCells
             float numCellsSignal = 0.0f;
             if (cell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                uint32_t numCells = static_cast<uint32_t>(density);
-                numCellsSignal = convertNumCellsToSignal(numCells);
-                density = 1.0f;  // Reset density to standard value for creature detection
+                auto otherCell = data.cellMap.getFirst(matchPos);
+                while (otherCell != nullptr) {
+                    if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == creatureIdPart) {
+                        numCellsSignal = convertNumCellsToSignal(otherCell->creature->numCells);
+                        break;
+                    }
+                    otherCell = otherCell->nextCell;
+                }
             }
 
             writeSignal(cell->signal, relAngle, density, distance, numCellsSignal);
             statistics.incNumSensorMatches(cell->color);
-
-            auto matchPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
-            data.cellMap.correctPosition(matchPos);
 
             // No relocation for structures 
             if (cell->cellTypeData.sensor.mode != SensorMode_DetectStructure) {
@@ -308,18 +313,23 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             }
 
             auto targetPos = cell->pos + Math::unitVectorOfAngle(absAngle) * distance;
+            data.cellMap.correctPosition(targetPos);
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - cell->frontAngle, -180.0f);
 
-            // For DetectCreature mode, density contains numCells - convert to signal
+            // For DetectCreature mode, look up the creature at target position to get numCells
             float numCellsSignal = 0.0f;
-            float densityForSignal = density;
             if (cell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                uint32_t numCells = static_cast<uint32_t>(density);
-                numCellsSignal = convertNumCellsToSignal(numCells);
-                densityForSignal = 1.0f;  // Reset density to standard value for creature detection
+                auto otherCell = data.cellMap.getFirst(targetPos);
+                while (otherCell != nullptr) {
+                    if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == creatureIdPart) {
+                        numCellsSignal = convertNumCellsToSignal(otherCell->creature->numCells);
+                        break;
+                    }
+                    otherCell = otherCell->nextCell;
+                }
             }
 
-            writeSignal(cell->signal, relAngle, densityForSignal, distance, numCellsSignal);
+            writeSignal(cell->signal, relAngle, density, distance, numCellsSignal);
     
             statistics.incNumSensorMatches(cell->color);
     
@@ -405,8 +415,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
 
                     if (matches) {
                         uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xFFFF) : 0;
-                        uint32_t numCells = otherCell->creature != nullptr ? otherCell->creature->numCells : 0;
-                        return pack(distance, absAngle, toFloat(numCells), creatureIdPart);
+                        return pack(distance, absAngle, 1.0f, creatureIdPart);
                     }
                 }
                 otherCell = otherCell->nextCell;
@@ -419,8 +428,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Cell* cell, float2 const& sc
             while (otherCell != nullptr) {
                 if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == sensor.lastMatch.creatureId) {
                     uint16_t creatureIdPart = otherCell->creature != nullptr ? static_cast<uint16_t>(otherCell->creature->id & 0xffff) : 0;
-                    uint32_t numCells = otherCell->creature != nullptr ? otherCell->creature->numCells : 0;
-                    return pack(distance, absAngle, toFloat(numCells), creatureIdPart);
+                    return pack(distance, absAngle, 1.0f, creatureIdPart);
                 }
                 otherCell = otherCell->nextCell;
             }
