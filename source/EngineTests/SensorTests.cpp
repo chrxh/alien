@@ -1372,3 +1372,174 @@ TEST_F(SensorTests, telemetry_allOutputs)
     EXPECT_TRUE(velStrength > 0.5f);
     EXPECT_TRUE(velStrength < 0.7f);
 }
+
+/**
+ * Tests for SensorNumCells output in DetectCreature mode
+ */
+TEST_F(SensorTests, detectCreature_numCellsOutput_smallCreature)
+{
+    auto data = Description().addCreature(CreatureDescription().id(0).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    }));
+    data.addConnection(1, 2);
+
+    // Create a small target creature with 4 cells
+    data.addCreature(CreatureDescription().id(1).cells({
+        CellDescription().id(10).pos({100.0f, 80.0f}),
+        CellDescription().id(11).pos({101.0f, 80.0f}),
+        CellDescription().id(12).pos({100.0f, 81.0f}),
+        CellDescription().id(13).pos({101.0f, 81.0f}),
+    }));
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
+
+    // 4 cells: log2(4) / 7.0 = 2 / 7 ≈ 0.286
+    auto numCellsSignal = actualSensor._signal._channels[Channels::SensorNumCells];
+    EXPECT_TRUE(numCellsSignal > 0.2f);
+    EXPECT_TRUE(numCellsSignal < 0.4f);
+}
+
+TEST_F(SensorTests, detectCreature_numCellsOutput_largeCreature)
+{
+    auto data = Description().addCreature(CreatureDescription().id(0).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    }));
+    data.addConnection(1, 2);
+
+    // Create a large creature with 100 cells (10x10 grid) using helper
+    data.add(createLargeCreature());
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
+
+    // 100 cells: log2(100) / 7.0 ≈ 6.64 / 7 ≈ 0.95
+    auto numCellsSignal = actualSensor._signal._channels[Channels::SensorNumCells];
+    EXPECT_TRUE(numCellsSignal > 0.85f);
+    EXPECT_TRUE(numCellsSignal < 1.0f);
+}
+
+TEST_F(SensorTests, detectCreature_numCellsOutput_varyingSizes)
+{
+    // Test that larger creatures produce higher numCells signals
+    auto runTest = [this](int creatureSize) {
+        auto data = Description().addCreature(CreatureDescription().id(0).cells({
+            CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
+            CellDescription().id(2).pos({101.0f, 100.0f}),
+        }));
+        data.addConnection(1, 2);
+
+        // Create target creature with specified number of cells
+        std::vector<CellDescription> targetCells;
+        for (int i = 0; i < creatureSize; ++i) {
+            targetCells.emplace_back(CellDescription().id(10 + i).pos({100.0f + toFloat(i % 10), 80.0f + toFloat(i / 10)}));
+        }
+        data.addCreature(CreatureDescription().id(1).cells(targetCells));
+
+        _simulationFacade->setSimulationData(data);
+        _simulationFacade->calcTimesteps(1);
+
+        auto actualData = _simulationFacade->getSimulationData();
+        auto actualSensor = actualData.getCellRef(1);
+
+        EXPECT_TRUE(actualSensor._signalState == SignalState_Active);
+        return actualSensor._signal._channels[Channels::SensorNumCells];
+    };
+
+    auto signal2Cells = runTest(2);
+    auto signal10Cells = runTest(10);
+    auto signal50Cells = runTest(50);
+
+    // Verify non-linear scaling: larger creatures should have higher signals
+    EXPECT_TRUE(signal10Cells > signal2Cells);
+    EXPECT_TRUE(signal50Cells > signal10Cells);
+
+    // Verify approximate expected values based on log2(n)/7 formula
+    // 2 cells: log2(2)/7 = 1/7 ≈ 0.14
+    EXPECT_TRUE(signal2Cells > 0.1f);
+    EXPECT_TRUE(signal2Cells < 0.2f);
+    // 10 cells: log2(10)/7 ≈ 3.32/7 ≈ 0.47
+    EXPECT_TRUE(signal10Cells > 0.4f);
+    EXPECT_TRUE(signal10Cells < 0.55f);
+    // 50 cells: log2(50)/7 ≈ 5.64/7 ≈ 0.81
+    EXPECT_TRUE(signal50Cells > 0.75f);
+    EXPECT_TRUE(signal50Cells < 0.9f);
+}
+
+TEST_F(SensorTests, detectCreature_numCellsOutput_relocation)
+{
+    // Test that numCells is also output correctly during relocation
+    auto data = Description().addCreature(CreatureDescription().id(0).cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    }));
+    data.addConnection(1, 2);
+
+    // Create a target creature with 25 cells (5x5 grid)
+    data.add(createLargeCreature({95.0f, 80.0f}, 5));
+
+    _simulationFacade->setSimulationData(data);
+
+    // First scan - initial detection
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
+    auto initialNumCellsSignal = actualSensor._signal._channels[Channels::SensorNumCells];
+
+    // Second scan - relocation
+    _simulationFacade->calcTimesteps(3);  // Wait for next trigger
+    actualData = _simulationFacade->getSimulationData();
+    actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(actualSensor._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
+
+    // numCells should be similar between initial scan and relocation
+    // 25 cells: log2(25)/7 ≈ 4.64/7 ≈ 0.66
+    auto relocationNumCellsSignal = actualSensor._signal._channels[Channels::SensorNumCells];
+    EXPECT_TRUE(relocationNumCellsSignal > 0.6f);
+    EXPECT_TRUE(relocationNumCellsSignal < 0.75f);
+    EXPECT_TRUE(approxCompare(initialNumCellsSignal, relocationNumCellsSignal));
+}
+
+TEST_P(SensorTests_AllDetectionModesExceptStructure, nonCreatureModes_numCellsZero)
+{
+    // For non-DetectCreature modes, numCells signal should be 0
+    if (GetParam() == SensorMode_DetectCreature) {
+        GTEST_SKIP() << "This test is for non-creature detection modes only";
+    }
+
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+
+    // Add detection targets above the sensor
+    addDetectionTargets(data, GetParam(), {98.0f, 20.0f}, 8);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto actualData = _simulationFacade->getSimulationData();
+    auto actualSensor = actualData.getCellRef(1);
+
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
+    // For non-creature modes, numCells signal should be 0
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor._signal._channels[Channels::SensorNumCells]));
+}
