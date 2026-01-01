@@ -69,7 +69,7 @@ void _GeneEditorWidget::processHeaderData()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Selected gene").highlighted(true));
 
-    if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+    if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
 
         _editData->updateGeometry(gene._shape);  // Do it every time in order to avoid check for changes

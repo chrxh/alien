@@ -172,7 +172,7 @@ void _NodeEditorWidget::processNodeAttributes()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Selected node").highlighted(true));
 
-    if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
+    if (ImGui::BeginChild("NodeData", ImVec2(0, -_layoutData->neuralNetEditorHeight), 0, 0)) {
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
 
@@ -246,9 +246,9 @@ void _NodeEditorWidget::processNodeAttributes()
             } else if (nodeType == CellTypeGenome_Depot) {
                 AlienGui::BeginIndent();
                 auto& depot = std::get<DepotGenomeDescription>(node._cellType);
-                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max usable energy for storage").textWidth(rightColumnWidth), depot._storageLimit);
+                AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Max energy for storage").textWidth(rightColumnWidth), depot._storageLimit);
                 AlienGui::InputFloat(
-                    AlienGui::InputFloatParameters().name("Initial stored usable energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
+                    AlienGui::InputFloatParameters().name("Initial stored energy").textWidth(rightColumnWidth), depot._initialStoredUsableEnergy);
                 AlienGui::EndIndent();
             } else if (nodeType == CellTypeGenome_Constructor) {
 

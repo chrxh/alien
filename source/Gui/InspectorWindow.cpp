@@ -548,11 +548,11 @@ void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
 void _InspectorWindow::processNeuronContent(CellDescription& cell)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
-        AlienGui::NeuronSelection(
-            AlienGui::NeuronSelectionParameters().rightMargin(0),
-            cell._neuralNetwork->_weights,
-            cell._neuralNetwork->_biases,
-            cell._neuralNetwork->_activationFunctions);
+        //AlienGui::NeuralNetEditor(
+        //    AlienGui::NeuralNetEditorParameters().rightMargin(0),
+        //    cell._neuralNetwork->_weights,
+        //    cell._neuralNetwork->_biases,
+        //    cell._neuralNetwork->_activationFunctions);
         ImGui::TreePop();
     }
 }

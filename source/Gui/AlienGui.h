@@ -441,19 +441,6 @@ public:
     static void BeginIndent();
     static void EndIndent();
 
-    struct NeuronSelectionParameters
-    {
-        MEMBER(NeuronSelectionParameters, std::string, name, "");
-        MEMBER(NeuronSelectionParameters, float, step, 0.05f);
-        MEMBER(NeuronSelectionParameters, std::string, format, "%.2f");
-        MEMBER(NeuronSelectionParameters, float, rightMargin, 0);
-    };
-    static void NeuronSelection(
-        NeuronSelectionParameters const& parameters,
-        std::vector<float>& weights,
-        std::vector<float>& biases,
-        std::vector<ActivationFunction>& activationFunctions);
-
     struct SignalMemoryEditorParameters
     {
         MEMBER(SignalMemoryEditorParameters, float, textWidth, 100);
