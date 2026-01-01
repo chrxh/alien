@@ -31,6 +31,7 @@ private:
     __inline__ __device__ static void writeSignal(Signal& signal, float angle, float density, float distance, float numCellsSignal = 0.0f);
 
     __inline__ __device__ static float convertNumCellsToSignal(uint32_t numCells);
+    __inline__ __device__ static float lookupCreatureNumCellsSignal(SimulationData& data, float2 const& pos, uint16_t creatureIdPart);
 
     __inline__ __device__ static uint16_t convertAngleToUint16(float angle);
     __inline__ __device__ static float convertUint16ToAngle(uint16_t b);
@@ -212,14 +213,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             // For DetectCreature mode, look up the creature at match position to get numCells
             float numCellsSignal = 0.0f;
             if (cell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                auto otherCell = data.cellMap.getFirst(matchPos);
-                while (otherCell != nullptr) {
-                    if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == creatureIdPart) {
-                        numCellsSignal = convertNumCellsToSignal(otherCell->creature->numCells);
-                        break;
-                    }
-                    otherCell = otherCell->nextCell;
-                }
+                numCellsSignal = lookupCreatureNumCellsSignal(data, matchPos, creatureIdPart);
             }
 
             writeSignal(cell->signal, relAngle, density, distance, numCellsSignal);
@@ -319,14 +313,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
             // For DetectCreature mode, look up the creature at target position to get numCells
             float numCellsSignal = 0.0f;
             if (cell->cellTypeData.sensor.mode == SensorMode_DetectCreature) {
-                auto otherCell = data.cellMap.getFirst(targetPos);
-                while (otherCell != nullptr) {
-                    if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == creatureIdPart) {
-                        numCellsSignal = convertNumCellsToSignal(otherCell->creature->numCells);
-                        break;
-                    }
-                    otherCell = otherCell->nextCell;
-                }
+                numCellsSignal = lookupCreatureNumCellsSignal(data, targetPos, creatureIdPart);
             }
 
             writeSignal(cell->signal, relAngle, density, distance, numCellsSignal);
@@ -471,6 +458,19 @@ __inline__ __device__ float SensorProcessor::convertNumCellsToSignal(uint32_t nu
         return 0.0f;
     }
     return min(1.0f, log2f(toFloat(numCells)) / 7.0f);
+}
+
+// Look up the creature at the given position and return its numCells as a signal value
+__inline__ __device__ float SensorProcessor::lookupCreatureNumCellsSignal(SimulationData& data, float2 const& pos, uint16_t creatureIdPart)
+{
+    auto otherCell = data.cellMap.getFirst(pos);
+    while (otherCell != nullptr) {
+        if (otherCell->creature != nullptr && (otherCell->creature->id & 0xffff) == creatureIdPart) {
+            return convertNumCellsToSignal(otherCell->creature->numCells);
+        }
+        otherCell = otherCell->nextCell;
+    }
+    return 0.0f;
 }
 
 __inline__ __device__ uint16_t SensorProcessor::convertAngleToUint16(float angle)
