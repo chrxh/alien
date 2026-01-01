@@ -17,6 +17,7 @@ namespace
 {
     auto constexpr HeaderMinRightColumnWidth = 160.0f;
     auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
+    auto constexpr HeaderMinColumnWidth = 300.0f;
 }
 
 
@@ -68,62 +69,72 @@ void _GeneEditorWidget::processHeaderData()
 {
     AlienGui::Group(AlienGui::GroupParameters().text("Selected gene").highlighted(true));
 
-    auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
     if (ImGui::BeginChild("GeneHeader", ImVec2(0, -_layoutData->nodeListHeight), 0, ImGuiWindowFlags_AlwaysVerticalScrollbar)) {
         auto& gene = _editData->getSelectedGeneRef();
 
         _editData->updateGeometry(gene._shape);  // Do it every time in order to avoid check for changes
 
-        // Gene name
-        AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
+        AlienGui::DynamicTableLayout table(HeaderMinColumnWidth);
+        if (table.begin()) {
 
-        // Shape
-        if (AlienGui::Combo(
-                AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape)) {
-            if (auto shapeGenerator = ShapeGeneratorFactory::create(gene._shape)) {
-                if (_editData->selectedGeneIndex.value() == 0) {
-                    _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
+            auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+
+            // Gene name
+            AlienGui::InputText(AlienGui::InputTextParameters().name("Gene name").textWidth(rightColumnWidth), gene._name);
+
+            // Shape
+            if (AlienGui::Combo(
+                    AlienGui::ComboParameters().name("Shape generator").values(Const::ConstructorShapeStrings).textWidth(rightColumnWidth), gene._shape)) {
+                if (auto shapeGenerator = ShapeGeneratorFactory::create(gene._shape)) {
+                    if (_editData->selectedGeneIndex.value() == 0) {
+                        _editData->genome._frontAngle = shapeGenerator->getPreferredFrontAngle();
+                    }
                 }
             }
-        }
 
-        // Angle alignment
-        AlienGui::BeginIndent();
-        if (gene._shape == ConstructorShape_Custom) {
-            AlienGui::Combo(
-                AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
-                gene._angleAlignment);
-        } /*else {
+            // Angle alignment
+            AlienGui::BeginIndent();
+            if (gene._shape == ConstructorShape_Custom) {
+                AlienGui::Combo(
+                    AlienGui::ComboParameters().name("Angle alignment").values(Const::ConstructorAlignmentStrings).textWidth(rightColumnWidth),
+                    gene._angleAlignment);
+            } /*else {
             std::string text = Const::ConstructorAlignmentStrings.at(gene._angleAlignment);
             AlienGui::InputText(AlienGui::InputTextParameters().name("Angle alignment").textWidth(rightColumnWidth).readOnly(true), text);
         }*/
-        AlienGui::EndIndent();
+            AlienGui::EndIndent();
 
-        // Separation
-        AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separation);
+            // Separation
+            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Separation").textWidth(rightColumnWidth), gene._separation);
 
-        // Number of branches
-        AlienGui::BeginIndent();
-        if (!gene._separation) {
-            auto numBranches = gene._numBranches - 1;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
-            AlienGui::Combo(
-                AlienGui::ComboParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
-            gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
-        } else {
-            std::string text = "-";
-            AlienGui::InputText(AlienGui::InputTextParameters().name("Number of branches").textWidth(rightColumnWidth).readOnly(true), text);
+            // Number of branches
+            AlienGui::BeginIndent();
+            if (!gene._separation) {
+                auto numBranches = gene._numBranches - 1;  // Convert to 0-based for UI (1 branch -> index 0, 2 branches -> index 1, etc.)
+                AlienGui::Combo(
+                    AlienGui::ComboParameters().name("Number of branches").values({"1", "2", "3", "4", "5", "6"}).textWidth(rightColumnWidth), numBranches);
+                gene._numBranches = numBranches + 1;  // Convert back to 1-based (index 0 -> 1 branch, index 1 -> 2 branches, etc.)
+            }/* else {
+                std::string text = "-";
+                AlienGui::InputText(AlienGui::InputTextParameters().name("Number of branches").textWidth(rightColumnWidth).readOnly(true), text);
+            }*/
+            AlienGui::EndIndent();
+
+            table.next();
+
+            // Concatenations
+            AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
+
+            // Connection distance
+            AlienGui::InputFloat(
+                AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
+
+            // Stiffness
+            AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
+
+            table.next();
+            table.end();
         }
-        AlienGui::EndIndent();
-
-        // Concatenations
-        AlienGui::InputInt(AlienGui::InputIntParameters().name("Concatenations").infinity(true).textWidth(rightColumnWidth), gene._numConcatenations);
-
-        // Connection distance
-        AlienGui::InputFloat(
-            AlienGui::InputFloatParameters().name("Connection distance").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._connectionDistance);
-
-        // Stiffness
-        AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Stiffness").format("%.2f").step(0.05f).textWidth(rightColumnWidth), gene._stiffness);
     }
     ImGui::EndChild();
 }

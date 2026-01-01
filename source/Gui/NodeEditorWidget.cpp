@@ -12,8 +12,9 @@
 
 namespace
 {
-    auto constexpr HeaderMinRightColumnWidth = 150.0f;
-    auto constexpr HeaderMaxLeftColumnWidth = 200.0f;
+    auto constexpr MinTextWidth = 150.0f;
+    auto constexpr MaxWidgetWidth = 200.0f;
+    auto constexpr MinColumnWidth = 300.0f;
 }
 
 
@@ -175,9 +176,9 @@ void _NodeEditorWidget::processNodeAttributes()
         auto& gene = _editData->getSelectedGeneRef();
         auto& node = _editData->getSelectedNodeRef();
 
-        AlienGui::DynamicTableLayout table(300.0f);
+        AlienGui::DynamicTableLayout table(MinColumnWidth);
         if (table.begin()) {
-            auto rightColumnWidth = std::max(HeaderMinRightColumnWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(HeaderMaxLeftColumnWidth)));
+            auto rightColumnWidth = std::max(MinTextWidth, scaleInverse(ImGui::GetContentRegionAvail().x - scale(MaxWidgetWidth)));
 
             // Angle
             auto nodeIndex = _editData->getSelectedNodeIndex();
@@ -567,11 +568,11 @@ void _NodeEditorWidget::processNodeAttributes()
                 AlienGui::BeginIndent();
                 auto& digestor = std::get<DigestorGenomeDescription>(node._cellType);
                 AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("Raw energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
+                    AlienGui::SliderFloatParameters().name("Energy conductivity").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                     &digestor._rawEnergyConductivity);
                 auto rawEnergyConversionRate = digestor.getRawEnergyConversionRate();
                 AlienGui::SliderFloat(
-                    AlienGui::SliderFloatParameters().name("Raw energy conversion rate").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
+                    AlienGui::SliderFloatParameters().name("Energy conversion").max(1.0f).format("%.2f").textWidth(rightColumnWidth),
                     &rawEnergyConversionRate);
                 digestor.setRawEnergyConversionRate(rawEnergyConversionRate);
                 AlienGui::EndIndent();
