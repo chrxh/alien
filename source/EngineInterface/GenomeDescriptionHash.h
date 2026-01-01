@@ -376,7 +376,7 @@ struct std::hash<SignalRecorderGenomeDescription>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._readOnly);
-        hash_combine(seed, desc._numSavedSignalEntries);
+        hash_combine(seed, desc._numWrittenSignalEntries);
         return seed;
     }
 };
@@ -387,6 +387,7 @@ struct std::hash<SignalStorageGenomeDescription>
     std::size_t operator()(SignalStorageGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
+        hash_combine(seed, desc._readOnly);
         return seed;
     }
 };

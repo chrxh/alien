@@ -216,6 +216,7 @@ struct SignalRecorderGenome
 
 struct SignalStorageGenome
 {
+    bool readOnly;
 };
 
 struct SignalIntegratorGenome

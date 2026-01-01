@@ -188,6 +188,7 @@ namespace
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.readOnly = node.cellTypeData.memory.modeData.signalRecorder.readOnly;
                             nodeTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = node.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                            nodeTO.cellTypeData.memory.modeData.signalStorage.readOnly = node.cellTypeData.memory.modeData.signalStorage.readOnly;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                             nodeTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
                                 node.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;
@@ -436,6 +437,7 @@ namespace
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numWrittenSignalEntries;
                 cellTO.cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries = cell->cellTypeData.memory.modeData.signalRecorder.numReadSignalEntries;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalStorage) {
+                cellTO.cellTypeData.memory.modeData.signalStorage.readOnly = cell->cellTypeData.memory.modeData.signalStorage.readOnly;
             } else if (cell->cellTypeData.memory.mode == MemoryMode_SignalIntegrator) {
                 cellTO.cellTypeData.memory.modeData.signalIntegrator.newSignalWeight =
                     cell->cellTypeData.memory.modeData.signalIntegrator.newSignalWeight;

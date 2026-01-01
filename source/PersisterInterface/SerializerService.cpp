@@ -230,6 +230,8 @@ namespace
     auto constexpr Id_SignalRecorderGenome_ReadOnly = 0;
     auto constexpr Id_SignalRecorderGenome_NumSavedSignalEntries = 1;
 
+    auto constexpr Id_SignalStorageGenome_ReadOnly = 0;
+
     auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
 
     auto constexpr Id_SignalDelay_Delay = 0;
@@ -576,7 +578,7 @@ namespace cereal
         SignalRecorderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorderGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
-        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumSavedSignalEntries, data._numSavedSignalEntries, defaultObject._numSavedSignalEntries);
+        loadSave(task, auxiliaries, Id_SignalRecorderGenome_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalRecorderGenomeDescription)
@@ -586,6 +588,7 @@ namespace cereal
     {
         SignalStorageGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalStorageGenome_ReadOnly, data._readOnly, defaultObject._readOnly);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalStorageGenomeDescription)
@@ -837,6 +840,8 @@ namespace
     auto constexpr Id_SignalRecorder_State = 1;
     auto constexpr Id_SignalRecorder_NumSavedSignalEntries = 2;
     auto constexpr Id_SignalRecorder_NumReadSignalEntries = 3;
+
+    auto constexpr Id_SignalStorage_ReadOnly = 0;
 
     auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
 }
@@ -1251,7 +1256,7 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SignalRecorder_ReadOnly, data._readOnly, defaultObject._readOnly);
         loadSave(task, auxiliaries, Id_SignalRecorder_State, data._state, defaultObject._state);
-        loadSave(task, auxiliaries, Id_SignalRecorder_NumSavedSignalEntries, data._numSavedSignalEntries, defaultObject._numSavedSignalEntries);
+        loadSave(task, auxiliaries, Id_SignalRecorder_NumSavedSignalEntries, data._numWrittenSignalEntries, defaultObject._numWrittenSignalEntries);
         loadSave(task, auxiliaries, Id_SignalRecorder_NumReadSignalEntries, data._numReadSignalEntries, defaultObject._numReadSignalEntries);
         processLoadSaveMap(task, ar, auxiliaries);
     }
@@ -1262,6 +1267,7 @@ namespace cereal
     {
         SignalStorageDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SignalStorage_ReadOnly, data._readOnly, defaultObject._readOnly);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalStorageDescription)
