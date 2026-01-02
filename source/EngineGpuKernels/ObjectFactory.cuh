@@ -236,6 +236,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
             case CellTypeGenome_Memory:
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
                 node.cellTypeData.memory.numSignalEntries = nodeTO.cellTypeData.memory.numSignalEntries;
+                node.cellTypeData.memory.channelBitMask = nodeTO.cellTypeData.memory.channelBitMask;
                 if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                     node.cellTypeData.memory.modeData.signalDelay.delay = nodeTO.cellTypeData.memory.modeData.signalDelay.delay;
                 } else if (nodeTO.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
@@ -481,6 +482,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     case CellType_Memory: {
         cell->cellTypeData.memory.mode = cellTO.cellTypeData.memory.mode;
         cell->cellTypeData.memory.numSignalEntries = cellTO.cellTypeData.memory.numSignalEntries;
+        cell->cellTypeData.memory.channelBitMask = cellTO.cellTypeData.memory.channelBitMask;
         if (cellTO.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
             cell->cellTypeData.memory.modeData.signalDelay.delay = cellTO.cellTypeData.memory.modeData.signalDelay.delay;
             cell->cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = cellTO.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
@@ -849,6 +851,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         auto& memory = cell->cellTypeData.memory;
         memory.mode = nodeMemory.mode;
         memory.numSignalEntries = nodeMemory.numSignalEntries;
+        memory.channelBitMask = nodeMemory.channelBitMask;
         if (nodeMemory.mode == MemoryMode_SignalDelay) {
             memory.modeData.signalDelay.delay = nodeMemory.modeData.signalDelay.delay;
             memory.modeData.signalDelay.numSignalEntriesInitialized = 0;

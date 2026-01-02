@@ -434,6 +434,7 @@ struct std::hash<MemoryGenomeDescription>
         for (auto const& entry : desc._signalEntries) {
             hash_combine(result, std::hash<SignalEntryGenomeDescription>{}(entry));
         }
+        hash_combine(result, desc._channelBitMask);
         return result;
     }
 };

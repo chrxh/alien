@@ -325,6 +325,7 @@ struct MemoryGenomeDescription
 
     MEMBER(MemoryGenomeDescription, MemoryModeGenomeDescription, mode, SignalDelayGenomeDescription());
     MEMBER(MemoryGenomeDescription, std::vector<SignalEntryGenomeDescription>, signalEntries, {});
+    MEMBER(MemoryGenomeDescription, uint8_t, channelBitMask, 0b11111111);
 
     MemoryMode getMode() const;
 };

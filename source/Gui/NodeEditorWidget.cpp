@@ -617,6 +617,26 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 }
 
+                // Channel bit mask checkboxes
+                ImGui::Text("Channel bit mask");
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(rightColumnWidth - ImGui::CalcTextSize("Channel bit mask").x - 8.0f));
+                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    ImGui::PushID(i);
+                    bool bit = (memory._channelBitMask & (1 << i)) != 0;
+                    if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name(std::to_string(i)).textWidth(0), bit)) {
+                        if (bit) {
+                            memory._channelBitMask |= (1 << i);
+                        } else {
+                            memory._channelBitMask &= ~(1 << i);
+                        }
+                    }
+                    ImGui::PopID();
+                    if (i < MAX_CHANNELS - 1) {
+                        ImGui::SameLine();
+                    }
+                }
+
                 AlienGui::EndIndent();
             }
             table.next();

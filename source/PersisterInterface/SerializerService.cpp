@@ -234,9 +234,13 @@ namespace
 
     auto constexpr Id_SignalIntegratorGenome_NewSignalWeight = 0;
 
+    auto constexpr Id_MemoryGenome_ChannelBitMask = 0;
+
     auto constexpr Id_SignalDelay_Delay = 0;
     auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
     auto constexpr Id_SignalDelay_RingBufferIndex = 2;
+
+    auto constexpr Id_Memory_ChannelBitMask = 0;
 }
 
 namespace cereal
@@ -618,6 +622,7 @@ namespace cereal
     {
         MemoryGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_MemoryGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._mode);
@@ -1297,6 +1302,7 @@ namespace cereal
     {
         MemoryDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Memory_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._mode);
