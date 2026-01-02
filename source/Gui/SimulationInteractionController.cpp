@@ -99,7 +99,7 @@ void SimulationInteractionController::processEditWidget()
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor());
 
     auto actionTexture = _modes.editMode ? _editorOn.textureId : _editorOff.textureId;
-    if (ImGui::ImageButton((void*)(intptr_t)actionTexture, {scale(80.0f), scale(80.0f)}, {0, 0}, {1.0f, 1.0f})) {
+    if (ImGui::ImageButton("editor_toggle", (ImTextureID)(intptr_t)actionTexture, ImVec2(scale(80.0f), scale(80.0f)), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
         _modes.editMode = !_modes.editMode;
         EditorController::get().setOn(!EditorController::get().isOn());
     }
