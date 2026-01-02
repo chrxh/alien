@@ -254,13 +254,13 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
 
 // Tests for SignalRestrictionMode_Conditional
 
-TEST_F(SignalTests, conditionalMode_channel0Positive_restrictionApplied)
+TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
 {
-    // Conditional mode with channel[0] >= 0 means restriction should be applied
+    // Conditional mode: signals outside the cone are always blocked, regardless of channel[0]
     std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0.5 >= 0
     Description data;
 
-    // Cell 2 has conditional restriction - signal should be blocked because angle is outside restriction
+    // Cell 2 has conditional restriction - signal to cell 3 is outside the cone
     auto cell2Desc = CellDescription().id(2).pos({1, 0}).signalAndState(signal);
     cell2Desc._signalRestriction._mode = SignalRestrictionMode_Conditional;
     cell2Desc._signalRestriction._baseAngle = 45.0f;  // Restriction points away from cell 3
@@ -279,19 +279,47 @@ TEST_F(SignalTests, conditionalMode_channel0Positive_restrictionApplied)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell3 = actualData.getCellRef(3);
-    EXPECT_FALSE(cell3._signalState == SignalState_Active);  // Signal blocked by restriction
+    EXPECT_FALSE(cell3._signalState == SignalState_Active);  // Signal blocked because outside cone
 }
 
-TEST_F(SignalTests, conditionalMode_channel0Negative_noRestriction)
+TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
 {
-    // Conditional mode with channel[0] < 0 means no restriction should be applied
+    // Conditional mode: signals inside the cone are blocked if channel[0] < 0
     std::vector<float> signal = {-0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = -0.5 < 0
     Description data;
 
-    // Cell 2 has conditional restriction - but signal should pass because channel[0] < 0
+    // Cell 2 has conditional restriction - signal to cell 3 is inside the cone but channel[0] < 0
     auto cell2Desc = CellDescription().id(2).pos({1, 0}).signalAndState(signal);
     cell2Desc._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    cell2Desc._signalRestriction._baseAngle = 45.0f;  // Restriction points away from cell 3
+    cell2Desc._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
+    cell2Desc._signalRestriction._openingAngle = 90.0f;
+
+    data._cells = {
+        CellDescription().id(1).pos({0, 0}),
+        cell2Desc,
+        CellDescription().id(3).pos({2, 0}),
+    };
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+    auto actualData = _simulationFacade->getSimulationData();
+
+    auto cell3 = actualData.getCellRef(3);
+    EXPECT_FALSE(cell3._signalState == SignalState_Active);  // Signal blocked because channel[0] < 0
+}
+
+TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
+{
+    // Conditional mode: signals inside the cone pass if channel[0] >= 0
+    std::vector<float> signal = {0.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0 >= 0
+    Description data;
+
+    // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
+    auto cell2Desc = CellDescription().id(2).pos({1, 0}).signalAndState(signal);
+    cell2Desc._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    cell2Desc._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
     cell2Desc._signalRestriction._openingAngle = 90.0f;
 
     data._cells = {
@@ -311,41 +339,13 @@ TEST_F(SignalTests, conditionalMode_channel0Negative_noRestriction)
     EXPECT_TRUE(approxCompare(signal, cell3._signal._channels));
 }
 
-TEST_F(SignalTests, conditionalMode_channel0Zero_restrictionApplied)
+TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
 {
-    // Conditional mode with channel[0] = 0 means restriction should be applied (>= 0)
-    std::vector<float> signal = {0.0f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0 >= 0
-    Description data;
-
-    // Cell 2 has conditional restriction - restriction should be applied
-    auto cell2Desc = CellDescription().id(2).pos({1, 0}).signalAndState(signal);
-    cell2Desc._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    cell2Desc._signalRestriction._baseAngle = 45.0f;  // Restriction points away from cell 3
-    cell2Desc._signalRestriction._openingAngle = 90.0f;
-
-    data._cells = {
-        CellDescription().id(1).pos({0, 0}),
-        cell2Desc,
-        CellDescription().id(3).pos({2, 0}),
-    };
-    data.addConnection(1, 2);
-    data.addConnection(2, 3);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-    auto actualData = _simulationFacade->getSimulationData();
-
-    auto cell3 = actualData.getCellRef(3);
-    EXPECT_FALSE(cell3._signalState == SignalState_Active);  // Signal blocked by restriction
-}
-
-TEST_F(SignalTests, conditionalMode_passesWithinCone)
-{
-    // Conditional mode with channel[0] >= 0 and angle within cone - signal should pass
+    // Conditional mode: signals inside the cone pass if channel[0] >= 0
     std::vector<float> signal = {0.5f, -1.0f, -0.5f, 0.0f, 0.5f, 2.0f, -2.0f, 0.0f};  // channel[0] = 0.5 >= 0
     Description data;
 
-    // Cell 2 has conditional restriction - signal should pass because angle is within restriction cone
+    // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = CellDescription().id(2).pos({1, 0}).signalAndState(signal);
     cell2Desc._signalRestriction._mode = SignalRestrictionMode_Conditional;
     cell2Desc._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
