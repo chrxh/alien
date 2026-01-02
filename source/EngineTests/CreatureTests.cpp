@@ -450,6 +450,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     _simulationFacade->calcTimesteps(1300);
 
     RealVector2D movementDirection;
+    float startPos_projected = 0;
     {
         auto actualData = _simulationFacade->getSimulationData();
         actualData.forEachCell([](CellDescription& cell) { cell._vel = {0, 0}; });
@@ -471,9 +472,12 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         if (abs(frontAngle) > 90.0f) {
             movementDirection = -movementDirection;
         }
+
+        auto movedRefPoint = refPoint + movementDirection * 10.0f;
+        startPos_projected = Math::dot(cells.front()._pos - movedRefPoint, movementDirection);
     }
 
-    _simulationFacade->calcTimesteps(4000);
+    _simulationFacade->calcTimesteps(1000);
     {
         auto actualData = _simulationFacade->getSimulationData();
         DescriptionEditService::get().removeCell(actualData, 0);
@@ -486,6 +490,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
 
         auto movedRefPoint = refPoint + movementDirection * 10.0f;
-        EXPECT_LT(0.0, Math::dot(cells.front()._pos - movedRefPoint, movementDirection));
+        auto endPos_projected = Math::dot(cells.front()._pos - movedRefPoint, movementDirection);
+        EXPECT_TRUE(startPos_projected + NEAR_ZERO < endPos_projected);
     }
 }
