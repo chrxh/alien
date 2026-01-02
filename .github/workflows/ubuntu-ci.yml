@@ -63,7 +63,7 @@ jobs:
         -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 
     - name: Build
-      run: cmake --build build
+      run: cmake --build build -j16
       
     - name: Run Tests
       run: |
