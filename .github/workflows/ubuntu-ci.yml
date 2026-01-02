@@ -56,7 +56,7 @@ jobs:
         ./bootstrap-vcpkg.sh -disableMetrics
         popd
 
-    - name: Configure CMake (mit vcpkg Manifest-Mode)
+    - name: Configure CMake
       run: cmake -S . -B build \
         -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake \
         -DCMAKE_BUILD_TYPE=Release \
@@ -65,7 +65,7 @@ jobs:
     - name: Build
       run: cmake --build build
       
-    - name: Run Tests (non-CUDA)
+    - name: Run Tests
       run: |
         cd build
         ./EngineInterfaceTests
