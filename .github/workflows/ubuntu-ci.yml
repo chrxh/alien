@@ -18,7 +18,7 @@ jobs:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
@@ -50,6 +50,20 @@ jobs:
         echo "/usr/local/cuda/bin" >> $GITHUB_PATH
         echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         
+    - name: Clean vcpkg caches
+      run: |
+        rm -rf build/vcpkg_installed || true
+        rm -rf external/vcpkg/buildtrees || true
+        rm -rf external/vcpkg/packages || true
+        rm -rf external/vcpkg/downloads || true
+
+    - name: Clear proxy settings
+      run: |
+        echo "HTTP_PROXY=" >> $GITHUB_ENV
+        echo "HTTPS_PROXY=" >> $GITHUB_ENV
+        echo "http_proxy=" >> $GITHUB_ENV
+        echo "https_proxy=" >> $GITHUB_ENV
+
     - name: Bootstrap vcpkg
       run: |
         pushd external/vcpkg
@@ -71,3 +85,4 @@ jobs:
         ./EngineInterfaceTests
         ./NetworkTests
         ./PersisterTests
+        ./EngineTests
