@@ -200,9 +200,12 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
             }
 
             if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                AlienGui::Switcher(
+                int modeAsInt = static_cast<int>(cell._signalRestriction._mode);
+                if (AlienGui::Switcher(
                     AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(BaseTabTextWidth),
-                    cell._signalRestriction._mode);
+                    modeAsInt)) {
+                    cell._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
+                }
                 bool restrictionActive = (cell._signalRestriction._mode == SignalRestrictionMode_Active || 
                                           cell._signalRestriction._mode == SignalRestrictionMode_Conditional);
                 if (restrictionActive) {

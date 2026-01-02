@@ -60,7 +60,7 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .headCell(true)
                       .parentNodeIndex(14)
                       .signalAndState({1, 0, 0.6f, 0, 0, 0, 0, 0})
-                      .signalRestriction(SignalRestrictionDescription().active(true).baseAngle(45.0f).openingAngle(120.0f))
+                      .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
                       .cellType(cellTypeDesc);
 
     if (cellParameter.cellType != CellType_Structure && cellParameter.cellType != CellType_Free) {
@@ -128,7 +128,7 @@ NodeDescription DescriptionTestDataFactory::createNonDefaultNodeDescription(Node
         .color(4)
         .numAdditionalConnections(3)
         .referenceAngle(90.0f)
-        .signalRestriction(SignalRestrictionGenomeDescription().active(true).baseAngle(60.0f).openingAngle(180.0f));
+        .signalRestriction(SignalRestrictionGenomeDescription().mode(SignalRestrictionMode_Active).baseAngle(60.0f).openingAngle(180.0f));
 }
 
 std::pair<CreatureDescription, GenomeDescription> DescriptionTestDataFactory::createNonDefaultCreatureDescription(NodeParameter nodeParameter) const

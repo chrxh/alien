@@ -209,9 +209,12 @@ void _NodeEditorWidget::processNodeAttributes()
                 node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
             }
 
-            AlienGui::Switcher(
+            int modeAsInt = static_cast<int>(node._signalRestriction._mode);
+            if (AlienGui::Switcher(
                 AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(rightColumnWidth),
-                node._signalRestriction._mode);
+                modeAsInt)) {
+                node._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
+            }
 
             bool restrictionActive = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
                                       node._signalRestriction._mode == SignalRestrictionMode_Conditional);
