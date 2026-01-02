@@ -41,8 +41,8 @@ cd build
 ./NetworkTests          # 4 tests, <1 second
 ./PersisterTests        # 35 tests, ~1.4 seconds
 
-# GPU tests (requires NVIDIA GPU with compute capability 6.0+)
-./EngineTests           # Requires CUDA GPU - will fail in CI environment
+# GPU tests (requires NVIDIA GPU with compute capability 7.5+)
+./EngineTests           # Requires CUDA GPU
 ```
 
 ### Run the Applications
@@ -71,8 +71,8 @@ cd build
 - **EngineInterfaceTests**: 129 tests pass in <1 second (no GPU required)
 - **NetworkTests**: 4 tests pass in <1 second (no GPU required)
 - **PersisterTests**: 35 tests pass in ~1.4 seconds (no GPU required)
-- **EngineTests**: Requires NVIDIA GPU - will fail in CI environment without compatible GPU
-- Always run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests` to verify your changes don't break core functionality
+- **EngineTests**: Requires NVIDIA GPU
+- Always run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
 
 ### Application Validation
 - **CLI works**: `./cli --help` shows usage information
@@ -91,13 +91,10 @@ clang-format --style=file:source/_clang-format -i path/to/modified/files.cpp
 cmake --build build --config Release -j8
 
 # 3. Run core tests (required - these must pass)
-cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests
+cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests & ./EngineTests
 
 # 4. Test CLI functionality
 ./cli --help
-
-# 5. If you have NVIDIA GPU, optionally run full test suite
-./EngineTests  # Will fail without compatible NVIDIA GPU
 ```
 
 ### Code Formatting
