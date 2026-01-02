@@ -193,7 +193,7 @@ CellDescription& CellDescription::signalAndState(std::vector<float> const& value
 CellDescription& CellDescription::signalRestriction(float baseAngle, float openingAngle)
 {
     SignalRestrictionDescription routingRestriction;
-    routingRestriction._active = true;
+    routingRestriction._mode = SignalRestrictionMode_Active;
     routingRestriction._baseAngle = baseAngle;
     routingRestriction._openingAngle = openingAngle;
     _signalRestriction = routingRestriction;

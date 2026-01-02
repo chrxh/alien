@@ -123,7 +123,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 node.neuralNetwork.biases[i] = nodeTO.neuralNetwork.biases[i];
                 node.neuralNetwork.activationFunctions[i] = nodeTO.neuralNetwork.activationFunctions[i];
             }
-            node.signalRestriction.active = nodeTO.signalRestriction.active;
+            node.signalRestriction.mode = nodeTO.signalRestriction.mode;
             node.signalRestriction.baseAngle = nodeTO.signalRestriction.baseAngle;
             node.signalRestriction.openingAngle = nodeTO.signalRestriction.openingAngle;
 
@@ -336,7 +336,7 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
     cell->frontAngleId = cellTO.frontAngleId;
     cell->headCell = cellTO.headCell;
 
-    cell->signalRestriction.active = cellTO.signalRestriction.active;
+    cell->signalRestriction.mode = cellTO.signalRestriction.mode;
     cell->signalRestriction.baseAngle = cellTO.signalRestriction.baseAngle;
     cell->signalRestriction.openingAngle = cellTO.signalRestriction.openingAngle;
 
@@ -569,7 +569,7 @@ __inline__ __device__ Cell* ObjectFactory::createFreeCell(float energy, float2 c
     cell->sticky = false;
     cell->age = 0;
     cell->activationTime = 0;
-    cell->signalRestriction.active = false;
+    cell->signalRestriction.mode = SignalRestrictionMode_Inactive;
     cell->signalState = 0;
     cell->density = 1.0f;
     cell->event = CellEvent_No;
@@ -668,7 +668,7 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->neuralNetwork->activationFunctions[i] = node->neuralNetwork.activationFunctions[i];
     }
-    cell->signalRestriction.active = node->signalRestriction.active;
+    cell->signalRestriction.mode = node->signalRestriction.mode;
     cell->signalRestriction.baseAngle = node->signalRestriction.baseAngle;
     cell->signalRestriction.openingAngle = node->signalRestriction.openingAngle;
     cell->signalState = 0;

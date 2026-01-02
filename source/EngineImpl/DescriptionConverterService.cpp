@@ -556,7 +556,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     }
 
     SignalRestrictionDescription routingRestriction;
-    routingRestriction._active = cellTO.signalRestriction.active;
+    routingRestriction._mode = cellTO.signalRestriction.mode;
     routingRestriction._baseAngle = cellTO.signalRestriction.baseAngle;
     routingRestriction._openingAngle = cellTO.signalRestriction.openingAngle;
     result._signalRestriction = routingRestriction;
@@ -579,7 +579,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
     nodeDesc._numAdditionalConnections = nodeTO->numAdditionalConnections;
 
     nodeDesc._neuralNetwork = convert(nodeTO->neuralNetwork);
-    nodeDesc._signalRestriction._active = nodeTO->signalRestriction.active;
+    nodeDesc._signalRestriction._mode = nodeTO->signalRestriction.mode;
     nodeDesc._signalRestriction._baseAngle = nodeTO->signalRestriction.baseAngle;
     nodeDesc._signalRestriction._openingAngle = nodeTO->signalRestriction.openingAngle;
 
@@ -903,7 +903,7 @@ void DescriptionConverterService::convertGenomeToTO(
             nodeTO.referenceAngle = nodeDesc._referenceAngle;
             nodeTO.color = nodeDesc._color;
             nodeTO.numAdditionalConnections = nodeDesc._numAdditionalConnections;
-            nodeTO.signalRestriction.active = nodeDesc._signalRestriction._active;
+            nodeTO.signalRestriction.mode = nodeDesc._signalRestriction._mode;
             nodeTO.signalRestriction.baseAngle = nodeDesc._signalRestriction._baseAngle;
             nodeTO.signalRestriction.openingAngle = nodeDesc._signalRestriction._openingAngle;
             nodeTO.neuralNetwork = convert(nodeDesc._neuralNetwork);
@@ -1367,7 +1367,7 @@ void DescriptionConverterService::convertCellToTO(
         copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
     } break;
     }
-    cellTO.signalRestriction.active = cellDesc._signalRestriction._active;
+    cellTO.signalRestriction.mode = cellDesc._signalRestriction._mode;
     cellTO.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
     cellTO.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
     cellTO.signalState = cellDesc._signalState;

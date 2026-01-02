@@ -391,3 +391,17 @@ enum SignalOrigin_
     SignalOrigin_Unknown,
     SignalOrigin_Sensor,
 };
+
+using SignalRestrictionMode = uint8_t;
+enum SignalRestrictionMode_
+{
+    SignalRestrictionMode_Inactive,
+    SignalRestrictionMode_Active,
+    SignalRestrictionMode_Conditional,
+    SignalRestrictionMode_Count,
+};
+
+namespace Const
+{
+    std::vector<std::string> const SignalRestrictionModeStrings = {"Inactive", "Active", "Conditional"};
+}

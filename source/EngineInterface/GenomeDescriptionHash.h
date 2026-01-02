@@ -466,7 +466,7 @@ struct std::hash<SignalRestrictionGenomeDescription>
     std::size_t operator()(SignalRestrictionGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._active);
+        hash_combine(seed, desc._mode);
         hash_combine(seed, desc._baseAngle);
         hash_combine(seed, desc._openingAngle);
         return seed;

@@ -69,13 +69,20 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
                 continue;
             }
             int skip = false;
-            if (connectedCell->signalRestriction.active) {
-                float signalAngleRestrictionStart = 0;
-                float signalAngleRestrictionEnd = 0;
-                if (connectedCell->signalRestriction.active) {
-                    signalAngleRestrictionStart = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
-                    signalAngleRestrictionEnd = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
-                }
+            auto restrictionMode = connectedCell->signalRestriction.mode;
+            
+            // Check if restriction should be applied based on mode
+            bool applyRestriction = false;
+            if (restrictionMode == SignalRestrictionMode_Active) {
+                applyRestriction = true;
+            } else if (restrictionMode == SignalRestrictionMode_Conditional) {
+                // Conditional mode: restriction applies only if channel[0] >= 0
+                applyRestriction = connectedCell->signal.channels[0] >= 0;
+            }
+            
+            if (applyRestriction) {
+                float signalAngleRestrictionStart = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
+                float signalAngleRestrictionEnd = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
 
                 float connectionAngle = 0;
                 for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {

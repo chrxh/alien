@@ -398,7 +398,11 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
 
                 // Calculate signal angle restrictions for this cell
                 // The 180° offset converts from connection-relative to absolute angles in world space
-                if (cell->signalRestriction.active && cell->numConnections > 0) {
+                // Render as active if mode is Active or Conditional
+                bool hasRestriction = (cell->signalRestriction.mode == SignalRestrictionMode_Active || 
+                                       cell->signalRestriction.mode == SignalRestrictionMode_Conditional) && 
+                                      cell->numConnections > 0;
+                if (hasRestriction) {
                     auto const& connectedCell = cell->connections[0].cell;
                     auto connectionAngle = Math::angleOfVector(connectedCell->pos - cell->pos);
 
@@ -475,8 +479,11 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
             }
 
             // Determine if signal can flow from cell1 to cell2
+            // For rendering, Active and Conditional modes are treated as having restriction
+            bool hasRestriction1 = (cell->signalRestriction.mode == SignalRestrictionMode_Active || 
+                                    cell->signalRestriction.mode == SignalRestrictionMode_Conditional);
             bool arrowToCell2 =
-                !cell->signalRestriction.active || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+                !hasRestriction1 || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
 
             // Determine if signal can flow from cell2 to cell1
             // Need to calculate the reverse angle from connectedCell's perspective
@@ -488,12 +495,14 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
             // Find the angle of this connection from connectedCell's perspective
             auto summedAngle2 = 0.0f;
             bool arrowToCell1 = false;
+            bool hasRestriction2 = (connectedCell->signalRestriction.mode == SignalRestrictionMode_Active || 
+                                    connectedCell->signalRestriction.mode == SignalRestrictionMode_Conditional);
             for (int j = 0; j < connectedCell->numConnections; ++j) {
                 if (j > 0) {
                     summedAngle2 += connectedCell->connections[j].angleFromPrevious;
                 }
                 if (connectedCell->connections[j].cell->id == cell->id) {
-                    arrowToCell1 = !connectedCell->signalRestriction.active
+                    arrowToCell1 = !hasRestriction2
                         || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
                     break;
                 }

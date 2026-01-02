@@ -195,7 +195,7 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             return false;
         }
     }
-    if (cell._signalRestriction._active != node._signalRestriction._active) {
+    if (cell._signalRestriction._mode != node._signalRestriction._mode) {
         return false;
     }
     if (cell._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {

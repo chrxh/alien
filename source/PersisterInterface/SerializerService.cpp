@@ -150,7 +150,7 @@ namespace
     auto constexpr Id_Node_Color = 1;
     auto constexpr Id_Node_NumAdditionalConnections = 2;
 
-    auto constexpr Id_SignalRestrictionGenome_Active = 0;
+    auto constexpr Id_SignalRestrictionGenome_Mode = 0;  // Replaces Active (0=inactive, 1=active, 2=conditional)
     auto constexpr Id_SignalRestrictionGenome_BaseAngle = 1;
     auto constexpr Id_SignalRestrictionGenome_OpeneningAngle = 2;
 
@@ -630,7 +630,7 @@ namespace cereal
     {
         SignalRestrictionGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_Active, data._active, defaultObject._active);
+        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_Mode, data._mode, defaultObject._mode);
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -727,7 +727,7 @@ namespace
 
     auto constexpr Id_Signal_Channels = 0;
 
-    auto constexpr Id_SignalRestriction_Active = 0;
+    auto constexpr Id_SignalRestriction_Mode = 0;  // Replaces Active (0=inactive, 1=active, 2=conditional)
     auto constexpr Id_SignalRestriction_BaseAngle = 1;
     auto constexpr Id_SignalRestriction_OpeningAngle = 2;
 
@@ -877,7 +877,7 @@ namespace cereal
     {
         SignalRestrictionDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRestriction_Active, data._active, defaultObject._active);
+        loadSave(task, auxiliaries, Id_SignalRestriction_Mode, data._mode, defaultObject._mode);
         loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);

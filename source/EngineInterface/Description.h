@@ -424,7 +424,7 @@ struct SignalRestrictionDescription
 {
     auto operator<=>(SignalRestrictionDescription const&) const = default;
 
-    MEMBER(SignalRestrictionDescription, bool, active, false);
+    MEMBER(SignalRestrictionDescription, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
     MEMBER(SignalRestrictionDescription, float, baseAngle, 0);
     MEMBER(SignalRestrictionDescription, float, openingAngle, 90.0f);
 };
