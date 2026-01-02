@@ -7,6 +7,14 @@
 
 using namespace std::string_literals;
 
+//***********
+//* General *
+//***********
+namespace Channels
+{
+    auto constexpr CellTypeActivation = 0;
+}
+
 using CellType = int;
 enum CellType_
 {
@@ -82,6 +90,27 @@ enum ActivationFunction_
     ActivationFunction_Count,
 };
 
+namespace Const
+{
+    std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
+}
+
+using CellEvent = uint8_t;
+enum CellEvent_
+{
+    CellEvent_No,
+    CellEvent_Attacking,
+    CellEvent_Attacked,
+    CellEvent_Detonation,
+};
+
+using CellTriggered = uint8_t;
+enum CellTriggered_
+{
+    CellTriggered_No,
+    CellTriggered_Yes,
+};
+
 using SignalState = uint8_t;
 enum SignalState_
 {
@@ -91,17 +120,25 @@ enum SignalState_
     SignalState_Count,
 };
 
+using SignalOrigin = uint8_t;
+enum SignalOrigin_
+{
+    SignalOrigin_Unknown,
+    SignalOrigin_Sensor,
+};
+
+using SignalRestrictionMode = uint8_t;
+enum SignalRestrictionMode_
+{
+    SignalRestrictionMode_Inactive,
+    SignalRestrictionMode_Active,
+    SignalRestrictionMode_Conditional,
+    SignalRestrictionMode_Count,
+};
+
 namespace Const
 {
-    std::vector<std::string> const ActivationFunctionStrings = {"Sigmoid", "Binary step", "Identity", "Absolute value", "Gaussian"};
-}
-
-//***********
-//* General *
-//***********
-namespace Channels
-{
-    auto constexpr CellTypeActivation = 0;
+    std::vector<std::string> const SignalRestrictionModeStrings = {"Inactive", "Active", "Conditional"};
 }
 
 //************************
@@ -367,41 +404,3 @@ enum SignalRecorderState_
     SignalRecorderState_Recording,
     SignalRecorderState_Reading,
 };
-
-
-using CellEvent = uint8_t;
-enum CellEvent_
-{
-    CellEvent_No,
-    CellEvent_Attacking,
-    CellEvent_Attacked,
-    CellEvent_Detonation,
-};
-
-using CellTriggered = uint8_t;
-enum CellTriggered_
-{
-    CellTriggered_No,
-    CellTriggered_Yes,
-};
-
-using SignalOrigin = uint8_t;
-enum SignalOrigin_
-{
-    SignalOrigin_Unknown,
-    SignalOrigin_Sensor,
-};
-
-using SignalRestrictionMode = uint8_t;
-enum SignalRestrictionMode_
-{
-    SignalRestrictionMode_Inactive,
-    SignalRestrictionMode_Active,
-    SignalRestrictionMode_Conditional,
-    SignalRestrictionMode_Count,
-};
-
-namespace Const
-{
-    std::vector<std::string> const SignalRestrictionModeStrings = {"Inactive", "Active", "Conditional"};
-}
