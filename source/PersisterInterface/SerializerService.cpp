@@ -642,7 +642,8 @@ namespace cereal
                     data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
                 } else if (std::holds_alternative<uint8_t>(variantData)) {
                     // New file format: SignalRestrictionMode (uint8_t)
-                    data._mode = std::get<uint8_t>(variantData);
+                    auto modeValue = std::get<uint8_t>(variantData);
+                    data._mode = (modeValue < SignalRestrictionMode_Count) ? modeValue : defaultObject._mode;
                 } else {
                     data._mode = defaultObject._mode;
                 }
@@ -912,7 +913,8 @@ namespace cereal
                     data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
                 } else if (std::holds_alternative<uint8_t>(variantData)) {
                     // New file format: SignalRestrictionMode (uint8_t)
-                    data._mode = std::get<uint8_t>(variantData);
+                    auto modeValue = std::get<uint8_t>(variantData);
+                    data._mode = (modeValue < SignalRestrictionMode_Count) ? modeValue : defaultObject._mode;
                 } else {
                     data._mode = defaultObject._mode;
                 }
