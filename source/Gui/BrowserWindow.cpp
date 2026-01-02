@@ -862,7 +862,10 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
                 auto emojiWidth = scale(toFloat(emoji.width) / 2.5f);
                 auto emojiHeight = scale(toFloat(emoji.height) / 2.5f);
                 ImGui::PushID(emojiType);
-                if (ImGui::ImageButton("reaction_emoji", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() - scale(4.0f));
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() - scale(3.0f));
+                if (ImGui::ImageButton(
+                        "reaction_emoji", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
                     toggleEmojiType = emojiType;
                 }
                 bool isLiked = _ownEmojiTypeBySimId.contains(leaf.rawTO->id) && _ownEmojiTypeBySimId.at(leaf.rawTO->id) == emojiType;
