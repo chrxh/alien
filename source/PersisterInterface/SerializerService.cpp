@@ -630,7 +630,30 @@ namespace cereal
     {
         SignalRestrictionGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRestrictionGenome_Mode, data._mode, defaultObject._mode);
+        
+        // Backward compatibility: old files stored a bool at key 0 (true = active, false = inactive)
+        // New files store a SignalRestrictionMode (uint8_t) at the same key
+        if (task == SerializationTask::Load) {
+            auto findResult = auxiliaries.find(Id_SignalRestrictionGenome_Mode);
+            if (findResult != auxiliaries.end()) {
+                auto& variantData = findResult->second;
+                if (std::holds_alternative<bool>(variantData)) {
+                    // Old file format: bool (true = active, false = inactive)
+                    data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
+                } else if (std::holds_alternative<uint8_t>(variantData)) {
+                    // New file format: SignalRestrictionMode (uint8_t)
+                    data._mode = std::get<uint8_t>(variantData);
+                } else {
+                    data._mode = defaultObject._mode;
+                }
+            } else {
+                data._mode = defaultObject._mode;
+            }
+        } else {
+            // Save using the new uint8_t format
+            auxiliaries.emplace(Id_SignalRestrictionGenome_Mode, data._mode);
+        }
+        
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestrictionGenome_OpeneningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -877,7 +900,30 @@ namespace cereal
     {
         SignalRestrictionDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_SignalRestriction_Mode, data._mode, defaultObject._mode);
+        
+        // Backward compatibility: old files stored a bool at key 0 (true = active, false = inactive)
+        // New files store a SignalRestrictionMode (uint8_t) at the same key
+        if (task == SerializationTask::Load) {
+            auto findResult = auxiliaries.find(Id_SignalRestriction_Mode);
+            if (findResult != auxiliaries.end()) {
+                auto& variantData = findResult->second;
+                if (std::holds_alternative<bool>(variantData)) {
+                    // Old file format: bool (true = active, false = inactive)
+                    data._mode = std::get<bool>(variantData) ? SignalRestrictionMode_Active : SignalRestrictionMode_Inactive;
+                } else if (std::holds_alternative<uint8_t>(variantData)) {
+                    // New file format: SignalRestrictionMode (uint8_t)
+                    data._mode = std::get<uint8_t>(variantData);
+                } else {
+                    data._mode = defaultObject._mode;
+                }
+            } else {
+                data._mode = defaultObject._mode;
+            }
+        } else {
+            // Save using the new uint8_t format
+            auxiliaries.emplace(Id_SignalRestriction_Mode, data._mode);
+        }
+        
         loadSave(task, auxiliaries, Id_SignalRestriction_BaseAngle, data._baseAngle, defaultObject._baseAngle);
         loadSave(task, auxiliaries, Id_SignalRestriction_OpeningAngle, data._openingAngle, defaultObject._openingAngle);
         processLoadSaveMap(task, ar, auxiliaries);
