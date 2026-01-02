@@ -861,7 +861,8 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
                 auto cursorPos = ImGui::GetCursorScreenPos();
                 auto emojiWidth = scale(toFloat(emoji.width) / 2.5f);
                 auto emojiHeight = scale(toFloat(emoji.height) / 2.5f);
-                if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, ImVec2(0, 0), ImVec2(1, 1), 0)) {
+                ImGui::PushID(emojiType);
+                if (ImGui::ImageButton("reaction_emoji", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1, 1))) {
                     toggleEmojiType = emojiType;
                 }
                 bool isLiked = _ownEmojiTypeBySimId.contains(leaf.rawTO->id) && _ownEmojiTypeBySimId.at(leaf.rawTO->id) == emojiType;
@@ -873,6 +874,7 @@ void BrowserWindow::processReactionList(NetworkResourceTreeTO const& treeTO)
                         1.0f);
                 }
                 ImGui::PopStyleColor(2);
+                ImGui::PopID();
                 AlienGui::Tooltip([=, this] { return getUserNamesToEmojiType(leaf.rawTO->id, emojiType); }, false);
             }
 
@@ -1094,11 +1096,13 @@ void BrowserWindow::processEmojiButton(int emojiType)
     auto emojiWidth = scale(toFloat(emoji.width));
     auto emojiHeight = scale(toFloat(emoji.height));
     auto leaf = _emojiPopupTO->getLeaf();
-    if (ImGui::ImageButton((void*)(intptr_t)emoji.textureId, {emojiWidth, emojiHeight}, {0, 0}, {1.0f, 1.0f})) {
+    ImGui::PushID(emojiType);
+    if (ImGui::ImageButton("emoji_popup", (ImTextureID)(intptr_t)emoji.textureId, ImVec2(emojiWidth, emojiHeight), ImVec2(0, 0), ImVec2(1.0f, 1.0f))) {
         onToggleLike(_emojiPopupTO, toInt(emojiType));
         ImGui::CloseCurrentPopup();
     }
     ImGui::PopStyleColor(2);
+    ImGui::PopID();
 
     bool isLiked = _ownEmojiTypeBySimId.contains(leaf.rawTO->id) && _ownEmojiTypeBySimId.at(leaf.rawTO->id) == emojiType;
     if (isLiked) {
