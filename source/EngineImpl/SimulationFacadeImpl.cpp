@@ -411,3 +411,8 @@ bool _SimulationFacadeImpl::testOnly_arePointersValid()
 {
     return _worker.testOnly_arePointersValid();
 }
+
+NumRenderObjects _SimulationFacadeImpl::testOnly_getNumRenderObjects()
+{
+    return _worker.testOnly_getNumRenderObjects();
+}

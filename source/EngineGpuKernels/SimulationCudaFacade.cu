@@ -662,6 +662,16 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
     return result;
 }
 
+NumRenderObjects _SimulationCudaFacade::testOnly_getNumRenderObjects()
+{
+    checkAndProcessSimulationParameterChanges();
+    auto simulationData = getSimulationDataPtrCopy();
+    RealRect visibleWorldRect = {{0, 0}, {static_cast<float>(_settings.worldSizeX), static_cast<float>(_settings.worldSizeY)}};
+    auto result = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
+    syncAndCheck();
+    return result;
+}
+
 void _SimulationCudaFacade::initCuda()
 {
     log(Priority::Important, "initialize CUDA");
