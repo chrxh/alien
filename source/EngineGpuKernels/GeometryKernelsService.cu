@@ -177,3 +177,47 @@ void GeometryKernelsService::extractObjectData(
     KERNEL_CALL(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices);
     CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
 }
+
+void GeometryKernelsService::extractObjectDataNoInterop(
+    SettingsForSimulation const& settings,
+    SimulationData data,
+    CudaGeometryBuffers& renderingData,
+    RealRect const& visibleWorldRect)
+{
+    auto const& gpuSettings = settings.cudaSettings;
+    float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
+
+    // Extract cell data to device buffer
+    KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceCellBuffer);
+
+    // Extract energy particle data to device buffer
+    KERNEL_CALL(cudaExtractEnergyParticleData, data, renderingData.deviceEnergyParticleBuffer);
+
+    // Extract location data to device buffer
+    setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+    KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);
+
+    // Extract selected object data to device buffer
+    setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedObjectData, data, renderingData.deviceSelectedObjectBuffer, _numSelectedObjects);
+
+    // Extract line indices to device buffer
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractLineIndices, data, renderingData.deviceLineIndexBuffer, _numLineIndices);
+
+    // Extract triangle indices to device buffer
+    setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractTriangleIndices, data, renderingData.deviceTriangleIndexBuffer, _numTriangleIndices);
+
+    // Extract selected connection data to device buffer
+    setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedConnectionData, data, renderingData.deviceSelectedConnectionBuffer, _numSelectedConnectionVertices);
+
+    // Extract attack event data to device buffer
+    setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractAttackEventData, data, renderingData.deviceAttackEventBuffer, _numAttackEventVertices);
+
+    // Extract detonation event data to device buffer
+    setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices);
+}

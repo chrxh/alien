@@ -18,21 +18,31 @@
 
 namespace
 {
-    bool isInDebugMode(int argc, char** argv)
+    bool hasArgument(int argc, char** argv, const char* arg)
     {
-        return argc == 2 && strcmp(argv[1], "-d") == 0;
+        for (int i = 1; i < argc; ++i) {
+            if (strcmp(argv[i], arg) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
 int main(int argc, char** argv)
 {
-    auto inDebugMode = isInDebugMode(argc, argv);
+    auto inDebugMode = hasArgument(argc, argv, "-d");
+    auto noInterop = hasArgument(argc, argv, "--no-interop");
     GlobalSettings::get().setDebugMode(inDebugMode);
+    GlobalSettings::get().setNoInterop(noInterop);
 
     FileLogger fileLogger = std::make_shared<_FileLogger>();
 
     if (inDebugMode) {
         log(Priority::Important, "DEBUG mode");
+    }
+    if (noInterop) {
+        log(Priority::Important, "NO-INTEROP mode: Using CPU-GPU memory transfers instead of CUDA-OpenGL interop");
     }
 
     MainWindow mainWindow;

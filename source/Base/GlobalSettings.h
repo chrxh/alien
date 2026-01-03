@@ -16,6 +16,9 @@ public:
     bool isDebugMode() const;
     void setDebugMode(bool value) const;
 
+    bool isNoInterop() const;
+    void setNoInterop(bool value) const;
+
     bool getValue(std::string const& key, bool defaultValue);
     void setValue(std::string const& key, bool value);
 

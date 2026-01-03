@@ -98,6 +98,17 @@ public:
 
     NumRenderObjects getNumObjects() const;
 
+    // Methods for uploading data from host memory (used in no-interop mode)
+    void uploadCellData(CellVertexData const* data, uint64_t count);
+    void uploadEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count);
+    void uploadLocationData(LocationVertexData const* data, uint64_t count);
+    void uploadSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count);
+    void uploadLineIndices(unsigned int const* data, uint64_t count);
+    void uploadTriangleIndices(unsigned int const* data, uint64_t count);
+    void uploadSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
+    void uploadAttackEventData(AttackEventVertexData const* data, uint64_t count);
+    void uploadDetonationEventData(DetonationEventVertexData const* data, uint64_t count);
+
 private:
     unsigned int _vaoForPointsAndLines = 0;
     unsigned int _vaoForTriangles = 0;

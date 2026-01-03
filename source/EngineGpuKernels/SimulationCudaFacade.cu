@@ -1,11 +1,13 @@
 #include <functional>
 #include <iostream>
 #include <list>
+#include <vector>
 
 #include <cuda/helper_cuda.h>
 #include <cuda_runtime.h>
 
 #include <Base/Exceptions.h>
+#include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
 
@@ -130,9 +132,74 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
     auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     geometryBuffers->updateNumObjects(numRenderObjects);
-    _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
-    GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+    if (GlobalSettings::get().isNoInterop()) {
+        // No-interop mode: use device buffers and copy to CPU, then upload to OpenGL
+        _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
+        GeometryKernelsService::get().extractObjectDataNoInterop(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        syncAndCheck();
+
+        // Copy from device to host and upload to OpenGL
+        if (numRenderObjects.cells > 0) {
+            std::vector<CellVertexData> hostCellBuffer(numRenderObjects.cells);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostCellBuffer.data(), _cudaGeometryBuffers->deviceCellBuffer, numRenderObjects.cells * sizeof(CellVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadCellData(hostCellBuffer.data(), numRenderObjects.cells);
+        }
+
+        if (numRenderObjects.energyParticles > 0) {
+            std::vector<EnergyParticleVertexData> hostEnergyParticleBuffer(numRenderObjects.energyParticles);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostEnergyParticleBuffer.data(), _cudaGeometryBuffers->deviceEnergyParticleBuffer, numRenderObjects.energyParticles * sizeof(EnergyParticleVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadEnergyParticleData(hostEnergyParticleBuffer.data(), numRenderObjects.energyParticles);
+        }
+
+        if (numRenderObjects.locations > 0) {
+            std::vector<LocationVertexData> hostLocationBuffer(numRenderObjects.locations);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLocationBuffer.data(), _cudaGeometryBuffers->deviceLocationBuffer, numRenderObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadLocationData(hostLocationBuffer.data(), numRenderObjects.locations);
+        }
+
+        if (numRenderObjects.selectedObjects > 0) {
+            std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numRenderObjects.selectedObjects);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedObjectBuffer.data(), _cudaGeometryBuffers->deviceSelectedObjectBuffer, numRenderObjects.selectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadSelectedObjectData(hostSelectedObjectBuffer.data(), numRenderObjects.selectedObjects);
+        }
+
+        if (numRenderObjects.lineIndices > 0) {
+            std::vector<unsigned int> hostLineIndexBuffer(numRenderObjects.lineIndices);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLineIndexBuffer.data(), _cudaGeometryBuffers->deviceLineIndexBuffer, numRenderObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadLineIndices(hostLineIndexBuffer.data(), numRenderObjects.lineIndices);
+        }
+
+        if (numRenderObjects.triangleIndices > 0) {
+            std::vector<unsigned int> hostTriangleIndexBuffer(numRenderObjects.triangleIndices);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostTriangleIndexBuffer.data(), _cudaGeometryBuffers->deviceTriangleIndexBuffer, numRenderObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadTriangleIndices(hostTriangleIndexBuffer.data(), numRenderObjects.triangleIndices);
+        }
+
+        if (numRenderObjects.connectionArrowVertices > 0) {
+            std::vector<ConnectionArrowVertexData> hostSelectedConnectionBuffer(numRenderObjects.connectionArrowVertices);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedConnectionBuffer.data(), _cudaGeometryBuffers->deviceSelectedConnectionBuffer, numRenderObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadSelectedConnectionData(hostSelectedConnectionBuffer.data(), numRenderObjects.connectionArrowVertices);
+        }
+
+        if (numRenderObjects.attackEventVertices > 0) {
+            std::vector<AttackEventVertexData> hostAttackEventBuffer(numRenderObjects.attackEventVertices);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostAttackEventBuffer.data(), _cudaGeometryBuffers->deviceAttackEventBuffer, numRenderObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadAttackEventData(hostAttackEventBuffer.data(), numRenderObjects.attackEventVertices);
+        }
+
+        if (numRenderObjects.detonationEventVertices > 0) {
+            std::vector<DetonationEventVertexData> hostDetonationEventBuffer(numRenderObjects.detonationEventVertices);
+            CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostDetonationEventBuffer.data(), _cudaGeometryBuffers->deviceDetonationEventBuffer, numRenderObjects.detonationEventVertices * sizeof(DetonationEventVertexData), cudaMemcpyDeviceToHost));
+            geometryBuffers->uploadDetonationEventData(hostDetonationEventBuffer.data(), numRenderObjects.detonationEventVertices);
+        }
+    } else {
+        // Interop mode: use CUDA-OpenGL interoperability
+        _cudaGeometryBuffers->registerBuffers(geometryBuffers);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        syncAndCheck();
+    }
+
     GeometryKernelsService::get().restorePositions(_settings, simulationData);
     syncAndCheck();
 }
