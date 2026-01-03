@@ -38,11 +38,9 @@ jobs:
         
     - name: Install CUDA (via NVIDIA's repo)
       run: |
-        sudo apt-get update
         sudo apt-get install -y gnupg software-properties-common wget
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
         sudo dpkg -i cuda-keyring_1.1-1_all.deb
-        sudo apt-get update
         sudo apt-get install -y cuda-compiler-13-0
 
     - name: Add CUDA to PATH
@@ -58,6 +56,7 @@ jobs:
 
     - name: Configure CMake
       run: cmake -S . -B build \
+        -G Ninja \
         -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
