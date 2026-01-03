@@ -6,6 +6,7 @@
 
 #include <cuda_gl_interop.h>
 #include <algorithm>
+#include <vector>
 
 #include "CudaMemoryManager.cuh"
 
@@ -216,5 +217,62 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
         memoryManager.freeMemory(deviceDetonationEventBuffer);
         deviceDetonationEventBuffer = nullptr;
         deviceDetonationEventBufferCapacity = 0;
+    }
+}
+
+void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
+{
+    if (numObjects.cells > 0) {
+        std::vector<CellVertexData> hostCellBuffer(numObjects.cells);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostCellBuffer.data(), deviceCellBuffer, numObjects.cells * sizeof(CellVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadCellData(hostCellBuffer.data(), numObjects.cells);
+    }
+
+    if (numObjects.energyParticles > 0) {
+        std::vector<EnergyParticleVertexData> hostEnergyParticleBuffer(numObjects.energyParticles);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostEnergyParticleBuffer.data(), deviceEnergyParticleBuffer, numObjects.energyParticles * sizeof(EnergyParticleVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadEnergyParticleData(hostEnergyParticleBuffer.data(), numObjects.energyParticles);
+    }
+
+    if (numObjects.locations > 0) {
+        std::vector<LocationVertexData> hostLocationBuffer(numObjects.locations);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLocationBuffer.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadLocationData(hostLocationBuffer.data(), numObjects.locations);
+    }
+
+    if (numObjects.selectedObjects > 0) {
+        std::vector<SelectedObjectVertexData> hostSelectedObjectBuffer(numObjects.selectedObjects);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedObjectBuffer.data(), deviceSelectedObjectBuffer, numObjects.selectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadSelectedObjectData(hostSelectedObjectBuffer.data(), numObjects.selectedObjects);
+    }
+
+    if (numObjects.lineIndices > 0) {
+        std::vector<unsigned int> hostLineIndexBuffer(numObjects.lineIndices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostLineIndexBuffer.data(), deviceLineIndexBuffer, numObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadLineIndices(hostLineIndexBuffer.data(), numObjects.lineIndices);
+    }
+
+    if (numObjects.triangleIndices > 0) {
+        std::vector<unsigned int> hostTriangleIndexBuffer(numObjects.triangleIndices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostTriangleIndexBuffer.data(), deviceTriangleIndexBuffer, numObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadTriangleIndices(hostTriangleIndexBuffer.data(), numObjects.triangleIndices);
+    }
+
+    if (numObjects.connectionArrowVertices > 0) {
+        std::vector<ConnectionArrowVertexData> hostSelectedConnectionBuffer(numObjects.connectionArrowVertices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostSelectedConnectionBuffer.data(), deviceSelectedConnectionBuffer, numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadSelectedConnectionData(hostSelectedConnectionBuffer.data(), numObjects.connectionArrowVertices);
+    }
+
+    if (numObjects.attackEventVertices > 0) {
+        std::vector<AttackEventVertexData> hostAttackEventBuffer(numObjects.attackEventVertices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostAttackEventBuffer.data(), deviceAttackEventBuffer, numObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadAttackEventData(hostAttackEventBuffer.data(), numObjects.attackEventVertices);
+    }
+
+    if (numObjects.detonationEventVertices > 0) {
+        std::vector<DetonationEventVertexData> hostDetonationEventBuffer(numObjects.detonationEventVertices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostDetonationEventBuffer.data(), deviceDetonationEventBuffer, numObjects.detonationEventVertices * sizeof(DetonationEventVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->uploadDetonationEventData(hostDetonationEventBuffer.data(), numObjects.detonationEventVertices);
     }
 }

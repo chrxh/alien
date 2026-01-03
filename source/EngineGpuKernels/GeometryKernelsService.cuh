@@ -21,7 +21,6 @@ public:
     void restorePositions(SettingsForSimulation const& settings, SimulationData data);
     NumRenderObjects getNumRenderObjects(SettingsForSimulation const& settings, SimulationData data, RealRect const& visibleWorldRect);
     void extractObjectData(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData, RealRect const& visibleWorldRect);
-    void extractObjectDataNoInterop(SettingsForSimulation const& settings, SimulationData data, CudaGeometryBuffers& renderingData, RealRect const& visibleWorldRect);
 
 private:
     GeometryKernelsService() = default;

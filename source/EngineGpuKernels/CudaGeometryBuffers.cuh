@@ -43,4 +43,5 @@ struct CudaGeometryBuffers
     void registerBuffers(GeometryBuffers const& buffers);
     void allocateBuffersForNoInterop(NumRenderObjects const& numObjects);
     void freeBuffersForNoInterop();
+    void copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
 };
