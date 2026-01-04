@@ -144,7 +144,14 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    auto requestedSimState = _PersisterFacade::get()->getRequestState(_loadSimRequestId).value();
+    auto requestedSimStateOpt = _PersisterFacade::get()->getRequestState(_loadSimRequestId);
+    if (!requestedSimStateOpt.has_value()) {
+        // Request state not available yet, continue waiting
+        OverlayController::get().process();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        return;
+    }
+    auto requestedSimState = requestedSimStateOpt.value();
     if (requestedSimState == PersisterRequestState::Finished) {
         auto const& data = _PersisterFacade::get()->fetchReadSimulationData(_loadSimRequestId);
         auto const& deserializedSim = data.deserializedSimulation;
@@ -260,7 +267,13 @@ void MainLoopController::processExiting()
 
     FpsController::get().processForceFps(WindowController::get().getFps());
 
-    auto requestedSimState = _PersisterFacade::get()->getRequestState(_saveSimRequestId).value();
+    auto requestedSimStateOpt = _PersisterFacade::get()->getRequestState(_saveSimRequestId);
+    if (!requestedSimStateOpt.has_value()) {
+        // Request state not available, finish anyway to avoid hanging on exit
+        _programState = ProgramState::Finished;
+        return;
+    }
+    auto requestedSimState = requestedSimStateOpt.value();
     if (requestedSimState == PersisterRequestState::Finished) {
         _PersisterFacade::get()->fetchSaveSimulationData(_saveSimRequestId);
         _programState = ProgramState::Finished;
