@@ -16,7 +16,29 @@ class GeometryTests : public IntegrationTestFramework
 public:
     GeometryTests()
         : IntegrationTestFramework()
-    {}
+    {
+        GlobalSettings::get().setNoInterop(true);
+
+        glfwInit();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        _window = glfwCreateWindow(100, 100, "Test", nullptr, nullptr);
+        if (_window) {
+            glfwMakeContextCurrent(_window);
+            gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+        }
+    }
+
+    ~GeometryTests()
+    {
+        GlobalSettings::get().setNoInterop(false);
+        if (_window) {
+            glfwDestroyWindow(_window);
+        }
+        glfwTerminate();
+    }
+
+protected:
+    GLFWwindow* _window = nullptr;
 };
 
 TEST_F(GeometryTests, getNumRenderObjects_emptySim)
@@ -153,45 +175,8 @@ TEST_F(GeometryTests, getNumRenderObjects_creature)
     EXPECT_EQ(4u, numObjects.lineIndices);
 }
 
-class GeometryTests_CopyBuffers
-    : public IntegrationTestFramework
-    , public testing::WithParamInterface<bool>
+TEST_F(GeometryTests, copyBuffers_emptySim)
 {
-public:
-    GeometryTests_CopyBuffers()
-        : IntegrationTestFramework()
-    {
-        GlobalSettings::get().setNoInterop(GetParam());
-
-        glfwInit();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        _window = glfwCreateWindow(100, 100, "Test", nullptr, nullptr);
-        if (_window) {
-            glfwMakeContextCurrent(_window);
-            gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
-        }
-    }
-
-    ~GeometryTests_CopyBuffers()
-    {
-        GlobalSettings::get().setNoInterop(false);
-        if (_window) {
-            glfwDestroyWindow(_window);
-        }
-        glfwTerminate();
-    }
-
-protected:
-    GLFWwindow* _window = nullptr;
-};
-
-INSTANTIATE_TEST_SUITE_P(InteropModes, GeometryTests_CopyBuffers, ::testing::Values(false, true));
-
-TEST_P(GeometryTests_CopyBuffers, copyBuffers_emptySim)
-{
-    if (!GetParam()) {
-        GTEST_SKIP() << "Interop mode requires display with CUDA-OpenGL support";
-    }
     _simulationFacade->clear();
     auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
@@ -203,11 +188,8 @@ TEST_P(GeometryTests_CopyBuffers, copyBuffers_emptySim)
     EXPECT_EQ(0u, numObjects.energyParticles);
 }
 
-TEST_P(GeometryTests_CopyBuffers, copyBuffers_singleCell)
+TEST_F(GeometryTests, copyBuffers_singleCell)
 {
-    if (!GetParam()) {
-        GTEST_SKIP() << "Interop mode requires display with CUDA-OpenGL support";
-    }
     auto data = Description().cells({CellDescription().id(1).pos({100.0f, 100.0f})});
     _simulationFacade->setSimulationData(data);
     auto geometryBuffers = _GeometryBuffers::create();
@@ -219,11 +201,8 @@ TEST_P(GeometryTests_CopyBuffers, copyBuffers_singleCell)
     EXPECT_EQ(1u, numObjects.cells);
 }
 
-TEST_P(GeometryTests_CopyBuffers, copyBuffers_multipleCells)
+TEST_F(GeometryTests, copyBuffers_multipleCells)
 {
-    if (!GetParam()) {
-        GTEST_SKIP() << "Interop mode requires display with CUDA-OpenGL support";
-    }
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -239,11 +218,8 @@ TEST_P(GeometryTests_CopyBuffers, copyBuffers_multipleCells)
     EXPECT_EQ(3u, numObjects.cells);
 }
 
-TEST_P(GeometryTests_CopyBuffers, copyBuffers_singleParticle)
+TEST_F(GeometryTests, copyBuffers_singleParticle)
 {
-    if (!GetParam()) {
-        GTEST_SKIP() << "Interop mode requires display with CUDA-OpenGL support";
-    }
     auto data = Description().particles({ParticleDescription().id(1).pos({100.0f, 100.0f}).energy(10.0f)});
     _simulationFacade->setSimulationData(data);
     auto geometryBuffers = _GeometryBuffers::create();
@@ -255,11 +231,8 @@ TEST_P(GeometryTests_CopyBuffers, copyBuffers_singleParticle)
     EXPECT_EQ(1u, numObjects.energyParticles);
 }
 
-TEST_P(GeometryTests_CopyBuffers, copyBuffers_cellsWithConnections)
+TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
 {
-    if (!GetParam()) {
-        GTEST_SKIP() << "Interop mode requires display with CUDA-OpenGL support";
-    }
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}),
         CellDescription().id(2).pos({101.0f, 100.0f}),
@@ -276,11 +249,8 @@ TEST_P(GeometryTests_CopyBuffers, copyBuffers_cellsWithConnections)
     EXPECT_EQ(2u, numObjects.lineIndices);
 }
 
-TEST_P(GeometryTests_CopyBuffers, copyBuffers_mixedCellsAndParticles)
+TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 {
-    if (!GetParam()) {
-        GTEST_SKIP() << "Interop mode requires display with CUDA-OpenGL support";
-    }
     auto data = Description()
                     .cells({
                         CellDescription().id(1).pos({100.0f, 100.0f}),
