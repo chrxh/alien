@@ -173,51 +173,15 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
 {
     auto& memoryManager = CudaMemoryManager::getInstance();
 
-    if (deviceCellBuffer != nullptr) {
-        memoryManager.freeMemory(deviceCellBuffer);
-        deviceCellBuffer = nullptr;
-        deviceCellBufferCapacity = 0;
-    }
-    if (deviceEnergyParticleBuffer != nullptr) {
-        memoryManager.freeMemory(deviceEnergyParticleBuffer);
-        deviceEnergyParticleBuffer = nullptr;
-        deviceEnergyParticleBufferCapacity = 0;
-    }
-    if (deviceLocationBuffer != nullptr) {
-        memoryManager.freeMemory(deviceLocationBuffer);
-        deviceLocationBuffer = nullptr;
-        deviceLocationBufferCapacity = 0;
-    }
-    if (deviceSelectedObjectBuffer != nullptr) {
-        memoryManager.freeMemory(deviceSelectedObjectBuffer);
-        deviceSelectedObjectBuffer = nullptr;
-        deviceSelectedObjectBufferCapacity = 0;
-    }
-    if (deviceLineIndexBuffer != nullptr) {
-        memoryManager.freeMemory(deviceLineIndexBuffer);
-        deviceLineIndexBuffer = nullptr;
-        deviceLineIndexBufferCapacity = 0;
-    }
-    if (deviceTriangleIndexBuffer != nullptr) {
-        memoryManager.freeMemory(deviceTriangleIndexBuffer);
-        deviceTriangleIndexBuffer = nullptr;
-        deviceTriangleIndexBufferCapacity = 0;
-    }
-    if (deviceSelectedConnectionBuffer != nullptr) {
-        memoryManager.freeMemory(deviceSelectedConnectionBuffer);
-        deviceSelectedConnectionBuffer = nullptr;
-        deviceSelectedConnectionBufferCapacity = 0;
-    }
-    if (deviceAttackEventBuffer != nullptr) {
-        memoryManager.freeMemory(deviceAttackEventBuffer);
-        deviceAttackEventBuffer = nullptr;
-        deviceAttackEventBufferCapacity = 0;
-    }
-    if (deviceDetonationEventBuffer != nullptr) {
-        memoryManager.freeMemory(deviceDetonationEventBuffer);
-        deviceDetonationEventBuffer = nullptr;
-        deviceDetonationEventBufferCapacity = 0;
-    }
+    memoryManager.freeMemory(deviceCellBuffer);
+    memoryManager.freeMemory(deviceEnergyParticleBuffer);
+    memoryManager.freeMemory(deviceLocationBuffer);
+    memoryManager.freeMemory(deviceSelectedObjectBuffer);
+    memoryManager.freeMemory(deviceLineIndexBuffer);
+    memoryManager.freeMemory(deviceTriangleIndexBuffer);
+    memoryManager.freeMemory(deviceSelectedConnectionBuffer);
+    memoryManager.freeMemory(deviceAttackEventBuffer);
+    memoryManager.freeMemory(deviceDetonationEventBuffer);
 }
 
 void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
