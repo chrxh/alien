@@ -51,7 +51,14 @@ add_executable(NetworkTests)
 add_executable(PersisterTests)
 
 find_package(CUDAToolkit)
-find_package(Boost REQUIRED)
+
+# Create Boost::boost target manually - vcpkg already provides headers in the include path
+# This avoids the slow find_package(Boost) which searches extensively
+if(NOT TARGET Boost::boost)
+    add_library(Boost::boost INTERFACE IMPORTED)
+    # vcpkg toolchain already adds vcpkg_installed/x64-linux/include to include dirs
+endif()
+
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(cereal CONFIG REQUIRED)
