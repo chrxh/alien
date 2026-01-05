@@ -520,18 +520,6 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
         numObjects = toInt(deserializedSim.mainData._cells.size() + deserializedSim.mainData._particles.size());
     } else {
         THROW_NOT_IMPLEMENTED();
-        //auto genome = std::get<ReplaceNetworkResourceRequestData::CreatureData>(requestData.data).description;
-        //if (genome._cells.empty()) {
-        //    return std::make_shared<_PersisterRequestError>(
-        //        request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The is no valid genome for replacement selected."});
-        //}
-        //auto genomeData = GenomeDescriptionConverterService::get().convertDescriptionToBytes(genome);
-        //numObjects = GenomeDescriptionConverterService::get().getNumNodesRecursively(genomeData, true);
-
-        //if (!SerializerService::get().serializeGenomeToString(mainData, genomeData)) {
-        //    return std::make_shared<_PersisterRequestError>(
-        //        request->getRequestId(), request->getSenderInfo().senderId, PersisterErrorInfo{"The genome could not be serialized for uploading."});
-        //}
     }
 
     if (!NetworkService::get().replaceResource(requestData.resourceId, worldSize, numObjects, mainData, settings, statistics)) {
@@ -639,26 +627,8 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
     try {
         UnlockGuard unlockGuard(lock);
 
-        //auto const& requestData = request->getData();
-
-        //auto peakStatistics = requestData.peakDeserializedSimulation->getStatisticsRawData();
-
         DeserializedSimulation deserializedSimulation;
         deserializedSimulation.statistics = _SimulationFacade::get()->getStatisticsHistory().getCopiedData();
-        //auto currentRawStatistics = _SimulationFacade::get()->getStatisticsRawData();
-        //if (sumColorVector(currentRawStatistics.timeline.timestep.numCellsVariance)
-        //    >= sumColorVector(peakStatistics.timeline.timestep.numCellsVariance)) {
-
-        //    deserializedSimulation.auxiliaryData.realTime = _SimulationFacade::get()->getRealTime();
-        //    deserializedSimulation.auxiliaryData.zoom = requestData.zoom;
-        //    deserializedSimulation.auxiliaryData.center = requestData.center;
-        //    deserializedSimulation.auxiliaryData.worldSize = _SimulationFacade::get()->getWorldSize();
-        //    deserializedSimulation.auxiliaryData.simulationParameters = _SimulationFacade::get()->getSimulationParameters();
-        //    deserializedSimulation.auxiliaryData.timestep = static_cast<uint32_t>(_SimulationFacade::get()->getCurrentTimestep());
-        //    deserializedSimulation.mainData = _SimulationFacade::get()->getSimulationData();
-        //    requestData.peakDeserializedSimulation->setDeserializedSimulation(std::move(deserializedSimulation));
-        //    requestData.peakDeserializedSimulation->setLastStatisticsData(currentRawStatistics);
-        //}
         return std::make_shared<_GetPeakSimulationRequestResult>(request->getRequestId(), GetPeakSimulationResultData());
     } catch (...) {
         return std::make_shared<_PersisterRequestError>(
