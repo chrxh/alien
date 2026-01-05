@@ -61,7 +61,7 @@ jobs:
         path: |
           ~/.cache/vcpkg/archives
           build/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'external/vcpkg/.git/HEAD') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-
 
