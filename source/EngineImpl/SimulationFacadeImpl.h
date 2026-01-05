@@ -114,6 +114,8 @@ public:
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;
     bool testOnly_arePointersValid() override;
     NumRenderObjects testOnly_getNumRenderObjects() override;
+    std::vector<SelectedObjectVertexData> testOnly_getSelectedObjectData() override;
+    std::vector<ConnectionArrowVertexData> testOnly_getConnectionArrowData() override;
 
 private:
     bool _selectionNeedsUpdate = false;

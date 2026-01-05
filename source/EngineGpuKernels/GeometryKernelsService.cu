@@ -207,3 +207,65 @@ void GeometryKernelsService::extractObjectData(
         KERNEL_CALL(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices);
     }
 }
+
+std::vector<SelectedObjectVertexData> GeometryKernelsService::testOnly_getSelectedObjectData(SettingsForSimulation const& settings, SimulationData data)
+{
+    auto const& gpuSettings = settings.cudaSettings;
+
+    // First count how many selected objects
+    setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
+    cudaDeviceSynchronize();
+    auto numObjects = copyToHost(_numSelectedObjects);
+
+    if (numObjects == 0) {
+        return {};
+    }
+
+    // Allocate device memory and extract data
+    SelectedObjectVertexData* deviceBuffer;
+    CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceBuffer, numObjects * sizeof(SelectedObjectVertexData)));
+
+    setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedObjectData, data, deviceBuffer, _numSelectedObjects);
+    cudaDeviceSynchronize();
+
+    // Copy to host
+    std::vector<SelectedObjectVertexData> result(numObjects);
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.data(), deviceBuffer, numObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+
+    CHECK_FOR_CUDA_ERROR(cudaFree(deviceBuffer));
+
+    return result;
+}
+
+std::vector<ConnectionArrowVertexData> GeometryKernelsService::testOnly_getConnectionArrowData(SettingsForSimulation const& settings, SimulationData data)
+{
+    auto const& gpuSettings = settings.cudaSettings;
+
+    // First count how many connection arrow vertices
+    setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedConnectionData, data, nullptr, _numSelectedConnectionVertices);
+    cudaDeviceSynchronize();
+    auto numVertices = copyToHost(_numSelectedConnectionVertices);
+
+    if (numVertices == 0) {
+        return {};
+    }
+
+    // Allocate device memory and extract data
+    ConnectionArrowVertexData* deviceBuffer;
+    CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceBuffer, numVertices * sizeof(ConnectionArrowVertexData)));
+
+    setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractSelectedConnectionData, data, deviceBuffer, _numSelectedConnectionVertices);
+    cudaDeviceSynchronize();
+
+    // Copy to host
+    std::vector<ConnectionArrowVertexData> result(numVertices);
+    CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.data(), deviceBuffer, numVertices * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+
+    CHECK_FOR_CUDA_ERROR(cudaFree(deviceBuffer));
+
+    return result;
+}

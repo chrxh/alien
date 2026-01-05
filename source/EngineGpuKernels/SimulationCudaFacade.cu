@@ -672,6 +672,24 @@ NumRenderObjects _SimulationCudaFacade::testOnly_getNumRenderObjects()
     return result;
 }
 
+std::vector<SelectedObjectVertexData> _SimulationCudaFacade::testOnly_getSelectedObjectData()
+{
+    checkAndProcessSimulationParameterChanges();
+    auto simulationData = getSimulationDataPtrCopy();
+    auto result = GeometryKernelsService::get().testOnly_getSelectedObjectData(_settings, simulationData);
+    syncAndCheck();
+    return result;
+}
+
+std::vector<ConnectionArrowVertexData> _SimulationCudaFacade::testOnly_getConnectionArrowData()
+{
+    checkAndProcessSimulationParameterChanges();
+    auto simulationData = getSimulationDataPtrCopy();
+    auto result = GeometryKernelsService::get().testOnly_getConnectionArrowData(_settings, simulationData);
+    syncAndCheck();
+    return result;
+}
+
 void _SimulationCudaFacade::initCuda()
 {
     log(Priority::Important, "initialize CUDA");

@@ -508,6 +508,18 @@ NumRenderObjects EngineWorker::testOnly_getNumRenderObjects()
     return _simulationCudaFacade->testOnly_getNumRenderObjects();
 }
 
+std::vector<SelectedObjectVertexData> EngineWorker::testOnly_getSelectedObjectData()
+{
+    EngineWorkerGuard access(this);
+    return _simulationCudaFacade->testOnly_getSelectedObjectData();
+}
+
+std::vector<ConnectionArrowVertexData> EngineWorker::testOnly_getConnectionArrowData()
+{
+    EngineWorkerGuard access(this);
+    return _simulationCudaFacade->testOnly_getConnectionArrowData();
+}
+
 void EngineWorker::resetTimeIntervalStatistics()
 {
     _simulationCudaFacade->resetTimeIntervalStatistics();

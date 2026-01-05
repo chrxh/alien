@@ -268,3 +268,152 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
     EXPECT_EQ(2u, numObjects.cells);
     EXPECT_EQ(3u, numObjects.energyParticles);
 }
+
+// Signal restriction tests for cudaExtractSelectedObjectData
+
+TEST_F(GeometryTests, selectedObjectData_noRestriction_inactive)
+{
+    auto cell = CellDescription().id(1).pos({100.0f, 100.0f});
+    cell._signalRestriction._mode = SignalRestrictionMode_Inactive;
+    cell._signalRestriction._baseAngle = 45.0f;
+    cell._signalRestriction._openingAngle = 90.0f;
+
+    auto data = Description().cells({
+        cell,
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    // Select cell 1 using position-based selection
+    _simulationFacade->setSelection({99.0f, 99.0f}, {100.5f, 101.0f});
+
+    auto selectedData = _simulationFacade->testOnly_getSelectedObjectData();
+    ASSERT_EQ(1u, selectedData.size());
+    EXPECT_EQ(0, selectedData[0].hasSignalRestriction);  // Inactive mode = no restriction
+}
+
+TEST_F(GeometryTests, selectedObjectData_hasRestriction_active)
+{
+    auto cell = CellDescription().id(1).pos({100.0f, 100.0f});
+    cell._signalRestriction._mode = SignalRestrictionMode_Active;
+    cell._signalRestriction._baseAngle = 45.0f;
+    cell._signalRestriction._openingAngle = 90.0f;
+
+    auto data = Description().cells({
+        cell,
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    // Select cell 1 using position-based selection
+    _simulationFacade->setSelection({99.0f, 99.0f}, {100.5f, 101.0f});
+
+    auto selectedData = _simulationFacade->testOnly_getSelectedObjectData();
+    ASSERT_EQ(1u, selectedData.size());
+    EXPECT_EQ(1, selectedData[0].hasSignalRestriction);  // Active mode = has restriction
+}
+
+TEST_F(GeometryTests, selectedObjectData_hasRestriction_conditional)
+{
+    auto cell = CellDescription().id(1).pos({100.0f, 100.0f});
+    cell._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    cell._signalRestriction._baseAngle = 45.0f;
+    cell._signalRestriction._openingAngle = 90.0f;
+
+    auto data = Description().cells({
+        cell,
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+    });
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    // Select cell 1 using position-based selection
+    _simulationFacade->setSelection({99.0f, 99.0f}, {100.5f, 101.0f});
+
+    auto selectedData = _simulationFacade->testOnly_getSelectedObjectData();
+    ASSERT_EQ(1u, selectedData.size());
+    EXPECT_EQ(1, selectedData[0].hasSignalRestriction);  // Conditional mode = has restriction
+}
+
+// Signal restriction tests for cudaExtractSelectedConnectionData
+
+TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
+{
+    auto cell1 = CellDescription().id(1).pos({100.0f, 100.0f});
+    cell1._signalRestriction._mode = SignalRestrictionMode_Inactive;
+
+    auto cell2 = CellDescription().id(2).pos({101.0f, 100.0f});
+    cell2._signalRestriction._mode = SignalRestrictionMode_Inactive;
+
+    auto data = Description().cells({cell1, cell2});
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    // Select both cells using position-based selection
+    _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
+
+    auto connectionData = _simulationFacade->testOnly_getConnectionArrowData();
+    ASSERT_EQ(2u, connectionData.size());  // 2 vertices per connection line
+    // arrowFlags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
+    // Both cells have no restriction, so signals can flow both ways (flags = 3)
+    EXPECT_EQ(3, connectionData[0].arrowFlags);
+    EXPECT_EQ(3, connectionData[1].arrowFlags);
+}
+
+TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
+{
+    auto cell1 = CellDescription().id(1).pos({100.0f, 100.0f});
+    cell1._signalRestriction._mode = SignalRestrictionMode_Active;
+    // Use baseAngle = 90 and openingAngle = 90 to point away from connection
+    // Connection angle is 0 (first connection), so range [45+180, 135+180] = [225, 315] doesn't include 0
+    cell1._signalRestriction._baseAngle = 90.0f;
+    cell1._signalRestriction._openingAngle = 90.0f;
+
+    auto cell2 = CellDescription().id(2).pos({101.0f, 100.0f});
+    cell2._signalRestriction._mode = SignalRestrictionMode_Inactive;
+
+    auto data = Description().cells({cell1, cell2});
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    // Select both cells using position-based selection
+    _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
+
+    auto connectionData = _simulationFacade->testOnly_getConnectionArrowData();
+    ASSERT_EQ(2u, connectionData.size());
+    // Cell1 has restriction that blocks signal to cell2 (connection angle 0 is outside range [225,315])
+    // Cell2 has no restriction, so signal can flow to cell1
+    // Expected: arrow to cell1 (bit 0 = 1), no arrow to cell2 (bit 1 = 0) => flags = 1
+    EXPECT_EQ(1, connectionData[0].arrowFlags);
+    EXPECT_EQ(1, connectionData[1].arrowFlags);
+}
+
+TEST_F(GeometryTests, connectionData_withRestriction_conditional_restrictedDirection)
+{
+    auto cell1 = CellDescription().id(1).pos({100.0f, 100.0f});
+    cell1._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    // Use baseAngle = 90 and openingAngle = 90 to point away from connection
+    cell1._signalRestriction._baseAngle = 90.0f;
+    cell1._signalRestriction._openingAngle = 90.0f;
+
+    auto cell2 = CellDescription().id(2).pos({101.0f, 100.0f});
+    cell2._signalRestriction._mode = SignalRestrictionMode_Inactive;
+
+    auto data = Description().cells({cell1, cell2});
+    data.addConnection(1, 2);
+    _simulationFacade->setSimulationData(data);
+
+    // Select both cells using position-based selection
+    _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
+
+    auto connectionData = _simulationFacade->testOnly_getConnectionArrowData();
+    ASSERT_EQ(2u, connectionData.size());
+    // Conditional mode should render the same as Active mode for arrow directions
+    // Cell1 has restriction that blocks signal to cell2
+    // Cell2 has no restriction, so signal can flow to cell1
+    // Expected: arrow to cell1 (bit 0 = 1), no arrow to cell2 (bit 1 = 0) => flags = 1
+    EXPECT_EQ(1, connectionData[0].arrowFlags);
+    EXPECT_EQ(1, connectionData[1].arrowFlags);
+}

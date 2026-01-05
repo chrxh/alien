@@ -127,6 +127,8 @@ public:
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_arePointersValid();
     NumRenderObjects testOnly_getNumRenderObjects();
+    std::vector<SelectedObjectVertexData> testOnly_getSelectedObjectData();
+    std::vector<ConnectionArrowVertexData> testOnly_getConnectionArrowData();
 
 private:
     void resetTimeIntervalStatistics();
