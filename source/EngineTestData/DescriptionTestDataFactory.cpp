@@ -501,6 +501,9 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         if (memory.getMode() != nodeMemory.getMode()) {
             return false;
         }
+        if (memory._channelBitMask != nodeMemory._channelBitMask) {
+            return false;
+        }
         switch (memory.getMode()) {
         case MemoryMode_SignalDelay: {
             auto const& signalDelay = std::get<SignalDelayDescription>(memory._mode);
@@ -714,7 +717,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         default:
             memoryModeDesc = MemoryModeDescription();
         }
-        auto memory = MemoryDescription().mode(memoryModeDesc);
+        auto memory = MemoryDescription().mode(memoryModeDesc).channelBitMask(0b01010101);
         for (int i = 0; i < 10; ++i) {
             SignalEntryDescription entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {
@@ -853,7 +856,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         default:
             memoryModeDesc = MemoryModeGenomeDescription();
         }
-        auto memory = MemoryGenomeDescription().mode(memoryModeDesc);
+        auto memory = MemoryGenomeDescription().mode(memoryModeDesc).channelBitMask(0b10101010);
         for (int i = 0; i < 5; ++i) {
             SignalEntryGenomeDescription entry;
             for (int j = 0; j < MAX_CHANNELS; ++j) {

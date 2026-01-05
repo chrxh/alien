@@ -331,6 +331,7 @@ struct MemoryTO
     MemoryModeDataTO modeData;
 
     uint8_t numSignalEntries;
+    uint8_t channelBitMask;
     uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryTO[MAX_CELL_MEMORY_ENTRIES]
 };
 

@@ -545,6 +545,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memory._mode = signalIntegrator;
         }
+        memory._channelBitMask = memoryTO.channelBitMask;
         auto const& signalEntriesTO = getFromHeap<SignalEntryTO>(to.heap, memoryTO.signalEntriesDataIndex);
         copyMemoryEntriesToDescription(memory._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         result._cellType = memory;
@@ -784,6 +785,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             signalIntegrator._newSignalWeight = memoryTO.modeData.signalIntegrator.newSignalWeight;
             memoryDesc._mode = signalIntegrator;
         }
+        memoryDesc._channelBitMask = memoryTO.channelBitMask;
         auto const& signalEntriesTO = getFromHeap<SignalEntryGenomeTO>(to.heap, memoryTO.signalEntriesDataIndex);
         copyMemoryEntriesToDescription(memoryDesc._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         nodeDesc._cellType = memoryDesc;
@@ -1077,6 +1079,7 @@ void DescriptionConverterService::convertGenomeToTO(
                     auto const& signalIntegratorDesc = std::get<SignalIntegratorGenomeDescription>(memoryDesc._mode);
                     memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
                 }
+                memoryTO.channelBitMask = memoryDesc._channelBitMask;
                 memoryTO.numSignalEntries = toInt(memoryDesc._signalEntries.size());
                 memoryTO.signalEntriesDataIndex = heap.size();
                 heap.resize(heap.size() + sizeof(SignalEntryGenomeTO) * memoryTO.numSignalEntries);
@@ -1360,6 +1363,7 @@ void DescriptionConverterService::convertCellToTO(
             auto const& signalIntegratorDesc = std::get<SignalIntegratorDescription>(memoryDesc._mode);
             memoryTO.modeData.signalIntegrator.newSignalWeight = signalIntegratorDesc._newSignalWeight;
         }
+        memoryTO.channelBitMask = memoryDesc._channelBitMask;
         memoryTO.numSignalEntries = toInt(memoryDesc._signalEntries.size());
         memoryTO.signalEntriesDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(SignalEntryTO) * memoryTO.numSignalEntries);

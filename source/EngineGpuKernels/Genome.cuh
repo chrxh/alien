@@ -243,6 +243,7 @@ struct MemoryGenome
     MemoryModeDataGenome modeData;
 
     uint8_t numSignalEntries;
+    uint8_t channelBitMask;
     SignalEntryGenome* signalEntries;  // Pointer to heap memory
 };
 

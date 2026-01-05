@@ -782,47 +782,56 @@ void AlienGui::InputColorTransition(InputColorTransitionParameters const& parame
     ImGui::PopID();
 }
 
-bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
+namespace
 {
-    auto startPos = ImGui::GetCursorScreenPos();
-    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(26.0f);
-    auto height = ImGui::GetFrameHeight();
-    ImVec4 frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
-    frameBgColor.w *= 0.6f;  // make it half-transparent
+    void drawHatchedRectangle(float width)
+    {
+        if (width > NEAR_ZERO) {
+            auto startPos = ImGui::GetCursorScreenPos();
+            auto height = ImGui::GetFrameHeight();
+            ImVec4 frameBgColor = ImGui::GetStyle().Colors[ImGuiCol_FrameBg];
+            frameBgColor.w *= 0.6f;  // make it half-transparent
 
-    // Draw hatched (diagonal lines) rectangle
-    if (width > NEAR_ZERO) {
-        ImDrawList* drawList = ImGui::GetWindowDrawList();
-        ImU32 bgCol = ImGui::GetColorU32(frameBgColor);
-        float hatchSpacing = 6.0f;
-        ImVec2 rectMin = startPos;
-        ImVec2 rectMax = ImVec2(startPos.x + width, startPos.y + height);
-        // Draw border
-        drawList->AddRect(rectMin, rectMax, bgCol);
-        // Draw hatching
-        for (float x = rectMin.x - height; x < rectMax.x; x += hatchSpacing) {
-            ImVec2 p1 = ImVec2(x, rectMin.y);
-            ImVec2 p2 = ImVec2(x + height, rectMin.y + height);
-            // Clip to rect
-            if (p1.x < rectMin.x) {
-                float dy = rectMin.x - p1.x;
-                p1.x = rectMin.x;
-                p1.y += dy;
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            ImU32 bgCol = ImGui::GetColorU32(frameBgColor);
+            float hatchSpacing = 6.0f;
+            ImVec2 rectMin = startPos;
+            ImVec2 rectMax = ImVec2(startPos.x + width, startPos.y + height);
+            // Draw border
+            drawList->AddRect(rectMin, rectMax, bgCol);
+            // Draw hatching
+            for (float x = rectMin.x - height; x < rectMax.x; x += hatchSpacing) {
+                ImVec2 p1 = ImVec2(x, rectMin.y);
+                ImVec2 p2 = ImVec2(x + height, rectMin.y + height);
+                // Clip to rect
+                if (p1.x < rectMin.x) {
+                    float dy = rectMin.x - p1.x;
+                    p1.x = rectMin.x;
+                    p1.y += dy;
+                }
+                if (p2.x > rectMax.x) {
+                    float dx = p2.x - rectMax.x;
+                    p2.x = rectMax.x;
+                    p2.y -= dx;
+                }
+                if (p1.y < rectMin.y)
+                    p1.y = rectMin.y;
+                if (p2.y > rectMax.y)
+                    p2.y = rectMax.y;
+                drawList->AddLine(p1, p2, bgCol, 1.0f);
             }
-            if (p2.x > rectMax.x) {
-                float dx = p2.x - rectMax.x;
-                p2.x = rectMax.x;
-                p2.y -= dx;
-            }
-            if (p1.y < rectMin.y)
-                p1.y = rectMin.y;
-            if (p2.y > rectMax.y)
-                p2.y = rectMax.y;
-            drawList->AddLine(p1, p2, bgCol, 1.0f);
         }
     }
 
-    ImGui::Dummy(ImVec2(width - ImGui::GetStyle().FramePadding.x, height));
+}
+
+bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
+{
+    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(26.0f);
+
+    drawHatchedRectangle(width);
+
+    ImGui::Dummy(ImVec2(width - ImGui::GetStyle().FramePadding.x, 0));
     ImGui::SameLine();
 
     auto result = ImGui::Checkbox(("##" + parameters._name).c_str(), &value);
@@ -842,6 +851,47 @@ bool AlienGui::Checkbox(CheckboxParameters const& parameters, bool& value)
         AlienGui::HelpMarker(*parameters._tooltip);
     }
 
+    return result;
+}
+
+bool AlienGui::MultiCheckboxes(MultiCheckboxesParameters const& parameters, bool& value1, bool& value2, bool& value3, bool& value4)
+{
+    ImGui::PushID(parameters._name.c_str());
+    auto padding = ImGui::GetStyle().FramePadding.x;
+    auto width = ImGui::GetContentRegionAvail().x - scale(parameters._textWidth) - scale(104.0f);
+
+    drawHatchedRectangle(width);
+
+    ImGui::Dummy(ImVec2(width - padding, 0));
+    ImGui::SameLine();
+
+    auto result = false;
+    if (ImGui::Checkbox("###1", &value1)) {
+        result |= true;
+    }
+    ImGui::SameLine();
+    MoveTickLeft();
+    if (ImGui::Checkbox("###2", &value2)) {
+        result |= true;
+    }
+    ImGui::SameLine();
+    MoveTickLeft();
+    if (ImGui::Checkbox("###3", &value3)) {
+        result |= true;
+    }
+    ImGui::SameLine();
+    MoveTickLeft();
+    if (ImGui::Checkbox("###4", &value4)) {
+        result |= true;
+    }
+
+    ImGui::SameLine();
+    AlienGui::Text(TextParameters().text(parameters._name.c_str()));
+    if (parameters._tooltip) {
+        AlienGui::HelpMarker(*parameters._tooltip);
+    }
+
+    ImGui::PopID();
     return result;
 }
 

@@ -182,6 +182,7 @@ namespace
                     case CellTypeGenome_Memory:
                         nodeTO.cellTypeData.memory.mode = node.cellTypeData.memory.mode;
                         nodeTO.cellTypeData.memory.numSignalEntries = node.cellTypeData.memory.numSignalEntries;
+                        nodeTO.cellTypeData.memory.channelBitMask = node.cellTypeData.memory.channelBitMask;
                         if (node.cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                             nodeTO.cellTypeData.memory.modeData.signalDelay.delay = node.cellTypeData.memory.modeData.signalDelay.delay;
                         } else if (node.cellTypeData.memory.mode == MemoryMode_SignalRecorder) {
@@ -427,6 +428,7 @@ namespace
         case CellType_Memory: {
             cellTO.cellTypeData.memory.mode = cell->cellTypeData.memory.mode;
             cellTO.cellTypeData.memory.numSignalEntries = cell->cellTypeData.memory.numSignalEntries;
+            cellTO.cellTypeData.memory.channelBitMask = cell->cellTypeData.memory.channelBitMask;
             if (cell->cellTypeData.memory.mode == MemoryMode_SignalDelay) {
                 cellTO.cellTypeData.memory.modeData.signalDelay.delay = cell->cellTypeData.memory.modeData.signalDelay.delay;
                 cellTO.cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized = cell->cellTypeData.memory.modeData.signalDelay.numSignalEntriesInitialized;
