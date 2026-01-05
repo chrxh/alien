@@ -32,17 +32,19 @@ namespace
 int main(int argc, char** argv)
 {
     auto inDebugMode = hasArgument(argc, argv, "-d");
-    auto noInterop = hasArgument(argc, argv, "--no-interop");
+    auto useInterop = hasArgument(argc, argv, "--interop");
     GlobalSettings::get().setDebugMode(inDebugMode);
-    GlobalSettings::get().setNoInterop(noInterop);
+    if (useInterop) {
+        GlobalSettings::get().setNoInterop(false);
+    }
 
     FileLogger fileLogger = std::make_shared<_FileLogger>();
 
     if (inDebugMode) {
         log(Priority::Important, "DEBUG mode");
     }
-    if (noInterop) {
-        log(Priority::Important, "NO-INTEROP mode: Using CPU-GPU memory transfers instead of CUDA-OpenGL interop");
+    if (useInterop) {
+        log(Priority::Important, "INTEROP mode: Using CUDA-OpenGL interop for rendering");
     }
 
     MainWindow mainWindow;

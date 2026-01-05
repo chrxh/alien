@@ -134,7 +134,7 @@ struct GlobalSettingsImpl
 {
     boost::property_tree::ptree _tree;
     bool _debugMode = false;
-    bool _noInterop = false;
+    bool _noInterop = true;
 };
 
 
