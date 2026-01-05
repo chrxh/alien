@@ -46,8 +46,8 @@ struct ConversionResult;
 
 struct Ids;
 
-class _OpenGlGeometryBuffers;
-using GeometryBuffers = std::shared_ptr<_OpenGlGeometryBuffers>;
+class _GeometryBuffers;
+using GeometryBuffers = std::shared_ptr<_GeometryBuffers>;
 
 struct NumRenderObjects;
 struct CellVertexData;

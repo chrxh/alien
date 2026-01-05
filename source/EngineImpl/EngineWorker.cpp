@@ -6,7 +6,7 @@
 #include <Base/ExitScopeGuard.h>
 
 #include <EngineInterface/DescriptionEditService.h>
-#include <EngineInterface/OpenGlGeometryBuffers.h>
+#include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
@@ -508,10 +508,10 @@ NumRenderObjects EngineWorker::testOnly_getNumRenderObjects()
     return _simulationCudaFacade->testOnly_getNumRenderObjects();
 }
 
-CpuGeometryBuffers EngineWorker::testOnly_getGeometryBuffers()
+CpuGeometryBuffers EngineWorker::testOnly_copyBuffersFromCudaToCpu()
 {
     EngineWorkerGuard access(this);
-    return _simulationCudaFacade->testOnly_getGeometryBuffers();
+    return _simulationCudaFacade->testOnly_copyBuffersFromCudaToCpu();
 }
 
 void EngineWorker::resetTimeIntervalStatistics()

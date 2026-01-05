@@ -1,12 +1,12 @@
-#include "OpenGlGeometryBuffers.h"
+#include "GeometryBuffers.h"
 
 #include <glad/glad.h>
 
 #include <Base/Definitions.h>
 
-GeometryBuffers _OpenGlGeometryBuffers::create()
+GeometryBuffers _GeometryBuffers::create()
 {
-    auto result = new _OpenGlGeometryBuffers();
+    auto result = new _GeometryBuffers();
     glGenVertexArrays(1, &result->_vaoForPointsAndLines);
     glGenBuffers(1, &result->_vboForCells);
     glGenBuffers(1, &result->_eboForLines);
@@ -27,7 +27,7 @@ GeometryBuffers _OpenGlGeometryBuffers::create()
     return GeometryBuffers(result);
 }
 
-void _OpenGlGeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
+void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
     _numObjects = numRenderObjects;
     if (numRenderObjects.cells >= _vertexBufferCapacity) {
@@ -79,40 +79,40 @@ void _OpenGlGeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderO
     }
 }
 
-NumRenderObjects _OpenGlGeometryBuffers::getNumObjects() const
+NumRenderObjects _GeometryBuffers::getNumObjects() const
 {
     return _numObjects;
 }
 
-void _OpenGlGeometryBuffers::uploadCellData(CellVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadCellData(CellVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(CellVertexData)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergyParticles());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(EnergyParticleVertexData)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadLocationData(LocationVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadLocationData(LocationVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForLocations());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(LocationVertexData)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(SelectedObjectVertexData)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadLineIndices(unsigned int const* data, uint64_t count)
+void _GeometryBuffers::uploadLineIndices(unsigned int const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindVertexArray(getVaoForPointsAndLines());
@@ -120,7 +120,7 @@ void _OpenGlGeometryBuffers::uploadLineIndices(unsigned int const* data, uint64_
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, toInt(count * sizeof(unsigned int)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadTriangleIndices(unsigned int const* data, uint64_t count)
+void _GeometryBuffers::uploadTriangleIndices(unsigned int const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindVertexArray(getVaoForTriangles());
@@ -128,21 +128,21 @@ void _OpenGlGeometryBuffers::uploadTriangleIndices(unsigned int const* data, uin
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, toInt(count * sizeof(unsigned int)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedConnections());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(ConnectionArrowVertexData)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadAttackEventData(AttackEventVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadAttackEventData(AttackEventVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForAttackEvents());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(AttackEventVertexData)), data);
 }
 
-void _OpenGlGeometryBuffers::uploadDetonationEventData(DetonationEventVertexData const* data, uint64_t count)
+void _GeometryBuffers::uploadDetonationEventData(DetonationEventVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForDetonationEvents());

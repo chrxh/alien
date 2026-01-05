@@ -71,7 +71,7 @@ struct DetonationEventVertexData
     float radius;  // circle radius
 };
 
-class _OpenGlGeometryBuffers
+class _GeometryBuffers
 {
 public:
     static GeometryBuffers create();
@@ -140,5 +140,5 @@ private:
 
     NumRenderObjects _numObjects;
 
-    _OpenGlGeometryBuffers() = default;
+    _GeometryBuffers() = default;
 };

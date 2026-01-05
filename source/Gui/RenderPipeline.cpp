@@ -4,7 +4,7 @@
 
 #include <boost/range/adaptor/indexed.hpp>
 
-#include <EngineInterface/OpenGlGeometryBuffers.h>
+#include <EngineInterface/GeometryBuffers.h>
 
 #include "RenderStep.h"
 #include "Shader.h"
@@ -12,7 +12,7 @@
 #include <EngineInterface/SimulationFacade.h>
 
 _RenderPipeline::_RenderPipeline(RenderBlocks&& blocks)
-    : _geometryBuffers(_OpenGlGeometryBuffers::create())
+    : _geometryBuffers(_GeometryBuffers::create())
     , _blocks(std::move(blocks))
 {
     {
