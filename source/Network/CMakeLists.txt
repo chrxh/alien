@@ -16,7 +16,6 @@ add_library(Network
     UserTO.h)
 
 target_link_libraries(Network Base)
-target_link_libraries(Network Boost::boost)
     
 if (MSVC)
     target_compile_options(Network PRIVATE "/MP")

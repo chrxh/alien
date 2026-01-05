@@ -10,7 +10,6 @@ target_link_libraries(cli PersisterInterface)
 
 target_link_libraries(cli CUDA::cudart_static)
 target_link_libraries(cli CUDA::cuda_driver)
-target_link_libraries(cli Boost::boost)
 target_link_libraries(cli OpenGL::GL OpenGL::GLU)
 target_link_libraries(cli GLEW::GLEW)
 target_link_libraries(cli glfw)

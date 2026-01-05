@@ -55,7 +55,6 @@ add_library(PersisterInterface
 
 target_link_libraries(PersisterInterface Base)
 
-target_link_libraries(PersisterInterface Boost::boost)
 target_link_libraries(PersisterInterface ZLIB::ZLIB)
 
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")

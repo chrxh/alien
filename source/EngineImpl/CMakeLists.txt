@@ -13,7 +13,6 @@ target_link_libraries(EngineImpl EngineGpuKernels)
 
 target_link_libraries(EngineImpl OpenGL::GL)
 target_link_libraries(EngineImpl CUDA::cudart_static)
-target_link_libraries(EngineImpl Boost::boost)
 
 if (MSVC)
     target_compile_options(EngineImpl PRIVATE "/MP")

@@ -28,8 +28,6 @@ add_library(Base
     VersionParserService.cpp
     VersionParserService.h)
 
-target_link_libraries(Base Boost::boost)
-
 if (MSVC)
     target_compile_options(Base PRIVATE "/MP")
 endif()

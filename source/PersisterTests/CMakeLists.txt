@@ -12,7 +12,6 @@ target_link_libraries(PersisterTests PersisterInterface)
 
 target_link_libraries(PersisterTests CUDA::cudart_static)
 target_link_libraries(PersisterTests CUDA::cuda_driver)
-target_link_libraries(PersisterTests Boost::boost)
 target_link_libraries(PersisterTests OpenGL::GL OpenGL::GLU)
 target_link_libraries(PersisterTests GLEW::GLEW)
 target_link_libraries(PersisterTests glfw)

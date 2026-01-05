@@ -11,7 +11,6 @@ target_link_libraries(EngineInterfaceTests Base)
 target_link_libraries(EngineInterfaceTests EngineInterface)
 target_link_libraries(EngineInterfaceTests EngineTestData)
 
-target_link_libraries(EngineInterfaceTests Boost::boost)
 target_link_libraries(EngineInterfaceTests GTest::GTest GTest::Main)
 
 if (MSVC)
