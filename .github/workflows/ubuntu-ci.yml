@@ -12,6 +12,7 @@ env:
   BUILD_TYPE: Release
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+  VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
   
 jobs:
   build:
@@ -53,6 +54,23 @@ jobs:
         pushd external/vcpkg
         ./bootstrap-vcpkg.sh -disableMetrics
         popd
+
+    - name: Cache vcpkg packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/vcpkg/archives
+          build/vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json', 'external/vcpkg/.git/HEAD') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Setup vcpkg binary caching
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     - name: Configure CMake
       run: >
