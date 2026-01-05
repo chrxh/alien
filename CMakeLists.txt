@@ -50,7 +50,7 @@ add_executable(EngineInterfaceTests)
 add_executable(NetworkTests)
 add_executable(PersisterTests)
 
-find_package(CUDAToolkit)
+find_package(CUDAToolkit REQUIRED MODULE)
 find_package(Boost REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)

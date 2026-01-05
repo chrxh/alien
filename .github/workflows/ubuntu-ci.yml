@@ -61,6 +61,9 @@ jobs:
         -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+        -DCUDAToolkit_ROOT=/usr/local/cuda
+        -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF
+        -DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF
 
     - name: Build
       run: cmake --build build -j16
