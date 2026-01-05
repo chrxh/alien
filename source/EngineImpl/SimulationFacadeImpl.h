@@ -114,7 +114,7 @@ public:
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;
     bool testOnly_arePointersValid() override;
     NumRenderObjects testOnly_getNumRenderObjects() override;
-    CpuGeometryBuffers testOnly_copyBuffersFromCudaToCpu() override;
+    CpuGeometryBuffers testOnly_getGeometryBuffers() override;
 
 private:
     bool _selectionNeedsUpdate = false;

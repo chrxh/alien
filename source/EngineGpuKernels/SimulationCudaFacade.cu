@@ -672,7 +672,7 @@ NumRenderObjects _SimulationCudaFacade::testOnly_getNumRenderObjects()
     return result;
 }
 
-CpuGeometryBuffers _SimulationCudaFacade::testOnly_copyBuffersFromCudaToCpu()
+CpuGeometryBuffers _SimulationCudaFacade::testOnly_getGeometryBuffers()
 {
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
@@ -682,7 +682,7 @@ CpuGeometryBuffers _SimulationCudaFacade::testOnly_copyBuffersFromCudaToCpu()
     auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
 
-    // Extract data to device buffers (useInterop=false)
+    // Extract data to device buffers
     GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, false);
     syncAndCheck();
 

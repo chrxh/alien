@@ -1,7 +1,7 @@
 #include "SimulationFacadeImpl.h"
 
 #include <EngineInterface/Description.h>
-#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/OpenGlGeometryBuffers.h>
 
 void _SimulationFacadeImpl::set(SimulationFacade const& instance)
 {
@@ -417,7 +417,7 @@ NumRenderObjects _SimulationFacadeImpl::testOnly_getNumRenderObjects()
     return _worker.testOnly_getNumRenderObjects();
 }
 
-CpuGeometryBuffers _SimulationFacadeImpl::testOnly_copyBuffersFromCudaToCpu()
+CpuGeometryBuffers _SimulationFacadeImpl::testOnly_getGeometryBuffers()
 {
-    return _worker.testOnly_copyBuffersFromCudaToCpu();
+    return _worker.testOnly_getGeometryBuffers();
 }

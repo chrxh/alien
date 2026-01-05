@@ -2,7 +2,7 @@
 
 #include <Base/Singleton.h>
 
-#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/OpenGlGeometryBuffers.h>
 
 #include "Base.cuh"
 #include "DataAccessKernels.cuh"

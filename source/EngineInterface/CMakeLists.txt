@@ -23,8 +23,6 @@ add_library(EngineInterface
     GenomeDescriptionInfoService.h
     GenomeDescriptionValidationService.cpp
     GenomeDescriptionValidationService.h
-    GeometryBuffers.cpp
-    GeometryBuffers.h
     Ids.h
     InspectedEntityIds.h
     LocationHelper.cpp
@@ -32,6 +30,8 @@ add_library(EngineInterface
     MutationType.h
     NumberGenerator.cpp
     NumberGenerator.h
+    OpenGlGeometryBuffers.cpp
+    OpenGlGeometryBuffers.h
     ParametersEditService.cpp
     ParametersEditService.h
     ParametersFilter.h

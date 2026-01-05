@@ -2,7 +2,7 @@
 
 #include <Base/Math.h>
 
-#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/OpenGlGeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "RenderPipeline.h"

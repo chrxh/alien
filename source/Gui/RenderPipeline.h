@@ -1,6 +1,6 @@
 #pragma once
 
-#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/OpenGlGeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "Definitions.h"

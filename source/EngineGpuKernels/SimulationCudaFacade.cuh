@@ -13,7 +13,7 @@
 #include <EngineInterface/ArraySizesForTO.h>
 #include <EngineInterface/CpuGeometryBuffers.h>
 #include <EngineInterface/Definitions.h>
-#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/OpenGlGeometryBuffers.h>
 #include <EngineInterface/MutationType.h>
 #include <EngineInterface/SelectionShallowData.h>
 #include <EngineInterface/SettingsForSimulation.h>
@@ -114,7 +114,7 @@ public:
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_arePointersValid();
     NumRenderObjects testOnly_getNumRenderObjects();
-    CpuGeometryBuffers testOnly_copyBuffersFromCudaToCpu();
+    CpuGeometryBuffers testOnly_getGeometryBuffers();
 
 private:
     void initCuda();

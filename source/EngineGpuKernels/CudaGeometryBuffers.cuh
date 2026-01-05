@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include <EngineInterface/CpuGeometryBuffers.h>
-#include <EngineInterface/GeometryBuffers.h>
+#include <EngineInterface/OpenGlGeometryBuffers.h>
 
 #include "Base.cuh"
 #include "Definitions.cuh"
