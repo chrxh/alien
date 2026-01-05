@@ -229,7 +229,10 @@ auto _PersisterWorker::processRequest(std::unique_lock<std::mutex>& lock, SaveSi
             filename = generateFilename(filename, deserializedData.auxiliaryData.timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
-            throw std::runtime_error("Error");
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
         }
 
         return std::make_shared<_SaveSimulationRequestResult>(
@@ -679,7 +682,10 @@ _PersisterWorker::PersisterRequestResultOrError _PersisterWorker::processRequest
             filename = generateFilename(filename, deserializedData.auxiliaryData.timestep);
         }
         if (!SerializerService::get().serializeSimulationToFiles(filename, deserializedData)) {
-            throw std::runtime_error("Error");
+            return std::make_shared<_PersisterRequestError>(
+                request->getRequestId(),
+                request->getSenderInfo().senderId,
+                PersisterErrorInfo{"The simulation could not be saved because an error occurred when writing the data to the specified file."});
         }
         auto result = std::make_shared<_SaveDeserializedSimulationRequestResult>(
             request->getRequestId(),
