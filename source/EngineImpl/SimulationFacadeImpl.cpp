@@ -416,8 +416,3 @@ NumRenderObjects _SimulationFacadeImpl::testOnly_getNumRenderObjects()
 {
     return _worker.testOnly_getNumRenderObjects();
 }
-
-CpuGeometryBuffers _SimulationFacadeImpl::testOnly_copyBuffersFromCudaToCpu()
-{
-    return _worker.testOnly_copyBuffersFromCudaToCpu();
-}

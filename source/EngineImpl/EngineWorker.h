@@ -11,7 +11,6 @@
 #include <Base/Definitions.h>
 
 #include <EngineInterface/ArraySizesForGpu.h>
-#include <EngineInterface/CpuGeometryBuffers.h>
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
@@ -128,7 +127,6 @@ public:
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_arePointersValid();
     NumRenderObjects testOnly_getNumRenderObjects();
-    CpuGeometryBuffers testOnly_copyBuffersFromCudaToCpu();
 
 private:
     void resetTimeIntervalStatistics();

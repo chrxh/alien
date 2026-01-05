@@ -148,3 +148,86 @@ void _GeometryBuffers::uploadDetonationEventData(DetonationEventVertexData const
     glBindBuffer(GL_ARRAY_BUFFER, getVboForDetonationEvents());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(DetonationEventVertexData)), data);
 }
+
+std::vector<CellVertexData> _GeometryBuffers::downloadCellData() const
+{
+    std::vector<CellVertexData> result(_numObjects.cells);
+    if (_numObjects.cells == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForCells);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.cells * sizeof(CellVertexData)), result.data());
+    return result;
+}
+
+std::vector<EnergyParticleVertexData> _GeometryBuffers::downloadEnergyParticleData() const
+{
+    std::vector<EnergyParticleVertexData> result(_numObjects.energyParticles);
+    if (_numObjects.energyParticles == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForEnergyParticles);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.energyParticles * sizeof(EnergyParticleVertexData)), result.data());
+    return result;
+}
+
+std::vector<LocationVertexData> _GeometryBuffers::downloadLocationData() const
+{
+    std::vector<LocationVertexData> result(_numObjects.locations);
+    if (_numObjects.locations == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForLocations);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.locations * sizeof(LocationVertexData)), result.data());
+    return result;
+}
+
+std::vector<SelectedObjectVertexData> _GeometryBuffers::downloadSelectedObjectData() const
+{
+    std::vector<SelectedObjectVertexData> result(_numObjects.selectedObjects);
+    if (_numObjects.selectedObjects == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForSelectedObjects);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.selectedObjects * sizeof(SelectedObjectVertexData)), result.data());
+    return result;
+}
+
+std::vector<unsigned int> _GeometryBuffers::downloadLineIndices() const
+{
+    std::vector<unsigned int> result(_numObjects.lineIndices);
+    if (_numObjects.lineIndices == 0) return result;
+    glBindVertexArray(_vaoForPointsAndLines);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _eboForLines);
+    glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, toInt(_numObjects.lineIndices * sizeof(unsigned int)), result.data());
+    return result;
+}
+
+std::vector<unsigned int> _GeometryBuffers::downloadTriangleIndices() const
+{
+    std::vector<unsigned int> result(_numObjects.triangleIndices);
+    if (_numObjects.triangleIndices == 0) return result;
+    glBindVertexArray(_vaoForTriangles);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _eboForTriangles);
+    glGetBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, toInt(_numObjects.triangleIndices * sizeof(unsigned int)), result.data());
+    return result;
+}
+
+std::vector<ConnectionArrowVertexData> _GeometryBuffers::downloadSelectedConnectionData() const
+{
+    std::vector<ConnectionArrowVertexData> result(_numObjects.connectionArrowVertices);
+    if (_numObjects.connectionArrowVertices == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForSelectedConnections);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData)), result.data());
+    return result;
+}
+
+std::vector<AttackEventVertexData> _GeometryBuffers::downloadAttackEventData() const
+{
+    std::vector<AttackEventVertexData> result(_numObjects.attackEventVertices);
+    if (_numObjects.attackEventVertices == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForAttackEvents);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.attackEventVertices * sizeof(AttackEventVertexData)), result.data());
+    return result;
+}
+
+std::vector<DetonationEventVertexData> _GeometryBuffers::downloadDetonationEventData() const
+{
+    std::vector<DetonationEventVertexData> result(_numObjects.detonationEventVertices);
+    if (_numObjects.detonationEventVertices == 0) return result;
+    glBindBuffer(GL_ARRAY_BUFFER, _vboForDetonationEvents);
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.detonationEventVertices * sizeof(DetonationEventVertexData)), result.data());
+    return result;
+}

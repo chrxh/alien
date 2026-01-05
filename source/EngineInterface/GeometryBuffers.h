@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include "Definitions.h"
 
@@ -108,6 +109,17 @@ public:
     void uploadSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
     void uploadAttackEventData(AttackEventVertexData const* data, uint64_t count);
     void uploadDetonationEventData(DetonationEventVertexData const* data, uint64_t count);
+
+    // Methods for downloading data from OpenGL buffers to host memory (for tests)
+    std::vector<CellVertexData> downloadCellData() const;
+    std::vector<EnergyParticleVertexData> downloadEnergyParticleData() const;
+    std::vector<LocationVertexData> downloadLocationData() const;
+    std::vector<SelectedObjectVertexData> downloadSelectedObjectData() const;
+    std::vector<unsigned int> downloadLineIndices() const;
+    std::vector<unsigned int> downloadTriangleIndices() const;
+    std::vector<ConnectionArrowVertexData> downloadSelectedConnectionData() const;
+    std::vector<AttackEventVertexData> downloadAttackEventData() const;
+    std::vector<DetonationEventVertexData> downloadDetonationEventData() const;
 
 private:
     unsigned int _vaoForPointsAndLines = 0;
