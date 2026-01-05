@@ -6,6 +6,7 @@
 #include <cuda_runtime.h>
 
 #include <Base/Exceptions.h>
+#include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Macros.h>
 
@@ -130,9 +131,18 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
     GeometryKernelsService::get().correctPositionsForRendering(_settings, simulationData, visibleWorldRect);
     auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     geometryBuffers->updateNumObjects(numRenderObjects);
-    _cudaGeometryBuffers->registerBuffers(geometryBuffers);
 
-    GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+    if (GlobalSettings::get().isInterop()) {
+        _cudaGeometryBuffers->registerBuffers(geometryBuffers);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        syncAndCheck();
+    } else {
+        _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        syncAndCheck();
+        _cudaGeometryBuffers->copyToOpenGL(geometryBuffers, numRenderObjects);
+    }
+
     GeometryKernelsService::get().restorePositions(_settings, simulationData);
     syncAndCheck();
 }
@@ -648,6 +658,16 @@ bool _SimulationCudaFacade::testOnly_arePointersValid()
 {
     checkAndProcessSimulationParameterChanges();
     auto result = TestKernelsService::get().testOnly_arePointersValid(_settings.cudaSettings, getSimulationDataPtrCopy());
+    syncAndCheck();
+    return result;
+}
+
+NumRenderObjects _SimulationCudaFacade::testOnly_getNumRenderObjects()
+{
+    checkAndProcessSimulationParameterChanges();
+    auto simulationData = getSimulationDataPtrCopy();
+    RealRect visibleWorldRect = {{0, 0}, {static_cast<float>(_settings.worldSizeX), static_cast<float>(_settings.worldSizeY)}};
+    auto result = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
     syncAndCheck();
     return result;
 }

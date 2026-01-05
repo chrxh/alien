@@ -18,6 +18,7 @@ PUBLIC
     FrontAngleUpdateTests.cpp
     GarbageCollectorTests.cpp
     GeneratorTests.cpp
+    GeometryTests.cpp
     InjectorTests.cpp
     IntegrationTestFramework.cpp
     IntegrationTestFramework.h

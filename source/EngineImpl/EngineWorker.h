@@ -13,6 +13,7 @@
 #include <EngineInterface/ArraySizesForGpu.h>
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/Definitions.h>
+#include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/MutationType.h>
 #include <EngineInterface/PreviewDescription.h>
 #include <EngineInterface/SelectionShallowData.h>
@@ -125,6 +126,7 @@ public:
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_arePointersValid();
+    NumRenderObjects testOnly_getNumRenderObjects();
 
 private:
     void resetTimeIntervalStatistics();

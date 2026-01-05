@@ -3,6 +3,7 @@
 #include "ArraySizesForGpu.h"
 #include "DataPointCollection.h"
 #include "Definitions.h"
+#include "GeometryBuffers.h"
 #include "MutationType.h"
 #include "PreviewDescription.h"
 #include "SelectionShallowData.h"
@@ -128,6 +129,7 @@ public:
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
     virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
     virtual bool testOnly_arePointersValid() = 0;
+    virtual NumRenderObjects testOnly_getNumRenderObjects() = 0;
 
 protected:
     static SimulationFacade _instance;

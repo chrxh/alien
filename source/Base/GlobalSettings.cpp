@@ -134,6 +134,7 @@ struct GlobalSettingsImpl
 {
     boost::property_tree::ptree _tree;
     bool _debugMode = false;
+    bool _interop = true;
 };
 
 
@@ -151,6 +152,16 @@ bool GlobalSettings::isDebugMode() const
 void GlobalSettings::setDebugMode(bool value) const
 {
     _impl->_debugMode = value;
+}
+
+bool GlobalSettings::isInterop() const
+{
+    return _impl->_interop;
+}
+
+void GlobalSettings::setInterop(bool value) const
+{
+    _impl->_interop = value;
 }
 
 bool GlobalSettings::getValue(std::string const& key, bool defaultValue)

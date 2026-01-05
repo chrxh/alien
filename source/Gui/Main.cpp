@@ -18,27 +18,37 @@
 
 namespace
 {
-    bool isInDebugMode(int argc, char** argv)
+    bool hasArgument(int argc, char** argv, const char* arg)
     {
-        return argc == 2 && strcmp(argv[1], "-d") == 0;
+        for (int i = 1; i < argc; ++i) {
+            if (strcmp(argv[i], arg) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
 int main(int argc, char** argv)
 {
-    auto inDebugMode = isInDebugMode(argc, argv);
+    auto inDebugMode = hasArgument(argc, argv, "-d");
+    auto useInterop = hasArgument(argc, argv, "--interop");
     GlobalSettings::get().setDebugMode(inDebugMode);
+    GlobalSettings::get().setInterop(useInterop);
 
     FileLogger fileLogger = std::make_shared<_FileLogger>();
-
-    if (inDebugMode) {
-        log(Priority::Important, "DEBUG mode");
-    }
 
     MainWindow mainWindow;
 
     try {
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
+
+        if (inDebugMode) {
+            log(Priority::Important, "DEBUG mode");
+        }
+        if (useInterop) {
+            log(Priority::Important, "INTEROP mode: Using CUDA-OpenGL interop for rendering");
+        }
 
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());

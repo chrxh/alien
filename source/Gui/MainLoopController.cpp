@@ -144,41 +144,41 @@ void MainLoopController::processLoadingScreen()
 {
     drawLoadingScreen();
 
-    auto requestedSimState = _PersisterFacade::get()->getRequestState(_loadSimRequestId).value();
-    if (requestedSimState == PersisterRequestState::Finished) {
-        auto const& data = _PersisterFacade::get()->fetchReadSimulationData(_loadSimRequestId);
-        auto const& deserializedSim = data.deserializedSimulation;
-        Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-        Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
-        TemporalControlWindow::get().onSnapshot();
+    if (auto requestedSimState = _PersisterFacade::get()->getRequestState(_loadSimRequestId)) {
+        if (requestedSimState.value() == PersisterRequestState::Finished) {
+            auto const& data = _PersisterFacade::get()->fetchReadSimulationData(_loadSimRequestId);
+            auto const& deserializedSim = data.deserializedSimulation;
+            Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            TemporalControlWindow::get().onSnapshot();
 
-        _simulationLoadedTimepoint = std::chrono::steady_clock::now();
-        _programState = ProgramState::FadeOutLoadingScreen;
+            _simulationLoadedTimepoint = std::chrono::steady_clock::now();
+            _programState = ProgramState::FadeOutLoadingScreen;
+        }
+        if (requestedSimState.value() == PersisterRequestState::Error) {
+            GenericMessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
+
+            DeserializedSimulation deserializedSim;
+            deserializedSim.auxiliaryData.worldSize.x = 1000;
+            deserializedSim.auxiliaryData.worldSize.y = 500;
+            deserializedSim.auxiliaryData.timestep = 0;
+            deserializedSim.auxiliaryData.zoom = 12.0f;
+            deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
+            deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
+
+            _SimulationFacade::get()->newSimulation(
+                deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.worldSize, deserializedSim.auxiliaryData.simulationParameters);
+            _SimulationFacade::get()->setSimulationData(deserializedSim.mainData);
+            _SimulationFacade::get()->setStatisticsHistory(deserializedSim.statistics);
+            _SimulationFacade::get()->setRealTime(deserializedSim.auxiliaryData.realTime);
+            Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
+            Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
+            TemporalControlWindow::get().onSnapshot();
+
+            _simulationLoadedTimepoint = std::chrono::steady_clock::now();
+            _programState = ProgramState::FadeOutLoadingScreen;
+        }
     }
-    if (requestedSimState == PersisterRequestState::Error) {
-        GenericMessageDialog::get().information("Error", "The default simulation file could not be read.\nAn empty simulation will be created.");
-
-        DeserializedSimulation deserializedSim;
-        deserializedSim.auxiliaryData.worldSize.x = 1000;
-        deserializedSim.auxiliaryData.worldSize.y = 500;
-        deserializedSim.auxiliaryData.timestep = 0;
-        deserializedSim.auxiliaryData.zoom = 12.0f;
-        deserializedSim.auxiliaryData.center = {500.0f, 250.0f};
-        deserializedSim.auxiliaryData.realTime = std::chrono::milliseconds(0);
-
-        _SimulationFacade::get()->newSimulation(
-            deserializedSim.auxiliaryData.timestep, deserializedSim.auxiliaryData.worldSize, deserializedSim.auxiliaryData.simulationParameters);
-        _SimulationFacade::get()->setSimulationData(deserializedSim.mainData);
-        _SimulationFacade::get()->setStatisticsHistory(deserializedSim.statistics);
-        _SimulationFacade::get()->setRealTime(deserializedSim.auxiliaryData.realTime);
-        Viewport::get().setCenterInWorldPos(deserializedSim.auxiliaryData.center);
-        Viewport::get().setZoomFactor(deserializedSim.auxiliaryData.zoom);
-        TemporalControlWindow::get().onSnapshot();
-
-        _simulationLoadedTimepoint = std::chrono::steady_clock::now();
-        _programState = ProgramState::FadeOutLoadingScreen;
-    }
-
     OverlayController::get().process();
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -260,12 +260,13 @@ void MainLoopController::processExiting()
 
     FpsController::get().processForceFps(WindowController::get().getFps());
 
-    auto requestedSimState = _PersisterFacade::get()->getRequestState(_saveSimRequestId).value();
-    if (requestedSimState == PersisterRequestState::Finished) {
-        _PersisterFacade::get()->fetchSaveSimulationData(_saveSimRequestId);
-        _programState = ProgramState::Finished;
-    } else if (requestedSimState == PersisterRequestState::Error) {
-        _programState = ProgramState::Finished;
+    if (auto requestedSimState = _PersisterFacade::get()->getRequestState(_saveSimRequestId)) {
+        if (requestedSimState.value() == PersisterRequestState::Finished) {
+            _PersisterFacade::get()->fetchSaveSimulationData(_saveSimRequestId);
+            _programState = ProgramState::Finished;
+        } else if (requestedSimState.value() == PersisterRequestState::Error) {
+            _programState = ProgramState::Finished;
+        }
     }
 }
 
