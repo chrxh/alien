@@ -22,7 +22,7 @@ struct CudaGeometryBuffers
     CellVertexData* deviceCellBuffer = nullptr;
     EnergyParticleVertexData* deviceEnergyParticleBuffer = nullptr;
     LocationVertexData* deviceLocationBuffer = nullptr;
-    SelectedObjectVertexData* deviceSelectedObjectBuffer = nullptr;
+    getObjectVertexData* deviceSelectedObjectBuffer = nullptr;
     unsigned int* deviceLineIndexBuffer = nullptr;
     unsigned int* deviceTriangleIndexBuffer = nullptr;
     ConnectionArrowVertexData* deviceSelectedConnectionBuffer = nullptr;

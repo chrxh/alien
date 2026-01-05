@@ -128,7 +128,7 @@ void GeometryKernelsService::extractObjectData(
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.locationBuffer));
 
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.selectedObjectBuffer));
-        SelectedObjectVertexData* mappedSelectedObjectBuffer;
+        getObjectVertexData* mappedSelectedObjectBuffer;
         size_t selectedObjectBufferSize;
         CHECK_FOR_CUDA_ERROR(cudaGraphicsResourceGetMappedPointer(
             reinterpret_cast<void**>(&mappedSelectedObjectBuffer), &selectedObjectBufferSize, renderingData.selectedObjectBuffer));

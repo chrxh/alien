@@ -112,7 +112,6 @@ public:
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_arePointersValid();
-    NumRenderObjects testOnly_getNumRenderObjects();
 
 private:
     void initCuda();

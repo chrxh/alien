@@ -113,7 +113,6 @@ public:
     void testOnly_cleanupAfterDataManipulation() override;
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) override;
     bool testOnly_arePointersValid() override;
-    NumRenderObjects testOnly_getNumRenderObjects() override;
 
 private:
     bool _selectionNeedsUpdate = false;
