@@ -273,10 +273,10 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
 TEST_F(GeometryTests, selectedObjectData_noRestriction_inactive)
 {
-    auto cell = CellDescription().id(1).pos({100.0f, 100.0f});
-    cell._signalRestriction._mode = SignalRestrictionMode_Inactive;
-    cell._signalRestriction._baseAngle = 45.0f;
-    cell._signalRestriction._openingAngle = 90.0f;
+    auto cell = CellDescription()
+                    .id(1)
+                    .pos({100.0f, 100.0f})
+                    .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive).baseAngle(45.0f).openingAngle(90.0f));
 
     auto data = Description().cells({
         cell,
@@ -295,10 +295,10 @@ TEST_F(GeometryTests, selectedObjectData_noRestriction_inactive)
 
 TEST_F(GeometryTests, selectedObjectData_hasRestriction_active)
 {
-    auto cell = CellDescription().id(1).pos({100.0f, 100.0f});
-    cell._signalRestriction._mode = SignalRestrictionMode_Active;
-    cell._signalRestriction._baseAngle = 45.0f;
-    cell._signalRestriction._openingAngle = 90.0f;
+    auto cell = CellDescription()
+                    .id(1)
+                    .pos({100.0f, 100.0f})
+                    .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(90.0f));
 
     auto data = Description().cells({
         cell,
@@ -317,10 +317,10 @@ TEST_F(GeometryTests, selectedObjectData_hasRestriction_active)
 
 TEST_F(GeometryTests, selectedObjectData_hasRestriction_conditional)
 {
-    auto cell = CellDescription().id(1).pos({100.0f, 100.0f});
-    cell._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    cell._signalRestriction._baseAngle = 45.0f;
-    cell._signalRestriction._openingAngle = 90.0f;
+    auto cell = CellDescription()
+                    .id(1)
+                    .pos({100.0f, 100.0f})
+                    .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(45.0f).openingAngle(90.0f));
 
     auto data = Description().cells({
         cell,
@@ -341,11 +341,15 @@ TEST_F(GeometryTests, selectedObjectData_hasRestriction_conditional)
 
 TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
 {
-    auto cell1 = CellDescription().id(1).pos({100.0f, 100.0f});
-    cell1._signalRestriction._mode = SignalRestrictionMode_Inactive;
+    auto cell1 = CellDescription()
+                     .id(1)
+                     .pos({100.0f, 100.0f})
+                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
 
-    auto cell2 = CellDescription().id(2).pos({101.0f, 100.0f});
-    cell2._signalRestriction._mode = SignalRestrictionMode_Inactive;
+    auto cell2 = CellDescription()
+                     .id(2)
+                     .pos({101.0f, 100.0f})
+                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
 
     auto data = Description().cells({cell1, cell2});
     data.addConnection(1, 2);
@@ -364,15 +368,17 @@ TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
 
 TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
 {
-    auto cell1 = CellDescription().id(1).pos({100.0f, 100.0f});
-    cell1._signalRestriction._mode = SignalRestrictionMode_Active;
     // Use baseAngle = 90 and openingAngle = 90 to point away from connection
     // Connection angle is 0 (first connection), so range [45+180, 135+180] = [225, 315] doesn't include 0
-    cell1._signalRestriction._baseAngle = 90.0f;
-    cell1._signalRestriction._openingAngle = 90.0f;
+    auto cell1 = CellDescription()
+                     .id(1)
+                     .pos({100.0f, 100.0f})
+                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(90.0f).openingAngle(90.0f));
 
-    auto cell2 = CellDescription().id(2).pos({101.0f, 100.0f});
-    cell2._signalRestriction._mode = SignalRestrictionMode_Inactive;
+    auto cell2 = CellDescription()
+                     .id(2)
+                     .pos({101.0f, 100.0f})
+                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
 
     auto data = Description().cells({cell1, cell2});
     data.addConnection(1, 2);
@@ -392,14 +398,16 @@ TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
 
 TEST_F(GeometryTests, connectionData_withRestriction_conditional_restrictedDirection)
 {
-    auto cell1 = CellDescription().id(1).pos({100.0f, 100.0f});
-    cell1._signalRestriction._mode = SignalRestrictionMode_Conditional;
     // Use baseAngle = 90 and openingAngle = 90 to point away from connection
-    cell1._signalRestriction._baseAngle = 90.0f;
-    cell1._signalRestriction._openingAngle = 90.0f;
+    auto cell1 = CellDescription()
+                     .id(1)
+                     .pos({100.0f, 100.0f})
+                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(90.0f).openingAngle(90.0f));
 
-    auto cell2 = CellDescription().id(2).pos({101.0f, 100.0f});
-    cell2._signalRestriction._mode = SignalRestrictionMode_Inactive;
+    auto cell2 = CellDescription()
+                     .id(2)
+                     .pos({101.0f, 100.0f})
+                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
 
     auto data = Description().cells({cell1, cell2});
     data.addConnection(1, 2);
