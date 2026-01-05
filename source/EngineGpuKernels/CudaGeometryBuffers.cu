@@ -26,7 +26,7 @@ namespace
     }
 }
 
-void CudaGeometryBuffers::registerBuffers(GeometryBuffers const& buffers)
+void CudaGeometryBuffers::registerBuffers(OpenGlGeometryBuffers const& buffers)
 {
     if (vertexBuffer != nullptr) {
         unregisterBufferResource(vertexBuffer);
@@ -184,7 +184,7 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
     memoryManager.freeMemory(deviceDetonationEventBuffer);
 }
 
-void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
+void CudaGeometryBuffers::copyToOpenGL(OpenGlGeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
 {
     if (numObjects.cells > 0) {
         std::vector<CellVertexData> hostCellBuffer(numObjects.cells);

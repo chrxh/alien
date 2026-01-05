@@ -55,7 +55,7 @@ struct StepParameters
 struct ExecutionParameters
 {
     // Input
-    MEMBER(ExecutionParameters, GeometryBuffers, geometryBuffers, GeometryBuffers());
+    MEMBER(ExecutionParameters, OpenGlGeometryBuffers, geometryBuffers, OpenGlGeometryBuffers());
     MEMBER(ExecutionParameters, std::vector<unsigned int>, textures, {});
     MEMBER(ExecutionParameters, bool, clearBackground, false);
 

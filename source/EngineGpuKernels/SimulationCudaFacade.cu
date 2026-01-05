@@ -123,7 +123,7 @@ _SimulationCudaFacade::~_SimulationCudaFacade()
     log(Priority::Important, "simulation closed");
 }
 
-void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(OpenGlGeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();

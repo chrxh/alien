@@ -40,7 +40,7 @@ std::string EngineWorker::getGpuName() const
     return _SimulationCudaFacade::checkAndReturnGpuInfo().gpuModelName;
 }
 
-void EngineWorker::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+void EngineWorker::tryCopyBuffersFromCudaToOpenGL(OpenGlGeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     EngineWorkerGuard access(this, FrameTimeout);
 

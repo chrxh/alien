@@ -4,7 +4,7 @@
 
 #include <Base/Definitions.h>
 
-GeometryBuffers _OpenGlGeometryBuffers::create()
+OpenGlGeometryBuffers _OpenGlGeometryBuffers::create()
 {
     auto result = new _OpenGlGeometryBuffers();
     glGenVertexArrays(1, &result->_vaoForPointsAndLines);
@@ -24,7 +24,7 @@ GeometryBuffers _OpenGlGeometryBuffers::create()
     glGenBuffers(1, &result->_vboForAttackEvents);
     glGenVertexArrays(1, &result->_vaoForDetonationEvents);
     glGenBuffers(1, &result->_vboForDetonationEvents);
-    return GeometryBuffers(result);
+    return OpenGlGeometryBuffers(result);
 }
 
 void _OpenGlGeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)

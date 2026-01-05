@@ -74,7 +74,7 @@ private:
 
     RenderBlocks _blocks;
 
-    GeometryBuffers _geometryBuffers;
+    OpenGlGeometryBuffers _geometryBuffers;
     std::vector<TextureTarget> _textureTargets;
     std::optional<IntVector2D> _textureSize;
 };

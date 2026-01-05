@@ -74,7 +74,7 @@ struct DetonationEventVertexData
 class _OpenGlGeometryBuffers
 {
 public:
-    static GeometryBuffers create();
+    static OpenGlGeometryBuffers create();
 
     unsigned int getVaoForPointsAndLines() const { return _vaoForPointsAndLines; }
     unsigned int getVaoForTriangles() const { return _vaoForTriangles; }
