@@ -240,3 +240,55 @@ void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, N
         geometryBuffers->uploadDetonationEventData(hostDetonationEventBuffer.data(), numObjects.detonationEventVertices);
     }
 }
+
+CpuGeometryBuffers CudaGeometryBuffers::copyToCpu(NumRenderObjects const& numObjects)
+{
+    CpuGeometryBuffers result;
+
+    if (numObjects.cells > 0) {
+        result.cells.resize(numObjects.cells);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.cells.data(), deviceCellBuffer, numObjects.cells * sizeof(CellVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.energyParticles > 0) {
+        result.energyParticles.resize(numObjects.energyParticles);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.energyParticles.data(), deviceEnergyParticleBuffer, numObjects.energyParticles * sizeof(EnergyParticleVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.locations > 0) {
+        result.locations.resize(numObjects.locations);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.locations.data(), deviceLocationBuffer, numObjects.locations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.selectedObjects > 0) {
+        result.selectedObjects.resize(numObjects.selectedObjects);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.selectedObjects.data(), deviceSelectedObjectBuffer, numObjects.selectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.lineIndices > 0) {
+        result.lineIndices.resize(numObjects.lineIndices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.lineIndices.data(), deviceLineIndexBuffer, numObjects.lineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.triangleIndices > 0) {
+        result.triangleIndices.resize(numObjects.triangleIndices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.triangleIndices.data(), deviceTriangleIndexBuffer, numObjects.triangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.connectionArrowVertices > 0) {
+        result.connectionArrows.resize(numObjects.connectionArrowVertices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.connectionArrows.data(), deviceSelectedConnectionBuffer, numObjects.connectionArrowVertices * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.attackEventVertices > 0) {
+        result.attackEvents.resize(numObjects.attackEventVertices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.attackEvents.data(), deviceAttackEventBuffer, numObjects.attackEventVertices * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    if (numObjects.detonationEventVertices > 0) {
+        result.detonationEvents.resize(numObjects.detonationEventVertices);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.detonationEvents.data(), deviceDetonationEventBuffer, numObjects.detonationEventVertices * sizeof(DetonationEventVertexData), cudaMemcpyDeviceToHost));
+    }
+
+    return result;
+}

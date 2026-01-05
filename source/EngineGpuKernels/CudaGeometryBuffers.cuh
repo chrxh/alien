@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <EngineInterface/CpuGeometryBuffers.h>
 #include <EngineInterface/GeometryBuffers.h>
 
 #include "Base.cuh"
@@ -44,4 +45,5 @@ struct CudaGeometryBuffers
     void allocateBuffersForNoInterop(NumRenderObjects const& numObjects);
     void freeBuffersForNoInterop();
     void copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
+    CpuGeometryBuffers copyToCpu(NumRenderObjects const& numObjects);
 };

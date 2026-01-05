@@ -677,10 +677,17 @@ CpuGeometryBuffers _SimulationCudaFacade::testOnly_copyBuffersFromCudaToCpu()
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
     RealRect visibleWorldRect = {{0, 0}, {static_cast<float>(_settings.worldSizeX), static_cast<float>(_settings.worldSizeY)}};
-    CpuGeometryBuffers cpuBuffers;
-    GeometryKernelsService::get().extractObjectDataToCpuBuffers(_settings, simulationData, cpuBuffers, visibleWorldRect);
+
+    // Get render object counts and allocate device buffers
+    auto numRenderObjects = GeometryKernelsService::get().getNumRenderObjects(_settings, simulationData, visibleWorldRect);
+    _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
+
+    // Extract data to device buffers (useInterop=false)
+    GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, false);
     syncAndCheck();
-    return cpuBuffers;
+
+    // Convert to CPU buffers
+    return _cudaGeometryBuffers->copyToCpu(numRenderObjects);
 }
 
 void _SimulationCudaFacade::initCuda()
