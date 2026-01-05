@@ -69,19 +69,24 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
                 continue;
             }
             int skip = false;
-            if (connectedCell->signalRestriction.active) {
-                float signalAngleRestrictionStart = 0;
-                float signalAngleRestrictionEnd = 0;
-                if (connectedCell->signalRestriction.active) {
-                    signalAngleRestrictionStart = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
-                    signalAngleRestrictionEnd = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
-                }
+            auto restrictionMode = connectedCell->signalRestriction.mode;
+            
+            if (restrictionMode == SignalRestrictionMode_Active || restrictionMode == SignalRestrictionMode_Conditional) {
+                float signalAngleRestrictionStart = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
+                float signalAngleRestrictionEnd = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
 
                 float connectionAngle = 0;
                 for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
                     if (connectedCell->connections[k].cell == cell) {
-                        if (!Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, connectionAngle)) {
+                        bool isInsideCone = Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, connectionAngle);
+                        if (!isInsideCone) {
+                            // Outside the cone: signal is always blocked for both Active and Conditional modes
                             skip = true;
+                        } else if (restrictionMode == SignalRestrictionMode_Conditional) {
+                            // Inside the cone in Conditional mode: signal passes only if channel[0] >= 0
+                            if (connectedCell->signal.channels[0] < 0) {
+                                skip = true;
+                            }
                         }
                         break;
                     }

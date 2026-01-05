@@ -310,7 +310,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSubGenomesForPreview_onlyBaseAnd
             NodeDescription()
                 .cellType(ConstructorGenomeDescription())
                 .neuralNetwork(NeuralNetworkGenomeDescription().weight(2, 3, 0.4f))
-                .signalRestriction(SignalRestrictionGenomeDescription().active(true).openingAngle(3.0f)),
+                .signalRestriction(SignalRestrictionGenomeDescription().mode(SignalRestrictionMode_Active).openingAngle(3.0f)),
             NodeDescription().cellType(DepotGenomeDescription()),
             NodeDescription().cellType(BaseGenomeDescription()),
             NodeDescription().cellType(SensorGenomeDescription()),

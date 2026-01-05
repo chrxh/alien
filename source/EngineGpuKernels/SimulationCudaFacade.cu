@@ -134,11 +134,11 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
 
     if (GlobalSettings::get().isInterop()) {
         _cudaGeometryBuffers->registerBuffers(geometryBuffers);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, true);
         syncAndCheck();
     } else {
         _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, false);
         syncAndCheck();
         _cudaGeometryBuffers->copyToOpenGL(geometryBuffers, numRenderObjects);
     }

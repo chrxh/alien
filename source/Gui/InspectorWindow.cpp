@@ -200,8 +200,15 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
             }
 
             if (ImGui::TreeNodeEx("Signal routing", TreeNodeFlags)) {
-                AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Signal restriction").textWidth(BaseTabTextWidth), cell._signalRestriction._active);
-                if (cell._signalRestriction._active) {
+                int modeAsInt = static_cast<int>(cell._signalRestriction._mode);
+                if (AlienGui::Switcher(
+                    AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(BaseTabTextWidth),
+                    modeAsInt)) {
+                    cell._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
+                }
+                bool restrictionActive = (cell._signalRestriction._mode == SignalRestrictionMode_Active || 
+                                          cell._signalRestriction._mode == SignalRestrictionMode_Conditional);
+                if (restrictionActive) {
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("Signal base angle").format("%.1f").step(2.0f).textWidth(BaseTabTextWidth),
                         cell._signalRestriction._baseAngle);

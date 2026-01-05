@@ -381,7 +381,7 @@ union CellTypeData
 
 struct SignalRestriction
 {
-    bool active;
+    SignalRestrictionMode mode;
     float baseAngle;
     float openingAngle;
 };

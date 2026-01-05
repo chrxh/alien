@@ -68,7 +68,7 @@ namespace
                         nodeTO.neuralNetwork.biases[i] = node.neuralNetwork.biases[i];
                         nodeTO.neuralNetwork.activationFunctions[i] = node.neuralNetwork.activationFunctions[i];
                     }
-                    nodeTO.signalRestriction.active = node.signalRestriction.active;
+                    nodeTO.signalRestriction.mode = node.signalRestriction.mode;
                     nodeTO.signalRestriction.baseAngle = node.signalRestriction.baseAngle;
                     nodeTO.signalRestriction.openingAngle = node.signalRestriction.openingAngle;
                     nodeTO.cellType = node.cellType;
@@ -268,7 +268,7 @@ namespace
         cellTO.color = cell->color;
         cellTO.frontAngle = cell->frontAngle;
         cellTO.age = cell->age;
-        cellTO.signalRestriction.active = cell->signalRestriction.active;
+        cellTO.signalRestriction.mode = cell->signalRestriction.mode;
         cellTO.signalRestriction.baseAngle = cell->signalRestriction.baseAngle;
         cellTO.signalRestriction.openingAngle = cell->signalRestriction.openingAngle;
         cellTO.signalState = cell->signalState;

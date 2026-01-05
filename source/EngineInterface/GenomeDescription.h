@@ -349,7 +349,7 @@ struct SignalRestrictionGenomeDescription
 {
     auto operator<=>(SignalRestrictionGenomeDescription const&) const = default;
 
-    MEMBER(SignalRestrictionGenomeDescription, bool, active, false);
+    MEMBER(SignalRestrictionGenomeDescription, SignalRestrictionMode, mode, SignalRestrictionMode_Inactive);
     MEMBER(SignalRestrictionGenomeDescription, float, baseAngle, 0.0f);
     MEMBER(SignalRestrictionGenomeDescription, float, openingAngle, 90.0f);
 };

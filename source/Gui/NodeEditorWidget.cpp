@@ -209,8 +209,15 @@ void _NodeEditorWidget::processNodeAttributes()
                 node._numAdditionalConnections = std::max(numAdditionalConnections - 1, 0);
             }
 
-            AlienGui::Checkbox(AlienGui::CheckboxParameters().name("Signal restriction").textWidth(rightColumnWidth), node._signalRestriction._active);
+            int modeAsInt = static_cast<int>(node._signalRestriction._mode);
+            if (AlienGui::Switcher(
+                AlienGui::SwitcherParameters().name("Signal restriction").values(Const::SignalRestrictionModeStrings).textWidth(rightColumnWidth),
+                modeAsInt)) {
+                node._signalRestriction._mode = static_cast<SignalRestrictionMode>(modeAsInt);
+            }
 
+            bool restrictionActive = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
+                                      node._signalRestriction._mode == SignalRestrictionMode_Conditional);
             AlienGui::BeginIndent();
 
             AlienGui::InputFloat(
@@ -218,7 +225,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     .name("Signal base angle")
                     .format("%.1f")
                     .step(0.5f)
-                    .readOnly(!node._signalRestriction._active)
+                    .readOnly(!restrictionActive)
                     .textWidth(rightColumnWidth),
                 node._signalRestriction._baseAngle);
 
@@ -227,7 +234,7 @@ void _NodeEditorWidget::processNodeAttributes()
                     .name("Signal opening angle")
                     .format("%.1f")
                     .step(0.5f)
-                    .readOnly(!node._signalRestriction._active)
+                    .readOnly(!restrictionActive)
                     .textWidth(rightColumnWidth),
                 node._signalRestriction._openingAngle);
 

@@ -102,7 +102,11 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
                                .nodeIndex(cell._nodeIndex)
                                .signalState(cell._signalState);
 
-        if (node._signalRestriction._active && !cell._connections.empty()) {
+        // Render as active if mode is Active or Conditional
+        bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
+                               node._signalRestriction._mode == SignalRestrictionMode_Conditional) && 
+                              !cell._connections.empty();
+        if (hasRestriction) {
             auto otherCellId = cell._connections.front()._cellId;
             auto const& otherCell = phenotype.getCellRef(otherCellId, cache);
             auto baseAngle = Math::angleOfVector(otherCell._pos - cell._pos) + 180.0f + node._signalRestriction._baseAngle;
@@ -131,6 +135,10 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
         signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
         signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
+        // For rendering, Active and Conditional modes are treated as having restriction
+        bool hasNodeRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
+                                   node._signalRestriction._mode == SignalRestrictionMode_Conditional);
+
         auto summedAngle = 0.0f;
         for (int i = 0; i < cell._connections.size(); ++i) {
             if (i > 0) {
@@ -139,7 +147,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             auto connectedCellId = cell._connections[i]._cellId;
 
             bool shouldAddArrow =
-                !node._signalRestriction._active || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
+                !hasNodeRestriction || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
 
             if (shouldAddArrow) {
                 arrowFromCell1ToCell2.insert({cell._id, connectedCellId});

@@ -95,12 +95,13 @@ void GeometryKernelsService::extractObjectData(
     SettingsForSimulation const& settings,
     SimulationData data,
     CudaGeometryBuffers& renderingData,
-    RealRect const& visibleWorldRect)
+    RealRect const& visibleWorldRect,
+    bool useInterop)
 {
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    if (GlobalSettings::get().isInterop()) {
+    if (useInterop) {
         // Interop mode: use CUDA-OpenGL interoperability
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
         CellVertexData* mappedCellBuffer;

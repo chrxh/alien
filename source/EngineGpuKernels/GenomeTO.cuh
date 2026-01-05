@@ -267,7 +267,7 @@ union CellTypeDataGenomeTO
 
 struct SignalRestrictionGenomeTO
 {
-    bool active;
+    SignalRestrictionMode mode;
     float baseAngle;
     float openingAngle;
 };

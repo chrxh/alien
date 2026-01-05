@@ -223,11 +223,17 @@ void _GeneEditorWidget::processNodeList()
 
                     // Column 4: Signal restriction
                     ImGui::TableNextColumn();
-                    if (node._signalRestriction._active) {
+                    bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
+                                           node._signalRestriction._mode == SignalRestrictionMode_Conditional);
+                    if (hasRestriction) {
                         if (ImGui::BeginChild("signal", {0, scale(17.0f)}, 0, ImGuiWindowFlags_NoInputs)) {
-                            AlienGui::Text(
+                            std::string restrictionText =
                                 StringHelper::format(node._signalRestriction._baseAngle, 1) + " deg, "
-                                + StringHelper::format(node._signalRestriction._openingAngle, 1) + " deg");
+                                + StringHelper::format(node._signalRestriction._openingAngle, 1) + " deg";
+                            if (node._signalRestriction._mode == SignalRestrictionMode_Conditional) {
+                                restrictionText += " (cond.)";
+                            }
+                            AlienGui::Text(restrictionText);
                         }
                         ImGui::EndChild();
                     }
