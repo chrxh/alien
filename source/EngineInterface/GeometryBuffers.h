@@ -45,7 +45,7 @@ struct LocationVertexData
     float opacity;        // opacity/transparency of the location
 };
 
-struct SelectedObjectVertexData
+struct getObjectVertexData
 {
     float pos[2];              // x, y position
     int hasSignalRestriction;  // 1 if signal restriction is active, 0 otherwise
@@ -100,26 +100,26 @@ public:
     NumRenderObjects getNumObjects() const;
 
     // Methods for uploading data from host memory (used in no-interop mode)
-    void uploadCellData(CellVertexData const* data, uint64_t count);
-    void uploadEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count);
-    void uploadLocationData(LocationVertexData const* data, uint64_t count);
-    void uploadSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count);
-    void uploadLineIndices(unsigned int const* data, uint64_t count);
-    void uploadTriangleIndices(unsigned int const* data, uint64_t count);
-    void uploadSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
-    void uploadAttackEventData(AttackEventVertexData const* data, uint64_t count);
-    void uploadDetonationEventData(DetonationEventVertexData const* data, uint64_t count);
+    void setCellData(CellVertexData const* data, uint64_t count);
+    void setEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count);
+    void setLocationData(LocationVertexData const* data, uint64_t count);
+    void setSelectedObjectData(getObjectVertexData const* data, uint64_t count);
+    void setLineIndices(unsigned int const* data, uint64_t count);
+    void setTriangleIndices(unsigned int const* data, uint64_t count);
+    void setSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count);
+    void setAttackEventData(AttackEventVertexData const* data, uint64_t count);
+    void setDetonationEventData(DetonationEventVertexData const* data, uint64_t count);
 
     // Methods for downloading data from OpenGL buffers to host memory (for tests)
-    std::vector<CellVertexData> downloadCellData() const;
-    std::vector<EnergyParticleVertexData> downloadEnergyParticleData() const;
-    std::vector<LocationVertexData> downloadLocationData() const;
-    std::vector<SelectedObjectVertexData> downloadSelectedObjectData() const;
-    std::vector<unsigned int> downloadLineIndices() const;
-    std::vector<unsigned int> downloadTriangleIndices() const;
-    std::vector<ConnectionArrowVertexData> downloadSelectedConnectionData() const;
-    std::vector<AttackEventVertexData> downloadAttackEventData() const;
-    std::vector<DetonationEventVertexData> downloadDetonationEventData() const;
+    std::vector<CellVertexData> getCellData() const;
+    std::vector<EnergyParticleVertexData> getEnergyParticleData() const;
+    std::vector<LocationVertexData> getLocationData() const;
+    std::vector<getObjectVertexData> getSelectedObjectData() const;
+    std::vector<unsigned int> getLineIndices() const;
+    std::vector<unsigned int> getTriangleIndices() const;
+    std::vector<ConnectionArrowVertexData> getSelectedConnectionData() const;
+    std::vector<AttackEventVertexData> getAttackEventData() const;
+    std::vector<DetonationEventVertexData> getDetonationEventData() const;
 
 private:
     unsigned int _vaoForPointsAndLines = 0;

@@ -48,7 +48,7 @@ void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects
     if (numRenderObjects.selectedObjects >= _selectedObjectBufferCapacity) {
         _selectedObjectBufferCapacity = std::max(numRenderObjects.selectedObjects * 2, static_cast<uint64_t>(10000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
-        glBufferData(GL_ARRAY_BUFFER, toInt(_selectedObjectBufferCapacity * sizeof(SelectedObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, toInt(_selectedObjectBufferCapacity * sizeof(getObjectVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
     if (numRenderObjects.lineIndices >= _lineIndexBufferCapacity) {
         _lineIndexBufferCapacity = std::max(numRenderObjects.lineIndices * 2, static_cast<uint64_t>(100000));
@@ -84,35 +84,35 @@ NumRenderObjects _GeometryBuffers::getNumObjects() const
     return _numObjects;
 }
 
-void _GeometryBuffers::uploadCellData(CellVertexData const* data, uint64_t count)
+void _GeometryBuffers::setCellData(CellVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(CellVertexData)), data);
 }
 
-void _GeometryBuffers::uploadEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count)
+void _GeometryBuffers::setEnergyParticleData(EnergyParticleVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForEnergyParticles());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(EnergyParticleVertexData)), data);
 }
 
-void _GeometryBuffers::uploadLocationData(LocationVertexData const* data, uint64_t count)
+void _GeometryBuffers::setLocationData(LocationVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForLocations());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(LocationVertexData)), data);
 }
 
-void _GeometryBuffers::uploadSelectedObjectData(SelectedObjectVertexData const* data, uint64_t count)
+void _GeometryBuffers::setSelectedObjectData(getObjectVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedObjects());
-    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(SelectedObjectVertexData)), data);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(getObjectVertexData)), data);
 }
 
-void _GeometryBuffers::uploadLineIndices(unsigned int const* data, uint64_t count)
+void _GeometryBuffers::setLineIndices(unsigned int const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindVertexArray(getVaoForPointsAndLines());
@@ -120,7 +120,7 @@ void _GeometryBuffers::uploadLineIndices(unsigned int const* data, uint64_t coun
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, toInt(count * sizeof(unsigned int)), data);
 }
 
-void _GeometryBuffers::uploadTriangleIndices(unsigned int const* data, uint64_t count)
+void _GeometryBuffers::setTriangleIndices(unsigned int const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindVertexArray(getVaoForTriangles());
@@ -128,28 +128,28 @@ void _GeometryBuffers::uploadTriangleIndices(unsigned int const* data, uint64_t 
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, toInt(count * sizeof(unsigned int)), data);
 }
 
-void _GeometryBuffers::uploadSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count)
+void _GeometryBuffers::setSelectedConnectionData(ConnectionArrowVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForSelectedConnections());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(ConnectionArrowVertexData)), data);
 }
 
-void _GeometryBuffers::uploadAttackEventData(AttackEventVertexData const* data, uint64_t count)
+void _GeometryBuffers::setAttackEventData(AttackEventVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForAttackEvents());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(AttackEventVertexData)), data);
 }
 
-void _GeometryBuffers::uploadDetonationEventData(DetonationEventVertexData const* data, uint64_t count)
+void _GeometryBuffers::setDetonationEventData(DetonationEventVertexData const* data, uint64_t count)
 {
     if (count == 0) return;
     glBindBuffer(GL_ARRAY_BUFFER, getVboForDetonationEvents());
     glBufferSubData(GL_ARRAY_BUFFER, 0, toInt(count * sizeof(DetonationEventVertexData)), data);
 }
 
-std::vector<CellVertexData> _GeometryBuffers::downloadCellData() const
+std::vector<CellVertexData> _GeometryBuffers::getCellData() const
 {
     std::vector<CellVertexData> result(_numObjects.cells);
     if (_numObjects.cells == 0) return result;
@@ -158,7 +158,7 @@ std::vector<CellVertexData> _GeometryBuffers::downloadCellData() const
     return result;
 }
 
-std::vector<EnergyParticleVertexData> _GeometryBuffers::downloadEnergyParticleData() const
+std::vector<EnergyParticleVertexData> _GeometryBuffers::getEnergyParticleData() const
 {
     std::vector<EnergyParticleVertexData> result(_numObjects.energyParticles);
     if (_numObjects.energyParticles == 0) return result;
@@ -167,7 +167,7 @@ std::vector<EnergyParticleVertexData> _GeometryBuffers::downloadEnergyParticleDa
     return result;
 }
 
-std::vector<LocationVertexData> _GeometryBuffers::downloadLocationData() const
+std::vector<LocationVertexData> _GeometryBuffers::getLocationData() const
 {
     std::vector<LocationVertexData> result(_numObjects.locations);
     if (_numObjects.locations == 0) return result;
@@ -176,16 +176,16 @@ std::vector<LocationVertexData> _GeometryBuffers::downloadLocationData() const
     return result;
 }
 
-std::vector<SelectedObjectVertexData> _GeometryBuffers::downloadSelectedObjectData() const
+std::vector<getObjectVertexData> _GeometryBuffers::getSelectedObjectData() const
 {
-    std::vector<SelectedObjectVertexData> result(_numObjects.selectedObjects);
+    std::vector<getObjectVertexData> result(_numObjects.selectedObjects);
     if (_numObjects.selectedObjects == 0) return result;
     glBindBuffer(GL_ARRAY_BUFFER, _vboForSelectedObjects);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.selectedObjects * sizeof(SelectedObjectVertexData)), result.data());
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.selectedObjects * sizeof(getObjectVertexData)), result.data());
     return result;
 }
 
-std::vector<unsigned int> _GeometryBuffers::downloadLineIndices() const
+std::vector<unsigned int> _GeometryBuffers::getLineIndices() const
 {
     std::vector<unsigned int> result(_numObjects.lineIndices);
     if (_numObjects.lineIndices == 0) return result;
@@ -195,7 +195,7 @@ std::vector<unsigned int> _GeometryBuffers::downloadLineIndices() const
     return result;
 }
 
-std::vector<unsigned int> _GeometryBuffers::downloadTriangleIndices() const
+std::vector<unsigned int> _GeometryBuffers::getTriangleIndices() const
 {
     std::vector<unsigned int> result(_numObjects.triangleIndices);
     if (_numObjects.triangleIndices == 0) return result;
@@ -205,7 +205,7 @@ std::vector<unsigned int> _GeometryBuffers::downloadTriangleIndices() const
     return result;
 }
 
-std::vector<ConnectionArrowVertexData> _GeometryBuffers::downloadSelectedConnectionData() const
+std::vector<ConnectionArrowVertexData> _GeometryBuffers::getSelectedConnectionData() const
 {
     std::vector<ConnectionArrowVertexData> result(_numObjects.connectionArrowVertices);
     if (_numObjects.connectionArrowVertices == 0) return result;
@@ -214,7 +214,7 @@ std::vector<ConnectionArrowVertexData> _GeometryBuffers::downloadSelectedConnect
     return result;
 }
 
-std::vector<AttackEventVertexData> _GeometryBuffers::downloadAttackEventData() const
+std::vector<AttackEventVertexData> _GeometryBuffers::getAttackEventData() const
 {
     std::vector<AttackEventVertexData> result(_numObjects.attackEventVertices);
     if (_numObjects.attackEventVertices == 0) return result;
@@ -223,7 +223,7 @@ std::vector<AttackEventVertexData> _GeometryBuffers::downloadAttackEventData() c
     return result;
 }
 
-std::vector<DetonationEventVertexData> _GeometryBuffers::downloadDetonationEventData() const
+std::vector<DetonationEventVertexData> _GeometryBuffers::getDetonationEventData() const
 {
     std::vector<DetonationEventVertexData> result(_numObjects.detonationEventVertices);
     if (_numObjects.detonationEventVertices == 0) return result;

@@ -382,7 +382,7 @@ __global__ void cudaExtractLocationData(SimulationData data, LocationVertexData*
     }
 }
 
-__global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
+__global__ void cudaExtractSelectedObjectData(SimulationData data, getObjectVertexData* selectedObjectData, uint64_t* numSelectedObjects)
 {
     // Process selected cells
     auto const& cells = data.objects.cells;

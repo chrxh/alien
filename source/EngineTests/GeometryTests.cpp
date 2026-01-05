@@ -53,29 +53,7 @@ TEST_F(GeometryTests, copyBuffers_emptySim)
     EXPECT_EQ(0u, numObjects.triangleIndices);
 }
 
-TEST_F(GeometryTests, copyBuffers_singleCell)
-{
-    auto data = Description().cells({CellDescription().id(1).pos({100.0f, 100.0f})});
-    _simulationFacade->setSimulationData(data);
-
-    // Select the cell to enable selected object data extraction
-    _simulationFacade->setSelection({99.0f, 99.0f}, {101.0f, 101.0f});
-
-    auto geometryBuffers = _GeometryBuffers::create();
-    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
-
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
-
-    auto numObjects = geometryBuffers->getNumObjects();
-    EXPECT_EQ(1u, numObjects.cells);
-    EXPECT_EQ(0u, numObjects.energyParticles);
-
-    // Verify buffer entries via downloadSelectedObjectData
-    auto selectedObjects = geometryBuffers->downloadSelectedObjectData();
-    EXPECT_EQ(1u, selectedObjects.size());
-}
-
-TEST_F(GeometryTests, copyBuffers_multipleCells)
+TEST_F(GeometryTests, copyBuffers_cells)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}),
@@ -90,22 +68,14 @@ TEST_F(GeometryTests, copyBuffers_multipleCells)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.cells);
+    EXPECT_EQ(0u, numObjects.energyParticles);
+
+    // Verify buffer entries
+    auto cellData = geometryBuffers->getCellData();
+    EXPECT_EQ(3u, cellData.size());
 }
 
-TEST_F(GeometryTests, copyBuffers_singleParticle)
-{
-    auto data = Description().particles({ParticleDescription().id(1).pos({100.0f, 100.0f}).energy(10.0f)});
-    _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _GeometryBuffers::create();
-    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
-
-    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
-
-    auto numObjects = geometryBuffers->getNumObjects();
-    EXPECT_EQ(1u, numObjects.energyParticles);
-}
-
-TEST_F(GeometryTests, copyBuffers_multipleParticles)
+TEST_F(GeometryTests, copyBuffers_particles)
 {
     auto data = Description().particles({
         ParticleDescription().id(1).pos({100.0f, 100.0f}).energy(10.0f),
@@ -121,6 +91,10 @@ TEST_F(GeometryTests, copyBuffers_multipleParticles)
 
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(4u, numObjects.energyParticles);
+
+    // Verify buffer entries
+    auto particleData = geometryBuffers->getEnergyParticleData();
+    EXPECT_EQ(4u, particleData.size());
 }
 
 TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
@@ -132,9 +106,6 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
 
-    // Select both cells to enable connection data extraction
-    _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
-
     auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
@@ -144,12 +115,12 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
     EXPECT_EQ(2u, numObjects.cells);
     EXPECT_EQ(2u, numObjects.lineIndices);
 
-    // Inspect connection data via downloadSelectedConnectionData
-    auto connectionArrows = geometryBuffers->downloadSelectedConnectionData();
-    EXPECT_EQ(2u, connectionArrows.size());  // 2 vertices per connection line
+    // Verify buffer entries
+    auto lines = geometryBuffers->getLineIndices();
+    EXPECT_EQ(2u, lines.size());
 }
 
-TEST_F(GeometryTests, copyBuffers_triangularCluster)
+TEST_F(GeometryTests, copyBuffers_triangle)
 {
     auto data = Description().cells({
         CellDescription().id(1).pos({100.0f, 100.0f}),
@@ -169,6 +140,44 @@ TEST_F(GeometryTests, copyBuffers_triangularCluster)
     EXPECT_EQ(3u, numObjects.cells);
     EXPECT_EQ(6u, numObjects.lineIndices);
     EXPECT_EQ(6u, numObjects.triangleIndices);
+
+    // Verify buffer entries
+    auto lines = geometryBuffers->getLineIndices();
+    EXPECT_EQ(6u, lines.size());
+
+    auto triangles = geometryBuffers->getTriangleIndices();
+    EXPECT_EQ(6u, triangles.size());
+}
+
+TEST_F(GeometryTests, copyBuffers_quad)
+{
+    auto data = Description().cells({
+        CellDescription().id(1).pos({100.0f, 100.0f}),
+        CellDescription().id(2).pos({101.0f, 100.0f}),
+        CellDescription().id(3).pos({101.0f, 101.0f}),
+        CellDescription().id(4).pos({100.0f, 101.0f}),
+    });
+    data.addConnection(1, 2);
+    data.addConnection(2, 3);
+    data.addConnection(3, 4);
+    data.addConnection(4, 1);
+    _simulationFacade->setSimulationData(data);
+    auto geometryBuffers = _GeometryBuffers::create();
+    RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
+
+    _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
+
+    auto numObjects = geometryBuffers->getNumObjects();
+    EXPECT_EQ(4u, numObjects.cells);
+    EXPECT_EQ(8u, numObjects.lineIndices);
+    EXPECT_EQ(12u, numObjects.triangleIndices);
+
+    // Verify buffer entries
+    auto lines = geometryBuffers->getLineIndices();
+    EXPECT_EQ(8u, lines.size());
+
+    auto triangles = geometryBuffers->getTriangleIndices();
+    EXPECT_EQ(12u, triangles.size());
 }
 
 TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
@@ -192,6 +201,13 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(2u, numObjects.cells);
     EXPECT_EQ(3u, numObjects.energyParticles);
+
+    // Verify buffer entries
+    auto particleData = geometryBuffers->getEnergyParticleData();
+    EXPECT_EQ(3u, particleData.size());
+
+    auto cellData = geometryBuffers->getCellData();
+    EXPECT_EQ(2u, cellData.size());
 }
 
 TEST_F(GeometryTests, copyBuffers_creature)
@@ -212,11 +228,17 @@ TEST_F(GeometryTests, copyBuffers_creature)
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(3u, numObjects.cells);
     EXPECT_EQ(4u, numObjects.lineIndices);
+    EXPECT_EQ(0u, numObjects.triangleIndices);
+
+    // Verify buffer entries
+    auto cellData = geometryBuffers->getCellData();
+    EXPECT_EQ(3u, cellData.size());
+
+    auto lines = geometryBuffers->getLineIndices();
+    EXPECT_EQ(4u, lines.size());
 }
 
-// Signal restriction tests for cudaExtractSelectedObjectData
-
-TEST_F(GeometryTests, selectedObjectData_noRestriction_inactive)
+TEST_F(GeometryTests, copyBuffers_selectedObjectData_noRestriction_inactive)
 {
     auto cell = CellDescription()
                     .id(1)
@@ -237,12 +259,12 @@ TEST_F(GeometryTests, selectedObjectData_noRestriction_inactive)
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
-    auto selectedObjects = geometryBuffers->downloadSelectedObjectData();
+    auto selectedObjects = geometryBuffers->getSelectedObjectData();
     ASSERT_EQ(1u, selectedObjects.size());
     EXPECT_EQ(0, selectedObjects[0].hasSignalRestriction);  // Inactive mode = no restriction
 }
 
-TEST_F(GeometryTests, selectedObjectData_hasRestriction_active)
+TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_active)
 {
     auto cell = CellDescription()
                     .id(1)
@@ -263,12 +285,12 @@ TEST_F(GeometryTests, selectedObjectData_hasRestriction_active)
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
-    auto selectedObjects = geometryBuffers->downloadSelectedObjectData();
+    auto selectedObjects = geometryBuffers->getSelectedObjectData();
     ASSERT_EQ(1u, selectedObjects.size());
     EXPECT_EQ(1, selectedObjects[0].hasSignalRestriction);  // Active mode = has restriction
 }
 
-TEST_F(GeometryTests, selectedObjectData_hasRestriction_conditional)
+TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_conditional)
 {
     auto cell = CellDescription()
                     .id(1)
@@ -289,14 +311,12 @@ TEST_F(GeometryTests, selectedObjectData_hasRestriction_conditional)
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
-    auto selectedObjects = geometryBuffers->downloadSelectedObjectData();
+    auto selectedObjects = geometryBuffers->getSelectedObjectData();
     ASSERT_EQ(1u, selectedObjects.size());
     EXPECT_EQ(1, selectedObjects[0].hasSignalRestriction);  // Conditional mode = has restriction
 }
 
-// Signal restriction tests for cudaExtractSelectedConnectionData
-
-TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
+TEST_F(GeometryTests, copyBuffers_connectionData_noRestriction_inactive_bothDirections)
 {
     auto cell1 = CellDescription()
                      .id(1)
@@ -319,7 +339,7 @@ TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
-    auto connectionArrows = geometryBuffers->downloadSelectedConnectionData();
+    auto connectionArrows = geometryBuffers->getSelectedConnectionData();
     ASSERT_EQ(2u, connectionArrows.size());  // 2 vertices per connection line
     // arrowFlags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
     // Both cells have no restriction, so signals can flow both ways (flags = 3)
@@ -327,7 +347,7 @@ TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
     EXPECT_EQ(3, connectionArrows[1].arrowFlags);
 }
 
-TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
+TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_active_restrictedDirection)
 {
     // Use baseAngle = 90 and openingAngle = 90 to point away from connection
     // Connection angle is 0 (first connection), so range [45+180, 135+180] = [225, 315] doesn't include 0
@@ -352,7 +372,7 @@ TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
-    auto connectionArrows = geometryBuffers->downloadSelectedConnectionData();
+    auto connectionArrows = geometryBuffers->getSelectedConnectionData();
     ASSERT_EQ(2u, connectionArrows.size());
     // Cell1 has restriction that blocks signal to cell2 (connection angle 0 is outside range [225,315])
     // Cell2 has no restriction, so signal can flow to cell1
@@ -361,7 +381,7 @@ TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
     EXPECT_EQ(1, connectionArrows[1].arrowFlags);
 }
 
-TEST_F(GeometryTests, connectionData_withRestriction_conditional_restrictedDirection)
+TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_conditional_restrictedDirection)
 {
     // Use baseAngle = 90 and openingAngle = 90 to point away from connection
     auto cell1 = CellDescription()
@@ -385,7 +405,7 @@ TEST_F(GeometryTests, connectionData_withRestriction_conditional_restrictedDirec
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 
-    auto connectionArrows = geometryBuffers->downloadSelectedConnectionData();
+    auto connectionArrows = geometryBuffers->getSelectedConnectionData();
     ASSERT_EQ(2u, connectionArrows.size());
     // Conditional mode should render the same as Active mode for arrow directions
     // Cell1 has restriction that blocks signal to cell2
