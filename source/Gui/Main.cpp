@@ -34,23 +34,21 @@ int main(int argc, char** argv)
     auto inDebugMode = hasArgument(argc, argv, "-d");
     auto useInterop = hasArgument(argc, argv, "--interop");
     GlobalSettings::get().setDebugMode(inDebugMode);
-    if (useInterop) {
-        GlobalSettings::get().setNoInterop(false);
-    }
+    GlobalSettings::get().setInterop(useInterop);
 
     FileLogger fileLogger = std::make_shared<_FileLogger>();
-
-    if (inDebugMode) {
-        log(Priority::Important, "DEBUG mode");
-    }
-    if (useInterop) {
-        log(Priority::Important, "INTEROP mode: Using CUDA-OpenGL interop for rendering");
-    }
 
     MainWindow mainWindow;
 
     try {
         log(Priority::Important, "starting ALIEN v" + Const::ProgramVersion);
+
+        if (inDebugMode) {
+            log(Priority::Important, "DEBUG mode");
+        }
+        if (useInterop) {
+            log(Priority::Important, "INTEROP mode: Using CUDA-OpenGL interop for rendering");
+        }
 
         _SimulationFacadeImpl::set(std::make_shared<_SimulationFacadeImpl>());
         _PersisterFacadeImpl::set(std::make_shared<_PersisterFacadeImpl>());

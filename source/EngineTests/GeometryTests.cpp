@@ -17,8 +17,6 @@ public:
     GeometryTests()
         : IntegrationTestFramework()
     {
-        GlobalSettings::get().setNoInterop(true);
-
         glfwInit();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         _window = glfwCreateWindow(100, 100, "Test", nullptr, nullptr);
@@ -30,7 +28,6 @@ public:
 
     ~GeometryTests()
     {
-        GlobalSettings::get().setNoInterop(false);
         if (_window) {
             glfwDestroyWindow(_window);
         }

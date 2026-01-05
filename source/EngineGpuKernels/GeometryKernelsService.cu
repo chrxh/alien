@@ -100,33 +100,7 @@ void GeometryKernelsService::extractObjectData(
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    if (GlobalSettings::get().isNoInterop()) {
-        // No-interop mode: extract to device buffers
-        KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceCellBuffer);
-
-        KERNEL_CALL(cudaExtractEnergyParticleData, data, renderingData.deviceEnergyParticleBuffer);
-
-        setValueToDevice(_numLocations, static_cast<uint64_t>(0));
-        KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);
-
-        setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedObjectData, data, renderingData.deviceSelectedObjectBuffer, _numSelectedObjects);
-
-        setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractLineIndices, data, renderingData.deviceLineIndexBuffer, _numLineIndices);
-
-        setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractTriangleIndices, data, renderingData.deviceTriangleIndexBuffer, _numTriangleIndices);
-
-        setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractSelectedConnectionData, data, renderingData.deviceSelectedConnectionBuffer, _numSelectedConnectionVertices);
-
-        setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractAttackEventData, data, renderingData.deviceAttackEventBuffer, _numAttackEventVertices);
-
-        setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
-        KERNEL_CALL(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices);
-    } else {
+    if (GlobalSettings::get().isInterop()) {
         // Interop mode: use CUDA-OpenGL interoperability
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
         CellVertexData* mappedCellBuffer;
@@ -205,5 +179,31 @@ void GeometryKernelsService::extractObjectData(
         setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
         KERNEL_CALL(cudaExtractDetonationEventData, data, mappedDetonationEventBuffer, _numDetonationEventVertices);
         CHECK_FOR_CUDA_ERROR(cudaGraphicsUnmapResources(1, &renderingData.detonationEventBuffer));
+    } else {
+        // No-interop mode: extract to device buffers
+        KERNEL_CALL(cudaExtractCellData, data, renderingData.deviceCellBuffer);
+
+        KERNEL_CALL(cudaExtractEnergyParticleData, data, renderingData.deviceEnergyParticleBuffer);
+
+        setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+        KERNEL_CALL_1_1(cudaExtractLocationData, data, renderingData.deviceLocationBuffer, _numLocations, visibleTopLeft);
+
+        setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractSelectedObjectData, data, renderingData.deviceSelectedObjectBuffer, _numSelectedObjects);
+
+        setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractLineIndices, data, renderingData.deviceLineIndexBuffer, _numLineIndices);
+
+        setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractTriangleIndices, data, renderingData.deviceTriangleIndexBuffer, _numTriangleIndices);
+
+        setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractSelectedConnectionData, data, renderingData.deviceSelectedConnectionBuffer, _numSelectedConnectionVertices);
+
+        setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractAttackEventData, data, renderingData.deviceAttackEventBuffer, _numAttackEventVertices);
+
+        setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractDetonationEventData, data, renderingData.deviceDetonationEventBuffer, _numDetonationEventVertices);
     }
 }
