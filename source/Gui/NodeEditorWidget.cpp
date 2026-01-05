@@ -617,23 +617,18 @@ void _NodeEditorWidget::processNodeAttributes()
                     AlienGui::EndIndent();
                 }
 
-                // Channel bit mask checkboxes
-                ImGui::Text("Channel bit mask");
-                ImGui::SameLine();
-                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + scale(rightColumnWidth - ImGui::CalcTextSize("Channel bit mask").x - 8.0f));
+                bool bit[MAX_CHANNELS];
                 for (int i = 0; i < MAX_CHANNELS; ++i) {
-                    ImGui::PushID(i);
-                    bool bit = (memory._channelBitMask & (1 << i)) != 0;
-                    if (AlienGui::Checkbox(AlienGui::CheckboxParameters().name(std::to_string(i)).textWidth(0), bit)) {
-                        if (bit) {
-                            memory._channelBitMask |= (1 << i);
-                        } else {
-                            memory._channelBitMask &= ~(1 << i);
-                        }
-                    }
-                    ImGui::PopID();
-                    if (i < MAX_CHANNELS - 1) {
-                        ImGui::SameLine();
+                    bit[i] = (memory._channelBitMask & (1 << i)) != 0;
+                }
+                AlienGui::MultiCheckboxes(
+                    AlienGui::MultiCheckboxesParameters().name("Channel mask bit 0-3").textWidth(rightColumnWidth), bit[0], bit[1], bit[2], bit[3]);
+                AlienGui::MultiCheckboxes(
+                    AlienGui::MultiCheckboxesParameters().name("Channel mask bit 4-7").textWidth(rightColumnWidth), bit[4], bit[5], bit[6], bit[7]);
+                memory._channelBitMask = 0;
+                for (int i = 0; i < MAX_CHANNELS; ++i) {
+                    if (bit[i]) {
+                        memory._channelBitMask |= 1 << i;
                     }
                 }
 
