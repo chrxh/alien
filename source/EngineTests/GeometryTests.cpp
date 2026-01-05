@@ -57,6 +57,10 @@ TEST_F(GeometryTests, copyBuffers_singleCell)
 {
     auto data = Description().cells({CellDescription().id(1).pos({100.0f, 100.0f})});
     _simulationFacade->setSimulationData(data);
+
+    // Select the cell to enable selected object data extraction
+    _simulationFacade->setSelection({99.0f, 99.0f}, {101.0f, 101.0f});
+
     auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
@@ -65,6 +69,10 @@ TEST_F(GeometryTests, copyBuffers_singleCell)
     auto numObjects = geometryBuffers->getNumObjects();
     EXPECT_EQ(1u, numObjects.cells);
     EXPECT_EQ(0u, numObjects.energyParticles);
+
+    // Verify buffer entries via downloadSelectedObjectData
+    auto selectedObjects = geometryBuffers->downloadSelectedObjectData();
+    EXPECT_EQ(1u, selectedObjects.size());
 }
 
 TEST_F(GeometryTests, copyBuffers_multipleCells)
