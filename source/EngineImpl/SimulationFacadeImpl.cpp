@@ -417,12 +417,7 @@ NumRenderObjects _SimulationFacadeImpl::testOnly_getNumRenderObjects()
     return _worker.testOnly_getNumRenderObjects();
 }
 
-std::vector<SelectedObjectVertexData> _SimulationFacadeImpl::testOnly_getSelectedObjectData()
+CpuGeometryBuffers _SimulationFacadeImpl::testOnly_copyBuffersFromCudaToCpu()
 {
-    return _worker.testOnly_getSelectedObjectData();
-}
-
-std::vector<ConnectionArrowVertexData> _SimulationFacadeImpl::testOnly_getConnectionArrowData()
-{
-    return _worker.testOnly_getConnectionArrowData();
+    return _worker.testOnly_copyBuffersFromCudaToCpu();
 }

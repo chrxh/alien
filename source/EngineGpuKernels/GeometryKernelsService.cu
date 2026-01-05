@@ -95,12 +95,13 @@ void GeometryKernelsService::extractObjectData(
     SettingsForSimulation const& settings,
     SimulationData data,
     CudaGeometryBuffers& renderingData,
-    RealRect const& visibleWorldRect)
+    RealRect const& visibleWorldRect,
+    bool useInterop)
 {
     auto const& gpuSettings = settings.cudaSettings;
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    if (GlobalSettings::get().isInterop()) {
+    if (useInterop) {
         // Interop mode: use CUDA-OpenGL interoperability
         CHECK_FOR_CUDA_ERROR(cudaGraphicsMapResources(1, &renderingData.vertexBuffer));
         CellVertexData* mappedCellBuffer;
@@ -208,64 +209,176 @@ void GeometryKernelsService::extractObjectData(
     }
 }
 
-std::vector<SelectedObjectVertexData> GeometryKernelsService::testOnly_getSelectedObjectData(SettingsForSimulation const& settings, SimulationData data)
+void GeometryKernelsService::extractObjectDataToCpuBuffers(
+    SettingsForSimulation const& settings,
+    SimulationData data,
+    CpuGeometryBuffers& cpuBuffers,
+    RealRect const& visibleWorldRect)
 {
     auto const& gpuSettings = settings.cudaSettings;
+    float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
-    // First count how many selected objects
+    // Get counts first
+    auto numCells = data.objects.cells.getNumEntries_host();
+    auto numParticles = data.objects.particles.getNumEntries_host();
+
+    setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+    KERNEL_CALL_1_1(cudaExtractLocationData, data, nullptr, _numLocations, visibleTopLeft);
+    cudaDeviceSynchronize();
+    auto numLocations = copyToHost(_numLocations);
+
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);
     cudaDeviceSynchronize();
-    auto numObjects = copyToHost(_numSelectedObjects);
+    auto numSelectedObjects = copyToHost(_numSelectedObjects);
 
-    if (numObjects == 0) {
-        return {};
-    }
-
-    // Allocate device memory and extract data
-    SelectedObjectVertexData* deviceBuffer;
-    CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceBuffer, numObjects * sizeof(SelectedObjectVertexData)));
-
-    setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractSelectedObjectData, data, deviceBuffer, _numSelectedObjects);
+    setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractLineIndices, data, nullptr, _numLineIndices);
     cudaDeviceSynchronize();
+    auto numLineIndices = copyToHost(_numLineIndices);
 
-    // Copy to host
-    std::vector<SelectedObjectVertexData> result(numObjects);
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.data(), deviceBuffer, numObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+    setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractTriangleIndices, data, nullptr, _numTriangleIndices);
+    cudaDeviceSynchronize();
+    auto numTriangleIndices = copyToHost(_numTriangleIndices);
 
-    CHECK_FOR_CUDA_ERROR(cudaFree(deviceBuffer));
-
-    return result;
-}
-
-std::vector<ConnectionArrowVertexData> GeometryKernelsService::testOnly_getConnectionArrowData(SettingsForSimulation const& settings, SimulationData data)
-{
-    auto const& gpuSettings = settings.cudaSettings;
-
-    // First count how many connection arrow vertices
     setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedConnectionData, data, nullptr, _numSelectedConnectionVertices);
     cudaDeviceSynchronize();
-    auto numVertices = copyToHost(_numSelectedConnectionVertices);
+    auto numConnectionArrows = copyToHost(_numSelectedConnectionVertices);
 
-    if (numVertices == 0) {
-        return {};
+    setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractAttackEventData, data, nullptr, _numAttackEventVertices);
+    cudaDeviceSynchronize();
+    auto numAttackEvents = copyToHost(_numAttackEventVertices);
+
+    setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+    KERNEL_CALL(cudaExtractDetonationEventData, data, nullptr, _numDetonationEventVertices);
+    cudaDeviceSynchronize();
+    auto numDetonationEvents = copyToHost(_numDetonationEventVertices);
+
+    // Allocate device buffers
+    CellVertexData* deviceCellBuffer = nullptr;
+    EnergyParticleVertexData* deviceEnergyParticleBuffer = nullptr;
+    LocationVertexData* deviceLocationBuffer = nullptr;
+    SelectedObjectVertexData* deviceSelectedObjectBuffer = nullptr;
+    unsigned int* deviceLineIndexBuffer = nullptr;
+    unsigned int* deviceTriangleIndexBuffer = nullptr;
+    ConnectionArrowVertexData* deviceConnectionArrowBuffer = nullptr;
+    AttackEventVertexData* deviceAttackEventBuffer = nullptr;
+    DetonationEventVertexData* deviceDetonationEventBuffer = nullptr;
+
+    if (numCells > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceCellBuffer, numCells * sizeof(CellVertexData)));
+    }
+    if (numParticles > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceEnergyParticleBuffer, numParticles * sizeof(EnergyParticleVertexData)));
+    }
+    if (numLocations > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceLocationBuffer, numLocations * sizeof(LocationVertexData)));
+    }
+    if (numSelectedObjects > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceSelectedObjectBuffer, numSelectedObjects * sizeof(SelectedObjectVertexData)));
+    }
+    if (numLineIndices > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceLineIndexBuffer, numLineIndices * sizeof(unsigned int)));
+    }
+    if (numTriangleIndices > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceTriangleIndexBuffer, numTriangleIndices * sizeof(unsigned int)));
+    }
+    if (numConnectionArrows > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceConnectionArrowBuffer, numConnectionArrows * sizeof(ConnectionArrowVertexData)));
+    }
+    if (numAttackEvents > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceAttackEventBuffer, numAttackEvents * sizeof(AttackEventVertexData)));
+    }
+    if (numDetonationEvents > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceDetonationEventBuffer, numDetonationEvents * sizeof(DetonationEventVertexData)));
     }
 
-    // Allocate device memory and extract data
-    ConnectionArrowVertexData* deviceBuffer;
-    CHECK_FOR_CUDA_ERROR(cudaMalloc(&deviceBuffer, numVertices * sizeof(ConnectionArrowVertexData)));
-
-    setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
-    KERNEL_CALL(cudaExtractSelectedConnectionData, data, deviceBuffer, _numSelectedConnectionVertices);
+    // Extract data to device buffers
+    if (numCells > 0) {
+        KERNEL_CALL(cudaExtractCellData, data, deviceCellBuffer);
+    }
+    if (numParticles > 0) {
+        KERNEL_CALL(cudaExtractEnergyParticleData, data, deviceEnergyParticleBuffer);
+    }
+    if (numLocations > 0) {
+        setValueToDevice(_numLocations, static_cast<uint64_t>(0));
+        KERNEL_CALL_1_1(cudaExtractLocationData, data, deviceLocationBuffer, _numLocations, visibleTopLeft);
+    }
+    if (numSelectedObjects > 0) {
+        setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractSelectedObjectData, data, deviceSelectedObjectBuffer, _numSelectedObjects);
+    }
+    if (numLineIndices > 0) {
+        setValueToDevice(_numLineIndices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractLineIndices, data, deviceLineIndexBuffer, _numLineIndices);
+    }
+    if (numTriangleIndices > 0) {
+        setValueToDevice(_numTriangleIndices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractTriangleIndices, data, deviceTriangleIndexBuffer, _numTriangleIndices);
+    }
+    if (numConnectionArrows > 0) {
+        setValueToDevice(_numSelectedConnectionVertices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractSelectedConnectionData, data, deviceConnectionArrowBuffer, _numSelectedConnectionVertices);
+    }
+    if (numAttackEvents > 0) {
+        setValueToDevice(_numAttackEventVertices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractAttackEventData, data, deviceAttackEventBuffer, _numAttackEventVertices);
+    }
+    if (numDetonationEvents > 0) {
+        setValueToDevice(_numDetonationEventVertices, static_cast<uint64_t>(0));
+        KERNEL_CALL(cudaExtractDetonationEventData, data, deviceDetonationEventBuffer, _numDetonationEventVertices);
+    }
     cudaDeviceSynchronize();
 
-    // Copy to host
-    std::vector<ConnectionArrowVertexData> result(numVertices);
-    CHECK_FOR_CUDA_ERROR(cudaMemcpy(result.data(), deviceBuffer, numVertices * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+    // Resize CPU buffers
+    cpuBuffers.cells.resize(numCells);
+    cpuBuffers.energyParticles.resize(numParticles);
+    cpuBuffers.locations.resize(numLocations);
+    cpuBuffers.selectedObjects.resize(numSelectedObjects);
+    cpuBuffers.lineIndices.resize(numLineIndices);
+    cpuBuffers.triangleIndices.resize(numTriangleIndices);
+    cpuBuffers.connectionArrows.resize(numConnectionArrows);
+    cpuBuffers.attackEvents.resize(numAttackEvents);
+    cpuBuffers.detonationEvents.resize(numDetonationEvents);
 
-    CHECK_FOR_CUDA_ERROR(cudaFree(deviceBuffer));
-
-    return result;
+    // Copy from device to host
+    if (numCells > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.cells.data(), deviceCellBuffer, numCells * sizeof(CellVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceCellBuffer));
+    }
+    if (numParticles > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.energyParticles.data(), deviceEnergyParticleBuffer, numParticles * sizeof(EnergyParticleVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceEnergyParticleBuffer));
+    }
+    if (numLocations > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.locations.data(), deviceLocationBuffer, numLocations * sizeof(LocationVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceLocationBuffer));
+    }
+    if (numSelectedObjects > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.selectedObjects.data(), deviceSelectedObjectBuffer, numSelectedObjects * sizeof(SelectedObjectVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceSelectedObjectBuffer));
+    }
+    if (numLineIndices > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.lineIndices.data(), deviceLineIndexBuffer, numLineIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceLineIndexBuffer));
+    }
+    if (numTriangleIndices > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.triangleIndices.data(), deviceTriangleIndexBuffer, numTriangleIndices * sizeof(unsigned int), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceTriangleIndexBuffer));
+    }
+    if (numConnectionArrows > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.connectionArrows.data(), deviceConnectionArrowBuffer, numConnectionArrows * sizeof(ConnectionArrowVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceConnectionArrowBuffer));
+    }
+    if (numAttackEvents > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.attackEvents.data(), deviceAttackEventBuffer, numAttackEvents * sizeof(AttackEventVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceAttackEventBuffer));
+    }
+    if (numDetonationEvents > 0) {
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(cpuBuffers.detonationEvents.data(), deviceDetonationEventBuffer, numDetonationEvents * sizeof(DetonationEventVertexData), cudaMemcpyDeviceToHost));
+        CHECK_FOR_CUDA_ERROR(cudaFree(deviceDetonationEventBuffer));
+    }
 }

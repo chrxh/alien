@@ -11,6 +11,7 @@
 
 #include <EngineInterface/ArraySizesForGpu.h>
 #include <EngineInterface/ArraySizesForTO.h>
+#include <EngineInterface/CpuGeometryBuffers.h>
 #include <EngineInterface/Definitions.h>
 #include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/MutationType.h>
@@ -113,8 +114,7 @@ public:
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);
     bool testOnly_arePointersValid();
     NumRenderObjects testOnly_getNumRenderObjects();
-    std::vector<SelectedObjectVertexData> testOnly_getSelectedObjectData();
-    std::vector<ConnectionArrowVertexData> testOnly_getConnectionArrowData();
+    CpuGeometryBuffers testOnly_copyBuffersFromCudaToCpu();
 
 private:
     void initCuda();

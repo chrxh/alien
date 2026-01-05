@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ArraySizesForGpu.h"
+#include "CpuGeometryBuffers.h"
 #include "DataPointCollection.h"
 #include "Definitions.h"
 #include "GeometryBuffers.h"
@@ -130,8 +131,7 @@ public:
     virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;
     virtual bool testOnly_arePointersValid() = 0;
     virtual NumRenderObjects testOnly_getNumRenderObjects() = 0;
-    virtual std::vector<SelectedObjectVertexData> testOnly_getSelectedObjectData() = 0;
-    virtual std::vector<ConnectionArrowVertexData> testOnly_getConnectionArrowData() = 0;
+    virtual CpuGeometryBuffers testOnly_copyBuffersFromCudaToCpu() = 0;
 
 protected:
     static SimulationFacade _instance;

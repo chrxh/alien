@@ -508,16 +508,10 @@ NumRenderObjects EngineWorker::testOnly_getNumRenderObjects()
     return _simulationCudaFacade->testOnly_getNumRenderObjects();
 }
 
-std::vector<SelectedObjectVertexData> EngineWorker::testOnly_getSelectedObjectData()
+CpuGeometryBuffers EngineWorker::testOnly_copyBuffersFromCudaToCpu()
 {
     EngineWorkerGuard access(this);
-    return _simulationCudaFacade->testOnly_getSelectedObjectData();
-}
-
-std::vector<ConnectionArrowVertexData> EngineWorker::testOnly_getConnectionArrowData()
-{
-    EngineWorkerGuard access(this);
-    return _simulationCudaFacade->testOnly_getConnectionArrowData();
+    return _simulationCudaFacade->testOnly_copyBuffersFromCudaToCpu();
 }
 
 void EngineWorker::resetTimeIntervalStatistics()

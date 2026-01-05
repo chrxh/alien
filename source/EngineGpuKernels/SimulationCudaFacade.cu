@@ -134,11 +134,11 @@ void _SimulationCudaFacade::copyBuffersFromCudaToOpenGL(GeometryBuffers const& g
 
     if (GlobalSettings::get().isInterop()) {
         _cudaGeometryBuffers->registerBuffers(geometryBuffers);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, true);
         syncAndCheck();
     } else {
         _cudaGeometryBuffers->allocateBuffersForNoInterop(numRenderObjects);
-        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect);
+        GeometryKernelsService::get().extractObjectData(_settings, simulationData, *_cudaGeometryBuffers, visibleWorldRect, false);
         syncAndCheck();
         _cudaGeometryBuffers->copyToOpenGL(geometryBuffers, numRenderObjects);
     }
@@ -672,22 +672,15 @@ NumRenderObjects _SimulationCudaFacade::testOnly_getNumRenderObjects()
     return result;
 }
 
-std::vector<SelectedObjectVertexData> _SimulationCudaFacade::testOnly_getSelectedObjectData()
+CpuGeometryBuffers _SimulationCudaFacade::testOnly_copyBuffersFromCudaToCpu()
 {
     checkAndProcessSimulationParameterChanges();
     auto simulationData = getSimulationDataPtrCopy();
-    auto result = GeometryKernelsService::get().testOnly_getSelectedObjectData(_settings, simulationData);
+    RealRect visibleWorldRect = {{0, 0}, {static_cast<float>(_settings.worldSizeX), static_cast<float>(_settings.worldSizeY)}};
+    CpuGeometryBuffers cpuBuffers;
+    GeometryKernelsService::get().extractObjectDataToCpuBuffers(_settings, simulationData, cpuBuffers, visibleWorldRect);
     syncAndCheck();
-    return result;
-}
-
-std::vector<ConnectionArrowVertexData> _SimulationCudaFacade::testOnly_getConnectionArrowData()
-{
-    checkAndProcessSimulationParameterChanges();
-    auto simulationData = getSimulationDataPtrCopy();
-    auto result = GeometryKernelsService::get().testOnly_getConnectionArrowData(_settings, simulationData);
-    syncAndCheck();
-    return result;
+    return cpuBuffers;
 }
 
 void _SimulationCudaFacade::initCuda()
