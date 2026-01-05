@@ -55,10 +55,11 @@ jobs:
         popd
 
     - name: Configure CMake
-      run: cmake -S . -B build \
-        -G Ninja \
-        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake \
-        -DCMAKE_BUILD_TYPE=Release \
+      run: >
+        cmake -S . -B build
+        -G Ninja
+        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake
+        -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 
     - name: Build

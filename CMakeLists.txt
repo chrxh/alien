@@ -51,14 +51,7 @@ add_executable(NetworkTests)
 add_executable(PersisterTests)
 
 find_package(CUDAToolkit)
-find_package(boost_headers CONFIG REQUIRED)
-find_package(boost_regex CONFIG REQUIRED)
-
-# Create Boost::boost compatibility target for header-only usage
-if(NOT TARGET Boost::boost)
-    add_library(Boost::boost ALIAS Boost::headers)
-endif()
-
+find_package(Boost REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(cereal CONFIG REQUIRED)
