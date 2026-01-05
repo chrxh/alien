@@ -41,9 +41,9 @@ struct CudaGeometryBuffers
     uint64_t deviceAttackEventBufferCapacity = 0;
     uint64_t deviceDetonationEventBufferCapacity = 0;
 
-    void registerBuffers(OpenGlGeometryBuffers const& buffers);
+    void registerBuffers(GeometryBuffers const& buffers);
     void allocateBuffersForNoInterop(NumRenderObjects const& numObjects);
     void freeBuffersForNoInterop();
-    void copyToOpenGL(OpenGlGeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
+    void copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects);
     CpuGeometryBuffers copyToCpu(NumRenderObjects const& numObjects);
 };

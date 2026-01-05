@@ -6,7 +6,7 @@
 #include <Base/GlobalSettings.h>
 
 #include <EngineInterface/Description.h>
-#include <EngineInterface/OpenGlGeometryBuffers.h>
+#include <EngineInterface/GeometryBuffers.h>
 #include <EngineInterface/SimulationFacade.h>
 
 #include "IntegrationTestFramework.h"
@@ -175,7 +175,7 @@ TEST_F(GeometryTests, getNumRenderObjects_creature)
 TEST_F(GeometryTests, copyBuffers_emptySim)
 {
     _simulationFacade->clear();
-    auto geometryBuffers = _OpenGlGeometryBuffers::create();
+    auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
@@ -189,7 +189,7 @@ TEST_F(GeometryTests, copyBuffers_singleCell)
 {
     auto data = Description().cells({CellDescription().id(1).pos({100.0f, 100.0f})});
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _OpenGlGeometryBuffers::create();
+    auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
@@ -206,7 +206,7 @@ TEST_F(GeometryTests, copyBuffers_multipleCells)
         CellDescription().id(3).pos({102.0f, 100.0f}),
     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _OpenGlGeometryBuffers::create();
+    auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
@@ -219,7 +219,7 @@ TEST_F(GeometryTests, copyBuffers_singleParticle)
 {
     auto data = Description().particles({ParticleDescription().id(1).pos({100.0f, 100.0f}).energy(10.0f)});
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _OpenGlGeometryBuffers::create();
+    auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
@@ -236,7 +236,7 @@ TEST_F(GeometryTests, copyBuffers_cellsWithConnections)
     });
     data.addConnection(1, 2);
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _OpenGlGeometryBuffers::create();
+    auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
@@ -259,7 +259,7 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
                         ParticleDescription().id(5).pos({202.0f, 200.0f}).energy(10.0f),
                     });
     _simulationFacade->setSimulationData(data);
-    auto geometryBuffers = _OpenGlGeometryBuffers::create();
+    auto geometryBuffers = _GeometryBuffers::create();
     RealRect visibleWorldRect{{0, 0}, {1000, 1000}};
 
     _simulationFacade->tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
@@ -288,7 +288,7 @@ TEST_F(GeometryTests, selectedObjectData_noRestriction_inactive)
     // Select cell 1 using position-based selection
     _simulationFacade->setSelection({99.0f, 99.0f}, {100.5f, 101.0f});
 
-    auto cpuBuffers = _simulationFacade->testOnly_getGeometryBuffers();
+    auto cpuBuffers = _simulationFacade->testOnly_copyBuffersFromCudaToCpu();
     ASSERT_EQ(1u, cpuBuffers.selectedObjects.size());
     EXPECT_EQ(0, cpuBuffers.selectedObjects[0].hasSignalRestriction);  // Inactive mode = no restriction
 }
@@ -310,7 +310,7 @@ TEST_F(GeometryTests, selectedObjectData_hasRestriction_active)
     // Select cell 1 using position-based selection
     _simulationFacade->setSelection({99.0f, 99.0f}, {100.5f, 101.0f});
 
-    auto cpuBuffers = _simulationFacade->testOnly_getGeometryBuffers();
+    auto cpuBuffers = _simulationFacade->testOnly_copyBuffersFromCudaToCpu();
     ASSERT_EQ(1u, cpuBuffers.selectedObjects.size());
     EXPECT_EQ(1, cpuBuffers.selectedObjects[0].hasSignalRestriction);  // Active mode = has restriction
 }
@@ -332,7 +332,7 @@ TEST_F(GeometryTests, selectedObjectData_hasRestriction_conditional)
     // Select cell 1 using position-based selection
     _simulationFacade->setSelection({99.0f, 99.0f}, {100.5f, 101.0f});
 
-    auto cpuBuffers = _simulationFacade->testOnly_getGeometryBuffers();
+    auto cpuBuffers = _simulationFacade->testOnly_copyBuffersFromCudaToCpu();
     ASSERT_EQ(1u, cpuBuffers.selectedObjects.size());
     EXPECT_EQ(1, cpuBuffers.selectedObjects[0].hasSignalRestriction);  // Conditional mode = has restriction
 }
@@ -358,7 +358,7 @@ TEST_F(GeometryTests, connectionData_noRestriction_inactive_bothDirections)
     // Select both cells using position-based selection
     _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
 
-    auto cpuBuffers = _simulationFacade->testOnly_getGeometryBuffers();
+    auto cpuBuffers = _simulationFacade->testOnly_copyBuffersFromCudaToCpu();
     ASSERT_EQ(2u, cpuBuffers.connectionArrows.size());  // 2 vertices per connection line
     // arrowFlags: bit 0 = arrow to cell1, bit 1 = arrow to cell2
     // Both cells have no restriction, so signals can flow both ways (flags = 3)
@@ -387,7 +387,7 @@ TEST_F(GeometryTests, connectionData_withRestriction_active_restrictedDirection)
     // Select both cells using position-based selection
     _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
 
-    auto cpuBuffers = _simulationFacade->testOnly_getGeometryBuffers();
+    auto cpuBuffers = _simulationFacade->testOnly_copyBuffersFromCudaToCpu();
     ASSERT_EQ(2u, cpuBuffers.connectionArrows.size());
     // Cell1 has restriction that blocks signal to cell2 (connection angle 0 is outside range [225,315])
     // Cell2 has no restriction, so signal can flow to cell1
@@ -416,7 +416,7 @@ TEST_F(GeometryTests, connectionData_withRestriction_conditional_restrictedDirec
     // Select both cells using position-based selection
     _simulationFacade->setSelection({99.0f, 99.0f}, {102.0f, 101.0f});
 
-    auto cpuBuffers = _simulationFacade->testOnly_getGeometryBuffers();
+    auto cpuBuffers = _simulationFacade->testOnly_copyBuffersFromCudaToCpu();
     ASSERT_EQ(2u, cpuBuffers.connectionArrows.size());
     // Conditional mode should render the same as Active mode for arrow directions
     // Cell1 has restriction that blocks signal to cell2

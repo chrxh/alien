@@ -42,7 +42,7 @@ std::string _SimulationFacadeImpl::getGpuName() const
     return _worker.getGpuName();
 }
 
-void _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(OpenGlGeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
+void _SimulationFacadeImpl::tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect)
 {
     _worker.tryCopyBuffersFromCudaToOpenGL(geometryBuffers, visibleWorldRect);
 }

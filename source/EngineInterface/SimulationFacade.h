@@ -37,7 +37,7 @@ public:
     // Resizes buffers if necessary and fills it with data for rendering.
     // If the GPU is busy for a specified duration, the buffers will not be updated.
     //
-    virtual void tryCopyBuffersFromCudaToOpenGL(OpenGlGeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
+    virtual void tryCopyBuffersFromCudaToOpenGL(GeometryBuffers const& geometryBuffers, RealRect const& visibleWorldRect) = 0;
     virtual bool isSyncSimulationWithRendering() const = 0;
     virtual void setSyncSimulationWithRendering(bool value) = 0;
     virtual int getSyncSimulationWithRenderingRatio() const = 0;
