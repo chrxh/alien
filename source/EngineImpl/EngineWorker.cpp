@@ -502,12 +502,6 @@ bool EngineWorker::testOnly_arePointersValid()
     return _simulationCudaFacade->testOnly_arePointersValid();
 }
 
-NumRenderObjects EngineWorker::testOnly_getNumRenderObjects()
-{
-    EngineWorkerGuard access(this);
-    return _simulationCudaFacade->testOnly_getNumRenderObjects();
-}
-
 void EngineWorker::resetTimeIntervalStatistics()
 {
     _simulationCudaFacade->resetTimeIntervalStatistics();
