@@ -404,3 +404,14 @@ enum SignalRecorderState_
     SignalRecorderState_Recording,
     SignalRecorderState_Reading,
 };
+
+//***************************
+//* Coommunicator constants *
+//***************************
+using CommunicatorMode = int;
+enum CommunicatorMode_
+{
+    CommunicatorMode_Send,
+    CommunicatorMode_Receive,
+    CommunicatorMode_Count,
+};

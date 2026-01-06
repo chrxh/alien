@@ -404,6 +404,33 @@ struct MemoryDescription
     MemoryMode getMode() const;
 };
 
+struct SenderDescription
+{
+    auto operator<=>(SenderDescription const&) const = default;
+
+    MEMBER(SenderDescription, float, range, 100.0f);
+};
+
+struct ReceiverDescription
+{
+    auto operator<=>(ReceiverDescription const&) const = default;
+
+    MEMBER(ReceiverDescription, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(ReceiverDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReceiverDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+};
+
+using CommunicatorModeDescription = std::variant<SenderDescription, ReceiverDescription>;
+
+struct CommunicatorDescription
+{
+    auto operator<=>(CommunicatorDescription const&) const = default;
+
+    MEMBER(CommunicatorDescription, CommunicatorModeDescription, mode, SenderDescription());
+
+    CommunicatorMode getMode() const;
+};
+
 using CellTypeDescription = std::variant<
     StructureCellDescription,
     FreeCellDescription,
