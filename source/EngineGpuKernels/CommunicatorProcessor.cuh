@@ -37,9 +37,9 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 
     // Placeholder implementation - actual communication logic will be added later
     auto const& mode = cell->cellTypeData.communicator.mode;
-    if (mode == CommunicatorMode_Send) {
+    if (mode == CommunicatorMode_Sender) {
         // Sender mode: transmit signal to receivers within range
-    } else if (mode == CommunicatorMode_Receive) {
+    } else if (mode == CommunicatorMode_Receiver) {
         // Receiver mode: receive signals from senders
     }
 }
