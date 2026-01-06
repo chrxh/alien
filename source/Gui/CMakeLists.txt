@@ -176,9 +176,13 @@ target_link_libraries(alien Network)
 target_link_libraries(alien PersisterInterface)
 target_link_libraries(alien PersisterImpl)
 
+target_include_directories(alien
+    PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+)
+
+target_link_libraries(alien cudart)
 target_link_libraries(alien im_file_dialog)
-target_link_libraries(alien CUDA::cudart_static)
-target_link_libraries(alien CUDA::cuda_driver)
 target_link_libraries(alien Boost::boost)
 target_link_libraries(alien OpenGL::GL OpenGL::GLU)
 target_link_libraries(alien GLEW::GLEW)

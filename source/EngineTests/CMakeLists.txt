@@ -40,8 +40,12 @@ target_link_libraries(EngineTests EngineImpl)
 target_link_libraries(EngineTests EngineInterface)
 target_link_libraries(EngineTests EngineTestData)
 
-target_link_libraries(EngineTests CUDA::cudart_static)
-target_link_libraries(EngineTests CUDA::cuda_driver)
+target_include_directories(EngineTests
+    PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+)
+
+target_link_libraries(EngineTests cudart)
 target_link_libraries(EngineTests Boost::boost)
 target_link_libraries(EngineTests OpenGL::GL OpenGL::GLU)
 target_link_libraries(EngineTests GLEW::GLEW)

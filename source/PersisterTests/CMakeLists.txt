@@ -10,8 +10,12 @@ target_link_libraries(PersisterTests EngineInterface)
 target_link_libraries(PersisterTests EngineTestData)
 target_link_libraries(PersisterTests PersisterInterface)
 
-target_link_libraries(PersisterTests CUDA::cudart_static)
-target_link_libraries(PersisterTests CUDA::cuda_driver)
+target_include_directories(PersisterTests
+    PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+)
+
+target_link_libraries(PersisterTests cudart)
 target_link_libraries(PersisterTests Boost::boost)
 target_link_libraries(PersisterTests OpenGL::GL OpenGL::GLU)
 target_link_libraries(PersisterTests GLEW::GLEW)

@@ -8,8 +8,12 @@ target_link_libraries(cli EngineImpl)
 target_link_libraries(cli EngineInterface)
 target_link_libraries(cli PersisterInterface)
 
-target_link_libraries(cli CUDA::cudart_static)
-target_link_libraries(cli CUDA::cuda_driver)
+target_include_directories(cli
+    PRIVATE
+        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+)
+
+target_link_libraries(cli cudart)
 target_link_libraries(cli Boost::boost)
 target_link_libraries(cli OpenGL::GL OpenGL::GLU)
 target_link_libraries(cli GLEW::GLEW)
