@@ -59,9 +59,9 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
     auto& neuronsState = cell->neuralNetwork;
 
     // Each thread computes one weight * input product
+    // row = tile index (which output channel), col = position within tile
     auto row = block.thread_rank() / MAX_CHANNELS;
-    auto col = block.thread_rank() % MAX_CHANNELS;
-    float myInput = neuronsState->weights[block.thread_rank()] * signal.channels[col];
+    float myInput = neuronsState->weights[block.thread_rank()] * signal.channels[tile.thread_rank()];
 
     // Use tile-level reduction to sum inputs for each row (output channel)
     float sum = cg::reduce(tile, myInput, cg::plus<float>());

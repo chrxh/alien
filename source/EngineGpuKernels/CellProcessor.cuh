@@ -160,6 +160,11 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __shared__ Cell* fixedCells[MaxBarrierCellsForCollision];
         __shared__ int numFixedCells;
 
+        __shared__ float2 F_pressure;
+        __shared__ float2 F_viscosity;
+        __shared__ float2 cellPosDelta;
+        __shared__ float density;
+
         if (block.thread_rank() == 0) {
             cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
             cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
@@ -169,6 +174,10 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             cellPosInt = {floorInt(cell->pos.x) - radiusInt, floorInt(cell->pos.y) - radiusInt};
 
             numFixedCells = 0;
+            F_pressure = {0, 0};
+            F_viscosity = {0, 0};
+            cellPosDelta = {0, 0};
+            density = 0;
         }
         block.sync();
 
@@ -252,7 +261,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             otherCell = otherCell->nextCell;
         }
 
-        // Warp-level reduction for accumulated values
+        // Warp-level reduction followed by atomic accumulation across warps
         float sumF_pressure_x = cg::reduce(warp, localF_pressure.x, cg::plus<float>());
         float sumF_pressure_y = cg::reduce(warp, localF_pressure.y, cg::plus<float>());
         float sumF_viscosity_x = cg::reduce(warp, localF_viscosity.x, cg::plus<float>());
@@ -260,20 +269,6 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         float sumCellPosDelta_x = cg::reduce(warp, localCellPosDelta.x, cg::plus<float>());
         float sumCellPosDelta_y = cg::reduce(warp, localCellPosDelta.y, cg::plus<float>());
         float sumDensity = cg::reduce(warp, localDensity, cg::plus<float>());
-
-        // Use shared memory to accumulate across warps
-        __shared__ float2 F_pressure;
-        __shared__ float2 F_viscosity;
-        __shared__ float2 cellPosDelta;
-        __shared__ float density;
-
-        if (block.thread_rank() == 0) {
-            F_pressure = {0, 0};
-            F_viscosity = {0, 0};
-            cellPosDelta = {0, 0};
-            density = 0;
-        }
-        block.sync();
 
         // Each warp leader adds its warp's sum to shared memory
         if (warp.thread_rank() == 0) {
