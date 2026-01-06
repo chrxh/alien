@@ -233,7 +233,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
             case CellTypeGenome_Digestor:
                 node.cellTypeData.digestor.rawEnergyConductivity = nodeTO.cellTypeData.digestor.rawEnergyConductivity;
                 break;
-            case CellTypeGenome_Memory:
+            case CellTypeGenome_Memory: {
                 node.cellTypeData.memory.mode = nodeTO.cellTypeData.memory.mode;
                 node.cellTypeData.memory.numSignalEntries = nodeTO.cellTypeData.memory.numSignalEntries;
                 node.cellTypeData.memory.channelBitMask = nodeTO.cellTypeData.memory.channelBitMask;
@@ -256,8 +256,7 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                         signalEntries[k].channels[l] = entriesTO[k].channels[l];
                     }
                 }
-                break;
-            }
+            } break;
             case CellTypeGenome_Communicator:
                 node.cellTypeData.communicator.mode = nodeTO.cellTypeData.communicator.mode;
                 if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Send) {
