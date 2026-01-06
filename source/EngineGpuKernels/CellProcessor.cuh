@@ -1,4 +1,6 @@
-﻿#pragma once
+#pragma once
+
+#include <cooperative_groups.h>
 
 #include <EngineInterface/CellTypeConstants.h>
 
@@ -15,6 +17,8 @@
 #include "Physics.cuh"
 #include "EnergyParticleProcessor.cuh"
 #include "TO.cuh"
+
+namespace cg = cooperative_groups;
 
 class CellProcessor
 {
@@ -136,6 +140,8 @@ namespace
 
 __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
 {
+    auto block = cg::this_thread_block();
+
     auto& cells = data.objects.cells;
     auto blockPartition = calcBlockPartition(cells.getNumEntries());
     auto const& smoothingLength = cudaSimulationParameters.smoothingLength.value;
@@ -156,7 +162,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __shared__ Cell* fixedCells[MaxBarrierCellsForCollision];
         __shared__ int numFixedCells;
 
-        if (threadIdx.x == 0) {
+        if (block.thread_rank() == 0) {
             F_pressure = {0, 0};
             F_viscosity = {0, 0};
             cellPosDelta = {0, 0};
@@ -170,9 +176,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
 
             numFixedCells = 0;
         }
-        __syncthreads();
+        block.sync();
 
-        int2 scanPos{cellPosInt.x + (toInt(threadIdx.x) % scanLength), cellPosInt.y + (toInt(threadIdx.x) / scanLength)};
+        int2 scanPos{cellPosInt.x + (toInt(block.thread_rank()) % scanLength), cellPosInt.y + (toInt(block.thread_rank()) / scanLength)};
         data.cellMap.correctPosition(scanPos);
         auto otherCell = data.cellMap.getFirst(scanPos);
         for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
@@ -245,9 +251,9 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
             otherCell = otherCell->nextCell;
         }
-        __syncthreads();
+        block.sync();
 
-        if (threadIdx.x == 0) {
+        if (block.thread_rank() == 0) {
             // Calculate fixed forces
             numFixedCells = min(MaxBarrierCellsForCollision, numFixedCells);
             if (numFixedCells > 0) {
@@ -294,7 +300,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             cell->shared2.x = density;
         }
-        __syncthreads();
+        block.sync();
     }
 }
 
