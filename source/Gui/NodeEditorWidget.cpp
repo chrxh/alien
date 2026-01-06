@@ -82,6 +82,8 @@ namespace
             return DigestorGenomeDescription();
         case CellTypeGenome_Memory:
             return MemoryGenomeDescription();
+        case CellTypeGenome_Communicator:
+            return CommunicatorGenomeDescription();
         default:
             CHECK(false);
         }
@@ -162,6 +164,18 @@ namespace
             return SignalStorageGenomeDescription();
         case MemoryMode_SignalIntegrator:
             return SignalIntegratorGenomeDescription();
+        default:
+            CHECK(false);
+        }
+    }
+
+    CommunicatorModeGenomeDescription createCommunicatorModeGenomeDescription(CommunicatorMode mode)
+    {
+        switch (mode) {
+        case CommunicatorMode_Sender:
+            return SenderGenomeDescription();
+        case CommunicatorMode_Receiver:
+            return ReceiverGenomeDescription();
         default:
             CHECK(false);
         }
@@ -637,6 +651,51 @@ void _NodeEditorWidget::processNodeAttributes()
                     if (bit[i]) {
                         memory._channelBitMask |= 1 << i;
                     }
+                }
+
+                AlienGui::EndIndent();
+            } else if (nodeType == CellTypeGenome_Communicator) {
+
+                AlienGui::BeginIndent();
+
+                // Mode selection
+                auto& communicator = std::get<CommunicatorGenomeDescription>(node._cellType);
+                auto mode = communicator.getMode();
+                if (AlienGui::Combo(AlienGui::ComboParameters().name("Mode").values(Const::CommunicatorModeStrings).textWidth(rightColumnWidth), mode)) {
+                    communicator._mode = createCommunicatorModeGenomeDescription(mode);
+                }
+
+                // Mode-specific parameters
+                if (mode == CommunicatorMode_Sender) {
+                    AlienGui::BeginIndent();
+                    auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
+                    AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Range").format("%.1f").textWidth(rightColumnWidth), sender._range);
+                    AlienGui::EndIndent();
+                } else if (mode == CommunicatorMode_Receiver) {
+                    AlienGui::BeginIndent();
+                    auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
+                    AlienGui::ComboOptionalColor(
+                        AlienGui::ComboColorParameters().name("Restrict to color").textWidth(rightColumnWidth), receiver._restrictToColor);
+                    AlienGui::Combo(
+                        AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
+                        receiver._restrictToLineage);
+
+                    bool bit[MAX_CHANNELS];
+                    for (int i = 0; i < MAX_CHANNELS; ++i) {
+                        bit[i] = (receiver._channelBitMask & (1 << i)) != 0;
+                    }
+                    AlienGui::MultiCheckboxes(
+                        AlienGui::MultiCheckboxesParameters().name("Channel mask bit 0-3").textWidth(rightColumnWidth), bit[0], bit[1], bit[2], bit[3]);
+                    AlienGui::MultiCheckboxes(
+                        AlienGui::MultiCheckboxesParameters().name("Channel mask bit 4-7").textWidth(rightColumnWidth), bit[4], bit[5], bit[6], bit[7]);
+                    receiver._channelBitMask = 0;
+                    for (int i = 0; i < MAX_CHANNELS; ++i) {
+                        if (bit[i]) {
+                            receiver._channelBitMask |= 1 << i;
+                        }
+                    }
+
+                    AlienGui::EndIndent();
                 }
 
                 AlienGui::EndIndent();

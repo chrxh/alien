@@ -236,11 +236,11 @@ namespace
 
     auto constexpr Id_MemoryGenome_ChannelBitMask = 0;
 
-    auto constexpr Id_SignalDelay_Delay = 0;
-    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
-    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
+    auto constexpr Id_SenderGenome_Range = 0;
 
-    auto constexpr Id_Memory_ChannelBitMask = 0;
+    auto constexpr Id_ReceiverGenome_ChannelBitMask = 0;
+    auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
+    auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
 }
 
 namespace cereal
@@ -631,6 +631,39 @@ namespace cereal
     SPLIT_SERIALIZATION(MemoryGenomeDescription)
 
     template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SenderGenomeDescription& data)
+    {
+        SenderGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_SenderGenome_Range, data._range, defaultObject._range);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SenderGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ReceiverGenomeDescription& data)
+    {
+        ReceiverGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_ReceiverGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
+        loadSave(task, auxiliaries, Id_ReceiverGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_ReceiverGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ReceiverGenomeDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CommunicatorGenomeDescription& data)
+    {
+        CommunicatorGenomeDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
+    }
+    SPLIT_SERIALIZATION(CommunicatorGenomeDescription)
+
+    template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, SignalRestrictionGenomeDescription& data)
     {
         SignalRestrictionGenomeDescription defaultObject;
@@ -865,6 +898,10 @@ namespace
 
     auto constexpr Id_SignalEntry_Channels = 0;
 
+    auto constexpr Id_SignalDelay_Delay = 0;
+    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
+    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
+
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
     auto constexpr Id_SignalRecorder_State = 1;
     auto constexpr Id_SignalRecorder_NumSavedSignalEntries = 2;
@@ -873,6 +910,14 @@ namespace
     auto constexpr Id_SignalStorage_ReadOnly = 0;
 
     auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
+
+    auto constexpr Id_Memory_ChannelBitMask = 0;
+
+    auto constexpr Id_Sender_Range = 0;
+
+    auto constexpr Id_Receiver_ChannelBitMask = 0;
+    auto constexpr Id_Receiver_RestrictToColor = 1;
+    auto constexpr Id_Receiver_RestrictToLineage = 2;
 }
 
 namespace cereal
@@ -1357,6 +1402,39 @@ namespace cereal
         ar(data._signalEntries);
     }
     SPLIT_SERIALIZATION(MemoryDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, SenderDescription& data)
+    {
+        SenderDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Sender_Range, data._range, defaultObject._range);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(SenderDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, ReceiverDescription& data)
+    {
+        ReceiverDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        loadSave(task, auxiliaries, Id_Receiver_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
+        loadSave(task, auxiliaries, Id_Receiver_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
+        loadSave(task, auxiliaries, Id_Receiver_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
+        processLoadSaveMap(task, ar, auxiliaries);
+    }
+    SPLIT_SERIALIZATION(ReceiverDescription)
+
+    template <class Archive>
+    void loadSave(SerializationTask task, Archive& ar, CommunicatorDescription& data)
+    {
+        CommunicatorDescription defaultObject;
+        auto auxiliaries = getLoadSaveMap(task, ar);
+        processLoadSaveMap(task, ar, auxiliaries);
+
+        ar(data._mode);
+    }
+    SPLIT_SERIALIZATION(CommunicatorDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CellDescription& data)

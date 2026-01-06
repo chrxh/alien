@@ -440,6 +440,49 @@ struct std::hash<MemoryGenomeDescription>
 };
 
 template <>
+struct std::hash<SenderGenomeDescription>
+{
+    std::size_t operator()(SenderGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._range);
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<ReceiverGenomeDescription>
+{
+    std::size_t operator()(ReceiverGenomeDescription const& desc) const
+    {
+        std::size_t seed = 0;
+        hash_combine(seed, desc._channelBitMask);
+        if (desc._restrictToColor) {
+            hash_combine(seed, *desc._restrictToColor);
+        } else {
+            hash_combine(seed, -1);
+        }
+        hash_combine(seed, static_cast<int>(desc._restrictToLineage));
+        return seed;
+    }
+};
+
+template <>
+struct std::hash<CommunicatorModeGenomeDescription>
+{
+    std::size_t operator()(CommunicatorModeGenomeDescription const& desc) const
+    {
+        return variant_hasher<SenderGenomeDescription, ReceiverGenomeDescription>{}(desc);
+    }
+};
+
+template <>
+struct std::hash<CommunicatorGenomeDescription>
+{
+    std::size_t operator()(CommunicatorGenomeDescription const& desc) const { return std::hash<CommunicatorModeGenomeDescription>{}(desc._mode); }
+};
+
+template <>
 struct std::hash<CellTypeGenomeDescription>
 {
     std::size_t operator()(CellTypeGenomeDescription const& desc) const
@@ -457,7 +500,8 @@ struct std::hash<CellTypeGenomeDescription>
             ReconnectorGenomeDescription,
             DetonatorGenomeDescription,
             DigestorGenomeDescription,
-            MemoryGenomeDescription>{}(desc);
+            MemoryGenomeDescription,
+            CommunicatorGenomeDescription>{}(desc);
     }
 };
 

@@ -4,6 +4,7 @@ PUBLIC
     BalanceTests.cpp
     CellConnectionTests.cpp
     CellStateTransitionTests.cpp
+    CommunicatorTests.cpp
     ConstructorTests.cpp
     CreatureTests.cpp
     DataTransferTests.cpp
