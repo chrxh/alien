@@ -1,4 +1,7 @@
-﻿#pragma once
+#pragma once
+
+#include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
 
 #include <EngineInterface/CellTypeConstants.h>
 
@@ -15,6 +18,8 @@
 #include "Physics.cuh"
 #include "EnergyParticleProcessor.cuh"
 #include "TO.cuh"
+
+namespace cg = cooperative_groups;
 
 class CellProcessor
 {
@@ -136,6 +141,9 @@ namespace
 
 __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correctOverlap(SimulationData& data)
 {
+    auto block = cg::this_thread_block();
+    auto warp = cg::tiled_partition<32>(block);
+
     auto& cells = data.objects.cells;
     auto blockPartition = calcBlockPartition(cells.getNumEntries());
     auto const& smoothingLength = cudaSimulationParameters.smoothingLength.value;
@@ -143,10 +151,6 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
     for (int cellIndex = blockPartition.startIndex; cellIndex <= blockPartition.endIndex; ++cellIndex) {
         auto& cell = cells.at(cellIndex);
 
-        __shared__ float2 F_pressure;
-        __shared__ float2 F_viscosity;
-        __shared__ float2 cellPosDelta;
-        __shared__ float density;
         __shared__ float cellMaxBindingEnergy;
         __shared__ float cellFusionVelocity;
 
@@ -156,11 +160,12 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
         __shared__ Cell* fixedCells[MaxBarrierCellsForCollision];
         __shared__ int numFixedCells;
 
-        if (threadIdx.x == 0) {
-            F_pressure = {0, 0};
-            F_viscosity = {0, 0};
-            cellPosDelta = {0, 0};
-            density = 0;
+        __shared__ float2 F_pressure;
+        __shared__ float2 F_viscosity;
+        __shared__ float2 cellPosDelta;
+        __shared__ float density;
+
+        if (block.thread_rank() == 0) {
             cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, cell->pos);
             cellFusionVelocity = ParameterCalculator::calcParameter(cudaSimulationParameters.cellFusionVelocity, data, cell->pos);
 
@@ -169,10 +174,20 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             cellPosInt = {floorInt(cell->pos.x) - radiusInt, floorInt(cell->pos.y) - radiusInt};
 
             numFixedCells = 0;
+            F_pressure = {0, 0};
+            F_viscosity = {0, 0};
+            cellPosDelta = {0, 0};
+            density = 0;
         }
-        __syncthreads();
+        block.sync();
 
-        int2 scanPos{cellPosInt.x + (toInt(threadIdx.x) % scanLength), cellPosInt.y + (toInt(threadIdx.x) / scanLength)};
+        // Per-thread accumulators
+        float2 localF_pressure = {0, 0};
+        float2 localF_viscosity = {0, 0};
+        float2 localCellPosDelta = {0, 0};
+        float localDensity = 0;
+
+        int2 scanPos{cellPosInt.x + (toInt(block.thread_rank()) % scanLength), cellPosInt.y + (toInt(block.thread_rank()) / scanLength)};
         data.cellMap.correctPosition(scanPos);
         auto otherCell = data.cellMap.getFirst(scanPos);
         for (int level = 0; level < MaxBarrierCellsForCollision; ++level) {
@@ -197,14 +212,14 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             if (!otherCell->fixed && adaptedDistance <= smoothingLength * 2 && cell->detached + otherCell->detached != 1) {
 
                 // Calc density
-                atomicAdd_block(&density, calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength));
+                localDensity += calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
                 if (cell != otherCell) {
 
                     // Overlap correction
                     if (!cell->fixed && origDistance < cudaSimulationParameters.minCellDistance.value) {
-                        atomicAdd_block(&cellPosDelta.x, posDelta.x * cudaSimulationParameters.minCellDistance.value / 5);
-                        atomicAdd_block(&cellPosDelta.y, posDelta.y * cudaSimulationParameters.minCellDistance.value / 5);
+                        localCellPosDelta.x += posDelta.x * cudaSimulationParameters.minCellDistance.value / 5;
+                        localCellPosDelta.y += posDelta.y * cudaSimulationParameters.minCellDistance.value / 5;
                     }
 
                     auto velDelta = cell->vel - otherCell->vel;
@@ -226,12 +241,12 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                             float kernel_d = calcKernel_d(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength * smoothingLength);
 
                             auto F_pressureDelta = posDelta / (-adaptedDistance) * factor * kernel_d;
-                            atomicAdd_block(&F_pressure.x, F_pressureDelta.x);
-                            atomicAdd_block(&F_pressure.y, F_pressureDelta.y);
+                            localF_pressure.x += F_pressureDelta.x;
+                            localF_pressure.y += F_pressureDelta.y;
 
                             auto F_viscosityDelta = velDelta / otherCell->density * adaptedDistance * kernel_d / (adaptedDistance * adaptedDistance + 0.25f);
-                            atomicAdd_block(&F_viscosity.x, F_viscosityDelta.x);
-                            atomicAdd_block(&F_viscosity.y, F_viscosityDelta.y);
+                            localF_viscosity.x += F_viscosityDelta.x;
+                            localF_viscosity.y += F_viscosityDelta.y;
                         }
                     }
 
@@ -245,34 +260,54 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             }
             otherCell = otherCell->nextCell;
         }
-        __syncthreads();
 
-        if (threadIdx.x == 0) {
+        // Warp-level reduction followed by atomic accumulation across warps
+        float sumF_pressure_x = cg::reduce(warp, localF_pressure.x, cg::plus<float>());
+        float sumF_pressure_y = cg::reduce(warp, localF_pressure.y, cg::plus<float>());
+        float sumF_viscosity_x = cg::reduce(warp, localF_viscosity.x, cg::plus<float>());
+        float sumF_viscosity_y = cg::reduce(warp, localF_viscosity.y, cg::plus<float>());
+        float sumCellPosDelta_x = cg::reduce(warp, localCellPosDelta.x, cg::plus<float>());
+        float sumCellPosDelta_y = cg::reduce(warp, localCellPosDelta.y, cg::plus<float>());
+        float sumDensity = cg::reduce(warp, localDensity, cg::plus<float>());
+
+        // Each warp leader adds its warp's sum to shared memory
+        if (warp.thread_rank() == 0) {
+            atomicAdd_block(&F_pressure.x, sumF_pressure_x);
+            atomicAdd_block(&F_pressure.y, sumF_pressure_y);
+            atomicAdd_block(&F_viscosity.x, sumF_viscosity_x);
+            atomicAdd_block(&F_viscosity.y, sumF_viscosity_y);
+            atomicAdd_block(&cellPosDelta.x, sumCellPosDelta_x);
+            atomicAdd_block(&cellPosDelta.y, sumCellPosDelta_y);
+            atomicAdd_block(&density, sumDensity);
+        }
+        block.sync();
+
+        if (block.thread_rank() == 0) {
             // Calculate fixed forces
             numFixedCells = min(MaxBarrierCellsForCollision, numFixedCells);
             if (numFixedCells > 0) {
-                Cell* closestBarrierCell = nullptr;
-                float closestBarrierCellDistance;
+                Cell* closestFixedCell = nullptr;
+                float closestFixedCellDistance;
                 for (int i = 0; i < numFixedCells; ++i) {
                     auto const& fixedCell = fixedCells[i];
                     auto distance = data.cellMap.getDistance(cell->pos, fixedCell->pos);
-                    if (!closestBarrierCell || distance < closestBarrierCellDistance) {
-                        closestBarrierCell = fixedCell;
-                        closestBarrierCellDistance = distance;
+                    if (!closestFixedCell || distance < closestFixedCellDistance) {
+                        closestFixedCell = fixedCell;
+                        closestFixedCellDistance = distance;
                     }
                 }
 
                 float2 r{0, 0};
-                if (closestBarrierCell->numConnections <= 1) {
-                    r = data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos);
+                if (closestFixedCell->numConnections <= 1) {
+                    r = data.cellMap.getCorrectedDirection(cell->pos - closestFixedCell->pos);
                 } else {
-                    auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos));
-                    auto numConnections = closestBarrierCell->numConnections;
+                    auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->pos - closestFixedCell->pos));
+                    auto numConnections = closestFixedCell->numConnections;
                     for (int i = 0; i < numConnections; ++i) {
-                        auto otherCell1 = closestBarrierCell->connections[i].cell;
-                        auto otherCell2 = closestBarrierCell->connections[(i + 1) % numConnections].cell;
-                        auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestBarrierCell->pos));
-                        auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestBarrierCell->pos));
+                        auto otherCell1 = closestFixedCell->connections[i].cell;
+                        auto otherCell2 = closestFixedCell->connections[(i + 1) % numConnections].cell;
+                        auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestFixedCell->pos));
+                        auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestFixedCell->pos));
                         if (Math::isAngleInBetween(angleToOtherCell1, angleToOtherCell2, angleToCell)) {
                             r = otherCell2->pos - otherCell1->pos;
                             Math::rotateQuarterCounterClockwise(r);
@@ -280,13 +315,13 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                         }
                     }
                 }
-                auto vr = cell->vel - closestBarrierCell->vel;
+                auto vr = cell->vel - closestFixedCell->vel;
                 auto dot_vr_r = Math::dot(vr, r);
 
                 if (dot_vr_r < 0) {
                     auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
-                    auto truncated_distance = max(0.05f, closestBarrierCellDistance);
-                    cell->shared1 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestBarrierCell->vel - cell->vel) / truncated_distance;
+                    auto truncated_distance = max(0.05f, closestFixedCellDistance);
+                    cell->shared1 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedCell->vel - cell->vel) / truncated_distance;
                 }
             }
 
@@ -294,7 +329,7 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             cell->shared1 += F_pressure * cudaSimulationParameters.pressureStrength.value + F_viscosity * cudaSimulationParameters.viscosityStrength.value;
             cell->shared2.x = density;
         }
-        __syncthreads();
+        block.sync();
     }
 }
 
