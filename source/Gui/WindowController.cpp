@@ -11,10 +11,50 @@
 
 #include <GLFW/glfw3.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 namespace
 {
     auto const WindowedMode = std::string("window");
     auto const DesktopMode = std::string("desktop");
+
+#ifdef _WIN32
+    // Known benign exception code that can occur during WGL initialization at SetPixelFormat
+    // 0x8007007A = ERROR_INSUFFICIENT_BUFFER (as HRESULT)
+    constexpr unsigned long EXCEPTION_WGL_INSUFFICIENT_BUFFER = 0x8007007A;
+
+    // Exception filter for SEH - only handles the known benign ERROR_INSUFFICIENT_BUFFER exception
+    // that can occur during WGL initialization. Other exceptions are passed to the default handler.
+    int wglExceptionFilter(unsigned int code, unsigned int* capturedCode)
+    {
+        *capturedCode = code;
+        if (code == EXCEPTION_WGL_INSUFFICIENT_BUFFER) {
+            return EXCEPTION_EXECUTE_HANDLER;
+        }
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    // Wrapper function to create GLFW window with SEH to catch benign Windows first-chance exceptions
+    // that can occur during WGL initialization (e.g., 0x8007007A - ERROR_INSUFFICIENT_BUFFER in SetPixelFormat)
+    GLFWwindow* createWindowWithSEH(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
+    {
+        GLFWwindow* window = nullptr;
+        unsigned int exceptionCode = 0;
+        __try {
+            window = glfwCreateWindow(width, height, title, monitor, share);
+        } __except (wglExceptionFilter(GetExceptionCode(), &exceptionCode)) {
+            // Log the exception with diagnostic info - this is a benign first-chance exception
+            // from Windows graphics initialization that is normally caught internally
+            std::stringstream ss;
+            ss << "caught Windows exception 0x" << std::hex << exceptionCode << " during glfwCreateWindow (benign WGL initialization exception)";
+            log(Priority::Important, ss.str());
+            window = nullptr;
+        }
+        return window;
+    }
+#endif
 
     GLFWvidmode convert(std::string const& mode)
     {
@@ -66,11 +106,19 @@ void WindowController::init()
         if (isWindowedMode()) {
             log(Priority::Important, "set windowed mode");
             _startupSize = _sizeInWindowedMode;
+#ifdef _WIN32
+            return createWindowWithSEH(_sizeInWindowedMode.x, _sizeInWindowedMode.y, "alien", nullptr, nullptr);
+#else
             return glfwCreateWindow(_sizeInWindowedMode.x, _sizeInWindowedMode.y, "alien", nullptr, nullptr);
+#endif
         } else {
             log(Priority::Important, "set full screen mode");
             _startupSize = {_windowData.mode->width, _windowData.mode->height};
+#ifdef _WIN32
+            return createWindowWithSEH(_windowData.mode->width, _windowData.mode->height, "alien", primaryMonitor, nullptr);
+#else
             return glfwCreateWindow(_windowData.mode->width, _windowData.mode->height, "alien", primaryMonitor, nullptr);
+#endif
         }
     }();
 
