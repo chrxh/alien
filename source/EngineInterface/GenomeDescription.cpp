@@ -108,9 +108,9 @@ MemoryMode MemoryGenomeDescription::getMode() const
 CommunicatorMode CommunicatorGenomeDescription::getMode() const
 {
     if (std::holds_alternative<SenderGenomeDescription>(_mode)) {
-        return CommunicatorMode_Send;
+        return CommunicatorMode_Sender;
     } else if (std::holds_alternative<ReceiverGenomeDescription>(_mode)) {
-        return CommunicatorMode_Receive;
+        return CommunicatorMode_Receiver;
     }
     CHECK(false);
 }

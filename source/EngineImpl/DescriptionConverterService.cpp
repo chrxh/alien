@@ -553,11 +553,11 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     case CellType_Communicator: {
         CommunicatorDescription communicator;
         auto const& communicatorTO = cellTO.cellTypeData.communicator;
-        if (communicatorTO.mode == CommunicatorMode_Send) {
+        if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
             communicator._mode = sender;
-        } else if (communicatorTO.mode == CommunicatorMode_Receive) {
+        } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverDescription receiver;
             receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
@@ -811,11 +811,11 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
     case CellTypeGenome_Communicator: {
         CommunicatorGenomeDescription communicatorDesc;
         auto const& communicatorTO = nodeTO->cellTypeData.communicator;
-        if (communicatorTO.mode == CommunicatorMode_Send) {
+        if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderGenomeDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
             communicatorDesc._mode = sender;
-        } else if (communicatorTO.mode == CommunicatorMode_Receive) {
+        } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDescription receiver;
             receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
@@ -1126,10 +1126,10 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto const& communicatorDesc = std::get<CommunicatorGenomeDescription>(nodeDesc._cellType);
                 auto& communicatorTO = nodeTO.cellTypeData.communicator;
                 communicatorTO.mode = communicatorDesc.getMode();
-                if (communicatorTO.mode == CommunicatorMode_Send) {
+                if (communicatorTO.mode == CommunicatorMode_Sender) {
                     auto const& senderDesc = std::get<SenderGenomeDescription>(communicatorDesc._mode);
                     communicatorTO.modeData.sender.range = senderDesc._range;
-                } else if (communicatorTO.mode == CommunicatorMode_Receive) {
+                } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDescription>(communicatorDesc._mode);
                     communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
                     communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
@@ -1424,10 +1424,10 @@ void DescriptionConverterService::convertCellToTO(
         auto const& communicatorDesc = std::get<CommunicatorDescription>(cellDesc._cellType);
         CommunicatorTO& communicatorTO = cellTO.cellTypeData.communicator;
         communicatorTO.mode = communicatorDesc.getMode();
-        if (communicatorTO.mode == CommunicatorMode_Send) {
+        if (communicatorTO.mode == CommunicatorMode_Sender) {
             auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
             communicatorTO.modeData.sender.range = senderDesc._range;
-        } else if (communicatorTO.mode == CommunicatorMode_Receive) {
+        } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
             communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
             communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));

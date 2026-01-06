@@ -241,18 +241,6 @@ namespace
     auto constexpr Id_ReceiverGenome_ChannelBitMask = 0;
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
     auto constexpr Id_ReceiverGenome_RestrictToLineage = 2;
-
-    auto constexpr Id_Sender_Range = 0;
-
-    auto constexpr Id_Receiver_ChannelBitMask = 0;
-    auto constexpr Id_Receiver_RestrictToColor = 1;
-    auto constexpr Id_Receiver_RestrictToLineage = 2;
-
-    auto constexpr Id_SignalDelay_Delay = 0;
-    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
-    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
-
-    auto constexpr Id_Memory_ChannelBitMask = 0;
 }
 
 namespace cereal
@@ -910,6 +898,10 @@ namespace
 
     auto constexpr Id_SignalEntry_Channels = 0;
 
+    auto constexpr Id_SignalDelay_Delay = 0;
+    auto constexpr Id_SignalDelay_NumMemoryEntriesInitialized = 1;
+    auto constexpr Id_SignalDelay_RingBufferIndex = 2;
+
     auto constexpr Id_SignalRecorder_ReadOnly = 0;
     auto constexpr Id_SignalRecorder_State = 1;
     auto constexpr Id_SignalRecorder_NumSavedSignalEntries = 2;
@@ -918,6 +910,14 @@ namespace
     auto constexpr Id_SignalStorage_ReadOnly = 0;
 
     auto constexpr Id_SignalIntegrator_NewSignalWeight = 0;
+
+    auto constexpr Id_Memory_ChannelBitMask = 0;
+
+    auto constexpr Id_Sender_Range = 0;
+
+    auto constexpr Id_Receiver_ChannelBitMask = 0;
+    auto constexpr Id_Receiver_RestrictToColor = 1;
+    auto constexpr Id_Receiver_RestrictToLineage = 2;
 }
 
 namespace cereal

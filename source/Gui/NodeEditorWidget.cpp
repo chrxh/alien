@@ -172,9 +172,9 @@ namespace
     CommunicatorModeGenomeDescription createCommunicatorModeGenomeDescription(CommunicatorMode mode)
     {
         switch (mode) {
-        case CommunicatorMode_Send:
+        case CommunicatorMode_Sender:
             return SenderGenomeDescription();
-        case CommunicatorMode_Receive:
+        case CommunicatorMode_Receiver:
             return ReceiverGenomeDescription();
         default:
             CHECK(false);
@@ -666,12 +666,12 @@ void _NodeEditorWidget::processNodeAttributes()
                 }
 
                 // Mode-specific parameters
-                if (mode == CommunicatorMode_Send) {
+                if (mode == CommunicatorMode_Sender) {
                     AlienGui::BeginIndent();
                     auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
                     AlienGui::InputFloat(AlienGui::InputFloatParameters().name("Range").format("%.1f").textWidth(rightColumnWidth), sender._range);
                     AlienGui::EndIndent();
-                } else if (mode == CommunicatorMode_Receive) {
+                } else if (mode == CommunicatorMode_Receiver) {
                     AlienGui::BeginIndent();
                     auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
                     AlienGui::ComboOptionalColor(

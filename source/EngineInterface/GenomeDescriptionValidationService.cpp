@@ -221,10 +221,10 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
             } else if (nodeType == CellTypeGenome_Communicator) {
                 auto& communicator = std::get<CommunicatorGenomeDescription>(node._cellType);
                 auto communicatorMode = communicator.getMode();
-                if (communicatorMode == CommunicatorMode_Send) {
+                if (communicatorMode == CommunicatorMode_Sender) {
                     auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
                     sender._range = std::max(sender._range, 0.0f);
-                } else if (communicatorMode == CommunicatorMode_Receive) {
+                } else if (communicatorMode == CommunicatorMode_Receiver) {
                     auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
                     if (receiver._restrictToColor.has_value()) {
                         auto& value = receiver._restrictToColor.value();

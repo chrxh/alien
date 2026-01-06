@@ -106,9 +106,9 @@ MemoryMode MemoryDescription::getMode() const
 CommunicatorMode CommunicatorDescription::getMode() const
 {
     if (std::holds_alternative<SenderDescription>(_mode)) {
-        return CommunicatorMode_Send;
+        return CommunicatorMode_Sender;
     } else if (std::holds_alternative<ReceiverDescription>(_mode)) {
-        return CommunicatorMode_Receive;
+        return CommunicatorMode_Receiver;
     }
     THROW_NOT_IMPLEMENTED();
 }

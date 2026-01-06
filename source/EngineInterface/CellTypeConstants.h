@@ -413,8 +413,8 @@ enum SignalRecorderState_
 using CommunicatorMode = int;
 enum CommunicatorMode_
 {
-    CommunicatorMode_Send,
-    CommunicatorMode_Receive,
+    CommunicatorMode_Sender,
+    CommunicatorMode_Receiver,
     CommunicatorMode_Count,
 };
 

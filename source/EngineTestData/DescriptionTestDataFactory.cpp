@@ -37,8 +37,8 @@ std::vector<DescriptionTestDataFactory::CellParameter> DescriptionTestDataFactor
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
         CellParameter{CellType_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
-        CellParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Send}},
-        CellParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receive}},
+        CellParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Sender}},
+        CellParameter{CellType_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receiver}},
     };
 }
 
@@ -112,8 +112,8 @@ std::vector<DescriptionTestDataFactory::NodeParameter> DescriptionTestDataFactor
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalRecorder}},
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalStorage}},
         NodeParameter{CellTypeGenome_Memory, MemoryModeWrapper{MemoryMode_SignalIntegrator}},
-        NodeParameter{CellTypeGenome_Communicator, CommunicatorModeWrapper{CommunicatorMode_Send}},
-        NodeParameter{CellTypeGenome_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receive}},
+        NodeParameter{CellTypeGenome_Communicator, CommunicatorModeWrapper{CommunicatorMode_Sender}},
+        NodeParameter{CellTypeGenome_Communicator, CommunicatorModeWrapper{CommunicatorMode_Receiver}},
     };
 }
 
@@ -562,14 +562,14 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             return false;
         }
         switch (communicator.getMode()) {
-        case CommunicatorMode_Send: {
+        case CommunicatorMode_Sender: {
             auto const& sender = std::get<SenderDescription>(communicator._mode);
             auto const& nodeSender = std::get<SenderGenomeDescription>(nodeCommunicator._mode);
             if (sender._range != nodeSender._range) {
                 return false;
             }
         } break;
-        case CommunicatorMode_Receive: {
+        case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDescription>(communicator._mode);
             auto const& nodeReceiver = std::get<ReceiverGenomeDescription>(nodeCommunicator._mode);
             if (receiver._channelBitMask != nodeReceiver._channelBitMask) {
@@ -766,13 +766,13 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Communicator: {
         auto communicatorMode = std::holds_alternative<CommunicatorModeWrapper>(cellParameter.mode)
             ? std::get<CommunicatorModeWrapper>(cellParameter.mode).value
-            : CommunicatorMode_Send;
+            : CommunicatorMode_Sender;
         CommunicatorModeDescription communicatorModeDesc;
         switch (communicatorMode) {
-        case CommunicatorMode_Send:
+        case CommunicatorMode_Sender:
             communicatorModeDesc = SenderDescription().range(150.0f);
             break;
-        case CommunicatorMode_Receive:
+        case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDescription().channelBitMask(0b10101010).restrictToColor(2).restrictToLineage(LineageRestriction_OtherLineage);
             break;
         default:
@@ -922,13 +922,13 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
     case CellTypeGenome_Communicator: {
         auto communicatorMode = std::holds_alternative<CommunicatorModeWrapper>(cellParameter.mode)
             ? std::get<CommunicatorModeWrapper>(cellParameter.mode).value
-            : CommunicatorMode_Send;
+            : CommunicatorMode_Sender;
         CommunicatorModeGenomeDescription communicatorModeDesc;
         switch (communicatorMode) {
-        case CommunicatorMode_Send:
+        case CommunicatorMode_Sender:
             communicatorModeDesc = SenderGenomeDescription().range(200.0f);
             break;
-        case CommunicatorMode_Receive:
+        case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverGenomeDescription().channelBitMask(0b11001100).restrictToColor(5).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
