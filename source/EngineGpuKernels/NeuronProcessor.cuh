@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cooperative_groups.h>
+#include <cooperative_groups/reduce.h>
 
 #include "sm_60_atomic_functions.h"
 
@@ -41,6 +42,7 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
 __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
     auto block = cg::this_thread_block();
+    auto tile = cg::tiled_partition<MAX_CHANNELS>(block);
 
     __shared__ Signal signal;
     __shared__ SignalState signalState;
@@ -54,18 +56,20 @@ __inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, Si
         return;
     }
 
-    __shared__ float sumInput[MAX_CHANNELS];
-    if (block.thread_rank() < MAX_CHANNELS) {
-        sumInput[block.thread_rank()] = cell->neuralNetwork->biases[block.thread_rank()];
-    }
-    block.sync();
-
     auto& neuronsState = cell->neuralNetwork;
 
+    // Each thread computes one weight * input product
     auto row = block.thread_rank() / MAX_CHANNELS;
     auto col = block.thread_rank() % MAX_CHANNELS;
-    atomicAdd_block(&sumInput[row], neuronsState->weights[block.thread_rank()] * signal.channels[col]);
+    float myInput = neuronsState->weights[block.thread_rank()] * signal.channels[col];
 
+    // Use tile-level reduction to sum inputs for each row (output channel)
+    float sum = cg::reduce(tile, myInput, cg::plus<float>());
+
+    __shared__ float sumInput[MAX_CHANNELS];
+    if (tile.thread_rank() == 0) {
+        sumInput[row] = sum + neuronsState->biases[row];
+    }
     block.sync();
 
     if (block.thread_rank() < MAX_CHANNELS) {
