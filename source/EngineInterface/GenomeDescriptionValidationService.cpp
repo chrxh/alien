@@ -217,6 +217,21 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 if (numEntries > MAX_CELL_MEMORY_ENTRIES) {
                     memory._signalEntries.resize(MAX_CELL_MEMORY_ENTRIES);
                 }
+
+            } else if (nodeType == CellTypeGenome_Communicator) {
+                auto& communicator = std::get<CommunicatorGenomeDescription>(node._cellType);
+                auto communicatorMode = communicator.getMode();
+                if (communicatorMode == CommunicatorMode_Send) {
+                    auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
+                    sender._range = std::max(sender._range, 0.0f);
+                } else if (communicatorMode == CommunicatorMode_Receive) {
+                    auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
+                    if (receiver._restrictToColor.has_value()) {
+                        auto& value = receiver._restrictToColor.value();
+                        value = std::clamp(value, 0, MAX_COLORS - 1);
+                    }
+                    receiver._restrictToLineage = std::clamp(receiver._restrictToLineage, 0, LineageRestriction_Count - 1);
+                }
             }
         }
     }

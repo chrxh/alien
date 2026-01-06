@@ -103,6 +103,16 @@ MemoryMode MemoryDescription::getMode() const
     THROW_NOT_IMPLEMENTED();
 }
 
+CommunicatorMode CommunicatorDescription::getMode() const
+{
+    if (std::holds_alternative<SenderDescription>(_mode)) {
+        return CommunicatorMode_Send;
+    } else if (std::holds_alternative<ReceiverDescription>(_mode)) {
+        return CommunicatorMode_Receive;
+    }
+    THROW_NOT_IMPLEMENTED();
+}
+
 InjectorDescription::InjectorDescription() {}
 
 CellDescription::CellDescription(bool createIds)
@@ -151,6 +161,8 @@ CellType CellDescription::getCellType() const
         return CellType_Digestor;
     } else if (std::holds_alternative<MemoryDescription>(_cellType)) {
         return CellType_Memory;
+    } else if (std::holds_alternative<CommunicatorDescription>(_cellType)) {
+        return CellType_Communicator;
     }
     CHECK(false);
 }

@@ -330,6 +330,33 @@ struct MemoryGenomeDescription
     MemoryMode getMode() const;
 };
 
+struct SenderGenomeDescription
+{
+    auto operator<=>(SenderGenomeDescription const&) const = default;
+
+    MEMBER(SenderGenomeDescription, float, range, 100.0f);
+};
+
+struct ReceiverGenomeDescription
+{
+    auto operator<=>(ReceiverGenomeDescription const&) const = default;
+
+    MEMBER(ReceiverGenomeDescription, uint8_t, channelBitMask, 0b11111111);
+    MEMBER(ReceiverGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReceiverGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
+};
+
+using CommunicatorModeGenomeDescription = std::variant<SenderGenomeDescription, ReceiverGenomeDescription>;
+
+struct CommunicatorGenomeDescription
+{
+    auto operator<=>(CommunicatorGenomeDescription const&) const = default;
+
+    MEMBER(CommunicatorGenomeDescription, CommunicatorModeGenomeDescription, mode, SenderGenomeDescription());
+
+    CommunicatorMode getMode() const;
+};
+
 using CellTypeGenomeDescription = std::variant<
     BaseGenomeDescription,
     DepotGenomeDescription,
@@ -343,7 +370,8 @@ using CellTypeGenomeDescription = std::variant<
     ReconnectorGenomeDescription,
     DetonatorGenomeDescription,
     DigestorGenomeDescription,
-    MemoryGenomeDescription>;
+    MemoryGenomeDescription,
+    CommunicatorGenomeDescription>;
 
 struct SignalRestrictionGenomeDescription
 {

@@ -7,6 +7,7 @@ add_library(EngineGpuKernels
     CellConnectionProcessor.cuh
     CellProcessor.cuh
     ClusterProcessor.cuh
+    CommunicatorProcessor.cuh
     ConstantMemory.cu
     ConstantMemory.cuh
     Constants.cuh

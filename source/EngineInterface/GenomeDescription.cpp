@@ -105,6 +105,16 @@ MemoryMode MemoryGenomeDescription::getMode() const
     CHECK(false);
 }
 
+CommunicatorMode CommunicatorGenomeDescription::getMode() const
+{
+    if (std::holds_alternative<SenderGenomeDescription>(_mode)) {
+        return CommunicatorMode_Send;
+    } else if (std::holds_alternative<ReceiverGenomeDescription>(_mode)) {
+        return CommunicatorMode_Receive;
+    }
+    CHECK(false);
+}
+
 CellTypeGenome NodeDescription::getCellType() const
 {
     if (std::holds_alternative<BaseGenomeDescription>(_cellType)) {
@@ -133,6 +143,8 @@ CellTypeGenome NodeDescription::getCellType() const
         return CellTypeGenome_Digestor;
     } else if (std::holds_alternative<MemoryGenomeDescription>(_cellType)) {
         return CellTypeGenome_Memory;
+    } else if (std::holds_alternative<CommunicatorGenomeDescription>(_cellType)) {
+        return CellTypeGenome_Communicator;
     }
     CHECK(false);
 }

@@ -446,7 +446,8 @@ using CellTypeDescription = std::variant<
     ReconnectorDescription,
     DetonatorDescription,
     DigestorDescription,
-    MemoryDescription>;
+    MemoryDescription,
+    CommunicatorDescription>;
 
 struct SignalRestrictionDescription
 {

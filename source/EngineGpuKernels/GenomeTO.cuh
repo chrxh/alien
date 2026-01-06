@@ -248,6 +248,30 @@ struct MemoryGenomeTO
     uint64_t signalEntriesDataIndex;  // Heap index to SignalEntryGenomeTO[MAX_CELL_MEMORY_ENTRIES]
 };
 
+struct SenderGenomeTO
+{
+    float range;
+};
+
+struct ReceiverGenomeTO
+{
+    uint8_t channelBitMask;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    LineageRestriction restrictToLineage;
+};
+
+union CommunicatorModeGenomeTO
+{
+    SenderGenomeTO sender;
+    ReceiverGenomeTO receiver;
+};
+
+struct CommunicatorGenomeTO
+{
+    CommunicatorMode mode;
+    CommunicatorModeGenomeTO modeData;
+};
+
 union CellTypeDataGenomeTO
 {
     BaseGenomeTO base;
@@ -263,6 +287,7 @@ union CellTypeDataGenomeTO
     DetonatorGenomeTO detonator;
     DigestorGenomeTO digestor;
     MemoryGenomeTO memory;
+    CommunicatorGenomeTO communicator;
 };
 
 struct SignalRestrictionGenomeTO

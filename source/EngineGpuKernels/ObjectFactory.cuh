@@ -258,6 +258,17 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                 }
                 break;
             }
+            case CellTypeGenome_Communicator:
+                node.cellTypeData.communicator.mode = nodeTO.cellTypeData.communicator.mode;
+                if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Send) {
+                    node.cellTypeData.communicator.modeData.sender.range = nodeTO.cellTypeData.communicator.modeData.sender.range;
+                } else if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Receive) {
+                    node.cellTypeData.communicator.modeData.receiver.channelBitMask = nodeTO.cellTypeData.communicator.modeData.receiver.channelBitMask;
+                    node.cellTypeData.communicator.modeData.receiver.restrictToColor = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                    node.cellTypeData.communicator.modeData.receiver.restrictToLineage = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
+                }
+                break;
+            }
         }
     }
     return genome;
@@ -502,6 +513,16 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cellTO.cellTypeData.memory.signalEntriesDataIndex,
             to.heap,
             reinterpret_cast<uint8_t*&>(cell->cellTypeData.memory.signalEntries));
+    } break;
+    case CellType_Communicator: {
+        cell->cellTypeData.communicator.mode = cellTO.cellTypeData.communicator.mode;
+        if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Send) {
+            cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
+        } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receive) {
+            cell->cellTypeData.communicator.modeData.receiver.channelBitMask = cellTO.cellTypeData.communicator.modeData.receiver.channelBitMask;
+            cell->cellTypeData.communicator.modeData.receiver.restrictToColor = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
+            cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
+        }
     } break;
     }
 }
@@ -871,6 +892,19 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 memory.signalEntries[i].channels[k] = nodeMemory.signalEntries[i].channels[k];
             }
+        }
+    } break;
+    case CellTypeGenome_Communicator: {
+        cell->cellType = CellType_Communicator;
+        auto const& nodeCommunicator = node->cellTypeData.communicator;
+        auto& communicator = cell->cellTypeData.communicator;
+        communicator.mode = nodeCommunicator.mode;
+        if (nodeCommunicator.mode == CommunicatorMode_Send) {
+            communicator.modeData.sender.range = nodeCommunicator.modeData.sender.range;
+        } else if (nodeCommunicator.mode == CommunicatorMode_Receive) {
+            communicator.modeData.receiver.channelBitMask = nodeCommunicator.modeData.receiver.channelBitMask;
+            communicator.modeData.receiver.restrictToColor = nodeCommunicator.modeData.receiver.restrictToColor;
+            communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;
         }
     } break;
     }

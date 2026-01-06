@@ -362,6 +362,30 @@ struct Memory
     SignalEntry* signalEntries;  // Pointer to SignalEntry[MAX_CELL_MEMORY_ENTRIES] in heap
 };
 
+struct Sender
+{
+    float range;
+};
+
+struct Receiver
+{
+    uint8_t channelBitMask;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    LineageRestriction restrictToLineage;
+};
+
+union CommunicatorModeData
+{
+    Sender sender;
+    Receiver receiver;
+};
+
+struct Communicator
+{
+    CommunicatorMode mode;
+    CommunicatorModeData modeData;
+};
+
 union CellTypeData
 {
     Base base;
@@ -377,6 +401,7 @@ union CellTypeData
     Detonator detonator;
     Digestor digestor;
     Memory memory;
+    Communicator communicator;
 };
 
 struct SignalRestriction
