@@ -286,28 +286,28 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
             // Calculate fixed forces
             numFixedCells = min(MaxBarrierCellsForCollision, numFixedCells);
             if (numFixedCells > 0) {
-                Cell* closestBarrierCell = nullptr;
-                float closestBarrierCellDistance;
+                Cell* closestFixedCell = nullptr;
+                float closestFixedCellDistance;
                 for (int i = 0; i < numFixedCells; ++i) {
                     auto const& fixedCell = fixedCells[i];
                     auto distance = data.cellMap.getDistance(cell->pos, fixedCell->pos);
-                    if (!closestBarrierCell || distance < closestBarrierCellDistance) {
-                        closestBarrierCell = fixedCell;
-                        closestBarrierCellDistance = distance;
+                    if (!closestFixedCell || distance < closestFixedCellDistance) {
+                        closestFixedCell = fixedCell;
+                        closestFixedCellDistance = distance;
                     }
                 }
 
                 float2 r{0, 0};
-                if (closestBarrierCell->numConnections <= 1) {
-                    r = data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos);
+                if (closestFixedCell->numConnections <= 1) {
+                    r = data.cellMap.getCorrectedDirection(cell->pos - closestFixedCell->pos);
                 } else {
-                    auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->pos - closestBarrierCell->pos));
-                    auto numConnections = closestBarrierCell->numConnections;
+                    auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->pos - closestFixedCell->pos));
+                    auto numConnections = closestFixedCell->numConnections;
                     for (int i = 0; i < numConnections; ++i) {
-                        auto otherCell1 = closestBarrierCell->connections[i].cell;
-                        auto otherCell2 = closestBarrierCell->connections[(i + 1) % numConnections].cell;
-                        auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestBarrierCell->pos));
-                        auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestBarrierCell->pos));
+                        auto otherCell1 = closestFixedCell->connections[i].cell;
+                        auto otherCell2 = closestFixedCell->connections[(i + 1) % numConnections].cell;
+                        auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestFixedCell->pos));
+                        auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestFixedCell->pos));
                         if (Math::isAngleInBetween(angleToOtherCell1, angleToOtherCell2, angleToCell)) {
                             r = otherCell2->pos - otherCell1->pos;
                             Math::rotateQuarterCounterClockwise(r);
@@ -315,13 +315,13 @@ __inline__ __device__ void CellProcessor::calcFluidForces_reconnectCells_correct
                         }
                     }
                 }
-                auto vr = cell->vel - closestBarrierCell->vel;
+                auto vr = cell->vel - closestFixedCell->vel;
                 auto dot_vr_r = Math::dot(vr, r);
 
                 if (dot_vr_r < 0) {
                     auto truncated_r_squared = max(0.05f, Math::lengthSquared(r));
-                    auto truncated_distance = max(0.05f, closestBarrierCellDistance);
-                    cell->shared1 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestBarrierCell->vel - cell->vel) / truncated_distance;
+                    auto truncated_distance = max(0.05f, closestFixedCellDistance);
+                    cell->shared1 += (vr - r * 2 * dot_vr_r / truncated_r_squared + closestFixedCell->vel - cell->vel) / truncated_distance;
                 }
             }
 
