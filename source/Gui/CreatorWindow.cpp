@@ -228,6 +228,7 @@ CreatorWindow::CreatorWindow()
 void CreatorWindow::createCell()
 {
     auto cell = CellDescription()
+                    .cellType(StructureCellDescription())
                     .pos(getRandomPos())
                     .usableEnergy(_energy)
                     .stiffness(_stiffness)
@@ -254,6 +255,7 @@ void CreatorWindow::createRectangle()
     }
 
     auto description = DescriptionEditService::get().createRect(DescriptionEditService::CreateRectParameters()
+                                                                    .cellType(StructureCellDescription())
                                                                     .width(_rectHorizontalCells)
                                                                     .height(_rectVerticalCells)
                                                                     .cellDistance(_cellDistance)
@@ -273,6 +275,7 @@ void CreatorWindow::createHexagon()
         return;
     }
     Description description = DescriptionEditService::get().createHex(DescriptionEditService::CreateHexParameters()
+                                                                          .cellType(StructureCellDescription())
                                                                           .layers(_layers)
                                                                           .cellDistance(_cellDistance)
                                                                           .usableEnergy(_energy)
@@ -306,6 +309,7 @@ void CreatorWindow::createDisc()
 
             description._cells.emplace_back(CellDescription()
                                                 .id(NumberGenerator::get().createId())
+                                                .cellType(StructureCellDescription())
                                                 .usableEnergy(_energy)
                                                 .stiffness(_stiffness)
                                                 .sticky(_makeSticky)
