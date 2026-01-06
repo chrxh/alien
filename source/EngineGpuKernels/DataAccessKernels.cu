@@ -202,6 +202,16 @@ namespace
                             nodeTO.cellTypeData.memory.signalEntriesDataIndex,
                             to);
                         break;
+                    case CellTypeGenome_Communicator:
+                        nodeTO.cellTypeData.communicator.mode = node.cellTypeData.communicator.mode;
+                        if (node.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
+                            nodeTO.cellTypeData.communicator.modeData.sender.range = node.cellTypeData.communicator.modeData.sender.range;
+                        } else if (node.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
+                            nodeTO.cellTypeData.communicator.modeData.receiver.channelBitMask = node.cellTypeData.communicator.modeData.receiver.channelBitMask;
+                            nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor = node.cellTypeData.communicator.modeData.receiver.restrictToColor;
+                            nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = node.cellTypeData.communicator.modeData.receiver.restrictToLineage;
+                        }
+                        break;
                     }
                 }
             }
@@ -451,6 +461,16 @@ namespace
                 targetSize,
                 cellTO.cellTypeData.memory.signalEntriesDataIndex,
                 to);
+        } break;
+        case CellType_Communicator: {
+            cellTO.cellTypeData.communicator.mode = cell->cellTypeData.communicator.mode;
+            if (cell->cellTypeData.communicator.mode == CommunicatorMode_Sender) {
+                cellTO.cellTypeData.communicator.modeData.sender.range = cell->cellTypeData.communicator.modeData.sender.range;
+            } else if (cell->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
+                cellTO.cellTypeData.communicator.modeData.receiver.channelBitMask = cell->cellTypeData.communicator.modeData.receiver.channelBitMask;
+                cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor = cell->cellTypeData.communicator.modeData.receiver.restrictToColor;
+                cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell->cellTypeData.communicator.modeData.receiver.restrictToLineage;
+            }
         } break;
         }
     }

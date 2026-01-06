@@ -1,6 +1,7 @@
 #include "AttackerProcessor.cuh"
 #include "CellProcessor.cuh"
 #include "ClusterProcessor.cuh"
+#include "CommunicatorProcessor.cuh"
 #include "ConstructorProcessor.cuh"
 #include "DepotProcessor.cuh"
 #include "DetonatorProcessor.cuh"
@@ -188,6 +189,11 @@ __global__ void cudaNextTimestep_cellType_digestor(SimulationData data, Simulati
 __global__ void cudaNextTimestep_cellType_memory(SimulationData data, SimulationStatistics statistics)
 {
     MemoryProcessor::process(data, statistics);
+}
+
+__global__ void cudaNextTimestep_cellType_communicator(SimulationData data, SimulationStatistics statistics)
+{
+    CommunicatorProcessor::process(data, statistics);
 }
 
 __global__ void cudaNextTimestep_physics_applyInnerFriction(SimulationData data)

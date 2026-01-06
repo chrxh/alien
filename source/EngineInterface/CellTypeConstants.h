@@ -33,13 +33,14 @@ enum CellType_
     CellType_Detonator,
     CellType_Digestor,
     CellType_Memory,
+    CellType_Communicator,
     CellType_Count,
 };
 
 namespace Const
 {
     std::vector<std::string> const CellTypeStrings =
-        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory"};
+        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory", "Communicator"};
 }
 
 using CellTypeGenome = int;
@@ -58,13 +59,14 @@ enum CellTypeGenome_
     CellTypeGenome_Detonator,
     CellTypeGenome_Digestor,
     CellTypeGenome_Memory,
+    CellTypeGenome_Communicator,
     CellTypeGenome_Count,
 };
 
 namespace Const
 {
     std::vector<std::string> const CellTypeGenomeStrings =
-        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory"};
+        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory", "Communicator"};
 }
 
 using CellState = int;
@@ -404,3 +406,19 @@ enum SignalRecorderState_
     SignalRecorderState_Recording,
     SignalRecorderState_Reading,
 };
+
+//***************************
+//* Communicator constants *
+//***************************
+using CommunicatorMode = int;
+enum CommunicatorMode_
+{
+    CommunicatorMode_Sender,
+    CommunicatorMode_Receiver,
+    CommunicatorMode_Count,
+};
+
+namespace Const
+{
+    std::vector<std::string> const CommunicatorModeStrings = {"Send", "Receive"};
+}

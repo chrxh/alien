@@ -247,6 +247,30 @@ struct MemoryGenome
     SignalEntryGenome* signalEntries;  // Pointer to heap memory
 };
 
+struct SenderGenome
+{
+    float range;
+};
+
+struct ReceiverGenome
+{
+    uint8_t channelBitMask;
+    uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
+    LineageRestriction restrictToLineage;
+};
+
+union CommunicatorModeDataGenome
+{
+    SenderGenome sender;
+    ReceiverGenome receiver;
+};
+
+struct CommunicatorGenome
+{
+    CommunicatorMode mode;
+    CommunicatorModeDataGenome modeData;
+};
+
 union CellTypeDataGenome
 {
     BaseGenome base;
@@ -262,6 +286,7 @@ union CellTypeDataGenome
     DetonatorGenome detonator;
     DigestorGenome digestor;
     MemoryGenome memory;
+    CommunicatorGenome communicator;
 };
 
 struct SignalRestrictionGenome

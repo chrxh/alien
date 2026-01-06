@@ -550,6 +550,24 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         copyMemoryEntriesToDescription(memory._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         result._cellType = memory;
     } break;
+    case CellType_Communicator: {
+        CommunicatorDescription communicator;
+        auto const& communicatorTO = cellTO.cellTypeData.communicator;
+        if (communicatorTO.mode == CommunicatorMode_Sender) {
+            SenderDescription sender;
+            sender._range = communicatorTO.modeData.sender.range;
+            communicator._mode = sender;
+        } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
+            ReceiverDescription receiver;
+            receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
+            receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
+                : std::nullopt;
+            receiver._restrictToLineage = communicatorTO.modeData.receiver.restrictToLineage;
+            communicator._mode = receiver;
+        }
+        result._cellType = communicator;
+    } break;
     }
     if (cellTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
         auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, cellTO.neuralNetworkDataIndex);
@@ -789,6 +807,24 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         auto const& signalEntriesTO = getFromHeap<SignalEntryGenomeTO>(to.heap, memoryTO.signalEntriesDataIndex);
         copyMemoryEntriesToDescription(memoryDesc._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
         nodeDesc._cellType = memoryDesc;
+    } break;
+    case CellTypeGenome_Communicator: {
+        CommunicatorGenomeDescription communicatorDesc;
+        auto const& communicatorTO = nodeTO->cellTypeData.communicator;
+        if (communicatorTO.mode == CommunicatorMode_Sender) {
+            SenderGenomeDescription sender;
+            sender._range = communicatorTO.modeData.sender.range;
+            communicatorDesc._mode = sender;
+        } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
+            ReceiverGenomeDescription receiver;
+            receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
+            receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
+                : std::nullopt;
+            receiver._restrictToLineage = communicatorTO.modeData.receiver.restrictToLineage;
+            communicatorDesc._mode = receiver;
+        }
+        nodeDesc._cellType = communicatorDesc;
     } break;
     }
     return nodeDesc;
@@ -1086,6 +1122,20 @@ void DescriptionConverterService::convertGenomeToTO(
                 auto signalEntriesTO = reinterpret_cast<SignalEntryGenomeTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
                 copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
             } break;
+            case CellTypeGenome_Communicator: {
+                auto const& communicatorDesc = std::get<CommunicatorGenomeDescription>(nodeDesc._cellType);
+                auto& communicatorTO = nodeTO.cellTypeData.communicator;
+                communicatorTO.mode = communicatorDesc.getMode();
+                if (communicatorTO.mode == CommunicatorMode_Sender) {
+                    auto const& senderDesc = std::get<SenderGenomeDescription>(communicatorDesc._mode);
+                    communicatorTO.modeData.sender.range = senderDesc._range;
+                } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
+                    auto const& receiverDesc = std::get<ReceiverGenomeDescription>(communicatorDesc._mode);
+                    communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
+                    communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
+                    communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
+                }
+            } break;
             }
         }
     }
@@ -1369,6 +1419,20 @@ void DescriptionConverterService::convertCellToTO(
         heap.resize(heap.size() + sizeof(SignalEntryTO) * memoryTO.numSignalEntries);
         auto signalEntriesTO = reinterpret_cast<SignalEntryTO*>(heap.data() + memoryTO.signalEntriesDataIndex);
         copyMemoryEntriesToTO(signalEntriesTO, memoryDesc._signalEntries);
+    } break;
+    case CellType_Communicator: {
+        auto const& communicatorDesc = std::get<CommunicatorDescription>(cellDesc._cellType);
+        CommunicatorTO& communicatorTO = cellTO.cellTypeData.communicator;
+        communicatorTO.mode = communicatorDesc.getMode();
+        if (communicatorTO.mode == CommunicatorMode_Sender) {
+            auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
+            communicatorTO.modeData.sender.range = senderDesc._range;
+        } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
+            auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
+            communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
+            communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
+            communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
+        }
     } break;
     }
     cellTO.signalRestriction.mode = cellDesc._signalRestriction._mode;
