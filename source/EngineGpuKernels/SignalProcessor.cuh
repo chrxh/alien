@@ -62,6 +62,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cell->futureSignal.channels[i] = 0;
         }
+        cell->futureSignal.numTimesSent = INT_MAX;  // Will track minimum
 
         for (int i = 0, j = cell->numConnections; i < j; ++i) {
             auto connectedCell = cell->connections[i].cell;
@@ -101,6 +102,13 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
             for (int k = 0; k < MAX_CHANNELS; ++k) {
                 cell->futureSignal.channels[k] += connectedCell->signal.channels[k];
             }
+            // Keep minimum numTimesSent when signals merge
+            cell->futureSignal.numTimesSent = min(cell->futureSignal.numTimesSent, connectedCell->signal.numTimesSent);
+        }
+
+        // Reset numTimesSent to 0 if no signals were received
+        if (cell->futureSignal.numTimesSent == INT_MAX) {
+            cell->futureSignal.numTimesSent = 0;
         }
     }
 }
@@ -121,6 +129,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
             for (int i = 0; i < MAX_CHANNELS; ++i) {
                 cell->signal.channels[i] = cell->futureSignal.channels[i];
             }
+            cell->signal.numTimesSent = cell->futureSignal.numTimesSent;
             cell->signalState = SignalState_Active;
         } else {
             cell->signalState = max(0, cell->signalState - 1);
@@ -133,6 +142,7 @@ __inline__ __device__ void SignalProcessor::createEmptySignal(Cell* cell)
     for (int i = 0; i < MAX_CHANNELS; ++i) {
         cell->signal.channels[i] = 0;
     }
+    cell->signal.numTimesSent = 0;
     cell->signalState = SignalState_Active;
 }
 

@@ -251,6 +251,7 @@ struct MemoryGenomeTO
 struct SenderGenomeTO
 {
     float range;
+    int maxTimesSent;
 };
 
 struct ReceiverGenomeTO

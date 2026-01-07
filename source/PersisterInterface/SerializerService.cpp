@@ -237,6 +237,7 @@ namespace
     auto constexpr Id_MemoryGenome_ChannelBitMask = 0;
 
     auto constexpr Id_SenderGenome_Range = 0;
+    auto constexpr Id_SenderGenome_MaxTimesSent = 1;
 
     auto constexpr Id_ReceiverGenome_ChannelBitMask = 0;
     auto constexpr Id_ReceiverGenome_RestrictToColor = 1;
@@ -636,6 +637,7 @@ namespace cereal
         SenderGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SenderGenome_Range, data._range, defaultObject._range);
+        loadSave(task, auxiliaries, Id_SenderGenome_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SenderGenomeDescription)
@@ -788,6 +790,7 @@ namespace
     auto constexpr Id_Cell_IsFrontAngleRefCell = 19;
 
     auto constexpr Id_Signal_Channels = 0;
+    auto constexpr Id_Signal_NumTimesSent = 1;
 
     auto constexpr Id_SignalRestriction_Mode = 0;  // Replaces Active (0=inactive, 1=active, 2=conditional)
     auto constexpr Id_SignalRestriction_BaseAngle = 1;
@@ -914,6 +917,7 @@ namespace
     auto constexpr Id_Memory_ChannelBitMask = 0;
 
     auto constexpr Id_Sender_Range = 0;
+    auto constexpr Id_Sender_MaxTimesSent = 1;
 
     auto constexpr Id_Receiver_ChannelBitMask = 0;
     auto constexpr Id_Receiver_RestrictToColor = 1;
@@ -942,6 +946,7 @@ namespace cereal
         SignalDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Signal_Channels, data._channels, defaultObject._channels);
+        loadSave(task, auxiliaries, Id_Signal_NumTimesSent, data._numTimesSent, defaultObject._numTimesSent);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SignalDescription)
@@ -1409,6 +1414,7 @@ namespace cereal
         SenderDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Sender_Range, data._range, defaultObject._range);
+        loadSave(task, auxiliaries, Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SenderDescription)

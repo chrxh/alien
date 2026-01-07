@@ -568,6 +568,9 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
             if (sender._range != nodeSender._range) {
                 return false;
             }
+            if (sender._maxTimesSent != nodeSender._maxTimesSent) {
+                return false;
+            }
         } break;
         case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDescription>(communicator._mode);
@@ -770,7 +773,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         CommunicatorModeDescription communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderDescription().range(150.0f);
+            communicatorModeDesc = SenderDescription().range(150.0f).maxTimesSent(6);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDescription().channelBitMask(0b10101010).restrictToColor(2).restrictToLineage(LineageRestriction_OtherLineage);
@@ -926,7 +929,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
         CommunicatorModeGenomeDescription communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderGenomeDescription().range(200.0f);
+            communicatorModeDesc = SenderGenomeDescription().range(200.0f).maxTimesSent(8);
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverGenomeDescription().channelBitMask(0b11001100).restrictToColor(5).restrictToLineage(LineageRestriction_SameLineage);

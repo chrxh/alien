@@ -556,6 +556,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
+            sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
             communicator._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverDescription receiver;
@@ -584,6 +585,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             result._signal._channels[i] = cellTO.signal.channels[i];
         }
+        result._signal._numTimesSent = cellTO.signal.numTimesSent;
     }
     result._activationTime = cellTO.activationTime;
     return result;
@@ -814,6 +816,7 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderGenomeDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
+            sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDescription receiver;
@@ -1129,6 +1132,7 @@ void DescriptionConverterService::convertGenomeToTO(
                 if (communicatorTO.mode == CommunicatorMode_Sender) {
                     auto const& senderDesc = std::get<SenderGenomeDescription>(communicatorDesc._mode);
                     communicatorTO.modeData.sender.range = senderDesc._range;
+                    communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDescription>(communicatorDesc._mode);
                     communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
@@ -1427,6 +1431,7 @@ void DescriptionConverterService::convertCellToTO(
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
             communicatorTO.modeData.sender.range = senderDesc._range;
+            communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
             communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
@@ -1443,6 +1448,7 @@ void DescriptionConverterService::convertCellToTO(
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.signal.channels[i] = cellDesc._signal._channels[i];
         }
+        cellTO.signal.numTimesSent = cellDesc._signal._numTimesSent;
     }
     cellTO.activationTime = cellDesc._activationTime;
     cellTO.numConnections = 0;

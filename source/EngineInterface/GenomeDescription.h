@@ -335,6 +335,7 @@ struct SenderGenomeDescription
     auto operator<=>(SenderGenomeDescription const&) const = default;
 
     MEMBER(SenderGenomeDescription, float, range, 100.0f);
+    MEMBER(SenderGenomeDescription, int, maxTimesSent, 4);
 };
 
 struct ReceiverGenomeDescription

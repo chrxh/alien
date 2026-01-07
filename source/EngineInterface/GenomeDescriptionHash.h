@@ -446,6 +446,7 @@ struct std::hash<SenderGenomeDescription>
     {
         std::size_t seed = 0;
         hash_combine(seed, desc._range);
+        hash_combine(seed, desc._maxTimesSent);
         return seed;
     }
 };
