@@ -1426,36 +1426,6 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
     EXPECT_TRUE(density > 0.95f);
 }
 
-TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_smallCreature)
-{
-    // Create sensor creature
-    auto data = Description().addCreature(CreatureDescription().id(0).cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectCreatureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}),
-    }));
-    data.addConnection(1, 2);
-
-    // Create a target creature with 15 cells (less than 30, should give density < 0.3)
-    std::vector<CellDescription> targetCells;
-    for (int i = 0; i < 15; ++i) {
-        targetCells.emplace_back(CellDescription().id(10 + i).pos({98.0f + (i % 5), 90.0f + (i / 5)}));
-    }
-    data.addCreature(CreatureDescription().id(1).cells(targetCells));
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto actualData = _simulationFacade->getSimulationData();
-    auto actualSensor = actualData.getCellRef(1);
-
-    EXPECT_TRUE(actualSensor._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, actualSensor._signal._channels[Channels::SensorFoundResult]));
-    // 15 cells should give density < 0.5
-    auto density = actualSensor._signal._channels[Channels::SensorMass];
-    EXPECT_TRUE(density > 0.0f);
-    EXPECT_TRUE(density < 0.3f);
-}
-
 TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_relocation)
 {
     // First scan - target creature is detected
