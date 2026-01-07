@@ -37,7 +37,7 @@ TEST_F(SignalTests, forwardSignal)
     std::vector<float> signal = {1.0f, -1.0f, -0.5f, 0, 0.5f, 2.0f, -2.0f, 0};
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).signalAndState(signal),
+        CellDescription().id(1).pos({0, 0}).signal(SignalDescription().channels(signal).numTimesSent(3)).signalState(SignalState_Active),
         CellDescription().id(2).pos({1, 0}),
     };
     data.addConnection(1, 2);
@@ -52,6 +52,7 @@ TEST_F(SignalTests, forwardSignal)
     auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(cell2._signalState == SignalState_Active);
     EXPECT_EQ(signal, cell2._signal._channels);
+    EXPECT_EQ(3, cell2._signal._numTimesSent);
     EXPECT_EQ(1, cell1._signalState);
     EXPECT_EQ(2, cell2._signalState);
 }
@@ -120,9 +121,9 @@ TEST_F(SignalTests, mergeSignals)
     std::vector<float> signal2 = {-0.5f, -1.0f, 0.5f, 1.0f, 0.7f, -0.7f, 0.5f, -0.5f};
     Description data;
     data._cells = {
-        CellDescription().id(1).pos({0, 0}).signalAndState(signal1),
+        CellDescription().id(1).pos({0, 0}).signal(SignalDescription().channels(signal1).numTimesSent(7)).signalState(SignalState_Active),
         CellDescription().id(2).pos({1, 0}),
-        CellDescription().id(3).pos({2, 0}).signalAndState(signal2),
+        CellDescription().id(3).pos({2, 0}).signal(SignalDescription().channels(signal2).numTimesSent(3)).signalState(SignalState_Active),
     };
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -145,6 +146,7 @@ TEST_F(SignalTests, mergeSignals)
         sumSignal[i] = signal1[i] + signal2[i];
     }
     EXPECT_TRUE(approxCompare(sumSignal, cell2._signal._channels));
+    EXPECT_EQ(3, cell2._signal._numTimesSent);  // Takes minimum of 7 and 3
     EXPECT_EQ(1, cell1._signalState);
     EXPECT_EQ(2, cell2._signalState);
     EXPECT_EQ(1, cell3._signalState);
@@ -156,7 +158,7 @@ TEST_F(SignalTests, forkSignals)
     Description data;
     data._cells = {
         CellDescription().id(1).pos({0, 0}),
-        CellDescription().id(2).pos({1, 0}).signalAndState(signal),
+        CellDescription().id(2).pos({1, 0}).signal(SignalDescription().channels(signal).numTimesSent(5)).signalState(SignalState_Active),
         CellDescription().id(3).pos({2, 0}),
     };
     data.addConnection(1, 2);
@@ -169,6 +171,7 @@ TEST_F(SignalTests, forkSignals)
     auto cell1 = actualData.getCellRef(1);
     EXPECT_TRUE(cell1._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(signal, cell1._signal._channels));
+    EXPECT_EQ(5, cell1._signal._numTimesSent);
     EXPECT_EQ(2, cell1._signalState);
 
     auto cell2 = actualData.getCellRef(2);
@@ -178,6 +181,7 @@ TEST_F(SignalTests, forkSignals)
     auto cell3 = actualData.getCellRef(3);
     EXPECT_TRUE(cell3._signalState == SignalState_Active);
     EXPECT_TRUE(approxCompare(signal, cell3._signal._channels));
+    EXPECT_EQ(5, cell3._signal._numTimesSent);
     EXPECT_EQ(2, cell3._signalState);
 }
 

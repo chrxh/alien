@@ -224,6 +224,7 @@ void GenomeDescriptionValidationService::validateAndCorrect(GenomeDescription& g
                 if (communicatorMode == CommunicatorMode_Sender) {
                     auto& sender = std::get<SenderGenomeDescription>(communicator._mode);
                     sender._range = std::max(sender._range, 0.0f);
+                    sender._maxTimesSent = std::max(sender._maxTimesSent, 0);
                 } else if (communicatorMode == CommunicatorMode_Receiver) {
                     auto& receiver = std::get<ReceiverGenomeDescription>(communicator._mode);
                     if (receiver._restrictToColor.has_value()) {

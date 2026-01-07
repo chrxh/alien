@@ -338,6 +338,7 @@ struct MemoryTO
 struct SenderTO
 {
     float range;
+    int maxTimesSent;
 };
 
 struct ReceiverTO
@@ -387,6 +388,7 @@ struct SignalRestrictionTO
 struct SignalTO
 {
     float channels[MAX_CHANNELS];
+    int numTimesSent;
 };
 
 struct CellTO

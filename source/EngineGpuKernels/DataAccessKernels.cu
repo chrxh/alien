@@ -206,6 +206,7 @@ namespace
                         nodeTO.cellTypeData.communicator.mode = node.cellTypeData.communicator.mode;
                         if (node.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                             nodeTO.cellTypeData.communicator.modeData.sender.range = node.cellTypeData.communicator.modeData.sender.range;
+                            nodeTO.cellTypeData.communicator.modeData.sender.maxTimesSent = node.cellTypeData.communicator.modeData.sender.maxTimesSent;
                         } else if (node.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                             nodeTO.cellTypeData.communicator.modeData.receiver.channelBitMask = node.cellTypeData.communicator.modeData.receiver.channelBitMask;
                             nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor = node.cellTypeData.communicator.modeData.receiver.restrictToColor;
@@ -285,6 +286,7 @@ namespace
         for (int i = 0; i < MAX_CHANNELS; ++i) {
             cellTO.signal.channels[i] = cell->signal.channels[i];
         }
+        cellTO.signal.numTimesSent = cell->signal.numTimesSent;
         cellTO.activationTime = cell->activationTime;
         cellTO.cellTriggered = cell->cellTriggered;
         cellTO.nodeIndex = cell->nodeIndex;
@@ -466,6 +468,7 @@ namespace
             cellTO.cellTypeData.communicator.mode = cell->cellTypeData.communicator.mode;
             if (cell->cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                 cellTO.cellTypeData.communicator.modeData.sender.range = cell->cellTypeData.communicator.modeData.sender.range;
+                cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent = cell->cellTypeData.communicator.modeData.sender.maxTimesSent;
             } else if (cell->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
                 cellTO.cellTypeData.communicator.modeData.receiver.channelBitMask = cell->cellTypeData.communicator.modeData.receiver.channelBitMask;
                 cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor = cell->cellTypeData.communicator.modeData.receiver.restrictToColor;

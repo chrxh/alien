@@ -365,6 +365,7 @@ struct Memory
 struct Sender
 {
     float range;
+    int maxTimesSent;
 };
 
 struct Receiver
@@ -414,6 +415,7 @@ struct SignalRestriction
 struct Signal
 {
     float channels[MAX_CHANNELS];
+    int numTimesSent;
 };
 
 struct uint32_float

@@ -409,6 +409,7 @@ struct SenderDescription
     auto operator<=>(SenderDescription const&) const = default;
 
     MEMBER(SenderDescription, float, range, 100.0f);
+    MEMBER(SenderDescription, int, maxTimesSent, 4);
 };
 
 struct ReceiverDescription
@@ -464,6 +465,7 @@ struct SignalDescription
     auto operator<=>(SignalDescription const&) const = default;
 
     MEMBER(SignalDescription, std::vector<float>, channels, {});
+    MEMBER(SignalDescription, int, numTimesSent, 0);
 };
 
 struct CellDescription
