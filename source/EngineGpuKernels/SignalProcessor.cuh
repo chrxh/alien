@@ -105,11 +105,6 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
             // Keep minimum numTimesSent when signals merge
             cell->futureSignal.numTimesSent = min(cell->futureSignal.numTimesSent, connectedCell->signal.numTimesSent);
         }
-
-        // Reset numTimesSent to 0 if no signals were received
-        if (cell->futureSignal.numTimesSent == INT_MAX) {
-            cell->futureSignal.numTimesSent = 0;
-        }
     }
 }
 
