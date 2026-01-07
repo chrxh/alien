@@ -61,7 +61,8 @@ CellDescription DescriptionTestDataFactory::createNonDefaultCellDescription(Cell
                       .frontAngleId(13)
                       .headCell(true)
                       .parentNodeIndex(14)
-                      .signalAndState({1, 0, 0.6f, 0, 0, 0, 0, 0})
+                      .signal(SignalDescription().channels({1, 0, 0.6f, 0, 0, 0, 0, 0}).numTimesSent(5))
+                      .signalState(SignalState_Active)
                       .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(120.0f))
                       .cellType(cellTypeDesc);
 
