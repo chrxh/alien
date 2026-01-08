@@ -1,6 +1,6 @@
 #include <EngineGpuKernels/Macros.cuh>
 #include <EngineGpuKernels/TestKernels.cuh>
-#include "TestKernelsService.cuh"
+#include "TestKernelsService.h"
 
 void TestKernelsService::init()
 {

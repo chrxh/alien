@@ -1,9 +1,9 @@
 ﻿#include <EngineGpuKernels/DataAccessKernels.cuh>
-#include "DataAccessKernelsService.cuh"
+#include "DataAccessKernelsService.h"
 #include <EngineGpuKernels/DebugKernels.cuh>
-#include "EditKernelsService.cuh"
-#include "GarbageCollectorKernelsService.cuh"
-#include "SelectionKernelsService.cuh"
+#include "EditKernelsService.h"
+#include "GarbageCollectorKernelsService.h"
+#include "SelectionKernelsService.h"
 
 void DataAccessKernelsService::init()
 {

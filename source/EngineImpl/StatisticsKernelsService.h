@@ -4,9 +4,8 @@
 
 #include <EngineInterface/CudaSettings.h>
 
-#include <EngineGpuKernels/Base.cuh>
-#include <EngineGpuKernels/Definitions.cuh>
-#include <EngineGpuKernels/Macros.cuh>
+struct SimulationData;
+class SimulationStatistics;
 
 class StatisticsKernelsService
 {

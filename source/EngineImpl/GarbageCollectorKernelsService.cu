@@ -1,5 +1,6 @@
 ﻿#include <EngineGpuKernels/DebugKernels.cuh>
-#include "GarbageCollectorKernelsService.cuh"
+#include <EngineGpuKernels/GarbageCollectorKernels.cuh>
+#include "GarbageCollectorKernelsService.h"
 
 void GarbageCollectorKernelsService::init()
 {

@@ -1,5 +1,5 @@
 ﻿#include <EngineGpuKernels/StatisticsKernels.cuh>
-#include "StatisticsKernelsService.cuh"
+#include "StatisticsKernelsService.h"
 
 void StatisticsKernelsService::init()
 {
