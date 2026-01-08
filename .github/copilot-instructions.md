@@ -36,13 +36,11 @@ cmake --build build --config Release -j8
 ```bash
 cd build
 
-# Fast tests (no GPU required)
-./EngineInterfaceTests  # 129 tests, <1 second
-./NetworkTests          # 4 tests, <1 second
-./PersisterTests        # 35 tests, ~1.4 seconds
-
-# GPU tests (requires NVIDIA GPU with compute capability 7.5+)
-./EngineTests           # Requires CUDA GPU
+# Tests
+./EngineInterfaceTests  # <1 second
+./NetworkTests          # <1 second
+./PersisterTests        # ~1.4 seconds
+./EngineTests           # >4 min
 ```
 
 ### Run the Applications
@@ -68,10 +66,10 @@ cd build
 - **No build errors or warnings** when following the exact commands above
 
 ### Test Validation  
-- **EngineInterfaceTests**: 129 tests pass in <1 second (no GPU required)
-- **NetworkTests**: 4 tests pass in <1 second (no GPU required)
-- **PersisterTests**: 35 tests pass in ~1.4 seconds (no GPU required)
-- **EngineTests**: Requires NVIDIA GPU
+- **EngineInterfaceTests**: tests pass in <1 second
+- **NetworkTests**: tests pass in <1 second
+- **PersisterTests**: tests pass in ~1.4 seconds
+- **EngineTests**: tests pass in >4 min
 - Always run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
 
 ### Application Validation
@@ -125,8 +123,8 @@ find source -name "*.cpp" -o -name "*.h" | xargs clang-format --style=file:sourc
   - `source/EngineGpuKernels/`: CUDA kernels for simulation
   - `source/EngineImpl/`: CPU-side engine implementation
   - `source/EngineInterface/`: Abstract simulation APIs
-  - `source/EngineInterfaceTests/`: Unit tests for EngineInterface (no GPU required)
-  - `source/EngineTests/`: Integration tests requiring CUDA GPU
+  - `source/EngineInterfaceTests/`: Unit tests for EngineInterface
+  - `source/EngineTests/`: Integration tests for engine
   - `source/Gui/`: ImGui-based user interface
   - `source/Network/`: HTTP client for cloud features
   - `source/PersisterImpl/`: File I/O and serialization
