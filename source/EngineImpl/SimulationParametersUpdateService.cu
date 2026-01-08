@@ -3,9 +3,9 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SpaceCalculator.h>
 
-#include "Base.cuh"
-#include "MaxAgeBalancer.cuh"
-#include "SimulationData.cuh"
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/MaxAgeBalancer.cuh>
+#include <EngineGpuKernels/SimulationData.cuh>
 #include "SimulationParametersUpdateService.cuh"
 
 SimulationParameters SimulationParametersUpdateService::integrateChanges(

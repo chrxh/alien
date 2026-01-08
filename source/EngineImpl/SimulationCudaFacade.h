@@ -1,6 +1,8 @@
 #pragma once
 
+#include <chrono>
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <vector>
@@ -21,9 +23,23 @@
 #include <EngineInterface/StatisticsHistory.h>
 #include <EngineInterface/StatisticsRawData.h>
 
-#include "Definitions.cuh"
-#include "TO.cuh"
 #include <vector_types.h>
+
+// Forward declarations for CUDA types (defined in EngineGpuKernels)
+struct SimulationData;
+struct CudaGeometryBuffers;
+class SelectionResult;
+class SimulationStatistics;
+struct TO;
+struct ApplyForceData;
+struct PointSelectionData;
+struct AreaSelectionData;
+class _MaxAgeBalancer;
+using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
+class _CudaTOProvider;
+using CudaTOProvider = std::shared_ptr<_CudaTOProvider>;
+class _TOProvider;
+using TOProvider = std::shared_ptr<_TOProvider>;
 
 struct cudaGraphicsResource;
 

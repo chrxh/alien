@@ -2,12 +2,12 @@
 
 #include <ranges>
 
-#include "DebugKernels.cuh"
-#include "ForceFieldKernels.cuh"
+#include <EngineGpuKernels/DebugKernels.cuh>
+#include <EngineGpuKernels/ForceFieldKernels.cuh>
 #include "GarbageCollectorKernelsService.cuh"
-#include "SimulationKernels.cuh"
+#include <EngineGpuKernels/SimulationKernels.cuh>
 #include "SimulationKernelsService.cuh"
-#include "SimulationStatistics.cuh"
+#include <EngineGpuKernels/SimulationStatistics.cuh>
 
 void SimulationKernelsService::init()
 {

@@ -16,35 +16,35 @@
 #include <EngineInterface/SimulationParameters.h>
 #include <EngineInterface/SpaceCalculator.h>
 
-#include "Base.cuh"
-#include "ConstantMemory.cuh"
-#include "CudaGeometryBuffers.cuh"
-#include "CudaMemoryManager.cuh"
-#include "CudaTOProvider.cuh"
-#include "DataAccessKernels.cuh"
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/ConstantMemory.cuh>
+#include <EngineGpuKernels/CudaGeometryBuffers.cuh>
+#include <EngineGpuKernels/CudaMemoryManager.cuh>
+#include <EngineGpuKernels/CudaTOProvider.cuh>
+#include <EngineGpuKernels/DataAccessKernels.cuh>
 #include "DataAccessKernelsService.cuh"
-#include "EditKernels.cuh"
+#include <EngineGpuKernels/EditKernels.cuh>
 #include "EditKernelsService.cuh"
-#include "GarbageCollectorKernels.cuh"
+#include <EngineGpuKernels/GarbageCollectorKernels.cuh>
 #include "GarbageCollectorKernelsService.cuh"
-#include "GeometryKernels.cuh"
+#include <EngineGpuKernels/GeometryKernels.cuh>
 #include "GeometryKernelsService.cuh"
-#include "Map.cuh"
-#include "MaxAgeBalancer.cuh"
-#include "Objects.cuh"
-#include "SelectionResult.cuh"
+#include <EngineGpuKernels/Map.cuh>
+#include <EngineGpuKernels/MaxAgeBalancer.cuh>
+#include <EngineGpuKernels/Objects.cuh>
+#include <EngineGpuKernels/SelectionResult.cuh>
 #include "SimulationCudaFacade.cuh"
 
 #include "SelectionKernelsService.cuh"
-#include "SimulationData.cuh"
+#include <EngineGpuKernels/SimulationData.cuh>
 #include "SimulationKernelsService.cuh"
 #include "SimulationParametersUpdateService.cuh"
-#include "SimulationStatistics.cuh"
-#include "StatisticsKernels.cuh"
+#include <EngineGpuKernels/SimulationStatistics.cuh>
+#include <EngineGpuKernels/StatisticsKernels.cuh>
 #include "StatisticsKernelsService.cuh"
 #include "StatisticsService.cuh"
-#include "TO.cuh"
-#include "TOProvider.cuh"
+#include <EngineGpuKernels/TO.cuh>
+#include <EngineGpuKernels/TOProvider.cuh>
 #include "TestKernelsService.cuh"
 
 namespace

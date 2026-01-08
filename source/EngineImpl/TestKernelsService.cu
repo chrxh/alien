@@ -1,5 +1,5 @@
-#include "Macros.cuh"
-#include "TestKernels.cuh"
+#include <EngineGpuKernels/Macros.cuh>
+#include <EngineGpuKernels/TestKernels.cuh>
 #include "TestKernelsService.cuh"
 
 void TestKernelsService::init()

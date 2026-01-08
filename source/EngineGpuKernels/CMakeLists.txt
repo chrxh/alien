@@ -22,8 +22,6 @@ add_library(EngineGpuKernels
     CudaTOProvider.cuh
     DataAccessKernels.cu
     DataAccessKernels.cuh
-    DataAccessKernelsService.cu
-    DataAccessKernelsService.cuh
     DebugKernels.cu
     DebugKernels.cuh
     Definitions.cuh
@@ -34,23 +32,17 @@ add_library(EngineGpuKernels
     DigestorProcessor.cuh
     EditKernels.cu
     EditKernels.cuh
-    EditKernelsService.cu
-    EditKernelsService.cuh
     EnergyParticleProcessor.cuh
     ForceFieldKernels.cu
     ForceFieldKernels.cuh
     GarbageCollectorKernels.cu
     GarbageCollectorKernels.cuh
-    GarbageCollectorKernelsService.cu
-    GarbageCollectorKernelsService.cuh
     GeneratorProcessor.cuh
     Genome.cuh
     GenomeProcessor.cuh
     GenomeTO.cuh
     GeometryKernels.cu
     GeometryKernels.cuh
-    GeometryKernelsService.cu
-    GeometryKernelsService.cuh
     HashMap.cuh
     HashSet.cuh
     InjectorProcessor.cuh
@@ -75,32 +67,18 @@ add_library(EngineGpuKernels
     ReconnectorProcessor.cuh
     SelectionKernels.cu
     SelectionKernels.cuh
-    SelectionKernelsService.cu
-    SelectionKernelsService.cuh
     SelectionResult.cuh
     SensorProcessor.cuh
     SignalProcessor.cuh
-    SimulationCudaFacade.cu
-    SimulationCudaFacade.cuh
     SimulationData.cu
     SimulationData.cuh
     SimulationKernels.cu
     SimulationKernels.cuh
-    SimulationKernelsService.cu
-    SimulationKernelsService.cuh
-    SimulationParametersUpdateService.cu
-    SimulationParametersUpdateService.cuh
     SimulationStatistics.cuh
-    StatisticsService.cu
-    StatisticsService.cuh
-    StatisticsKernelsService.cu
-    StatisticsKernelsService.cuh
     StatisticsKernels.cu
     StatisticsKernels.cuh
     TestKernels.cu
     TestKernels.cuh
-    TestKernelsService.cu
-    TestKernelsService.cuh
     TO.cuh
     TOProvider.cu
     TOProvider.cuh

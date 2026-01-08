@@ -5,7 +5,7 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/MutationType.h>
 
-#include "Definitions.cuh"
+#include <EngineGpuKernels/Definitions.cuh>
 
 class TestKernelsService
 {

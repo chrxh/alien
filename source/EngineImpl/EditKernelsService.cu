@@ -1,11 +1,11 @@
 ﻿#include "EditKernelsService.cuh"
 
-#include "DataAccessKernels.cuh"
-#include "EditKernels.cuh"
+#include <EngineGpuKernels/DataAccessKernels.cuh>
+#include <EngineGpuKernels/EditKernels.cuh>
 #include "GarbageCollectorKernelsService.cuh"
 #include "SelectionKernelsService.cuh"
-#include "SimulationKernels.cuh"
-#include "SelectionKernels.cuh"
+#include <EngineGpuKernels/SimulationKernels.cuh>
+#include <EngineGpuKernels/SelectionKernels.cuh>
 
 void EditKernelsService::init()
 {

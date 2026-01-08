@@ -10,7 +10,7 @@
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
-#include <EngineGpuKernels/SimulationCudaFacade.cuh>
+#include "SimulationCudaFacade.cuh"
 #include <EngineGpuKernels/TO.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
 

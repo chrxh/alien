@@ -1,4 +1,4 @@
-﻿#include "StatisticsKernels.cuh"
+﻿#include <EngineGpuKernels/StatisticsKernels.cuh>
 #include "StatisticsKernelsService.cuh"
 
 void StatisticsKernelsService::init()

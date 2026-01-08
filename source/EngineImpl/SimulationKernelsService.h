@@ -1,13 +1,19 @@
 ﻿#pragma once
 
-#include <unordered_map>
+#include <map>
 
 #include <Base/Singleton.h>
 
 #include <EngineInterface/SettingsForSimulation.h>
 
-#include "Definitions.cuh"
-#include "Macros.cuh"
+struct SimulationData;
+class SimulationStatistics;
+
+// Opaque CUDA types (defined in cuda_runtime.h)
+struct CUgraphExec_st;
+typedef CUgraphExec_st* cudaGraphExec_t;
+struct CUstream_st;
+typedef CUstream_st* cudaStream_t;
 
 // Configuration key for CUDA Graph caching
 // Captures all runtime-varying parameters that affect kernel execution

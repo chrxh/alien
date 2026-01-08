@@ -1,3 +1,6 @@
+#pragma once
+
+#include <memory>
 #include <optional>
 
 #include <Base/Singleton.h>
@@ -6,7 +9,9 @@
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsRawData.h>
 
-#include "Definitions.cuh"
+struct SimulationData;
+class _MaxAgeBalancer;
+using MaxAgeBalancer = std::shared_ptr<_MaxAgeBalancer>;
 
 class SimulationParametersUpdateService
 {

@@ -4,10 +4,7 @@
 
 #include <EngineInterface/CudaSettings.h>
 
-#include "Base.cuh"
-#include "Definitions.cuh"
-#include "GarbageCollectorKernels.cuh"
-#include "Macros.cuh"
+struct SimulationData;
 
 class GarbageCollectorKernelsService
 {
