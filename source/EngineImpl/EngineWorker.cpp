@@ -10,12 +10,11 @@
 #include <EngineInterface/Ids.h>
 #include <EngineInterface/NumberGenerator.h>
 
+#include "SimulationCudaFacade.cuh"
 #include <EngineGpuKernels/TO.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
 
 #include "DescriptionConverterService.h"
-
-#include "SimulationCudaFacade.cuh"
 
 namespace
 {

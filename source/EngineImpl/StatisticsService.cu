@@ -1,7 +1,6 @@
 #include <EngineInterface/StatisticsConverterService.h>
 
 #include <EngineGpuKernels/Base.cuh>
-
 #include "StatisticsService.cuh"
 
 namespace

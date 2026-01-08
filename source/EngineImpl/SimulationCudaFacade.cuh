@@ -23,7 +23,6 @@
 
 #include <EngineGpuKernels/Definitions.cuh>
 #include <EngineGpuKernels/TO.cuh>
-
 #include <vector_types.h>
 
 struct cudaGraphicsResource;

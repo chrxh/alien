@@ -1,11 +1,11 @@
-﻿#include <EngineGpuKernels/DataAccessKernels.cuh>
-#include <EngineGpuKernels/EditKernels.cuh>
-#include <EngineGpuKernels/SelectionKernels.cuh>
-#include <EngineGpuKernels/SimulationKernels.cuh>
+﻿#include "EditKernelsService.cuh"
 
-#include "EditKernelsService.cuh"
+#include <EngineGpuKernels/DataAccessKernels.cuh>
+#include <EngineGpuKernels/EditKernels.cuh>
 #include "GarbageCollectorKernelsService.cuh"
 #include "SelectionKernelsService.cuh"
+#include <EngineGpuKernels/SimulationKernels.cuh>
+#include <EngineGpuKernels/SelectionKernels.cuh>
 
 void EditKernelsService::init()
 {
@@ -39,7 +39,10 @@ void EditKernelsService::shutdown()
     memoryManager.freeMemory(_result);
 }
 
-void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, ShallowUpdateSelectionData const& updateData)
+void EditKernelsService::shallowUpdateSelectedObjects(
+    CudaSettings const& gpuSettings,
+    SimulationData const& data,
+    ShallowUpdateSelectionData const& updateData)
 {
     bool reconnectionRequired = !updateData.considerClusters && (updateData.posDeltaX != 0 || updateData.posDeltaY != 0 || updateData.angleDelta != 0);
 

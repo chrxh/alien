@@ -1,14 +1,13 @@
-﻿#include <ranges>
+﻿#include <EngineInterface/SpaceCalculator.h>
 
-#include <EngineInterface/SpaceCalculator.h>
+#include <ranges>
 
 #include <EngineGpuKernels/DebugKernels.cuh>
 #include <EngineGpuKernels/ForceFieldKernels.cuh>
-#include <EngineGpuKernels/SimulationKernels.cuh>
-#include <EngineGpuKernels/SimulationStatistics.cuh>
-
 #include "GarbageCollectorKernelsService.cuh"
+#include <EngineGpuKernels/SimulationKernels.cuh>
 #include "SimulationKernelsService.cuh"
+#include <EngineGpuKernels/SimulationStatistics.cuh>
 
 void SimulationKernelsService::init()
 {
