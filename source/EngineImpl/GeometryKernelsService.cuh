@@ -4,10 +4,10 @@
 
 #include <EngineInterface/GeometryBuffers.h>
 
-struct SimulationData;
-struct CudaGeometryBuffers;
-struct SettingsForSimulation;
-struct NumRenderObjects;
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/DataAccessKernels.cuh>
+#include <EngineGpuKernels/Definitions.cuh>
+#include <EngineGpuKernels/Macros.cuh>
 
 class GeometryKernelsService
 {

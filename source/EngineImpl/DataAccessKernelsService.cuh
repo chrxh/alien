@@ -8,11 +8,9 @@
 #include <EngineInterface/InspectedEntityIds.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
-#include <vector_types.h>
-
-struct SimulationData;
-struct TO;
-struct Cell;
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/Definitions.cuh>
+#include <EngineGpuKernels/Macros.cuh>
 
 class DataAccessKernelsService
 {

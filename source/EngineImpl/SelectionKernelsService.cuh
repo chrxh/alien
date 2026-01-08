@@ -5,9 +5,8 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
-struct SimulationData;
-struct PointSelectionData;
-struct AreaSelectionData;
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/Definitions.cuh>
 
 class SelectionKernelsService
 {

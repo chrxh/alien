@@ -1,34 +1,34 @@
 
 add_library(EngineImpl
     DataAccessKernelsService.cu
-    DataAccessKernelsService.h
+    DataAccessKernelsService.cuh
     DescriptionConverterService.cpp
     DescriptionConverterService.h
     Definitions.h
     EditKernelsService.cu
-    EditKernelsService.h
+    EditKernelsService.cuh
     EngineWorker.cpp
     EngineWorker.h
     GarbageCollectorKernelsService.cu
-    GarbageCollectorKernelsService.h
+    GarbageCollectorKernelsService.cuh
     GeometryKernelsService.cu
-    GeometryKernelsService.h
+    GeometryKernelsService.cuh
     SelectionKernelsService.cu
-    SelectionKernelsService.h
+    SelectionKernelsService.cuh
     SimulationCudaFacade.cu
-    SimulationCudaFacade.h
+    SimulationCudaFacade.cuh
     SimulationFacadeImpl.cpp
     SimulationFacadeImpl.h
     SimulationKernelsService.cu
-    SimulationKernelsService.h
+    SimulationKernelsService.cuh
     SimulationParametersUpdateService.cu
-    SimulationParametersUpdateService.h
+    SimulationParametersUpdateService.cuh
     StatisticsKernelsService.cu
-    StatisticsKernelsService.h
+    StatisticsKernelsService.cuh
     StatisticsService.cu
-    StatisticsService.h
+    StatisticsService.cuh
     TestKernelsService.cu
-    TestKernelsService.h)
+    TestKernelsService.cuh)
 
 target_link_libraries(EngineImpl Base)
 target_link_libraries(EngineImpl EngineGpuKernels)

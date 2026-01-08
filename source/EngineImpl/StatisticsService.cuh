@@ -1,10 +1,10 @@
-#pragma once
-
 #include <optional>
 
 #include <Base/Singleton.h>
 
 #include <EngineInterface/StatisticsHistory.h>
+
+#include <EngineGpuKernels/Definitions.cuh>
 
 class StatisticsService
 {

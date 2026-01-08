@@ -5,14 +5,8 @@
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
-#include <vector_types.h>
-
-struct SimulationData;
-struct TO;
-struct Genome;
-struct Creature;
-struct ApplyForceData;
-class SelectionResult;
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/Definitions.cuh>
 
 class EditKernelsService
 {

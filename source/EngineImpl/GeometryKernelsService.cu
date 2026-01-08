@@ -3,7 +3,7 @@
 
 #include <EngineGpuKernels/CudaGeometryBuffers.cuh>
 #include <EngineGpuKernels/GeometryKernels.cuh>
-#include "GeometryKernelsService.h"
+#include "GeometryKernelsService.cuh"
 
 void GeometryKernelsService::init()
 {

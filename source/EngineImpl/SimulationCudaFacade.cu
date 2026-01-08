@@ -22,30 +22,30 @@
 #include <EngineGpuKernels/CudaMemoryManager.cuh>
 #include <EngineGpuKernels/CudaTOProvider.cuh>
 #include <EngineGpuKernels/DataAccessKernels.cuh>
-#include "DataAccessKernelsService.h"
+#include "DataAccessKernelsService.cuh"
 #include <EngineGpuKernels/EditKernels.cuh>
-#include "EditKernelsService.h"
+#include "EditKernelsService.cuh"
 #include <EngineGpuKernels/GarbageCollectorKernels.cuh>
-#include "GarbageCollectorKernelsService.h"
+#include "GarbageCollectorKernelsService.cuh"
 #include <EngineGpuKernels/GeometryKernels.cuh>
-#include "GeometryKernelsService.h"
+#include "GeometryKernelsService.cuh"
 #include <EngineGpuKernels/Map.cuh>
 #include <EngineGpuKernels/MaxAgeBalancer.cuh>
 #include <EngineGpuKernels/Objects.cuh>
 #include <EngineGpuKernels/SelectionResult.cuh>
-#include "SimulationCudaFacade.h"
+#include "SimulationCudaFacade.cuh"
 
-#include "SelectionKernelsService.h"
+#include "SelectionKernelsService.cuh"
 #include <EngineGpuKernels/SimulationData.cuh>
-#include "SimulationKernelsService.h"
-#include "SimulationParametersUpdateService.h"
+#include "SimulationKernelsService.cuh"
+#include "SimulationParametersUpdateService.cuh"
 #include <EngineGpuKernels/SimulationStatistics.cuh>
 #include <EngineGpuKernels/StatisticsKernels.cuh>
-#include "StatisticsKernelsService.h"
-#include "StatisticsService.h"
+#include "StatisticsKernelsService.cuh"
+#include "StatisticsService.cuh"
 #include <EngineGpuKernels/TO.cuh>
 #include <EngineGpuKernels/TOProvider.cuh>
-#include "TestKernelsService.h"
+#include "TestKernelsService.cuh"
 
 namespace
 {

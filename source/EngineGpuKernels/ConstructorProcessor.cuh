@@ -9,7 +9,7 @@
 #include "GenomeProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SignalProcessor.cuh"
-#include <EngineImpl/SimulationCudaFacade.h>
+#include <EngineImpl/SimulationCudaFacade.cuh>
 #include "SimulationStatistics.cuh"
 
 class ConstructorProcessor

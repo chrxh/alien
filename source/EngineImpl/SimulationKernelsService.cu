@@ -4,9 +4,9 @@
 
 #include <EngineGpuKernels/DebugKernels.cuh>
 #include <EngineGpuKernels/ForceFieldKernels.cuh>
-#include "GarbageCollectorKernelsService.h"
+#include "GarbageCollectorKernelsService.cuh"
 #include <EngineGpuKernels/SimulationKernels.cuh>
-#include "SimulationKernelsService.h"
+#include "SimulationKernelsService.cuh"
 #include <EngineGpuKernels/SimulationStatistics.cuh>
 
 void SimulationKernelsService::init()
