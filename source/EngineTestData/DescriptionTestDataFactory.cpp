@@ -771,7 +771,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
         CommunicatorModeDescription communicatorModeDesc;
         switch (communicatorMode) {
         case CommunicatorMode_Sender:
-            communicatorModeDesc = SenderDescription().range(150.0f).maxTimesSent(6);
+            communicatorModeDesc = SenderDescription().range(150.0f).maxTimesSent(6).lastMatches({{10.0f, 20.0f}, {30.0f, 40.0f}});
             break;
         case CommunicatorMode_Receiver:
             communicatorModeDesc = ReceiverDescription().restrictToColor(2).restrictToLineage(LineageRestriction_OtherLineage);

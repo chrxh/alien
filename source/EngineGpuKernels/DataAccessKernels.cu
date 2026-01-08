@@ -468,8 +468,9 @@ namespace
             if (cell->cellTypeData.communicator.mode == CommunicatorMode_Sender) {
                 cellTO.cellTypeData.communicator.modeData.sender.range = cell->cellTypeData.communicator.modeData.sender.range;
                 cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent = cell->cellTypeData.communicator.modeData.sender.maxTimesSent;
-                cellTO.cellTypeData.communicator.modeData.sender.numLastMatches = cell->cellTypeData.communicator.modeData.sender.numLastMatches;
-                for (int i = 0; i < cell->cellTypeData.communicator.modeData.sender.numLastMatches; ++i) {
+                auto numLastMatches = cell->cellTypeData.communicator.modeData.sender.numLastMatches;
+                cellTO.cellTypeData.communicator.modeData.sender.numLastMatches = numLastMatches;
+                for (int i = 0; i < numLastMatches; ++i) {
                     cellTO.cellTypeData.communicator.modeData.sender.lastMatches[i] = cell->cellTypeData.communicator.modeData.sender.lastMatches[i];
                 }
             } else if (cell->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
