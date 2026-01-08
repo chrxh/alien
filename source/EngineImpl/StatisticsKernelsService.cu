@@ -1,13 +1,10 @@
 ﻿#include <EngineGpuKernels/StatisticsKernels.cuh>
+
 #include "StatisticsKernelsService.cuh"
 
-void StatisticsKernelsService::init()
-{
-}
+void StatisticsKernelsService::init() {}
 
-void StatisticsKernelsService::shutdown()
-{
-}
+void StatisticsKernelsService::shutdown() {}
 
 void StatisticsKernelsService::updateStatistics(CudaSettings const& gpuSettings, SimulationData const& data, SimulationStatistics const& simulationStatistics)
 {

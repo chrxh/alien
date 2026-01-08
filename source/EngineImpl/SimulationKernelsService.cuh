@@ -13,13 +13,13 @@
 // Captures all runtime-varying parameters that affect kernel execution
 struct CudaGraphConfig
 {
-    int counterMod3;            // Not every kernel needs to be executed each time
-    int motionType;             // MotionType_Fluid or MotionType_Collision
-    bool hasLayers;             // settings.simulationParameters.numLayers > 0
-    bool constructorCheck;      // settings.simulationParameters.constructorCompletenessCheck.value
-    bool rigidityEnabled;       // isRigidityUpdateEnabled(settings)
-    int fluidKernelThreads;     // calcOptimalThreadsForFluidKernel result
-    int numBlocks;              // gpuSettings.numBlocks
+    int counterMod3;         // Not every kernel needs to be executed each time
+    int motionType;          // MotionType_Fluid or MotionType_Collision
+    bool hasLayers;          // settings.simulationParameters.numLayers > 0
+    bool constructorCheck;   // settings.simulationParameters.constructorCompletenessCheck.value
+    bool rigidityEnabled;    // isRigidityUpdateEnabled(settings)
+    int fluidKernelThreads;  // calcOptimalThreadsForFluidKernel result
+    int numBlocks;           // gpuSettings.numBlocks
 
     bool operator==(CudaGraphConfig const& other) const = default;
     auto operator<=>(CudaGraphConfig const& other) const = default;
@@ -28,10 +28,10 @@ struct CudaGraphConfig
 // Configuration key for Preview CUDA Graph caching
 struct CudaGraphPreviewConfig
 {
-    int counterMod3;            // Not every kernel needs to be executed each time
-    bool detailSimulation;      // Whether detail simulation is enabled
-    int fluidKernelThreads;     // calcOptimalThreadsForFluidKernel result
-    int numBlocks;              // gpuSettings.numBlocks
+    int counterMod3;         // Not every kernel needs to be executed each time
+    bool detailSimulation;   // Whether detail simulation is enabled
+    int fluidKernelThreads;  // calcOptimalThreadsForFluidKernel result
+    int numBlocks;           // gpuSettings.numBlocks
 
     bool operator==(CudaGraphPreviewConfig const& other) const = default;
     auto operator<=>(CudaGraphPreviewConfig const& other) const = default;
@@ -73,11 +73,8 @@ private:
         SimulationData const& data,
         SimulationStatistics const& statistics);
 
-    CudaGraphPreviewConfig buildPreviewGraphConfig(
-        SettingsForSimulation const& settings,
-        SimulationData const& data,
-        int counterMod3,
-        bool detailSimulation) const;
+    CudaGraphPreviewConfig buildPreviewGraphConfig(SettingsForSimulation const& settings, SimulationData const& data, int counterMod3, bool detailSimulation)
+        const;
 
     cudaGraphExec_t capturePreviewGraph(
         CudaGraphPreviewConfig const& config,
