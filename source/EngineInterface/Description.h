@@ -410,13 +410,15 @@ struct SenderDescription
 
     MEMBER(SenderDescription, float, range, 100.0f);
     MEMBER(SenderDescription, int, maxTimesSent, 4);
+
+    // Process data
+    MEMBER(SenderDescription, std::vector<RealVector2D>, lastMatches, {});
 };
 
 struct ReceiverDescription
 {
     auto operator<=>(ReceiverDescription const&) const = default;
 
-    MEMBER(ReceiverDescription, uint8_t, channelBitMask, 0b11111111);
     MEMBER(ReceiverDescription, std::optional<int>, restrictToColor, std::nullopt);
     MEMBER(ReceiverDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };

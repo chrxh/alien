@@ -576,9 +576,6 @@ bool DescriptionTestDataFactory::compare(CellDescription const& cell, NodeDescri
         case CommunicatorMode_Receiver: {
             auto const& receiver = std::get<ReceiverDescription>(communicator._mode);
             auto const& nodeReceiver = std::get<ReceiverGenomeDescription>(nodeCommunicator._mode);
-            if (receiver._channelBitMask != nodeReceiver._channelBitMask) {
-                return false;
-            }
             if (receiver._restrictToColor != nodeReceiver._restrictToColor) {
                 return false;
             }
@@ -777,7 +774,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             communicatorModeDesc = SenderDescription().range(150.0f).maxTimesSent(6);
             break;
         case CommunicatorMode_Receiver:
-            communicatorModeDesc = ReceiverDescription().channelBitMask(0b10101010).restrictToColor(2).restrictToLineage(LineageRestriction_OtherLineage);
+            communicatorModeDesc = ReceiverDescription().restrictToColor(2).restrictToLineage(LineageRestriction_OtherLineage);
             break;
         default:
             communicatorModeDesc = CommunicatorModeDescription();
@@ -933,7 +930,7 @@ CellTypeGenomeDescription DescriptionTestDataFactory::createNonDefaultCellTypeGe
             communicatorModeDesc = SenderGenomeDescription().range(200.0f).maxTimesSent(8);
             break;
         case CommunicatorMode_Receiver:
-            communicatorModeDesc = ReceiverGenomeDescription().channelBitMask(0b11001100).restrictToColor(5).restrictToLineage(LineageRestriction_SameLineage);
+            communicatorModeDesc = ReceiverGenomeDescription().restrictToColor(5).restrictToLineage(LineageRestriction_SameLineage);
             break;
         default:
             communicatorModeDesc = CommunicatorModeGenomeDescription();

@@ -557,10 +557,14 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             SenderDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
             sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
+            sender._lastMatches.reserve(communicatorTO.modeData.sender.numLastMatches);
+            for (int i = 0; i < communicatorTO.modeData.sender.numLastMatches; ++i) {
+                sender._lastMatches.emplace_back(RealVector2D{
+                    communicatorTO.modeData.sender.lastMatches[i].x, communicatorTO.modeData.sender.lastMatches[i].y});
+            }
             communicator._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverDescription receiver;
-            receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
                 : std::nullopt;
@@ -820,7 +824,6 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDescription receiver;
-            receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
                 : std::nullopt;
@@ -1135,7 +1138,6 @@ void DescriptionConverterService::convertGenomeToTO(
                     communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDescription>(communicatorDesc._mode);
-                    communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
                     communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
                     communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
                 }
@@ -1432,9 +1434,13 @@ void DescriptionConverterService::convertCellToTO(
             auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
             communicatorTO.modeData.sender.range = senderDesc._range;
             communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
+            auto numMatches = std::min(toInt(senderDesc._lastMatches.size()), MAX_SENDER_MATCHES);
+            communicatorTO.modeData.sender.numLastMatches = numMatches;
+            for (int i = 0; i < numMatches; ++i) {
+                communicatorTO.modeData.sender.lastMatches[i] = {senderDesc._lastMatches[i].x, senderDesc._lastMatches[i].y};
+            }
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
-            communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
             communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
             communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
         }

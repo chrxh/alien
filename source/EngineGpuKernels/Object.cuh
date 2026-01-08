@@ -366,11 +366,14 @@ struct Sender
 {
     float range;
     int maxTimesSent;
+
+    // Process data
+    int numLastMatches;
+    float2 lastMatches[MAX_SENDER_MATCHES];
 };
 
 struct Receiver
 {
-    uint8_t channelBitMask;
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };
