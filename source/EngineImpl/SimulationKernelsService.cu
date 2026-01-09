@@ -1,4 +1,4 @@
-﻿#include <EngineInterface/SpaceCalculator.h>
+#include <EngineInterface/SpaceCalculator.h>
 
 #include <ranges>
 

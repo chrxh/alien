@@ -1,4 +1,4 @@
-﻿#include <Base/GlobalSettings.h>
+#include <Base/GlobalSettings.h>
 #include <EngineInterface/SettingsForSimulation.h>
 
 #include <EngineGpuKernels/CudaGeometryBuffers.cuh>

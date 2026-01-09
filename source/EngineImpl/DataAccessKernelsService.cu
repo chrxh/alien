@@ -1,4 +1,4 @@
-﻿#include <EngineGpuKernels/DataAccessKernels.cuh>
+#include <EngineGpuKernels/DataAccessKernels.cuh>
 #include "DataAccessKernelsService.cuh"
 #include <EngineGpuKernels/DebugKernels.cuh>
 #include "EditKernelsService.cuh"

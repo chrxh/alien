@@ -1,4 +1,4 @@
-﻿#include "EditKernelsService.cuh"
+#include "EditKernelsService.cuh"
 
 #include <EngineGpuKernels/DataAccessKernels.cuh>
 #include <EngineGpuKernels/EditKernels.cuh>
