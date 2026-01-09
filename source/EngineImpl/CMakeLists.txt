@@ -47,5 +47,5 @@ target_link_libraries(EngineImpl cudart)
 set_property(TARGET EngineImpl PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 if (MSVC)
-    target_compile_options(EngineImpl PRIVATE "/MP")
+    target_compile_options(EngineImpl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/MP>)
 endif()
