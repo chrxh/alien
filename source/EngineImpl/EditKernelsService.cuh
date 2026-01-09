@@ -1,12 +1,12 @@
-﻿#pragma once
+#pragma once
 
 #include <Base/Singleton.h>
 
 #include <EngineInterface/CudaSettings.h>
 #include <EngineInterface/ShallowUpdateSelectionData.h>
 
-#include "Base.cuh"
-#include "Definitions.cuh"
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/Definitions.cuh>
 
 class EditKernelsService
 {

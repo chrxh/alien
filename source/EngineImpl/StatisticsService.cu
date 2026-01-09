@@ -1,7 +1,9 @@
+
+#include "StatisticsService.cuh"
+
 #include <EngineInterface/StatisticsConverterService.h>
 
-#include "Base.cuh"
-#include "StatisticsService.cuh"
+#include <EngineGpuKernels/Base.cuh>
 
 namespace
 {

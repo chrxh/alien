@@ -1,12 +1,12 @@
-﻿#pragma once
+#pragma once
 
 #include <Base/Singleton.h>
 
 #include <EngineInterface/CudaSettings.h>
 
-#include "Base.cuh"
-#include "Definitions.cuh"
-#include "Macros.cuh"
+#include <EngineGpuKernels/Base.cuh>
+#include <EngineGpuKernels/Definitions.cuh>
+#include <EngineGpuKernels/Macros.cuh>
 
 class StatisticsKernelsService
 {

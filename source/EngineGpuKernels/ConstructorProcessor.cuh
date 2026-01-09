@@ -2,6 +2,8 @@
 
 #include <EngineInterface/CellTypeConstants.h>
 
+#include <EngineImpl/SimulationCudaFacade.cuh>
+
 #include "CellConnectionProcessor.cuh"
 #include "ConstructorHelper.cuh"
 #include "CudaShapeGenerator.cuh"
@@ -9,7 +11,6 @@
 #include "GenomeProcessor.cuh"
 #include "MuscleProcessor.cuh"
 #include "SignalProcessor.cuh"
-#include "SimulationCudaFacade.cuh"
 #include "SimulationStatistics.cuh"
 
 class ConstructorProcessor
@@ -80,14 +81,14 @@ private:
 
     //
     // Assumption: cell1 is connected with cell2 and cell2 is connected with cell3
-    // 
+    //
     // If cell3 is connected to cell1 directly or via further cells (not cell2):
     //  Calculates the inner angle sum of the n-polygon spanned by
     //      (1) cell1
     //      (2) cell2
     //      (3) cell3
     //      + possibly further cells between (3) and (1)
-    //  and 
+    //  and
     //      set the angle on cell (3) between the connected cells (2) and (4)
     //      (where (4) can be (1) if no further cells are in the polygon, i.e. n=3)
     //      such that the inner angle sum of the polygon is (n - 2) * 180 deg
@@ -902,7 +903,7 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
 {
     // Check if cell3 connects back to cell1 (directly or via further cells, not through cell2)
     // to form a closed polygon
-    
+
     // Determine traversal direction to find minimal polygon
     // Find indices of cell1 and cell3 in cell2's connections (which are sorted clockwise)
     int cell1IndexInCell2 = cell2->getConnectionIndex(cell1);
@@ -920,28 +921,28 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
         // cell3 is counter-clockwise from cell1 (wrapped around)
         goClockwiseFromCell3 = false;
     }
-    
+
     // Find the minimal path from cell3 to cell1 (not going through cell2)
     Cell* currentCell = cell3;
     Cell* previousCell = cell2;
     int numIntermediateCells = 0;
     bool foundPolygon = false;
-    Cell* cell4 = nullptr; // The next cell after cell3 in the polygon
-    
+    Cell* cell4 = nullptr;  // The next cell after cell3 in the polygon
+
     // Find cell2's index in cell3's connections to determine traversal direction
     int cell2IndexInCell3 = cell3->getConnectionIndex(cell2);
-    
+
     constexpr int maxPolygonSize = 50;
     float currentAngleSum = 0.0f;
     for (int step = 0; step < maxPolygonSize; ++step) {
         Cell* nextCell = nullptr;
-        
+
         if (step == 0) {
             int startIndex = goClockwiseFromCell3 ? cell2IndexInCell3 + 1 : cell2IndexInCell3 - 1;
-            
+
             for (int i = 0; i < cell3->numConnections; ++i) {
                 int index = goClockwiseFromCell3 ? startIndex + i : startIndex - i;
-                    
+
                 Cell* candidate = cell3->getConnectedCell(index);
                 if (candidate == cell1) {
                     nextCell = candidate;
@@ -956,11 +957,11 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
         } else {
             // Subsequent steps: find next cell that's not the previous one
             int prevIndex = currentCell->getConnectionIndex(previousCell);
-            
+
             // Continue in the same general direction
             for (int i = 1; i < currentCell->numConnections; ++i) {
                 int index = goClockwiseFromCell3 ? prevIndex + i : prevIndex - i;
-                    
+
                 Cell* candidate = currentCell->getConnectedCell(index);
                 if (candidate == cell1) {
                     nextCell = candidate;
@@ -984,29 +985,29 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
         if (foundPolygon || nextCell == nullptr) {
             break;
         }
-        
+
         previousCell = currentCell;
         currentCell = nextCell;
         numIntermediateCells++;
     }
-    
+
     if (!foundPolygon) {
         // No closed polygon found, no angle correction based on polygon possible
         return;
     }
-    
+
     // If cell4 is still null, it means cell3 connects directly to cell1
     if (cell4 == nullptr) {
         cell4 = cell1;
     }
-    
+
     // Number of vertices in the polygon
-    int numVertices = 3 + numIntermediateCells; // cell1, cell2, cell3, + intermediate cells
-    
+    int numVertices = 3 + numIntermediateCells;  // cell1, cell2, cell3, + intermediate cells
+
     // Calculate expected inner angle sum for an n-sided polygon: (n - 2) * 180 degrees
     float expectedAngleSum = (numVertices - 2) * 180.0f;
-    
-    Cell* lastCellBeforeCell1 = currentCell; // This is the last cell we visited before reaching cell1
+
+    Cell* lastCellBeforeCell1 = currentCell;  // This is the last cell we visited before reaching cell1
     if (!goClockwiseFromCell3) {
         currentAngleSum += cell1->getAngelSpan(cell2, lastCellBeforeCell1);
         currentAngleSum += cell2->getAngelSpan(cell3, cell1);
@@ -1016,15 +1017,14 @@ __inline__ __device__ void ConstructorProcessor::correctAnglesByInnerAngleSum(Ce
         currentAngleSum += cell2->getAngelSpan(cell1, cell3);
         currentAngleSum += cell3->getAngelSpan(cell2, cell4);
     }
-    
+
     float angleCorrection = expectedAngleSum - currentAngleSum;
 
     int cell2Index = cell3->getConnectionIndex(cell2);
-    
+
     if (!goClockwiseFromCell3) {
         cell3->increaseAngle(cell2Index, angleCorrection);
     } else {
         cell3->increaseAngle(cell2Index, -angleCorrection);
     }
 }
-

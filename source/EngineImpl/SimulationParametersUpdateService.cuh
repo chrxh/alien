@@ -6,7 +6,7 @@
 #include <EngineInterface/SimulationParametersUpdateConfig.h>
 #include <EngineInterface/StatisticsRawData.h>
 
-#include "Definitions.cuh"
+#include <EngineGpuKernels/Definitions.cuh>
 
 class SimulationParametersUpdateService
 {
