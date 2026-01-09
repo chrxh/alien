@@ -633,6 +633,6 @@ void EngineWorkerGuard::checkForException(ExceptionData const& exceptionData)
 {
     std::unique_lock<std::mutex> uniqueLock(exceptionData.mutex);
     if (exceptionData.errorMessage) {
-        throw std::runtime_error("GPU worker thread is in an invalid state.");
+        throw std::runtime_error(*exceptionData.errorMessage);
     }
 }
