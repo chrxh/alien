@@ -61,7 +61,7 @@ cd build
 
 ### Build Validation
 - **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `EngineInterfaceTests`, `NetworkTests`, `PersisterTests`
-- **Build time**: 3-4 minutes on 8-core system with `-j8` parallelization
+- **Build time**: >4 minutes on 16-core system with `-j16` parallelization
 - **Clean configuration**: ~6 seconds
 - **No build errors or warnings** when following the exact commands above
 
@@ -107,14 +107,9 @@ find source -name "*.cpp" -o -name "*.h" | xargs clang-format --style=file:sourc
 ## Technology Stack & Requirements
 - **Languages**: C++23, CUDA 20, Python (for CLI tools)
 - **Build System**: CMake 3.31+, vcpkg package manager
-- **GPU Computing**: NVIDIA CUDA (requires compute capability 6.0+)
+- **GPU Computing**: NVIDIA CUDA (requires compute capability 7.5+)
 - **GUI Framework**: Dear ImGui with custom widgets
 - **Dependencies**: All managed via vcpkg manifest mode (`vcpkg.json`)
-
-### Known Compatibility Issues
-- **GCC 12+**: Use GCC 11 or earlier
-- **Visual Studio 17.10**: Use VS 17.9 or earlier  
-- **CUDA 12.5+**: Use CUDA 12.4 or earlier
 
 ## Repository Structure & Navigation
 - `source/`: Main C++ and CUDA source code
