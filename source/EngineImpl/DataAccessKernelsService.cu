@@ -1,6 +1,7 @@
 #include <EngineGpuKernels/DataAccessKernels.cuh>
-#include "DataAccessKernelsService.cuh"
 #include <EngineGpuKernels/DebugKernels.cuh>
+
+#include "DataAccessKernelsService.cuh"
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
 #include "SelectionKernelsService.cuh"
@@ -69,12 +70,7 @@ void DataAccessKernelsService::getInspectedData(CudaSettings const& gpuSettings,
     KERNEL_CALL(cudaGetInspectedParticleData, entityIds, data, to);
 }
 
-void DataAccessKernelsService::getOverlayData(
-    CudaSettings const& gpuSettings,
-    SimulationData const& data,
-    int2 rectUpperLeft,
-    int2 rectLowerRight,
-    TO const& to)
+void DataAccessKernelsService::getOverlayData(CudaSettings const& gpuSettings, SimulationData const& data, int2 rectUpperLeft, int2 rectLowerRight, TO const& to)
 {
     KERNEL_CALL_1_1(cudaClearDataTO, to);
     KERNEL_CALL(cudaGetOverlayData, rectUpperLeft, rectLowerRight, data, to);
