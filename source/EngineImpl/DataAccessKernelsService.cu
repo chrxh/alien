@@ -1,7 +1,8 @@
+#include "DataAccessKernelsService.cuh"
+
 #include <EngineGpuKernels/DataAccessKernels.cuh>
 #include <EngineGpuKernels/DebugKernels.cuh>
 
-#include "DataAccessKernelsService.cuh"
 #include "EditKernelsService.cuh"
 #include "GarbageCollectorKernelsService.cuh"
 #include "SelectionKernelsService.cuh"

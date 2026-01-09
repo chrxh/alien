@@ -1,3 +1,5 @@
+#include "SimulationParametersUpdateService.cuh"
+
 #include <vector>
 
 #include <EngineInterface/SimulationParameters.h>
@@ -6,8 +8,6 @@
 #include <EngineGpuKernels/Base.cuh>
 #include <EngineGpuKernels/MaxAgeBalancer.cuh>
 #include <EngineGpuKernels/SimulationData.cuh>
-
-#include "SimulationParametersUpdateService.cuh"
 
 SimulationParameters SimulationParametersUpdateService::integrateChanges(
     SimulationParameters const& currentParameters,

@@ -1,3 +1,5 @@
+#include "SimulationCudaFacade.cuh"
+
 #include <functional>
 #include <iostream>
 #include <list>
@@ -40,7 +42,6 @@
 #include "GarbageCollectorKernelsService.cuh"
 #include "GeometryKernelsService.cuh"
 #include "SelectionKernelsService.cuh"
-#include "SimulationCudaFacade.cuh"
 #include "SimulationKernelsService.cuh"
 #include "SimulationParametersUpdateService.cuh"
 #include "StatisticsKernelsService.cuh"
