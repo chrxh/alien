@@ -39,7 +39,7 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
     __shared__ bool shouldProcess;
     if (threadIdx.x == 0) {
         // Process if signal is Active or Fading (signal has been or is being processed this timestep)
-        shouldProcess = cell->signalState == SignalState_Active || cell->signalState == SignalState_Fading;
+        shouldProcess = SignalProcessor::isManuallyTriggered(data, cell);
     }
     __syncthreads();
 

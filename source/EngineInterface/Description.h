@@ -408,7 +408,7 @@ struct SenderDescription
 {
     auto operator<=>(SenderDescription const&) const = default;
 
-    MEMBER(SenderDescription, float, range, 100.0f);
+    MEMBER(SenderDescription, float, range, 15.0f);
     MEMBER(SenderDescription, int, maxTimesSent, 4);
 };
 

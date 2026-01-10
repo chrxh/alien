@@ -29,15 +29,17 @@ protected:
     // Helper to create a sender creature with 2 cells (sender + helper for signal)
     Description createSenderCreature(uint64_t creatureId, RealVector2D pos, float range = 50.0f, int maxTimesSent = 4, int color = 0)
     {
-        auto data = Description().addCreature(CreatureDescription().id(creatureId).cells({
-            CellDescription()
-                .id(creatureId * 100)
-                .pos(pos)
-                .color(color)
-                .cellType(CommunicatorDescription().mode(SenderDescription().range(range).maxTimesSent(maxTimesSent)))
-                .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
-            CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
-        }));
+        auto data = Description().addCreature(
+            CreatureDescription()
+                .id(creatureId)
+                .cells({
+                    CellDescription()
+                        .id(creatureId * 100)
+                        .pos(pos)
+                        .color(color)
+                        .cellType(CommunicatorDescription().mode(SenderDescription().range(range).maxTimesSent(maxTimesSent))),
+                    CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+                }));
         data.addConnection(creatureId * 100, creatureId * 100 + 1);
         return data;
     }
@@ -75,7 +77,7 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
     auto sender = result.getCellRef(100);
 
     // Sender's signal should have faded after processing (SignalState_Fading)
-    EXPECT_TRUE(sender._signalState == SignalState_Fading || sender._signalState == SignalState_Active);
+    EXPECT_TRUE(sender._signalState == SignalState_Fading);
 }
 
 TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
@@ -106,7 +108,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
     auto data = createSenderCreature(1, {100.0f, 100.0f}, 10.0f);
 
     // Create receiver in creature 2, out of range
-    data.add(createReceiverCreature(2, {150.0f, 100.0f}), false);
+    data.add(createReceiverCreature(2, {115.0f, 100.0f}), false);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -123,15 +125,20 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     // Create sender and receiver in the same creature (both connected)
     auto data = Description().addCreature(CreatureDescription().id(1).cells({
         CellDescription()
+            .id(0)
+            .pos({99.0f, 100.0f})
+            .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+        CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4)))
-            .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+            .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(0).openingAngle(0))
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
         CellDescription()
             .id(2)
             .pos({110.0f, 100.0f})
             .cellType(CommunicatorDescription().mode(ReceiverDescription())),
     }));
+    data.addConnection(0, 1);
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -140,12 +147,8 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getCellRef(2);
 
-    // Receiver gets signal through connection (normal signal flow), not through CommunicatorProcessor.
-    // Signal via connection should have numTimesSent = 0 (from sender's initial signal).
-    // Signal via CommunicatorProcessor would have numTimesSent = 1 (incremented).
     // Since they're in the same creature, CommunicatorProcessor should NOT transmit.
-    EXPECT_EQ(receiver._signalState, SignalState_Active);  // Signal flows through connection
-    EXPECT_EQ(receiver._signal._numTimesSent, 0);          // Not incremented = not from CommunicatorProcessor
+    EXPECT_EQ(receiver._signalState, SignalState_Inactive);
 }
 
 TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
@@ -179,10 +182,12 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
         CellDescription()
             .id(100)
             .pos({100.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(2)))
-            .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0})
-            .signal(SignalDescription().numTimesSent(2)),
-        CellDescription().id(101).pos({101.0f, 100.0f}),
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(2))),
+        CellDescription()
+            .id(101)
+            .pos({101.0f, 100.0f})
+            .signalState(SignalState_Active)
+            .signal(SignalDescription().numTimesSent(2).channels({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(100, 101);
 
@@ -268,10 +273,12 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
         CellDescription()
             .id(100)
             .pos({100.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10)))
-            .signalAndState({10.0f, 0, 0, 0, 0, 0, 0, 0})
-            .signal(SignalDescription().numTimesSent(3).channels({10.0f, 0, 0, 0, 0, 0, 0, 0})),
-        CellDescription().id(101).pos({101.0f, 100.0f}),
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
+        CellDescription()
+            .id(101)
+            .pos({101.0f, 100.0f})
+            .signalState(SignalState_Active)
+            .signal(SignalDescription().numTimesSent(3).channels({1.0f, 0, 0, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(100, 101);
 
@@ -280,10 +287,12 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
         CellDescription()
             .id(200)
             .pos({100.0f, 120.0f})
-            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10)))
-            .signalAndState({20.0f, 0, 0, 0, 0, 0, 0, 0})
-            .signal(SignalDescription().numTimesSent(1).channels({20.0f, 0, 0, 0, 0, 0, 0, 0})),
-        CellDescription().id(201).pos({101.0f, 120.0f}),
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
+        CellDescription()
+            .id(201)
+            .pos({101.0f, 120.0f})
+            .signalState(SignalState_Active)
+            .signal(SignalDescription().numTimesSent(1).channels({-1.0f, 0, 0, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(200, 201);
 
@@ -299,5 +308,6 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     // Receiver should have received the signal
     EXPECT_EQ(receiver._signalState, SignalState_Active);
     // The numTimesSent should be the lower one + 1 = 2
-    EXPECT_LE(receiver._signal._numTimesSent, 4);
+    EXPECT_EQ(receiver._signal._numTimesSent, 2);
+    EXPECT_EQ(receiver._signal._channels[0], -1.0f);
 }
