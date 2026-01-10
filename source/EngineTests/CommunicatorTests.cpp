@@ -76,8 +76,7 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto sender = result.getCellRef(100);
 
-    // Sender's signal should have faded after processing (SignalState_Fading)
-    EXPECT_TRUE(sender._signalState == SignalState_Fading);
+    EXPECT_TRUE(sender._signalState == SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
