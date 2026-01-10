@@ -38,7 +38,7 @@ protected:
                         .pos(pos)
                         .color(color)
                         .cellType(CommunicatorDescription().mode(SenderDescription().range(range).maxTimesSent(maxTimesSent))),
-                    CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).signalAndState({0.5f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+                    CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).signalAndState({1.0f, 0.5f, 3.0f, 0, 0, 0, 0, 0}),
                 }));
         data.addConnection(creatureId * 100, creatureId * 100 + 1);
         return data;
@@ -98,8 +98,8 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
 
     // Receiver should have received the signal
     EXPECT_EQ(receiver._signalState, SignalState_Active);
-    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 0.5f);
-    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 2.0f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 1.0f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
     EXPECT_FLOAT_EQ(receiver._signal._channels[2], 3.0f);
     EXPECT_EQ(receiver._signal._numTimesSent, 1);
 }
@@ -166,7 +166,7 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
     for (uint64_t id : {200, 300, 400}) {
         auto receiver = result.getCellRef(id);
         EXPECT_EQ(receiver._signalState, SignalState_Active);
-        EXPECT_FLOAT_EQ(receiver._signal._channels[0], 0.5f);
+        EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
         EXPECT_EQ(receiver._signal._numTimesSent, 1);
     }
 }
@@ -310,7 +310,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_sameOrientation)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),  // 0.5 = 90 degrees
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // channel[1] = 0.5 = 90 degrees
     }));
     data.addConnection(100, 101);
 
@@ -328,7 +328,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_sameOrientation)
 
     EXPECT_EQ(receiver._signalState, SignalState_Active);
     // Same orientation means no angle translation needed
-    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 0.5f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
 }
 
 TEST_F(CommunicatorTests, sender_angleTranslation_oppositeOrientation)
@@ -347,7 +347,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_oppositeOrientation)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),  // 0.5 = 90 degrees
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // channel[1] = 0.5 = 90 degrees
     }));
     data.addConnection(100, 101);
 
@@ -366,7 +366,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_oppositeOrientation)
     EXPECT_EQ(receiver._signalState, SignalState_Active);
     // Opposite orientation means 180 degree angle difference
     // 0.5 + (-180)/180 = 0.5 - 1.0 = -0.5
-    EXPECT_FLOAT_EQ(receiver._signal._channels[0], -0.5f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], -0.5f);
 }
 
 TEST_F(CommunicatorTests, sender_angleTranslation_90degreeRotation)
@@ -385,7 +385,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_90degreeRotation)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),  // 0.5 = 90 degrees
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // channel[1] = 0.5 = 90 degrees
     }));
     data.addConnection(100, 101);
 
@@ -404,7 +404,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_90degreeRotation)
     EXPECT_EQ(receiver._signalState, SignalState_Active);
     // 90 degree rotation means angle is adjusted by -90 degrees
     // 0.5 - 0.5 = 0
-    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 0.0f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.0f);
 }
 
 TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_accepted)
@@ -416,7 +416,7 @@ TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_accepted)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(100, 101);
 
@@ -438,7 +438,7 @@ TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_accepted)
 
     // Receiver should have received the signal (same lineage)
     EXPECT_EQ(receiver._signalState, SignalState_Active);
-    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 0.5f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
 }
 
 TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_rejected)
@@ -450,7 +450,7 @@ TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_rejected)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(100, 101);
 
@@ -483,7 +483,7 @@ TEST_F(CommunicatorTests, sender_lineageRestriction_otherLineage_accepted)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(100, 101);
 
@@ -505,7 +505,7 @@ TEST_F(CommunicatorTests, sender_lineageRestriction_otherLineage_accepted)
 
     // Receiver should have received the signal (different lineage)
     EXPECT_EQ(receiver._signalState, SignalState_Active);
-    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 0.5f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
 }
 
 TEST_F(CommunicatorTests, sender_lineageRestriction_otherLineage_rejected)
@@ -517,7 +517,7 @@ TEST_F(CommunicatorTests, sender_lineageRestriction_otherLineage_rejected)
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({0.5f, 0, 0, 0, 0, 0, 0, 0})),
+            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
     }));
     data.addConnection(100, 101);
 

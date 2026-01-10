@@ -164,7 +164,7 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
         receiverCell->signal.numTimesSent = newNumTimesSent;
         receiverCell->signalState = SignalState_Active;
 
-        // Translate angle in channel[0] from sender's reference direction to receiver's reference direction
+        // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
         // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
         // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
         // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
@@ -175,11 +175,11 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
         auto angleDiff = senderRefAngle - receiverRefAngle;
 
         // The signal angle is encoded as angle/180, so the diff must also be scaled
-        auto senderAngle = senderCell->signal.channels[0];
+        auto senderAngle = senderCell->signal.channels[Channels::CommunicatorAngle];
         auto translatedAngle = senderAngle + angleDiff / 180.0f;
         // Normalize to [-1, 1] range (representing [-180, 180] degrees)
         translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
-        receiverCell->signal.channels[0] = translatedAngle;
+        receiverCell->signal.channels[Channels::CommunicatorAngle] = translatedAngle;
     }
 
     receiverCell->releaseLock();
