@@ -7,7 +7,6 @@ auto constexpr MAX_CELL_BONDS = 6;
 auto constexpr MAX_CHANNELS = 8;
 auto constexpr MAX_COLORS = 7;
 auto constexpr MAX_CELL_MEMORY_ENTRIES = 32;
-auto constexpr MAX_SENDER_MATCHES = 4;
 
 auto constexpr MAX_LAYERS = 20;
 auto constexpr MAX_SOURCES = 40;

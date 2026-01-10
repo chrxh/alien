@@ -1415,7 +1415,6 @@ namespace cereal
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Sender_Range, data._range, defaultObject._range);
         loadSave(task, auxiliaries, Id_Sender_MaxTimesSent, data._maxTimesSent, defaultObject._maxTimesSent);
-        loadSave(task, auxiliaries, Id_Sender_LastMatches, data._lastMatches, defaultObject._lastMatches);
         processLoadSaveMap(task, ar, auxiliaries);
     }
     SPLIT_SERIALIZATION(SenderDescription)

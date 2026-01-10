@@ -557,11 +557,6 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             SenderDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
             sender._maxTimesSent = communicatorTO.modeData.sender.maxTimesSent;
-            sender._lastMatches.reserve(communicatorTO.modeData.sender.numLastMatches);
-            for (int i = 0; i < communicatorTO.modeData.sender.numLastMatches; ++i) {
-                sender._lastMatches.emplace_back(RealVector2D{
-                    communicatorTO.modeData.sender.lastMatches[i].x, communicatorTO.modeData.sender.lastMatches[i].y});
-            }
             communicator._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverDescription receiver;
@@ -1434,11 +1429,6 @@ void DescriptionConverterService::convertCellToTO(
             auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
             communicatorTO.modeData.sender.range = senderDesc._range;
             communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
-            auto numMatches = std::min(toInt(senderDesc._lastMatches.size()), MAX_SENDER_MATCHES);
-            communicatorTO.modeData.sender.numLastMatches = numMatches;
-            for (int i = 0; i < numMatches; ++i) {
-                communicatorTO.modeData.sender.lastMatches[i] = {senderDesc._lastMatches[i].x, senderDesc._lastMatches[i].y};
-            }
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
             communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));

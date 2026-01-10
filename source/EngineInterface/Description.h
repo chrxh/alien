@@ -410,9 +410,6 @@ struct SenderDescription
 
     MEMBER(SenderDescription, float, range, 100.0f);
     MEMBER(SenderDescription, int, maxTimesSent, 4);
-
-    // Process data
-    MEMBER(SenderDescription, std::vector<RealVector2D>, lastMatches, {});
 };
 
 struct ReceiverDescription

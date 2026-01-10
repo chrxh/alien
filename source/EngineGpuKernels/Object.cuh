@@ -366,10 +366,6 @@ struct Sender
 {
     float range;
     int maxTimesSent;
-
-    // Process data
-    int numLastMatches;
-    float2 lastMatches[MAX_SENDER_MATCHES];
 };
 
 struct Receiver

@@ -519,10 +519,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
         if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Sender) {
             cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
             cell->cellTypeData.communicator.modeData.sender.maxTimesSent = cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
-            cell->cellTypeData.communicator.modeData.sender.numLastMatches = cellTO.cellTypeData.communicator.modeData.sender.numLastMatches;
-            for (int i = 0; i < cellTO.cellTypeData.communicator.modeData.sender.numLastMatches; ++i) {
-                cell->cellTypeData.communicator.modeData.sender.lastMatches[i] = cellTO.cellTypeData.communicator.modeData.sender.lastMatches[i];
-            }
         } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
             cell->cellTypeData.communicator.modeData.receiver.restrictToColor = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
             cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
@@ -906,7 +902,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
         if (nodeCommunicator.mode == CommunicatorMode_Sender) {
             communicator.modeData.sender.range = nodeCommunicator.modeData.sender.range;
             communicator.modeData.sender.maxTimesSent = nodeCommunicator.modeData.sender.maxTimesSent;
-            communicator.modeData.sender.numLastMatches = 0;
         } else if (nodeCommunicator.mode == CommunicatorMode_Receiver) {
             communicator.modeData.receiver.restrictToColor = nodeCommunicator.modeData.receiver.restrictToColor;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;

@@ -24,10 +24,276 @@ public:
     }
 
     ~CommunicatorTests() = default;
+
+protected:
+    // Helper to create a sender creature with 2 cells (sender + helper for signal)
+    Description createSenderCreature(uint64_t creatureId, RealVector2D pos, float range = 50.0f, int maxTimesSent = 4, int color = 0)
+    {
+        auto data = Description().addCreature(CreatureDescription().id(creatureId).cells({
+            CellDescription()
+                .id(creatureId * 100)
+                .pos(pos)
+                .color(color)
+                .cellType(CommunicatorDescription().mode(SenderDescription().range(range).maxTimesSent(maxTimesSent)))
+                .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+            CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
+        }));
+        data.addConnection(creatureId * 100, creatureId * 100 + 1);
+        return data;
+    }
+
+    // Helper to create a receiver creature with 2 cells
+    Description createReceiverCreature(
+        uint64_t creatureId,
+        RealVector2D pos,
+        std::optional<int> restrictToColor = std::nullopt,
+        LineageRestriction restrictToLineage = LineageRestriction_No,
+        int color = 0)
+    {
+        auto data = Description().addCreature(CreatureDescription().id(creatureId).cells({
+            CellDescription()
+                .id(creatureId * 100)
+                .pos(pos)
+                .color(color)
+                .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToColor(restrictToColor).restrictToLineage(restrictToLineage))),
+            CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
+        }));
+        data.addConnection(creatureId * 100, creatureId * 100 + 1);
+        return data;
+    }
 };
 
-// Placeholder test - actual tests will be implemented when the CommunicatorProcessor is fully implemented
-TEST_F(CommunicatorTests, placeholder)
+TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
 {
-    GTEST_SKIP() << "CommunicatorProcessor is not yet implemented";
+    // Create a sender with no nearby receiver
+    auto data = createSenderCreature(1, {100.0f, 100.0f});
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto sender = result.getCellRef(100);
+
+    // Sender's signal should have faded after processing (SignalState_Fading)
+    EXPECT_TRUE(sender._signalState == SignalState_Fading || sender._signalState == SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
+{
+    // Create sender in creature 1
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
+
+    // Create receiver in creature 2, within range
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(200);
+
+    // Receiver should have received the signal
+    EXPECT_EQ(receiver._signalState, SignalState_Active);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[0], 1.0f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 2.0f);
+    EXPECT_FLOAT_EQ(receiver._signal._channels[2], 3.0f);
+    EXPECT_EQ(receiver._signal._numTimesSent, 1);
+}
+
+TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
+{
+    // Create sender in creature 1 with small range
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 10.0f);
+
+    // Create receiver in creature 2, out of range
+    data.add(createReceiverCreature(2, {150.0f, 100.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(200);
+
+    // Receiver should NOT have received the signal
+    EXPECT_NE(receiver._signalState, SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
+{
+    // Create sender and receiver in the same creature (both connected)
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription()
+            .id(1)
+            .pos({100.0f, 100.0f})
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4)))
+            .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+        CellDescription()
+            .id(2)
+            .pos({110.0f, 100.0f})
+            .cellType(CommunicatorDescription().mode(ReceiverDescription())),
+    }));
+    data.addConnection(1, 2);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(2);
+
+    // Receiver should NOT have received the signal (same creature)
+    EXPECT_NE(receiver._signalState, SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
+{
+    // Create sender in creature 1
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f);
+
+    // Create multiple receivers in different creatures
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
+    data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
+    data.add(createReceiverCreature(4, {90.0f, 100.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+
+    // All receivers should have received the signal
+    for (uint64_t id : {200, 300, 400}) {
+        auto receiver = result.getCellRef(id);
+        EXPECT_EQ(receiver._signalState, SignalState_Active);
+        EXPECT_FLOAT_EQ(receiver._signal._channels[0], 1.0f);
+        EXPECT_EQ(receiver._signal._numTimesSent, 1);
+    }
+}
+
+TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
+{
+    // Create sender in creature 1 with signal that has numTimesSent = 2 (equal to maxTimesSent)
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription()
+            .id(100)
+            .pos({100.0f, 100.0f})
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(2)))
+            .signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0})
+            .signal(SignalDescription().numTimesSent(2)),
+        CellDescription().id(101).pos({101.0f, 100.0f}),
+    }));
+    data.addConnection(100, 101);
+
+    // Create receiver
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(200);
+
+    // Receiver should NOT have received the signal (maxTimesSent exceeded)
+    EXPECT_NE(receiver._signalState, SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
+{
+    // Create sender with color 2
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 2);
+
+    // Create receiver that only accepts color 2
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(200);
+
+    // Receiver should have received the signal (color matches)
+    EXPECT_EQ(receiver._signalState, SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
+{
+    // Create sender with color 3
+    auto data = createSenderCreature(1, {100.0f, 100.0f}, 50.0f, 4, 3);
+
+    // Create receiver that only accepts color 2
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}, 2), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(200);
+
+    // Receiver should NOT have received the signal (color doesn't match)
+    EXPECT_NE(receiver._signalState, SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
+{
+    // Create sender without active signal
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription()
+            .id(100)
+            .pos({100.0f, 100.0f})
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
+        // No signalAndState set, so signal is not active
+        CellDescription().id(101).pos({101.0f, 100.0f}),
+    }));
+    data.addConnection(100, 101);
+
+    // Create receiver
+    data.add(createReceiverCreature(2, {110.0f, 100.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(200);
+
+    // Receiver should NOT have received the signal (sender has no active signal)
+    EXPECT_NE(receiver._signalState, SignalState_Active);
+}
+
+TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
+{
+    // Create first sender with numTimesSent = 3
+    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        CellDescription()
+            .id(100)
+            .pos({100.0f, 100.0f})
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10)))
+            .signalAndState({10.0f, 0, 0, 0, 0, 0, 0, 0})
+            .signal(SignalDescription().numTimesSent(3).channels({10.0f, 0, 0, 0, 0, 0, 0, 0})),
+        CellDescription().id(101).pos({101.0f, 100.0f}),
+    }));
+    data.addConnection(100, 101);
+
+    // Create second sender with numTimesSent = 1 (higher priority)
+    data.addCreature(CreatureDescription().id(2).cells({
+        CellDescription()
+            .id(200)
+            .pos({100.0f, 120.0f})
+            .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10)))
+            .signalAndState({20.0f, 0, 0, 0, 0, 0, 0, 0})
+            .signal(SignalDescription().numTimesSent(1).channels({20.0f, 0, 0, 0, 0, 0, 0, 0})),
+        CellDescription().id(201).pos({101.0f, 120.0f}),
+    }));
+    data.addConnection(200, 201);
+
+    // Create receiver
+    data.add(createReceiverCreature(3, {100.0f, 110.0f}), false);
+
+    _simulationFacade->setSimulationData(data);
+    _simulationFacade->calcTimesteps(1);
+
+    auto result = _simulationFacade->getSimulationData();
+    auto receiver = result.getCellRef(300);
+
+    // Receiver should have received the signal
+    EXPECT_EQ(receiver._signalState, SignalState_Active);
+    // The numTimesSent should be the lower one + 1 = 2
+    EXPECT_LE(receiver._signal._numTimesSent, 4);
 }

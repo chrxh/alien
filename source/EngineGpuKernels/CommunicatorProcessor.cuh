@@ -17,16 +17,8 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static void evaluateLastMatches(SimulationData& data, Cell* cell);
-    __inline__ __device__ static void
-    addNearestMatch(SimulationData& data, Cell* cell, Cell* otherCell, int& numNearestMatches, float2* nearestMatches, float* nearestMatchDistances, int& nearestMatchesLock);
-    __inline__ __device__ static void
-    mergeMatches(SimulationData& data, Cell* cell, int numNearestMatches, float2* nearestMatches, float* nearestMatchDistances);
     __inline__ __device__ static bool
     tryTransmitSignal(Cell* senderCell, Cell* receiverCell, int newNumTimesSent);
-
-    static float constexpr ScanStep = 8.0f;
-    static float constexpr MatchLookupRadius = 5.0f;
 };
 
 /************************************************************************/
@@ -63,24 +55,17 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 
 __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    __shared__ float seedAngle;
     __shared__ float range;
     __shared__ int maxTimesSent;
     __shared__ int currentNumTimesSent;
-
-    __shared__ int numNearestMatches; 
-    __shared__ float2 nearestMatches[MAX_SENDER_MATCHES];
-    __shared__ float nearestMatchDistances[MAX_SENDER_MATCHES];
-    __shared__ int nearestMatchesLock;
+    __shared__ float2 senderPos;
 
     if (threadIdx.x == 0) {
         auto& sender = cell->cellTypeData.communicator.modeData.sender;
         range = sender.range;
         maxTimesSent = sender.maxTimesSent;
         currentNumTimesSent = cell->signal.numTimesSent;
-        seedAngle = data.primaryNumberGen.random(360.0f);
-        numNearestMatches = 0;
-        nearestMatchesLock = 0;
+        senderPos = cell->pos;
     }
     __syncthreads();
 
@@ -89,214 +74,71 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         return;
     }
 
-    // Evaluate last matches in parallel: remove out-of-range ones and transmit to remaining ones
-    evaluateLastMatches(data, cell);
-    __syncthreads();
+    auto const newNumTimesSent = currentNumTimesSent + 1;
+    int rangeInt = static_cast<int>(ceilf(range));
 
-    auto const senderPos = cell->pos;
-
-    auto isMatch = [&cell](Cell* otherCell){
-
+    // Matching lambda to check if a cell is a valid receiver
+    auto isMatch = [&cell](Cell* otherCell) {
         // Must be a communicator in receiver mode
-        if (otherCell->cellType == CellType_Communicator && otherCell->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
+        if (otherCell->cellType != CellType_Communicator || otherCell->cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
+            return false;
+        }
 
-            // Must be from a different creature
-            if (!cell->isSameCreature(otherCell)) {
-                auto const& receiver = otherCell->cellTypeData.communicator.modeData.receiver;
+        // Must be from a different creature
+        if (cell->isSameCreature(otherCell)) {
+            return false;
+        }
 
-                // Check color restriction
-                if (receiver.restrictToColor != 255 && cell->color != receiver.restrictToColor) {
+        auto const& receiver = otherCell->cellTypeData.communicator.modeData.receiver;
+
+        // Check color restriction
+        if (receiver.restrictToColor != 255 && cell->color != receiver.restrictToColor) {
+            return false;
+        }
+
+        // Check lineage restriction
+        if (receiver.restrictToLineage != LineageRestriction_No) {
+            if (cell->creature == nullptr || otherCell->creature == nullptr) {
+                return false;
+            } else if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
+                if (cell->creature->lineageId != otherCell->creature->lineageId) {
                     return false;
                 }
-
-                // Check lineage restriction
-                if (receiver.restrictToLineage != LineageRestriction_No) {
-                    if (cell->creature == nullptr || otherCell->creature == nullptr) {
-                        return false;
-                    } else if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
-                        if (cell->creature->lineageId != otherCell->creature->lineageId) {
-                            return false;
-                        }
-                    } else if (receiver.restrictToLineage == LineageRestriction_OtherLineage) {
-                        if (cell->creature->lineageId == otherCell->creature->lineageId) {
-                            return false;
-                        }
-                    }
+            } else if (receiver.restrictToLineage == LineageRestriction_OtherLineage) {
+                if (cell->creature->lineageId == otherCell->creature->lineageId) {
+                    return false;
                 }
-
-                return true;
             }
         }
-        return false;
+
+        return true;
     };
 
-    // Use ray scanning
-    auto angle = 360.0f * toFloat(threadIdx.x) / toFloat(blockDim.x) + seedAngle;
+    // Calculate the total number of scan positions in the [-range, range] x [-range, range] region
+    int diameter = 2 * rangeInt + 1;
+    int totalPositions = diameter * diameter;
 
-    for (float distance = ScanStep; distance <= range; distance += ScanStep) {
-        auto delta = Math::unitVectorOfAngle(angle) * distance;
-        auto scanPos = senderPos + delta;
+    // Each thread scans different positions in parallel
+    for (int idx = threadIdx.x; idx < totalPositions; idx += blockDim.x) {
+        int dx = (idx % diameter) - rangeInt;
+        int dy = (idx / diameter) - rangeInt;
+
+        // Check if within circular range
+        float distSq = static_cast<float>(dx * dx + dy * dy);
+        if (distSq > range * range) {
+            continue;
+        }
+
+        float2 scanPos = {senderPos.x + static_cast<float>(dx), senderPos.y + static_cast<float>(dy)};
         data.cellMap.correctPosition(scanPos);
 
+        // Check all cells at this position (including overlapping cells)
         auto otherCell = data.cellMap.getFirst(scanPos);
         while (otherCell != nullptr) {
             if (isMatch(otherCell)) {
-                tryTransmitSignal(cell, otherCell, currentNumTimesSent + 1);
-                addNearestMatch(data, cell, otherCell, numNearestMatches, nearestMatches, nearestMatchDistances, nearestMatchesLock);
+                tryTransmitSignal(cell, otherCell, newNumTimesSent);
             }
             otherCell = otherCell->nextCell;
-        }
-    }
-    __syncthreads();
-    
-    // Update last matches in sender: merge existing lastMatches with newly found nearestMatches
-    if (threadIdx.x == 0) {
-        mergeMatches(data, cell, numNearestMatches, nearestMatches, nearestMatchDistances);
-    }
-}
-
-__inline__ __device__ void
-CommunicatorProcessor::addNearestMatch(SimulationData& data, Cell* cell, Cell* otherCell, int& numNearestMatches, float2* nearestMatches, float* nearestMatchDistances, int& nearestMatchesLock)
-{
-    auto matchDistance = data.cellMap.getDistance(cell->pos, otherCell->pos);
-    
-    // Acquire lock
-    while (atomicExch_block(&nearestMatchesLock, 1) == 1) {}
-    __threadfence_block();
-    
-    // Check if we can add this match
-    if (numNearestMatches < MAX_SENDER_MATCHES) {
-        // Array not full, just add it
-        nearestMatches[numNearestMatches] = otherCell->pos;
-        nearestMatchDistances[numNearestMatches] = matchDistance;
-        ++numNearestMatches;
-    } else {
-        // Array is full, find farthest match and replace if this one is closer
-        int farthestIdx = 0;
-        float farthestDist = nearestMatchDistances[0];
-        for (int i = 1; i < MAX_SENDER_MATCHES; ++i) {
-            if (nearestMatchDistances[i] > farthestDist) {
-                farthestDist = nearestMatchDistances[i];
-                farthestIdx = i;
-            }
-        }
-        if (matchDistance < farthestDist) {
-            nearestMatches[farthestIdx] = otherCell->pos;
-            nearestMatchDistances[farthestIdx] = matchDistance;
-        }
-    }
-    
-    // Release lock
-    __threadfence_block();
-    atomicExch_block(&nearestMatchesLock, 0);
-}
-
-__inline__ __device__ void
-CommunicatorProcessor::mergeMatches(SimulationData& data, Cell* cell, int numNearestMatches, float2* nearestMatches, float* nearestMatchDistances)
-{
-    auto& sender = cell->cellTypeData.communicator.modeData.sender;
-    
-    // Create combined array of all matches with distances
-    float2 allMatches[MAX_SENDER_MATCHES * 2];
-    float allDistances[MAX_SENDER_MATCHES * 2];
-    int numAllMatches = 0;
-    
-    // Add existing lastMatches (already filtered for range in evaluateLastMatches)
-    for (int i = 0; i < sender.numLastMatches; ++i) {
-        allMatches[numAllMatches] = sender.lastMatches[i];
-        allDistances[numAllMatches] = data.cellMap.getDistance(cell->pos, sender.lastMatches[i]);
-        ++numAllMatches;
-    }
-    
-    // Add new nearestMatches (only if at least MatchLookupRadius distance to existing ones)
-    for (int i = 0; i < numNearestMatches; ++i) {
-        bool isTooClose = false;
-        for (int j = 0; j < numAllMatches; ++j) {
-            if (data.cellMap.getDistance(nearestMatches[i], allMatches[j]) < MatchLookupRadius) {
-                isTooClose = true;
-                break;
-            }
-        }
-        if (!isTooClose) {
-            allMatches[numAllMatches] = nearestMatches[i];
-            allDistances[numAllMatches] = nearestMatchDistances[i];
-            ++numAllMatches;
-        }
-    }
-    
-    // Sort by distance (simple bubble sort for small array)
-    for (int i = 0; i < numAllMatches - 1; ++i) {
-        for (int j = 0; j < numAllMatches - i - 1; ++j) {
-            if (allDistances[j] > allDistances[j + 1]) {
-                // Swap
-                float tempDist = allDistances[j];
-                allDistances[j] = allDistances[j + 1];
-                allDistances[j + 1] = tempDist;
-                float2 tempPos = allMatches[j];
-                allMatches[j] = allMatches[j + 1];
-                allMatches[j + 1] = tempPos;
-            }
-        }
-    }
-    
-    // Store the nearest MAX_SENDER_MATCHES matches
-    sender.numLastMatches = min(numAllMatches, MAX_SENDER_MATCHES);
-    for (int i = 0; i < sender.numLastMatches; ++i) {
-        sender.lastMatches[i] = allMatches[i];
-    }
-}
-
-__inline__ __device__ void CommunicatorProcessor::evaluateLastMatches(SimulationData& data, Cell* cell)
-{
-    auto& sender = cell->cellTypeData.communicator.modeData.sender;
-    float senderRange = sender.range;
-    int newNumTimesSent = cell->signal.numTimesSent + 1;
-    
-    __shared__ int numValidMatches;
-    __shared__ float2 validMatches[MAX_SENDER_MATCHES];
-    
-    if (threadIdx.x == 0) {
-        numValidMatches = 0;
-    }
-    __syncthreads();
-    
-    // Process matches in parallel - each thread handles different matches
-    for (int i = threadIdx.x, numLastMatches = sender.numLastMatches; i < numLastMatches; i += blockDim.x) {
-        float2 matchPos = sender.lastMatches[i];
-        float distance = data.cellMap.getDistance(cell->pos, matchPos);
-        
-        if (distance <= senderRange) {
-            // Match is still in range - look for receiver within MatchLookupRadius
-            Cell* foundCells[MAX_SENDER_MATCHES];
-            int numFoundCells = 0;
-            data.cellMap.getMatchingCells(foundCells, MAX_SENDER_MATCHES, numFoundCells, matchPos, MatchLookupRadius, cell->detached,
-                [&](Cell* otherCell) {
-                    return otherCell->cellType == CellType_Communicator &&
-                           otherCell->cellTypeData.communicator.mode == CommunicatorMode_Receiver &&
-                           !cell->isSameCreature(otherCell);
-                });
-            
-            if (numFoundCells > 0) {
-                // Found a receiver - transmit and keep this match with updated position
-                Cell* otherCell = foundCells[0];
-                tryTransmitSignal(cell, otherCell, newNumTimesSent);
-                
-                // Add to valid matches atomically
-                int idx = atomicAdd(&numValidMatches, 1);
-                if (idx < MAX_SENDER_MATCHES) {
-                    validMatches[idx] = otherCell->pos;
-                }
-            }
-            // If no cell found, the match is discarded
-        }
-    }
-    __syncthreads();
-    
-    // Copy valid matches back to sender (done by thread 0)
-    if (threadIdx.x == 0) {
-        sender.numLastMatches = min(numValidMatches, MAX_SENDER_MATCHES);
-        for (int i = 0; i < sender.numLastMatches; ++i) {
-            sender.lastMatches[i] = validMatches[i];
         }
     }
 }
