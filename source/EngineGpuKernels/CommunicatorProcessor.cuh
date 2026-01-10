@@ -36,13 +36,14 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
 
 __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
 {
-    __shared__ bool isActive;
+    __shared__ bool shouldProcess;
     if (threadIdx.x == 0) {
-        isActive = cell->signalState == SignalState_Active;
+        // Process if signal is Active or Fading (signal has been or is being processed this timestep)
+        shouldProcess = cell->signalState == SignalState_Active || cell->signalState == SignalState_Fading;
     }
     __syncthreads();
 
-    if (!isActive) {
+    if (!shouldProcess) {
         return;
     }
 

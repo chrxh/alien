@@ -140,8 +140,12 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getCellRef(2);
 
-    // Receiver should NOT have received the signal (same creature)
-    EXPECT_NE(receiver._signalState, SignalState_Active);
+    // Receiver gets signal through connection (normal signal flow), not through CommunicatorProcessor.
+    // Signal via connection should have numTimesSent = 0 (from sender's initial signal).
+    // Signal via CommunicatorProcessor would have numTimesSent = 1 (incremented).
+    // Since they're in the same creature, CommunicatorProcessor should NOT transmit.
+    EXPECT_EQ(receiver._signalState, SignalState_Active);  // Signal flows through connection
+    EXPECT_EQ(receiver._signal._numTimesSent, 0);          // Not incremented = not from CommunicatorProcessor
 }
 
 TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
