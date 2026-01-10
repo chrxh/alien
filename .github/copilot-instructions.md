@@ -29,7 +29,7 @@ ALIEN is an artificial life simulation tool based on a specialized 2D particle e
 **NEVER CANCEL long-running commands. Build may take 4-5 minutes. Use long timeouts.**
 
 ```bash
-cmake --build build --config Release -j8
+cmake --build build --config Release -j32
 ```
 
 ### Run Tests
@@ -61,7 +61,7 @@ cd build
 
 ### Build Validation
 - **Build succeeds** and produces all expected executables: `alien`, `cli`, `EngineTests`, `EngineInterfaceTests`, `NetworkTests`, `PersisterTests`
-- **Build time**: >4 minutes on 16-core system with `-j16` parallelization
+- **Build time**: ~1 min on 32-core system with `-j32` parallelization
 - **Clean configuration**: ~6 seconds
 - **No build errors or warnings** when following the exact commands above
 
@@ -85,8 +85,8 @@ cd build
 # 1. Format code (if modified)
 clang-format --style=file:source/_clang-format -i path/to/modified/files.cpp
 
-# 2. Build (NEVER CANCEL - takes 3-4 minutes)
-cmake --build build --config Release -j8
+# 2. Build (NEVER CANCEL - ~ 1 minute)
+cmake --build build --config Release -j32
 
 # 3. Run core tests (required - these must pass)
 cd build && ./EngineInterfaceTests && ./NetworkTests && ./PersisterTests & ./EngineTests
