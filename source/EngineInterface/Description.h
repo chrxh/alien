@@ -408,7 +408,7 @@ struct SenderDescription
 {
     auto operator<=>(SenderDescription const&) const = default;
 
-    MEMBER(SenderDescription, float, range, 100.0f);
+    MEMBER(SenderDescription, float, range, 15.0f);
     MEMBER(SenderDescription, int, maxTimesSent, 4);
 };
 
@@ -416,7 +416,6 @@ struct ReceiverDescription
 {
     auto operator<=>(ReceiverDescription const&) const = default;
 
-    MEMBER(ReceiverDescription, uint8_t, channelBitMask, 0b11111111);
     MEMBER(ReceiverDescription, std::optional<int>, restrictToColor, std::nullopt);
     MEMBER(ReceiverDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };

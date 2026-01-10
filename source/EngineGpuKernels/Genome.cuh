@@ -255,7 +255,6 @@ struct SenderGenome
 
 struct ReceiverGenome
 {
-    uint8_t channelBitMask;
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
     LineageRestriction restrictToLineage;
 };

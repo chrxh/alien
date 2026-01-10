@@ -681,21 +681,6 @@ void _NodeEditorWidget::processNodeAttributes()
                         AlienGui::ComboParameters().name("Restrict to lineage").values({"No", "Same lineage", "Other lineage"}).textWidth(rightColumnWidth),
                         receiver._restrictToLineage);
 
-                    bool bit[MAX_CHANNELS];
-                    for (int i = 0; i < MAX_CHANNELS; ++i) {
-                        bit[i] = (receiver._channelBitMask & (1 << i)) != 0;
-                    }
-                    AlienGui::MultiCheckboxes(
-                        AlienGui::MultiCheckboxesParameters().name("Channel mask bit 0-3").textWidth(rightColumnWidth), bit[0], bit[1], bit[2], bit[3]);
-                    AlienGui::MultiCheckboxes(
-                        AlienGui::MultiCheckboxesParameters().name("Channel mask bit 4-7").textWidth(rightColumnWidth), bit[4], bit[5], bit[6], bit[7]);
-                    receiver._channelBitMask = 0;
-                    for (int i = 0; i < MAX_CHANNELS; ++i) {
-                        if (bit[i]) {
-                            receiver._channelBitMask |= 1 << i;
-                        }
-                    }
-
                     AlienGui::EndIndent();
                 }
 

@@ -560,7 +560,6 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             communicator._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverDescription receiver;
-            receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
                 : std::nullopt;
@@ -820,7 +819,6 @@ NodeDescription DescriptionConverterService::createNodeDescription(TO const& to,
             communicatorDesc._mode = sender;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             ReceiverGenomeDescription receiver;
-            receiver._channelBitMask = communicatorTO.modeData.receiver.channelBitMask;
             receiver._restrictToColor = communicatorTO.modeData.receiver.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(communicatorTO.modeData.receiver.restrictToColor))
                 : std::nullopt;
@@ -1135,7 +1133,6 @@ void DescriptionConverterService::convertGenomeToTO(
                     communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
                 } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
                     auto const& receiverDesc = std::get<ReceiverGenomeDescription>(communicatorDesc._mode);
-                    communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
                     communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
                     communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
                 }
@@ -1434,7 +1431,6 @@ void DescriptionConverterService::convertCellToTO(
             communicatorTO.modeData.sender.maxTimesSent = senderDesc._maxTimesSent;
         } else if (communicatorTO.mode == CommunicatorMode_Receiver) {
             auto const& receiverDesc = std::get<ReceiverDescription>(communicatorDesc._mode);
-            communicatorTO.modeData.receiver.channelBitMask = receiverDesc._channelBitMask;
             communicatorTO.modeData.receiver.restrictToColor = static_cast<uint8_t>(receiverDesc._restrictToColor.value_or(255));
             communicatorTO.modeData.receiver.restrictToLineage = receiverDesc._restrictToLineage;
         }

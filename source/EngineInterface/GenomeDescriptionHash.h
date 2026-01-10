@@ -457,7 +457,6 @@ struct std::hash<ReceiverGenomeDescription>
     std::size_t operator()(ReceiverGenomeDescription const& desc) const
     {
         std::size_t seed = 0;
-        hash_combine(seed, desc._channelBitMask);
         if (desc._restrictToColor) {
             hash_combine(seed, *desc._restrictToColor);
         } else {

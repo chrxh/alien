@@ -79,6 +79,7 @@ namespace cereal
         std::vector<int8_t>,
         std::vector<int>,
         std::vector<float>,
+        std::vector<RealVector2D>,
         std::vector<std::vector<uint8_t>>,
         std::vector<std::vector<int8_t>>,
         std::vector<std::vector<int>>,
@@ -647,7 +648,6 @@ namespace cereal
     {
         ReceiverGenomeDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_ReceiverGenome_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         loadSave(task, auxiliaries, Id_ReceiverGenome_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_ReceiverGenome_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -919,7 +919,6 @@ namespace
     auto constexpr Id_Sender_Range = 0;
     auto constexpr Id_Sender_MaxTimesSent = 1;
 
-    auto constexpr Id_Receiver_ChannelBitMask = 0;
     auto constexpr Id_Receiver_RestrictToColor = 1;
     auto constexpr Id_Receiver_RestrictToLineage = 2;
 }
@@ -1424,7 +1423,6 @@ namespace cereal
     {
         ReceiverDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Receiver_ChannelBitMask, data._channelBitMask, defaultObject._channelBitMask);
         loadSave(task, auxiliaries, Id_Receiver_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         loadSave(task, auxiliaries, Id_Receiver_RestrictToLineage, data._restrictToLineage, defaultObject._restrictToLineage);
         processLoadSaveMap(task, ar, auxiliaries);

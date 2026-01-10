@@ -208,7 +208,6 @@ namespace
                             nodeTO.cellTypeData.communicator.modeData.sender.range = node.cellTypeData.communicator.modeData.sender.range;
                             nodeTO.cellTypeData.communicator.modeData.sender.maxTimesSent = node.cellTypeData.communicator.modeData.sender.maxTimesSent;
                         } else if (node.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                            nodeTO.cellTypeData.communicator.modeData.receiver.channelBitMask = node.cellTypeData.communicator.modeData.receiver.channelBitMask;
                             nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor = node.cellTypeData.communicator.modeData.receiver.restrictToColor;
                             nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = node.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                         }
@@ -470,7 +469,6 @@ namespace
                 cellTO.cellTypeData.communicator.modeData.sender.range = cell->cellTypeData.communicator.modeData.sender.range;
                 cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent = cell->cellTypeData.communicator.modeData.sender.maxTimesSent;
             } else if (cell->cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                cellTO.cellTypeData.communicator.modeData.receiver.channelBitMask = cell->cellTypeData.communicator.modeData.receiver.channelBitMask;
                 cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor = cell->cellTypeData.communicator.modeData.receiver.restrictToColor;
                 cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage = cell->cellTypeData.communicator.modeData.receiver.restrictToLineage;
             }

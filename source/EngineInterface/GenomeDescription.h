@@ -342,7 +342,6 @@ struct ReceiverGenomeDescription
 {
     auto operator<=>(ReceiverGenomeDescription const&) const = default;
 
-    MEMBER(ReceiverGenomeDescription, uint8_t, channelBitMask, 0b11111111);
     MEMBER(ReceiverGenomeDescription, std::optional<int>, restrictToColor, std::nullopt);
     MEMBER(ReceiverGenomeDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };

@@ -263,7 +263,6 @@ __inline__ __device__ Genome* ObjectFactory::createGenomeFromTO(TO const& to, in
                     node.cellTypeData.communicator.modeData.sender.range = nodeTO.cellTypeData.communicator.modeData.sender.range;
                     node.cellTypeData.communicator.modeData.sender.maxTimesSent = nodeTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
                 } else if (nodeTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-                    node.cellTypeData.communicator.modeData.receiver.channelBitMask = nodeTO.cellTypeData.communicator.modeData.receiver.channelBitMask;
                     node.cellTypeData.communicator.modeData.receiver.restrictToColor = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
                     node.cellTypeData.communicator.modeData.receiver.restrictToLineage = nodeTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
                 }
@@ -521,7 +520,6 @@ __inline__ __device__ void ObjectFactory::changeCellFromTO(TO const& to, CellTO 
             cell->cellTypeData.communicator.modeData.sender.range = cellTO.cellTypeData.communicator.modeData.sender.range;
             cell->cellTypeData.communicator.modeData.sender.maxTimesSent = cellTO.cellTypeData.communicator.modeData.sender.maxTimesSent;
         } else if (cellTO.cellTypeData.communicator.mode == CommunicatorMode_Receiver) {
-            cell->cellTypeData.communicator.modeData.receiver.channelBitMask = cellTO.cellTypeData.communicator.modeData.receiver.channelBitMask;
             cell->cellTypeData.communicator.modeData.receiver.restrictToColor = cellTO.cellTypeData.communicator.modeData.receiver.restrictToColor;
             cell->cellTypeData.communicator.modeData.receiver.restrictToLineage = cellTO.cellTypeData.communicator.modeData.receiver.restrictToLineage;
         }
@@ -905,7 +903,6 @@ __inline__ __device__ Cell* ObjectFactory::createCellFromNode(
             communicator.modeData.sender.range = nodeCommunicator.modeData.sender.range;
             communicator.modeData.sender.maxTimesSent = nodeCommunicator.modeData.sender.maxTimesSent;
         } else if (nodeCommunicator.mode == CommunicatorMode_Receiver) {
-            communicator.modeData.receiver.channelBitMask = nodeCommunicator.modeData.receiver.channelBitMask;
             communicator.modeData.receiver.restrictToColor = nodeCommunicator.modeData.receiver.restrictToColor;
             communicator.modeData.receiver.restrictToLineage = nodeCommunicator.modeData.receiver.restrictToLineage;
         }
