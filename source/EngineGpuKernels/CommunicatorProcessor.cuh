@@ -17,8 +17,7 @@ private:
     __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
     __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
 
-    __inline__ __device__ static bool
-    tryTransmitSignal(Cell* senderCell, Cell* receiverCell, int newNumTimesSent);
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Cell* senderCell, Cell* receiverCell, int newNumTimesSent);
 };
 
 /************************************************************************/
@@ -137,15 +136,14 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         auto otherCell = data.cellMap.getFirst(scanPos);
         while (otherCell != nullptr) {
             if (isMatch(otherCell)) {
-                tryTransmitSignal(cell, otherCell, newNumTimesSent);
+                tryTransmitSignal(data, cell, otherCell, newNumTimesSent);
             }
             otherCell = otherCell->nextCell;
         }
     }
 }
 
-__inline__ __device__ bool
-CommunicatorProcessor::tryTransmitSignal(Cell* senderCell, Cell* receiverCell, int newNumTimesSent)
+__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Cell* senderCell, Cell* receiverCell, int newNumTimesSent)
 {
     receiverCell->getLock();
 
@@ -165,6 +163,23 @@ CommunicatorProcessor::tryTransmitSignal(Cell* senderCell, Cell* receiverCell, i
         }
         receiverCell->signal.numTimesSent = newNumTimesSent;
         receiverCell->signalState = SignalState_Active;
+
+        // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
+        // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
+        // We need to maintain the absolute direction: senderRefDir rotated by senderAngle = receiverRefDir rotated by receiverAngle
+        // Therefore: receiverAngle = senderAngle + (senderRefAngle - receiverRefAngle)
+        auto senderRefDir = SignalProcessor::calcReferenceDirection(data, senderCell);
+        auto receiverRefDir = SignalProcessor::calcReferenceDirection(data, receiverCell);
+        auto senderRefAngle = Math::angleOfVector(senderRefDir);
+        auto receiverRefAngle = Math::angleOfVector(receiverRefDir);
+        auto angleDiff = senderRefAngle - receiverRefAngle;
+
+        // The signal angle is encoded as angle/180, so the diff must also be scaled
+        auto senderAngle = senderCell->signal.channels[Channels::CommunicatorAngle];
+        auto translatedAngle = senderAngle + angleDiff / 180.0f;
+        // Normalize to [-1, 1] range (representing [-180, 180] degrees)
+        translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
+        receiverCell->signal.channels[Channels::CommunicatorAngle] = translatedAngle;
     }
 
     receiverCell->releaseLock();

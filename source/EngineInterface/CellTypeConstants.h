@@ -39,8 +39,23 @@ enum CellType_
 
 namespace Const
 {
-    std::vector<std::string> const CellTypeStrings =
-        {"Structure", "Free", "Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory", "Communicator"};
+    std::vector<std::string> const CellTypeStrings = {
+        "Structure",
+        "Free",
+        "Base",
+        "Depot",
+        "Constructor",
+        "Sensor",
+        "Generator",
+        "Attacker",
+        "Injector",
+        "Muscle",
+        "Defender",
+        "Reconnector",
+        "Detonator",
+        "Digestor",
+        "Memory",
+        "Communicator"};
 }
 
 using CellTypeGenome = int;
@@ -65,8 +80,21 @@ enum CellTypeGenome_
 
 namespace Const
 {
-    std::vector<std::string> const CellTypeGenomeStrings =
-        {"Base", "Depot", "Constructor", "Sensor", "Generator", "Attacker", "Injector", "Muscle", "Defender", "Reconnector", "Detonator", "Digestor", "Memory", "Communicator"};
+    std::vector<std::string> const CellTypeGenomeStrings = {
+        "Base",
+        "Depot",
+        "Constructor",
+        "Sensor",
+        "Generator",
+        "Attacker",
+        "Injector",
+        "Muscle",
+        "Defender",
+        "Reconnector",
+        "Detonator",
+        "Digestor",
+        "Memory",
+        "Communicator"};
 }
 
 using CellState = int;
@@ -188,8 +216,7 @@ enum SensorMode_
 
 namespace Const
 {
-    std::vector<std::string> const SensorModeStrings =
-        {"Telemetry", "Detect energy", "Detect structure", "Detect free cell", "Detect creature"};
+    std::vector<std::string> const SensorModeStrings = {"Telemetry", "Detect energy", "Detect structure", "Detect free cell", "Detect creature"};
 }
 
 //********************
@@ -410,6 +437,11 @@ enum SignalRecorderState_
 //***************************
 //* Communicator constants *
 //***************************
+namespace Channels
+{
+    auto constexpr CommunicatorAngle = 1;
+}
+
 using CommunicatorMode = int;
 enum CommunicatorMode_
 {
