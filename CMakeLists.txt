@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.31 FATAL_ERROR)
 # Using the vcpkg submodule
 set(CMAKE_TOOLCHAIN_FILE external/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
 
+# Use static libraries to reduce linking bottleneck during parallel builds (improves MSVC compile times)
+set(BUILD_SHARED_LIBS OFF)
+
 # Default to Debug
 if(NOT CMAKE_BUILD_TYPE)
     message("Build type not specified, using Debug")
