@@ -89,8 +89,6 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         return;
     }
 
-    auto const newNumTimesSent = currentNumTimesSent + 1;
-
     // Evaluate last matches in parallel: remove out-of-range ones and transmit to remaining ones
     evaluateLastMatches(data, cell);
     __syncthreads();
@@ -143,7 +141,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         auto otherCell = data.cellMap.getFirst(scanPos);
         while (otherCell != nullptr) {
             if (isMatch(otherCell)) {
-                tryTransmitSignal(cell, otherCell, newNumTimesSent);
+                tryTransmitSignal(cell, otherCell, currentNumTimesSent + 1);
                 addNearestMatch(data, cell, otherCell, numNearestMatches, nearestMatches, nearestMatchDistances, nearestMatchesLock);
             }
             otherCell = otherCell->nextCell;
@@ -263,17 +261,15 @@ __inline__ __device__ void CommunicatorProcessor::evaluateLastMatches(Simulation
     __syncthreads();
     
     // Process matches in parallel - each thread handles different matches
-    int numLastMatches = sender.numLastMatches;
-    for (int i = threadIdx.x; i < numLastMatches; i += blockDim.x) {
+    for (int i = threadIdx.x, numLastMatches = sender.numLastMatches; i < numLastMatches; i += blockDim.x) {
         float2 matchPos = sender.lastMatches[i];
         float distance = data.cellMap.getDistance(cell->pos, matchPos);
         
         if (distance <= senderRange) {
             // Match is still in range - look for receiver within MatchLookupRadius
-            Cell* foundCells[4];
+            Cell* foundCells[MAX_SENDER_MATCHES];
             int numFoundCells = 0;
-            data.cellMap.getMatchingCells(
-                foundCells, 4, numFoundCells, matchPos, MatchLookupRadius, cell->detached,
+            data.cellMap.getMatchingCells(foundCells, MAX_SENDER_MATCHES, numFoundCells, matchPos, MatchLookupRadius, cell->detached,
                 [&](Cell* otherCell) {
                     return otherCell->cellType == CellType_Communicator &&
                            otherCell->cellTypeData.communicator.mode == CommunicatorMode_Receiver &&
