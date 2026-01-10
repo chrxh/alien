@@ -296,13 +296,27 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     EXPECT_EQ(receiver._signal._channels[0], -1.0f);
 }
 
-TEST_F(CommunicatorTests, sender_angleTranslation_sameOrientation)
+/**
+ * Parameterized test for angle translation with different reference direction differences.
+ * Parameter: receiverRefAngleDiff - the difference in degrees between sender and receiver reference directions.
+ */
+class CommunicatorTests_AngleTranslation
+    : public CommunicatorTests
+    , public testing::WithParamInterface<float>
+{};
+
+INSTANTIATE_TEST_SUITE_P(CommunicatorTests_AngleTranslation, CommunicatorTests_AngleTranslation, ::testing::Values(0.0f, 90.0f, 180.0f, 270.0f));
+
+TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 {
-    // Create sender and receiver with the same orientation (both pointing right)
-    // In this system, angleOfVector returns the angle from the up direction (0,-1), going clockwise.
-    // Sender: at (100, 100), connected to (101, 100) -> reference direction (1, 0) -> angleOfVector returns 90 degrees
-    // Receiver: at (120, 100), connected to (121, 100) -> reference direction (1, 0) -> angleOfVector returns 90 degrees
-    // Angle difference = 0, so transmitted angle should be the same as input angle
+    // The sender is at (100, 100) with connected cell at (101, 100) -> reference direction (1, 0) -> 90 degrees
+    // The receiver's connected cell position is calculated based on the angle difference parameter
+    auto receiverRefAngleDiff = GetParam();
+
+    // Calculate the receiver's connected cell position based on the angle difference
+    // Sender reference angle is 90 degrees (pointing right), receiver will be at 90 + receiverRefAngleDiff
+    auto receiverRefAngle = 90.0f + receiverRefAngleDiff;
+    auto receiverConnectedCellOffset = Math::unitVectorOfAngle(receiverRefAngle);
 
     auto data = Description().addCreature(CreatureDescription().id(1).cells({
         CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
@@ -316,7 +330,7 @@ TEST_F(CommunicatorTests, sender_angleTranslation_sameOrientation)
 
     data.addCreature(CreatureDescription().id(2).cells({
         CellDescription().id(200).pos({120.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
-        CellDescription().id(201).pos({121.0f, 100.0f}),
+        CellDescription().id(201).pos({120.0f + receiverConnectedCellOffset.x, 100.0f + receiverConnectedCellOffset.y}),
     }));
     data.addConnection(200, 201);
 
@@ -327,34 +341,72 @@ TEST_F(CommunicatorTests, sender_angleTranslation_sameOrientation)
     auto receiver = result.getCellRef(200);
 
     EXPECT_EQ(receiver._signalState, SignalState_Active);
-    // Same orientation means no angle translation needed
-    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
+
+    // The angle translation formula: translatedAngle = senderAngle + (senderRefAngle - receiverRefAngle) / 180
+    // senderAngle = 0.5 (90 degrees), senderRefAngle = 90 degrees, receiverRefAngle = 90 + receiverRefAngleDiff
+    // angleDiff = 90 - (90 + receiverRefAngleDiff) = -receiverRefAngleDiff
+    // translatedAngle = 0.5 + (-receiverRefAngleDiff) / 180
+    auto expectedAngle = Math::getNormalizedAngle(0.5f * 180.0f - receiverRefAngleDiff, -180.0f) / 180.0f;
+    EXPECT_NEAR(receiver._signal._channels[1], expectedAngle, 0.001f);
 }
 
-TEST_F(CommunicatorTests, sender_angleTranslation_oppositeOrientation)
+/**
+ * Parameterized test for lineage restriction.
+ * Parameters: (LineageRestriction mode, sameLineage flag, expected acceptance)
+ */
+struct LineageRestrictionParams
 {
-    // Create sender and receiver with opposite orientations
-    // In this system, angleOfVector returns the angle from the up direction (0,-1), going clockwise.
-    // Sender: at (100, 100), connected to (101, 100) -> reference direction (1, 0) -> angleOfVector returns 90 degrees
-    // Receiver: at (120, 100), connected to (119, 100) -> reference direction (-1, 0) -> angleOfVector returns 270 degrees
-    // angleDiff = senderRefAngle - receiverRefAngle = 90 - 270 = -180 degrees
-    // Input signal angle: 0.5 (representing 90 degrees)
-    // Translated angle: 0.5 + (-180)/180 = 0.5 - 1.0 = -0.5 (representing -90 degrees)
+    LineageRestriction restriction;
+    bool sameLineage;
+    bool expectedAccept;
+};
 
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
-            .id(101)
-            .pos({101.0f, 100.0f})
-            .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // channel[1] = 0.5 = 90 degrees
-    }));
+class CommunicatorTests_LineageRestriction
+    : public CommunicatorTests
+    , public testing::WithParamInterface<LineageRestrictionParams>
+{};
+
+INSTANTIATE_TEST_SUITE_P(
+    CommunicatorTests_LineageRestriction,
+    CommunicatorTests_LineageRestriction,
+    ::testing::Values(
+        LineageRestrictionParams{LineageRestriction_SameLineage, true, true},    // sameLineage, accept
+        LineageRestrictionParams{LineageRestriction_SameLineage, false, false},  // sameLineage, rejected
+        LineageRestrictionParams{LineageRestriction_OtherLineage, false, true},  // otherLineage, accept
+        LineageRestrictionParams{LineageRestriction_OtherLineage, true, false}   // otherLineage, rejected
+        ));
+
+TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
+{
+    auto params = GetParam();
+
+    uint64_t senderLineageId = 12345;
+    uint64_t receiverLineageId = params.sameLineage ? 12345 : 67890;
+
+    auto data = Description().addCreature(
+        CreatureDescription()
+            .id(1)
+            .lineageId(senderLineageId)
+            .cells({
+                CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
+                CellDescription()
+                    .id(101)
+                    .pos({101.0f, 100.0f})
+                    .signalState(SignalState_Active)
+                    .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
+            }));
     data.addConnection(100, 101);
 
-    data.addCreature(CreatureDescription().id(2).cells({
-        CellDescription().id(200).pos({120.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
-        CellDescription().id(201).pos({119.0f, 100.0f}),  // Connected cell is to the LEFT, so reference points left
-    }));
+    data.addCreature(CreatureDescription()
+                         .id(2)
+                         .lineageId(receiverLineageId)
+                         .cells({
+                             CellDescription()
+                                 .id(200)
+                                 .pos({120.0f, 100.0f})
+                                 .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToLineage(params.restriction))),
+                             CellDescription().id(201).pos({121.0f, 100.0f}),
+                         }));
     data.addConnection(200, 201);
 
     _simulationFacade->setSimulationData(data);
@@ -363,180 +415,10 @@ TEST_F(CommunicatorTests, sender_angleTranslation_oppositeOrientation)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getCellRef(200);
 
-    EXPECT_EQ(receiver._signalState, SignalState_Active);
-    // Opposite orientation means 180 degree angle difference
-    // 0.5 + (-180)/180 = 0.5 - 1.0 = -0.5
-    EXPECT_FLOAT_EQ(receiver._signal._channels[1], -0.5f);
-}
-
-TEST_F(CommunicatorTests, sender_angleTranslation_90degreeRotation)
-{
-    // Create sender pointing right and receiver pointing down
-    // In this system, angleOfVector returns the angle from the up direction (0,-1), going clockwise.
-    // Sender: at (100, 100), connected to (101, 100) -> reference direction (1, 0) -> angleOfVector returns 90 degrees
-    // Receiver: at (120, 100), connected to (120, 101) -> reference direction (0, 1) -> angleOfVector returns 180 degrees
-    // angleDiff = senderRefAngle - receiverRefAngle = 90 - 180 = -90 degrees
-    // Input signal angle: 0.5 (representing 90 degrees)
-    // Translated angle: 0.5 + (-90)/180 = 0.5 - 0.5 = 0.0 (representing 0 degrees)
-
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
-            .id(101)
-            .pos({101.0f, 100.0f})
-            .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),  // channel[1] = 0.5 = 90 degrees
-    }));
-    data.addConnection(100, 101);
-
-    data.addCreature(CreatureDescription().id(2).cells({
-        CellDescription().id(200).pos({120.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
-        CellDescription().id(201).pos({120.0f, 101.0f}),  // Connected cell is BELOW, so reference points down
-    }));
-    data.addConnection(200, 201);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
-
-    EXPECT_EQ(receiver._signalState, SignalState_Active);
-    // 90 degree rotation means angle is adjusted by -90 degrees
-    // 0.5 - 0.5 = 0
-    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.0f);
-}
-
-TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_accepted)
-{
-    // Create sender and receiver creatures with the same lineage
-    auto data = Description().addCreature(CreatureDescription().id(1).lineageId(12345).cells({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
-            .id(101)
-            .pos({101.0f, 100.0f})
-            .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
-    }));
-    data.addConnection(100, 101);
-
-    // Receiver with same lineage and restrictToLineage = SameLineage
-    data.addCreature(CreatureDescription().id(2).lineageId(12345).cells({
-        CellDescription()
-            .id(200)
-            .pos({120.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToLineage(LineageRestriction_SameLineage))),
-        CellDescription().id(201).pos({121.0f, 100.0f}),
-    }));
-    data.addConnection(200, 201);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
-
-    // Receiver should have received the signal (same lineage)
-    EXPECT_EQ(receiver._signalState, SignalState_Active);
-    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
-}
-
-TEST_F(CommunicatorTests, sender_lineageRestriction_sameLineage_rejected)
-{
-    // Create sender and receiver creatures with different lineages
-    auto data = Description().addCreature(CreatureDescription().id(1).lineageId(12345).cells({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
-            .id(101)
-            .pos({101.0f, 100.0f})
-            .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
-    }));
-    data.addConnection(100, 101);
-
-    // Receiver with different lineage and restrictToLineage = SameLineage
-    data.addCreature(CreatureDescription().id(2).lineageId(67890).cells({
-        CellDescription()
-            .id(200)
-            .pos({120.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToLineage(LineageRestriction_SameLineage))),
-        CellDescription().id(201).pos({121.0f, 100.0f}),
-    }));
-    data.addConnection(200, 201);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
-
-    // Receiver should NOT have received the signal (different lineage)
-    EXPECT_NE(receiver._signalState, SignalState_Active);
-}
-
-TEST_F(CommunicatorTests, sender_lineageRestriction_otherLineage_accepted)
-{
-    // Create sender and receiver creatures with different lineages
-    auto data = Description().addCreature(CreatureDescription().id(1).lineageId(12345).cells({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
-            .id(101)
-            .pos({101.0f, 100.0f})
-            .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
-    }));
-    data.addConnection(100, 101);
-
-    // Receiver with different lineage and restrictToLineage = OtherLineage
-    data.addCreature(CreatureDescription().id(2).lineageId(67890).cells({
-        CellDescription()
-            .id(200)
-            .pos({120.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToLineage(LineageRestriction_OtherLineage))),
-        CellDescription().id(201).pos({121.0f, 100.0f}),
-    }));
-    data.addConnection(200, 201);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
-
-    // Receiver should have received the signal (different lineage)
-    EXPECT_EQ(receiver._signalState, SignalState_Active);
-    EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
-}
-
-TEST_F(CommunicatorTests, sender_lineageRestriction_otherLineage_rejected)
-{
-    // Create sender and receiver creatures with the same lineage
-    auto data = Description().addCreature(CreatureDescription().id(1).lineageId(12345).cells({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
-            .id(101)
-            .pos({101.0f, 100.0f})
-            .signalState(SignalState_Active)
-            .signal(SignalDescription().numTimesSent(0).channels({1.0f, 0.5f, 0, 0, 0, 0, 0, 0})),
-    }));
-    data.addConnection(100, 101);
-
-    // Receiver with same lineage and restrictToLineage = OtherLineage
-    data.addCreature(CreatureDescription().id(2).lineageId(12345).cells({
-        CellDescription()
-            .id(200)
-            .pos({120.0f, 100.0f})
-            .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToLineage(LineageRestriction_OtherLineage))),
-        CellDescription().id(201).pos({121.0f, 100.0f}),
-    }));
-    data.addConnection(200, 201);
-
-    _simulationFacade->setSimulationData(data);
-    _simulationFacade->calcTimesteps(1);
-
-    auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
-
-    // Receiver should NOT have received the signal (same lineage)
-    EXPECT_NE(receiver._signalState, SignalState_Active);
+    if (params.expectedAccept) {
+        EXPECT_EQ(receiver._signalState, SignalState_Active);
+        EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
+    } else {
+        EXPECT_NE(receiver._signalState, SignalState_Active);
+    }
 }
