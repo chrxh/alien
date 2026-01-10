@@ -918,7 +918,6 @@ namespace
 
     auto constexpr Id_Sender_Range = 0;
     auto constexpr Id_Sender_MaxTimesSent = 1;
-    auto constexpr Id_Sender_LastMatches = 2;
 
     auto constexpr Id_Receiver_RestrictToColor = 1;
     auto constexpr Id_Receiver_RestrictToLineage = 2;
