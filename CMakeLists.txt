@@ -24,11 +24,9 @@ set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -lineinfo --use-local-env -use_fast
 
 project(alien-project LANGUAGES C CXX CUDA)
 
-# Enable Unity Build on MSVC to optimize build time
-if (MSVC)
-    set(CMAKE_UNITY_BUILD ON)
-    set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
-endif()
+# Enable Unity Build to optimize build time
+set(CMAKE_UNITY_BUILD ON)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
 
 include_directories(
     source

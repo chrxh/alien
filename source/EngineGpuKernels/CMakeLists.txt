@@ -85,6 +85,9 @@ add_library(EngineGpuKernels
     Util.cuh
     )
 
+# Disable Unity Build for CUDA files (causes class redefinition errors)
+set_target_properties(EngineGpuKernels PROPERTIES UNITY_BUILD OFF)
+
 target_link_libraries(EngineGpuKernels Base)
 target_link_libraries(EngineGpuKernels EngineInterface)
 target_link_libraries(EngineGpuKernels OpenGL::GL)

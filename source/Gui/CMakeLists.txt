@@ -194,6 +194,9 @@ target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
 
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 
+# Disable Unity Build for Gui (conflicting anonymous namespace declarations)
+set_target_properties(alien PROPERTIES UNITY_BUILD OFF)
+
 if (MSVC)
     target_compile_options(alien PRIVATE "/MP")
 endif()

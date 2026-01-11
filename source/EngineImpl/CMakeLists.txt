@@ -30,6 +30,9 @@ add_library(EngineImpl
     TestKernelsService.cu
     TestKernelsService.cuh)
 
+# Disable Unity Build for CUDA files (causes class redefinition errors)
+set_target_properties(EngineImpl PROPERTIES UNITY_BUILD OFF)
+
 target_link_libraries(EngineImpl Base)
 target_link_libraries(EngineImpl EngineGpuKernels)
 
