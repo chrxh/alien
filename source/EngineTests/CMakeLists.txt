@@ -54,6 +54,9 @@ target_link_libraries(EngineTests glfw)
 target_link_libraries(EngineTests glad::glad)
 target_link_libraries(EngineTests GTest::GTest GTest::Main)
 
+# CUDA device linking for OBJECT libraries
+set_property(TARGET EngineTests PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
 if (MSVC)
     target_compile_options(EngineTests PRIVATE "/MP")
 endif()

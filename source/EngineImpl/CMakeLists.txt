@@ -1,5 +1,5 @@
 
-add_library(EngineImpl
+add_library(EngineImpl OBJECT
     DataAccessKernelsService.cu
     DataAccessKernelsService.cuh
     DescriptionConverterService.cpp
@@ -30,21 +30,11 @@ add_library(EngineImpl
     TestKernelsService.cu
     TestKernelsService.cuh)
 
-target_link_libraries(EngineImpl Base)
-target_link_libraries(EngineImpl EngineGpuKernels)
-
+target_include_directories(EngineImpl PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
+target_include_directories(EngineImpl PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 target_link_libraries(EngineImpl OpenGL::GL)
 target_link_libraries(EngineImpl glad::glad)
 target_link_libraries(EngineImpl Boost::boost)
-target_include_directories(EngineImpl
-    PRIVATE
-        ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
-)
-
-target_link_libraries(EngineImpl cudart)
-
-# See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
-set_property(TARGET EngineImpl PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 if (MSVC)
     target_compile_options(EngineImpl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/MP>)

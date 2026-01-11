@@ -194,6 +194,9 @@ target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
 
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 
+# CUDA device linking for OBJECT libraries
+set_property(TARGET alien PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
 if (MSVC)
     target_compile_options(alien PRIVATE "/MP")
 endif()

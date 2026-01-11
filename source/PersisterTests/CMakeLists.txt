@@ -23,6 +23,9 @@ target_link_libraries(PersisterTests glfw)
 target_link_libraries(PersisterTests glad::glad)
 target_link_libraries(PersisterTests GTest::GTest GTest::Main)
 
+# CUDA device linking for OBJECT libraries
+set_property(TARGET PersisterTests PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
 if (MSVC)
     target_compile_options(PersisterTests PRIVATE "/MP")
 endif()

@@ -1,5 +1,5 @@
 
-add_library(EngineGpuKernels
+add_library(EngineGpuKernels OBJECT
     ActiveRadiationSources.cuh
     Array.cuh
     AttackerProcessor.cuh
@@ -85,10 +85,7 @@ add_library(EngineGpuKernels
     Util.cuh
     )
 
-target_link_libraries(EngineGpuKernels Base)
-target_link_libraries(EngineGpuKernels EngineInterface)
+target_include_directories(EngineGpuKernels PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
+target_include_directories(EngineGpuKernels PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 target_link_libraries(EngineGpuKernels OpenGL::GL)
 target_link_libraries(EngineGpuKernels glad::glad)
-
-# See https://gitlab.kitware.com/cmake/cmake/-/issues/17520
-set_property(TARGET EngineGpuKernels PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)

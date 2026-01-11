@@ -24,6 +24,9 @@ target_link_libraries(cli glad::glad)
 target_link_libraries(cli CLI11::CLI11)
 target_link_libraries(cli ZLIB::ZLIB)
 
+# CUDA device linking for OBJECT libraries
+set_property(TARGET cli PROPERTY CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
 if (MSVC)
     target_compile_options(cli PRIVATE "/MP")
 endif()
