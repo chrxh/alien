@@ -32,6 +32,7 @@ add_library(EngineImpl
 
 target_link_libraries(EngineImpl EngineGpuKernels)
 
+target_include_directories(EngineImpl PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(EngineImpl OpenGL::GL)
 target_link_libraries(EngineImpl glad::glad)
 target_link_libraries(EngineImpl Boost::boost)
