@@ -86,6 +86,7 @@ add_library(EngineGpuKernels
     )
 
 target_include_directories(EngineGpuKernels PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
+target_include_directories(EngineGpuKernels PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 target_link_libraries(EngineGpuKernels OpenGL::GL)
 target_link_libraries(EngineGpuKernels glad::glad)
 
