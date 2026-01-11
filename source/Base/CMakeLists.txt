@@ -1,5 +1,10 @@
+if (MSVC)
+    set(LIB_TYPE OBJECT)
+else()
+    set(LIB_TYPE STATIC)
+endif()
 
-add_library(Base
+add_library(Base ${LIB_TYPE}
     Cache.h
     Definitions.cpp
     Definitions.h
@@ -28,7 +33,7 @@ add_library(Base
     VersionParserService.cpp
     VersionParserService.h)
 
-target_link_libraries(Base Boost::boost)
+target_link_libraries(Base PUBLIC Boost::boost)
 
 if (MSVC)
     target_compile_options(Base PRIVATE "/MP")

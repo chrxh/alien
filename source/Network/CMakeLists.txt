@@ -1,5 +1,10 @@
+if (MSVC)
+    set(LIB_TYPE OBJECT)
+else()
+    set(LIB_TYPE STATIC)
+endif()
 
-add_library(Network
+add_library(Network ${LIB_TYPE}
     Definitions.h
     NetworkService.cpp
     NetworkService.h
@@ -15,8 +20,8 @@ add_library(Network
     NetworkValidationService.h
     UserTO.h)
 
-target_link_libraries(Network Base)
-target_link_libraries(Network Boost::boost)
+target_link_libraries(Network PUBLIC Base)
+target_link_libraries(Network PUBLIC Boost::boost)
     
 if (MSVC)
     target_compile_options(Network PRIVATE "/MP")

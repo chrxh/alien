@@ -1,5 +1,10 @@
+if (MSVC)
+    set(LIB_TYPE OBJECT)
+else()
+    set(LIB_TYPE STATIC)
+endif()
 
-add_library(PersisterImpl
+add_library(PersisterImpl ${LIB_TYPE}
     Definitions.h
     PersisterFacadeImpl.cpp
     PersisterFacadeImpl.h
@@ -9,10 +14,10 @@ add_library(PersisterImpl
     PersisterWorker.cpp
     PersisterWorker.h)
 
-target_link_libraries(PersisterImpl Base)
-target_link_libraries(PersisterImpl PersisterInterface)
+target_link_libraries(PersisterImpl PUBLIC Base)
+target_link_libraries(PersisterImpl PUBLIC PersisterInterface)
 
-target_link_libraries(PersisterImpl Boost::boost)
+target_link_libraries(PersisterImpl PUBLIC Boost::boost)
 
 if (MSVC)
     target_compile_options(PersisterImpl PRIVATE "/MP")

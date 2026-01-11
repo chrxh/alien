@@ -1,5 +1,10 @@
+if (MSVC)
+    set(LIB_TYPE OBJECT)
+else()
+    set(LIB_TYPE STATIC)
+endif()
 
-add_library(EngineInterface
+add_library(EngineInterface ${LIB_TYPE}
     ArraySizesForGpu.h
     ArraySizesForTO.h
     CellTypeConstants.h
@@ -65,10 +70,10 @@ add_library(EngineInterface
     StatisticsHistory.h
     StatisticsRawData.h)
 
-target_link_libraries(EngineInterface Base)
+target_link_libraries(EngineInterface PUBLIC Base)
 
-target_link_libraries(EngineInterface Boost::boost)
-target_link_libraries(EngineInterface glad::glad)
+target_link_libraries(EngineInterface PUBLIC Boost::boost)
+target_link_libraries(EngineInterface PUBLIC glad::glad)
 
 if (MSVC)
     target_compile_options(EngineInterface PRIVATE "/MP")
