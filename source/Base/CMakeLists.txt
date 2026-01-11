@@ -28,6 +28,7 @@ add_library(Base OBJECT
     VersionParserService.cpp
     VersionParserService.h)
 
+target_include_directories(Base PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(Base Boost::boost)
 
 if (MSVC)

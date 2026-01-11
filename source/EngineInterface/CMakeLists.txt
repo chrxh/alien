@@ -65,6 +65,7 @@ add_library(EngineInterface OBJECT
     StatisticsHistory.h
     StatisticsRawData.h)
 
+target_include_directories(EngineInterface PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(EngineInterface Boost::boost)
 target_link_libraries(EngineInterface glad::glad)
 

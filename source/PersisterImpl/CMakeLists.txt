@@ -9,6 +9,7 @@ add_library(PersisterImpl OBJECT
     PersisterWorker.cpp
     PersisterWorker.h)
 
+target_include_directories(PersisterImpl PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(PersisterImpl Boost::boost)
 
 if (MSVC)

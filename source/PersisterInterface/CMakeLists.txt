@@ -53,6 +53,7 @@ add_library(PersisterInterface OBJECT
     UploadNetworkResourceRequestData.h
     UploadNetworkResourceResultData.h)
 
+target_include_directories(PersisterInterface PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(PersisterInterface Boost::boost)
 target_link_libraries(PersisterInterface ZLIB::ZLIB)
 

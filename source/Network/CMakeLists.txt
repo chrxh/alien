@@ -15,6 +15,7 @@ add_library(Network OBJECT
     NetworkValidationService.h
     UserTO.h)
 
+target_include_directories(Network PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(Network Boost::boost)
     
 if (MSVC)

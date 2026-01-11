@@ -5,6 +5,7 @@ add_library(EngineTestData OBJECT
     TestHelper.cpp
     TestHelper.h)
 
+target_include_directories(EngineTestData PUBLIC ${CMAKE_SOURCE_DIR}/source ${CMAKE_SOURCE_DIR}/external)
 target_link_libraries(EngineTestData Boost::boost)
 
 if (MSVC)
