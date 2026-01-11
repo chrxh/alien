@@ -1,5 +1,5 @@
 
-add_library(EngineImpl OBJECT
+add_library(EngineImpl
     DataAccessKernelsService.cu
     DataAccessKernelsService.cuh
     DescriptionConverterService.cpp
@@ -29,6 +29,8 @@ add_library(EngineImpl OBJECT
     StatisticsService.cuh
     TestKernelsService.cu
     TestKernelsService.cuh)
+
+target_link_libraries(EngineImpl EngineGpuKernels)
 
 target_link_libraries(EngineImpl OpenGL::GL)
 target_link_libraries(EngineImpl glad::glad)

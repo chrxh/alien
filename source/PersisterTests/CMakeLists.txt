@@ -22,7 +22,6 @@ target_link_libraries(PersisterTests GLEW::GLEW)
 target_link_libraries(PersisterTests glfw)
 target_link_libraries(PersisterTests glad::glad)
 target_link_libraries(PersisterTests GTest::GTest GTest::Main)
-target_link_libraries(PersisterTests ZLIB::ZLIB)
 
 if (MSVC)
     target_compile_options(PersisterTests PRIVATE "/MP")
