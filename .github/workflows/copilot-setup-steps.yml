@@ -39,9 +39,8 @@ jobs:
       shell: pwsh
       run: |
         cd external/vcpkg
-        git fetch --unshallow 2>$null
-        if (-not $?) { Write-Host "Already unshallowed or fetch failed (continuing)" }
-        cd ../..
+        git fetch --unshallow 2>$null; if (-not $?) { Write-Host "Already unshallowed or fetch failed (continuing)" }
+        exit 0
     
     - name: Bootstrap vcpkg
       shell: pwsh
@@ -52,11 +51,7 @@ jobs:
 
     - name: Configure CMake
       shell: pwsh
-      run: >
-        cmake -S . -B build
-        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake
-        -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
-        -DCMAKE_CUDA_COMPILER=nvcc
+      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="external\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CUDA_COMPILER=nvcc
 
     - name: Build
       shell: pwsh

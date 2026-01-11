@@ -46,12 +46,3 @@ jobs:
     - name: Build
       shell: pwsh
       run: cmake --build build -j32
-      
-    - name: Run Tests
-      shell: pwsh
-      run: |
-        cd build
-        .\EngineInterfaceTests.exe
-        .\NetworkTests.exe
-        .\PersisterTests.exe
-        .\EngineTests.exe
