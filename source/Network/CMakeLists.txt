@@ -15,7 +15,6 @@ add_library(Network OBJECT
     NetworkValidationService.h
     UserTO.h)
 
-target_link_libraries(Network Base)
 target_link_libraries(Network Boost::boost)
 target_link_libraries(Network OpenSSL::SSL OpenSSL::Crypto)
     

@@ -53,8 +53,6 @@ add_library(PersisterInterface OBJECT
     UploadNetworkResourceRequestData.h
     UploadNetworkResourceResultData.h)
 
-target_link_libraries(PersisterInterface Base)
-
 target_link_libraries(PersisterInterface Boost::boost)
 target_link_libraries(PersisterInterface ZLIB::ZLIB)
 

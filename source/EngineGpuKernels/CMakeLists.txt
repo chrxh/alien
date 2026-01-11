@@ -85,8 +85,6 @@ add_library(EngineGpuKernels OBJECT
     Util.cuh
     )
 
-target_link_libraries(EngineGpuKernels Base)
-target_link_libraries(EngineGpuKernels EngineInterface)
 target_link_libraries(EngineGpuKernels OpenGL::GL)
 target_link_libraries(EngineGpuKernels glad::glad)
 

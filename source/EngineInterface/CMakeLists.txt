@@ -65,8 +65,6 @@ add_library(EngineInterface OBJECT
     StatisticsHistory.h
     StatisticsRawData.h)
 
-target_link_libraries(EngineInterface Base)
-
 target_link_libraries(EngineInterface Boost::boost)
 target_link_libraries(EngineInterface glad::glad)
 

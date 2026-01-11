@@ -30,9 +30,6 @@ add_library(EngineImpl OBJECT
     TestKernelsService.cu
     TestKernelsService.cuh)
 
-target_link_libraries(EngineImpl Base)
-target_link_libraries(EngineImpl EngineGpuKernels)
-
 target_link_libraries(EngineImpl OpenGL::GL)
 target_link_libraries(EngineImpl glad::glad)
 target_link_libraries(EngineImpl Boost::boost)

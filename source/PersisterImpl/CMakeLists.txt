@@ -9,9 +9,6 @@ add_library(PersisterImpl OBJECT
     PersisterWorker.cpp
     PersisterWorker.h)
 
-target_link_libraries(PersisterImpl Base)
-target_link_libraries(PersisterImpl PersisterInterface)
-
 target_link_libraries(PersisterImpl Boost::boost)
 
 if (MSVC)
