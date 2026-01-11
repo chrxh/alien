@@ -1,10 +1,5 @@
-if (MSVC)
-    set(LIB_TYPE OBJECT)
-else()
-    set(LIB_TYPE STATIC)
-endif()
 
-add_library(PersisterInterface ${LIB_TYPE}
+add_library(PersisterInterface
     Definitions.h
     DeleteNetworkResourceRequestData.h
     DeleteNetworkResourceResultData.h
@@ -58,13 +53,13 @@ add_library(PersisterInterface ${LIB_TYPE}
     UploadNetworkResourceRequestData.h
     UploadNetworkResourceResultData.h)
 
-target_link_libraries(PersisterInterface PUBLIC Base)
+target_link_libraries(PersisterInterface Base)
 
-target_link_libraries(PersisterInterface PUBLIC Boost::boost)
-target_link_libraries(PersisterInterface PUBLIC ZLIB::ZLIB)
+target_link_libraries(PersisterInterface Boost::boost)
+target_link_libraries(PersisterInterface ZLIB::ZLIB)
 
 find_path(ZSTR_INCLUDE_DIRS "zstr.hpp")
-target_include_directories(PersisterInterface PUBLIC ${ZSTR_INCLUDE_DIRS})
+target_include_directories(PersisterInterface PRIVATE ${ZSTR_INCLUDE_DIRS})
 
 if (MSVC)
     target_compile_options(PersisterInterface PRIVATE "/MP")
