@@ -41,11 +41,7 @@ jobs:
 
     - name: Configure CMake
       shell: pwsh
-      run: |
-        cmake -S . -B build `
-          -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake `
-          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
-          -DCMAKE_CUDA_COMPILER=nvcc
+      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CUDA_COMPILER=nvcc
 
     - name: Build
       shell: pwsh
