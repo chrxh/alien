@@ -1,5 +1,5 @@
 
-add_library(Base
+add_library(Base OBJECT
     Cache.h
     Definitions.cpp
     Definitions.h

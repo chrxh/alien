@@ -1,5 +1,5 @@
 
-add_library(im_file_dialog
+add_library(im_file_dialog OBJECT
   ImFileDialog.cpp)
 
 target_include_directories(im_file_dialog PUBLIC .)

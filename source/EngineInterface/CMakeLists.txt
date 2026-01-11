@@ -1,5 +1,5 @@
 
-add_library(EngineInterface
+add_library(EngineInterface OBJECT
     ArraySizesForGpu.h
     ArraySizesForTO.h
     CellTypeConstants.h

@@ -1,5 +1,5 @@
 
-add_library(EngineTestData
+add_library(EngineTestData OBJECT
     DescriptionTestDataFactory.cpp
     DescriptionTestDataFactory.h
     TestHelper.cpp

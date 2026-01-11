@@ -1,5 +1,5 @@
 
-add_library(EngineImpl
+add_library(EngineImpl OBJECT
     DataAccessKernelsService.cu
     DataAccessKernelsService.cuh
     DescriptionConverterService.cpp

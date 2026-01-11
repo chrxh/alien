@@ -1,5 +1,5 @@
 
-add_library(PersisterInterface
+add_library(PersisterInterface OBJECT
     Definitions.h
     DeleteNetworkResourceRequestData.h
     DeleteNetworkResourceResultData.h

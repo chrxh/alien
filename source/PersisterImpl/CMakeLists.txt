@@ -1,5 +1,5 @@
 
-add_library(PersisterImpl
+add_library(PersisterImpl OBJECT
     Definitions.h
     PersisterFacadeImpl.cpp
     PersisterFacadeImpl.h

@@ -1,5 +1,5 @@
 
-add_library(EngineGpuKernels
+add_library(EngineGpuKernels OBJECT
     ActiveRadiationSources.cuh
     Array.cuh
     AttackerProcessor.cuh
