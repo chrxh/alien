@@ -1,0 +1,63 @@
+name: CMake (Windows)
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  MCP_AUTH_TOKEN: ${{ secrets.MCP_AUTH_TOKEN }}
+  
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: [self-hosted, Windows, CUDA]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    
+    - name: Unshallow vcpkg submodule
+      shell: pwsh
+      run: |
+        cd external/vcpkg
+        git fetch --unshallow 2>$null
+        if (-not $?) { Write-Host "Already unshallowed or fetch failed (continuing)" }
+        cd ../..
+    
+    - name: Bootstrap vcpkg
+      shell: pwsh
+      run: |
+        Push-Location external/vcpkg
+        .\bootstrap-vcpkg.bat -disableMetrics
+        Pop-Location
+
+    - name: Configure CMake
+      shell: pwsh
+      run: >
+        cmake -S . -B build
+        -G Ninja
+        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake
+        -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+        -DCMAKE_CUDA_COMPILER=nvcc
+
+    - name: Build
+      shell: pwsh
+      run: cmake --build build -j32
+      
+    - name: Run Tests
+      shell: pwsh
+      run: |
+        cd build
+        .\EngineInterfaceTests.exe
+        .\NetworkTests.exe
+        .\PersisterTests.exe
+        .\EngineTests.exe
