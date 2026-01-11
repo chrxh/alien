@@ -13,6 +13,7 @@ target_link_libraries(NetworkTests GLEW::GLEW)
 target_link_libraries(NetworkTests glfw)
 target_link_libraries(NetworkTests glad::glad)
 target_link_libraries(NetworkTests GTest::GTest GTest::Main)
+target_link_libraries(NetworkTests OpenSSL::SSL OpenSSL::Crypto)
 
 if (MSVC)
     target_compile_options(NetworkTests PRIVATE "/MP")

@@ -191,6 +191,7 @@ target_link_libraries(alien implot::implot)
 target_link_libraries(alien glfw)
 target_link_libraries(alien glad::glad)
 target_link_libraries(alien OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(alien ZLIB::ZLIB)
 
 include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ..)
 

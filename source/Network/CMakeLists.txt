@@ -16,7 +16,6 @@ add_library(Network OBJECT
     UserTO.h)
 
 target_link_libraries(Network Boost::boost)
-target_link_libraries(Network OpenSSL::SSL OpenSSL::Crypto)
     
 if (MSVC)
     target_compile_options(Network PRIVATE "/MP")
