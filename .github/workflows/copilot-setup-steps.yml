@@ -36,23 +36,42 @@ jobs:
         submodules: recursive
     
     - name: Unshallow vcpkg submodule
-      shell: pwsh
       run: |
         cd external/vcpkg
-        git fetch --unshallow 2>$null; if (-not $?) { Write-Host "Already unshallowed or fetch failed (continuing)" }
-        exit 0
+        git fetch --unshallow || true
+        cd ../..
     
-    - name: Bootstrap vcpkg
-      shell: pwsh
+    - name: Install Packages
       run: |
-        Push-Location external/vcpkg
-        .\bootstrap-vcpkg.bat -disableMetrics
-        Pop-Location
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev libxfixes-dev libgl1-mesa-dev libglu-dev
+        
+    - name: Install CUDA (via NVIDIA's repo)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnupg software-properties-common wget
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+        sudo dpkg -i cuda-keyring_1.1-1_all.deb
+        sudo apt-get update
+        sudo apt-get install -y cuda-compiler-13-0
 
-    - name: Configure CMake
-      shell: pwsh
-      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="external\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CUDA_COMPILER=nvcc
+    - name: Add CUDA to PATH
+      run: |
+        echo "/usr/local/cuda/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+        
+    - name: Bootstrap vcpkg
+      run: |
+        pushd external/vcpkg
+        ./bootstrap-vcpkg.sh -disableMetrics
+        popd
+
+    - name: Configure CMake (mit vcpkg Manifest-Mode)
+      run: >
+        cmake -S . -B build
+        -DCMAKE_TOOLCHAIN_FILE=external/vcpkg/scripts/buildsystems/vcpkg.cmake
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
 
     - name: Build
-      shell: pwsh
       run: cmake --build build -j32
