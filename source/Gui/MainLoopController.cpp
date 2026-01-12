@@ -238,7 +238,7 @@ void MainLoopController::processScheduleExit()
     if (_saveOnExit) {
         printOverlayMessage("Saving on exit ...");
 
-        auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = false};
+        auto senderInfo = SenderInfo{.senderId = SenderId{StartupSenderId}, .wishResultData = true, .wishErrorInfo = true};
         auto saveData = SaveSimulationRequestData{Const::AutosaveFile, Viewport::get().getZoomFactor(), Viewport::get().getCenterInWorldPos()};
         _saveSimRequestId = _PersisterFacade::get()->scheduleSaveSimulation(senderInfo, saveData);
         _programState = ProgramState::Exiting;
