@@ -7,6 +7,12 @@
 
 #ifdef _WIN32
 #include "WinReg/WinReg.hpp"
+#else
+#include <cstdlib>
+
+#include <pwd.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif
 
 #include <Base/LoggingService.h>
@@ -126,6 +132,53 @@ namespace
     void setBoolToWinReg(std::string const& name, bool const& value)
     {
         setStringToWinReg(name, value ? "1" : "0");
+    }
+}
+#endif
+
+#ifndef _WIN32
+namespace
+{
+    std::filesystem::path getLinuxConfigPath()
+    {
+        std::filesystem::path configHome;
+
+        // First, try XDG_CONFIG_HOME environment variable
+        const char* xdgConfigHome = std::getenv("XDG_CONFIG_HOME");
+        if (xdgConfigHome && xdgConfigHome[0] != '\0') {
+            configHome = xdgConfigHome;
+        } else {
+            // Fallback to ~/.config
+            const char* home = std::getenv("HOME");
+            if (!home || home[0] == '\0') {
+                // Last resort: use getpwuid
+                struct passwd* pw = getpwuid(getuid());
+                if (pw && pw->pw_dir) {
+                    home = pw->pw_dir;
+                }
+            }
+            if (home && home[0] != '\0') {
+                configHome = std::filesystem::path(home) / ".config";
+            } else {
+                // If all else fails, use current directory
+                configHome = ".";
+            }
+        }
+
+        return configHome / "alien";
+    }
+
+    std::filesystem::path getLinuxSettingsFilePath()
+    {
+        return getLinuxConfigPath() / "settings.json";
+    }
+
+    void ensureLinuxConfigDirectoryExists()
+    {
+        auto configPath = getLinuxConfigPath();
+        if (!std::filesystem::exists(configPath)) {
+            std::filesystem::create_directories(configPath);
+        }
     }
 }
 #endif
@@ -262,7 +315,8 @@ GlobalSettings::GlobalSettings()
     _impl = std::make_shared<GlobalSettingsImpl>();
 #ifndef _WIN32
     try {
-        std::ifstream stream(Const::SettingsFilename, std::ios::binary);
+        auto settingsPath = getLinuxSettingsFilePath();
+        std::ifstream stream(settingsPath, std::ios::binary);
         if (!stream) {
             return;
         }
@@ -282,11 +336,14 @@ GlobalSettings::~GlobalSettings()
 {
 #ifndef _WIN32
     try {
+        ensureLinuxConfigDirectoryExists();
+
         std::stringstream ss;
         boost::property_tree::json_parser::write_json(ss, _impl->_tree);
         auto data = ss.str();
 
-        std::ofstream stream(Const::SettingsFilename, std::ios::binary);
+        auto settingsPath = getLinuxSettingsFilePath();
+        std::ofstream stream(settingsPath, std::ios::binary);
         if (stream) {
             stream << data;
             stream.close();
