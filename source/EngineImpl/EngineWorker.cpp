@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include <Base/ExitScopeGuard.h>
+#include <Base/StackTraceHelper.h>
 
 #include <EngineInterface/DescriptionEditService.h>
 #include <EngineInterface/GeometryBuffers.h>
@@ -393,6 +394,7 @@ void EngineWorker::runThreadLoop()
             }
         }
     } catch (std::exception const& e) {
+        StackTraceHelper::logExceptionWithStackTrace(e.what());
         std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
         _exceptionData.errorMessage = e.what();
     }

@@ -7,6 +7,7 @@
 #include <Base/GlobalSettings.h>
 #include <Base/LoggingService.h>
 #include <Base/Resources.h>
+#include <Base/StackTraceHelper.h>
 #include <Base/StringHelper.h>
 
 #include <EngineInterface/SimulationFacade.h>
@@ -85,8 +86,10 @@ int main(int argc, char** argv)
 
         std::cout << "Finished" << std::endl;
     } catch (std::exception const& e) {
+        StackTraceHelper::logExceptionWithStackTrace(e.what());
         std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
     } catch (...) {
+        StackTraceHelper::logExceptionWithStackTrace("Unknown exception");
         std::cerr << "An unknown exception occurred." << std::endl;
     }
     return 0;
