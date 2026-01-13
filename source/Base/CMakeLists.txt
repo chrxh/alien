@@ -23,8 +23,6 @@ add_library(Base
     Physics.h
     Resources.h
     Singleton.h
-    StackTraceHelper.cpp
-    StackTraceHelper.h
     StringHelper.cpp
     StringHelper.h
     UnlockGuard.h

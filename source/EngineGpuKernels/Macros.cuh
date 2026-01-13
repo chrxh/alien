@@ -45,12 +45,15 @@ void checkAndThrowError(T result, char const* const func, const char* const file
                << "Location: " << file << ":" << line << " code=" << static_cast<unsigned int>(result) << "(" << _cudaGetErrorEnum(result) << ") \"" << func
                << "\"";
         auto text = stream.str();
-        log(Priority::Important, text);
 
         if (cudaError::cudaErrorMemoryAllocation == result) {
-            throw CudaMemoryAllocationException(text);
+            CudaMemoryAllocationException e(text);
+            log(Priority::Important, e.what());
+            throw e;
         } else {
-            throw std::runtime_error(text);
+            StackTraceException e(text);
+            log(Priority::Important, e.what());
+            throw e;
         }
     }
 }

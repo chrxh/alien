@@ -17,11 +17,8 @@ class StackTraceException : public std::runtime_error
 {
 public:
     StackTraceException(std::string const& what)
-        : std::runtime_error(what)
-        , _stackTrace(captureStackTrace())
+        : std::runtime_error(what + "\n\nStack trace:\n" + captureStackTrace())
     {}
-
-    std::string const& getStackTrace() const { return _stackTrace; }
 
 private:
     std::string _stackTrace;
