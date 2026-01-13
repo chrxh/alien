@@ -1,17 +1,7 @@
 #include "Exceptions.h"
 
-// Check for C++23 stacktrace support on Windows (MSVC)
-#if defined(_MSC_VER) && _MSC_VER >= 1930
-#if __has_include(<stacktrace>)
-#include <stacktrace>
-#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
-#define ALIEN_HAS_STACKTRACE 1
-#endif
-#endif
-#endif
-
-// Linux stack trace support using execinfo.h
-#if defined(__linux__) && !defined(ALIEN_HAS_STACKTRACE)
+// Linux stack trace support using execinfo.h (preferred on Linux)
+#if defined(__linux__)
 #include <cstdlib>
 #include <memory>
 #include <sstream>
@@ -22,22 +12,19 @@
 #define ALIEN_HAS_LINUX_BACKTRACE 1
 #endif
 
+// Check for C++23 stacktrace support (non-Linux platforms)
+#if !defined(ALIEN_HAS_LINUX_BACKTRACE) && __has_include(<stacktrace>)
+#include <stacktrace>
+#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
+#define ALIEN_HAS_STACKTRACE 1
+#endif
+#endif
+
 std::string captureStackTrace()
 {
     std::string result;
 
-#ifdef ALIEN_HAS_STACKTRACE
-    // Windows: Use C++23 std::stacktrace
-    try {
-        auto trace = std::stacktrace::current();
-        for (auto const& entry : trace) {
-            result += entry.description() + "\n";
-        }
-    } catch (...) {
-        result = "Failed to capture stack trace.";
-    }
-
-#elif defined(ALIEN_HAS_LINUX_BACKTRACE)
+#if defined(ALIEN_HAS_LINUX_BACKTRACE)
     // Linux: Use backtrace() and backtrace_symbols()
     constexpr int maxFrames = 64;
     void* frames[maxFrames];
@@ -75,6 +62,17 @@ std::string captureStackTrace()
         free(symbols);
         result = oss.str();
     } else {
+        result = "Failed to capture stack trace.";
+    }
+
+#elif defined(ALIEN_HAS_STACKTRACE)
+    // Use C++23 std::stacktrace (Windows/MSVC)
+    try {
+        auto trace = std::stacktrace::current();
+        for (auto const& entry : trace) {
+            result += entry.description() + "\n";
+        }
+    } catch (...) {
         result = "Failed to capture stack trace.";
     }
 #endif
