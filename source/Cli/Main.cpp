@@ -85,11 +85,14 @@ int main(int argc, char** argv)
         }
 
         std::cout << "Finished" << std::endl;
+    } catch (StackTraceException const& e) {
+        StackTraceHelper::logException(e);
+        std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
     } catch (std::exception const& e) {
-        StackTraceHelper::logExceptionWithStackTrace(e.what());
+        StackTraceHelper::logException(e);
         std::cerr << "An uncaught exception occurred: " << e.what() << std::endl;
     } catch (...) {
-        StackTraceHelper::logExceptionWithStackTrace("Unknown exception");
+        StackTraceHelper::logUnknownException();
         std::cerr << "An unknown exception occurred." << std::endl;
     }
     return 0;

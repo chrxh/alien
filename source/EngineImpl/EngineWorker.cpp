@@ -393,8 +393,12 @@ void EngineWorker::runThreadLoop()
                 _accessState = 2;
             }
         }
+    } catch (StackTraceException const& e) {
+        StackTraceHelper::logException(e);
+        std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
+        _exceptionData.errorMessage = e.what();
     } catch (std::exception const& e) {
-        StackTraceHelper::logExceptionWithStackTrace(e.what());
+        StackTraceHelper::logException(e);
         std::unique_lock<std::mutex> uniqueLock(_exceptionData.mutex);
         _exceptionData.errorMessage = e.what();
     }
