@@ -7,12 +7,14 @@
 // Function to capture stack trace at call site.
 // Implemented in Exceptions.cpp which is compiled with C++23.
 // This allows stack trace capture even when the header is included in CUDA code.
+// - Windows: Uses C++23 std::stacktrace (MSVC)
+// - Linux: Uses backtrace() and backtrace_symbols() with demangling
 std::string captureStackTrace();
 
 // Base exception class that captures stack trace at throw site.
 // The stack trace is captured in the constructor, preserving the call stack
 // at the point where the exception is created/thrown.
-// Works on Windows with MSVC and C++23.
+// Works on Windows (MSVC with C++23) and Linux (using backtrace).
 class StackTraceException : public std::runtime_error
 {
 public:
