@@ -23,7 +23,7 @@
 #ifdef _WIN32
 namespace
 {
-    std::string ConvertWideToUtf8(const std::wstring& wstr)
+    std::string ConvertWideToUtf8(std::wstring const& wstr)
     {
         int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL);
         std::string str(count, 0);
@@ -31,7 +31,7 @@ namespace
         return str;
     }
 
-    std::wstring ConvertUtf8ToWide(const std::string& str)
+    std::wstring ConvertUtf8ToWide(std::string const& str)
     {
         int count = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), NULL, 0);
         std::wstring wstr(count, 0);
@@ -41,7 +41,7 @@ namespace
 
     winreg::RegKey getOrCreateAlienRegKey()
     {
-        const std::wstring testSubKey = L"SOFTWARE\\alien";
+        std::wstring const testSubKey = L"SOFTWARE\\alien";
         winreg::RegKey key{HKEY_CURRENT_USER, testSubKey};
         if (key.TryOpen(HKEY_CURRENT_USER, testSubKey)) {
             return key;
@@ -144,12 +144,12 @@ namespace
         std::filesystem::path configHome;
 
         // First, try XDG_CONFIG_HOME environment variable
-        const char* xdgConfigHome = std::getenv("XDG_CONFIG_HOME");
+        char const* xdgConfigHome = std::getenv("XDG_CONFIG_HOME");
         if (xdgConfigHome && xdgConfigHome[0] != '\0') {
             configHome = xdgConfigHome;
         } else {
             // Fallback to ~/.config
-            const char* home = std::getenv("HOME");
+            char const* home = std::getenv("HOME");
             if (!home || home[0] == '\0') {
                 // Last resort: use getpwuid
                 struct passwd* pw = getpwuid(getuid());
