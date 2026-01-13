@@ -8,12 +8,10 @@ namespace StackTraceHelper
     {
         std::string logMessage = "Exception occurred: " + std::string(exception.what());
 
-#ifdef _WIN32
         std::string const& stackTrace = exception.getStackTrace();
         if (!stackTrace.empty()) {
             logMessage += "\nStack trace:\n" + stackTrace;
         }
-#endif
 
         log(Priority::Important, logMessage);
     }
