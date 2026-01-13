@@ -1515,6 +1515,11 @@ bool SerializerService::serializeSimulationToFiles(std::filesystem::path const& 
 {
     try {
         log(Priority::Important, "save simulation to " + filename.string());
+
+        if (filename.has_parent_path()) {
+            std::filesystem::create_directories(filename.parent_path());
+        }
+
         std::filesystem::path settingsFilename(filename);
         settingsFilename.replace_extension(std::filesystem::path(".settings.json"));
         std::filesystem::path statisticsFilename(filename);
