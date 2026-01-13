@@ -4,40 +4,22 @@
 #include <stdexcept>
 #include <string>
 
-// Check for C++23 stacktrace support
-// On MSVC, stacktrace is available with C++23
-// On GCC/libstdc++, it requires linking with libstdc++_libbacktrace which may not be available
-// Exclude CUDA compilation (__CUDACC__) since CUDA uses C++20
-#if defined(_MSC_VER) && _MSC_VER >= 1930 && !defined(__CUDACC__)
-#if __has_include(<stacktrace>)
-#include <stacktrace>
-#if defined(__cpp_lib_stacktrace) && __cpp_lib_stacktrace >= 202011L
-#define ALIEN_HAS_STACKTRACE 1
-#endif
-#endif
-#endif
+// Function to capture stack trace at call site.
+// Implemented in Exceptions.cpp which is compiled with C++23.
+// This allows stack trace capture even when the header is included in CUDA code.
+std::string captureStackTrace();
 
 // Base exception class that captures stack trace at throw site.
 // The stack trace is captured in the constructor, preserving the call stack
 // at the point where the exception is created/thrown.
-// Currently only supported on Windows with MSVC and C++23 (non-CUDA code).
+// Works on Windows with MSVC and C++23.
 class StackTraceException : public std::runtime_error
 {
 public:
     StackTraceException(std::string const& what)
         : std::runtime_error(what)
-    {
-#ifdef ALIEN_HAS_STACKTRACE
-        try {
-            auto trace = std::stacktrace::current();
-            for (auto const& entry : trace) {
-                _stackTrace += entry.description() + "\n";
-            }
-        } catch (...) {
-            _stackTrace = "Failed to capture stack trace.";
-        }
-#endif
-    }
+        , _stackTrace(captureStackTrace())
+    {}
 
     std::string const& getStackTrace() const { return _stackTrace; }
 

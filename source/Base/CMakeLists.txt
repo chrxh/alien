@@ -3,6 +3,7 @@ add_library(Base
     Cache.h
     Definitions.cpp
     Definitions.h
+    Exceptions.cpp
     Exceptions.h
     ExitScopeGuard.h
     FileLogger.cpp
