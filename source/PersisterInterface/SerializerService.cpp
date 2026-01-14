@@ -788,6 +788,7 @@ namespace
     auto constexpr Id_Cell_Sticky = 17;
     auto constexpr Id_Cell_FrontAngleId = 18;
     auto constexpr Id_Cell_IsFrontAngleRefCell = 19;
+    auto constexpr Id_Cell_CreatureId = 21;
 
     auto constexpr Id_Signal_Channels = 0;
     auto constexpr Id_Signal_NumTimesSent = 1;
@@ -1465,6 +1466,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Cell_SignalState, data._signalState, defaultObject._signalState);
         loadSave(task, auxiliaries, Id_Cell_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Cell_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
+        loadSave(task, auxiliaries, Id_Cell_CreatureId, data._creatureId, defaultObject._creatureId);
         processLoadSaveMap(task, ar, auxiliaries);
 
         ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
@@ -1485,8 +1487,6 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
 
         processLoadSaveMap(task, ar, auxiliaries);
-
-        ar(data._cells);
     }
     SPLIT_SERIALIZATION(CreatureDescription)
 

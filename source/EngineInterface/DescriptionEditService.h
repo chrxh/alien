@@ -113,7 +113,6 @@ public:
 
     void setCenter(Description& collection, RealVector2D const& center) const;
     RealVector2D calcCenter(Description const& collection) const;
-    RealVector2D calcCenter(CreatureDescription const& creature) const;
     void shift(Description& collection, RealVector2D const& delta) const;
     void rotate(Description& collection, float angle) const;
     void accelerate(Description& collection, RealVector2D const& velDelta, float angularVelDelta) const;
