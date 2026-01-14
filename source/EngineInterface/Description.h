@@ -547,14 +547,6 @@ struct CreatureDescription
 
     // Process data
     MEMBER(CreatureDescription, int, frontAngleId, 0);
-
-    // Compatibility: cells associated with this creature (populated during conversion)
-    std::vector<CellDescription> _cells;
-    CreatureDescription& cells(std::vector<CellDescription> const& cells)
-    {
-        _cells = cells;
-        return *this;
-    }
 };
 
 struct _DescriptionCache
@@ -582,7 +574,6 @@ struct Description
     void assignNewIds();  // Preserves order of cell ids
 
     Description& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome = GenomeDescription());
-    Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
 
     // Compatibility: iterate over all cells
     template <typename Func>

@@ -212,7 +212,7 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
 TEST_F(GeometryTests, copyBuffers_creature)
 {
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(1).pos({100.0f, 100.0f}),
         CellDescription().id(2).pos({101.0f, 100.0f}),
         CellDescription().id(3).pos({102.0f, 100.0f}),

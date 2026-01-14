@@ -57,11 +57,11 @@ TEST_F(EditTests, getSelectionShallowData_selectCells)
 TEST_F(EditTests, getSelectionShallowData_selectCreatures)
 {
     auto data = Description()
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(1).pos({50, 50}),
                         CellDescription().id(2).pos({51, 50}),
                     }))
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(3).pos({60, 50}),
                     }));
     data.addConnection(1, 2);
@@ -104,7 +104,7 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
                     .particles({
                         ParticleDescription().id(3).pos({52, 50}).energy(10.0f),
                     })
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(4).pos({53, 50}),
                         CellDescription().id(5).pos({54, 50}),
                         CellDescription().id(6).pos({55, 50}),
@@ -126,14 +126,14 @@ TEST_F(EditTests, getSelectionShallowData_selectMixed)
 TEST_F(EditTests, getSelectionShallowData_selectMultipleCreatures)
 {
     auto data = Description()
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(1).pos({50, 50}),
                         CellDescription().id(2).pos({51, 50}),
                     }))
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(3).pos({52, 50}),
                     }))
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(4).pos({70, 70}),
                     }));
     data.addConnection(1, 2);

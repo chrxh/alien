@@ -135,7 +135,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
     if (GetParam() == CellsOnCreature::No) {
         data._cells = {CellDescription().id(0), CellDescription().id(1)};
     } else {
-        data.addCreature(CreatureDescription().cells({CellDescription().id(0), CellDescription().id(1)}));
+        data.addCreature(CreatureDescription(), {CellDescription().id(0), CellDescription().id(1)}));
     }
 
     // Perform action
@@ -155,7 +155,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
         if (GetParam() == CellsOnCreature::No) {
             return Description().cells({CellDescription().id(0), CellDescription().id(0)});
         } else {
-            return Description().addCreature(CreatureDescription().cells({CellDescription().id(0), CellDescription().id(0)}));
+            return Description().addCreature(CreatureDescription(), {CellDescription().id(0), CellDescription().id(0)}));
         }
     };
     auto data = createCollection();
@@ -216,7 +216,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
                         CellDescription().id(0).connections({ConnectionDescription().cellId(1)}),
                         CellDescription().id(1).connections({ConnectionDescription().cellId(0)}),
                     })
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(0).connections({ConnectionDescription().cellId(1)}),
                         CellDescription().id(1).connections({ConnectionDescription().cellId(0)}),
                     }));
@@ -233,7 +233,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
     ASSERT_EQ(1, data._creatures.size());
 
     for (auto const& creature : data._creatures) {
-        ASSERT_EQ(2, creature._cells.size());
+        ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
         auto const& cell1 = creature._cells.front();
         auto const& cell2 = creature._cells.back();
 
@@ -249,11 +249,11 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(0).connections({ConnectionDescription().cellId(2)}),
                         CellDescription().id(1),
                     }))
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(2).connections({ConnectionDescription().cellId(0)}),
                     }));
 
@@ -270,10 +270,10 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 
     std::optional<CreatureDescription> smallCreature, largeCreature;
     for (auto const& creature : data._creatures) {
-        if (creature._cells.size() == 1) {
+        if (getCellsForCreature(actualData, creature._id).size() == 1) {
             smallCreature = creature;
         }
-        if (creature._cells.size() == 2) {
+        if (getCellsForCreature(actualData, creature._id).size() == 2) {
             largeCreature = creature;
         }
     }
@@ -307,7 +307,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
                         CellDescription().id(0).connections({ConnectionDescription().cellId(3)}),
                         CellDescription().id(1),
                     })
-                    .addCreature(CreatureDescription().cells({
+                    .addCreature(CreatureDescription(), {
                         CellDescription().id(2).connections({ConnectionDescription().cellId(4)}),
                     }));
     // Perform action
@@ -336,7 +336,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     EXPECT_EQ(3, cellWithConnection->_connections.front()._cellId);
 
     auto const& creature = data._creatures.front();
-    ASSERT_EQ(1, creature._cells.size());
+    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
 
     ASSERT_EQ(1, creature._cells.front()._connections.size());
     ASSERT_EQ(4, creature._cells.front()._connections.front()._cellId);
@@ -446,8 +446,8 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}))
-                    .addCreature(CreatureDescription().id(1).cells({CellDescription().id(0), CellDescription().id(0)}));
+                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)}))
+                    .addCreature(CreatureDescription().id(1), {CellDescription().id(0), CellDescription().id(0)}));
 
     // Perform action
     data.assignNewIds();
@@ -471,8 +471,8 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}))
-                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}));
+                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)}))
+                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)}));
 
     // Perform action
     data.assignNewIds();
@@ -496,8 +496,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
-                    .addCreature(CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}));
+                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(2), {CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -527,8 +527,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
-                    .addCreature(CreatureDescription().id(3).ancestorId(1).cells({CellDescription()}));
+                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(1), {CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -558,9 +558,9 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
-                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
-                    .addCreature(CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}));
+                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
+                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(2), {CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -581,8 +581,8 @@ TEST_F(DescriptionEditTests, adaptMaxIds)
 {
     auto data = Description()
                     .creatures({
-                        CreatureDescription().id(3).cells({CellDescription().id(5)}),
-                        CreatureDescription().cells({CellDescription()}),
+                        CreatureDescription().id(3), {CellDescription().id(5)}),
+                        CreatureDescription(), {CellDescription()}),
                     })
                     .particles({
                         ParticleDescription().id(7),

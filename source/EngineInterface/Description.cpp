@@ -429,11 +429,6 @@ Description& Description::addCreature(CreatureDescription const& creature, std::
     return *this;
 }
 
-Description& Description::addCreature(CreatureDescription const& creature, GenomeDescription const& genome)
-{
-    return addCreature(creature, creature._cells, genome);
-}
-
 DescriptionCache Description::createCache() const
 {
     DescriptionCache result = std::make_shared<_DescriptionCache>();

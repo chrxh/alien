@@ -147,7 +147,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
 
     Description data;
     data.addCreature(
-        CreatureDescription().cells({
+        CreatureDescription(), {
             CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true).cellType(getCellTypeDescription(cellType)),
             CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
         }),
@@ -190,7 +190,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
 
     Description data;
     data.addCreature(
-        CreatureDescription().cells({
+        CreatureDescription(), {
             CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(false).cellType(getCellTypeDescription(cellType)),
             CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
         }),
@@ -232,7 +232,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
         CreatureDescription().cells(
             {CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true).cellType(getCellTypeDescription(cellType))}),
         GenomeDescription());
-    data.addCreature(CreatureDescription().cells({CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}), GenomeDescription());
+    data.addCreature(CreatureDescription(), {CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}), GenomeDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);

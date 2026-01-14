@@ -125,7 +125,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
 TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
 {
     // Create sender and receiver in the same creature (both connected)
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(0).pos({99.0f, 100.0f}).signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
         CellDescription()
             .id(1)
@@ -174,7 +174,7 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
 TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
 {
     // Create sender in creature 1 with signal that has numTimesSent = 2 (equal to maxTimesSent)
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(2))),
         CellDescription()
             .id(101)
@@ -236,7 +236,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
 TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
 {
     // Create sender without active signal
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
         // No signalAndState set, so signal is not active
         CellDescription().id(101).pos({101.0f, 100.0f}),
@@ -259,7 +259,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
 TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
 {
     // Create first sender with numTimesSent = 3
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
         CellDescription()
             .id(101)
@@ -270,7 +270,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     data.addConnection(100, 101);
 
     // Create second sender with numTimesSent = 1 (higher priority)
-    data.addCreature(CreatureDescription().id(2).cells({
+    data.addCreature(CreatureDescription().id(2), {
         CellDescription().id(200).pos({100.0f, 120.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
         CellDescription()
             .id(201)
@@ -318,7 +318,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     auto receiverRefAngle = 90.0f + receiverRefAngleDiff;
     auto receiverConnectedCellOffset = Math::unitVectorOfAngle(receiverRefAngle);
 
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
         CellDescription()
             .id(101)
@@ -328,7 +328,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     }));
     data.addConnection(100, 101);
 
-    data.addCreature(CreatureDescription().id(2).cells({
+    data.addCreature(CreatureDescription().id(2), {
         CellDescription().id(200).pos({120.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
         CellDescription().id(201).pos({120.0f + receiverConnectedCellOffset.x, 100.0f + receiverConnectedCellOffset.y}),
     }));

@@ -24,7 +24,7 @@ public:
         auto worldSize = toRealVector2D(_simulationFacade->getWorldSize());
         auto& numberGen = NumberGenerator::get();
         return Description().addCreature(
-            CreatureDescription().lineageId(0).cells({
+            CreatureDescription().lineageId(0), {
                 CellDescription()
                     .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
                     .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
@@ -57,7 +57,7 @@ public:
         auto& numberGen = NumberGenerator::get();
         auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 1.0f : 0.0f;
         return Description().addCreature(
-            CreatureDescription().lineageId(1).cells({
+            CreatureDescription().lineageId(1), {
                 CellDescription()
                     .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
                     .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),

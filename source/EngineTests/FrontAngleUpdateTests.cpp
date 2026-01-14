@@ -47,7 +47,7 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, creature._cells.size());
+    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
 
     EXPECT_FALSE(actualData.getCellRef(1)._frontAngle.has_value());
     EXPECT_FALSE(actualData.getCellRef(2)._frontAngle.has_value());
@@ -79,7 +79,7 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(2, creature._cells.size());
+    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
 
     EXPECT_FALSE(actualData.getCellRef(1)._frontAngle.has_value());
     EXPECT_FALSE(actualData.getCellRef(2)._frontAngle.has_value());
@@ -126,7 +126,7 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(9, creature._cells.size());
+    ASSERT_EQ(9, getCellsForCreature(actualData, creature._id).size());
 
     EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
     EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
@@ -167,7 +167,7 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, creature._cells.size());
+    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
 
     EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
     EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
@@ -193,7 +193,7 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
         GenomeDescription().frontAngle(FrontAngle));
 
     data.addCreature(
-        CreatureDescription().id(2).cells({
+        CreatureDescription().id(2), {
             CellDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
         }),
         GenomeDescription().frontAngle(FrontAngle));
@@ -211,14 +211,14 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
 
     {
         auto creature = actualData.getCreatureRef(1);
-        ASSERT_EQ(2, creature._cells.size());
+        ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
 
         EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
         EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
     }
     {
         auto creature = actualData.getCreatureRef(2);
-        ASSERT_EQ(1, creature._cells.size());
+        ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
 
         EXPECT_FALSE(actualData.getCellRef(3)._frontAngle.has_value());
     }
@@ -273,7 +273,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(4, creature._cells.size());
+    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
         EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
@@ -325,7 +325,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, creature._cells.size());
+    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
         EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(1)._frontAngle.value()));
@@ -375,7 +375,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, creature._cells.size());
+    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
 
     EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getCellRef(1)._frontAngle.value()));
     EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getCellRef(2)._frontAngle.value()));
