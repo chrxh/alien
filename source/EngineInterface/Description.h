@@ -493,6 +493,7 @@ struct CellDescription
     MEMBER(CellDescription, CellState, cellState, CellState_Ready);
 
     // Creature/genome data
+    MEMBER(CellDescription, std::optional<uint64_t>, creatureId, std::nullopt);
     MEMBER(CellDescription, int, nodeIndex, 0);
     MEMBER(CellDescription, int, parentNodeIndex, 0);
     MEMBER(CellDescription, int, geneIndex, 0);
@@ -543,38 +544,14 @@ struct CreatureDescription
     MEMBER(CreatureDescription, int, lineageId, 0);
     MEMBER(CreatureDescription, int, numCells, 0);
     MEMBER(CreatureDescription, uint64_t, genomeId, 0);
-    MEMBER(CreatureDescription, std::vector<CellDescription>, cells, {});
 
     // Process data
     MEMBER(CreatureDescription, int, frontAngleId, 0);
 };
 
-// TODO change CreatureDescription to following
-//struct CreatureDescription
-//{
-//    CreatureDescription();
-//    auto operator<=>(CreatureDescription const&) const = default;
-//
-//    uint64_t _id = 0;
-//    CreatureDescription id(uint64_t id);
-//    MEMBER(CreatureDescription, std::optional<uint64_t>, ancestorId, std::nullopt);
-//    MEMBER(CreatureDescription, int, generation, 0);
-//    MEMBER(CreatureDescription, int, lineageId, 0);
-//    MEMBER(CreatureDescription, int, numCells, 0);
-//    MEMBER(CreatureDescription, uint64_t, genomeId, 0);
-//
-//    // Process data
-//    MEMBER(CreatureDescription, int, frontAngleId, 0);
-//};
-
 struct _DescriptionCache
 {
-    struct Index
-    {
-        std::optional<int> creatureIndex;
-        int cellIndex;
-    };
-    std::unordered_map<uint64_t, Index> cellIdToIndex;
+    std::unordered_map<uint64_t, int> cellIdToIndex;
     std::unordered_map<uint64_t, uint64_t> genomeIdToIndex;
 };
 using DescriptionCache = std::shared_ptr<_DescriptionCache>;
@@ -588,14 +565,6 @@ struct Description
     MEMBER(Description, std::vector<CreatureDescription>, creatures, {});
     MEMBER(Description, std::vector<GenomeDescription>, genomes, {});
 
-    void forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const;
-    void forEachCell(std::function<void(CellDescription&)> const& applyFunc);
-    // First parameter of lambda is creature index, second parameter is cell index
-    void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const;
-    void forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc);
-
-    size_t getNumCells() const;
-
     void clear();
     bool isEmpty() const;
 
@@ -604,7 +573,7 @@ struct Description
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
+    Description& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome = GenomeDescription());
 
     DescriptionCache createCache() const;
     Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache = nullptr);
@@ -612,7 +581,6 @@ struct Description
 
     CellDescription const& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr) const;
     CellDescription& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr);
-    CellDescription& getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex);
 
     CellDescription& getOtherCellRef(uint64_t id);
     CellDescription& getOtherCellRef(std::set<uint64_t> const& ids);
@@ -628,53 +596,8 @@ struct Description
     CreatureDescription& getOtherCreatureRef(uint64_t id);
 
 private:
-    _DescriptionCache::Index getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
+    int getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
 };
-
-// TODO change Description to following
-//struct Description
-//{
-//    auto operator<=>(Description const&) const = default;
-//
-//    MEMBER(Description, std::vector<CellDescription>, cells, {});
-//    MEMBER(Description, std::vector<ParticleDescription>, particles, {});
-//    MEMBER(Description, std::vector<CreatureDescription>, creatures, {});
-//    MEMBER(Description, std::vector<GenomeDescription>, genomes, {});
-//
-//    void clear();
-//    bool isEmpty() const;
-//
-//    Description& add(Description&& other, bool assignNewIds = true);
-//
-//    bool hasUniqueIds() const;
-//    void assignNewIds();  // Preserves order of cell ids
-//
-//    Description& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome = GenomeDescription());
-//
-//    DescriptionCache createCache() const;
-//    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache = nullptr);
-//    Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, RealVector2D const& refPosCell2, DescriptionCache const& cache = nullptr);
-//
-//    CellDescription const& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr) const;
-//    CellDescription& getCellRef(uint64_t const& cellId, DescriptionCache const& cache = nullptr);
-//    CellDescription& getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex);
-//
-//    CellDescription& getOtherCellRef(uint64_t id);
-//    CellDescription& getOtherCellRef(std::set<uint64_t> const& ids);
-//    std::vector<CellDescription> getOtherCells(std::set<uint64_t> const& ids) const;
-//
-//    GenomeDescription const& getGenomeRef(uint64_t const& genomeId, DescriptionCache const& cache = nullptr) const;
-//
-//    bool hasConnection(uint64_t id, uint64_t otherId) const;
-//    bool hasConnection(CellDescription const& cell1, CellDescription const& cell2) const;
-//    ConnectionDescription& getConnectionRef(uint64_t id, uint64_t otherId);
-//    ConnectionDescription const& getConnection(CellDescription const& cell1, CellDescription const& cell2) const;
-//    CreatureDescription& getCreatureRef(uint64_t id);
-//    CreatureDescription& getOtherCreatureRef(uint64_t id);
-//
-//private:
-//    _DescriptionCache::Index getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
-//};
 
 struct ExtendedCellDescription
 {

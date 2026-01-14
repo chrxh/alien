@@ -236,75 +236,6 @@ CreatureDescription CreatureDescription::id(uint64_t id)
     return *this;
 }
 
-void Description::forEachCell(std::function<void(CellDescription const&)> const& applyFunc) const
-{
-    for (auto const& cell : _cells) {
-        applyFunc(cell);
-    }
-    for (auto const& creature : _creatures) {
-        for (auto const& cell : creature._cells) {
-            applyFunc(cell);
-        }
-    }
-}
-
-void Description::forEachCell(std::function<void(CellDescription&)> const& applyFunc)
-{
-    for (auto& cell : _cells) {
-        applyFunc(cell);
-    }
-    for (auto& creature : _creatures) {
-        for (auto& cell : creature._cells) {
-            applyFunc(cell);
-        }
-    }
-}
-
-void Description::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription const&)> const& applyFunc) const
-{
-    uint64_t cellIndex = 0;
-    for (auto const& cell : _cells) {
-        applyFunc(std::nullopt, cellIndex, cell);
-        ++cellIndex;
-    }
-    uint64_t creatureIndex = 0;
-    for (auto const& creature : _creatures) {
-        cellIndex = 0;
-        for (auto const& cell : creature._cells) {
-            applyFunc(creatureIndex, cellIndex, cell);
-            ++cellIndex;
-        }
-        ++creatureIndex;
-    }
-}
-
-void Description::forEachCell(std::function<void(std::optional<uint64_t> const&, uint64_t, CellDescription&)> const& applyFunc)
-{
-    uint64_t cellIndex = 0;
-    for (auto& cell : _cells) {
-        applyFunc(std::nullopt, cellIndex, cell);
-        ++cellIndex;
-    }
-    uint64_t creatureIndex = 0;
-    for (auto& creature : _creatures) {
-        cellIndex = 0;
-        for (auto& cell : creature._cells) {
-            applyFunc(creatureIndex, cellIndex, cell);
-            ++cellIndex;
-        }
-        ++creatureIndex;
-    }
-}
-
-size_t Description::getNumCells() const
-{
-    size_t result = _cells.size();
-    for (auto const& creature : _creatures) {
-        result += creature._cells.size();
-    }
-    return result;
-}
-
 void Description::clear()
 {
     _cells.clear();
@@ -315,9 +246,7 @@ void Description::clear()
 
 bool Description::isEmpty() const
 {
-    auto numCells = 0;
-    forEachCell([&numCells](auto const& cell) { ++numCells; });
-    return numCells == 0 && _particles.empty();
+    return _cells.empty() && _particles.empty();
 }
 
 Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
@@ -335,12 +264,10 @@ Description& Description::add(Description&& other, bool assignNewIds /*= true*/)
 bool Description::hasUniqueIds() const
 {
     std::unordered_set<uint64_t> cellIds;
-    uint64_t numCells = 0;
-    forEachCell([&](auto const& cell) {
+    for (auto const& cell : _cells) {
         cellIds.insert(cell._id);
-        ++numCells;
-    });
-    if (cellIds.size() != numCells) {
+    }
+    if (cellIds.size() != _cells.size()) {
         return false;
     }
 
@@ -372,81 +299,50 @@ bool Description::hasUniqueIds() const
 
 void Description::assignNewIds()
 {
-    struct IndexKey
-    {
-        std::optional<uint64_t> creatureIndex;
-        uint64_t cellIndex;
-        auto operator<=>(IndexKey const&) const = default;
-    };
-
-    // Create (index, cellId) vector sorted by cell id
-    std::vector<std::pair<IndexKey, uint64_t>> indexToNewCellId;
-    forEachCell([&indexToNewCellId](std::optional<uint64_t> const& creatureIndex, uint64_t cellIndex, CellDescription const& cell) {
-        indexToNewCellId.emplace_back(IndexKey{.creatureIndex = creatureIndex, .cellIndex = cellIndex}, 0);
-    });
-    std::sort(indexToNewCellId.begin(), indexToNewCellId.end(), [this](auto const& lhs, auto const& rhs) {
-        return getCellRef(lhs.first.creatureIndex, lhs.first.cellIndex)._id < getCellRef(rhs.first.creatureIndex, rhs.first.cellIndex)._id;
+    // Create (index, oldCellId) vector sorted by cell id
+    std::vector<std::pair<int, uint64_t>> indexToOldCellId;
+    for (int i = 0; i < toInt(_cells.size()); ++i) {
+        indexToOldCellId.emplace_back(i, _cells[i]._id);
+    }
+    std::sort(indexToOldCellId.begin(), indexToOldCellId.end(), [](auto const& lhs, auto const& rhs) {
+        return lhs.second < rhs.second;
     });
 
     // Generate new cellIds and create maps for fast access
-    struct IndexIdKey
-    {
-        std::optional<uint64_t> creatureIndex;
-        uint64_t cellId;
-
-        auto operator<=>(IndexIdKey const&) const = default;
-    };
-    std::map<IndexIdKey, uint64_t> indexIdToNewCellId;
-    std::unordered_map<uint64_t, uint64_t> oldToNewCellId_global;
-    std::unordered_set<uint64_t> nonUniqueCellIds_global;
-    for (auto& [key, value] : indexToNewCellId) {
-        value = NumberGenerator::get().createId();
-        auto& cell = getCellRef(key.creatureIndex, key.cellIndex);
-        auto insertionResult = oldToNewCellId_global.insert({cell._id, value});
+    std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
+    std::unordered_set<uint64_t> nonUniqueCellIds;
+    for (auto& [index, oldId] : indexToOldCellId) {
+        auto newId = NumberGenerator::get().createId();
+        auto insertionResult = oldToNewCellId.insert({oldId, newId});
         if (!insertionResult.second) {
-            nonUniqueCellIds_global.insert(cell._id);
+            nonUniqueCellIds.insert(oldId);
         }
-        indexIdToNewCellId.insert({IndexIdKey{.creatureIndex = key.creatureIndex, .cellId = cell._id}, value});
-        cell._id = value;
+        _cells[index]._id = newId;
     }
 
     // Helper for finding new cellId (uses original cellIds)
-    auto findNewCellId = [&](std::optional<uint64_t> creatureIndex, uint64_t cellId) {
-        // Look in cells for given creature
-        auto it = indexIdToNewCellId.find(IndexIdKey{.creatureIndex = creatureIndex, .cellId = cellId});
-        if (it != indexIdToNewCellId.end()) {
-            return it->second;
-        }
-
-        // Fallback: check in global map if unique
-        else if (!nonUniqueCellIds_global.contains(cellId)) {
-            auto findResult = oldToNewCellId_global.find(cellId);
-            if (findResult != oldToNewCellId_global.end()) {
+    auto findNewCellId = [&](uint64_t cellId) {
+        if (!nonUniqueCellIds.contains(cellId)) {
+            auto findResult = oldToNewCellId.find(cellId);
+            if (findResult != oldToNewCellId.end()) {
                 return findResult->second;
             }
-
-            // Else: cell not contained in data => return old cellId
-            else {
-                return cellId;
-            }
+            return cellId;
         }
-
-        // Else: cellId not unique => error
-        else {
-            THROW_NOT_IMPLEMENTED();
-        }
+        THROW_NOT_IMPLEMENTED();
     };
-    forEachCell([&](std::optional<uint64_t> const& creatureIndex, uint64_t cellIndex, CellDescription& cell) {
+
+    for (auto& cell : _cells) {
         for (auto& connection : cell._connections) {
-            connection._cellId = findNewCellId(creatureIndex, connection._cellId);
+            connection._cellId = findNewCellId(connection._cellId);
         }
         if (cell.getCellType() == CellType_Constructor) {
             auto& constructor = std::get<ConstructorDescription>(cell._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = findNewCellId(creatureIndex, constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewCellId(constructor._lastConstructedCellId.value());
             }
         }
-    });
+    }
 
     // Generate new creatureIds
     std::unordered_map<uint64_t, uint64_t> oldToNewCreatureId;
@@ -460,7 +356,19 @@ void Description::assignNewIds()
         creature._id = newId;
     }
 
-    // Assign new creatureIds
+    // Assign new creatureIds to cells
+    for (auto& cell : _cells) {
+        if (cell._creatureId.has_value()) {
+            if (!nonUniqueCreatureIds.contains(cell._creatureId.value())) {
+                auto findResult = oldToNewCreatureId.find(cell._creatureId.value());
+                if (findResult != oldToNewCreatureId.end()) {
+                    cell._creatureId = findResult->second;
+                }
+            }
+        }
+    }
+
+    // Assign new creatureIds (ancestorId)
     for (auto& creature : _creatures) {
         if (creature._ancestorId.has_value()) {
             if (nonUniqueCreatureIds.contains(creature._ancestorId.value())) {
@@ -498,7 +406,7 @@ void Description::assignNewIds()
     }
 }
 
-Description& Description::addCreature(CreatureDescription const& creature, GenomeDescription const& genome)
+Description& Description::addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome)
 {
     // Add genome to genomes array if not already present
     auto genomeIt = std::find_if(_genomes.begin(), _genomes.end(), [&genome](auto const& g) { return g._id == genome._id; });
@@ -509,8 +417,14 @@ Description& Description::addCreature(CreatureDescription const& creature, Genom
     // Add creature with genomeId and numCells set
     auto newCreature = creature;
     newCreature._genomeId = genome._id;
-    newCreature._numCells = toInt(newCreature._cells.size());
+    newCreature._numCells = toInt(cells.size());
     _creatures.emplace_back(newCreature);
+
+    // Add cells with creatureId set
+    for (auto cell : cells) {
+        cell._creatureId = creature._id;
+        _cells.emplace_back(cell);
+    }
 
     return *this;
 }
@@ -518,13 +432,8 @@ Description& Description::addCreature(CreatureDescription const& creature, Genom
 DescriptionCache Description::createCache() const
 {
     DescriptionCache result = std::make_shared<_DescriptionCache>();
-    for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
-        for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
-            result->cellIdToIndex.emplace(cell._id, _DescriptionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)});
-        }
-    }
     for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
-        result->cellIdToIndex.emplace(cell._id, _DescriptionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)});
+        result->cellIdToIndex.emplace(cell._id, toInt(cellIndex));
     }
     for (auto const& [genomeIndex, genome] : _genomes | boost::adaptors::indexed(0)) {
         result->genomeIdToIndex.emplace(genome._id, genomeIndex);
@@ -631,22 +540,11 @@ CellDescription const& Description::getCellRef(uint64_t const& cellId, Descripti
 {
     if (cache != nullptr) {
         auto index = getCellIndex(cellId, cache);
-        if (index.creatureIndex.has_value()) {
-            return _creatures.at(index.creatureIndex.value())._cells.at(index.cellIndex);
-        } else {
-            return _cells.at(index.cellIndex);
-        }
+        return _cells.at(index);
     } else {
-        for (auto& cell : _cells) {
+        for (auto const& cell : _cells) {
             if (cell._id == cellId) {
                 return cell;
-            }
-        }
-        for (auto& creature : _creatures) {
-            for (auto& cell : creature._cells) {
-                if (cell._id == cellId) {
-                    return cell;
-                }
             }
         }
         CHECK(false);
@@ -657,22 +555,11 @@ CellDescription& Description::getCellRef(uint64_t const& cellId, DescriptionCach
 {
     if (cache != nullptr) {
         auto index = getCellIndex(cellId, cache);
-        if (index.creatureIndex.has_value()) {
-            return _creatures.at(index.creatureIndex.value())._cells.at(index.cellIndex);
-        } else {
-            return _cells.at(index.cellIndex);
-        }
+        return _cells.at(index);
     } else {
         for (auto& cell : _cells) {
             if (cell._id == cellId) {
                 return cell;
-            }
-        }
-        for (auto& creature : _creatures) {
-            for (auto& cell : creature._cells) {
-                if (cell._id == cellId) {
-                    return cell;
-                }
             }
         }
         CHECK(false);
@@ -692,25 +579,11 @@ CellDescription& Description::getOtherCellRef(std::set<uint64_t> const& ids)
             matchingCells.emplace_back(cell._id);
         }
     }
-    for (auto& creature : _creatures) {
-        for (auto& cell : creature._cells) {
-            if (!ids.contains(cell._id)) {
-                matchingCells.emplace_back(cell._id);
-            }
-        }
-    }
     CHECK(matchingCells.size() == 1);
 
     for (auto& cell : _cells) {
         if (!ids.contains(cell._id)) {
             return cell;
-        }
-    }
-    for (auto& creature : _creatures) {
-        for (auto& cell : creature._cells) {
-            if (!ids.contains(cell._id)) {
-                return cell;
-            }
         }
     }
     CHECK(false);
@@ -719,11 +592,11 @@ CellDescription& Description::getOtherCellRef(std::set<uint64_t> const& ids)
 std::vector<CellDescription> Description::getOtherCells(std::set<uint64_t> const& ids) const
 {
     std::vector<CellDescription> result;
-    forEachCell([&](auto const& cell) {
+    for (auto const& cell : _cells) {
         if (!ids.contains(cell._id)) {
             result.emplace_back(cell);
         }
-    });
+    }
     return result;
 }
 
@@ -739,15 +612,6 @@ GenomeDescription const& Description::getGenomeRef(uint64_t const& genomeId, Des
             }
         }
         CHECK(false);
-    }
-}
-
-CellDescription& Description::getCellRef(std::optional<uint64_t> const& creatureIndex, uint64_t const& cellIndex)
-{
-    if (!creatureIndex.has_value()) {
-        return _cells.at(cellIndex);
-    } else {
-        return _creatures.at(creatureIndex.value())._cells.at(cellIndex);
     }
 }
 
@@ -808,32 +672,11 @@ CreatureDescription& Description::getOtherCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-_DescriptionCache::Index Description::getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const
+int Description::getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const
 {
-    _DescriptionCache::Index result;
     auto findResult = cache->cellIdToIndex.find(cellId);
     if (findResult != cache->cellIdToIndex.end()) {
-        result = findResult->second;
-    } else {
-        auto found = false;
-        for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
-            for (auto const& [cellIndex, cell] : creature._cells | boost::adaptors::indexed(0)) {
-                result = _DescriptionCache::Index{.creatureIndex = toInt(creatureIndex), .cellIndex = toInt(cellIndex)};
-                found = true;
-                break;
-            }
-            if (found) {
-                break;
-            }
-        }
-        for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
-            result = _DescriptionCache::Index{.creatureIndex = std::nullopt, .cellIndex = toInt(cellIndex)};
-            found = true;
-            break;
-        }
-        if (!found) {
-            CHECK(false);
-        }
+        return findResult->second;
     }
-    return result;
+    CHECK(false);
 }

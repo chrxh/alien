@@ -47,12 +47,6 @@ bool TestHelper::compare(Description left, Description right)
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._genomes.begin(), right._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    for (auto& creature : left._creatures) {
-        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    }
-    for (auto& creature : right._creatures) {
-        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    }
     return left == right;
 }
 

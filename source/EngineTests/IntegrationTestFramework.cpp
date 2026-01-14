@@ -69,11 +69,6 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
     for (auto const& cell : data._cells) {
         result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(cell);
     }
-    for (auto const& creature : data._creatures) {
-        for (auto const& cell : creature._cells) {
-            result += cell._usableEnergy + cell._rawEnergy + getDepotEnergy(cell);
-        }
-    }
     for (auto const& particle : data._particles) {
         result += particle._energy;
     }
