@@ -594,6 +594,11 @@ struct Description
 
     size_t getNumCells() const { return _cells.size(); }
 
+    size_t getNumFreeCells() const
+    {
+        return std::count_if(_cells.begin(), _cells.end(), [](auto const& cell) { return !cell._creatureId.has_value(); });
+    }
+
     std::vector<CellDescription> getCellsForCreature(uint64_t creatureId) const
     {
         std::vector<CellDescription> result;
