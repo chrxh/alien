@@ -626,7 +626,7 @@ struct Description
     CreatureDescription& getOtherCreatureRef(uint64_t id);
 
 private:
-    int getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
+    uint64_t getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const;
 };
 
 struct ExtendedCellDescription

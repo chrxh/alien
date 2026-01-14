@@ -304,24 +304,51 @@ void Description::assignNewIds()
     for (int i = 0; i < toInt(_cells.size()); ++i) {
         indexToOldCellId.emplace_back(i, _cells[i]._id);
     }
-    std::sort(indexToOldCellId.begin(), indexToOldCellId.end(), [](auto const& lhs, auto const& rhs) {
-        return lhs.second < rhs.second;
-    });
 
     // Generate new cellIds and create maps for fast access
     std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
     std::unordered_set<uint64_t> nonUniqueCellIds;
+
+    std::unordered_map<std::optional<uint64_t>, std::map<uint64_t, uint64_t>> creatureIdToOldToNewCellId;
+    std::unordered_map<std::optional<uint64_t>, std::set<uint64_t>> creatureIdToNonUniqueCellIds;
+
     for (auto& [index, oldId] : indexToOldCellId) {
         auto newId = NumberGenerator::get().createId();
-        auto insertionResult = oldToNewCellId.insert({oldId, newId});
-        if (!insertionResult.second) {
-            nonUniqueCellIds.insert(oldId);
+
+        auto& cell = _cells.at(index);
+        {
+            auto insertionResult = oldToNewCellId.insert({oldId, newId});
+            if (!insertionResult.second) {
+                nonUniqueCellIds.insert(oldId);
+            }
         }
-        _cells[index]._id = newId;
+        {
+            auto insertionResult = creatureIdToOldToNewCellId[cell._creatureId].insert({oldId, newId});
+            if (!insertionResult.second) {
+                creatureIdToNonUniqueCellIds[cell._creatureId].insert(oldId);
+            }
+        }
+
+        cell._id = newId;
     }
 
     // Helper for finding new cellId (uses original cellIds)
-    auto findNewCellId = [&](uint64_t cellId) {
+    auto findNewCellId = [&](std::optional<uint64_t> const& creatureId, uint64_t cellId) {
+
+        // Look in cells for given creature
+        if (!nonUniqueCellIds.contains(cellId)) {
+            auto creatureFindResult = creatureIdToOldToNewCellId.find(creatureId);
+            if (creatureFindResult != creatureIdToOldToNewCellId.end()) {
+                auto& oldToNewCellId = creatureFindResult->second;
+                auto findResult = oldToNewCellId.find(cellId);
+                if (findResult != oldToNewCellId.end()) {
+                    return findResult->second;
+                }
+            }
+            return cellId;
+        }
+
+        // Fallback: check in global map if unique
         if (!nonUniqueCellIds.contains(cellId)) {
             auto findResult = oldToNewCellId.find(cellId);
             if (findResult != oldToNewCellId.end()) {
@@ -329,17 +356,19 @@ void Description::assignNewIds()
             }
             return cellId;
         }
-        THROW_NOT_IMPLEMENTED();
+
+        // Else: cellId not unique => error
+        CHECK(false);
     };
 
     for (auto& cell : _cells) {
         for (auto& connection : cell._connections) {
-            connection._cellId = findNewCellId(connection._cellId);
+            connection._cellId = findNewCellId(cell._creatureId, connection._cellId);
         }
         if (cell.getCellType() == CellType_Constructor) {
             auto& constructor = std::get<ConstructorDescription>(cell._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = findNewCellId(constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewCellId(cell._creatureId, constructor._lastConstructedCellId.value());
             }
         }
     }
@@ -364,6 +393,8 @@ void Description::assignNewIds()
                 if (findResult != oldToNewCreatureId.end()) {
                     cell._creatureId = findResult->second;
                 }
+            } else {
+                CHECK(false);
             }
         }
     }
@@ -672,7 +703,7 @@ CreatureDescription& Description::getOtherCreatureRef(uint64_t id)
     CHECK(false);
 }
 
-int Description::getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const
+uint64_t Description::getCellIndex(uint64_t const& cellId, DescriptionCache const& cache) const
 {
     auto findResult = cache->cellIdToIndex.find(cellId);
     if (findResult != cache->cellIdToIndex.end()) {
