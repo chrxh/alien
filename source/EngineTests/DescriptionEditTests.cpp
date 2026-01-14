@@ -179,19 +179,19 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
         }
         std::sort(data._cells.begin(), data._cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
     } else {
-        CreatureDescription creature;
+        std::vector<CellDescription> cells;
         for (int i = 0; i < 10; ++i) {
-            creature._cells.emplace_back(CellDescription().id(i).age(i));
+            cells.emplace_back(CellDescription().id(i).age(i));
         }
-        std::sort(creature._cells.begin(), creature._cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
-        data.addCreature(creature);
+        std::sort(cells.begin(), cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
+        data.addCreature(CreatureDescription(), cells);
     }
 
     // Perform action
     data.assignNewIds();
 
     // Check result
-    auto const& cells = GetParam() == CellsOnCreature::No ? data._cells : data._creatures.front()._cells;
+    auto cells = GetParam() == CellsOnCreature::No ? data._cells : data.getCellsForCreature(data._creatures.front()._id);
     std::map<int, CellDescription> ageToCell;
     for (auto const& cell : cells) {
         ageToCell.insert_or_assign(cell._age, cell);
@@ -233,9 +233,10 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
     ASSERT_EQ(1, data._creatures.size());
 
     for (auto const& creature : data._creatures) {
-        ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
-        auto const& cell1 = actualData.getCellsForCreature(creature._id).front();
-        auto const& cell2 = creature._cells.back();
+        auto creatureCells = data.getCellsForCreature(creature._id);
+        ASSERT_EQ(2, creatureCells.size());
+        auto const& cell1 = creatureCells.front();
+        auto const& cell2 = creatureCells.back();
 
         ASSERT_EQ(1, cell1._connections.size());
         EXPECT_EQ(cell2._id, cell1._connections.front()._cellId);
@@ -270,21 +271,23 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 
     std::optional<CreatureDescription> smallCreature, largeCreature;
     for (auto const& creature : data._creatures) {
-        if (actualData.getCellsForCreature(creature._id).size() == 1) {
+        if (data.getCellsForCreature(creature._id).size() == 1) {
             smallCreature = creature;
         }
-        if (actualData.getCellsForCreature(creature._id).size() == 2) {
+        if (data.getCellsForCreature(creature._id).size() == 2) {
             largeCreature = creature;
         }
     }
     ASSERT_TRUE(smallCreature.has_value());
     ASSERT_TRUE(largeCreature.has_value());
 
-    EXPECT_EQ(1, smallCreature->_cells.front()._connections.size());
-    auto connectedCellId = smallCreature->_cells.front()._connections.front()._cellId;
+    auto smallCreatureCells = data.getCellsForCreature(smallCreature->_id);
+    EXPECT_EQ(1, smallCreatureCells.front()._connections.size());
+    auto connectedCellId = smallCreatureCells.front()._connections.front()._cellId;
 
+    auto largeCreatureCells = data.getCellsForCreature(largeCreature->_id);
     std::optional<CellDescription> cellWithoutConnection, cellWithConnection;
-    for (auto const& cell : largeCreature->_cells) {
+    for (auto const& cell : largeCreatureCells) {
         if (cell._connections.empty()) {
             cellWithoutConnection = cell;
         } else {
@@ -296,7 +299,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 
     ASSERT_EQ(1, cellWithConnection->_connections.size());
     EXPECT_EQ(connectedCellId, cellWithConnection->_id);
-    EXPECT_EQ(smallCreature->_cells.front()._id, cellWithConnection->_connections.front()._cellId);
+    EXPECT_EQ(smallCreatureCells.front()._id, cellWithConnection->_connections.front()._cellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
@@ -336,10 +339,11 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     EXPECT_EQ(3, cellWithConnection->_connections.front()._cellId);
 
     auto const& creature = data._creatures.front();
-    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).size());
+    auto creatureCells = data.getCellsForCreature(creature._id);
+    ASSERT_EQ(1, creatureCells.size());
 
-    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).front()._connections.size());
-    ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).front()._connections.front()._cellId);
+    ASSERT_EQ(1, creatureCells.front()._connections.size());
+    ASSERT_EQ(4, creatureCells.front()._connections.front()._cellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
@@ -580,17 +584,17 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
 TEST_F(DescriptionEditTests, adaptMaxIds)
 {
     auto data = Description()
-                    .creatures({
-                        CreatureDescription().id(3), {CellDescription().id(5)},
-                        CreatureDescription(), {CellDescription()},
-                    })
+                    .addCreature(CreatureDescription().id(3), {CellDescription().id(5)})
+                    .addCreature(CreatureDescription(), {CellDescription()})
                     .particles({
                         ParticleDescription().id(7),
                         ParticleDescription(),
                     });
 
     EXPECT_LT(data._creatures.at(0)._id, data._creatures.at(1)._id);
-    EXPECT_LT(data._creatures.at(0)._cells.at(0)._id, data._creatures.at(1)._cells.at(0)._id);
+    auto cells0 = data.getCellsForCreature(data._creatures.at(0)._id);
+    auto cells1 = data.getCellsForCreature(data._creatures.at(1)._id);
+    EXPECT_LT(cells0.at(0)._id, cells1.at(0)._id);
     EXPECT_LT(data._particles.at(0)._id, data._particles.at(1)._id);
 }
 
@@ -600,11 +604,11 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     auto const& WorldWidth = 346;
     auto const& WorldHeight = 100;
 
-    CreatureDescription creature;
+    std::vector<CellDescription> cells;
     for (int i = 0; i < 1000; ++i) {
-        creature._cells.emplace_back(CellDescription().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
+        cells.emplace_back(CellDescription().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
     }
-    auto data = Description().creatures({creature});
+    auto data = Description().addCreature(CreatureDescription(), cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }
@@ -614,7 +618,8 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     ASSERT_EQ(1, data._creatures.size());
 
     auto creatureAfter = data._creatures.front();
-    ASSERT_EQ(1000, creatureAfter._cells.size());
+    auto creatureCells = data.getCellsForCreature(creatureAfter._id);
+    ASSERT_EQ(1000, creatureCells.size());
 
     for (int i = 0; i < 1000; ++i) {
         auto const& refCell = data.getCellRef(0);
@@ -629,11 +634,11 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     auto const& WorldWidth = 346;
     auto const& WorldHeight = 100;
 
-    CreatureDescription creature;
+    std::vector<CellDescription> cells;
     for (int i = 0; i < 1000; ++i) {
-        creature._cells.emplace_back(CellDescription().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
+        cells.emplace_back(CellDescription().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
     }
-    auto data = Description().creatures({creature});
+    auto data = Description().addCreature(CreatureDescription(), cells);
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }
@@ -643,7 +648,8 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     ASSERT_EQ(1, data._creatures.size());
 
     auto creatureAfter = data._creatures.front();
-    ASSERT_EQ(1000, creatureAfter._cells.size());
+    auto creatureCells = data.getCellsForCreature(creatureAfter._id);
+    ASSERT_EQ(1000, creatureCells.size());
 
     for (int i = 0; i < 1000; ++i) {
         auto const& refCell = data.getCellRef(0);
