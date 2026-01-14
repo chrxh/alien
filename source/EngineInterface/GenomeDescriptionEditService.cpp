@@ -276,13 +276,15 @@ Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescript
     Description result;
     result._genomes.emplace_back(subGenome.genome);
     auto creature = CreatureDescription().genomeId(subGenome.genome._id);
+    auto cell = CellDescription()
+                    .creatureId(creature._id)
+                    .color(PreviewColor)
+                    .stiffness(1.0f)
+                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))
+                    .pos(pos);
+    creature._cells.emplace_back(cell);
     result._creatures.emplace_back(creature);
-    result._cells.emplace_back(CellDescription()
-                                   .creatureId(creature._id)
-                                   .color(PreviewColor)
-                                   .stiffness(1.0f)
-                                   .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))
-                                   .pos(pos));
+    result._cells.emplace_back(cell);
     return result;
 }
 

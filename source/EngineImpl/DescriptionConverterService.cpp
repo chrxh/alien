@@ -158,6 +158,15 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
         result._cells.emplace_back(cell);
     }
 
+    // Populate creature._cells for compatibility
+    for (auto& creature : result._creatures) {
+        for (auto const& cell : result._cells) {
+            if (cell._creatureId.has_value() && cell._creatureId.value() == creature._id) {
+                creature._cells.push_back(cell);
+            }
+        }
+    }
+
     // Particles
     for (int i = 0; i < *to.numParticles; ++i) {
         result._particles.emplace_back(createParticleDescription(to, i));

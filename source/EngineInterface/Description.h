@@ -547,6 +547,14 @@ struct CreatureDescription
 
     // Process data
     MEMBER(CreatureDescription, int, frontAngleId, 0);
+
+    // Compatibility: cells associated with this creature (populated during conversion)
+    std::vector<CellDescription> _cells;
+    CreatureDescription& cells(std::vector<CellDescription> const& cells)
+    {
+        _cells = cells;
+        return *this;
+    }
 };
 
 struct _DescriptionCache
@@ -574,6 +582,37 @@ struct Description
     void assignNewIds();  // Preserves order of cell ids
 
     Description& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome = GenomeDescription());
+    Description& addCreature(CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
+
+    // Compatibility: iterate over all cells
+    template <typename Func>
+    void forEachCell(Func func)
+    {
+        for (auto& cell : _cells) {
+            func(cell);
+        }
+    }
+
+    template <typename Func>
+    void forEachCell(Func func) const
+    {
+        for (auto const& cell : _cells) {
+            func(cell);
+        }
+    }
+
+    size_t getNumCells() const { return _cells.size(); }
+
+    std::vector<CellDescription> getCellsForCreature(uint64_t creatureId) const
+    {
+        std::vector<CellDescription> result;
+        for (auto const& cell : _cells) {
+            if (cell._creatureId.has_value() && cell._creatureId.value() == creatureId) {
+                result.push_back(cell);
+            }
+        }
+        return result;
+    }
 
     DescriptionCache createCache() const;
     Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache = nullptr);
