@@ -36,10 +36,10 @@ protected:
 TEST_F(ConstructorTests, alreadyFinished)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({100.0f, 101.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         }));
@@ -50,12 +50,12 @@ TEST_F(ConstructorTests, alreadyFinished)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
 
     auto hostCell = actualData.getCellRef(0);
     auto hostConstructor = std::get<ConstructorDescription>(hostCell._cellType);
@@ -68,9 +68,9 @@ TEST_F(ConstructorTests, alreadyFinished)
 TEST_F(ConstructorTests, emptyGenome)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
@@ -78,12 +78,12 @@ TEST_F(ConstructorTests, emptyGenome)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -97,9 +97,9 @@ TEST_F(ConstructorTests, emptyGenome)
 TEST_F(ConstructorTests, emptyGene)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(true)}));
 
     _simulationFacade->setSimulationData(data);
@@ -107,12 +107,12 @@ TEST_F(ConstructorTests, emptyGene)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -126,13 +126,13 @@ TEST_F(ConstructorTests, emptyGene)
 TEST_F(ConstructorTests, nodeIndexOutOfRange)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentBranch(0).currentNodeIndex(1))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(true)}));
 
     _simulationFacade->setSimulationData(data);
@@ -140,12 +140,12 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -159,13 +159,13 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
 TEST_F(ConstructorTests, geneIndexOutOfRange)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(1).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(true)}));
 
     _simulationFacade->setSimulationData(data);
@@ -173,12 +173,12 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -192,9 +192,9 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
 TEST_F(ConstructorTests, insufficientEnergy)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).cellType(ConstructorDescription().geneIndex(0).currentBranch(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
@@ -202,12 +202,12 @@ TEST_F(ConstructorTests, insufficientEnergy)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(1, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(1, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -221,13 +221,13 @@ TEST_F(ConstructorTests, insufficientEnergy)
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),  // Not enough energy
             CellDescription().id(1).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(true).nodes({NodeDescription()})}));
     data.addConnection(0, 1);
 
@@ -236,12 +236,12 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(2, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -256,14 +256,14 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription()})}));
     data.addConnection(0, 1);
 
@@ -272,12 +272,12 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(3, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -292,14 +292,14 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().autoTriggerInterval(std::nullopt).geneIndex(0).currentBranch(0).currentNodeIndex(0))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(false).nodes({NodeDescription()})}));
     data.addConnection(0, 1);
 
@@ -308,12 +308,12 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
     ASSERT_EQ(2, creature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -327,13 +327,13 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
 TEST_F(ConstructorTests, lastConstructedCellNotFound)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentBranch(0).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()})}));
 
     _simulationFacade->setSimulationData(data);
@@ -341,12 +341,12 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
     ASSERT_EQ(2, hostCreature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -361,20 +361,20 @@ TEST_F(ConstructorTests, insufficientSpace)
 {
     Description data;
     data.addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
         }));
     data.addCreature(
-        CreatureDescription().id(1).cells({
+        CreatureDescription().id(1), {
             CellDescription().id(1).pos({100.5f, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
         }));
@@ -385,15 +385,15 @@ TEST_F(ConstructorTests, insufficientSpace)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
     ASSERT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getCreatureRef(1);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
     ASSERT_EQ(1, newCreature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -411,7 +411,7 @@ TEST_F(ConstructorTests, crossingLinks)
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(10)
                 .pos({10.0f, 10.0f})
@@ -420,7 +420,7 @@ TEST_F(ConstructorTests, crossingLinks)
             CellDescription().id(3).pos({10.0f, 10.0f + getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(2),
             CellDescription().id(2).pos({9.0f, 9.0f + getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1),
             CellDescription().id(1).pos({11.0f, 9.0f + getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(0),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -433,10 +433,10 @@ TEST_F(ConstructorTests, crossingLinks)
     auto actualData = _simulationFacade->getSimulationData();
 
     // No cell constructed
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
 }
 
 using NodeParameter = DescriptionTestDataFactory::NodeParameter;
@@ -469,20 +469,20 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
     EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
     EXPECT_EQ(1, newCreature._numCells);
 
-    auto hostCell = getCellsForCreature(actualData, hostCreature._id).front();
-    auto newCell = getCellsForCreature(actualData, newCreature._id).front();
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_EQ(FrontAngleId, newCell._frontAngleId);
@@ -503,7 +503,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(nodeParameter);
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
+        CreatureDescription().id(0), {CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})},
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({randomNode}),
         }));
@@ -513,20 +513,20 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto actualData = _simulationFacade->getPreviewData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
     EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
     EXPECT_EQ(1, newCreature._numCells);
 
-    auto hostCell = getCellsForCreature(actualData, hostCreature._id).front();
-    auto newCell = getCellsForCreature(actualData, newCreature._id).front();
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
@@ -544,7 +544,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
     auto randomNode = _descriptionTestDataFactory->createNonDefaultNodeDescription(NodeParameter{CellTypeGenome_Base});
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})}),
+        CreatureDescription().id(0), {CellDescription().usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription()).pos({100.0f, 100.0f})},
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({randomNode}),
         }));
@@ -554,20 +554,20 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto actualData = _simulationFacade->getPreviewData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
     EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
     EXPECT_EQ(1, newCreature._numCells);
 
-    auto hostCell = getCellsForCreature(actualData, hostCreature._id).front();
-    auto newCell = getCellsForCreature(actualData, newCreature._id).front();
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(Math::length(hostCell._pos - newCell._pos) > 50.0f);  // Preview specific: Move seed far away from construction
@@ -595,20 +595,20 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
     EXPECT_EQ(1, hostCreature._numCells);
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
     EXPECT_EQ(1, newCreature._numCells);
 
-    auto hostCell = getCellsForCreature(actualData, hostCreature._id).front();
-    auto newCell = getCellsForCreature(actualData, newCreature._id).front();
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(approxCompare(1.0f, Math::length(hostCell._pos - newCell._pos)));
@@ -627,19 +627,19 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     });
     auto data = Description()
                     .addCreature(
-                        CreatureDescription().id(0).cells({
+                        CreatureDescription().id(0), {
                             CellDescription()
                                 .id(1)
                                 .pos({10.0f, 10.0f})
                                 .usableEnergy(getConstructorEnergy())
                                 .cellType(ConstructorDescription().currentNodeIndex(2).geneIndex(0).lastConstructedCellId(2)),
-                        }),
+                        },
                         genome)
                     .addCreature(
-                        CreatureDescription().id(1).cells({
+                        CreatureDescription().id(1), {
                             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
                             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
-                        }),
+                        },
                         genome);
     data.addConnection(2, 3);
     data.addConnection(1, 2);
@@ -649,13 +649,13 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
-    ASSERT_EQ(3, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
+    ASSERT_EQ(3, newCreature._cells.size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
     auto prevConstructedCell = actualData.getCellRef(2);
@@ -675,19 +675,19 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
     });
     auto data = Description()
                     .addCreature(
-                        CreatureDescription().id(0).cells({
+                        CreatureDescription().id(0), {
                             CellDescription()
                                 .id(1)
                                 .pos({10.0f, 10.0f})
                                 .usableEnergy(getConstructorEnergy())
                                 .cellType(ConstructorDescription().currentNodeIndex(2).geneIndex(0).lastConstructedCellId(2)),
-                        }),
+                        },
                         genome)
                     .addCreature(
-                        CreatureDescription().id(1).cells({
+                        CreatureDescription().id(1), {
                             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
                             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 11.0f}).cellState(CellState_Constructing),
-                        }),
+                        },
                         genome);
     data.addConnection(2, 3);
     data.addConnection(1, 2);
@@ -697,13 +697,13 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
-    ASSERT_EQ(3, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
+    ASSERT_EQ(3, newCreature._cells.size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
     auto prevConstructedCell = actualData.getCellRef(2);
@@ -730,12 +730,12 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
     ASSERT_EQ(2, hostCreature._numCells);
 
     auto hostCell = actualData.getCellRef(0);
@@ -770,12 +770,12 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef(0);
@@ -803,7 +803,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
             .id(0)
             .frontAngleId(InitialFrontAngleId)
 
-            .cells({CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
+            , {CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f})}),
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).numConcatenations(1).nodes({NodeDescription(), NodeDescription()}),
         }));
@@ -813,13 +813,13 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
     EXPECT_EQ(InitialFrontAngleId, creature._frontAngleId);
-    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef(0);
@@ -847,11 +847,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
             .id(0)
             .frontAngleId(InitialFrontAngleId)
 
-            .cells({CellDescription()
+            , {CellDescription()
                         .id(0)
                         .usableEnergy(getConstructorEnergy())
                         .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(0))
-                        .pos({100.0f, 100.0f})}),
+                        .pos({100.0f, 100.0f})},
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDescription()}),
         }));
@@ -861,13 +861,13 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
     EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef(0);
@@ -915,7 +915,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
             .id(0)
             .frontAngleId(InitialFrontAngleId)
 
-            .cells({
+            , {
                 CellDescription().id(0).pos({100.0f, 100.0f}),
                 CellDescription()
                     .id(1)
@@ -924,7 +924,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
                     .pos({100.0f, 101.0f}),
                 CellDescription().id(2).pos({100.0f, 102.0f}),
                 CellDescription().id(3).pos({100.0f + getOffspringDistance(), 101.0f}).cellType(MuscleDescription().mode(muscleMode)),
-            }),
+            },
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).numConcatenations(2).nodes({NodeDescription().cellType(MuscleGenomeDescription())}),
         }));
@@ -937,12 +937,12 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
     EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
-    ASSERT_EQ(5, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(5, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
     auto prevCell = actualData.getCellRef(3);
@@ -981,9 +981,9 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
         CreatureDescription()
             .id(0)
             .frontAngleId(InitialFrontAngleId)
-            .cells({
+            , {
                 CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(0)).pos({100.0f, 100.0f}),
-            }),
+            },
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -991,13 +991,13 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
     EXPECT_EQ(InitialFrontAngleId + 1, hostCreature._frontAngleId);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0});
@@ -1021,10 +1021,10 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
         GeneDescription().separation(false).numBranches(2).nodes({NodeDescription()}),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({100.0f, 101.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -1033,12 +1033,12 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(3, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0, 1});
@@ -1064,9 +1064,9 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
         GeneDescription().separation(false).numBranches(2).nodes({NodeDescription()}),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentBranch(1)).pos({100.0f, 100.0f}),
-        }),
+        },
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -1074,12 +1074,12 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0});
@@ -1105,9 +1105,9 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
         }),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
-        }),
+        },
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -1115,14 +1115,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0});
@@ -1139,10 +1139,10 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription()}),
         }));
@@ -1153,18 +1153,18 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(2, hostCreature._cells.size());
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
 
-    auto hostCell = getCellsForCreature(actualData, hostCreature._id).front();
-    auto newCell = getCellsForCreature(actualData, newCreature._id).front();
+    auto hostCell = hostCreature._cells.front();
+    auto newCell = newCreature._cells.front();
     EXPECT_EQ(CellState_Activating, newCell._cellState);
     EXPECT_TRUE(newCell._headCell);
     EXPECT_TRUE(approxCompare(hostCell._pos - RealVector2D(1.0f, 0.0f), newCell._pos));
@@ -1176,10 +1176,10 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({101.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
         }));
@@ -1190,11 +1190,11 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(3, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0, 1});
@@ -1212,7 +1212,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
         GeneDescription().separation(false).numBranches(2).nodes({NodeDescription()}),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).pos({101.0f, 100.0f}),
             CellDescription()
                 .id(1)
@@ -1221,7 +1221,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
                     10.0f))  // constructionAngle should be ignored for the second branch
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({99.0f, 100.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -1231,11 +1231,11 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(4, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
     auto newCell = actualData.getOtherCellRef({0, 1, 2});
@@ -1254,11 +1254,11 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
     //20.0f;
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).pos({101.0f, 100.0f}),
             CellDescription().id(1).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0)).pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.0f, 101.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes({NodeDescription().referenceAngle(ConstructionAngle)}),
         }));
@@ -1270,12 +1270,12 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(4, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(1);
     auto newCell = actualData.getOtherCellRef({0, 1, 2});
@@ -1298,13 +1298,13 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
 
     Description data;
     data.addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
         }));
@@ -1313,9 +1313,9 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
             .id(1)
             .frontAngleId(InitialFrontAngleId)
 
-            .cells({
+            , {
                 CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
-            }),
+            },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
         }));
@@ -1326,16 +1326,16 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getCreatureRef(1);
     EXPECT_EQ(InitialFrontAngleId + 1, newCreature._frontAngleId);
-    ASSERT_EQ(2, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
@@ -1354,14 +1354,14 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
         GeneDescription().nodes({NodeDescription(), NodeDescription().referenceAngle(LastAngle)}).separation(false).numBranches(1),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -1371,12 +1371,12 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
     {
         auto actualData = _simulationFacade->getSimulationData();
 
-        ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(0, actualData._cells.size());
         ASSERT_EQ(1, actualData._creatures.size());
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
         auto creature = actualData.getCreatureRef(0);
-        ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
+        ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
 
         auto hostCell = actualData.getCellRef(0);
         auto prevCell = actualData.getCellRef(1);
@@ -1410,7 +1410,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
             .id(0)
 
             .frontAngleId(InitialFrontAngleId)
-            .cells({
+            , {
                 CellDescription().id(0).pos({101.0f, 100.0f}).cellState(CellState_Constructing),
                 CellDescription()
                     .id(1)
@@ -1422,7 +1422,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
                     .id(3)
                     .pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * (1.0f + _parameters.constructorAdditionalOffspringDistance))
                     .cellState(CellState_Constructing),
-            }),
+            },
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -1433,12 +1433,12 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(5, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
     EXPECT_EQ(InitialFrontAngleId + 1, creature._frontAngleId);
 
     auto hostCell = actualData.getCellRef(1);
@@ -1459,7 +1459,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
         GeneDescription().nodes({NodeDescription(), NodeDescription().referenceAngle(MiddleAngle)}).separation(false).numBranches(1),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).pos({100.0f, 101.0f}),
             CellDescription()
                 .id(1)
@@ -1471,7 +1471,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
                 .id(3)
                 .pos(RealVector2D{100.0f, 100.0f} + Math::unitVectorOfAngle(-45.0f) * (1.0f + _parameters.constructorAdditionalOffspringDistance))
                 .cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -1482,12 +1482,12 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(5, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
 
     auto hostCell = actualData.getCellRef(1);
     auto prevCell = actualData.getCellRef(3);
@@ -1507,7 +1507,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(1).pos({10.0f, 10.0f}),
             CellDescription()
                 .id(2)
@@ -1515,7 +1515,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(1).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(3)),
             CellDescription().id(3).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -1525,10 +1525,10 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
 
     auto actualOtherCell = actualData.getCellRef(1);
     auto actualHostCell = actualData.getCellRef(2);
@@ -1555,21 +1555,21 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
 {
     Description data;
     data.addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes(
                 {NodeDescription().referenceAngle(0.0f), NodeDescription().referenceAngle(45.0f), NodeDescription().referenceAngle(0.0f)}),
         }));
     data.addCreature(
-        CreatureDescription().id(1).cells({
+        CreatureDescription().id(1), {
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes(
                 {NodeDescription().referenceAngle(0.0f), NodeDescription().referenceAngle(45.0f), NodeDescription().referenceAngle(0.0f)}),
@@ -1581,14 +1581,14 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getCreatureRef(1);
-    ASSERT_EQ(2, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
@@ -1610,13 +1610,13 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
 {
     Description data;
     data.addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(2).lastConstructedCellId(2))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({
                 NodeDescription(),
@@ -1626,10 +1626,10 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
             }),
         }));
     data.addCreature(
-        CreatureDescription().id(1).cells({
+        CreatureDescription().id(1), {
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 99.0f}).cellState(CellState_Constructing),
             CellDescription().id(2).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({
                 NodeDescription(),
@@ -1646,14 +1646,14 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(3, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevPrevCell = actualData.getCellRef(1);
@@ -1700,13 +1700,13 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
 
     Description data;
     data.addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(2).lastConstructedCellId(2))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription()
                 .separation(true)
@@ -1719,10 +1719,10 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
                 .angleAlignment(angleAlignment),
         }));
     data.addCreature(
-        CreatureDescription().id(1).cells({
+        CreatureDescription().id(1), {
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 99.0f}).cellState(CellState_Constructing),
             CellDescription().id(2).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription()
                 .separation(true)
@@ -1742,14 +1742,14 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getCreatureRef(1);
-    ASSERT_EQ(3, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(3, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevPrevCell = actualData.getCellRef(1);
@@ -1825,14 +1825,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
         GeneDescription().nodes({NodeDescription().referenceAngle(ConcatenationAngle)}).numConcatenations(3).separation(false).numBranches(1),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentConcatenation(1).currentNodeIndex(0).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(1).pos({99.0f - _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -1841,11 +1841,11 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(3, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
@@ -1882,7 +1882,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
     });
     auto addDistance = _parameters.constructorAdditionalOffspringDistance;
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
@@ -1892,7 +1892,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
             CellDescription().id(2).pos({100.0f + addDistance, 99.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({101.0f + addDistance, 99.0f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({101.0f + addDistance, 100.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -1904,11 +1904,11 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(6, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(6, hostCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(4);
@@ -1937,7 +1937,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
 TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_bothSidesPresent)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -1946,7 +1946,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.5f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.5f}).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(false).numBranches(1).nodes(
                 {NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(1)}),
@@ -1963,12 +1963,12 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(5, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(5, hostCreature._cells.size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2003,7 +2003,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -2012,7 +2012,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).cellState(CellState_Constructing),
             CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(2)}),
         }));
@@ -2030,7 +2030,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto actualHostCell = actualData.getCellRef(1);
@@ -2066,7 +2066,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__numAdditionalConnections_2__threeCellsWithSmallAngles__variant_2)
 {
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({458.20f, 239.23f})
@@ -2075,7 +2075,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription().id(2).pos({456.40f, 238.88f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({455.96f, 239.75f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({456.07f, 240.77f}).cellState(CellState_Constructing),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription(), NodeDescription().numAdditionalConnections(2)}),
         }));
@@ -2094,7 +2094,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2135,7 +2135,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     auto offset = Math::rotateClockwise({-1.0f, 0.0f}, 60.0f);
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -2144,7 +2144,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos(RealVector2D(10.0f + getOffspringDistance() + 0.2f, 10.0f) + offset * 0.1f).cellState(CellState_Constructing),
             CellDescription().id(4).pos(RealVector2D(10.0f + getOffspringDistance(), 10.0f) + offset * 0.2f).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     auto cell3_refPos = data.getCellRef(2)._pos + Math::rotateClockwise({-0.5f, 0.0f}, 60.0f);
@@ -2157,10 +2157,10 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(5, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2200,7 +2200,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -2209,7 +2209,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({10.0f + getOffspringDistance() - 1.0f, 9.0f - 0.2f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -2221,10 +2221,10 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(5, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2264,7 +2264,7 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -2272,7 +2272,7 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
                 .cellType(ConstructorDescription().currentNodeIndex(2).autoTriggerInterval(1).geneIndex(0).lastConstructedCellId(2)),
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 9.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -2282,10 +2282,10 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2318,7 +2318,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -2327,7 +2327,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
             CellDescription().id(2).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({10.0f + getOffspringDistance(), 10.0f - 0.5f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({10.0f + getOffspringDistance(), 10.0f - 1.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -2339,10 +2339,10 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(5, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
 
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2378,9 +2378,9 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
         GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
     });
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).usableEnergy(getConstructorEnergy()).cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0)).pos({100.0f, 100.0f}),
-        }),
+        },
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -2388,14 +2388,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(1, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto newCell = actualData.getOtherCellRef({0});
@@ -2413,20 +2413,20 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
 {
     Description data;
     data.addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().geneIndex(0).currentNodeIndex(0).currentConcatenation(1).lastConstructedCellId(1))
                 .pos({100.0f, 100.0f}),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
         }));
     data.addCreature(
-        CreatureDescription().id(1).cells({
+        CreatureDescription().id(1), {
             CellDescription().id(1).pos({101.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f}).cellState(CellState_Ready),
-        }),
+        },
         GenomeDescription().genes({
             GeneDescription().separation(true).numConcatenations(GeneDescription::NumConcatenations_Infinite).nodes({NodeDescription()}),
         }));
@@ -2437,14 +2437,14 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(1, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(1, hostCreature._cells.size());
 
     auto newCreature = actualData.getOtherCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, newCreature._id).size());
+    ASSERT_EQ(2, newCreature._cells.size());
 
     auto hostCell = actualData.getCellRef(0);
     auto prevCell = actualData.getCellRef(1);
@@ -2472,7 +2472,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
                 .id(1)
@@ -2480,7 +2480,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
                 .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(100))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -2489,12 +2489,12 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     auto hostCreature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, hostCreature._id).size());
+    ASSERT_EQ(4, hostCreature._cells.size());
 
     auto const& hostCell = actualData.getCellRef(1);
     auto const& newCell = actualData.getOtherCellRef({0, 1, 2});
@@ -2511,7 +2511,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(1).pos({10.0f, 10.0f}),
             CellDescription()
                 .id(2)
@@ -2519,7 +2519,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0)),
             CellDescription().id(3).pos({9.0f, 11.0f}),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -2529,10 +2529,10 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
@@ -2546,7 +2546,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(1).pos({8.0f, 10.0f}),
             CellDescription()
                 .id(2)
@@ -2554,7 +2554,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
                 .usableEnergy(getConstructorEnergy())
                 .cellType(ConstructorDescription().currentNodeIndex(0).autoTriggerInterval(1).geneIndex(0)),
             CellDescription().id(3).pos({9.0f, 11.0f}),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -2564,10 +2564,10 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({1, 2, 3});
 
@@ -2613,7 +2613,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
     auto genome = GenomeDescription().genes({gene});
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(0).pos({100.0f, 99.0f}),
             CellDescription()
                 .id(1)
@@ -2621,7 +2621,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
                 .cellType(ConstructorDescription().constructionAngle(ConstructionAngle).geneIndex(0).currentNodeIndex(0).autoTriggerInterval(200))
                 .pos({100.0f, 100.0f}),
             CellDescription().id(2).pos({100.1f, 101.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -2635,12 +2635,12 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             _simulationFacade->calcTimesteps(200);
             auto actualData = _simulationFacade->getSimulationData();
 
-            ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+            ASSERT_EQ(0, actualData._cells.size());
             ASSERT_EQ(1, actualData._creatures.size());
             EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
             auto hostCreature = actualData.getCreatureRef(0);
-            ASSERT_EQ(3 + i + 1, getCellsForCreature(actualData, hostCreature._id).size());
+            ASSERT_EQ(3 + i + 1, hostCreature._cells.size());
 
             auto hostCell = actualData.getCellRef(1);
 
@@ -2709,7 +2709,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription().id(1).pos({10.0f, 10.0f}),
             CellDescription()
                 .id(2)
@@ -2726,7 +2726,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
             CellDescription().id(6).pos({10.0f, 9.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
             CellDescription().id(7).pos({11.0f + getOffspringDistance() + 1.0f, 10.0f}).cellState(CellState_Constructing).nodeIndex(0).geneIndex(1),
             CellDescription().id(8).pos({11.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(1),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -2744,10 +2744,10 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(10, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(10, actualData.getCellsForCreature(creature._id).size());
 }
 
 TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
@@ -2759,7 +2759,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(1)
                 .pos({10.0f, 10.0f})
@@ -2789,7 +2789,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
                 .geneIndex(2)
                 .parentNodeIndex(1),
             CellDescription().id(6).pos({11.0f, 10.0f - getOffspringDistance()}).cellState(CellState_Constructing).nodeIndex(1).geneIndex(2).parentNodeIndex(1),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
 
@@ -2804,10 +2804,10 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(8, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(8, actualData.getCellsForCreature(creature._id).size());
 
     auto constructedCells = actualData.getOtherCells({1, 2, 3, 4, 5, 6});
     CellDescription cell1, cell2;
@@ -2875,7 +2875,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
         }
     }();
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
@@ -2883,7 +2883,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -2892,10 +2892,10 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
@@ -2936,7 +2936,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
     auto constructorEnergy =
         provideEnergy == ProvideEnergy_CellAndGene && separation == Separation::No ? normalCellEnergy * (2 * 3 * 2 + 2) - 1.0f : normalCellEnergy * 2 - 1.0f;
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
@@ -2944,7 +2944,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -2953,10 +2953,10 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
 }
 
 TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcatenations)
@@ -2990,7 +2990,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
 
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
@@ -2998,7 +2998,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -3007,10 +3007,10 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
@@ -3068,7 +3068,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     }();
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
@@ -3076,7 +3076,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -3085,12 +3085,12 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
 
     // For separation, offspring is in a separate creature
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(3, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
 
     auto actualConstructedCell = actualData.getOtherCellRef({0, 1});
 
@@ -3127,7 +3127,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
     auto constructorEnergy = normalCellEnergy * 2 + InitialStoredUsableEnergy - 1.0f;
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos({10.0f, 10.0f})
@@ -3135,7 +3135,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
                 .cellType(
                     ConstructorDescription().provideEnergy(provideEnergy).geneIndex(0).currentNodeIndex(1).autoTriggerInterval(1).lastConstructedCellId(1)),
             CellDescription().id(1).pos({10.0f + getOffspringDistance(), 10.0f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(0, 1);
 
@@ -3144,11 +3144,11 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
 
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());  // Host + previously constructed, no new cell
+    ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());  // Host + previously constructed, no new cell
 
     if (provideEnergy != ProvideEnergy_FreeGeneration) {
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -3209,7 +3209,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos(RealVector2D{10.0f, 8.5f} + Math::unitVectorOfAngle(180.0f - 45.0f) * getOffspringDistance())
@@ -3220,7 +3220,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
             CellDescription().id(2).pos({10.0f, 9.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({9.0f, 9.0f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({10.0f, 8.5f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -3236,10 +3236,10 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(6, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(6, actualData.getCellsForCreature(creature._id).size());
 
     auto cell = [&](uint64_t id) { return actualData.getCellRef(id); };
     auto constructedCell = actualData.getOtherCellRef({0, 1, 2, 3, 4});
@@ -3272,7 +3272,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
     });
 
     auto data = Description().addCreature(
-        CreatureDescription().id(0).cells({
+        CreatureDescription().id(0), {
             CellDescription()
                 .id(0)
                 .pos(RealVector2D{10.0f, 8.5f} + Math::unitVectorOfAngle(180.0f + 45.0f) * getOffspringDistance())
@@ -3283,7 +3283,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
             CellDescription().id(2).pos({10.0f, 9.0f}).cellState(CellState_Constructing),
             CellDescription().id(3).pos({11.0f, 9.0f}).cellState(CellState_Constructing),
             CellDescription().id(4).pos({10.0f, 8.5f}).cellState(CellState_Constructing),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -3299,10 +3299,10 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(0, actualData._cells.size());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
-    ASSERT_EQ(6, getCellsForCreature(actualData, creature._id).size());
+    ASSERT_EQ(6, actualData.getCellsForCreature(creature._id).size());
 
     auto cell = [&](uint64_t id) { return actualData.getCellRef(id); };
     auto constructedCell = actualData.getOtherCellRef({0, 1, 2, 3, 4});

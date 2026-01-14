@@ -150,7 +150,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
         CreatureDescription(), {
             CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true).cellType(getCellTypeDescription(cellType)),
             CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
 
@@ -193,7 +193,7 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
         CreatureDescription(), {
             CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(false).cellType(getCellTypeDescription(cellType)),
             CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching),
-        }),
+        },
         genome);
     data.addConnection(1, 2);
 

@@ -35,7 +35,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
             data.addConnection(i, i + 1);
         }
     }
-    getCellsForCreature(actualData, data._id).at(0)._usableEnergy = 1000.0f;
+    data._cells.at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -68,7 +68,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
             data.addConnection(i, i + 1);
         }
     }
-    getCellsForCreature(actualData, creature._id).at(0)._usableEnergy = 1000.0f;
+    creature._cells.at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -78,7 +78,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto const& actualCreature = actualData._creatures.front();
-    ASSERT_EQ(20, getCellsForCreature(actualData, actualCreature._id).size());
+    ASSERT_EQ(20, actualCreature._cells.size());
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {
@@ -119,7 +119,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             }
         }
     }
-    getCellsForCreature(actualData, creature._id).at(0)._usableEnergy = 1000.0f;
+    creature._cells.at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -156,7 +156,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
             data.addConnection(i, i + 1);
         }
     }
-    getCellsForCreature(actualData, creature._id).at(0)._usableEnergy = 1000.0f;
+    creature._cells.at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -209,14 +209,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        CreatureDescription(), {CellDescription()
+        CreatureDescription().cells({CellDescription()
                                          .id(1)
                                          .pos({100.0f, 100.0f})
                                          .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
                                          .usableEnergy(normalCellEnergy * 10)}),
         genome);
     data.addCreature(
-        CreatureDescription(), {CellDescription()
+        CreatureDescription().cells({CellDescription()
                                          .id(2)
                                          .cellState(CellState_Constructing)
                                          .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
@@ -246,14 +246,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        CreatureDescription(), {CellDescription()
+        CreatureDescription().cells({CellDescription()
                                          .id(1)
                                          .pos({100.0f, 100.0f})
                                          .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
                                          .usableEnergy(normalCellEnergy * 10)}),
         genome);
     data.addCreature(
-        CreatureDescription(), {CellDescription()
+        CreatureDescription().cells({CellDescription()
                                          .id(2)
                                          .pos({101.0f, 100.0f})
                                          .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
@@ -490,7 +490,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
             }
         }
         // Put all raw energy in the first cell
-        getCellsForCreature(actualData, data._id).at(0)._rawEnergy = 100.0f;
+        data._cells.at(0)._rawEnergy = 100.0f;
     }
 
     // Run simulations for a shorter time to see difference in flow rate

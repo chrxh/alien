@@ -50,11 +50,11 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
 
     // Verify that the particle was transformed into a cell
     EXPECT_EQ(0, actualData._particles.size());
-    EXPECT_EQ(1, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(1, actualData._cells.size());
 
     // Verify the cell has approximately the same energy as the original particle
     if (!actualData._cells.empty()) {
-        auto const& cell = getCellsForCreature(actualData, actualData._id).at(0);
+        auto const& cell = actualData._cells.at(0);
         EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, cell._usableEnergy, 1.0f));
         EXPECT_EQ(0, cell._color);
     }
@@ -87,7 +87,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationDisabled)
 
     // Verify that the particle was NOT transformed (remains a particle)
     EXPECT_EQ(1, actualData._particles.size());
-    EXPECT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(0, actualData._cells.size());
 }
 
 TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
@@ -117,7 +117,7 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
 
     // Verify that the particle was NOT transformed (insufficient energy)
     EXPECT_EQ(1, actualData._particles.size());
-    EXPECT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(0, actualData._cells.size());
 }
 
 TEST_F(EnergyParticleTests, particleAbsorption)
@@ -137,7 +137,7 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     EXPECT_EQ(0, actualData._particles.size());
-    EXPECT_EQ(1, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(1, actualData._cells.size());
 
     auto const& cell = actualData.getCellRef(1);
     EXPECT_TRUE(approxCompare(cellEnergy, cell._usableEnergy));
@@ -162,12 +162,12 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_EQ(0, actualData._particles.size());
-    EXPECT_EQ(1, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(1, actualData._cells.size());
 
     _simulationFacade->calcTimesteps(1);
     actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_EQ(1, actualData._particles.size());
-    EXPECT_EQ(0, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(0, actualData._cells.size());
 }

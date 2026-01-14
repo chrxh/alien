@@ -100,7 +100,7 @@ TEST_F(LayerParameterTests, circularZone_minCellEnergy_cellsDieInsideZone)
     auto resultData = _simulationFacade->getSimulationData();
 
     // Verify results: expect 2 surviving cells
-    EXPECT_EQ(2, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(2, resultData._cells.size());
 
     // The surviving cells should be the ones with sufficient energy for their zones
     bool foundInsideSurvivor = false;
@@ -156,7 +156,7 @@ TEST_F(LayerParameterTests, rectangularZone_minCellEnergy_cellsDieInsideZone)
     auto resultData = _simulationFacade->getSimulationData();
 
     // Verify results: expect 2 surviving cells
-    EXPECT_EQ(2, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(2, resultData._cells.size());
 }
 
 /**
@@ -208,7 +208,7 @@ TEST_F(LayerParameterTests, multipleCircularZones_differentSizes)
     auto resultData = _simulationFacade->getSimulationData();
 
     // Verify: 3 cells should survive
-    EXPECT_EQ(3, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(3, resultData._cells.size());
 }
 
 /**
@@ -265,7 +265,7 @@ TEST_F(LayerParameterTests, overlappingCircularZones_parameterPrecedence)
     auto resultData = _simulationFacade->getSimulationData();
 
     // Verify: 4 cells should survive (one from each region: zone1 only, overlap, zone2 only, outside)
-    EXPECT_EQ(4, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(4, resultData._cells.size());
 }
 
 /**
@@ -302,7 +302,7 @@ TEST_F(LayerParameterTests, circularZone_fadeoutRadius_transitionBehavior)
     // Cell at center should survive (energy > layer min)
     // Cell outside fadeout should survive (energy > base min)
     // At least 2 cells should survive
-    EXPECT_GE(getCellsForCreature(actualData, resultData._id).size(), 2);
+    EXPECT_GE(resultData._cells.size(), 2);
 }
 
 /**
@@ -339,7 +339,7 @@ TEST_F(LayerParameterTests, rectangularZone_dimensions_correctBoundaries)
     auto resultData = _simulationFacade->getSimulationData();
 
     // Expect 4 survivors
-    EXPECT_EQ(4, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(4, resultData._cells.size());
 }
 
 /**
@@ -390,7 +390,7 @@ TEST_F(LayerParameterTests, mixedZoneShapes_circularAndRectangular)
     auto resultData = _simulationFacade->getSimulationData();
 
     // Expect 3 survivors
-    EXPECT_EQ(3, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(3, resultData._cells.size());
 }
 
 /**
@@ -443,7 +443,7 @@ TEST_F(LayerParameterTests, movingRectangularZone_cellsAffectedByMovingZone)
     // Dead cells:
     // - Cell at 300 (dies in initial zone)
     // - Cell at 450 (dies when zone moves over it)
-    EXPECT_EQ(3, getCellsForCreature(actualData, resultData._id).size());
+    EXPECT_EQ(3, resultData._cells.size());
 
     // Verify at least one survivor is near the expected positions
     bool foundInitialZoneSurvivor = false;
