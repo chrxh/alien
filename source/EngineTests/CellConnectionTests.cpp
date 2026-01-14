@@ -34,7 +34,7 @@ TEST_F(CellConnectionTests, decay)
     _simulationFacade->calcTimesteps(1000);
 
     auto data = _simulationFacade->getSimulationData();
-    EXPECT_EQ(0, getCellsForCreature(actualData, data._id).size());
+    EXPECT_EQ(0, data._cells.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(origData)));
 }
 
@@ -50,7 +50,7 @@ TEST_F(CellConnectionTests, addFirstConnection)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_EQ(2, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(2, actualData._cells.size());
 
     auto cell1 = actualData.getCellRef(1);
     EXPECT_EQ(1, cell1._connections.size());
@@ -75,7 +75,7 @@ TEST_F(CellConnectionTests, addSecondConnection)
     _simulationFacade->testOnly_createConnection(1, 3);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto cell = actualData.getCellRef(1);
     ASSERT_EQ(2, cell._connections.size());
@@ -103,7 +103,7 @@ TEST_F(CellConnectionTests, addThirdConnection1)
     _simulationFacade->testOnly_createConnection(1, 4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(4, actualData._cells.size());
 
     auto cell = actualData.getCellRef(1);
     EXPECT_EQ(3, cell._connections.size());
@@ -136,7 +136,7 @@ TEST_F(CellConnectionTests, addThirdConnection2)
     _simulationFacade->testOnly_createConnection(1, 4);
 
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+    EXPECT_EQ(4, actualData._cells.size());
 
     auto cell = actualData.getCellRef(1);
     EXPECT_EQ(3, cell._connections.size());

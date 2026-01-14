@@ -82,7 +82,7 @@ TEST_F(MuscleTests, noFrontAngle)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualMuscleCell = actualData.getCellRef(2);
 
-    ASSERT_EQ(3, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(3, actualData._cells.size());
     EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
 }
 
@@ -167,7 +167,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithTwoConnections)
         _simulationFacade->calcTimesteps(10);
 
         auto actualData = _simulationFacade->getSimulationData();
-        ASSERT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(4, actualData._cells.size());
 
         auto actualCell1 = actualData.getCellRef(1);
         auto actualMuscleCell = actualData.getCellRef(2);
@@ -247,7 +247,7 @@ TEST_P(MuscleTests_AutoBending, muscleWithOneConnection)
         auto actualCell2 = actualData.getCellRef(2);
         auto actualCell3 = actualData.getCellRef(3);
 
-        ASSERT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(4, actualData._cells.size());
 
         EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
@@ -333,7 +333,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithTwoConnections)
         calcTimesteps(10, detailedPreview);
 
         auto actualData = getSimulationData(detailedPreview);
-        ASSERT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(4, actualData._cells.size());
 
         auto actualCell1 = actualData.getCellRef(1);
         auto actualMuscleCell = actualData.getCellRef(2);
@@ -435,7 +435,7 @@ TEST_P(MuscleTests_ManualBending, muscleWithOneConnection)
         auto actualCell2 = actualData.getCellRef(2);
         auto actualCell3 = actualData.getCellRef(3);
 
-        ASSERT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(4, actualData._cells.size());
 
         EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
         EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
@@ -542,7 +542,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithTwoConnections)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(4, actualData._cells.size());
     auto actualCell1 = actualData.getCellRef(1);
     auto actualMuscleCell = actualData.getCellRef(2);
     auto actualCell3 = actualData.getCellRef(3);
@@ -598,7 +598,7 @@ TEST_P(MuscleTests_AngleBending, muscleWithOneConnection)
     auto actualCell2 = actualData.getCellRef(2);
     auto actualCell3 = actualData.getCellRef(3);
 
-    ASSERT_EQ(4, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(4, actualData._cells.size());
 
     EXPECT_TRUE(approxCompare(1.0f, actualCell1._connections.at(0)._distance));
     EXPECT_TRUE(approxCompare(1.0f, actualCell2._connections.at(0)._distance));
@@ -654,7 +654,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithTwoConnections)
         auto actualCell1 = actualData.getCellRef(1);
         auto actualCell3 = actualData.getCellRef(3);
 
-        ASSERT_EQ(3, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(3, actualData._cells.size());
 
         EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(0)._angleFromPrevious));
         EXPECT_TRUE(approxCompare(180.0f, actualMuscleCell._connections.at(1)._angleFromPrevious));
@@ -717,7 +717,7 @@ TEST_P(MuscleTests_AutoCrawling, muscleWithOneConnection)
         auto actualMuscleCell = actualData.getCellRef(2);
         auto actualCell1 = actualData.getCellRef(1);
 
-        ASSERT_EQ(2, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(2, actualData._cells.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
         EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
@@ -786,7 +786,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithTwoConnections)
         auto actualMuscleCell = actualData.getCellRef(2);
         auto actualCell1 = actualData.getCellRef(1);
 
-        ASSERT_EQ(3, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(3, actualData._cells.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
         EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
@@ -835,7 +835,7 @@ TEST_P(MuscleTests_ManualCrawling, muscleWithOneConnection)
         auto actualMuscleCell = actualData.getCellRef(2);
         auto actualCell1 = actualData.getCellRef(1);
 
-        ASSERT_EQ(2, getCellsForCreature(actualData, actualData._id).size());
+        ASSERT_EQ(2, actualData._cells.size());
 
         auto distance = actualMuscleCell._connections.at(0)._distance;
         EXPECT_TRUE(approxCompare(distance, actualCell1._connections.at(0)._distance));
@@ -898,7 +898,7 @@ TEST_P(MuscleTests_DirectMovement, muscleWithTwoConnections)
     _simulationFacade->calcTimesteps(3);
 
     auto actualData = _simulationFacade->getSimulationData();
-    ASSERT_EQ(3, getCellsForCreature(actualData, actualData._id).size());
+    ASSERT_EQ(3, actualData._cells.size());
 
     auto actualCell1 = actualData.getCellRef(1);
     auto actualCell2 = actualData.getCellRef(2);
