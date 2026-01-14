@@ -51,12 +51,12 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
 
     // Get first and second constructed cell on start gene
     std::set<uint64_t> cellIdsOnStartGene;
-    phenotype.forEachCell([&](auto const& cell) {
+    for (auto const& cell : phenotype._cells) {
         if (cell._geneIndex != startGeneIndex) {
-            return;
+            continue;
         }
         cellIdsOnStartGene.insert(cell._id);
-    });
+    }
     CHECK(!cellIdsOnStartGene.empty());
     auto firstCell = phenotype.getCellRef(getFirstElement(cellIdsOnStartGene));
     std::optional<CellDescription> secondCell;
@@ -66,32 +66,27 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
         // Only 1 cell with start gene? => try cells of referenced gene
         if (firstCell.getCellType() == CellType_Constructor) {
             auto refGeneIndex = std::get<ConstructorDescription>(firstCell._cellType)._geneIndex;
-            phenotype.forEachCell([&](auto const& cell) {
+            for (auto const& cell : phenotype._cells) {
                 if (cell._geneIndex != refGeneIndex || cell._id == firstCell._id) {
-                    return;
+                    continue;
                 }
                 if (!secondCell.has_value() || cell._id > secondCell->_id) {
                     secondCell = cell;
                 }
-            });
+            }
         }
     }
 
     // Rotate preview
     if (secondCell.has_value()) {
         auto angle = Math::angleOfVector(secondCell->_pos - firstCell._pos);
-        //if (!result.visualFrontAngle.has_value()) {
         result.visualFrontAngle = angle;
-        //} else {
-        //    result.visualFrontAngle.value() += Math::normalizedAngle(angle - result.visualFrontAngle.value(), -180.0f) / 3.0f;
-        //    result.visualFrontAngle.value() = Math::normalizedAngle(result.visualFrontAngle.value(), 0.0);
-        //}
         editService.rotate(phenotype, -result.visualFrontAngle.value());
     }
 
     // Create preview cells
     auto getNode = [&](CellDescription const& cell) -> NodeDescription const& { return genome._genes.at(cell._geneIndex)._nodes.at(cell._nodeIndex); };
-    phenotype.forEachCell([&](CellDescription const& cell) {
+    for (auto const& cell : phenotype._cells) {
         auto const& node = getNode(cell);
         auto const& color = cell._cellState == CellState_Ready ? node._color : -1;
         auto previewCell = CellPreviewDescription()
@@ -124,11 +119,11 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             }
         }
         result.description._cells.emplace_back(previewCell);
-    });
+    }
 
     // Determine arrow directions for each cell
     std::set<std::pair<uint64_t, uint64_t>> arrowFromCell1ToCell2;
-    phenotype.forEachCell([&](CellDescription const& cell) {
+    for (auto const& cell : phenotype._cells) {
         auto const& node = getNode(cell);
         auto signalAngleRestrictionStart = 180.0f + node._signalRestriction._baseAngle - node._signalRestriction._openingAngle / 2;
         auto signalAngleRestrictionEnd = 180.0f + node._signalRestriction._baseAngle + node._signalRestriction._openingAngle / 2;
@@ -153,11 +148,11 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
                 arrowFromCell1ToCell2.insert({cell._id, connectedCellId});
             }
         }
-    });
+    }
 
     // Create preview connections
     std::set<std::pair<uint64_t, uint64_t>> processedConnections;
-    phenotype.forEachCell([&](CellDescription const& cell) {
+    for (auto const& cell : phenotype._cells) {
         for (const auto& connection : cell._connections) {
             uint64_t cellId1 = cell._id;
             uint64_t cellId2 = connection._cellId;
@@ -177,7 +172,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
                                          .arrowToCell2(arrowToCell2);
             result.description._connections.push_back(previewConnection);
         }
-    });
+    }
 
     return result;
 }

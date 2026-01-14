@@ -136,14 +136,14 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
     }
 
     // Creatures
-    std::unordered_map<uint64_t, uint64_t> indexByCreatureId;
+    std::unordered_map<uint64_t, uint64_t> creatureIdByTOIndex;
     for (int i = 0; i < *to.numCreatures; ++i) {
         auto creature = createCreatureDescription(to, i);
         auto genomeTOIndex = to.creatures[i].genomeArrayIndex;
         auto genomeId = to.genomes[genomeTOIndex].id;
         creature._genomeId = genomeId;
 
-        indexByCreatureId.emplace(creature._id, i);
+        creatureIdByTOIndex.emplace(i, creature._id);
         result._creatures.emplace_back(creature);
     }
 
@@ -153,13 +153,9 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
 
         if (to.cells[i].belongToCreature) {
             auto creatureTOIndex = to.cells[i].creatureIndex;
-            auto creatureId = to.creatures[creatureTOIndex].id;
-            auto creatureIndex = indexByCreatureId.at(creatureId);
-            auto& creature = result._creatures.at(creatureIndex);
-            creature._cells.emplace_back(cell);
-        } else {
-            result._cells.emplace_back(cell);
+            cell._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
+        result._cells.emplace_back(cell);
     }
 
     // Particles
@@ -192,14 +188,11 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     for (auto const& cell : description._cells) {
-        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);
+        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, cell._creatureId, creatureTOIndexById);
     }
-    for (auto const& creature : description._creatures) {
-        for (auto const& cell : creature._cells) {
-            convertCellToTO(cellTOs, heap, cellIndexTOById, cell, creature._id, creatureTOIndexById);
-        }
+    for (auto const& cell : description._cells) {
+        setConnections(cellTOs, cell, cellIndexTOById);
     }
-    description.forEachCell([&](auto const& cell) { setConnections(cellTOs, cell, cellIndexTOById); });
     for (auto const& particle : description._particles) {
         addParticle(particleTOs, particle);
     }

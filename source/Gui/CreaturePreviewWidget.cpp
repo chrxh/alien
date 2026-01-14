@@ -517,7 +517,7 @@ void _CreaturePreviewWidget::moveCenter(
 
 void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const
 {
-    phenotype.forEachCell([&](CellDescription& cell) {
+    for (auto& cell : phenotype._cells) {
         if (cell._id == editedCell._id) {
             cell._signalState = editedCell._signalState;
             if (editedCell._signalState == SignalState_Active) {
@@ -525,5 +525,5 @@ void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreview
                 cell._signal = signalDesc;
             }
         }
-    });
+    }
 }

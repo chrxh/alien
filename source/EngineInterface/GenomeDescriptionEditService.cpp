@@ -261,8 +261,10 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotyp
     std::set<uint64_t> seedCellIds;
     for (auto const& creature : phenotype._creatures) {
         if (creature._generation == 0) {
-            for (auto const& cell : creature._cells) {
-                seedCellIds.insert(cell._id);
+            for (auto const& cell : phenotype._cells) {
+                if (cell._creatureId == creature._id) {
+                    seedCellIds.insert(cell._id);
+                }
             }
         }
     }
@@ -273,15 +275,14 @@ Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescript
 {
     Description result;
     result._genomes.emplace_back(subGenome.genome);
-    result._creatures.emplace_back(CreatureDescription()
-                                       .genomeId(subGenome.genome._id)
-                                       .cells({
-                                           CellDescription()
-                                               .color(PreviewColor)
-                                               .stiffness(1.0f)
-                                               .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))
-                                               .pos(pos),
-                                       }));
+    auto creature = CreatureDescription().genomeId(subGenome.genome._id);
+    result._creatures.emplace_back(creature);
+    result._cells.emplace_back(CellDescription()
+                                   .creatureId(creature._id)
+                                   .color(PreviewColor)
+                                   .stiffness(1.0f)
+                                   .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(subGenome.startIndex))
+                                   .pos(pos));
     return result;
 }
 

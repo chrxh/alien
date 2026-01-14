@@ -152,7 +152,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(6 + 4 + 4, creature._cells.size());
+    ASSERT_EQ(6 + 4 + 4, actualData.getCellsForCreature(creature._id).size());
 
     auto& cells = creature._cells;
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -235,7 +235,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(6 + 4 + 4, creature._cells.size());
+    ASSERT_EQ(6 + 4 + 4, actualData.getCellsForCreature(creature._id).size());
 
     auto& cells = creature._cells;
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -347,7 +347,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(6 + 4 + 4, creature._cells.size());
+        ASSERT_EQ(6 + 4 + 4, actualData.getCellsForCreature(creature._id).size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -365,7 +365,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(6 + 4 + 4, creature._cells.size());
+        ASSERT_EQ(6 + 4 + 4, actualData.getCellsForCreature(creature._id).size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -400,7 +400,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
-    ASSERT_EQ(10, creature._cells.size());
+    ASSERT_EQ(10, actualData.getCellsForCreature(creature._id).size());
 
     auto& cells = creature._cells;
     std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -460,7 +460,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(10, creature._cells.size());
+        ASSERT_EQ(10, actualData.getCellsForCreature(creature._id).size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -484,7 +484,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
         ASSERT_EQ(1, actualData._creatures.size());
 
         auto creature = actualData._creatures.front();
-        ASSERT_EQ(10, creature._cells.size());
+        ASSERT_EQ(10, actualData.getCellsForCreature(creature._id).size());
 
         auto& cells = creature._cells;
         std::ranges::sort(cells, [](auto const& left, auto const& right) { return left._id < right._id; });

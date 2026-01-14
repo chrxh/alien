@@ -28,10 +28,10 @@ protected:
     // Helper to create an injector creature with a generator that triggers it
     Description createInjectorWithGenerator(RealVector2D const& injectorPos, int geneIndex = 0, int injectorColor = 0)
     {
-        auto data = Description().addCreature(CreatureDescription().id(1).cells({
+        auto data = Description().addCreature(CreatureDescription().id(1), {
             CellDescription().id(1).pos(injectorPos).color(injectorColor).cellType(InjectorDescription().geneIndex(geneIndex)),
             CellDescription().id(2).pos({injectorPos.x + 1.0f, injectorPos.y}).color(injectorColor).cellType(GeneratorDescription().autoTriggerInterval(3)),
-        }));
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -39,10 +39,10 @@ protected:
     // Helper to create a target creature with a constructor at a given position
     Description createTargetCreatureWithConstructor(RealVector2D const& pos, uint64_t creatureId = 2, int color = 0, float usableEnergy = 100.0f)
     {
-        auto data = Description().addCreature(CreatureDescription().id(creatureId).cells({
+        auto data = Description().addCreature(CreatureDescription().id(creatureId), {
             CellDescription().id(100).pos(pos).color(color).usableEnergy(usableEnergy).cellType(ConstructorDescription()),
             CellDescription().id(101).pos({pos.x + 1.0f, pos.y}).color(color).usableEnergy(usableEnergy),
-        }));
+        });
         data.addConnection(100, 101);
         return data;
     }
@@ -105,11 +105,11 @@ TEST_F(InjectorTests, successfulInjection)
 TEST_F(InjectorTests, noInjectionOnOwnCreatureCells)
 {
     // Create a single creature with injector and constructor
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(InjectorDescription().geneIndex(3)),
         CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
         CellDescription().id(3).pos({100.0f, 103.0f}).cellType(ConstructorDescription().geneIndex(0)),  // Same creature
-    }));
+    });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
 
@@ -134,10 +134,10 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 3);
 
     // Add target creature with fixed constructor
-    data.addCreature(CreatureDescription().id(2).cells({
+    data.addCreature(CreatureDescription().id(2), {
         CellDescription().id(100).pos({100.0f, 103.0f}).fixed(true).cellType(ConstructorDescription().geneIndex(0)),
         CellDescription().id(101).pos({101.0f, 103.0f}).fixed(true),
-    }));
+    });
     data.addConnection(100, 101);
 
     auto origConstructor = std::get<ConstructorDescription>(data.getCellRef(100)._cellType);
@@ -159,23 +159,23 @@ TEST_F(InjectorTests, noInjectionOnFixedCells)
 TEST_F(InjectorTests, rayBlockedBySameCreatureConnections)
 {
     // Create injector with connections that block the injection ray
-    auto data = Description().addCreature(CreatureDescription().id(1).cells({
+    auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(InjectorDescription().geneIndex(3)),
         CellDescription().id(2).pos({101.0f, 100.0f}).cellType(GeneratorDescription().autoTriggerInterval(3)),
         // Create a connection that crosses the ray path to target at (100, 97)
         CellDescription().id(3).pos({99.0f, 99.0f}),
         CellDescription().id(4).pos({101.0f, 99.0f}),
-    }));
+    });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
     data.addConnection(3, 4);
     data.addConnection(1, 4);
 
     // Add target creature below (ray to target is blocked by connection 3-4)
-    data.addCreature(CreatureDescription().id(2).cells({
+    data.addCreature(CreatureDescription().id(2), {
         CellDescription().id(100).pos({100.0f, 97.0f}).cellType(ConstructorDescription().geneIndex(0)),
         CellDescription().id(101).pos({101.0f, 97.0f}),
-    }));
+    });
     data.addConnection(100, 101);
 
     auto origConstructor = std::get<ConstructorDescription>(data.getCellRef(100)._cellType);
@@ -199,10 +199,10 @@ TEST_F(InjectorTests, injectionResetsConstructionProgress)
     auto data = createInjectorWithGenerator({100.0f, 100.0f}, 2);
 
     // Add target creature with constructor that has some progress
-    data.addCreature(CreatureDescription().id(2).cells({
+    data.addCreature(CreatureDescription().id(2), {
         CellDescription().id(100).pos({100.0f, 103.0f}).cellType(ConstructorDescription().geneIndex(5).currentNodeIndex(3).currentConcatenation(2)),
         CellDescription().id(101).pos({101.0f, 103.0f}),
-    }));
+    });
     data.addConnection(100, 101);
 
     _simulationFacade->setSimulationData(data);
