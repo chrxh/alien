@@ -71,6 +71,7 @@ cd build
 - **PersisterTests**: tests pass in ~1.4 seconds
 - **EngineTests**: tests pass in >4 min
 - Always run `./EngineInterfaceTests && ./NetworkTests && ./PersisterTests && ./EngineTests` to verify your changes don't break core functionality
+- `./EngineTests` are most important and contain the entire simulation logic written in CUDA
 
 ### Application Validation
 - **CLI works**: `./cli --help` shows usage information
