@@ -229,12 +229,12 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
     data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
     ASSERT_EQ(4, ids.size());
 
-    ASSERT_EQ(2, data._cells.size());
+    ASSERT_EQ(2, getCellsForCreature(actualData, data._id).size());
     ASSERT_EQ(1, data._creatures.size());
 
     for (auto const& creature : data._creatures) {
         ASSERT_EQ(2, getCellsForCreature(actualData, creature._id).size());
-        auto const& cell1 = creature._cells.front();
+        auto const& cell1 = getCellsForCreature(actualData, creature._id).front();
         auto const& cell2 = creature._cells.back();
 
         ASSERT_EQ(1, cell1._connections.size());
@@ -265,7 +265,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
     data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
     ASSERT_EQ(3, ids.size());
 
-    ASSERT_EQ(0, data._cells.size());
+    ASSERT_EQ(0, getCellsForCreature(actualData, data._id).size());
     ASSERT_EQ(2, data._creatures.size());
 
     std::optional<CreatureDescription> smallCreature, largeCreature;
@@ -318,7 +318,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
     ASSERT_EQ(3, ids.size());
 
-    ASSERT_EQ(2, data._cells.size());
+    ASSERT_EQ(2, getCellsForCreature(actualData, data._id).size());
     ASSERT_EQ(1, data._creatures.size());
 
     std::optional<CellDescription> cellWithoutConnection, cellWithConnection;
@@ -338,8 +338,8 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     auto const& creature = data._creatures.front();
     ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).size());
 
-    ASSERT_EQ(1, creature._cells.front()._connections.size());
-    ASSERT_EQ(4, creature._cells.front()._connections.front()._cellId);
+    ASSERT_EQ(1, getCellsForCreature(actualData, creature._id).front()._connections.size());
+    ASSERT_EQ(4, getCellsForCreature(actualData, creature._id).front()._connections.front()._cellId);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_contained)
@@ -358,7 +358,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
     ASSERT_EQ(2, ids.size());
 
-    ASSERT_EQ(2, data._cells.size());
+    ASSERT_EQ(2, getCellsForCreature(actualData, data._id).size());
     ASSERT_EQ(0, data._creatures.size());
 
     std::optional<CellDescription> constructor, base;
@@ -392,7 +392,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
     ASSERT_EQ(2, ids.size());
 
-    ASSERT_EQ(2, data._cells.size());
+    ASSERT_EQ(2, getCellsForCreature(actualData, data._id).size());
     ASSERT_EQ(0, data._creatures.size());
 
     std::optional<CellDescription> constructor, base;
@@ -446,8 +446,8 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)}))
-                    .addCreature(CreatureDescription().id(1), {CellDescription().id(0), CellDescription().id(0)}));
+                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}))
+                    .addCreature(CreatureDescription().id(1).cells({CellDescription().id(0), CellDescription().id(0)}));
 
     // Perform action
     data.assignNewIds();
@@ -471,8 +471,8 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)}))
-                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)}));
+                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}))
+                    .addCreature(CreatureDescription().id(0).cells({CellDescription().id(0), CellDescription().id(0)}));
 
     // Perform action
     data.assignNewIds();
@@ -496,8 +496,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
-                    .addCreature(CreatureDescription().id(3).ancestorId(2), {CellDescription()}));
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -527,8 +527,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
-                    .addCreature(CreatureDescription().id(3).ancestorId(1), {CellDescription()}));
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(1).cells({CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -558,9 +558,9 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
-                    .addCreature(CreatureDescription().id(2), {CellDescription()}))
-                    .addCreature(CreatureDescription().id(3).ancestorId(2), {CellDescription()}));
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(2).cells({CellDescription()}))
+                    .addCreature(CreatureDescription().id(3).ancestorId(2).cells({CellDescription()}));
 
     // Perform action
     data.assignNewIds();
@@ -581,7 +581,7 @@ TEST_F(DescriptionEditTests, adaptMaxIds)
 {
     auto data = Description()
                     .creatures({
-                        CreatureDescription().id(3), {CellDescription().id(5)}),
+                        CreatureDescription().id(3).cells({CellDescription().id(5)}),
                         CreatureDescription(), {CellDescription()}),
                     })
                     .particles({
@@ -614,7 +614,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     ASSERT_EQ(1, data._creatures.size());
 
     auto creatureAfter = data._creatures.front();
-    ASSERT_EQ(1000, creatureAfter._cells.size());
+    ASSERT_EQ(1000, getCellsForCreature(actualData, creatureAfter._id).size());
 
     for (int i = 0; i < 1000; ++i) {
         auto const& refCell = data.getCellRef(0);
@@ -643,7 +643,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     ASSERT_EQ(1, data._creatures.size());
 
     auto creatureAfter = data._creatures.front();
-    ASSERT_EQ(1000, creatureAfter._cells.size());
+    ASSERT_EQ(1000, getCellsForCreature(actualData, creatureAfter._id).size());
 
     for (int i = 0; i < 1000; ++i) {
         auto const& refCell = data.getCellRef(0);

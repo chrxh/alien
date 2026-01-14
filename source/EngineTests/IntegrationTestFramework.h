@@ -24,23 +24,6 @@ public:
 protected:
     double getEnergy(Description const& data) const;
 
-    static std::vector<CellDescription> getCellsForCreature(Description const& data, uint64_t creatureId)
-    {
-        std::vector<CellDescription> result;
-        for (auto const& cell : data._cells) {
-            if (cell._creatureId.has_value() && cell._creatureId.value() == creatureId) {
-                result.push_back(cell);
-            }
-        }
-        return result;
-    }
-
-    static std::vector<CellDescription>& getCellsForCreatureMut(Description& data, uint64_t creatureId)
-    {
-        static std::vector<CellDescription> empty;
-        return data._cells;
-    }
-
     bool approxCompare(double expected, double actual, float precision = 0.001f) const { return TestHelper::approxCompare(expected, actual, precision); }
 
     bool approxCompare(float expected, float actual, float precision = 0.001f) const { return TestHelper::approxCompare(expected, actual, precision); }

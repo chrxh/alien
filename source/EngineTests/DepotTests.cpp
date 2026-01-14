@@ -26,7 +26,7 @@ public:
 protected:
     Description createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
-        auto data = Description().addCreature(CreatureDescription().id(1), {
+        auto data = Description().addCreature(CreatureDescription().id(1).cells({
             CellDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
@@ -41,7 +41,7 @@ protected:
     Description createDepotWithIncomingNegativeSignal(float usableEnergy, float storedUsableEnergy = 0.0f)
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
-        auto data = Description().addCreature(CreatureDescription().id(1), {
+        auto data = Description().addCreature(CreatureDescription().id(1).cells({
             CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
             CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
         }));

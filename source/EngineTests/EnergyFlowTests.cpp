@@ -35,7 +35,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
             data.addConnection(i, i + 1);
         }
     }
-    data._cells.at(0)._usableEnergy = 1000.0f;
+    getCellsForCreature(actualData, data._id).at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -50,25 +50,25 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 {
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-    });
-    auto creature = CreatureDescription();
 
-    std::vector<CellDescription> cells;
+    auto data = Description().addCreature(
+        CreatureDescription(),
+        GenomeDescription().genes({
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+        }));
+
+    auto& creature = data._creatures.front();
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
             cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
         }
-        cells.emplace_back(cell);
+        creature._cells.emplace_back(cell);
+        if (i > 0) {
+            data.addConnection(i, i + 1);
+        }
     }
-    cells.at(0)._usableEnergy = 1000.0f;
-
-    auto data = Description().addCreature(creature, cells, genome);
-    for (int i = 1; i < 20; ++i) {
-        data.addConnection(i, i + 1);
-    }
+    getCellsForCreature(actualData, creature._id).at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -77,8 +77,8 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 
     ASSERT_EQ(1, actualData._creatures.size());
 
-    auto creatureCells = getCellsForCreature(actualData, actualData._creatures.front()._id);
-    ASSERT_EQ(20, creatureCells.size());
+    auto const& actualCreature = actualData._creatures.front();
+    ASSERT_EQ(20, getCellsForCreature(actualData, actualCreature._id).size());
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {
@@ -94,12 +94,15 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     auto constructorId1 = 10 + 1;
     auto constructorId2 = 20 + 19 + 1;
 
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-    });
-    auto creature = CreatureDescription();
 
-    std::vector<CellDescription> cells;
+    auto data = Description().addCreature(
+        CreatureDescription(),
+        GenomeDescription().genes({
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+        }));
+
+    auto& creature = data._creatures.front();
+
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
@@ -107,15 +110,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             if (id == constructorId1 || id == constructorId2) {
                 cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
             }
-            cells.emplace_back(cell);
-        }
-    }
-    cells.at(0)._usableEnergy = 1000.0f;
-
-    auto data = Description().addCreature(creature, cells, genome);
-    for (int j = 0; j < 2; ++j) {
-        for (int i = 0; i < 20; ++i) {
-            auto id = i + j * 20 + 1;
+            creature._cells.emplace_back(cell);
             if (i > 0) {
                 data.addConnection(id - 1, id);
             }
@@ -124,6 +119,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             }
         }
     }
+    getCellsForCreature(actualData, creature._id).at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -141,25 +137,26 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
 {
-    auto genome = GenomeDescription().genes({
-        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-    });
-    auto creature = CreatureDescription();
 
-    std::vector<CellDescription> cells;
+    auto data = Description().addCreature(
+        CreatureDescription(),
+        GenomeDescription().genes({
+            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+        }));
+
+    auto& creature = data._creatures.front();
+
     for (int i = 0; i < 20; ++i) {
         auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
             cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
         }
-        cells.emplace_back(cell);
+        creature._cells.emplace_back(cell);
+        if (i > 0) {
+            data.addConnection(i, i + 1);
+        }
     }
-    cells.at(0)._usableEnergy = 1000.0f;
-
-    auto data = Description().addCreature(creature, cells, genome);
-    for (int i = 1; i < 20; ++i) {
-        data.addConnection(i, i + 1);
-    }
+    getCellsForCreature(actualData, creature._id).at(0)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -212,21 +209,19 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        CreatureDescription(),
-        {CellDescription()
-             .id(1)
-             .pos({100.0f, 100.0f})
-             .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy * 10)},
+        CreatureDescription(), {CellDescription()
+                                         .id(1)
+                                         .pos({100.0f, 100.0f})
+                                         .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                         .usableEnergy(normalCellEnergy * 10)}),
         genome);
     data.addCreature(
-        CreatureDescription(),
-        {CellDescription()
-             .id(2)
-             .cellState(CellState_Constructing)
-             .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
-             .cellType(ConstructorDescription().currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy)},
+        CreatureDescription(), {CellDescription()
+                                         .id(2)
+                                         .cellState(CellState_Constructing)
+                                         .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
+                                         .cellType(ConstructorDescription().currentNodeIndex(1))
+                                         .usableEnergy(normalCellEnergy)}),
         genome);
     data.addConnection(1, 2);
 
@@ -237,7 +232,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     auto actualEnergy = getEnergy(actualData);
     EXPECT_TRUE(approxCompare(getEnergy(data), actualEnergy));
 
-    EXPECT_EQ(2, actualData._cells.size());
+    EXPECT_EQ(2, actualData.getNumCells());
     auto cell1 = actualData.getCellRef(1);
     auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(abs(cell1._usableEnergy - normalCellEnergy * 10) < 1.0f);
@@ -251,20 +246,18 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        CreatureDescription(),
-        {CellDescription()
-             .id(1)
-             .pos({100.0f, 100.0f})
-             .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy * 10)},
+        CreatureDescription(), {CellDescription()
+                                         .id(1)
+                                         .pos({100.0f, 100.0f})
+                                         .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                         .usableEnergy(normalCellEnergy * 10)}),
         genome);
     data.addCreature(
-        CreatureDescription(),
-        {CellDescription()
-             .id(2)
-             .pos({101.0f, 100.0f})
-             .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy)},
+        CreatureDescription(), {CellDescription()
+                                         .id(2)
+                                         .pos({101.0f, 100.0f})
+                                         .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
+                                         .usableEnergy(normalCellEnergy)}),
         genome);
     data.addConnection(1, 2);
 
@@ -275,7 +268,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     auto actualEnergy = getEnergy(actualData);
     EXPECT_TRUE(approxCompare(getEnergy(data), actualEnergy));
 
-    EXPECT_EQ(2, actualData._cells.size());
+    EXPECT_EQ(2, actualData.getNumCells());
     auto cell1 = actualData.getCellRef(1);
     auto cell2 = actualData.getCellRef(2);
     EXPECT_TRUE(abs(cell1._usableEnergy - actualEnergy / 2) < 1.0f);
@@ -497,7 +490,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
             }
         }
         // Put all raw energy in the first cell
-        data._cells.at(0)._rawEnergy = 100.0f;
+        getCellsForCreature(actualData, data._id).at(0)._rawEnergy = 100.0f;
     }
 
     // Run simulations for a shorter time to see difference in flow rate
