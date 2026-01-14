@@ -42,7 +42,7 @@ protected:
                 target.emplace_back(CellDescription().id(diameterCount + i + j * diameterCount).pos({startPos.x + i, startPos.y + j}));
             }
         }
-        result.addCreature(CreatureDescription().id(1).cells(target));
+        result.addCreature(CreatureDescription().id(1), target);
         for (int j = 0; j < diameterCount; ++j) {
             for (int i = 0; i < diameterCount - 1; ++i) {
                 result.addConnection(diameterCount + i + diameterCount * j, diameterCount + 1 + i + diameterCount * j);
@@ -416,13 +416,13 @@ TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
 TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
 {
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0).cells(
+                    .addCreature(CreatureDescription().id(0), 
                         {CellDescription()
                              .id(1)
                              .pos({100.0f, 100.0f})
                              .frontAngle(0.0f)
                              .cellType(SensorDescription().autoTriggerInterval(3).mode(createModeWithDensity(GetParam()))),
-                         CellDescription().id(2).pos({101.0f, 100.0f})}))
+                         CellDescription().id(2).pos({101.0f, 100.0f})})
                     .addCreature(CreatureDescription(), {
                         // Create a different creature with a connection that would cross the ray path
                         CellDescription().id(10).pos({100.0f, 99.0f}),
@@ -1025,7 +1025,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
             targetCells.emplace_back(CellDescription().id(10 + i + j * 10).pos({95.0f + i, 80.0f + j}).color(1));
         }
     }
-    data.addCreature(CreatureDescription().id(1).cells(targetCells));
+    data.addCreature(CreatureDescription().id(1), targetCells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1351,7 +1351,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
     for (int i = 0; i < 30; ++i) {
         targetCells.emplace_back(CellDescription().id(10 + i).pos({95.0f + (i % 6), 80.0f + (i / 6)}));
     }
-    data.addCreature(CreatureDescription().id(1).cells(targetCells));
+    data.addCreature(CreatureDescription().id(1), targetCells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1381,7 +1381,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
     for (int i = 0; i < 60; ++i) {
         targetCells.emplace_back(CellDescription().id(10 + i).pos({95.0f + (i % 8), 80.0f + (i / 8)}));
     }
-    data.addCreature(CreatureDescription().id(1).cells(targetCells));
+    data.addCreature(CreatureDescription().id(1), targetCells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1411,7 +1411,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
     for (int i = 0; i < 120; ++i) {
         targetCells.emplace_back(CellDescription().id(10 + i).pos({95.0f + (i % 12), 80.0f + (i / 12)}));
     }
-    data.addCreature(CreatureDescription().id(1).cells(targetCells));
+    data.addCreature(CreatureDescription().id(1), targetCells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -1440,7 +1440,7 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_relocation)
     for (int i = 0; i < 60; ++i) {
         targetCells.emplace_back(CellDescription().id(10 + i).pos({95.0f + (i % 8), 80.0f + (i / 8)}));
     }
-    data.addCreature(CreatureDescription().id(1).cells(targetCells));
+    data.addCreature(CreatureDescription().id(1), targetCells);
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);

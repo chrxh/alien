@@ -229,10 +229,10 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
 
     Description data;
     data.addCreature(
-        CreatureDescription().cells(
-            {CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true).cellType(getCellTypeDescription(cellType))}),
+        CreatureDescription(),
+        {CellDescription().id(1).pos({10.0f, 10.0f}).cellState(CellState_Ready).headCell(true).cellType(getCellTypeDescription(cellType))},
         GenomeDescription());
-    data.addCreature(CreatureDescription(), {CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}), GenomeDescription());
+    data.addCreature(CreatureDescription(), {CellDescription().id(2).pos({11.0f, 10.0f}).cellState(CellState_Detaching)}, GenomeDescription());
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);

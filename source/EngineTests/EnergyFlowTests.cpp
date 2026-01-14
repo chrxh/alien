@@ -50,25 +50,27 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 {
-
-    auto data = Description().addCreature(
-        CreatureDescription(),
-        GenomeDescription().genes({
-            GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
-        }));
-
-    auto& creature = data._creatures.front();
+    auto genome = GenomeDescription().genes({
+        GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
+    });
+    auto creature = CreatureDescription();
+    auto creatureId = creature._id;
+    
+    std::vector<CellDescription> cells;
     for (int i = 0; i < 20; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
+        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).creatureId(creatureId);
         if (i == 19) {
             cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
         }
-        creature._cells.emplace_back(cell);
-        if (i > 0) {
-            data.addConnection(i, i + 1);
-        }
+        cells.push_back(cell);
     }
-    creature._cells.at(0)._usableEnergy = 1000.0f;
+    cells.at(0)._usableEnergy = 1000.0f;
+    
+    Description data;
+    data.addCreature(creature, cells, genome);
+    for (int i = 1; i < 20; ++i) {
+        data.addConnection(i, i + 1);
+    }
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -78,7 +80,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto const& actualCreature = actualData._creatures.front();
-    ASSERT_EQ(20, actualCreature._cells.size());
+    ASSERT_EQ(20, actualData.getCellsForCreature(actualCreature._id).size());
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {

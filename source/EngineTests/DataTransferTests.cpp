@@ -119,8 +119,8 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode)
     auto [creature2, genome2] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
 
     Description data;
-    data.addCreature(creature1.cells({CellDescription()}), genome1);
-    data.addCreature(creature2.cells({CellDescription()}), genome2);
+    data.addCreature(creature1, {CellDescription()}, genome1);
+    data.addCreature(creature2, {CellDescription()}, genome2);
 
     _simulationFacade->setSimulationData(data);
     auto actualData = _simulationFacade->getSimulationData();
@@ -135,7 +135,7 @@ TEST_P(DataTransferTests_AllNodeTypes, cellsWithCreatures_oneNode_preview)
     auto [creature, genome] = _descriptionTestDataFactory->createNonDefaultCreatureDescription(nodeParameter);
 
     Description data;
-    data.addCreature(creature.cells({CellDescription()}), genome);
+    data.addCreature(creature, {CellDescription()}, genome);
 
     _simulationFacade->setPreviewData(data);
     auto actualData = _simulationFacade->getPreviewData();
