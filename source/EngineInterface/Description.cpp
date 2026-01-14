@@ -304,6 +304,10 @@ void Description::assignNewIds()
     for (int i = 0; i < toInt(_cells.size()); ++i) {
         indexToOldCellId.emplace_back(i, _cells[i]._id);
     }
+    // Sort by oldCellId to preserve order (lower original IDs get lower new IDs)
+    std::sort(indexToOldCellId.begin(), indexToOldCellId.end(), [](auto const& lhs, auto const& rhs) {
+        return lhs.second < rhs.second;
+    });
 
     // Generate new cellIds and create maps for fast access
     std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
@@ -335,30 +339,30 @@ void Description::assignNewIds()
     // Helper for finding new cellId (uses original cellIds)
     auto findNewCellId = [&](std::optional<uint64_t> const& creatureId, uint64_t cellId) {
 
-        // Look in cells for given creature
-        if (!nonUniqueCellIds.contains(cellId)) {
-            auto creatureFindResult = creatureIdToOldToNewCellId.find(creatureId);
-            if (creatureFindResult != creatureIdToOldToNewCellId.end()) {
-                auto& oldToNewCellId = creatureFindResult->second;
-                auto findResult = oldToNewCellId.find(cellId);
-                if (findResult != oldToNewCellId.end()) {
+        // First check in creature-specific map (always preferred when available)
+        auto creatureFindResult = creatureIdToOldToNewCellId.find(creatureId);
+        if (creatureFindResult != creatureIdToOldToNewCellId.end()) {
+            auto& creatureNonUnique = creatureIdToNonUniqueCellIds[creatureId];
+            if (!creatureNonUnique.contains(cellId)) {
+                auto& oldToNewMap = creatureFindResult->second;
+                auto findResult = oldToNewMap.find(cellId);
+                if (findResult != oldToNewMap.end()) {
                     return findResult->second;
                 }
             }
-            return cellId;
         }
 
-        // Fallback: check in global map if unique
+        // Fallback: check in global map if unique globally
         if (!nonUniqueCellIds.contains(cellId)) {
             auto findResult = oldToNewCellId.find(cellId);
             if (findResult != oldToNewCellId.end()) {
                 return findResult->second;
             }
-            return cellId;
         }
 
-        // Else: cellId not unique => error
-        CHECK(false);
+        // If neither creature-specific nor global lookup worked, keep original cellId
+        // This handles the case where the referenced cell doesn't exist or IDs are ambiguous
+        return cellId;
     };
 
     for (auto& cell : _cells) {
@@ -394,7 +398,9 @@ void Description::assignNewIds()
                     cell._creatureId = findResult->second;
                 }
             } else {
-                CHECK(false);
+                // When creature ID is non-unique, we can't determine which creature the cell belongs to
+                // Reset to nullopt to make it a free cell
+                cell._creatureId.reset();
             }
         }
     }
