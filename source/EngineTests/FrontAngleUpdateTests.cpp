@@ -75,7 +75,7 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
@@ -122,7 +122,7 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
@@ -206,7 +206,7 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(2, actualData._creatures.size());
 
     {
@@ -269,7 +269,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
@@ -321,7 +321,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);
@@ -371,7 +371,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData.getCreatureRef(1);

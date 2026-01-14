@@ -45,12 +45,12 @@ TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
 
     Description data;
     data.addCreature(
-        CreatureDescription().cells(
-            {CellDescription().id(1).pos({10.0f, 10.0f}).cellType(BaseDescription()), CellDescription().id(2).pos({11.0f, 10.0f}).cellType(BaseDescription())}),
+        CreatureDescription(),
+        {CellDescription().id(1).pos({10.0f, 10.0f}).cellType(BaseDescription()), CellDescription().id(2).pos({11.0f, 10.0f}).cellType(BaseDescription())},
         genome);
     data.addCreature(
-        CreatureDescription().cells(
-            {CellDescription().id(3).pos({20.0f, 20.0f}).cellType(BaseDescription()), CellDescription().id(4).pos({21.0f, 20.0f}).cellType(BaseDescription())}),
+        CreatureDescription(),
+        {CellDescription().id(3).pos({20.0f, 20.0f}).cellType(BaseDescription()), CellDescription().id(4).pos({21.0f, 20.0f}).cellType(BaseDescription())},
         genome);
     data.addConnection(1, 2);
     data.addConnection(3, 4);
@@ -149,7 +149,8 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 
 
     auto data = Description().addCreature(
-        CreatureDescription().cells(hexagon._cells),
+        CreatureDescription(),
+        hexagon._cells,
         GenomeDescription().genes({
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription()}),
             GeneDescription().separation(true).nodes({NodeDescription(), NodeDescription(), NodeDescription()}),
@@ -164,8 +165,8 @@ TEST_F(DataTransferTests, multipleCells_genome_multipleGenes_multipleNodes)
 TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 {
     auto data = Description().cells({CellDescription().id(0), CellDescription().id(1)}).particles({ParticleDescription().id(2), ParticleDescription().id(3)});
-    data.addCreature(CreatureDescription().id(4), {CellDescription().id(5)}), GenomeDescription());
-    data.addCreature(CreatureDescription().id(5), {CellDescription().id(6)}), GenomeDescription());
+    data.addCreature(CreatureDescription().id(4), {CellDescription().id(5)}, GenomeDescription());
+    data.addCreature(CreatureDescription().id(5), {CellDescription().id(6)}, GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->setSimulationData(data);
@@ -202,8 +203,8 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
 TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
 {
     auto data = Description().cells({CellDescription().id(0), CellDescription().id(1)}).particles({ParticleDescription().id(2), ParticleDescription().id(3)});
-    data.addCreature(CreatureDescription().id(4), {CellDescription().id(5)}), GenomeDescription());
-    data.addCreature(CreatureDescription().id(5), {CellDescription().id(6)}), GenomeDescription());
+    data.addCreature(CreatureDescription().id(4), {CellDescription().id(5)}, GenomeDescription());
+    data.addCreature(CreatureDescription().id(5), {CellDescription().id(6)}, GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->addAndSelectSimulationData(std::move(data));
@@ -231,7 +232,7 @@ TEST_F(DataTransferTests, changeGenome_successful)
 {
     auto const CreatureId = 1;
 
-    auto data = Description().addCreature(CreatureDescription().id(CreatureId), {CellDescription()}), GenomeDescription());
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId), {CellDescription()}, GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
@@ -241,7 +242,7 @@ TEST_F(DataTransferTests, changeGenome_successful)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData._cells.size());
+    ASSERT_EQ(0, actualData.getNumFreeCells());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();
@@ -262,7 +263,7 @@ TEST_F(DataTransferTests, changeGenome_failed)
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
 
-    auto data = Description().addCreature(CreatureDescription().id(CreatureId), {CellDescription()}), GenomeDescription());
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId), {CellDescription()}, GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
@@ -278,7 +279,7 @@ TEST_F(DataTransferTests, getGenomeOfCreature_successful)
     auto genome =
         GenomeDescription().name("Test Genome").genes({GeneDescription().name("Gene1").separation(true).nodes({NodeDescription(), NodeDescription()})});
     auto data = Description().addCreature(
-        CreatureDescription().id(CreatureId), {CellDescription(), CellDescription(), CellDescription(), CellDescription()}), genome);
+        CreatureDescription().id(CreatureId), {CellDescription(), CellDescription(), CellDescription(), CellDescription()}, genome);
 
     _simulationFacade->setSimulationData(data);
 
@@ -297,7 +298,7 @@ TEST_F(DataTransferTests, getGenomeOfCreature_nonexistentCreature)
     auto constexpr CreatureId = 1;
     auto constexpr WrongCreatureId = 2;
 
-    auto data = Description().addCreature(CreatureDescription().id(CreatureId), {CellDescription()}), GenomeDescription());
+    auto data = Description().addCreature(CreatureDescription().id(CreatureId), {CellDescription()}, GenomeDescription());
 
     _simulationFacade->setSimulationData(data);
 
@@ -313,8 +314,8 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
     auto genome2 = GenomeDescription();
 
     Description data;
-    data.addCreature(CreatureDescription().id(CreatureId1), {CellDescription().id(1), CellDescription().id(2)}), genome);
-    data.addCreature(CreatureDescription().id(CreatureId2), {CellDescription().id(3)}), genome2);
+    data.addCreature(CreatureDescription().id(CreatureId1), {CellDescription().id(1), CellDescription().id(2)}, genome);
+    data.addCreature(CreatureDescription().id(CreatureId2), {CellDescription().id(3)}, genome2);
 
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -325,7 +326,7 @@ TEST_F(DataTransferTests, getInspectedSimulationData)
 
     auto creature = inspectedData.getCreatureRef(CreatureId1);
 
-    EXPECT_EQ(2, actualData.getCellsForCreature(creature._id).size());
+    EXPECT_EQ(2, inspectedData.getCellsForCreature(creature._id).size());
 
     auto cell1 = inspectedData.getCellRef(1);
     auto cell2 = inspectedData.getCellRef(2);
@@ -379,7 +380,7 @@ TEST_F(DataTransferTests, adaptIdGenerator_creatures)
 TEST_F(DataTransferTests, adaptIdGenerator_genomes)
 {
     auto constexpr HighId = 1000000;
-    auto data = Description().addCreature(CreatureDescription().id(1), {CellDescription().id(2)}), GenomeDescription().id(HighId));
+    auto data = Description().addCreature(CreatureDescription().id(1), {CellDescription().id(2)}, GenomeDescription().id(HighId));
     _simulationFacade->setSimulationData(data);
 
     NumberGenerator::get().setIds({1});
