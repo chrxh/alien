@@ -37,7 +37,7 @@ protected:
                 .pos({pos.x + 1.0f, pos.y})
                 .color(color)
                 .signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),  // Signal on connected cell will propagate
-        }));
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -55,7 +55,7 @@ protected:
                 .pos({pos.x + 1.0f, pos.y})
                 .color(color)
                 .signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),  // Signal on connected cell will propagate
-        }));
+        });
         data.addConnection(1, 2);
         return data;
     }
@@ -630,7 +630,7 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     // Create attacker with connections that block the attack ray
     auto data = Description().addCreature(CreatureDescription().id(1), {
         CellDescription().id(1).pos({100.0f, 100.0f}).cellType(ReconnectorDescription().mode(ReconnectStructureDescription())),
-        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+        CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
         // Create a connection that crosses the ray path to target at (100, 99)
         CellDescription().id(3).pos({99.0f, 99.0f}),
         CellDescription().id(4).pos({101.0f, 99.0f}),
