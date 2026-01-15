@@ -448,6 +448,9 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
             auto it = creatureEnergies.find(cell._creatureId.value());
             if (it != creatureEnergies.end()) {
                 cell._usableEnergy = it->second;
+            } else {
+                // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
+                cell._usableEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
             }
         } else {
             cell._usableEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
@@ -458,9 +461,9 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
 void DescriptionEditService::randomizeAges(Description& description, int minAge, int maxAge) const
 {
     // Step 1: Create random age value for each creature
-    std::unordered_map<uint64_t, float> creatureAges;
+    std::unordered_map<uint64_t, int> creatureAges;
     for (auto const& creature : description._creatures) {
-        creatureAges[creature._id] = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
+        creatureAges[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
     }
     
     // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
@@ -469,9 +472,12 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
             auto it = creatureAges.find(cell._creatureId.value());
             if (it != creatureAges.end()) {
                 cell._age = it->second;
+            } else {
+                // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
+                cell._age = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
             }
         } else {
-            cell._age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
+            cell._age = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
         }
     }
 }
@@ -479,9 +485,9 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
 void DescriptionEditService::randomizeCountdowns(Description& description, int minValue, int maxValue) const
 {
     // Step 1: Create random countdown value for each creature
-    std::unordered_map<uint64_t, float> creatureCountdowns;
+    std::unordered_map<uint64_t, int> creatureCountdowns;
     for (auto const& creature : description._creatures) {
-        creatureCountdowns[creature._id] = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
+        creatureCountdowns[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     }
     
     // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
@@ -491,9 +497,12 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
                 auto it = creatureCountdowns.find(cell._creatureId.value());
                 if (it != creatureCountdowns.end()) {
                     std::get<DetonatorDescription>(cell._cellType)._countdown = it->second;
+                } else {
+                    // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
+                    std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
                 }
             } else {
-                std::get<DetonatorDescription>(cell._cellType)._countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
+                std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
             }
         }
     }
