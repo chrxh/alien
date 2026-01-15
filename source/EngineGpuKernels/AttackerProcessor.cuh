@@ -18,9 +18,9 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -36,7 +36,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
     }
 }
 
-__device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     if (SignalProcessor::isManuallyTriggered(data, cell) && object->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
 
@@ -184,7 +184,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
     }
 }
 
-__inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatistics& statistics, Object* object)
 {
     int result = 0;
     if (object->cellType == CellType_Defender && object->cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {

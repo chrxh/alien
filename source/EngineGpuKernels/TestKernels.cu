@@ -12,40 +12,40 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationT
         //if (object->id == objectId) {
         //    switch (mutationType) {
         //    case MutationType::Properties:
-        //        MutationProcessor::propertiesMutation(data, cell);
+        //        MutationProcessor::propertiesMutation(data, object);
         //        break;
         //    case MutationType::NeuronData:
-        //        MutationProcessor::neuronDataMutation(data, cell);
+        //        MutationProcessor::neuronDataMutation(data, object);
         //        break;
         //    case MutationType::Geometry:
-        //        MutationProcessor::geometryMutation(data, cell);
+        //        MutationProcessor::geometryMutation(data, object);
         //        break;
         //    case MutationType::CustomGeometry:
-        //        MutationProcessor::customGeometryMutation(data, cell);
+        //        MutationProcessor::customGeometryMutation(data, object);
         //        break;
         //    case MutationType::CellType:
-        //        MutationProcessor::cellTypeMutation(data, cell);
+        //        MutationProcessor::cellTypeMutation(data, object);
         //        break;
         //    case MutationType::Insertion:
-        //        MutationProcessor::insertMutation(data, cell);
+        //        MutationProcessor::insertMutation(data, object);
         //        break;
         //    case MutationType::Deletion:
-        //        MutationProcessor::deleteMutation(data, cell);
+        //        MutationProcessor::deleteMutation(data, object);
         //        break;
         //    case MutationType::Translation:
-        //        MutationProcessor::translateMutation(data, cell);
+        //        MutationProcessor::translateMutation(data, object);
         //        break;
         //    case MutationType::Duplication:
-        //        MutationProcessor::duplicateMutation(data, cell);
+        //        MutationProcessor::duplicateMutation(data, object);
         //        break;
         //    case MutationType::CellColor:
-        //        MutationProcessor::cellColorMutation(data, cell);
+        //        MutationProcessor::cellColorMutation(data, object);
         //        break;
         //    case MutationType::SubgenomeColor:
-        //        MutationProcessor::subgenomeColorMutation(data, cell);
+        //        MutationProcessor::subgenomeColorMutation(data, object);
         //        break;
         //    case MutationType::GenomeColor:
-        //        MutationProcessor::genomeColorMutation(data, cell);
+        //        MutationProcessor::genomeColorMutation(data, object);
         //        break;
         //    }
         //}
@@ -63,10 +63,10 @@ __global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = cells.at(index);
         if (object->id == objectId1) {
-            object1 = cell;
+            object1 = object;
         }
         if (object->id == objectId2) {
-            object2 = cell;
+            object2 = object;
         }
     }
 
@@ -151,7 +151,7 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         if (auto& object = cells.at(index)) {
 
-            if (isPointerValid(data, cell)) {
+            if (isPointerValid(data, object)) {
                 for (int i = 0; i < object->numConnections; ++i) {
                     auto connectingCell = object->connections[i].object;
                     *result &= isPointerValid(data, connectingCell);
@@ -190,7 +190,7 @@ __global__ void cudaTestMutationCheck(SimulationData data, uint64_t objectId)
     //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
     //    auto& object = cells.at(index);
     //    if (object->id == objectId) {
-    //        MutationProcessor::checkMutationsForCell(data, cell);
+    //        MutationProcessor::checkMutationsForCell(data, object);
     //    }
     //}
 }

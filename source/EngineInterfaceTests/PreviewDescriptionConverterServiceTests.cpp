@@ -32,23 +32,23 @@ public:
     {
         RealVector2D object1;
         RealVector2D object2;
-        bool arrowToCell1 = true;
-        bool arrowToCell2 = true;
+        bool arrowToObject1 = true;
+        bool arrowToObject2 = true;
     };
     void checkConnections(PreviewDescription const& preview, std::vector<ConnectionCheckDescription> const& expectedConnections)
     {
         for (auto const& expectedConnection : expectedConnections) {
             auto found = false;
             for (auto const& connection : preview._connections) {
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._cell1)
-                    && TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._cell2)
-                    && expectedConnection.arrowToCell1 == connection._arrowToCell1 && expectedConnection.arrowToCell2 == connection._arrowToCell2) {
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._object1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._object2)
+                    && expectedConnection.arrowToObject1 == connection._arrowToObject1 && expectedConnection.arrowToObject2 == connection._arrowToObject2) {
                     found = true;
                     break;
                 }
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._cell1)
-                    && TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._cell2)
-                    && expectedConnection.arrowToCell2 == connection._arrowToCell1 && expectedConnection.arrowToCell1 == connection._arrowToCell2) {
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._object1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._object2)
+                    && expectedConnection.arrowToObject2 == connection._arrowToObject1 && expectedConnection.arrowToObject1 == connection._arrowToObject2) {
                     found = true;
                     break;
                 }

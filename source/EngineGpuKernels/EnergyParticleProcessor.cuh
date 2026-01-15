@@ -153,7 +153,7 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
                         if (killParticle) {
                             particle = nullptr;
                         } else {
-                            particle->lastAbsorbedCell = cell;
+                            particle->lastAbsorbedCell = object;
                         }
                     }
                     object->releaseLock();

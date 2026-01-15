@@ -315,7 +315,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
             drawList->AddLine(
                 {connectionStartPos.x, connectionStartPos.y}, {connectionEndPos.x, connectionEndPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
 
-            if (connection._arrowToCell1) {
+            if (connection._arrowToObject1) {
                 auto arrowPartDirection1 = RealVector2D{-direction.x + direction.y, -direction.x - direction.y};
                 auto arrowPartStart1 = connectionStartPos + arrowPartDirection1 * cellSize / 8;
                 drawList->AddLine(
@@ -327,7 +327,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
                     {arrowPartStart2.x, arrowPartStart2.y}, {connectionStartPos.x, connectionStartPos.y}, Const::GenomePreviewConnectionColor, LineThickness);
             }
 
-            if (connection._arrowToCell2) {
+            if (connection._arrowToObject2) {
                 auto arrowPartDirection1 = RealVector2D{direction.x - direction.y, direction.x + direction.y};
                 auto arrowPartStart1 = connectionEndPos + arrowPartDirection1 * cellSize / 8;
                 drawList->AddLine(

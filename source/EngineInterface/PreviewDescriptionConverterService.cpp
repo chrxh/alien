@@ -163,13 +163,13 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             }
             processedConnections.insert(connectionPair);
 
-            bool arrowToCell1 = arrowFromCell1ToCell2.contains({objectId2, objectId1});
-            bool arrowToCell2 = arrowFromCell1ToCell2.contains({objectId1, objectId2});
+            bool arrowToObject1 = arrowFromCell1ToCell2.contains({objectId2, objectId1});
+            bool arrowToObject2 = arrowFromCell1ToCell2.contains({objectId1, objectId2});
             auto previewConnection = ConnectionPreviewDescription()
                                          .object1(phenotype.getObjectRef(objectId1, cache)._pos)
                                          .object2(phenotype.getObjectRef(objectId2, cache)._pos)
-                                         .arrowToCell1(arrowToCell1)
-                                         .arrowToCell2(arrowToCell2);
+                                         .arrowToObject1(arrowToObject1)
+                                         .arrowToObject2(arrowToObject2);
             result.description._connections.push_back(previewConnection);
         }
     }

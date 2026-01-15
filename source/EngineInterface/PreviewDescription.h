@@ -44,8 +44,8 @@ struct ConnectionPreviewDescription
 
     MEMBER(ConnectionPreviewDescription, RealVector2D, object1, {});
     MEMBER(ConnectionPreviewDescription, RealVector2D, object2, {});
-    MEMBER(ConnectionPreviewDescription, bool, arrowToCell1, false);
-    MEMBER(ConnectionPreviewDescription, bool, arrowToCell2, false);
+    MEMBER(ConnectionPreviewDescription, bool, arrowToObject1, false);
+    MEMBER(ConnectionPreviewDescription, bool, arrowToObject2, false);
 };
 
 struct PreviewDescription

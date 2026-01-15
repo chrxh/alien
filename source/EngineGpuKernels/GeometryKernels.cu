@@ -92,7 +92,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
             for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
                 auto connectionIndex = i % numConnections;
                 auto const& connectedCell = object->connections[connectionIndex].object;
-                auto backIndex = connectedCell->getConnectionIndex(cell);
+                auto backIndex = connectedCell->getConnectionIndex(object);
                 backIndices[connectionIndex] = backIndex;
                 if (first) {
                     first = false;
@@ -194,7 +194,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
-    auto addTriangle = [&](Object* cell, uint64_t cellIndex, Object* connectedCell, Object* prevConnectedCell) {
+    auto addTriangle = [&](Object* object, uint64_t cellIndex, Object* connectedCell, Object* prevConnectedCell) {
         // Only add triangle once (avoid duplicates by checking ids)
         if (Math::length(object->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
             && Math::length(object->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
@@ -219,7 +219,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
             auto connectionIndex = i % numConnections;
             auto const& connectedCell = object->connections[connectionIndex].object;
-            auto backIndex = connectedCell->getConnectionIndex(cell);
+            auto backIndex = connectedCell->getConnectionIndex(object);
             backIndices[connectionIndex] = backIndex;
             if (first) {
                 first = false;
@@ -232,7 +232,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             // Triangle?
             if (prevConnectedCell->getConnectedCell(prevBackIndex - 1) == connectedCell) {
                 if (object->id < connectedCell->id && object->id < prevConnectedCell->id) {
-                    addTriangle(cell, index, prevConnectedCell, connectedCell);
+                    addTriangle(object, index, prevConnectedCell, connectedCell);
                 }
             }
 
@@ -242,8 +242,8 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != cell && fourthCellCandidate2 != cell
                 && connectedCell != prevConnectedCell) {
                 if (object->id < connectedCell->id && object->id < prevConnectedCell->id && object->id < fourthCellCandidate2->id) {
-                    addTriangle(cell, index, connectedCell, fourthCellCandidate1);
-                    addTriangle(cell, index, fourthCellCandidate1, prevConnectedCell);
+                    addTriangle(object, index, connectedCell, fourthCellCandidate1);
+                    addTriangle(object, index, fourthCellCandidate1, prevConnectedCell);
                 }
             }
         }

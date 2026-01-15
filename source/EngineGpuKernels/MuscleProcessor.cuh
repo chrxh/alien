@@ -12,25 +12,25 @@ class MuscleProcessor
 public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
-    __inline__ __device__ static float getInitialAngleFromPrevious(Object* cell, int connectionIndex);  // Return the angleFromPrevious without muscle distortions
+    __inline__ __device__ static float getInitialAngleFromPrevious(Object* object, int connectionIndex);  // Return the angleFromPrevious without muscle distortions
     __inline__ __device__ static void restoreInitialAngleFromPrevious(Object* muscleCell, Object* affectedCell, int connectionIndex);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void autoBending(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void manualBending(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void angleBending(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void manualCrawling(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void autoBending(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void manualBending(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void angleBending(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void manualCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object);
     __inline__ __device__ static void restoreInitialAngleFromPreviousIntern(float& initialAngle, Object* muscleCell, Object* affectedCell, int connectionIndex);
 
-    __inline__ __device__ static void radiate(SimulationData& data, Object* cell);
+    __inline__ __device__ static void radiate(SimulationData& data, Object* object);
 
     __inline__ __device__ static void getChain(Object** chain, int& chainLength, Object* startCell);
-    __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Object* cell);
-    __inline__ __device__ static void applyAcceleration(Object* cell, float2 const& acceleration);
+    __inline__ __device__ static float2 calcAverageDirection(SimulationData& data, Object* object);
+    __inline__ __device__ static void applyAcceleration(Object* object, float2 const& acceleration);
 
     struct BendingInfo
     {
@@ -39,9 +39,9 @@ private:
         ObjectConnection* connectionPrev;
         ObjectConnection* connectionNext;
     };
-    __inline__ __device__ static BendingInfo getBendingInfo(Object* cell);
+    __inline__ __device__ static BendingInfo getBendingInfo(Object* object);
 
-    __inline__ __device__ static bool isLeftSide(Object* cell);
+    __inline__ __device__ static bool isLeftSide(Object* object);
 
     static auto constexpr AccelerationLimit = 0.3f;
     static auto constexpr AutoTriggerInterval = 9;
@@ -62,7 +62,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
     }
 }
 
-__device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object* cell, int connectionIndex)
+__device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object* object, int connectionIndex)
 {
     CUDA_CHECK(connectionIndex < object->numConnections);
     for (int i = 0, j = object->numConnections; i < j; ++i) {
@@ -99,7 +99,7 @@ __device__ __inline__ void MuscleProcessor::restoreInitialAngleFromPrevious(Obje
     }
 }
 
-__device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     object->cellTypeData.muscle.lastMovementX = 0;
     object->cellTypeData.muscle.lastMovementY = 0;
@@ -126,7 +126,7 @@ __device__ __inline__ void MuscleProcessor::processCell(SimulationData& data, Si
     }
 }
 
-__inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& muscle = object->cellTypeData.muscle;
     auto& bending = muscle.modeData.autoBending;
@@ -262,7 +262,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
     }
 }
 
-__inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& muscle = object->cellTypeData.muscle;
     auto& bending = muscle.modeData.manualBending;
@@ -365,7 +365,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
     }
 }
 
-__inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& muscle = object->cellTypeData.muscle;
     auto& bending = muscle.modeData.angleBending;
@@ -424,7 +424,7 @@ __inline__ __device__ void MuscleProcessor::angleBending(SimulationData& data, S
     }
 }
 
-__inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& muscle = object->cellTypeData.muscle;
     auto& crawling = muscle.modeData.autoCrawling;
@@ -520,7 +520,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
     }
 }
 
-__inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& muscle = object->cellTypeData.muscle;
     auto& crawling = muscle.modeData.manualCrawling;
@@ -602,7 +602,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
     }
 }
 
-__inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MuscleProcessor::directMovement(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     if (object->frontAngle == VALUE_NOT_SET_FLOAT) {
         return;
@@ -639,7 +639,7 @@ MuscleProcessor::restoreInitialAngleFromPreviousIntern(float& initialAngle, Obje
     }
 }
 
-__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* cell)
+__inline__ __device__ void MuscleProcessor::radiate(SimulationData& data, Object* object)
 {
     auto cellTypeMuscleEnergyCost = cudaSimulationParameters.muscleEnergyCost.value[object->color];
     if (cellTypeMuscleEnergyCost > 0) {
@@ -680,7 +680,7 @@ __inline__ __device__ void MuscleProcessor::getChain(Object** chain, int& chainL
     }
 }
 
-__inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationData& data, Object* cell)
+__inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationData& data, Object* object)
 {
     Object* chain[MaxChainLength];
     int chainLength;
@@ -694,7 +694,7 @@ __inline__ __device__ float2 MuscleProcessor::calcAverageDirection(SimulationDat
     return result;
 }
 
-__inline__ __device__ void MuscleProcessor::applyAcceleration(Object* cell, float2 const& acceleration)
+__inline__ __device__ void MuscleProcessor::applyAcceleration(Object* object, float2 const& acceleration)
 {
     Object* chain[MaxChainLength];
     int chainLength;
@@ -708,7 +708,7 @@ __inline__ __device__ void MuscleProcessor::applyAcceleration(Object* cell, floa
     }
 }
 
-__inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Object* cell)
+__inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingInfo(Object* object)
 {
     BendingInfo result;
     if (object->numConnections == 2) {
@@ -740,7 +740,7 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
     return result;
 }
 
-__inline__ __device__ bool MuscleProcessor::isLeftSide(Object* cell)
+__inline__ __device__ bool MuscleProcessor::isLeftSide(Object* object)
 {
     if (object->numConnections == 2) {
         return object->frontAngle > NEAR_ZERO;

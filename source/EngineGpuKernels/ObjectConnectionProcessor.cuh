@@ -76,13 +76,13 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleAddConnectionPair(
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteAllConnections(SimulationData& data, Object* cell)
 {
-    auto index = data.structuralOperations.tryGetEntries(object->numConnections * 2);
+    auto index = data.structuralOperations.tryGetEntries(cell->numConnections * 2);
     if (index == -1) {
         return;
     }
 
-    for (int i = 0; i < object->numConnections; ++i) {
-        auto const& connectedCell = object->connections[i].object;
+    for (int i = 0; i < cell->numConnections; ++i) {
+        auto const& connectedCell = cell->connections[i].object;
         {
             StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
@@ -184,7 +184,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (!cell) {
+        if (!object) {
             continue;
         }
         auto scheduledOperationIndex = object->scheduledOperationIndex;
@@ -198,7 +198,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
-                    deleteConnectionOneWay(cell, operation.data.delConnection.connectedObject);
+                    deleteConnectionOneWay(object, operation.data.delConnection.connectedObject);
                 } break;
                 default:
                     break;
@@ -520,13 +520,13 @@ __inline__ __device__ bool ObjectConnectionProcessor::hasAngleSpace(SimulationDa
     int index = 0;
     float prevAngle;
     float nextAngle;
-    for (; index < object->numConnections; ++index) {
-        auto prevIndex = (index + object->numConnections - 1) % object->numConnections;
-        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(object->connections[prevIndex].object->pos - object->pos));
-        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(object->connections[index].object->pos - object->pos));
+    for (; index < cell->numConnections; ++index) {
+        auto prevIndex = (index + cell->numConnections - 1) % cell->numConnections;
+        prevAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->connections[prevIndex].object->pos - cell->pos));
+        nextAngle = Math::angleOfVector(data.cellMap.getCorrectedDirection(cell->connections[index].object->pos - cell->pos));
         if (Math::isAngleInBetween(prevAngle, nextAngle, angle) || prevIndex == index) {
             auto const angleUnit = 360.0f / toFloat(angleAlignment + 1);
-            return object->connections[index].angleFromPrevious > angleUnit + NEAR_ZERO;
+            return cell->connections[index].angleFromPrevious > angleUnit + NEAR_ZERO;
         }
     }
     return true;
@@ -562,18 +562,18 @@ __inline__ __device__ bool ObjectConnectionProcessor::isConnectedConnected(Objec
 __inline__ __device__ ObjectConnectionProcessor::ReferenceAndActualAngle
 ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData& data, Object* cell, float angleDeviation)
 {
-    if (0 == object->numConnections) {
+    if (0 == cell->numConnections) {
         return ReferenceAndActualAngle{0, data.primaryNumberGen.random() * 360};
     }
-    auto displacement = object->connections[0].object->pos - object->pos;
+    auto displacement = cell->connections[0].object->pos - cell->pos;
     data.cellMap.correctDirection(displacement);
     auto angle = Math::angleOfVector(displacement);
     int index = 0;
     float largestAngleGap = 0;
     float angleOfLargestAngleGap = 0;
-    auto numConnections = object->numConnections;
+    auto numConnections = cell->numConnections;
     for (int i = 1; i <= numConnections; ++i) {
-        auto angleDiff = object->connections[i % numConnections].angleFromPrevious;
+        auto angleDiff = cell->connections[i % numConnections].angleFromPrevious;
         if (angleDiff > largestAngleGap) {
             largestAngleGap = angleDiff;
             index = i % numConnections;
@@ -582,19 +582,19 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
         angle += angleDiff;
     }
 
-    auto angleFromPrev = object->connections[index].angleFromPrevious;
+    auto angleFromPrev = cell->connections[index].angleFromPrevious;
     for (int i = 0; i < numConnections - 1; ++i) {
         if (angleDeviation > angleFromPrev / 2) {
             angleDeviation -= angleFromPrev / 2;
             index = (index + 1) % numConnections;
             angleOfLargestAngleGap += angleFromPrev;
-            angleFromPrev = object->connections[index].angleFromPrevious;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
             angleDeviation = angleDeviation - angleFromPrev / 2;
         }
         if (angleDeviation < -angleFromPrev / 2) {
             angleDeviation += angleFromPrev / 2;
             index = (index + numConnections - 1) % numConnections;
-            angleFromPrev = object->connections[index].angleFromPrevious;
+            angleFromPrev = cell->connections[index].angleFromPrevious;
             angleDeviation = angleDeviation + angleFromPrev / 2;
             angleOfLargestAngleGap -= angleFromPrev;
         }
@@ -611,7 +611,7 @@ ObjectConnectionProcessor::calcLargestGapReferenceAndActualAngle(SimulationData&
 
 __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(SimulationData& data, Object* cell, int operationIndex)
 {
-    auto origOperationIndex = atomicCAS(&object->scheduledOperationIndex, -1, operationIndex);
+    auto origOperationIndex = atomicCAS(&cell->scheduledOperationIndex, -1, operationIndex);
     for (int depth = 0; depth < MaxOperationsPerCell; ++depth) {
         if (origOperationIndex == -1) {
             break;
@@ -624,7 +624,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleOperationOnCell(Si
 __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(SimulationData& data, Object* cell, Object* otherCell)
 {
     auto result = false;
-    data.cellMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](Object* nearCell) {
+    data.cellMap.executeForEach(cell->pos, cudaSimulationParameters.attackerRadius.value[cell->color], cell->detached, [&](Object* nearCell) {
         if (result) {
             return;
         }
@@ -634,12 +634,12 @@ __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellI
         if (nearCell == otherCell) {
             return;
         }
-        if (!object->isSameCreature(nearCell)) {
+        if (!cell->isSameCreature(nearCell)) {
             return;
         }
         for (int i = 0; i < nearCell->numConnections; ++i) {
             auto connectedNearCell = nearCell->connections[i].object;
-            if (Math::crossing(nearCell->pos, connectedNearCell->pos, object->pos, otherCell->pos)) {
+            if (Math::crossing(nearCell->pos, connectedNearCell->pos, cell->pos, otherCell->pos)) {
                 result = true;
                 return;
             }
