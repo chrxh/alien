@@ -500,6 +500,9 @@ DescriptionCache Description::createCache() const
     for (auto const& [cellIndex, cell] : _cells | boost::adaptors::indexed(0)) {
         result->cellIdToIndex.emplace(cell._id, toInt(cellIndex));
     }
+    for (auto const& [creatureIndex, creature] : _creatures | boost::adaptors::indexed(0)) {
+        result->creatureIdToIndex.emplace(creature._id, toInt(creatureIndex));
+    }
     for (auto const& [genomeIndex, genome] : _genomes | boost::adaptors::indexed(0)) {
         result->genomeIdToIndex.emplace(genome._id, genomeIndex);
     }

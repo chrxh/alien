@@ -553,6 +553,7 @@ struct CreatureDescription
 struct _DescriptionCache
 {
     std::unordered_map<uint64_t, int> cellIdToIndex;
+    std::unordered_map<uint64_t, uint64_t> creatureIdToIndex;
     std::unordered_map<uint64_t, uint64_t> genomeIdToIndex;
 };
 using DescriptionCache = std::shared_ptr<_DescriptionCache>;

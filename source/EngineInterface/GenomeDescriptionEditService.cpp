@@ -244,14 +244,18 @@ std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPrev
             result.at(index)._genomes.emplace_back(genome);
         } else {
             CHECK(creature._generation == 1);
-            auto genomeIndex = cache->genomeIdToIndex.at(creature._genomeId);
-            auto const& genome = preview._genomes.at(genomeIndex);
 
             auto index = creatureIdToIndex.at(creature._ancestorId.value());
             result.at(index)._creatures.emplace_back(std::move(creature));
 
             // Genome already added from the seed creature (should be the same since no mutations in preview)
         }
+    }
+    for (auto& cell: preview._cells) {
+        auto creatureIndex = cache->creatureIdToIndex.at(*cell._creatureId);
+        auto& creature = preview._creatures.at(creatureIndex);
+        auto phenotypeIndex = creatureIdToIndex.at(creature._generation == 0 ? creature._id : creature._ancestorId.value());
+        result.at(phenotypeIndex)._cells.emplace_back(std::move(cell));
     }
     return result;
 }
