@@ -3,7 +3,7 @@
 __global__ void cudaPreparePointerArraysForCleanup(SimulationData data)
 {
     data.tempEntities.energyParticles.reset();
-    data.tempEntities.entities.reset();
+    data.tempEntities.objects.reset();
 }
 
 __global__ void cudaPrepareHeapForCleanup(SimulationData data)
@@ -11,10 +11,10 @@ __global__ void cudaPrepareHeapForCleanup(SimulationData data)
     data.tempEntities.heap.reset();
 }
 
-__global__ void cudaCleanupCellsStep1(Array<Object*> cells, Heap newHeap)
+__global__ void cudaCleanupCellsStep1(Array<Object*> objects, Heap newHeap)
 {
     // Assumes that cellPointers are already cleaned up
-    auto cellPartition = calcSystemThreadPartition(cells.getNumEntries());
+    auto cellPartition = calcSystemThreadPartition(objects.getNumEntries());
 
     int numCellsToCopy = cellPartition.numElements();
     if (numCellsToCopy > 0) {
@@ -23,12 +23,12 @@ __global__ void cudaCleanupCellsStep1(Array<Object*> cells, Heap newHeap)
 
         int newCellIndex = 0;
         for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
-            auto& object = cells.at(index);
+            auto& object = objects.at(index);
             auto newCell = &newCells[newCellIndex];
-            *newCell = *cell;
+            *newCell = *object;
 
             object->tempValue.as_uint64 = reinterpret_cast<uint8_t*>(newCell) - newHeapStart;  // Save index of new cell in old cell
-            cell = newCell;
+            object = newCell;
 
             ++newCellIndex;
         }

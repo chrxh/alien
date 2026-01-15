@@ -92,7 +92,7 @@ public:
         _mapEntries.free();
     }
 
-    __device__ __inline__ void set_block(int numEntities, Object** cells)
+    __device__ __inline__ void set_block(int numEntities, Object** objects)
     {
         if (0 == numEntities) {
             return;
@@ -106,14 +106,14 @@ public:
 
         auto partition = calcThreadBlockPartition(numEntities);
         for (int index = partition.startIndex; index <= partition.endIndex; ++index) {
-            auto const& object = cells[index];
+            auto const& object = objects[index];
             int2 posInt = {floorInt(object->pos.x), floorInt(object->pos.y)};
             correctPosition(posInt);
             auto slot = posInt.x + posInt.y * _size.x;
             Object* slotCell = reinterpret_cast<Object*>(atomicCAS(
                 reinterpret_cast<unsigned long long int*>(&_map[slot]),
                 reinterpret_cast<unsigned long long int>(nullptr),
-                reinterpret_cast<unsigned long long int>(cell)));
+                reinterpret_cast<unsigned long long int>(object)));
             for (int level = 0; level < 10; ++level) {
                 if (!slotCell) {
                     break;
@@ -121,7 +121,7 @@ public:
                 slotCell = reinterpret_cast<Object*>(atomicCAS(
                     reinterpret_cast<unsigned long long int*>(&slotCell->nextCell),
                     reinterpret_cast<unsigned long long int>(nullptr),
-                    reinterpret_cast<unsigned long long int>(cell)));
+                    reinterpret_cast<unsigned long long int>(object)));
             }
 
             entrySubarray[index] = slot;

@@ -6,7 +6,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
 {
     worldSize = worldSize_;
 
-    objects.init();
+    entities.init();
     tempEntities.init();
     preprocessedSimulationData.init(worldSize);
     cellMap.init(worldSize);
@@ -42,8 +42,8 @@ bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArray, sizeDelta.particleArray);
-    return objects.entities.shouldResize_host(cellArraySizeResult) || objects.energyParticles.shouldResize_host(particleArraySizeResult)
-        || objects.heap.shouldResize_host(sizeDelta.heap);
+    return entities.objects.shouldResize_host(cellArraySizeResult) || entities.energyParticles.shouldResize_host(particleArraySizeResult)
+        || entities.heap.shouldResize_host(sizeDelta.heap);
 }
 
 void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
@@ -51,9 +51,9 @@ void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
-    resizeTargetIntern(objects.objects, tempEntities.objects, cellArraySizeResult);
-    resizeTargetIntern(objects.energyParticles, tempEntities.energyParticles, particleArraySizeResult);
-    resizeTargetIntern(objects.heap, tempEntities.heap, size.heap);
+    resizeTargetIntern(entities.objects, tempEntities.objects, cellArraySizeResult);
+    resizeTargetIntern(entities.energyParticles, tempEntities.energyParticles, particleArraySizeResult);
+    resizeTargetIntern(entities.heap, tempEntities.heap, size.heap);
 }
 
 void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
@@ -61,10 +61,10 @@ void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
-    objects.entities.resize(cellArraySizeResult);
-    objects.energyParticles.resize(particleArraySizeResult);
-    objects.heap.resize(size.heap);
-    tempEntities.entities.resize(cellArraySizeResult);
+    entities.objects.resize(cellArraySizeResult);
+    entities.energyParticles.resize(particleArraySizeResult);
+    entities.heap.resize(size.heap);
+    tempEntities.objects.resize(cellArraySizeResult);
     tempEntities.energyParticles.resize(particleArraySizeResult);
     tempEntities.heap.resize(size.heap);
 
@@ -73,21 +73,21 @@ void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
 
 void SimulationData::resizeObjectsByMatchingTempObjects()
 {
-    objects.entities.resize(tempEntities.entities.getCapacity_host());
-    objects.energyParticles.resize(tempEntities.energyParticles.getCapacity_host());
-    objects.heap.resize(tempEntities.heap.getCapacity_host());
+    entities.objects.resize(tempEntities.objects.getCapacity_host());
+    entities.energyParticles.resize(tempEntities.energyParticles.getCapacity_host());
+    entities.heap.resize(tempEntities.heap.getCapacity_host());
 
     resizeAuxiliaryData();
 }
 
 bool SimulationData::isEmpty()
 {
-    return 0 == objects.heap.getNumEntries_host();
+    return 0 == entities.heap.getNumEntries_host();
 }
 
 void SimulationData::free()
 {
-    objects.free();
+    entities.free();
     tempEntities.free();
     preprocessedSimulationData.free();
     cellMap.free();
@@ -106,9 +106,9 @@ void SimulationData::free()
 
 void SimulationData::resizeAuxiliaryData()
 {
-    auto estimatedMaxActiveCells = objects.entities.getCapacity_host();
+    auto estimatedMaxActiveCells = entities.objects.getCapacity_host();
     cellMap.resize(estimatedMaxActiveCells);
-    auto estimatedMaxActiveParticles = objects.energyParticles.getCapacity_host();
+    auto estimatedMaxActiveParticles = entities.energyParticles.getCapacity_host();
     particleMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =

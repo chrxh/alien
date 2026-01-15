@@ -46,7 +46,7 @@ public:
 __device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outward)
 {
     Math::normalize(outward);
-    if (object->numConnections < 2) {
+    if (cell->numConnections < 2) {
         return outward;
     }
 
@@ -57,10 +57,10 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outw
     float min_h = 0.0;  //h = angular distance from outward vector
     float max_h = 0.0;
 
-    for (int i = 0; i < object->numConnections; ++i) {
+    for (int i = 0; i < cell->numConnections; ++i) {
 
         //calculate h (angular distance from outward vector)
-        float2 u = object->connections[i].object->pos - object->pos;
+        float2 u = cell->connections[i].cell->pos - cell->pos;
         Math::normalize(u);
         float h = Math::dot(outward, u);
         if (outward.x * u.y - outward.y * u.x < 0.0) {
@@ -68,12 +68,12 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outw
         }
 
         if (!minCell || h < min_h) {
-            minCell = object->connections[i].cell;
+            minCell = cell->connections[i].cell;
             minVector = u;
             min_h = h;
         }
         if (!maxCell || h > max_h) {
-            maxCell = object->connections[i].cell;
+            maxCell = cell->connections[i].cell;
             maxVector = u;
             max_h = h;
         }
@@ -86,7 +86,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outw
 
     //one adjacent cells?
     if (minCell == maxCell) {
-        return object->pos - minCell->pos;
+        return cell->pos - minCell->pos;
     }
 
     //calc normal vectors

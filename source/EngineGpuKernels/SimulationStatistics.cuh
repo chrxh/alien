@@ -135,7 +135,7 @@ private:
     {
         uint32_t color;
         uint32_t count;
-        float numCells;
+        float numObjects;
     };
     MutantStatistics* _mutantToMutantStatisticsMap;
 };

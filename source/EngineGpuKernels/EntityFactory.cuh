@@ -295,9 +295,9 @@ __inline__ __device__ Creature* EntityFactory::createCreatureFromTO(TO const& to
 __inline__ __device__ Object* EntityFactory::createCellFromTO(TO const& to, int cellIndex, Object* cellArray)
 {
     auto cellTO = to.objects[cellIndex];
-    Object** cellPointer = _data->entities.entities.getNewElement();
-    Object* cell = cellArray + cellIndex;
-    *cellPointer = cell;
+    Object** cellPointer = _data->entities.objects.getNewElement();
+    Object* object = cellArray + cellIndex;
+    *cellPointer = object;
 
     changeCellFromTO(to, cellTO, cell);
     object->id = cellTO.id;
@@ -320,7 +320,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromTO(TO const& to, int 
     } else {
         object->creature = nullptr;
     }
-    return cell;
+    return object;
 }
 
 __inline__ __device__ void EntityFactory::changeCellFromTO(TO const& to, ObjectTO const& cellTO, Object* cell)
@@ -570,7 +570,7 @@ __inline__ __device__ Energy* EntityFactory::createParticle(float energy, float2
 __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
 {
     auto cell = _data->entities.heap.getTypedSubArray<Object>(1);
-    auto cellPointers = _data->entities.entities.getNewElement();
+    auto cellPointers = _data->entities.objects.getNewElement();
     *cellPointers = cell;
 
     object->id = _data->primaryNumberGen.createId();
@@ -604,7 +604,7 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     object->cellType = CellType_Free;
     object->neuralNetwork = nullptr;
 
-    return cell;
+    return object;
 }
 
 __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
@@ -621,8 +621,8 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
 //__inline__ __device__ Object* EntityFactory::createEmptyCell(uint64_t& cellIndex)
 //{
 //    auto cell = _data->entities.heap.getTypedSubArray<Object>(1);
-//    auto cellPointer = _data->entities.entities.getNewElement(&cellIndex);
-//    *cellPointer = cell;
+//    auto cellPointer = _data->entities.objects.getNewElement(&cellIndex);
+//    *cellPointer = object;
 //
 //    object->id = _data->primaryNumberGen.createObjectId();
 //    object->stiffness = 1.0f;
@@ -641,7 +641,7 @@ __inline__ __device__ Creature* EntityFactory::cloneCreature(Creature* creature)
 //    object->density = 1.0f;
 //    object->event = CellEvent_No;
 //    object->cellTriggered = CellTriggered_No;
-//    return cell;
+//    return object;
 //}
 
 __inline__ __device__ Object* EntityFactory::createCellFromNode(
@@ -658,8 +658,8 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     auto const& node = &gene->nodes[nodeIndex];
 
     auto cell = _data->entities.heap.getTypedSubArray<Object>(1);
-    auto cellPointer = _data->entities.entities.getNewElement(&cellIndex);
-    *cellPointer = cell;
+    auto cellPointer = _data->entities.objects.getNewElement(&cellIndex);
+    *cellPointer = object;
     object->id = _data->primaryNumberGen.createId();
     object->pos = pos;
     object->vel = vel;
@@ -908,7 +908,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
         }
     } break;
     }
-    return cell;
+    return object;
 }
 
 __inline__ __device__ Creature* EntityFactory::createEmptyCreature()

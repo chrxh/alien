@@ -440,7 +440,7 @@ struct CreatureTO
 
     uint32_t generation;
     uint32_t lineageId;
-    uint32_t numCells;
+    uint32_t numObjects;
 
     uint64_t genomeArrayIndex;
 
