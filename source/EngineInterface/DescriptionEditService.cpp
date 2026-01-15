@@ -404,20 +404,22 @@ void DescriptionEditService::reconnectCells(Description& description, float maxD
 
 void DescriptionEditService::randomizeCellColors(Description& description, std::vector<int> const& colorCodes) const
 {
+    // Step 1: Create random color value for each creature
+    std::unordered_map<uint64_t, float> cellColorsByCreatureId;
     for (auto const& creature : description._creatures) {
-        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& cell : description._cells) {
-            if (cell._creatureId == creature._id) {
-                cell._color = newColor;
-            }
-        }
+        cellColorsByCreatureId[creature._id] = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
     }
-    {
-        auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        for (auto& cell : description._cells) {
-            if (!cell._creatureId.has_value()) {
-                cell._color = newColor;
+
+    // Step 2: Iterate over cells and apply stored color values (including cells without creatureId)
+    auto nonCreatureColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
+    for (auto& cell : description._cells) {
+        if (cell._creatureId.has_value()) {
+            auto it = cellColorsByCreatureId.find(cell._creatureId.value());
+            if (it != cellColorsByCreatureId.end()) {
+                cell._color = it->second;
             }
+        } else {
+            cell._usableEnergy = nonCreatureColor;
         }
     }
 }
@@ -443,17 +445,15 @@ void DescriptionEditService::randomizeEnergies(Description& description, float m
     }
     
     // Step 2: Iterate over cells and apply stored energy values (including cells without creatureId)
+    auto nonCreatureEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
     for (auto& cell : description._cells) {
         if (cell._creatureId.has_value()) {
             auto it = creatureEnergies.find(cell._creatureId.value());
             if (it != creatureEnergies.end()) {
                 cell._usableEnergy = it->second;
-            } else {
-                // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
-                cell._usableEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
             }
         } else {
-            cell._usableEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
+            cell._usableEnergy = nonCreatureEnergy;
         }
     }
 }
@@ -467,17 +467,15 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
     }
     
     // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
+    auto nonCreatureAge = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
     for (auto& cell : description._cells) {
         if (cell._creatureId.has_value()) {
             auto it = creatureAges.find(cell._creatureId.value());
             if (it != creatureAges.end()) {
                 cell._age = it->second;
-            } else {
-                // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
-                cell._age = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
             }
         } else {
-            cell._age = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
+            cell._age = nonCreatureAge;
         }
     }
 }
@@ -491,18 +489,16 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
     }
     
     // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
+    auto nonCreatureCountdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     for (auto& cell : description._cells) {
         if (cell.getCellType() == CellType_Detonator) {
             if (cell._creatureId.has_value()) {
                 auto it = creatureCountdowns.find(cell._creatureId.value());
                 if (it != creatureCountdowns.end()) {
                     std::get<DetonatorDescription>(cell._cellType)._countdown = it->second;
-                } else {
-                    // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
-                    std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
                 }
             } else {
-                std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
+                std::get<DetonatorDescription>(cell._cellType)._countdown = nonCreatureCountdown;
             }
         }
     }

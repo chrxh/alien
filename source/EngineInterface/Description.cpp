@@ -399,15 +399,10 @@ void Description::assignNewIds()
     // Assign new creatureIds to cells
     for (auto& cell : _cells) {
         if (cell._creatureId.has_value()) {
-            if (!nonUniqueCreatureIds.contains(cell._creatureId.value())) {
-                auto findResult = oldToNewCreatureId.find(cell._creatureId.value());
-                if (findResult != oldToNewCreatureId.end()) {
-                    cell._creatureId = findResult->second;
-                }
-            } else {
-                // When creature ID is non-unique, we can't determine which creature the cell belongs to
-                // Reset to nullopt to make it a free cell
-                //cell._creatureId.reset();
+            CHECK(!nonUniqueCreatureIds.contains(cell._creatureId.value()));
+            auto findResult = oldToNewCreatureId.find(cell._creatureId.value());
+            if (findResult != oldToNewCreatureId.end()) {
+                cell._creatureId = findResult->second;
             }
         }
     }
