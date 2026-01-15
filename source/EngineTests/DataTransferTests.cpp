@@ -233,7 +233,7 @@ TEST_F(DataTransferTests, changeGenome_successful)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto creature = actualData._creatures.front();

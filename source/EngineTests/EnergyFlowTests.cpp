@@ -53,12 +53,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
     });
-    auto creature = CreatureDescription();
-    auto creatureId = creature._id;
     
     std::vector<CellDescription> cells;
     for (int i = 0; i < 20; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).creatureId(creatureId);
+        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
             cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
         }
@@ -67,7 +65,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     cells.at(0)._usableEnergy = 1000.0f;
     
     Description data;
-    data.addCreature(cells, creature, genome);
+    data.addCreature(cells, CreatureDescription(), genome);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
     }
@@ -99,14 +97,12 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
     });
-    auto creature = CreatureDescription();
-    auto creatureId = creature._id;
 
     std::vector<CellDescription> cells;
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
-            auto cell = CellDescription().id(id).pos({100.0f + toFloat(i), 100.0f}).creatureId(creatureId);
+            auto cell = CellDescription().id(id).pos({100.0f + toFloat(i), 100.0f});
             if (id == constructorId1 || id == constructorId2) {
                 cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
             }
@@ -116,7 +112,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     cells.at(0)._usableEnergy = 1000.0f;
 
     Description data;
-    data.addCreature(cells, creature, genome);
+    data.addCreature(cells, CreatureDescription(), genome);
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
@@ -148,12 +144,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     auto genome = GenomeDescription().genes({
         GeneDescription().separation(false).numBranches(1).nodes({NodeDescription()}),
     });
-    auto creature = CreatureDescription();
-    auto creatureId = creature._id;
 
     std::vector<CellDescription> cells;
     for (int i = 0; i < 20; ++i) {
-        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f}).creatureId(creatureId);
+        auto cell = CellDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
             cell.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
         }
@@ -162,7 +156,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     cells.at(0)._usableEnergy = 1000.0f;
 
     Description data;
-    data.addCreature(cells, creature, genome);
+    data.addCreature(cells, CreatureDescription(), genome);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
     }

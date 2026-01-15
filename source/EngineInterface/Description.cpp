@@ -473,7 +473,7 @@ size_t Description::getNumCells() const
     return _cells.size();
 }
 
-size_t Description::getNumFreeCells() const
+size_t Description::getNumCellsWithoutCreature() const
 {
     return std::count_if(_cells.begin(), _cells.end(), [](auto const& cell) { return !cell._creatureId.has_value(); });
 }

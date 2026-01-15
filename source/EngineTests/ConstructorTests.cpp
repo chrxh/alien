@@ -48,7 +48,7 @@ TEST_F(ConstructorTests, alreadyFinished)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -74,7 +74,7 @@ TEST_F(ConstructorTests, emptyGenome)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -101,7 +101,7 @@ TEST_F(ConstructorTests, emptyGene)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -132,7 +132,7 @@ TEST_F(ConstructorTests, nodeIndexOutOfRange)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -163,7 +163,7 @@ TEST_F(ConstructorTests, geneIndexOutOfRange)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -190,7 +190,7 @@ TEST_F(ConstructorTests, insufficientEnergy)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -222,7 +222,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_failed)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -256,7 +256,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withSignal_success)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -290,7 +290,7 @@ TEST_F(ConstructorTests, manuallyTriggered_withoutSignal)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -321,7 +321,7 @@ TEST_F(ConstructorTests, lastConstructedCellNotFound)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -361,7 +361,7 @@ TEST_F(ConstructorTests, insufficientSpace)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -407,7 +407,7 @@ TEST_F(ConstructorTests, crossingLinks)
     auto actualData = _simulationFacade->getSimulationData();
 
     // No cell constructed
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
@@ -440,7 +440,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -482,7 +482,7 @@ TEST_P(ConstructorTests_AllNodeTypes, creature_1__node_0_1__concatenation_0_1__b
 
     auto actualData = _simulationFacade->getPreviewData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -521,7 +521,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto actualData = _simulationFacade->getPreviewData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -559,7 +559,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ge
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -609,7 +609,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -653,7 +653,7 @@ TEST_F(ConstructorTests, creature_1__node_2_3__concatenation_0_1__branch_0_0__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -683,7 +683,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -720,7 +720,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_1__ge
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -759,7 +759,7 @@ TEST_F(ConstructorTests, creature_1__node_0_2__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -803,7 +803,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_2__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -875,7 +875,7 @@ TEST_P(ConstructorTests_BendingMuscles, creature_2__node_0_1__concatenation_1_2_
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -926,7 +926,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_2)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -966,7 +966,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_1_2)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1005,7 +1005,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_1_2__fi
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1044,7 +1044,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_1__branch_0_0__ig
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1080,7 +1080,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1115,7 +1115,7 @@ TEST_F(ConstructorTests, creature_2__node_0_1__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1154,7 +1154,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_1_2)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1191,7 +1191,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1241,7 +1241,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1284,7 +1284,7 @@ TEST_F(ConstructorTests, creature_1__node_1_2__concatenation_0_1__branch_0_1)
     {
         auto actualData = _simulationFacade->getSimulationData();
 
-        ASSERT_EQ(0, actualData.getNumFreeCells());
+        ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
         ASSERT_EQ(1, actualData._creatures.size());
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1332,7 +1332,6 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
                     .cellState(CellState_Constructing),
             }, CreatureDescription()
             .id(0)
-
             .frontAngleId(InitialFrontAngleId), genome);
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -1343,7 +1342,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1390,7 +1389,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__mi
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1431,7 +1430,7 @@ TEST_F(ConstructorTests, creature_3__node_1_2__concatenation_0_1__branch_0_1__on
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
@@ -1483,7 +1482,7 @@ TEST_F(ConstructorTests, creature_1__node_1_3__concatenation_0_1__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1544,7 +1543,7 @@ TEST_F(ConstructorTests, creature_1__node_2_4__concatenation_0_1__branch_0_0__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1636,7 +1635,7 @@ TEST_P(ConstructorTests_AllAngleAlignments, creature_1__node_2_4__concatenation_
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1733,7 +1732,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_3__branch_0_1__co
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1794,7 +1793,7 @@ TEST_F(ConstructorTests, creature_1__node_0_4__concatenation_1_2__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -1851,7 +1850,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -1916,7 +1915,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
 
     auto actualHostCell = actualData.getCellRef(1);
@@ -1978,7 +1977,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto actualHostCell = actualData.getCellRef(1);
     auto actualPrevConstructedCell = actualData.getCellRef(2);
@@ -2039,7 +2038,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
@@ -2101,7 +2100,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
@@ -2160,7 +2159,7 @@ TEST_F(ConstructorTests, creature_3__node_2_3__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
@@ -2215,7 +2214,7 @@ TEST_F(ConstructorTests, creature_4__node_3_4__concatenation_0_1__branch_0_1__nu
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(5, actualData.getCellsForCreature(creature._id).size());
@@ -2262,7 +2261,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_0_inf__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -2307,7 +2306,7 @@ TEST_F(ConstructorTests, creature_1__node_0_1__concatenation_1_inf__branch_0_0)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(2, actualData._creatures.size());
 
     auto hostCreature = actualData.getCreatureRef(0);
@@ -2357,7 +2356,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__la
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -2395,7 +2394,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
@@ -2428,7 +2427,7 @@ TEST_F(ConstructorTests, creature_3__node_0_1__concatenation_0_1__branch_0_1__fr
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(4, actualData.getCellsForCreature(creature._id).size());
@@ -2497,7 +2496,7 @@ TEST_P(ConstructorTests_AllShapes, creature_3__generateShape)
             _simulationFacade->calcTimesteps(200);
             auto actualData = _simulationFacade->getSimulationData();
 
-            ASSERT_EQ(0, actualData.getNumFreeCells());
+            ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
             ASSERT_EQ(1, actualData._creatures.size());
             EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -2604,7 +2603,7 @@ TEST_F(ConstructorTests, avoidDeadlockByLockingNearCells)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(10, actualData.getCellsForCreature(creature._id).size());
@@ -2662,7 +2661,7 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(8, actualData.getCellsForCreature(creature._id).size());
@@ -2748,7 +2747,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_sufficientEnergy
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
@@ -2807,7 +2806,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_insufficientEner
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(2, actualData.getCellsForCreature(creature._id).size());
@@ -2859,7 +2858,7 @@ TEST_P(ConstructorTests_ProvideEnergy_Separation, provideEnergy_infiniteConcaten
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(3, actualData.getCellsForCreature(creature._id).size());
@@ -2935,7 +2934,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
 
     // For separation, offspring is in a separate creature
     ASSERT_EQ(1, actualData._creatures.size());
@@ -2992,7 +2991,7 @@ TEST_P(ConstructorTests_ProvideEnergy, provideEnergy_depotWithInitialStoredEnerg
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
 
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
@@ -3082,7 +3081,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(6, actualData.getCellsForCreature(creature._id).size());
@@ -3143,7 +3142,7 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    ASSERT_EQ(0, actualData.getNumFreeCells());
+    ASSERT_EQ(0, actualData.getNumCellsWithoutCreature());
     ASSERT_EQ(1, actualData._creatures.size());
     auto creature = actualData.getCreatureRef(0);
     ASSERT_EQ(6, actualData.getCellsForCreature(creature._id).size());

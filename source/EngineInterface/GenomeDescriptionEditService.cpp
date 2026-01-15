@@ -263,12 +263,15 @@ std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPrev
 void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotype) const
 {
     std::set<uint64_t> seedCellIds;
-    for (auto const& creature : phenotype._creatures) {
-        if (creature._generation == 0) {
-            for (auto const& cell : phenotype._cells) {
-                if (cell._creatureId == creature._id) {
-                    seedCellIds.insert(cell._id);
-                }
+    std::map<uint64_t, uint64_t> creatureIdToIndex;
+    for (auto const& [creatureIndex, creature] : phenotype._creatures | boost::adaptors::indexed(0)) {
+        creatureIdToIndex.emplace(creature._id, toInt(creatureIndex));
+    }
+    for (auto const& cell : phenotype._cells) {
+        if (cell._creatureId.has_value()) {
+            auto const& creature = phenotype._creatures.at(creatureIdToIndex.at(cell._creatureId.value()));
+            if (creature._generation == 0) {
+                seedCellIds.insert(cell._id);
             }
         }
     }

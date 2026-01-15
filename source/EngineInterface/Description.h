@@ -578,7 +578,7 @@ struct Description
     Description& addCreature(std::vector<CellDescription> const& cells, CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
 
     size_t getNumCells() const;
-    size_t getNumFreeCells() const;
+    size_t getNumCellsWithoutCreature() const;
     std::vector<CellDescription> getCellsForCreature(uint64_t creatureId) const;
 
     DescriptionCache createCache() const;

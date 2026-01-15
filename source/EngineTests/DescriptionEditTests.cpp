@@ -229,7 +229,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
     for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(4, ids.size());
 
-    ASSERT_EQ(2, data.getNumFreeCells());
+    ASSERT_EQ(2, data.getNumCellsWithoutCreature());
     ASSERT_EQ(1, data._creatures.size());
 
     for (auto const& creature : data._creatures) {
@@ -266,7 +266,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
     for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(3, ids.size());
 
-    ASSERT_EQ(0, data.getNumFreeCells());
+    ASSERT_EQ(0, data.getNumCellsWithoutCreature());
     ASSERT_EQ(2, data._creatures.size());
 
     std::optional<CreatureDescription> smallCreature, largeCreature;
@@ -321,12 +321,13 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(3, ids.size());
 
-    ASSERT_EQ(2, data.getNumFreeCells());
+    ASSERT_EQ(2, data.getNumCellsWithoutCreature());
     ASSERT_EQ(1, data._creatures.size());
 
+    // Only look at cells without creature
     std::optional<CellDescription> cellWithoutConnection, cellWithConnection;
     for (auto const& cell : data._cells) {
-        if (!cell._creatureId.has_value()) {  // Only look at free cells
+        if (!cell._creatureId.has_value()) {
             if (cell._connections.empty()) {
                 cellWithoutConnection = cell;
             } else {
