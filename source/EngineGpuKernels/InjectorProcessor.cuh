@@ -22,7 +22,7 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
     auto& operations = data.cellTypeOperations[CellType_Injector];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, statistics, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).object);
     }
 }
 
@@ -90,7 +90,7 @@ __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatis
 {
     int result = 0;
     for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedCell = object->connections[i].cell;
+        auto connectedCell = object->connections[i].object;
         if (connectedCell->cellType == CellType_Defender && connectedCell->cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
             statistics.incNumDefenderActivities(connectedCell->color);
             ++result;

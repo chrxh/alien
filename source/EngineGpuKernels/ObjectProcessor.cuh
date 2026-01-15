@@ -225,7 +225,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     auto velDelta = object->vel - otherCell->vel;
                     bool isConnected = false;
                     for (int i = 0; i < object->numConnections; ++i) {
-                        auto const& connectedCell = object->connections[i].cell;
+                        auto const& connectedCell = object->connections[i].object;
                         if (connectedCell == otherCell) {
                             isConnected = true;
                         }
@@ -304,8 +304,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     auto angleToCell = Math::angleOfVector(data.cellMap.getCorrectedDirection(object->pos - closestFixedCell->pos));
                     auto numConnections = closestFixedCell->numConnections;
                     for (int i = 0; i < numConnections; ++i) {
-                        auto otherCell1 = closestFixedCell->connections[i].cell;
-                        auto otherCell2 = closestFixedCell->connections[(i + 1) % numConnections].cell;
+                        auto otherCell1 = closestFixedCell->connections[i].object;
+                        auto otherCell2 = closestFixedCell->connections[(i + 1) % numConnections].object;
                         auto angleToOtherCell1 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell1->pos - closestFixedCell->pos));
                         auto angleToOtherCell2 = Math::angleOfVector(data.cellMap.getCorrectedDirection(otherCell2->pos - closestFixedCell->pos));
                         if (Math::isAngleInBetween(angleToOtherCell1, angleToOtherCell2, angleToCell)) {
@@ -359,7 +359,7 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
 
             bool alreadyConnected = false;
             for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedCell = object->connections[i].cell;
+                auto const& connectedCell = object->connections[i].object;
                 if (connectedCell == otherCell) {
                     alreadyConnected = true;
                     break;
@@ -459,7 +459,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
 
         auto numConnections = object->numConnections;
         for (int i = 0; i < numConnections; ++i) {
-            auto connectedCell = object->connections[i].cell;
+            auto connectedCell = object->connections[i].object;
             auto connectedCellStiffnessSquared = connectedCell->stiffness * connectedCell->stiffness;
 
             auto displacement = connectedCell->pos - object->pos;
@@ -472,7 +472,7 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
 
             if (calcAngularForces) {
                 auto lastIndex = (i + numConnections - 1) % numConnections;
-                auto lastConnectedCell = object->connections[lastIndex].cell;
+                auto lastConnectedCell = object->connections[lastIndex].object;
 
                 auto referenceAngleFromPrevious = object->connections[i].angleFromPrevious;
 
@@ -524,7 +524,7 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
 
         bool scheduleForDestruction = false;
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedCell = object->connections[i].cell;
+            auto connectedCell = object->connections[i].object;
 
             auto displacement = connectedCell->pos - object->pos;
             data.cellMap.correctDirection(displacement);
@@ -536,7 +536,7 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
         if (scheduleForDestruction) {
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, cell);
             for (int i = 0; i < object->numConnections; ++i) {
-                auto connectedCell = object->connections[i].cell;
+                auto connectedCell = object->connections[i].object;
                 connectedCell->cellState = CellState_Detaching;
             }
         }
@@ -627,7 +627,7 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
         bool isNeighborActivating = false;
         //int activatingObjectConnection = -1;
         for (int i = 0; i < object->numConnections; ++i) {
-            auto const& connectedCell = object->connections[i].cell;
+            auto const& connectedCell = object->connections[i].object;
             if (object->isSameCreature(connectedCell)) {
                 auto connectedCellState = connectedCell->cellState;
                 if (connectedCellState == CellState_Detaching) {
@@ -635,7 +635,7 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
                 } else if (connectedCellState == CellState_Reviving) {
                     isSameCreatureNeighborReviving = true;
                 } else if (connectedCellState == CellState_Activating) {
-                    if (connectedCell->connections[0].cell == cell) {
+                    if (connectedCell->connections[0].object == cell) {
                         isNeighborActivating = true;
                         //activatingObjectConnection = i;
                     }
@@ -718,13 +718,13 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
             if (!object->headCell) {
                 auto update = false;
                 for (int i = 0, j = object->numConnections; i < j; ++i) {
-                    auto const& otherCell = object->connections[i].cell;
+                    auto const& otherCell = object->connections[i].object;
                     if (!object->isSameCreature(otherCell)) {
                         continue;
                     }
                     if (otherCell->frontAngleId == object->creature->frontAngleId) {
                         auto frontAngle_otherCell_cell =
-                            Math::getNormalizedAngle(otherCell->frontAngle + getInitialAngelSpan(otherCell, cell, otherCell->connections[0].cell), -180.0f);
+                            Math::getNormalizedAngle(otherCell->frontAngle + getInitialAngelSpan(otherCell, cell, otherCell->connections[0].object), -180.0f);
                         auto frontAngle_cell_otherCell = Math::getNormalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
                         auto frontAngle_cell_connection0 = Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(cell, 0, i), -180.0f);
                         object->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
@@ -778,7 +778,7 @@ __inline__ __device__ void ObjectProcessor::applyInnerFriction(SimulationData& d
             continue;
         }
         for (int index = 0; index < object->numConnections; ++index) {
-            auto connectingCell = object->connections[index].cell;
+            auto connectingCell = object->connections[index].object;
             if (connectingCell->fixed) {
                 continue;
             }
@@ -922,7 +922,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
             auto orig = atomicExch(&object->cellState, CellState_Dying);
             if (orig != CellState_Dying) {
                 for (int i = 0; i < object->numConnections; ++i) {
-                    auto const& connectedCell = object->connections[i].cell;
+                    auto const& connectedCell = object->connections[i].object;
                     auto origConnected = atomicExch(&connectedCell->cellState, CellState_Detaching);
                     if (origConnected == CellState_Dying) {
                         atomicExch(&connectedCell->cellState, CellState_Dying);
@@ -972,7 +972,7 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
         //    continue;
         //}
         auto i = *data.timestep % object->numConnections;
-        auto& connectedCell = object->connections[i].cell;
+        auto& connectedCell = object->connections[i].object;
 
         // Flow of usable energy
         {
@@ -1082,10 +1082,10 @@ __device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* cell, O
     auto connectionIndex1 = -1;
     auto connectionIndex2 = -1;
     for (int i = 0; i < object->numConnections; i++) {
-        if (object->connections[i].cell == connectedCell1) {
+        if (object->connections[i].object == connectedCell1) {
             connectionIndex1 = i;
         }
-        if (object->connections[i].cell == connectedCell2) {
+        if (object->connections[i].object == connectedCell2) {
             connectionIndex2 = i;
         }
     }

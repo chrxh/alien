@@ -19,7 +19,7 @@ public:
     __inline__ __device__ Creature* createCreatureFromTO(TO const& to, int creatureIndex);
     __inline__ __device__ Genome* createGenomeFromTO(TO const& to, int genomeIndex);
     __inline__ __device__ Object* createCellFromTO(TO const& to, int cellIndex, Object* cellArray);
-    __inline__ __device__ void changeCellFromTO(TO const& to, ObjectTO const& cellTO, Object* cell);
+    __inline__ __device__ void changeCellFromTO(TO const& to, ObjectTO const& cellTO, Object* object);
     __inline__ __device__ void changeParticleFromTO(EnergyTO const& particleTO, Energy* particle);
 
     __inline__ __device__ Energy* createParticle(float energy, float2 const& pos, float2 const& vel, int color);
@@ -299,7 +299,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromTO(TO const& to, int 
     Object* object = cellArray + cellIndex;
     *cellPointer = object;
 
-    changeCellFromTO(to, cellTO, cell);
+    changeCellFromTO(to, cellTO, object);
     object->id = cellTO.id;
     object->locked = 0;
     object->detached = 0;
@@ -310,7 +310,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromTO(TO const& to, int 
     object->density = 1.0f;
     for (int i = 0; i < object->numConnections; ++i) {
         auto& connectingCell = object->connections[i];
-        connectingCell.cell = cellArray + cellTO.connections[i].cellIndex;
+        connectingCell.object = cellArray + cellTO.connections[i].cellIndex;
         connectingCell.distance = cellTO.connections[i].distance;
         connectingCell.angleFromPrevious = cellTO.connections[i].angleFromPrevious;
     }
@@ -323,7 +323,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromTO(TO const& to, int 
     return object;
 }
 
-__inline__ __device__ void EntityFactory::changeCellFromTO(TO const& to, ObjectTO const& cellTO, Object* cell)
+__inline__ __device__ void EntityFactory::changeCellFromTO(TO const& to, ObjectTO const& cellTO, Object* object)
 {
     object->id = cellTO.id;
     object->pos = cellTO.pos;
@@ -569,9 +569,9 @@ __inline__ __device__ Energy* EntityFactory::createParticle(float energy, float2
 
 __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2 const& pos, float2 const& vel)
 {
-    auto cell = _data->entities.heap.getTypedSubArray<Object>(1);
+    auto object = _data->entities.heap.getTypedSubArray<Object>(1);
     auto cellPointers = _data->entities.objects.getNewElement();
-    *cellPointers = cell;
+    *cellPointers = object;
 
     object->id = _data->primaryNumberGen.createId();
     object->pos = pos;
@@ -657,7 +657,7 @@ __inline__ __device__ Object* EntityFactory::createCellFromNode(
     auto const& gene = &creature->genome->genes[geneIndex];
     auto const& node = &gene->nodes[nodeIndex];
 
-    auto cell = _data->entities.heap.getTypedSubArray<Object>(1);
+    auto object = _data->entities.heap.getTypedSubArray<Object>(1);
     auto cellPointer = _data->entities.objects.getNewElement(&cellIndex);
     *cellPointer = object;
     object->id = _data->primaryNumberGen.createId();

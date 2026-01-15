@@ -456,7 +456,7 @@ Description& Description::addCreature(std::vector<ObjectDescription> const& obje
     // Add creature with genomeId and numCells set
     auto newCreature = creature;
     newCreature._genomeId = genome._id;
-    newCreature._numCells = toInt(objects.size());
+    newCreature._numObjects = toInt(objects.size());
     _creatures.emplace_back(newCreature);
 
     // Add cells with creatureId set

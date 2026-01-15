@@ -91,7 +91,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
             int backIndices[MAX_CELL_BONDS];
             for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
                 auto connectionIndex = i % numConnections;
-                auto const& connectedCell = object->connections[connectionIndex].cell;
+                auto const& connectedCell = object->connections[connectionIndex].object;
                 auto backIndex = connectedCell->getConnectionIndex(cell);
                 backIndices[connectionIndex] = backIndex;
                 if (first) {
@@ -99,7 +99,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
                     continue;
                 }
                 auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-                auto const& prevConnectedCell = object->connections[prevIndex].cell;
+                auto const& prevConnectedCell = object->connections[prevIndex].object;
                 auto prevBackIndex = backIndices[prevIndex];
 
                 // Triangle?
@@ -173,7 +173,7 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
 
         // Add line indices for each connection
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedCell = object->connections[i].cell;
+            auto connectedCell = object->connections[i].object;
 
             // Only add each connection once (from lower index to higher index to avoid duplicates)
             if (object->id < connectedCell->id) {
@@ -218,7 +218,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         int backIndices[MAX_CELL_BONDS];
         for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
             auto connectionIndex = i % numConnections;
-            auto const& connectedCell = object->connections[connectionIndex].cell;
+            auto const& connectedCell = object->connections[connectionIndex].object;
             auto backIndex = connectedCell->getConnectionIndex(cell);
             backIndices[connectionIndex] = backIndex;
             if (first) {
@@ -226,7 +226,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
                 continue;
             }
             auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-            auto const& prevConnectedCell = object->connections[prevIndex].cell;
+            auto const& prevConnectedCell = object->connections[prevIndex].object;
             auto prevBackIndex = backIndices[prevIndex];
 
             // Triangle?
@@ -403,7 +403,7 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, getObjectVert
                                        object->signalRestriction.mode == SignalRestrictionMode_Conditional) && 
                                       object->numConnections > 0;
                 if (hasRestriction) {
-                    auto const& connectedCell = object->connections[0].cell;
+                    auto const& connectedCell = object->connections[0].object;
                     auto connectionAngle = Math::angleOfVector(connectedCell->pos - object->pos);
 
                     auto signalAngleRestrictionStart = connectionAngle + 180.0f + object->signalRestriction.baseAngle - object->signalRestriction.openingAngle / 2;
@@ -466,7 +466,7 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 summedAngle += object->connections[i].angleFromPrevious;
             }
 
-            auto connectedCell = object->connections[i].cell;
+            auto connectedCell = object->connections[i].object;
 
             // Only add each connection once (from lower id to higher id to avoid duplicates)
             if (object->id >= connectedCell->id) {

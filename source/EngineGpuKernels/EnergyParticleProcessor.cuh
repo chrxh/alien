@@ -102,7 +102,7 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
                 lock.releaseLock();
             }
         } else {
-            if (auto cell = data.cellMap.getFirst(particle->pos + particle->vel)) {
+            if (auto object = data.cellMap.getFirst(particle->pos + particle->vel)) {
                 if (object->fixed) {
                     auto vr = particle->vel - object->vel;
                     auto r = data.cellMap.getCorrectedDirection(particle->pos - object->pos);
@@ -112,7 +112,7 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
                         particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + object->vel;
                     }
                 } else {
-                    if (particle->lastAbsorbedCell == cell) {
+                    if (particle->lastAbsorbedCell == object) {
                         continue;
                     }
                     auto radiationAbsorption = ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, object->pos, object->color);
@@ -209,7 +209,7 @@ __inline__ __device__ void EnergyParticleProcessor::transformation(SimulationDat
             if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
                 EntityFactory factory;
                 factory.init(&data);
-                auto cell = factory.createFreeCell(particle->energy, particle->pos, particle->vel);
+                auto object = factory.createFreeCell(particle->energy, particle->pos, particle->vel);
                 object->color = particle->color;
 
                 particle = nullptr;
@@ -220,23 +220,23 @@ __inline__ __device__ void EnergyParticleProcessor::transformation(SimulationDat
 
 __inline__ __device__ void EnergyParticleProcessor::radiate(SimulationData& data, Object* cell, float energy)
 {
-    auto const cellEnergy = atomicAdd(&object->usableEnergy, 0);
+    auto const cellEnergy = atomicAdd(&cell->usableEnergy, 0);
 
     auto const radiationEnergy = min(cellEnergy, energy);
-    auto origEnergy = atomicAdd(&object->usableEnergy, -radiationEnergy);
+    auto origEnergy = atomicAdd(&cell->usableEnergy, -radiationEnergy);
     if (origEnergy < 1.0f) {
-        atomicAdd(&object->usableEnergy, radiationEnergy);  //revert
+        atomicAdd(&cell->usableEnergy, radiationEnergy);  //revert
         return;
     }
 
-    float2 particleVel = (object->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+    float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
         + float2{
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-    float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
+    float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
     data.cellMap.correctPosition(particlePos);
 
-    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiationEnergy);
+    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
 }
 
 __inline__ __device__ void EnergyParticleProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)

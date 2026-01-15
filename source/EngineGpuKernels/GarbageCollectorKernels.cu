@@ -43,7 +43,7 @@ __global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = cellPointers.at(index);
             for (int i = 0; i < object->numConnections; ++i) {
-                auto& connectedCell = object->connections[i].cell;
+                auto& connectedCell = object->connections[i].object;
                 connectedCell = reinterpret_cast<Object*>(newHeapStart + connectedCell->tempValue.as_uint64);
             }
             if (object->cellType == CellType_Constructor) {

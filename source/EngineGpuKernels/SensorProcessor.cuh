@@ -50,7 +50,7 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
     auto& operations = data.cellTypeOperations[CellType_Sensor];
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, statistics, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).object);
     }
 }
 
@@ -158,7 +158,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     for (int i = 0; i < numNearCreatureCells; ++i) {
         auto nearCell = nearCreatureCells[i];
         for (int j = 0, k = nearCell->numConnections; j < k; ++j) {
-            auto& connectedNearCell = nearCell->connections[j].cell;
+            auto& connectedNearCell = nearCell->connections[j].object;
             if (Math::crossing(nearCell->pos, connectedNearCell->pos, object->pos, object->pos + Math::unitVectorOfAngle(angle) * RayBlockingTestLength)) {
                 rayBlocked = true;
                 break;

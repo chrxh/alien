@@ -108,7 +108,7 @@ __global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool in
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedCell = object->connections[i].cell;
+            auto connectedCell = object->connections[i].object;
             if ((includeClusters && object->selected != 0) || (!includeClusters && (object->selected == 1 || connectedCell->selected == 1))) {
                 ObjectConnectionProcessor::deleteConnectionOneWay(cell, connectedCell);
                 --i;
@@ -126,7 +126,7 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
         if (isSelected(cell, includeClusters)) {
             auto const numConnections = object->numConnections;
             for (int i = 0; i < numConnections; ++i) {
-                auto connectedCell = object->connections[i].cell;
+                auto connectedCell = object->connections[i].object;
                 if (isSelected(connectedCell, includeClusters)) {
                     auto delta = connectedCell->pos - object->pos;
                     data.cellMap.correctDirection(delta);
@@ -136,8 +136,8 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
 
             if (numConnections > 1) {
                 for (int i = 0; i < numConnections; ++i) {
-                    auto prevConnectedCell = object->connections[(i + numConnections - 1) % numConnections].cell;
-                    auto connectedCell = object->connections[i].cell;
+                    auto prevConnectedCell = object->connections[(i + numConnections - 1) % numConnections].object;
+                    auto connectedCell = object->connections[i].object;
                     if (isSelected(connectedCell, includeClusters) && isSelected(prevConnectedCell, includeClusters)) {
                         auto prevDisplacement = prevConnectedCell->pos - object->pos;
                         data.cellMap.correctDirection(prevDisplacement);
@@ -183,7 +183,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
             data.cellMap.correctDirection(posDelta);
 
             for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedCell = object->connections[i].cell;
+                auto const& connectedCell = object->connections[i].object;
                 if (connectedCell == otherCell) {
                     return;
                 }
@@ -378,7 +378,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
         auto const& object = data.entities.objects.at(index);
         if (1 == object->selected) {
             for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedCell = object->connections[i].cell;
+                auto const& connectedCell = object->connections[i].object;
 
                 if (1 != connectedCell->selected
                     && data.cellMap.getDistance(object->pos, connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {

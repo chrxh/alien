@@ -25,7 +25,7 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto const& operation = operations.at(i);
-        auto const& object = operation.cell;
+        auto const& object = operation.object;
 
         auto& generator = object->cellTypeData.generator;
         if (SignalProcessor::isAutoTriggered(data, cell, max(1, generator.autoTriggerInterval))) {

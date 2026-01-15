@@ -69,8 +69,8 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleAddConnectionPair(
 {
     StructuralOperation operation;
     operation.type = StructuralOperation::Type::AddConnectionPair;
-    operation.data.addConnection.cell = object1;
-    operation.data.addConnection.otherCell = object2;
+    operation.data.addConnection.object = object1;
+    operation.data.addConnection.otherObject = object2;
     data.structuralOperations.tryAddEntry(operation);
 }
 
@@ -82,11 +82,11 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteAllConnectio
     }
 
     for (int i = 0; i < object->numConnections; ++i) {
-        auto const& connectedCell = object->connections[i].cell;
+        auto const& connectedCell = object->connections[i].object;
         {
             StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
-            operation.data.delConnection.connectedCell = cell;
+            operation.data.delConnection.connectedObject = cell;
             operation.nextOperationIndex = -1;
             scheduleOperationOnCell(data, connectedCell, index);
             ++index;
@@ -94,7 +94,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteAllConnectio
         {
             StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
-            operation.data.delConnection.connectedCell = connectedCell;
+            operation.data.delConnection.connectedObject = connectedCell;
             operation.nextOperationIndex = -1;
             scheduleOperationOnCell(data, cell, index);
             ++index;
@@ -106,7 +106,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPa
 {
     StructuralOperation operation1;
     operation1.type = StructuralOperation::Type::DelConnection;
-    operation1.data.delConnection.connectedCell = object2;
+    operation1.data.delConnection.connectedObject = object2;
     operation1.nextOperationIndex = -1;
     auto operationIndex1 = data.structuralOperations.tryAddEntry(operation1);
     if (operationIndex1 != -1) {
@@ -117,7 +117,7 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteConnectionPa
 
     StructuralOperation operation2;
     operation2.type = StructuralOperation::Type::DelConnection;
-    operation2.data.delConnection.connectedCell = object1;
+    operation2.data.delConnection.connectedObject = object1;
     operation2.nextOperationIndex = -1;
     auto operationIndex2 = data.structuralOperations.tryAddEntry(operation2);
     if (operationIndex2 != -1) {
@@ -142,7 +142,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processAddOperations(Simul
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& operation = data.structuralOperations.at(index);
         if (StructuralOperation::Type::AddConnectionPair == operation.type) {
-            lockAndtryAddConnections(data, operation.data.addConnection.cell, operation.data.addConnection.otherCell);
+            lockAndtryAddConnections(data, operation.data.addConnection.object, operation.data.addConnection.otherObject);
         }
     }
 }
@@ -164,11 +164,11 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteCellOperation
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;
                     operation.type = StructuralOperation::Type::DelConnection;
-                    operation.data.delConnection.connectedCell = origCell;
+                    operation.data.delConnection.connectedObject = origCell;
                     operation.nextOperationIndex = -1;
                     auto operationIndex = data.structuralOperations.tryAddEntry(operation);
                     if (operationIndex != -1) {
-                        scheduleOperationOnCell(data, origCell->connections[i].cell, operationIndex);
+                        scheduleOperationOnCell(data, origCell->connections[i].object, operationIndex);
                     } else {
                         CUDA_THROW_NOT_IMPLEMENTED();
                     }
@@ -198,7 +198,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteConnectionOpe
                 auto operation = data.structuralOperations.at(scheduledOperationIndex);
                 switch (operation.type) {
                 case StructuralOperation::Type::DelConnection: {
-                    deleteConnectionOneWay(cell, operation.data.delConnection.connectedCell);
+                    deleteConnectionOneWay(cell, operation.data.delConnection.connectedObject);
                 } break;
                 default:
                     break;
@@ -258,7 +258,7 @@ __inline__ __device__ void ObjectConnectionProcessor::lockAndtryAddConnections(S
 
         bool alreadyConnected = false;
         for (int i = 0; i < object1->numConnections; ++i) {
-            if (object1->connections[i].cell == object2) {
+            if (object1->connections[i].object == object2) {
                 alreadyConnected = true;
                 break;
             }
@@ -306,7 +306,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     // *****
     if (0 == object1->numConnections) {
         object1->numConnections++;
-        object1->connections[0].cell = object2;
+        object1->connections[0].object = object2;
         object1->connections[0].distance = desiredDistance;
         object1->connections[0].angleFromPrevious = 360.0f;
         return true;
@@ -336,7 +336,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
         object1->connections[0].angleFromPrevious = 360.0f - angleDiff;
 
         object1->numConnections++;
-        object1->connections[1].cell = object2;
+        object1->connections[1].object = object2;
         object1->connections[1].distance = desiredDistance;
         return true;
     }
@@ -360,7 +360,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
 
     // create new connection object
     ObjectConnection newConnection;
-    newConnection.cell = object2;
+    newConnection.object = object2;
     newConnection.distance = desiredDistance;
 
     float angleFromPrevious;
@@ -446,7 +446,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
 __inline__ __device__ void ObjectConnectionProcessor::deleteConnectionOneWay(Object* object1, Object* object2)
 {
     for (int i = 0; i < object1->numConnections; ++i) {
-        if (object1->connections[i].cell == object2) {
+        if (object1->connections[i].object == object2) {
             float angleToAdd = object1->connections[i].angleFromPrevious;
             for (int j = i; j < object1->numConnections - 1; ++j) {
                 object1->connections[j] = object1->connections[j + 1];
@@ -473,7 +473,7 @@ ObjectConnectionProcessor::existCrossingConnections(SimulationData& data, float2
             return;
         }
         for (int j = 0; j < nearCell->numConnections; ++j) {
-            auto const& connectedNearCell = nearCell->connections[j].cell;
+            auto const& connectedNearCell = nearCell->connections[j].object;
             if (Math::crossing(pos1, pos2, nearCell->pos, connectedNearCell->pos)) {
                 nearCell->releaseLock();
                 result = true;
@@ -492,11 +492,11 @@ __inline__ __device__ bool ObjectConnectionProcessor::checkConnectedCellsForCros
         return false;
     }
     for (int i = 0; i < n; ++i) {
-        auto connectedCell = object1->connections[i].cell;
-        auto nextConnectedCell = object1->connections[(i + 1) % n].cell;
+        auto connectedCell = object1->connections[i].object;
+        auto nextConnectedCell = object1->connections[(i + 1) % n].object;
         bool bothConnected = false;
         for (int j = 0; j < connectedCell->numConnections; ++j) {
-            if (connectedCell->connections[j].cell == nextConnectedCell) {
+            if (connectedCell->connections[j].object == nextConnectedCell) {
                 bothConnected = true;
                 break;
             }
@@ -539,14 +539,14 @@ __inline__ __device__ bool ObjectConnectionProcessor::isConnectedConnected(Objec
     }
     bool result = false;
     for (int i = 0; i < otherCell->numConnections; ++i) {
-        auto const& connectedCell = otherCell->connections[i].cell;
+        auto const& connectedCell = otherCell->connections[i].object;
         if (connectedCell == cell) {
             result = true;
             break;
         }
 
         for (int j = 0; j < connectedCell->numConnections; ++j) {
-            auto const& connectedConnectedCell = connectedCell->connections[j].cell;
+            auto const& connectedConnectedCell = connectedCell->connections[j].object;
             if (connectedConnectedCell == cell) {
                 result = true;
                 break;
@@ -638,7 +638,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellI
             return;
         }
         for (int i = 0; i < nearCell->numConnections; ++i) {
-            auto connectedNearCell = nearCell->connections[i].cell;
+            auto connectedNearCell = nearCell->connections[i].object;
             if (Math::crossing(nearCell->pos, connectedNearCell->pos, object->pos, otherCell->pos)) {
                 result = true;
                 return;

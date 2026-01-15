@@ -58,7 +58,7 @@ __device__ __inline__ void MuscleProcessor::process(SimulationData& data, Simula
     auto& operations = data.cellTypeOperations[CellType_Muscle];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, statistics, operations.at(i).cell);
+        processCell(data, statistics, operations.at(i).object);
     }
 }
 
@@ -66,7 +66,7 @@ __device__ __inline__ float MuscleProcessor::getInitialAngleFromPrevious(Object*
 {
     CUDA_CHECK(connectionIndex < object->numConnections);
     for (int i = 0, j = object->numConnections; i < j; ++i) {
-        auto connectedCell = object->connections[i].cell;
+        auto connectedCell = object->connections[i].object;
         if (connectedCell->cellType == CellType_Muscle
             && (connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedCell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
 
@@ -173,7 +173,7 @@ __inline__ __device__ void MuscleProcessor::autoBending(SimulationData& data, Si
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         auto pivotCell = bendingInfo.pivotCell;
         for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
-            auto connectedCell = pivotCell->connections[k].cell;
+            auto connectedCell = pivotCell->connections[k].object;
             if (connectedCell->cellType == CellType_Muscle
                 && (connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedCell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
                 auto const& initialAngle = connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending
@@ -280,7 +280,7 @@ __inline__ __device__ void MuscleProcessor::manualBending(SimulationData& data, 
         bending.initialAngle = bendingInfo.connection->angleFromPrevious;
         auto pivotCell = bendingInfo.pivotCell;
         for (int k = 0, l = pivotCell->numConnections; k < l; ++k) {
-            auto connectedCell = pivotCell->connections[k].cell;
+            auto connectedCell = pivotCell->connections[k].object;
             if (connectedCell->cellType == CellType_Muscle
                 && (connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending || connectedCell->cellTypeData.muscle.mode == MuscleMode_ManualBending)) {
                 auto const& initialAngle = connectedCell->cellTypeData.muscle.mode == MuscleMode_AutoBending
@@ -483,7 +483,7 @@ __inline__ __device__ void MuscleProcessor::autoCrawling(SimulationData& data, S
             distanceDelta = minDistance - object->connections[0].distance;
         }
         object->connections[0].distance += distanceDelta;
-        auto& connectedCell = object->connections[0].cell;
+        auto& connectedCell = object->connections[0].object;
         connectedCell->getRefDistance(cell) += distanceDelta;
 
         // Apply impulse
@@ -561,7 +561,7 @@ __inline__ __device__ void MuscleProcessor::manualCrawling(SimulationData& data,
             distanceDelta = minDistance - object->connections[0].distance;
         }
         object->connections[0].distance += distanceDelta;
-        auto& connectedCell = object->connections[0].cell;
+        auto& connectedCell = object->connections[0].object;
         connectedCell->getRefDistance(cell) += distanceDelta;
 
         if ((distanceDelta > 0 && crawling.lastDistanceDelta <= 0) || (distanceDelta < 0 && crawling.lastDistanceDelta >= 0)) {
@@ -652,9 +652,9 @@ __inline__ __device__ void MuscleProcessor::getChain(Object** chain, int& chainL
     chain[0] = startCell;
 
     if (startCell->numConnections == 1) {
-        chain[1] = startCell->connections[0].cell;
+        chain[1] = startCell->connections[0].object;
     } else if (startCell->numConnections == 2) {
-        chain[1] = startCell->connections[1].cell;
+        chain[1] = startCell->connections[1].object;
     } else {
         CUDA_CHECK(false);
     }
@@ -667,7 +667,7 @@ __inline__ __device__ void MuscleProcessor::getChain(Object** chain, int& chainL
         }
         auto foundNextCell = false;
         for (int j = 0; j < currentCell->numConnections; ++j) {
-            auto const& connectedCell = currentCell->connections[j].cell;
+            auto const& connectedCell = currentCell->connections[j].object;
             if (connectedCell != chain[i - 1]) {
                 chain[i + 1] = connectedCell;
                 foundNextCell = true;
@@ -712,10 +712,10 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
 {
     BendingInfo result;
     if (object->numConnections == 2) {
-        auto privotCell = object->connections[1].cell;
+        auto privotCell = object->connections[1].object;
         result.pivotCell = privotCell;
         for (int i = 0; i < privotCell->numConnections; ++i) {
-            if (privotCell->connections[i].cell == cell) {
+            if (privotCell->connections[i].object == cell) {
                 result.connection = &privotCell->connections[i];
                 result.connectionPrev = &privotCell->connections[(i + privotCell->numConnections - 1) % privotCell->numConnections];
                 result.connectionNext = &privotCell->connections[(i + 1) % privotCell->numConnections];
@@ -726,10 +726,10 @@ __inline__ __device__ MuscleProcessor::BendingInfo MuscleProcessor::getBendingIn
 
     // numConnections == 1
     else {
-        auto privotCell = object->connections[0].cell;
+        auto privotCell = object->connections[0].object;
         result.pivotCell = privotCell;
         for (int i = 0; i < privotCell->numConnections; ++i) {
-            if (privotCell->connections[i].cell == cell) {
+            if (privotCell->connections[i].object == cell) {
                 result.connection = &privotCell->connections[i];
                 result.connectionPrev = &privotCell->connections[(i + privotCell->numConnections - 1) % privotCell->numConnections];
                 result.connectionNext = &privotCell->connections[(i + 1) % privotCell->numConnections];

@@ -6,13 +6,13 @@
 struct AddConnectionPairOperation
 {
     bool addTokens;
-    Object* cell;
-    Object* otherCell;
+    Object* object;
+    Object* otherObject;
 };
 
 struct DelConnectionOperation
 {
-    Object* connectedCell;
+    Object* connectedObject;
 };
 
 struct DelCellOperation
@@ -42,5 +42,5 @@ struct StructuralOperation
 
 struct CellTypeOperation
 {
-    Object* cell;
+    Object* object;
 };

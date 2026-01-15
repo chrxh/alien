@@ -40,7 +40,7 @@ struct Energy
 
 struct ObjectConnection
 {
-    Object* cell;
+    Object* object;
     float distance;
     float angleFromPrevious;
 };
@@ -532,7 +532,7 @@ struct Object
     __device__ __inline__ int getConnectionIndex(Object* connectedCell)
     {
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell) {
+            if (connections[i].object == connectedCell) {
                 return i;
             }
         }
@@ -541,7 +541,7 @@ struct Object
     }
 
     __device__ __inline__ ObjectConnection& getConnection(int index) { return connections[(index + numConnections) % numConnections]; }
-    __device__ __inline__ Object* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].cell; }
+    __device__ __inline__ Object* getConnectedCell(int index) { return connections[(index + numConnections) % numConnections].object; }
     __device__ __inline__ void increaseAngle(int index, float increment) {
         auto& angle1 = getConnection(index).angleFromPrevious;
         auto& angle2 = getConnection(index + 1).angleFromPrevious;
@@ -573,10 +573,10 @@ struct Object
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].cell == connectedCell1) {
+            if (connections[i].object == connectedCell1) {
                 connectionIndex1 = i;
             }
-            if (connections[i].cell == connectedCell2) {
+            if (connections[i].object == connectedCell2) {
                 connectionIndex2 = i;
             }
         }

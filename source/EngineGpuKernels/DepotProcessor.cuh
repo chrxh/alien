@@ -27,7 +27,7 @@ __device__ __inline__ void DepotProcessor::process(SimulationData& data, Simulat
     auto& operations = data.cellTypeOperations[CellType_Depot];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        auto const& object = operations.at(i).cell;
+        auto const& object = operations.at(i).object;
         processCell(data, statistics, cell);
     }
 }

@@ -2,14 +2,14 @@
 
 __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int location)
 {
-    auto& cells = data.entities.objects;
-    auto partition = calcSystemThreadPartition(cells.getNumEntries());
+    auto& objects = data.entities.objects;
+    auto partition = calcSystemThreadPartition(objects.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        if (auto& object = cells.at(index)) {
+        if (auto& object = objects.at(index)) {
 
-            if (reinterpret_cast<uint64_t>(cell) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                || reinterpret_cast<uint64_t>(cell) + sizeof(Cell)
+            if (reinterpret_cast<uint64_t>(object) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                || reinterpret_cast<uint64_t>(object) + sizeof(Object)
                     >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                 printf("wrong cell pointer at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();
@@ -50,9 +50,9 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
             for (int i = 0; i < object->numConnections; ++i) {
-                auto connectingCell = object->connections[i].cell;
+                auto connectingCell = object->connections[i].object;
                 if (reinterpret_cast<uint64_t>(connectingCell) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(connectingCell) + sizeof(Cell)
+                    || reinterpret_cast<uint64_t>(connectingCell) + sizeof(Object)
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong connectingCell pointer (cell: %llu, numConnections: %d) at %d\n", object->id, object->numConnections, location);
                     CUDA_THROW_NOT_IMPLEMENTED();
@@ -84,7 +84,7 @@ __device__ void DEBUG_checkParticles(SimulationData& data, float* sumEnergy, int
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
         if (auto& particle = data.entities.energyParticles.at(particleIndex)) {
             if (reinterpret_cast<uint64_t>(particle) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                || reinterpret_cast<uint64_t>(particle) + sizeof(Particle)
+                || reinterpret_cast<uint64_t>(particle) + sizeof(Energy)
                     >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                 printf("wrong particle pointer at %d\n", location);
                 CUDA_THROW_NOT_IMPLEMENTED();

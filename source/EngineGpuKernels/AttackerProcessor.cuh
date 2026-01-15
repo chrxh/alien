@@ -32,7 +32,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
     auto& operations = data.cellTypeOperations[CellType_Attacker];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, result, operations.at(i).object);
     }
 }
 
@@ -191,7 +191,7 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
         ++result;
     }
     for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedCell = object->connections[i].cell;
+        auto connectedCell = object->connections[i].object;
         if (connectedCell->cellType == CellType_Defender && connectedCell->cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
             statistics.incNumDefenderActivities(connectedCell->color);
             ++result;

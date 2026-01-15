@@ -32,7 +32,7 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
     auto& operations = data.cellTypeOperations[CellType_Reconnector];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, result, operations.at(i).object);
     }
 }
 
@@ -158,7 +158,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         return;
     }
     for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedCell = object->connections[i].cell;
+        auto connectedCell = object->connections[i].object;
         bool shouldRemove = false;
 
         if (connectedCell->cellType == CellType_Structure || connectedCell->cellType == CellType_Free) {

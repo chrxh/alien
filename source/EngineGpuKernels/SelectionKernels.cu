@@ -130,7 +130,7 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
             for (int i = 0; i < 30; ++i) {
                 bool found = false;
                 for (int j = 0; j < currentCell->numConnections; ++j) {
-                    auto candidateCell = currentCell->connections[j].cell;
+                    auto candidateCell = currentCell->connections[j].object;
                     if (0 == candidateCell->selected) {
                         currentCell = candidateCell;
                         found = true;

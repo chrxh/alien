@@ -543,7 +543,7 @@ struct CreatureDescription
     MEMBER(CreatureDescription, std::optional<uint64_t>, ancestorId, std::nullopt);
     MEMBER(CreatureDescription, int, generation, 0);
     MEMBER(CreatureDescription, int, lineageId, 0);
-    MEMBER(CreatureDescription, int, numCells, 0);
+    MEMBER(CreatureDescription, int, numObjects, 0);
     MEMBER(CreatureDescription, uint64_t, genomeId, 0);
 
     // Process data

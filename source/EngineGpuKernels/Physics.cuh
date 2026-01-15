@@ -60,7 +60,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outw
     for (int i = 0; i < cell->numConnections; ++i) {
 
         //calculate h (angular distance from outward vector)
-        float2 u = cell->connections[i].cell->pos - cell->pos;
+        float2 u = cell->connections[i].object->pos - cell->pos;
         Math::normalize(u);
         float h = Math::dot(outward, u);
         if (outward.x * u.y - outward.y * u.x < 0.0) {
@@ -68,12 +68,12 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outw
         }
 
         if (!minCell || h < min_h) {
-            minCell = cell->connections[i].cell;
+            minCell = cell->connections[i].object;
             minVector = u;
             min_h = h;
         }
         if (!maxCell || h > max_h) {
-            maxCell = cell->connections[i].cell;
+            maxCell = cell->connections[i].object;
             maxVector = u;
             max_h = h;
         }

@@ -296,7 +296,7 @@ namespace
 
         object->tempValue.as_uint64 = cellTOIndex;
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectingCell = object->connections[i].cell;
+            auto connectingCell = object->connections[i].object;
             cellTO.connections[i].cellIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
             cellTO.connections[i].distance = object->connections[i].distance;
             cellTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;

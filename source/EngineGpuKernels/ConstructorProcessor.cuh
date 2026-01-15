@@ -106,7 +106,7 @@ __inline__ __device__ void ConstructorProcessor::preprocess(SimulationData& data
     //auto& operations = data.cellTypeOperations[CellType_Constructor];
     //auto partition = calcAllThreadsPartition(operations.getNumEntries());
     //for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-    //    completenessCheck(data, statistics, operations.at(i).cell);
+    //    completenessCheck(data, statistics, operations.at(i).object);
     //}
 }
 
@@ -115,7 +115,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     auto& operations = data.cellTypeOperations[CellType_Constructor];
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
-        processCell(data, statistics, operations.at(i).cell, isPreview);
+        processCell(data, statistics, operations.at(i).object, isPreview);
     }
 }
 
@@ -151,7 +151,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //
 //        if ((numTaggedCells + 1) % QueueLength != currentTaggedCellIndex) {
 //            for (int i = 0, j = currentCell->numConnections; i < j; ++i) {
-//                auto& nextCell = currentCell->connections[i].cell;
+//                auto& nextCell = currentCell->connections[i].object;
 //                if (nextCell->creatureId == object->creatureId) {
 //                    auto origTagBit = static_cast<uint32_t>(atomicOr(&nextCell->tempValue, toInt(tagBit)));
 //                    if ((origTagBit & tagBit) == 0) {
@@ -367,7 +367,7 @@ __inline__ __device__ Object* ConstructorProcessor::getLastConstructedCellOnBran
     auto const& constructor = hostCell->cellTypeData.constructor;
     if (constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64) {
         for (int i = 0; i < hostCell->numConnections; ++i) {
-            auto const& connectedCell = hostCell->connections[i].cell;
+            auto const& connectedCell = hostCell->connections[i].object;
             if (connectedCell->id == constructor.lastConstructedCellId) {
                 return connectedCell;
             }
@@ -407,7 +407,7 @@ __inline__ __device__ Object* ConstructorProcessor::startConstructionOnNewBranch
 
     // For bending muscle cells: Reset front angle and restore initial angle
     for (int i = 0; i < hostCell->numConnections; ++i) {
-        auto const& connectedCell = hostCell->connections[i].cell;
+        auto const& connectedCell = hostCell->connections[i].object;
         if (connectedCell->cellType == CellType_Muscle && connectedCell->cellTypeData.muscle.isBendingMuscle()) {
             connectedCell->frontAngle = VALUE_NOT_SET_FLOAT;
             MuscleProcessor::restoreInitialAngleFromPrevious(connectedCell, hostCell, i);
@@ -504,7 +504,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
     float origAngleFromPreviousOnHostCell;
     for (int i = 0; i < hostCell->numConnections; ++i) {
-        if (hostCell->connections[i].cell == constructionData.lastConstructionCell) {
+        if (hostCell->connections[i].object == constructionData.lastConstructionCell) {
             origAngleFromPreviousOnHostCell = hostCell->connections[i].angleFromPrevious;
             break;
         }
@@ -512,7 +512,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
 
     float origAngleFromPreviousOnLastConstructedCell;
     for (int i = 0; i < constructionData.lastConstructionCell->numConnections; ++i) {
-        if (constructionData.lastConstructionCell->connections[i].cell == hostCell) {
+        if (constructionData.lastConstructionCell->connections[i].object == hostCell) {
             origAngleFromPreviousOnLastConstructedCell = constructionData.lastConstructionCell->connections[i].angleFromPrevious;
         }
     }
@@ -520,12 +520,12 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
     // Move connection between lastConstructionCell and hostCell to a connection between lastConstructionCell and newCell
     for (int i = 0; i < lastCell->numConnections; ++i) {
         auto& connection = lastCell->connections[i];
-        if (connection.cell == hostCell) {
-            connection.cell = newCell;
+        if (connection.object == hostCell) {
+            connection.object = newCell;
             connection.distance = desiredDistance;
             connection.angleFromPrevious = origAngleFromPreviousOnLastConstructedCell;
             newCell->numConnections = 1;
-            newCell->connections[0].cell = lastCell;
+            newCell->connections[0].object = lastCell;
             newCell->connections[0].distance = desiredDistance;
             newCell->connections[0].angleFromPrevious = 360.0f;
             ObjectConnectionProcessor::deleteConnectionOneWay(hostCell, lastCell);
@@ -546,7 +546,7 @@ __inline__ __device__ Object* ConstructorProcessor::continueConstructionOnBranch
             ObjectConnectionProcessor::scheduleDeleteCell(data, cellPointerIndex);
             hostCell->cellState = CellState_Dying;
             for (int i = 0; i < hostCell->numConnections; ++i) {
-                auto const& connectedCell = hostCell->connections[i].cell;
+                auto const& connectedCell = hostCell->connections[i].object;
                 if (connectedCell->creature == hostCell->creature) {
                     connectedCell->cellState = CellState_Detaching;
                 }
@@ -661,7 +661,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
         float angleFromPrevious1;
         float angleFromPrevious2;
         for (int i = 0; i < lastConstructionCell->numConnections; ++i) {
-            if (lastConstructionCell->connections[i].cell == hostCell) {
+            if (lastConstructionCell->connections[i].object == hostCell) {
                 angleFromPrevious1 = lastConstructionCell->connections[i].angleFromPrevious;
                 angleFromPrevious2 = lastConstructionCell->connections[(i + 1) % lastConstructionCell->numConnections].angleFromPrevious;
                 break;
@@ -736,7 +736,7 @@ __inline__ __device__ void ConstructorProcessor::getCellsToConnect(
                 }
                 if (nearCell->tryLock()) {
                     for (int k = 0; k < nearCell->numConnections; ++k) {
-                        if (nearCell->connections[k].cell == otherCell) {
+                        if (nearCell->connections[k].object == otherCell) {
                             continue;
                         }
                         if (Math::crossing(newCellPos, otherCell->pos, nearCell->pos, nearCell->connections[k].object->pos)) {

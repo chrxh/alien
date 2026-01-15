@@ -51,7 +51,7 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
         for (int i = 0; i < 30; ++i) {
             bool found = false;
             for (int j = 0; j < currentCell->numConnections; ++j) {
-                auto candidateCell = currentCell->connections[j].cell;
+                auto candidateCell = currentCell->connections[j].object;
                 auto cellTag = currentCell->clusterIndex;
                 auto origTag = atomicMin(&candidateCell->clusterIndex, cellTag);
                 if (cellTag < origTag) {

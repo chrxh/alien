@@ -29,7 +29,7 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
     auto& operations = data.cellTypeOperations[CellType_Communicator];
     auto partition = calcBlockPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
-        processCell(data, result, operations.at(i).cell);
+        processCell(data, result, operations.at(i).object);
     }
 }
 

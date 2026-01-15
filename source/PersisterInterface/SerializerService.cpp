@@ -1482,7 +1482,7 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Creature_AncestorId, data._ancestorId, defaultObject._ancestorId);
         loadSave(task, auxiliaries, Id_Creature_Generation, data._generation, defaultObject._generation);
         loadSave(task, auxiliaries, Id_Creature_LineageId, data._lineageId, defaultObject._lineageId);
-        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numCells, defaultObject._numCells);
+        loadSave(task, auxiliaries, Id_Creature_NumCells, data._numObjects, defaultObject._numObjects);
         loadSave(task, auxiliaries, Id_Creature_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
         loadSave(task, auxiliaries, Id_Creature_GenomeId, data._genomeId, defaultObject._genomeId);
 
