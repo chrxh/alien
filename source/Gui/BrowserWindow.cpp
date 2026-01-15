@@ -945,9 +945,9 @@ void BrowserWindow::processNumObjectsField(NetworkResourceTreeTO const& treeTO, 
     if (treeTO->isLeaf()) {
         auto& leaf = treeTO->getLeaf();
         if (kobjects) {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->particles / 1000) + " K");
+            AlienGui::Text(StringHelper::format(leaf.rawTO->energyParticles / 1000) + " K");
         } else {
-            AlienGui::Text(StringHelper::format(leaf.rawTO->particles));
+            AlienGui::Text(StringHelper::format(leaf.rawTO->energyParticles));
         }
     }
 }

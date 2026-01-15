@@ -8,17 +8,17 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
-struct Cell;
+struct Object;
 struct Token;
-struct Particle;
-struct Objects;
+struct Energy;
+struct Entities;
 struct Creature;
 struct Genome;
 
 struct SimulationData;
 struct CudaGeometryBuffers;
 class SelectionResult;
-struct CellTO;
+struct ObjectTO;
 struct ClusterAccessTO;
 struct TO;
 struct SimulationParameters;

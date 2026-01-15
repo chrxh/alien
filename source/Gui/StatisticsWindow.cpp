@@ -308,7 +308,7 @@ void StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numParticles);
+        processPlot(row++, &DataPointCollection::numEnergyParticles);
         ImGui::TableSetColumnIndex(1);
         AlienGui::Text("Energy particles");
 

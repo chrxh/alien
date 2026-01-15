@@ -251,11 +251,11 @@ std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPrev
             // Genome already added from the seed creature (should be the same since no mutations in preview)
         }
     }
-    for (auto& cell: preview._cells) {
-        auto creatureIndex = cache->creatureIdToIndex.at(*cell._creatureId);
+    for (auto& object: preview._objects) {
+        auto creatureIndex = cache->creatureIdToIndex.at(*object._creatureId);
         auto& creature = preview._creatures.at(creatureIndex);
         auto phenotypeIndex = creatureIdToIndex.at(creature._generation == 0 ? creature._id : creature._ancestorId.value());
-        result.at(phenotypeIndex)._cells.emplace_back(std::move(cell));
+        result.at(phenotypeIndex)._objects.emplace_back(std::move(object));
     }
     return result;
 }
@@ -267,15 +267,15 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotyp
     for (auto const& [creatureIndex, creature] : phenotype._creatures | boost::adaptors::indexed(0)) {
         creatureIdToIndex.emplace(creature._id, toInt(creatureIndex));
     }
-    for (auto const& cell : phenotype._cells) {
-        if (cell._creatureId.has_value()) {
-            auto const& creature = phenotype._creatures.at(creatureIdToIndex.at(cell._creatureId.value()));
+    for (auto const& object : phenotype._objects) {
+        if (object._creatureId.has_value()) {
+            auto const& creature = phenotype._creatures.at(creatureIdToIndex.at(object._creatureId.value()));
             if (creature._generation == 0) {
-                seedCellIds.insert(cell._id);
+                seedCellIds.insert(object._id);
             }
         }
     }
-    DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& cell) { return seedCellIds.contains(cell._id); });
+    DescriptionEditService::get().removeCellIf(phenotype, [&seedCellIds](auto const& object) { return seedCellIds.contains(object._id); });
 }
 
 Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescription const& subGenome, RealVector2D const& pos) const
@@ -284,7 +284,7 @@ Description GenomeDescriptionEditService::createSeedForPreview(SubGenomeDescript
     result._genomes.emplace_back(subGenome.genome);
     auto creature = CreatureDescription().genomeId(subGenome.genome._id);
     result._creatures.emplace_back(creature);
-    result._cells.emplace_back(CellDescription()
+    result._objects.emplace_back(ObjectDescription()
                                    .creatureId(creature._id)
                                    .color(PreviewColor)
                                    .stiffness(1.0f)

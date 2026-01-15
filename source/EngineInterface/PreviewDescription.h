@@ -42,8 +42,8 @@ struct ConnectionPreviewDescription
 {
     auto operator<=>(ConnectionPreviewDescription const&) const = default;
 
-    MEMBER(ConnectionPreviewDescription, RealVector2D, cell1, {});
-    MEMBER(ConnectionPreviewDescription, RealVector2D, cell2, {});
+    MEMBER(ConnectionPreviewDescription, RealVector2D, object1, {});
+    MEMBER(ConnectionPreviewDescription, RealVector2D, object2, {});
     MEMBER(ConnectionPreviewDescription, bool, arrowToCell1, false);
     MEMBER(ConnectionPreviewDescription, bool, arrowToCell2, false);
 };
@@ -52,6 +52,6 @@ struct PreviewDescription
 {
     auto operator<=>(PreviewDescription const&) const = default;
 
-    MEMBER(PreviewDescription, std::vector<CellPreviewDescription>, cells, {});
+    MEMBER(PreviewDescription, std::vector<CellPreviewDescription>, objects, {});
     MEMBER(PreviewDescription, std::vector<ConnectionPreviewDescription>, connections, {});
 };

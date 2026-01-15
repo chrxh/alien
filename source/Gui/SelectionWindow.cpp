@@ -27,7 +27,7 @@ void SelectionWindow::processIntern()
         ImGui::Text("Cells");
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-        ImGui::TextUnformatted(StringHelper::format(selection.numCells).c_str());
+        ImGui::TextUnformatted(StringHelper::format(selection.numObjects).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
         table.next();
@@ -51,7 +51,7 @@ void SelectionWindow::processIntern()
         ImGui::Text("Energy particles");
         ImGui::PushFont(StyleRepository::get().getLargeFont());
         ImGui::PushStyleColor(ImGuiCol_Text, Const::TextDecentColor.Value);
-        ImGui::TextUnformatted(StringHelper::format(selection.numParticles).c_str());
+        ImGui::TextUnformatted(StringHelper::format(selection.numEnergyParticles).c_str());
         ImGui::PopStyleColor();
         ImGui::PopFont();
         table.next();

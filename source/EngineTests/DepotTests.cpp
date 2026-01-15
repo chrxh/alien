@@ -27,12 +27,12 @@ protected:
     Description createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
         auto data = Description().addCreature({
-            CellDescription()
+            ObjectDescription()
                 .id(1)
                 .pos({100.0f, 100.0f})
                 .cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
                 .usableEnergy(usableEnergy),
-            CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
         }, CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
@@ -42,8 +42,8 @@ protected:
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
         auto data = Description().addCreature({
-            CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
-            CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
+            ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
         }, CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
@@ -56,8 +56,8 @@ TEST_F(DepotTests, noSignal_noChange)
     auto initialUsableEnergy = normalCellEnergy + 20.0f;
 
     // Create depot without a cell carrying a signel => no signal will be sent
-    auto data = Description().cells({
-        CellDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy),
+    auto data = Description().objects({
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -65,8 +65,8 @@ TEST_F(DepotTests, noSignal_noChange)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    auto origDepot = data.getCellRef(1);
-    auto actualDepot = actualData.getCellRef(1);
+    auto origDepot = data.getObjectRef(1);
+    auto actualDepot = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     EXPECT_TRUE(approxCompare(origDepot._usableEnergy, actualDepot._usableEnergy));
@@ -84,7 +84,7 @@ TEST_F(DepotTests, positiveSignal_storeEnergy)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
+    auto actualDepot = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy should have been transferred to storage
@@ -103,7 +103,7 @@ TEST_F(DepotTests, negativeSignal_releaseEnergy)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
+    auto actualDepot = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy should have been released from storage
@@ -122,7 +122,7 @@ TEST_F(DepotTests, positiveSignal_usableEnergyBelowNormal_noStore)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
+    auto actualDepot = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // No energy should have been stored since usableEnergy <= normalCellEnergy
@@ -139,7 +139,7 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
     _simulationFacade->calcTimesteps(1);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
+    auto actualDepot = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // No energy should have been released since storedUsableEnergy was 0
@@ -158,11 +158,11 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getCellRef(2);
+    auto origOtherCell = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
-    auto actualOtherCell = actualData.getCellRef(2);
+    auto actualDepot = actualData.getObjectRef(1);
+    auto actualOtherCell = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
@@ -184,11 +184,11 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getCellRef(2);
+    auto origOtherCell = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
-    auto actualOtherCell = actualData.getCellRef(2);
+    auto actualDepot = actualData.getObjectRef(1);
+    auto actualOtherCell = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -208,11 +208,11 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit2)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getCellRef(2);
+    auto origOtherCell = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
-    auto actualOtherCell = actualData.getCellRef(2);
+    auto actualDepot = actualData.getObjectRef(1);
+    auto actualOtherCell = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
@@ -231,11 +231,11 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
-    auto origOtherCell = data.getCellRef(2);
+    auto origOtherCell = data.getObjectRef(2);
 
     auto actualData = _simulationFacade->getSimulationData();
-    auto actualDepot = actualData.getCellRef(1);
-    auto actualOtherCell = actualData.getCellRef(2);
+    auto actualDepot = actualData.getObjectRef(1);
+    auto actualOtherCell = actualData.getObjectRef(2);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit

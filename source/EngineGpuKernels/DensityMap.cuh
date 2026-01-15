@@ -3,7 +3,7 @@
 #include "Array.cuh"
 #include "Base.cuh"
 #include "CudaMemoryManager.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 
 class DensityMap
 {
@@ -188,32 +188,32 @@ public:
         return 0;
     }
 
-    //__device__ __inline__ void addCell(uint64_t const& timestep, Cell* cell)
+    //__device__ __inline__ void addCell(uint64_t const& timestep, Object* cell)
     //{
-    //    auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
+    //    auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
     //    if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-    //        auto color = calcMod(cell->color, MAX_COLORS);
+    //        auto color = calcMod(object->color, MAX_COLORS);
     //        alienAtomicAdd64(&_colorDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
 
-    //        if (cell->cellType == CellType_Structure) {
+    //        if (object->cellType == CellType_Structure) {
     //            alienAtomicAdd32(&_specificCellTypeDensityMap[index], static_cast<uint32_t>(1));
-    //        } else if (cell->cellType == CellType_Free) {
+    //        } else if (object->cellType == CellType_Free) {
     //            alienAtomicAdd32(&_specificCellTypeDensityMap[index], static_cast<uint32_t>(0x100));
     //        } else {
-    //            if (cell->creature != nullptr) {
+    //            if (object->creature != nullptr) {
     //                {
-    //                    uint64_t bucket = calcOtherMutantsBucket(cell->creature->lineageId, timestep);
+    //                    uint64_t bucket = calcOtherMutantsBucket(object->creature->lineageId, timestep);
     //                    alienAtomicAdd64(&_otherMutantDensityMap[index], static_cast<uint64_t>(0x0101010101010101ull ^ (1ull << (bucket * 8))));
     //                }
     //                {
-    //                    uint64_t bucket1 = cell->creature->lineageId % 3;
-    //                    uint64_t bucket2 = cell->creature->lineageId % 5;
-    //                    uint64_t bucket3 = cell->creature->lineageId % 7;
+    //                    uint64_t bucket1 = object->creature->lineageId % 3;
+    //                    uint64_t bucket2 = object->creature->lineageId % 5;
+    //                    uint64_t bucket3 = object->creature->lineageId % 7;
     //                    alienAtomicAdd64(&_sameMutantDensityMap1[index], static_cast<uint64_t>((1ull << (bucket1 * 8)) | (1ull << ((bucket2 + 3) * 8))));
     //                    alienAtomicAdd64(&_sameMutantDensityMap2[index], static_cast<uint64_t>(1ull << (bucket3 * 8)));
     //                }
     //                {
-    //                    auto bucket = 32 - __clz(convertNumCellsToIntValue(cell->creature->numCells));
+    //                    auto bucket = 32 - __clz(convertNumCellsToIntValue(object->creature->numObjects));
     //                    if (bucket < 8) {
     //                        {
     //                            auto bitset = static_cast<uint64_t>(1ull << bucket * 8);
@@ -253,7 +253,7 @@ public:
     //    }
     //}
 
-    __device__ __inline__ void addParticle(Particle* particle)
+    __device__ __inline__ void addParticle(Energy* particle)
     {
         auto index = toInt(particle->pos.x) / _slotSize + toInt(particle->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
@@ -261,19 +261,19 @@ public:
         }
     }
 
-    __device__ __inline__ void addFreeCell(Cell* cell)
+    __device__ __inline__ void addFreeCell(Object* cell)
     {
-        auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto color = calcMod(cell->color, MAX_COLORS);
+            auto color = calcMod(object->color, MAX_COLORS);
             // Increment both the color-specific count and the total count
             alienAtomicAdd64(&_freeCellDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
         }
     }
 
-    __device__ __inline__ void addStructureCell(Cell* cell)
+    __device__ __inline__ void addStructureCell(Object* cell)
     {
-        auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             atomicAdd(&_structureCellDensityMap[index], 1u);
         }

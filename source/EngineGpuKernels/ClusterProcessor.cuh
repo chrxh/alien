@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Object.cuh"
+#include "Entity.cuh"
 #include "ParameterCalculator.cuh"
 #include "Physics.cuh"
 #include "SimulationData.cuh"
@@ -24,24 +24,24 @@ private:
 
 __device__ __inline__ void ClusterProcessor::initClusterData(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        cell->clusterIndex = index;
-        cell->clusterBoundaries = 0;
-        cell->clusterPos = {0, 0};
-        cell->clusterVel = {0, 0};
-        cell->clusterAngularMass = 0;
-        cell->clusterAngularMomentum = 0;
-        cell->numCellsInCluster = 0;
+        auto& object = cells.at(index);
+        object->clusterIndex = index;
+        object->clusterBoundaries = 0;
+        object->clusterPos = {0, 0};
+        object->clusterVel = {0, 0};
+        object->clusterAngularMass = 0;
+        object->clusterAngularMomentum = 0;
+        object->numCellsInCluster = 0;
     }
 }
 
 __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
@@ -69,16 +69,16 @@ __device__ __inline__ void ClusterProcessor::findClusterIteration(SimulationData
 
 __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
-        if (cell->pos.x < data.worldSize.x / 3) {
+        auto cluster = cells.at(object->clusterIndex);
+        if (object->pos.x < data.worldSize.x / 3) {
             atomicOr(&cluster->clusterBoundaries, 1);
         }
-        if (cell->pos.y < data.worldSize.y / 3) {
+        if (object->pos.y < data.worldSize.y / 3) {
             atomicOr(&cluster->clusterBoundaries, 2);
         }
     }
@@ -86,17 +86,17 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
-        atomicAdd(&cluster->clusterVel.x, cell->vel.x);
-        atomicAdd(&cluster->clusterVel.y, cell->vel.y);
+        auto cluster = cells.at(object->clusterIndex);
+        atomicAdd(&cluster->clusterVel.x, object->vel.x);
+        atomicAdd(&cluster->clusterVel.y, object->vel.y);
 
         //topology correction
-        auto cellPos = cell->pos;
+        auto cellPos = object->pos;
         if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
@@ -113,17 +113,17 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
 
 __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
+        auto cluster = cells.at(object->clusterIndex);
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
 
         //topology correction
-        auto cellPos = cell->pos;
+        auto cellPos = object->pos;
         if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
@@ -133,7 +133,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
         auto r = cellPos - clusterPos;
 
         auto angularMass = Math::lengthSquared(r);
-        auto angularMomentum = Physics::angularMomentum(r, cell->vel - clusterVel);
+        auto angularMomentum = Physics::angularMomentum(r, object->vel - clusterVel);
         atomicAdd(&cluster->clusterAngularMass, angularMass);
         atomicAdd(&cluster->clusterAngularMomentum, angularMomentum);
     }
@@ -141,16 +141,16 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
 
 __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& data)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto cell = cells.at(index);
-        auto cluster = cells.at(cell->clusterIndex);
+        auto cluster = cells.at(object->clusterIndex);
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
 
-        auto cellPos = cell->pos;
+        auto cellPos = object->pos;
         if ((cluster->clusterBoundaries & 1) == 1 && cellPos.x > data.worldSize.x * 2 / 3) {
             cellPos.x -= data.worldSize.x;
         }
@@ -161,7 +161,7 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
 
         auto angularVel = Physics::angularVelocity(cluster->clusterAngularMomentum, cluster->clusterAngularMass);
 
-        auto rigidity = ParameterCalculator::calcParameter(cudaSimulationParameters.rigidity, data, cell->pos) * cell->stiffness * cell->stiffness;
-        cell->vel = cell->vel * (1.0f - rigidity) + Physics::tangentialVelocity(r, clusterVel, angularVel) * rigidity;
+        auto rigidity = ParameterCalculator::calcParameter(cudaSimulationParameters.rigidity, data, object->pos) * object->stiffness * object->stiffness;
+        object->vel = object->vel * (1.0f - rigidity) + Physics::tangentialVelocity(r, clusterVel, angularVel) * rigidity;
     }
 }

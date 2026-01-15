@@ -34,21 +34,21 @@
 //TEST_F(DefenderTests, attackerVsAntiAttacker)
 //{
 //    Description data;
-//    data.cells() = {
-//        CellDescription()
+//    data.objects() = {
+//        ObjectDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
 //            .cellType(AttackerDescription()),
-//        CellDescription()
+//        ObjectDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
 //            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription()
+//        ObjectDescription()
 //            .id(3)
 //            .pos({9.0f, 10.0f})
 //            .cellType(GeneratorDescription()),
-//        CellDescription()
+//        ObjectDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
 //            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
@@ -73,18 +73,18 @@
 //TEST_F(DefenderTests, attackerVsAntiInjector)
 //{
 //    Description data;
-//    data.cells() = {
-//        CellDescription()
+//    data.objects() = {
+//        ObjectDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
 //            .cellType(AttackerDescription()),
-//        CellDescription()
+//        ObjectDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
 //            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(GeneratorDescription()),
-//        CellDescription()
+//        ObjectDescription().id(3).pos({9.0f, 10.0f}).cellType(GeneratorDescription()),
+//        ObjectDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
 //            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),
@@ -108,21 +108,21 @@
 //
 //TEST_F(DefenderTests, injectorVsAntiAttacker)
 //{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
+//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().objects({CellGenomeDescription()}));
 //
 //    Description data;
-//    data.cells() = {
-//        CellDescription()
+//    data.objects() = {
+//        ObjectDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
 //            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
-//        CellDescription()
+//        ObjectDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
 //            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
-//        CellDescription()
+//        ObjectDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
+//        ObjectDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
 //            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstAttacker)),
@@ -153,21 +153,21 @@
 //
 //TEST_F(DefenderTests, injectorVsAntiInjector)
 //{
-//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().cells({CellGenomeDescription()}));
+//    auto genome = GenomeDescriptionConverterService::get().convertDescriptionToBytes(GenomeDescription().objects({CellGenomeDescription()}));
 //
 //    Description data;
-//    data.cells() = {
-//        CellDescription()
+//    data.objects() = {
+//        ObjectDescription()
 //            .id(1)
 //            .pos({10.0f, 10.0f})
 //            .cellType(InjectorDescription().mode(InjectorMode_InjectAll).genome(genome)),
-//        CellDescription()
+//        ObjectDescription()
 //            .id(2)
 //            .pos({11.0f, 10.0f})
 //            .cellType(GeneratorDescription().autoTriggerInterval(1))
 //            .signalAndRelaxTime({1, 0, 0, 0, 0, 0, 0, 0}),
-//        CellDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
-//        CellDescription()
+//        ObjectDescription().id(3).pos({9.0f, 10.0f}).cellType(ConstructorDescription()),
+//        ObjectDescription()
 //            .id(4)
 //            .pos({7.0f, 10.0f})
 //            .cellType(DefenderDescription().mode(DefenderMode_DefendAgainstInjector)),

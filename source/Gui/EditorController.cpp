@@ -91,24 +91,24 @@ void EditorController::onInspectSelectedGenomes()
     onInspectObjects(constructors, true);
 }
 
-bool EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescription> const& entities, bool selectGenomeTab)
+bool EditorController::onInspectObjects(std::vector<ExtendedCellOrEnergyDescription> const& entities, bool selectGenomeTab)
 {
     if (entities.empty()) {
         return true;
     }
 
     // Filter entities if cells are selected
-    std::vector<ExtendedCellOrParticleDescription> filteredEntities;
+    std::vector<ExtendedCellOrEnergyDescription> filteredEntities;
     auto areCellsSelected = false;
     for (auto const& cellOrParticle : entities) {
-        if (std::holds_alternative<ExtendedCellDescription>(cellOrParticle)) {
+        if (std::holds_alternative<ExtendedObjectDescription>(cellOrParticle)) {
             areCellsSelected = true;
             break;
         }
     }
     if (areCellsSelected) {
         for (auto const& cellOrParticle : entities) {
-            if (std::holds_alternative<ExtendedCellDescription>(cellOrParticle)) {
+            if (std::holds_alternative<ExtendedObjectDescription>(cellOrParticle)) {
                 filteredEntities.emplace_back(cellOrParticle);
             }
         }
@@ -127,7 +127,7 @@ bool EditorController::onInspectObjects(std::vector<ExtendedCellOrParticleDescri
         inspectedIds.insert(DescriptionEditService::get().getId(entity));
     }
 
-    std::vector<ExtendedCellOrParticleDescription> newEntities;
+    std::vector<ExtendedCellOrEnergyDescription> newEntities;
     for (auto const& entity : filteredEntities) {
         if (origInspectedIds.find(DescriptionEditService::get().getId(entity)) == origInspectedIds.end()) {
             newEntities.emplace_back(entity);
@@ -213,7 +213,7 @@ void EditorController::processInspectorWindows()
 
     //inspector windows closed?
     std::vector<InspectorWindow> inspectorWindows;
-    std::vector<ExtendedCellOrParticleDescription> inspectedEntities;
+    std::vector<ExtendedCellOrEnergyDescription> inspectedEntities;
     for (auto const& inspectorWindow : _inspectorWindows) {
         if (!inspectorWindow->isClosed()) {
             inspectorWindows.emplace_back(inspectorWindow);

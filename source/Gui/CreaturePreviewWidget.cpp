@@ -153,7 +153,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
     // Clear selection if another node has been selected outside of this widget or if cell id does not exist in preview
     auto selectedCellIdExists = false;
-    for (auto const& cell : desc._cells) {
+    for (auto const& object : desc._objects) {
         if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
             selectedCellIdExists = true;
             break;
@@ -167,7 +167,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Draw front circle
     {
         auto maxDistance = 0.0f;
-        for (auto const& cell : desc._cells) {
+        for (auto const& object : desc._objects) {
             maxDistance = std::max(maxDistance, Math::length(cell._pos));
         }
         auto radius = (maxDistance + 1.0f);
@@ -198,7 +198,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
     // Draw selected gene
     auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.15f);
-    for (auto const& cell : desc._cells) {
+    for (auto const& object : desc._objects) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
@@ -206,7 +206,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     }
 
     // Draw selected nodes
-    for (auto const& cell : desc._cells) {
+    for (auto const& object : desc._objects) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
             float h, s, v;
@@ -219,7 +219,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
     // Draw signal restrictions
     if (_zoom > ZoomLevelForConnections) {
-        for (auto const& cell : desc._cells) {
+        for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
             float radius = cellSize * 0.33f;
 
@@ -256,7 +256,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
 
     // Draw cells and selected cells
-    for (auto const& cell : desc._cells) {
+    for (auto const& object : desc._objects) {
         auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
         float h, s, v;
         uint32_t color = cell._color != -1 ? Const::IndividualCellColors[cell._color] : 0x707070;
@@ -285,7 +285,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
     // Draw signals
     if (_zoom > ZoomLevelForConnections) {
-        for (auto const& cell : desc._cells) {
+        for (auto const& object : desc._objects) {
             auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
             auto constexpr cellRadiusFactor = 0.3f;
             float radius = cellSize * cellRadiusFactor;
@@ -343,7 +343,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
     // Draw gene references
     if (_zoom > ZoomLevelForLabels) {
-        for (auto const& cell : desc._cells) {
+        for (auto const& object : desc._objects) {
             if (cell._constructorGeneIndex.has_value()) {
                 auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
                 auto text = std::to_string(cell._constructorGeneIndex.value() + 1);
@@ -377,7 +377,7 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Descrip
         return;
     }
     std::optional<CellPreviewDescription> selectedCell;
-    for (auto const& cell : conversionResult.description._cells) {
+    for (auto const& object : conversionResult.description._objects) {
         if (cell._id == _selectedCellIdFromPreview.value()) {
             selectedCell = cell;
             break;
@@ -517,7 +517,7 @@ void _CreaturePreviewWidget::moveCenter(
 
 void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const
 {
-    for (auto& cell : phenotype._cells) {
+    for (auto& object : phenotype._objects) {
         if (cell._id == editedCell._id) {
             cell._signalState = editedCell._signalState;
             if (editedCell._signalState == SignalState_Active) {

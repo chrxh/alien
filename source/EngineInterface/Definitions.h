@@ -15,8 +15,8 @@ struct ColorTransitionRule;
 struct ParameterSpec;
 
 struct Description;
-struct CellDescription;
-struct ParticleDescription;
+struct ObjectDescription;
+struct EnergyDescription;
 struct GenomeDescription;
 struct GeneDescription;
 

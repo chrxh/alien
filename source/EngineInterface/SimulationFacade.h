@@ -57,8 +57,8 @@ public:
     virtual void colorSelectedObjects(unsigned char color, bool includeClusters) = 0;
     virtual void reconnectSelectedObjects() = 0;
     virtual void setDetached(bool value) = 0;
-    virtual void changeCell(CellDescription const& changedCell) = 0;
-    virtual void changeParticle(ParticleDescription const& changedParticle) = 0;
+    virtual void changeCell(ObjectDescription const& changedCell) = 0;
+    virtual void changeParticle(EnergyDescription const& changedParticle) = 0;
     virtual bool changeCreature(uint64_t creatureId, GenomeDescription const& genome) = 0;
     virtual std::optional<GenomeDescription> getGenomeOfCreature(uint64_t creatureId) = 0;
     virtual void switchSelection(RealVector2D const& pos, float radius) = 0;
@@ -122,9 +122,9 @@ public:
     //****************
     //* Only for tests
     //****************
-    virtual void testOnly_mutate(uint64_t cellId, MutationType mutationType) = 0;
-    virtual void testOnly_mutationCheck(uint64_t cellId) = 0;
-    virtual void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2) = 0;
+    virtual void testOnly_mutate(uint64_t objectId, MutationType mutationType) = 0;
+    virtual void testOnly_mutationCheck(uint64_t objectId) = 0;
+    virtual void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2) = 0;
     virtual void testOnly_cleanupAfterTimestep() = 0;
     virtual void testOnly_cleanupAfterDataManipulation() = 0;
     virtual void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta) = 0;

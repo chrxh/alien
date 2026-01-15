@@ -34,7 +34,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
 
     // Create a particle with energy above normalCellEnergy
     Description data;
-    data._particles.emplace_back(ParticleDescription()
+    data._energyParticles.emplace_back(EnergyDescription()
                                       .id(1)
                                       .pos({100.0f, 100.0f})
                                       .vel({0.1f, 0.1f})
@@ -49,12 +49,12 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Verify that the particle was transformed into a cell
-    EXPECT_EQ(0, actualData._particles.size());
-    EXPECT_EQ(1, actualData._cells.size());
+    EXPECT_EQ(0, actualData._energyParticles.size());
+    EXPECT_EQ(1, actualData._objects.size());
 
     // Verify the cell has approximately the same energy as the original particle
-    if (!actualData._cells.empty()) {
-        auto const& cell = actualData._cells.at(0);
+    if (!actualData._objects.empty()) {
+        auto const& object = actualData._objects.at(0);
         EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, cell._usableEnergy, 1.0f));
         EXPECT_EQ(0, cell._color);
     }
@@ -71,7 +71,7 @@ TEST_F(EnergyParticleTests, particleToCell_transformationDisabled)
 
     // Create a particle with energy above normalCellEnergy
     Description data;
-    data._particles.emplace_back(ParticleDescription()
+    data._energyParticles.emplace_back(EnergyDescription()
                                       .id(1)
                                       .pos({100.0f, 100.0f})
                                       .vel({0.1f, 0.1f})
@@ -86,8 +86,8 @@ TEST_F(EnergyParticleTests, particleToCell_transformationDisabled)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Verify that the particle was NOT transformed (remains a particle)
-    EXPECT_EQ(1, actualData._particles.size());
-    EXPECT_EQ(0, actualData._cells.size());
+    EXPECT_EQ(1, actualData._energyParticles.size());
+    EXPECT_EQ(0, actualData._objects.size());
 }
 
 TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
@@ -101,7 +101,7 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
 
     // Create a particle with energy below normalCellEnergy
     Description data;
-    data._particles.emplace_back(ParticleDescription()
+    data._energyParticles.emplace_back(EnergyDescription()
                                       .id(1)
                                       .pos({100.0f, 100.0f})
                                       .vel({0.1f, 0.1f})
@@ -116,8 +116,8 @@ TEST_F(EnergyParticleTests, particleToCell_insufficientEnergy)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Verify that the particle was NOT transformed (insufficient energy)
-    EXPECT_EQ(1, actualData._particles.size());
-    EXPECT_EQ(0, actualData._cells.size());
+    EXPECT_EQ(1, actualData._energyParticles.size());
+    EXPECT_EQ(0, actualData._objects.size());
 }
 
 TEST_F(EnergyParticleTests, particleAbsorption)
@@ -126,8 +126,8 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     auto particleEnergy = 10.0f;
 
     auto data = Description()
-                    .cells({CellDescription().id(1).pos({100.4f, 100.4f}).usableEnergy(cellEnergy).color(0)})
-                    .particles({ParticleDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
+                    .objects({ObjectDescription().id(1).pos({100.4f, 100.4f}).usableEnergy(cellEnergy).color(0)})
+                    .energyParticles({EnergyDescription().pos({100.4f, 100.4f}).energy(particleEnergy)});
 
     _simulationFacade->setSimulationData(data);
 
@@ -136,10 +136,10 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     auto actualData = _simulationFacade->getSimulationData();
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
-    EXPECT_EQ(0, actualData._particles.size());
-    EXPECT_EQ(1, actualData._cells.size());
+    EXPECT_EQ(0, actualData._energyParticles.size());
+    EXPECT_EQ(1, actualData._objects.size());
 
-    auto const& cell = actualData.getCellRef(1);
+    auto const& object = actualData.getObjectRef(1);
     EXPECT_TRUE(approxCompare(cellEnergy, cell._usableEnergy));
     EXPECT_TRUE(approxCompare(particleEnergy, cell._rawEnergy));
 }
@@ -152,8 +152,8 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
     auto cellEnergy = _parameters.minCellEnergy.baseValue[0] / 2;
     auto depotEnergy = 100.0f;
 
-    auto data = Description().cells(
-        {CellDescription().id(1).pos({100.4f, 100.4f}).usableEnergy(cellEnergy).color(0).cellType(DepotDescription().storedUsableEnergy(depotEnergy))});
+    auto data = Description().objects(
+        {ObjectDescription().id(1).pos({100.4f, 100.4f}).usableEnergy(cellEnergy).color(0).cellType(DepotDescription().storedUsableEnergy(depotEnergy))});
 
     _simulationFacade->setSimulationData(data);
 
@@ -161,13 +161,13 @@ TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_EQ(0, actualData._particles.size());
-    EXPECT_EQ(1, actualData._cells.size());
+    EXPECT_EQ(0, actualData._energyParticles.size());
+    EXPECT_EQ(1, actualData._objects.size());
 
     _simulationFacade->calcTimesteps(1);
     actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_EQ(1, actualData._particles.size());
-    EXPECT_EQ(0, actualData._cells.size());
+    EXPECT_EQ(1, actualData._energyParticles.size());
+    EXPECT_EQ(0, actualData._objects.size());
 }

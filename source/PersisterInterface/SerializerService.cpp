@@ -933,7 +933,7 @@ namespace cereal
     {
         ConnectionDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
-        loadSave(task, auxiliaries, Id_Connection_CellId, data._cellId, defaultObject._cellId);
+        loadSave(task, auxiliaries, Id_Connection_CellId, data._objectId, defaultObject._objectId);
         loadSave(task, auxiliaries, Id_Connection_Distance, data._distance, defaultObject._distance);
         loadSave(task, auxiliaries, Id_Connection_AngleFromPrevious, data._angleFromPrevious, defaultObject._angleFromPrevious);
         processLoadSaveMap(task, ar, auxiliaries);
@@ -1064,15 +1064,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, DetectFreeObjectDescription& data)
     {
-        DetectFreeCellDescription defaultObject;
+        DetectFreeObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(DetectFreeCellDescription)
+    SPLIT_SERIALIZATION(DetectFreeObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
@@ -1126,14 +1126,14 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneratorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, AttackFreeCellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, AttackFreeObjectDescription& data)
     {
-        AttackFreeCellDescription defaultObject;
+        AttackFreeObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(AttackFreeCellDescription)
+    SPLIT_SERIALIZATION(AttackFreeObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackCreatureDescription& data)
@@ -1286,14 +1286,14 @@ namespace cereal
     SPLIT_SERIALIZATION(ReconnectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeObjectDescription& data)
     {
-        ReconnectFreeCellDescription defaultObject;
+        ReconnectFreeObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ReconnectFreeCellDescription)
+    SPLIT_SERIALIZATION(ReconnectFreeObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureDescription& data)
@@ -1442,9 +1442,9 @@ namespace cereal
     SPLIT_SERIALIZATION(CommunicatorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, CellDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ObjectDescription& data)
     {
-        CellDescription defaultObject;
+        ObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Cell_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Cell_Energy, data._usableEnergy, defaultObject._usableEnergy);
@@ -1471,7 +1471,7 @@ namespace cereal
 
         ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
     }
-    SPLIT_SERIALIZATION(CellDescription)
+    SPLIT_SERIALIZATION(ObjectDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, CreatureDescription& data)
@@ -1491,9 +1491,9 @@ namespace cereal
     SPLIT_SERIALIZATION(CreatureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ParticleDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, EnergyDescription& data)
     {
-        ParticleDescription defaultObject;
+        EnergyDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Particle_Id, data._id, defaultObject._id);
         loadSave(task, auxiliaries, Id_Particle_Pos, data._pos, defaultObject._pos);
@@ -1502,12 +1502,12 @@ namespace cereal
         loadSave(task, auxiliaries, Id_Particle_Color, data._color, defaultObject._color);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ParticleDescription)
+    SPLIT_SERIALIZATION(EnergyDescription)
 
     template <class Archive>
     void serialize(Archive& ar, Description& description)
     {
-        ar(description._cells, description._particles, description._creatures, description._genomes);
+        ar(description._objects, description._energyParticles, description._creatures, description._genomes);
     }
 }
 
@@ -1924,7 +1924,7 @@ namespace
         if (colIndex == 0) {
             return &dataPoints.time;
         } else if (colIndex == 1) {
-            return &dataPoints.numCells;
+            return &dataPoints.numObjects;
         } else if (colIndex == 2) {
             return &dataPoints.numSelfReplicators;
         } else if (colIndex == 3) {
@@ -1932,7 +1932,7 @@ namespace
         } else if (colIndex == 4) {
             return &dataPoints.numFreeCells;
         } else if (colIndex == 5) {
-            return &dataPoints.numParticles;
+            return &dataPoints.numEnergyParticles;
         } else if (colIndex == 6) {
             return &dataPoints.averageGenomeCells;
         } else if (colIndex == 7) {

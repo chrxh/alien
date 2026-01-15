@@ -109,7 +109,7 @@ void EditKernelsService::shallowUpdateSelectedObjects(CudaSettings const& gpuSet
 
 void EditKernelsService::removeSelectedObjects(CudaSettings const& gpuSettings, SimulationData const& data, bool includeClusters)
 {
-    KERNEL_CALL(cudaRemoveSelectedCellConnections, data, includeClusters);
+    KERNEL_CALL(cudaRemoveSelectedObjectConnections, data, includeClusters);
 
     KERNEL_CALL(cudaRemoveSelectedEntities, data, includeClusters);
     cudaDeviceSynchronize();
@@ -194,12 +194,12 @@ void EditKernelsService::changeSimulationData(CudaSettings const& gpuSettings, S
     cudaDeviceSynchronize();
     CHECK_FOR_CUDA_ERROR(cudaGetLastError());
 
-    if (copyToHost(changeTO.numCells) == 1) {
+    if (copyToHost(changeTO.numObjects) == 1) {
         KERNEL_CALL(cudaChangeCell, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());
     }
-    if (copyToHost(changeTO.numParticles) == 1) {
+    if (copyToHost(changeTO.numEnergyParticles) == 1) {
         KERNEL_CALL(cudaChangeParticle, data, changeTO);
         cudaDeviceSynchronize();
         CHECK_FOR_CUDA_ERROR(cudaGetLastError());

@@ -7,7 +7,7 @@ void SimulationData::init(int2 const& worldSize_, uint64_t timestep_)
     worldSize = worldSize_;
 
     objects.init();
-    tempObjects.init();
+    tempEntities.init();
     preprocessedSimulationData.init(worldSize);
     cellMap.init(worldSize);
     particleMap.init(worldSize);
@@ -42,7 +42,7 @@ bool SimulationData::shouldResize(ArraySizesForGpu const& sizeDelta)
 {
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, sizeDelta.cellArray, sizeDelta.particleArray);
-    return objects.cells.shouldResize_host(cellArraySizeResult) || objects.particles.shouldResize_host(particleArraySizeResult)
+    return objects.entities.shouldResize_host(cellArraySizeResult) || objects.energyParticles.shouldResize_host(particleArraySizeResult)
         || objects.heap.shouldResize_host(sizeDelta.heap);
 }
 
@@ -51,9 +51,9 @@ void SimulationData::resizeTempObjects(ArraySizesForGpu const& size)
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
-    resizeTargetIntern(objects.cells, tempObjects.cells, cellArraySizeResult);
-    resizeTargetIntern(objects.particles, tempObjects.particles, particleArraySizeResult);
-    resizeTargetIntern(objects.heap, tempObjects.heap, size.heap);
+    resizeTargetIntern(objects.objects, tempEntities.objects, cellArraySizeResult);
+    resizeTargetIntern(objects.energyParticles, tempEntities.energyParticles, particleArraySizeResult);
+    resizeTargetIntern(objects.heap, tempEntities.heap, size.heap);
 }
 
 void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
@@ -61,21 +61,21 @@ void SimulationData::resizeObjectsAndTempObjects(ArraySizesForGpu const& size)
     uint64_t cellArraySizeResult, particleArraySizeResult;
     calcArraySizes(cellArraySizeResult, particleArraySizeResult, size.cellArray, size.particleArray);
 
-    objects.cells.resize(cellArraySizeResult);
-    objects.particles.resize(particleArraySizeResult);
+    objects.entities.resize(cellArraySizeResult);
+    objects.energyParticles.resize(particleArraySizeResult);
     objects.heap.resize(size.heap);
-    tempObjects.cells.resize(cellArraySizeResult);
-    tempObjects.particles.resize(particleArraySizeResult);
-    tempObjects.heap.resize(size.heap);
+    tempEntities.entities.resize(cellArraySizeResult);
+    tempEntities.energyParticles.resize(particleArraySizeResult);
+    tempEntities.heap.resize(size.heap);
 
     resizeAuxiliaryData();
 }
 
 void SimulationData::resizeObjectsByMatchingTempObjects()
 {
-    objects.cells.resize(tempObjects.cells.getCapacity_host());
-    objects.particles.resize(tempObjects.particles.getCapacity_host());
-    objects.heap.resize(tempObjects.heap.getCapacity_host());
+    objects.entities.resize(tempEntities.entities.getCapacity_host());
+    objects.energyParticles.resize(tempEntities.energyParticles.getCapacity_host());
+    objects.heap.resize(tempEntities.heap.getCapacity_host());
 
     resizeAuxiliaryData();
 }
@@ -88,7 +88,7 @@ bool SimulationData::isEmpty()
 void SimulationData::free()
 {
     objects.free();
-    tempObjects.free();
+    tempEntities.free();
     preprocessedSimulationData.free();
     cellMap.free();
     particleMap.free();
@@ -106,9 +106,9 @@ void SimulationData::free()
 
 void SimulationData::resizeAuxiliaryData()
 {
-    auto estimatedMaxActiveCells = objects.cells.getCapacity_host();
+    auto estimatedMaxActiveCells = objects.entities.getCapacity_host();
     cellMap.resize(estimatedMaxActiveCells);
-    auto estimatedMaxActiveParticles = objects.particles.getCapacity_host();
+    auto estimatedMaxActiveParticles = objects.energyParticles.getCapacity_host();
     particleMap.resize(estimatedMaxActiveParticles);
 
     auto upperBoundDynamicMemory =

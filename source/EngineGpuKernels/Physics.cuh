@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 #include <cuda_runtime.h>
 #include <vector_types.h>
 
@@ -14,7 +14,7 @@ public:
     __inline__ __device__ static float2 tangentialVelocity(float2 const& positionFromCenter, float2 const& velocityOfCenter, float angularVel);
     __inline__ __device__ static float2 transformVelocity(float massOld, float massNew, float2 const& velOld);
     __inline__ __device__ static float transformAngularVelocity(float angularMassOld, float angularMassNew, float angularVelOld);
-    __inline__ __device__ static float2 calcNormalToCell(Cell* cell, float2 outward);
+    __inline__ __device__ static float2 calcNormalToCell(Object* cell, float2 outward);
     __inline__ __device__ static void calcCollision(
         float2 const& vA1,
         float2 const& vB1,
@@ -43,24 +43,24 @@ public:
 /* Implementation                                                       */
 /************************************************************************/
 
-__device__ __inline__ float2 Physics::calcNormalToCell(Cell* cell, float2 outward)
+__device__ __inline__ float2 Physics::calcNormalToCell(Object* cell, float2 outward)
 {
     Math::normalize(outward);
-    if (cell->numConnections < 2) {
+    if (object->numConnections < 2) {
         return outward;
     }
 
-    Cell* minCell = nullptr;
-    Cell* maxCell = nullptr;
+    Object* minCell = nullptr;
+    Object* maxCell = nullptr;
     float2 minVector;
     float2 maxVector;
     float min_h = 0.0;  //h = angular distance from outward vector
     float max_h = 0.0;
 
-    for (int i = 0; i < cell->numConnections; ++i) {
+    for (int i = 0; i < object->numConnections; ++i) {
 
         //calculate h (angular distance from outward vector)
-        float2 u = cell->connections[i].cell->pos - cell->pos;
+        float2 u = object->connections[i].object->pos - object->pos;
         Math::normalize(u);
         float h = Math::dot(outward, u);
         if (outward.x * u.y - outward.y * u.x < 0.0) {
@@ -68,12 +68,12 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Cell* cell, float2 outwar
         }
 
         if (!minCell || h < min_h) {
-            minCell = cell->connections[i].cell;
+            minCell = object->connections[i].cell;
             minVector = u;
             min_h = h;
         }
         if (!maxCell || h > max_h) {
-            maxCell = cell->connections[i].cell;
+            maxCell = object->connections[i].cell;
             maxVector = u;
             max_h = h;
         }
@@ -86,7 +86,7 @@ __device__ __inline__ float2 Physics::calcNormalToCell(Cell* cell, float2 outwar
 
     //one adjacent cells?
     if (minCell == maxCell) {
-        return cell->pos - minCell->pos;
+        return object->pos - minCell->pos;
     }
 
     //calc normal vectors

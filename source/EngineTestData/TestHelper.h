@@ -19,6 +19,6 @@ public:
     static bool approxCompareAngles(float expected, float actual, float precision = 0.001f);
 
     static bool compare(Description left, Description right);
-    static bool compare(CellDescription left, CellDescription right);
-    static bool compare(ParticleDescription left, ParticleDescription right);
+    static bool compare(ObjectDescription left, ObjectDescription right);
+    static bool compare(EnergyDescription left, EnergyDescription right);
 };

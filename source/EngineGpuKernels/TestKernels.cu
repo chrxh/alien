@@ -1,15 +1,15 @@
-#include "CellConnectionProcessor.cuh"
+#include "ObjectConnectionProcessor.cuh"
 #include "SimulationData.cuh"
 #include "TestKernels.cuh"
 
-__global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationType mutationType)
+__global__ void cudaTestMutate(SimulationData data, uint64_t objectId, MutationType mutationType)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        //if (cell->id == cellId) {
+        auto& object = cells.at(index);
+        //if (object->id == objectId) {
         //    switch (mutationType) {
         //    case MutationType::Properties:
         //        MutationProcessor::propertiesMutation(data, cell);
@@ -52,43 +52,43 @@ __global__ void cudaTestMutate(SimulationData data, uint64_t cellId, MutationTyp
     }
 }
 
-__global__ void cudaTestCreateConnection(SimulationData data, uint64_t cellId1, uint64_t cellId2)
+__global__ void cudaTestCreateConnection(SimulationData data, uint64_t objectId1, uint64_t objectId2)
 {
     CUDA_CHECK(blockDim.x == 1 && gridDim.x == 1);
 
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
-    Cell* cell1 = nullptr;
-    Cell* cell2 = nullptr;
+    Object* object1 = nullptr;
+    Object* object2 = nullptr;
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto& cell = cells.at(index);
-        if (cell->id == cellId1) {
-            cell1 = cell;
+        auto& object = cells.at(index);
+        if (object->id == objectId1) {
+            object1 = cell;
         }
-        if (cell->id == cellId2) {
-            cell2 = cell;
+        if (object->id == objectId2) {
+            object2 = cell;
         }
     }
 
-    if (cell1 != nullptr && cell2 != nullptr) {
+    if (object1 != nullptr && object2 != nullptr) {
         data.cellMap.reset();
         data.particleMap.reset();
         data.processMemory.reset();
 
         // Heuristics
-        auto maxStructureOperations = 1000 + data.objects.cells.getNumEntries() / 2;
-        auto maxCellTypeOperations = data.objects.cells.getNumEntries();
+        auto maxStructureOperations = 1000 + data.entities.objects.getNumEntries() / 2;
+        auto maxCellTypeOperations = data.entities.objects.getNumEntries();
 
         data.structuralOperations.setMemory(data.processMemory.getTypedSubArray<StructuralOperation>(maxStructureOperations), maxStructureOperations);
         for (int i = CellType_Base; i < CellType_Count; ++i) {
             data.cellTypeOperations[i].setMemory(data.processMemory.getTypedSubArray<CellTypeOperation>(maxCellTypeOperations), maxCellTypeOperations);
         }
         *data.externalEnergy = cudaSimulationParameters.externalEnergy.value;
-        data.objects.saveNumEntries();
+        data.entities.saveNumEntries();
 
-        CellConnectionProcessor::scheduleAddConnectionPair(data, cell1, cell2);
+        ObjectConnectionProcessor::scheduleAddConnectionPair(data, object1, object2);
         data.structuralOperations.saveNumEntries();
-        CellConnectionProcessor::processAddOperations(data);
+        ObjectConnectionProcessor::processAddOperations(data);
     }
 }
 
@@ -97,8 +97,8 @@ namespace
     template<typename Pointer>
     __device__ bool isPointerValid(SimulationData const& data, Pointer pointer)
     {
-        return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(data.objects.heap.getArray())
-            && reinterpret_cast<uint64_t>(pointer) < reinterpret_cast<uint64_t>(data.objects.heap.getArray() + data.objects.heap.getCapacity());
+        return reinterpret_cast<uint64_t>(pointer) >= reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+            && reinterpret_cast<uint64_t>(pointer) < reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity());
     }
 
     __device__ bool isGenomeValid(SimulationData const& data, Genome* genome)
@@ -145,34 +145,34 @@ namespace
 
 __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
 {
-    auto& cells = data.objects.cells;
+    auto& cells = data.entities.objects;
     auto partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        if (auto& cell = cells.at(index)) {
+        if (auto& object = cells.at(index)) {
 
             if (isPointerValid(data, cell)) {
-                for (int i = 0; i < cell->numConnections; ++i) {
-                    auto connectingCell = cell->connections[i].cell;
+                for (int i = 0; i < object->numConnections; ++i) {
+                    auto connectingCell = object->connections[i].cell;
                     *result &= isPointerValid(data, connectingCell);
                 }
 
-                if (cell->cellType == CellType_Memory) {
-                    if (cell->cellTypeData.memory.numSignalEntries > 0) {
-                        auto signalEntries = cell->cellTypeData.memory.signalEntries;
+                if (object->cellType == CellType_Memory) {
+                    if (object->cellTypeData.memory.numSignalEntries > 0) {
+                        auto signalEntries = object->cellTypeData.memory.signalEntries;
                         *result &= isPointerValid(data, signalEntries);
                     }
                 }
 
-                if (cell->neuralNetwork != nullptr) {
-                    *result &= isPointerValid(data, cell->neuralNetwork);
+                if (object->neuralNetwork != nullptr) {
+                    *result &= isPointerValid(data, object->neuralNetwork);
                 }
 
-                if (cell->creature != nullptr) {
-                    if (!isPointerValid(data, cell->creature)) {
+                if (object->creature != nullptr) {
+                    if (!isPointerValid(data, object->creature)) {
                         *result = false;
                     } else {
-                        *result &= isGenomeValid(data, cell->creature->genome);
+                        *result &= isGenomeValid(data, object->creature->genome);
                     }
                 }
             } else {
@@ -182,14 +182,14 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
     }
 }
 
-__global__ void cudaTestMutationCheck(SimulationData data, uint64_t cellId)
+__global__ void cudaTestMutationCheck(SimulationData data, uint64_t objectId)
 {
-    //auto& cells = data.objects.cells;
+    //auto& cells = data.entities.objects;
     //auto partition = calcAllThreadsPartition(cells.getNumEntries());
 
     //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-    //    auto& cell = cells.at(index);
-    //    if (cell->id == cellId) {
+    //    auto& object = cells.at(index);
+    //    if (object->id == objectId) {
     //        MutationProcessor::checkMutationsForCell(data, cell);
     //    }
     //}

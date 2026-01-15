@@ -121,8 +121,8 @@ void main()
 
   
     // Extract arrow direction flags from the state field
-    // Bit 0: arrow to cell1 (vertex 0)
-    // Bit 1: arrow to cell2 (vertex 1)
+    // Bit 0: arrow to object1 (vertex 0)
+    // Bit 1: arrow to object2 (vertex 1)
     bool arrowToCell1 = (vertexActive[0] & 1) != 0;
     bool arrowToCell2 = (vertexActive[0] & 2) != 0;
     

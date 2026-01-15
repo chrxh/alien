@@ -148,19 +148,19 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
     }
 
     // Cells
-    for (int i = 0; i < *to.numCells; ++i) {
-        auto cell = createCellDescription(to, i);
+    for (int i = 0; i < *to.numObjects; ++i) {
+        auto object = createObjectDescription(to, i);
 
-        if (to.cells[i].belongToCreature) {
-            auto creatureTOIndex = to.cells[i].creatureIndex;
-            cell._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
+        if (to.objects[i].belongToCreature) {
+            auto creatureTOIndex = to.objects[i].creatureIndex;
+            object._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
-        result._cells.emplace_back(cell);
+        result._objects.emplace_back(cell);
     }
 
     // Particles
-    for (int i = 0; i < *to.numParticles; ++i) {
-        result._particles.emplace_back(createParticleDescription(to, i));
+    for (int i = 0; i < *to.numEnergyParticles; ++i) {
+        result._energyParticles.emplace_back(createEnergyDescription(to, i));
     }
 
     return result;
@@ -172,8 +172,8 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
     std::vector<CreatureTO> creatureTOs;
     std::vector<GeneTO> geneTOs;
     std::vector<NodeTO> nodeTOs;
-    std::vector<CellTO> cellTOs;
-    std::vector<ParticleTO> particleTOs;
+    std::vector<ObjectTO> cellTOs;
+    std::vector<EnergyTO> particleTOs;
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> genomeTOIndexById;
@@ -187,34 +187,34 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
     }
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
-    for (auto const& cell : description._cells) {
-        convertCellToTO(cellTOs, heap, cellIndexTOById, cell, cell._creatureId, creatureTOIndexById);
+    for (auto const& object : description._objects) {
+        convertCellToTO(cellTOs, heap, cellIndexTOById, object, object._creatureId, creatureTOIndexById);
     }
-    for (auto const& cell : description._cells) {
-        setConnections(cellTOs, cell, cellIndexTOById);
+    for (auto const& object : description._objects) {
+        setConnections(cellTOs, object, cellIndexTOById);
     }
-    for (auto const& particle : description._particles) {
+    for (auto const& energyParticle : description._energyParticles) {
         addParticle(particleTOs, particle);
     }
 
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(CellDescription const& cell) const
+TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& cell) const
 {
-    std::vector<CellTO> cellTOs;
+    std::vector<ObjectTO> cellTOs;
     std::vector<uint8_t> heap;
 
     std::unordered_map<uint64_t, uint64_t> cellIndexTOById;
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertCellToTO(cellTOs, heap, cellIndexTOById, cell, std::nullopt, creatureTOIndexById);
+    convertCellToTO(cellTOs, heap, cellIndexTOById, object, std::nullopt, creatureTOIndexById);
 
     return provideDataTO({}, {}, {}, {}, cellTOs, {}, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(ParticleDescription const& particle) const
+TO DescriptionConverterService::convertDescriptionToTO(EnergyDescription const& particle) const
 {
-    std::vector<ParticleTO> particleTOs;
+    std::vector<EnergyTO> particleTOs;
     std::vector<uint8_t> heap;
     addParticle(particleTOs, particle);
 
@@ -245,11 +245,11 @@ DescriptionConverterService::DescriptionConverterService()
     _collectionTOProvider = std::make_shared<_TOProvider>();
 }
 
-CellDescription DescriptionConverterService::createCellDescription(TO const& to, int cellIndex) const
+ObjectDescription DescriptionConverterService::createObjectDescription(TO const& to, int cellIndex) const
 {
-    CellDescription result(false);
+    ObjectDescription result(false);
 
-    auto const& cellTO = to.cells[cellIndex];
+    auto const& cellTO = to.objects[cellIndex];
     result._id = cellTO.id;
     NumberGenerator::get().adaptMaxIds({.entityId = cellTO.id});
     result._pos = RealVector2D(cellTO.pos.x, cellTO.pos.y);
@@ -262,7 +262,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
         auto const& connectionTO = cellTO.connections[i];
         ConnectionDescription connection;
         if (connectionTO.cellIndex != VALUE_NOT_SET_UINT64) {
-            connection._cellId = to.cells[connectionTO.cellIndex].id;
+            connection._objectId = to.objects[connectionTO.cellIndex].id;
         } else {
             connections.clear();
             break;
@@ -287,11 +287,11 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
 
     switch (cellTO.cellType) {
     case CellType_Structure: {
-        StructureCellDescription base;
+        StructureObjectDescription base;
         result._cellType = base;
     } break;
     case CellType_Free: {
-        FreeCellDescription base;
+        FreeObjectDescription base;
         result._cellType = base;
     } break;
     case CellType_Base: {
@@ -338,7 +338,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             DetectStructureDescription detectStructure;
             sensor._mode = detectStructure;
         } else if (cellTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
-            DetectFreeCellDescription detectFreeCell;
+            DetectFreeObjectDescription detectFreeCell;
             detectFreeCell._minDensity = cellTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
             detectFreeCell._restrictToColor = cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(cellTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
@@ -379,7 +379,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
     case CellType_Attacker: {
         AttackerDescription attacker;
         if (cellTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-            AttackFreeCellDescription attackFreeCell;
+            AttackFreeObjectDescription attackFreeCell;
             attackFreeCell._restrictToColor = cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(cellTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor))
                 : std::nullopt;
@@ -481,7 +481,7 @@ CellDescription DescriptionConverterService::createCellDescription(TO const& to,
             ReconnectStructureDescription reconnectStructure;
             reconnector._mode = reconnectStructure;
         } else if (cellTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-            ReconnectFreeCellDescription reconnectFreeCell;
+            ReconnectFreeObjectDescription reconnectFreeCell;
             reconnectFreeCell._restrictToColor = cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(cellTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
                 : std::nullopt;
@@ -871,17 +871,17 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
     result._generation = creatureTO.generation;
     result._lineageId = creatureTO.lineageId;
     NumberGenerator::get().adaptMaxIds({.entityId = creatureTO.lineageId});
-    result._numCells = creatureTO.numCells;
+    result._numCells = creatureTO.numObjects;
     result._frontAngleId = creatureTO.frontAngleId;
 
     return result;
 }
 
-ParticleDescription DescriptionConverterService::createParticleDescription(TO const& to, int particleIndex) const
+EnergyDescription DescriptionConverterService::createEnergyDescription(TO const& to, int particleIndex) const
 {
-    auto const& particle = to.particles[particleIndex];
+    auto const& energyParticle = to.energyParticles[particleIndex];
     NumberGenerator::get().adaptMaxIds({.entityId = particle.id});
-    return ParticleDescription()
+    return EnergyDescription()
         .id(particle.id)
         .pos({particle.pos.x, particle.pos.y})
         .vel({particle.vel.x, particle.vel.y})
@@ -977,9 +977,9 @@ void DescriptionConverterService::convertGenomeToTO(
                 } else if (sensorTO.mode == SensorMode_DetectStructure) {
                 } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
                     auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDescription>(sensorDesc._mode);
-                    auto& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
-                    detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
-                    detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+                    auto& detectFreeObjectTO = sensorTO.modeData.detectFreeCell;
+                    detectFreeObjectTO.minDensity = detectFreeCellDesc._minDensity;
+                    detectFreeObjectTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
                 } else if (sensorTO.mode == SensorMode_DetectCreature) {
                     auto const& detectCreatureDesc = std::get<DetectCreatureGenomeDescription>(sensorDesc._mode);
                     auto& detectCreatureTO = sensorTO.modeData.detectCreature;
@@ -1002,8 +1002,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 attackerTO.mode = attackerDesc.getMode();
                 if (attackerTO.mode == AttackerMode_FreeCell) {
                     auto const& attackFreeCellDesc = std::get<AttackFreeCellGenomeDescription>(attackerDesc._mode);
-                    auto& attackFreeCellTO = attackerTO.modeData.attackFreeCell;
-                    attackFreeCellTO.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
+                    auto& attackFreeObjectTO = attackerTO.modeData.attackFreeCell;
+                    attackFreeObjectTO.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
                 } else if (attackerTO.mode == AttackerMode_Creature) {
                     auto const& attackCreatureDesc = std::get<AttackCreatureGenomeDescription>(attackerDesc._mode);
                     auto& attackCreatureTO = attackerTO.modeData.attackCreature;
@@ -1070,8 +1070,8 @@ void DescriptionConverterService::convertGenomeToTO(
                     // No data to copy
                 } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
                     auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDescription>(reconnectorDesc._mode);
-                    auto& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
-                    reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
+                    auto& reconnectFreeObjectTO = reconnectorTO.modeData.reconnectFreeCell;
+                    reconnectFreeObjectTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
                 } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
                     auto const& reconnectCreatureDesc = std::get<ReconnectCreatureGenomeDescription>(reconnectorDesc._mode);
                     auto& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
@@ -1152,7 +1152,7 @@ void DescriptionConverterService::convertCreatureToTO(
     creatureTO.generation = creatureDesc._generation;
     creatureTO.lineageId = creatureDesc._lineageId;
     creatureTO.frontAngleId = creatureDesc._frontAngleId;
-    creatureTO.numCells = creatureDesc._numCells;
+    creatureTO.numObjects = creatureDesc._numCells;
     creatureTO.genomeArrayIndex = genomeTOIndexById.at(creatureDesc._genomeId);
 }
 
@@ -1167,17 +1167,17 @@ namespace
 }
 
 void DescriptionConverterService::convertCellToTO(
-    std::vector<CellTO>& cellTOs,
+    std::vector<ObjectTO>& cellTOs,
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& cellTOIndexById,
-    CellDescription const& cellDesc,
+    ObjectDescription const& cellDesc,
     std::optional<uint64_t> const& creatureId,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
     auto cellIndex = cellTOs.size();
     cellTOs.resize(cellIndex + 1);
 
-    CellTO& cellTO = cellTOs.at(cellIndex);
+    ObjectTO& cellTO = cellTOs.at(cellIndex);
     cellTO.id = cellDesc._id;
     cellTOIndexById.insert_or_assign(cellTO.id, cellIndex);
 
@@ -1251,10 +1251,10 @@ void DescriptionConverterService::convertCellToTO(
             detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
         } else if (sensorTO.mode == SensorMode_DetectStructure) {
         } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
-            auto const& detectFreeCellDesc = std::get<DetectFreeCellDescription>(sensorDesc._mode);
-            DetectFreeCellTO& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
-            detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
-            detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+            auto const& detectFreeCellDesc = std::get<DetectFreeObjectDescription>(sensorDesc._mode);
+            DetectFreeObjectTO& detectFreeObjectTO = sensorTO.modeData.detectFreeCell;
+            detectFreeObjectTO.minDensity = detectFreeCellDesc._minDensity;
+            detectFreeObjectTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
         } else if (sensorTO.mode == SensorMode_DetectCreature) {
             auto const& detectCreatureDesc = std::get<DetectCreatureDescription>(sensorDesc._mode);
             DetectCreatureTO& detectCreatureTO = sensorTO.modeData.detectCreature;
@@ -1282,7 +1282,7 @@ void DescriptionConverterService::convertCellToTO(
         AttackerTO& attackerTO = cellTO.cellTypeData.attacker;
         attackerTO.mode = attackerDesc.getMode();
         if (attackerTO.mode == AttackerMode_FreeCell) {
-            auto const& attackFreeCellDesc = std::get<AttackFreeCellDescription>(attackerDesc._mode);
+            auto const& attackFreeCellDesc = std::get<AttackFreeObjectDescription>(attackerDesc._mode);
             attackerTO.modeData.attackFreeCell.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
         } else if (attackerTO.mode == AttackerMode_Creature) {
             auto const& attackCreatureDesc = std::get<AttackCreatureDescription>(attackerDesc._mode);
@@ -1362,9 +1362,9 @@ void DescriptionConverterService::convertCellToTO(
         if (reconnectorTO.mode == ReconnectorMode_Structure) {
             // No data to copy
         } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
-            auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDescription>(reconnectorDesc._mode);
-            ReconnectFreeCellTO& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
-            reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
+            auto const& reconnectFreeCellDesc = std::get<ReconnectFreeObjectDescription>(reconnectorDesc._mode);
+            ReconnectFreeObjectTO& reconnectFreeObjectTO = reconnectorTO.modeData.reconnectFreeCell;
+            reconnectFreeObjectTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
         } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
             auto const& reconnectCreatureDesc = std::get<ReconnectCreatureDescription>(reconnectorDesc._mode);
             ReconnectCreatureTO& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
@@ -1447,7 +1447,7 @@ void DescriptionConverterService::convertCellToTO(
     cellTO.color = cellDesc._color;
 }
 
-void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleTOs, ParticleDescription const& particleDesc) const
+void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDescription const& particleDesc) const
 {
     auto& particleTO = particleTOs.emplace_back();
 
@@ -1460,15 +1460,15 @@ void DescriptionConverterService::addParticle(std::vector<ParticleTO>& particleT
 }
 
 void DescriptionConverterService::setConnections(
-    std::vector<CellTO>& cellTOs,
-    CellDescription const& cellToAdd,
+    std::vector<ObjectTO>& cellTOs,
+    ObjectDescription const& cellToAdd,
     std::unordered_map<uint64_t, uint64_t> const& cellIndexByIds) const
 {
     int index = 0;
     auto& cellTO = cellTOs.at(cellIndexByIds.at(cellToAdd._id));
     float angleOffset = 0;
     for (ConnectionDescription const& connection : cellToAdd._connections) {
-        cellTO.connections[index].cellIndex = cellIndexByIds.at(connection._cellId);
+        cellTO.connections[index].cellIndex = cellIndexByIds.at(connection._objectId);
         cellTO.connections[index].distance = connection._distance;
         cellTO.connections[index].angleFromPrevious = connection._angleFromPrevious + angleOffset;
         ++index;
@@ -1485,8 +1485,8 @@ TO DescriptionConverterService::provideDataTO(
     std::vector<GenomeTO> const& genomeTOs,
     std::vector<GeneTO> const& geneTOs,
     std::vector<NodeTO> const& nodeTOs,
-    std::vector<CellTO> const& cellTOs,
-    std::vector<ParticleTO> const& particleTOs,
+    std::vector<ObjectTO> const& cellTOs,
+    std::vector<EnergyTO> const& particleTOs,
     std::vector<uint8_t> const& heap) const
 {
     TO result = _collectionTOProvider->provideDataTO(
@@ -1494,24 +1494,24 @@ TO DescriptionConverterService::provideDataTO(
          .genomes = genomeTOs.size(),
          .genes = geneTOs.size(),
          .nodes = nodeTOs.size(),
-         .cells = cellTOs.size(),
-         .particles = particleTOs.size(),
+         .objects = cellTOs.size(),
+         .energyParticles = particleTOs.size(),
          .heap = heap.size()});
 
     *result.numCreatures = creatureTOs.size();
     *result.numGenomes = genomeTOs.size();
     *result.numGenes = geneTOs.size();
     *result.numNodes = nodeTOs.size();
-    *result.numCells = cellTOs.size();
-    *result.numParticles = particleTOs.size();
+    *result.numObjects = cellTOs.size();
+    *result.numEnergyParticles = particleTOs.size();
     *result.heapSize = heap.size();
 
     std::memcpy(result.creatures, creatureTOs.data(), creatureTOs.size() * sizeof(CreatureTO));
     std::memcpy(result.genomes, genomeTOs.data(), genomeTOs.size() * sizeof(GenomeTO));
     std::memcpy(result.genes, geneTOs.data(), geneTOs.size() * sizeof(GeneTO));
     std::memcpy(result.nodes, nodeTOs.data(), nodeTOs.size() * sizeof(NodeTO));
-    std::memcpy(result.cells, cellTOs.data(), cellTOs.size() * sizeof(CellTO));
-    std::memcpy(result.particles, particleTOs.data(), particleTOs.size() * sizeof(ParticleTO));
+    std::memcpy(result.objects, cellTOs.data(), cellTOs.size() * sizeof(ObjectTO));
+    std::memcpy(result.energyParticles, particleTOs.data(), particleTOs.size() * sizeof(EnergyTO));
     std::memcpy(result.heap, heap.data(), heap.size());
 
     return result;

@@ -39,10 +39,10 @@ bool TestHelper::approxCompareAngles(float expected, float actual, float precisi
 
 bool TestHelper::compare(Description left, Description right)
 {
-    std::sort(left._cells.begin(), left._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._cells.begin(), right._cells.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(left._particles.begin(), left._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
-    std::sort(right._particles.begin(), right._particles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(left._objects.begin(), left._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._objects.begin(), right._objects.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(left._energyParticles.begin(), left._energyParticles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
+    std::sort(right._energyParticles.begin(), right._energyParticles.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._creatures.begin(), left._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(right._creatures.begin(), right._creatures.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
     std::sort(left._genomes.begin(), left._genomes.end(), [](auto const& left, auto const& right) { return left._id < right._id; });
@@ -50,14 +50,14 @@ bool TestHelper::compare(Description left, Description right)
     return left == right;
 }
 
-bool TestHelper::compare(CellDescription left, CellDescription right)
+bool TestHelper::compare(ObjectDescription left, ObjectDescription right)
 {
     left._id = 0;
     right._id = 0;
     return left == right;
 }
 
-bool TestHelper::compare(ParticleDescription left, ParticleDescription right)
+bool TestHelper::compare(EnergyDescription left, EnergyDescription right)
 {
     left._id = 0;
     right._id = 0;

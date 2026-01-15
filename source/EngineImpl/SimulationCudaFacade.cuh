@@ -106,9 +106,9 @@ public:
     TO getPreviewData();
 
     // Only for tests
-    void testOnly_mutate(uint64_t cellId, MutationType mutationType);
-    void testOnly_mutationCheck(uint64_t cellId);
-    void testOnly_createConnection(uint64_t cellId1, uint64_t cellId2);
+    void testOnly_mutate(uint64_t objectId, MutationType mutationType);
+    void testOnly_mutationCheck(uint64_t objectId);
+    void testOnly_createConnection(uint64_t objectId1, uint64_t objectId2);
     void testOnly_cleanupAfterTimestep();
     void testOnly_cleanupAfterDataManipulation();
     void testOnly_resizeArrays(ArraySizesForGpu const& sizeDelta);

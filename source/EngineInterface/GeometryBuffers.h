@@ -7,7 +7,7 @@
 
 struct NumRenderObjects
 {
-    uint64_t cells;
+    uint64_t objects;
     uint64_t energyParticles;
     uint64_t locations;
     uint64_t lineIndices;

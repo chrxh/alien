@@ -30,8 +30,8 @@ GeometryBuffers _GeometryBuffers::create()
 void _GeometryBuffers::updateNumObjects(NumRenderObjects const& numRenderObjects)
 {
     _numObjects = numRenderObjects;
-    if (numRenderObjects.cells >= _vertexBufferCapacity) {
-        _vertexBufferCapacity = std::max(numRenderObjects.cells * 2, static_cast<uint64_t>(100000));
+    if (numRenderObjects.objects >= _vertexBufferCapacity) {
+        _vertexBufferCapacity = std::max(numRenderObjects.objects * 2, static_cast<uint64_t>(100000));
         glBindBuffer(GL_ARRAY_BUFFER, getVboForCells());
         glBufferData(GL_ARRAY_BUFFER, toInt(_vertexBufferCapacity * sizeof(CellVertexData)), nullptr, GL_DYNAMIC_DRAW);
     }
@@ -151,10 +151,10 @@ void _GeometryBuffers::setDetonationEventData(DetonationEventVertexData const* d
 
 std::vector<CellVertexData> _GeometryBuffers::getCellData() const
 {
-    std::vector<CellVertexData> result(_numObjects.cells);
-    if (_numObjects.cells == 0) return result;
+    std::vector<CellVertexData> result(_numObjects.objects);
+    if (_numObjects.objects == 0) return result;
     glBindBuffer(GL_ARRAY_BUFFER, _vboForCells);
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.cells * sizeof(CellVertexData)), result.data());
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, toInt(_numObjects.objects * sizeof(CellVertexData)), result.data());
     return result;
 }
 

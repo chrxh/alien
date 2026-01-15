@@ -30,12 +30,12 @@ protected:
     Description createSenderCreature(uint64_t creatureId, RealVector2D pos, float range = 50.0f, int maxTimesSent = 4, int color = 0)
     {
         auto data = Description().addCreature({
-                    CellDescription()
+                    ObjectDescription()
                         .id(creatureId * 100)
                         .pos(pos)
                         .color(color)
                         .cellType(CommunicatorDescription().mode(SenderDescription().range(range).maxTimesSent(maxTimesSent))),
-                    CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).signalAndState({1.0f, 0.5f, 3.0f, 0, 0, 0, 0, 0}),
+                    ObjectDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color).signalAndState({1.0f, 0.5f, 3.0f, 0, 0, 0, 0, 0}),
                 }, CreatureDescription()
                 .id(creatureId));
         data.addConnection(creatureId * 100, creatureId * 100 + 1);
@@ -51,12 +51,12 @@ protected:
         int color = 0)
     {
         auto data = Description().addCreature({
-                    CellDescription()
+                    ObjectDescription()
                         .id(creatureId * 100)
                         .pos(pos)
                         .color(color)
                         .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToColor(restrictToColor).restrictToLineage(restrictToLineage))),
-                    CellDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
+                    ObjectDescription().id(creatureId * 100 + 1).pos({pos.x + 1.0f, pos.y}).color(color),
                 }, CreatureDescription()
                 .id(creatureId));
         data.addConnection(creatureId * 100, creatureId * 100 + 1);
@@ -73,7 +73,7 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto sender = result.getCellRef(100);
+    auto sender = result.getObjectRef(100);
 
     EXPECT_TRUE(sender._signalState == SignalState_Active);
 }
@@ -90,7 +90,7 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     // Receiver should have received the signal
     EXPECT_EQ(receiver._signalState, SignalState_Active);
@@ -112,7 +112,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal
     EXPECT_NE(receiver._signalState, SignalState_Active);
@@ -122,13 +122,13 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
 {
     // Create sender and receiver in the same creature (both connected)
     auto data = Description().addCreature({
-        CellDescription().id(0).pos({99.0f, 100.0f}).signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
-        CellDescription()
+        ObjectDescription().id(0).pos({99.0f, 100.0f}).signalAndState({1.0f, 2.0f, 3.0f, 0, 0, 0, 0, 0}),
+        ObjectDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(0).openingAngle(0))
             .cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription().id(2).pos({110.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
+        ObjectDescription().id(2).pos({110.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
     }, CreatureDescription().id(1));
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -137,7 +137,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(2);
+    auto receiver = result.getObjectRef(2);
 
     // Since they're in the same creature, CommunicatorProcessor should NOT transmit.
     EXPECT_EQ(receiver._signalState, SignalState_Inactive);
@@ -160,7 +160,7 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
 
     // All receivers should have received the signal
     for (uint64_t id : {200, 300, 400}) {
-        auto receiver = result.getCellRef(id);
+        auto receiver = result.getObjectRef(id);
         EXPECT_EQ(receiver._signalState, SignalState_Active);
         EXPECT_FLOAT_EQ(receiver._signal._channels[1], 0.5f);
         EXPECT_EQ(receiver._signal._numTimesSent, 1);
@@ -171,8 +171,8 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
 {
     // Create sender in creature 1 with signal that has numTimesSent = 2 (equal to maxTimesSent)
     auto data = Description().addCreature({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(2))),
-        CellDescription()
+        ObjectDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(2))),
+        ObjectDescription()
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
@@ -187,7 +187,7 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (maxTimesSent exceeded)
     EXPECT_NE(receiver._signalState, SignalState_Active);
@@ -205,7 +205,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     // Receiver should have received the signal (color matches)
     EXPECT_EQ(receiver._signalState, SignalState_Active);
@@ -223,7 +223,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (color doesn't match)
     EXPECT_NE(receiver._signalState, SignalState_Active);
@@ -233,9 +233,9 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
 {
     // Create sender without active signal
     auto data = Description().addCreature({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
+        ObjectDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
         // No signalAndState set, so signal is not active
-        CellDescription().id(101).pos({101.0f, 100.0f}),
+        ObjectDescription().id(101).pos({101.0f, 100.0f}),
     }, CreatureDescription().id(1));
     data.addConnection(100, 101);
 
@@ -246,7 +246,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (sender has no active signal)
     EXPECT_NE(receiver._signalState, SignalState_Active);
@@ -256,8 +256,8 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
 {
     // Create first sender with numTimesSent = 3
     auto data = Description().addCreature({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
-        CellDescription()
+        ObjectDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
+        ObjectDescription()
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
@@ -267,8 +267,8 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
 
     // Create second sender with numTimesSent = 1 (higher priority)
     data.addCreature({
-        CellDescription().id(200).pos({100.0f, 120.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
-        CellDescription()
+        ObjectDescription().id(200).pos({100.0f, 120.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(10))),
+        ObjectDescription()
             .id(201)
             .pos({101.0f, 120.0f})
             .signalState(SignalState_Active)
@@ -283,7 +283,7 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(300);
+    auto receiver = result.getObjectRef(300);
 
     // Receiver should have received the signal
     EXPECT_EQ(receiver._signalState, SignalState_Active);
@@ -315,8 +315,8 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     auto receiverConnectedCellOffset = Math::unitVectorOfAngle(receiverRefAngle);
 
     auto data = Description().addCreature({
-        CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-        CellDescription()
+        ObjectDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
+        ObjectDescription()
             .id(101)
             .pos({101.0f, 100.0f})
             .signalState(SignalState_Active)
@@ -325,8 +325,8 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     data.addConnection(100, 101);
 
     data.addCreature({
-        CellDescription().id(200).pos({120.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
-        CellDescription().id(201).pos({120.0f + receiverConnectedCellOffset.x, 100.0f + receiverConnectedCellOffset.y}),
+        ObjectDescription().id(200).pos({120.0f, 100.0f}).cellType(CommunicatorDescription().mode(ReceiverDescription())),
+        ObjectDescription().id(201).pos({120.0f + receiverConnectedCellOffset.x, 100.0f + receiverConnectedCellOffset.y}),
     }, CreatureDescription().id(2));
     data.addConnection(200, 201);
 
@@ -334,7 +334,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     EXPECT_EQ(receiver._signalState, SignalState_Active);
 
@@ -380,8 +380,8 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     uint64_t receiverLineageId = params.sameLineage ? 12345 : 67890;
 
     auto data = Description().addCreature({
-                CellDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
-                CellDescription()
+                ObjectDescription().id(100).pos({100.0f, 100.0f}).cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4))),
+                ObjectDescription()
                     .id(101)
                     .pos({101.0f, 100.0f})
                     .signalState(SignalState_Active)
@@ -392,11 +392,11 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     data.addConnection(100, 101);
 
     data.addCreature({
-                             CellDescription()
+                             ObjectDescription()
                                  .id(200)
                                  .pos({120.0f, 100.0f})
                                  .cellType(CommunicatorDescription().mode(ReceiverDescription().restrictToLineage(params.restriction))),
-                             CellDescription().id(201).pos({121.0f, 100.0f}),
+                             ObjectDescription().id(201).pos({121.0f, 100.0f}),
                          }, CreatureDescription()
                          .id(2)
                          .lineageId(receiverLineageId));
@@ -406,7 +406,7 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     _simulationFacade->calcTimesteps(1);
 
     auto result = _simulationFacade->getSimulationData();
-    auto receiver = result.getCellRef(200);
+    auto receiver = result.getObjectRef(200);
 
     if (params.expectedAccept) {
         EXPECT_EQ(receiver._signalState, SignalState_Active);

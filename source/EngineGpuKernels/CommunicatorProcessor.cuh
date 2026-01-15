@@ -3,7 +3,7 @@
 #include <EngineInterface/CellTypeConstants.h>
 
 #include "ConstantMemory.cuh"
-#include "Object.cuh"
+#include "Entity.cuh"
 #include "SignalProcessor.cuh"
 #include "SimulationData.cuh"
 #include "SimulationStatistics.cuh"
@@ -14,10 +14,10 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
-    __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Cell* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* cell);
 
-    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Cell* senderCell, Cell* receiverCell, int newNumTimesSent);
+    __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderCell, Object* receiverCell, int newNumTimesSent);
 };
 
 /************************************************************************/
@@ -33,7 +33,7 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
     }
 }
 
-__device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
 {
     __shared__ bool shouldProcess;
     if (threadIdx.x == 0) {
@@ -46,14 +46,14 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
         return;
     }
 
-    auto const& mode = cell->cellTypeData.communicator.mode;
+    auto const& mode = object->cellTypeData.communicator.mode;
     if (mode == CommunicatorMode_Sender) {
         processSender(data, statistics, cell);
     }
     // Receiver mode: signals are set by senders, no additional processing needed
 }
 
-__device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Cell* cell)
+__device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* cell)
 {
     __shared__ float range;
     __shared__ int maxTimesSent;
@@ -61,11 +61,11 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     __shared__ float2 senderPos;
 
     if (threadIdx.x == 0) {
-        auto& sender = cell->cellTypeData.communicator.modeData.sender;
+        auto& sender = object->cellTypeData.communicator.modeData.sender;
         range = sender.range;
         maxTimesSent = sender.maxTimesSent;
-        currentNumTimesSent = cell->signal.numTimesSent;
-        senderPos = cell->pos;
+        currentNumTimesSent = object->signal.numTimesSent;
+        senderPos = object->pos;
     }
     __syncthreads();
 
@@ -78,34 +78,34 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     int rangeInt = static_cast<int>(ceilf(range));
 
     // Matching lambda to check if a cell is a valid receiver
-    auto isMatch = [&cell](Cell* otherCell) {
+    auto isMatch = [&cell](Object* otherCell) {
         // Must be a communicator in receiver mode
         if (otherCell->cellType != CellType_Communicator || otherCell->cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;
         }
 
         // Must be from a different creature
-        if (cell->isSameCreature(otherCell)) {
+        if (object->isSameCreature(otherCell)) {
             return false;
         }
 
         auto const& receiver = otherCell->cellTypeData.communicator.modeData.receiver;
 
         // Check color restriction
-        if (receiver.restrictToColor != 255 && cell->color != receiver.restrictToColor) {
+        if (receiver.restrictToColor != 255 && object->color != receiver.restrictToColor) {
             return false;
         }
 
         // Check lineage restriction
         if (receiver.restrictToLineage != LineageRestriction_No) {
-            if (cell->creature == nullptr || otherCell->creature == nullptr) {
+            if (object->creature == nullptr || otherCell->creature == nullptr) {
                 return false;
             } else if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
-                if (cell->creature->lineageId != otherCell->creature->lineageId) {
+                if (object->creature->lineageId != otherCell->creature->lineageId) {
                     return false;
                 }
             } else if (receiver.restrictToLineage == LineageRestriction_OtherLineage) {
-                if (cell->creature->lineageId == otherCell->creature->lineageId) {
+                if (object->creature->lineageId == otherCell->creature->lineageId) {
                     return false;
                 }
             }
@@ -143,7 +143,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     }
 }
 
-__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Cell* senderCell, Cell* receiverCell, int newNumTimesSent)
+__inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationData& data, Object* senderCell, Object* receiverCell, int newNumTimesSent)
 {
     receiverCell->getLock();
 

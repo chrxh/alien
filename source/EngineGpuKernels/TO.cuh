@@ -8,7 +8,7 @@
 #include <cuda_runtime.h>
 #include <stdint.h>
 
-struct ParticleTO
+struct EnergyTO
 {
     uint64_t id;
     float energy;
@@ -72,7 +72,7 @@ struct DetectEnergyTO
 struct DetectStructureTO
 {};
 
-struct DetectFreeCellTO
+struct DetectFreeObjectTO
 {
     float minDensity;
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
@@ -91,7 +91,7 @@ union SensorModeTO
     TelemetryTO telemetry;
     DetectEnergyTO detectEnergy;
     DetectStructureTO detectStructure;
-    DetectFreeCellTO detectFreeCell;
+    DetectFreeObjectTO detectFreeCell;
     DetectCreatureTO detectCreature;
 };
 
@@ -124,7 +124,7 @@ struct GeneratorTO
     uint32_t numPulses;
 };
 
-struct AttackFreeCellTO
+struct AttackFreeObjectTO
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
 };
@@ -139,7 +139,7 @@ struct AttackCreatureTO
 
 union AttackerModeTO
 {
-    AttackFreeCellTO attackFreeCell;
+    AttackFreeObjectTO attackFreeCell;
     AttackCreatureTO attackCreature;
 };
 
@@ -250,7 +250,7 @@ struct DefenderTO
 struct ReconnectStructureTO
 {};
 
-struct ReconnectFreeCellTO
+struct ReconnectFreeObjectTO
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
 };
@@ -266,7 +266,7 @@ struct ReconnectCreatureTO
 union ReconnectorModeTO
 {
     ReconnectStructureTO reconnectStructure;
-    ReconnectFreeCellTO reconnectFreeCell;
+    ReconnectFreeObjectTO reconnectFreeCell;
     ReconnectCreatureTO reconnectCreature;
 };
 
@@ -390,7 +390,7 @@ struct SignalTO
     int numTimesSent;
 };
 
-struct CellTO
+struct ObjectTO
 {
     // General
     uint64_t id;
@@ -455,10 +455,10 @@ struct TO
 {
     ArraySizesForTO capacities;
 
-    uint64_t* numCells = nullptr;
-    CellTO* cells = nullptr;
-    uint64_t* numParticles = nullptr;
-    ParticleTO* particles = nullptr;
+    uint64_t* numObjects = nullptr;
+    ObjectTO* objects = nullptr;
+    uint64_t* numEnergyParticles = nullptr;
+    EnergyTO* energyParticles = nullptr;
     uint64_t* numCreatures = nullptr;
     CreatureTO* creatures = nullptr;
     uint64_t* numGenomes = nullptr;

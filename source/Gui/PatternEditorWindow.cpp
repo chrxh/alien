@@ -400,5 +400,5 @@ bool PatternEditorWindow::hasSelectionChanged(SelectionShallowData const& select
     if (!_lastSelection) {
         return false;
     }
-    return _lastSelection->numCells != selection.numCells || _lastSelection->numParticles != selection.numParticles;
+    return _lastSelection->numObjects != selection.numObjects || _lastSelection->numEnergyParticles != selection.numEnergyParticles;
 }

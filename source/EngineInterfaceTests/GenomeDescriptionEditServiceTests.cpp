@@ -789,16 +789,16 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
     // Check creature properties
     auto const& creature = result.description._creatures.at(0);
     EXPECT_EQ(0, creature._generation);
-    EXPECT_EQ(1, result.description.getCellsForCreature(creature._id).size());
+    EXPECT_EQ(1, result.description.getObjectsForCreature(creature._id).size());
     EXPECT_EQ(result.seedCreatureIds.at(0), creature._id);
 
     // Verify that new IDs are assigned (not the original genome ID)
     EXPECT_NE(originalGenomeId, result.description._genomes.at(0)._id);
 
     // Check cell position
-    auto const& cell = result.description.getCellsForCreature(creature._id).at(0);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell._pos.x);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell._pos.y);
+    auto const& object = result.description.getObjectsForCreature(creature._id).at(0);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, object._pos.x);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, object._pos.y);
 
     // Check genome reference
     EXPECT_EQ(creature._genomeId, result.description._genomes.at(0)._id);
@@ -817,9 +817,9 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
 
     // Create cached phenotype with seed (generation 0) and offspring (generation 1)
     Description cachedPhenotype;
-    cachedPhenotype.addCreature({CellDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome);
+    cachedPhenotype.addCreature({ObjectDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome);
     auto seedAncestorId = cachedPhenotype._creatures.at(0)._id;
-    cachedPhenotype.addCreature({CellDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seedAncestorId), genome);
+    cachedPhenotype.addCreature({ObjectDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seedAncestorId), genome);
 
     // Store original IDs from cache
     auto originalSeedId = cachedPhenotype._creatures.at(0)._id;
@@ -881,15 +881,15 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
 
     auto seedCreature = CreatureDescription().generation(0).genomeId(genome._id);
     auto seedId = seedCreature._id;
-    auto seedCell = CellDescription().pos(RealVector2D{0, 0}).creatureId(seedId);
-    cachedPhenotype._cells.emplace_back(seedCell);
+    auto seedCell = ObjectDescription().pos(RealVector2D{0, 0}).creatureId(seedId);
+    cachedPhenotype._objects.emplace_back(seedCell);
 
     // Add offspring first
     auto offspringCreature = CreatureDescription().generation(1).genomeId(genome._id).ancestorId(seedId);
     auto offspringId = offspringCreature._id;
-    auto offspringCell = CellDescription().pos(RealVector2D{1, 1}).creatureId(offspringId);
+    auto offspringCell = ObjectDescription().pos(RealVector2D{1, 1}).creatureId(offspringId);
     cachedPhenotype._creatures.emplace_back(offspringCreature);
-    cachedPhenotype._cells.emplace_back(offspringCell);
+    cachedPhenotype._objects.emplace_back(offspringCell);
     // Add seed second
     cachedPhenotype._creatures.emplace_back(seedCreature);
 
@@ -954,23 +954,23 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
 
     // Check positions are different (offset by PREVIEW_HEIGHT / 2)
     // Find cells for each creature based on index in cells array
-    std::vector<CellDescription> cells1, cells2;
-    for (auto const& cell : result.description._cells) {
-        if (cell._creatureId == result.description._creatures.at(0)._id) {
-            cells1.push_back(cell);
-        } else if (cell._creatureId == result.description._creatures.at(1)._id) {
-            cells2.push_back(cell);
+    std::vector<ObjectDescription> cells1, cells2;
+    for (auto const& object : result.description._objects) {
+        if (object._creatureId == result.description._creatures.at(0)._id) {
+            cells1.push_back(object);
+        } else if (object._creatureId == result.description._creatures.at(1)._id) {
+            cells2.push_back(object);
         }
     }
     ASSERT_EQ(1, cells1.size());
     ASSERT_EQ(1, cells2.size());
-    auto const& cell1 = cells1.at(0);
-    auto const& cell2 = cells2.at(0);
+    auto const& object1 = cells1.at(0);
+    auto const& object2 = cells2.at(0);
 
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell1._pos.x);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell1._pos.y);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT), cell2._pos.x);
-    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, cell2._pos.y);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, object1._pos.x);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, object1._pos.y);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT), object2._pos.x);
+    EXPECT_FLOAT_EQ(toFloat(PREVIEW_HEIGHT) / 2, object2._pos.y);
 
     // Check seed ids correspond to correct creatures
     EXPECT_EQ(result.seedCreatureIds.at(0), result.description._creatures.at(0)._id);
@@ -996,7 +996,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
 
     // Create cached phenotype only for first subGenome
     Description cachedPhenotype;
-    cachedPhenotype.addCreature({CellDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome1);
+    cachedPhenotype.addCreature({ObjectDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome1);
 
     // Store original IDs from cache
     auto originalCachedCreatureId = cachedPhenotype._creatures.at(0)._id;
@@ -1079,10 +1079,10 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
 
     // Create cached phenotypes for both subGenomes
     Description cachedPhenotype1;
-    cachedPhenotype1.addCreature({CellDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome1);
+    cachedPhenotype1.addCreature({ObjectDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome1);
 
     Description cachedPhenotype2;
-    cachedPhenotype2.addCreature({CellDescription().pos(RealVector2D{5, 5})}, CreatureDescription().generation(0), genome2);
+    cachedPhenotype2.addCreature({ObjectDescription().pos(RealVector2D{5, 5})}, CreatureDescription().generation(0), genome2);
 
     // Store original IDs from cache
     auto originalCreatureId1 = cachedPhenotype1._creatures.at(0)._id;
@@ -1149,7 +1149,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
 
     auto seedCreature = CreatureDescription().generation(0);
     auto seedId = seedCreature._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
 
     std::vector<uint64_t> seedCreatureIds = {seedId};
 
@@ -1168,8 +1168,8 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     EXPECT_EQ(genome._id, result.at(0)._genomes.at(0)._id);
 
     // Should have the cell associated with the seed creature
-    ASSERT_EQ(1, result.at(0)._cells.size());
-    EXPECT_EQ(seedId, result.at(0)._cells.at(0)._creatureId);
+    ASSERT_EQ(1, result.at(0)._objects.size());
+    EXPECT_EQ(seedId, result.at(0)._objects.at(0)._creatureId);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSeed_withOffspring)
@@ -1184,12 +1184,12 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
 
     auto seedCreature = CreatureDescription().generation(0);
     auto seedId = seedCreature._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
 
     // Add offspring (generation 1)
     auto offspringCreature = CreatureDescription().generation(1).ancestorId(seedId);
     auto offspringId = offspringCreature._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, offspringCreature, genome);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{1, 1})}, offspringCreature, genome);
 
     std::vector<uint64_t> seedCreatureIds = {seedId};
 
@@ -1214,12 +1214,12 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     EXPECT_EQ(genome._id, result.at(0)._genomes.at(0)._id);
 
     // Should have 2 cells (1 from seed, 1 from offspring)
-    ASSERT_EQ(2, result.at(0)._cells.size());
+    ASSERT_EQ(2, result.at(0)._objects.size());
 
     // Verify cells are associated with correct creatures
     std::set<uint64_t> cellCreatureIds;
-    for (auto const& cell : result.at(0)._cells) {
-        cellCreatureIds.insert(*cell._creatureId);
+    for (auto const& object : result.at(0)._objects) {
+        cellCreatureIds.insert(*object._creatureId);
     }
     EXPECT_TRUE(cellCreatureIds.contains(seedId));
     EXPECT_TRUE(cellCreatureIds.contains(offspringId));
@@ -1244,22 +1244,22 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     // Seed 1
     auto seed1 = CreatureDescription().generation(0);
     auto seed1Id = seed1._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seed1, genome1);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{0, 0})}, seed1, genome1);
 
     // Offspring of seed 1
     auto offspring1 = CreatureDescription().generation(1).ancestorId(seed1Id);
     auto offspring1Id = offspring1._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, offspring1, genome1);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{1, 1})}, offspring1, genome1);
 
     // Seed 2
     auto seed2 = CreatureDescription().generation(0);
     auto seed2Id = seed2._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{10, 10})}, seed2, genome2);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{10, 10})}, seed2, genome2);
 
     // Offspring of seed 2
     auto offspring2 = CreatureDescription().generation(1).ancestorId(seed2Id);
     auto offspring2Id = offspring2._id;
-    preview.addCreature({CellDescription().pos(RealVector2D{11, 11})}, offspring2, genome2);
+    preview.addCreature({ObjectDescription().pos(RealVector2D{11, 11})}, offspring2, genome2);
 
     std::vector<uint64_t> seedCreatureIds = {seed1Id, seed2Id};
 
@@ -1287,19 +1287,19 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     EXPECT_EQ(genome2._id, result.at(1)._genomes.at(0)._id);
 
     // Phenotype 1: should have 2 cells (1 from seed1, 1 from offspring1)
-    ASSERT_EQ(2, result.at(0)._cells.size());
+    ASSERT_EQ(2, result.at(0)._objects.size());
     std::set<uint64_t> phenotype1CellCreatureIds;
-    for (auto const& cell : result.at(0)._cells) {
-        phenotype1CellCreatureIds.insert(*cell._creatureId);
+    for (auto const& object : result.at(0)._objects) {
+        phenotype1CellCreatureIds.insert(*object._creatureId);
     }
     EXPECT_TRUE(phenotype1CellCreatureIds.contains(seed1Id));
     EXPECT_TRUE(phenotype1CellCreatureIds.contains(offspring1Id));
 
     // Phenotype 2: should have 2 cells (1 from seed2, 1 from offspring2)
-    ASSERT_EQ(2, result.at(1)._cells.size());
+    ASSERT_EQ(2, result.at(1)._objects.size());
     std::set<uint64_t> phenotype2CellCreatureIds;
-    for (auto const& cell : result.at(1)._cells) {
-        phenotype2CellCreatureIds.insert(*cell._creatureId);
+    for (auto const& object : result.at(1)._objects) {
+        phenotype2CellCreatureIds.insert(*object._creatureId);
     }
     EXPECT_TRUE(phenotype2CellCreatureIds.contains(seed2Id));
     EXPECT_TRUE(phenotype2CellCreatureIds.contains(offspring2Id));

@@ -52,8 +52,8 @@ NumRenderObjects GeometryKernelsService::getNumRenderObjects(SettingsForSimulati
     float2 const visibleTopLeft{visibleWorldRect.topLeft.x, visibleWorldRect.topLeft.y};
 
     NumRenderObjects result;
-    result.cells = data.objects.cells.getNumEntries_host();
-    result.energyParticles = data.objects.particles.getNumEntries_host();
+    result.objects = data.entities.objects.getNumEntries_host();
+    result.energyParticles = data.entities.energyParticles.getNumEntries_host();
 
     setValueToDevice(_numSelectedObjects, static_cast<uint64_t>(0));
     KERNEL_CALL(cudaExtractSelectedObjectData, data, nullptr, _numSelectedObjects);

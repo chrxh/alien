@@ -9,7 +9,7 @@
 #include "EditKernels.cuh"
 #include "GarbageCollectorKernels.cuh"
 #include "Map.cuh"
-#include "ObjectFactory.cuh"
+#include "EntityFactory.cuh"
 #include "SimulationData.cuh"
 #include "TO.cuh"
 
@@ -38,11 +38,11 @@ __global__ void cudaGetInspectedCellDataWithoutConnections(InspectedEntityIds id
 
 __global__ void cudaResolveConnections(SimulationData data, TO to);
 __global__ void cudaGetParticleData(int2 rectUpperLeft, int2 rectLowerRight, SimulationData data, TO access);
-__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO to, Cell** cellArray);
+__global__ void cudaGetArraysBasedOnTO(SimulationData data, TO to, Object** cellArray);
 
 __global__ void cudaSetGenomeDataFromTO(SimulationData data, TO to);
 __global__ void cudaSetCreatureDataFromTO(SimulationData data, TO to);
-__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Cell** cellArray, bool selectNewData);
+__global__ void cudaSetCellAndParticleDataFromTO(SimulationData data, TO to, Object** cellArray, bool selectNewData);
 
 __global__ void cudaAdaptNumberGenerator(CudaNumberGenerator numberGen, TO to);
 __global__ void cudaClearDataTO(TO to);

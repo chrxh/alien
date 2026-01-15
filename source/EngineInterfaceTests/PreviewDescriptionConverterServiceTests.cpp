@@ -20,9 +20,9 @@ public:
 
     CellPreviewDescription const& getPreviewCell(PreviewDescription const& preview, int geneIndex, int nodeIndex)
     {
-        for (auto const& cell : preview._cells) {
-            if (cell._geneIndex == geneIndex && cell._nodeIndex == nodeIndex) {
-                return cell;
+        for (auto const& object : preview._objects) {
+            if (object._geneIndex == geneIndex && object._nodeIndex == nodeIndex) {
+                return object;
             }
         }
         CHECK(false);
@@ -30,8 +30,8 @@ public:
 
     struct ConnectionCheckDescription
     {
-        RealVector2D cell1;
-        RealVector2D cell2;
+        RealVector2D object1;
+        RealVector2D object2;
         bool arrowToCell1 = true;
         bool arrowToCell2 = true;
     };
@@ -40,14 +40,14 @@ public:
         for (auto const& expectedConnection : expectedConnections) {
             auto found = false;
             for (auto const& connection : preview._connections) {
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell1)
-                    && TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._cell1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._cell2)
                     && expectedConnection.arrowToCell1 == connection._arrowToCell1 && expectedConnection.arrowToCell2 == connection._arrowToCell2) {
                     found = true;
                     break;
                 }
-                if (TestHelper::TestHelper::approxCompare(expectedConnection.cell2, connection._cell1)
-                    && TestHelper::TestHelper::approxCompare(expectedConnection.cell1, connection._cell2)
+                if (TestHelper::TestHelper::approxCompare(expectedConnection.object2, connection._cell1)
+                    && TestHelper::TestHelper::approxCompare(expectedConnection.object1, connection._cell2)
                     && expectedConnection.arrowToCell2 == connection._arrowToCell1 && expectedConnection.arrowToCell1 == connection._arrowToCell2) {
                     found = true;
                     break;
@@ -66,7 +66,7 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertEmptyCollection)
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(GenomeDescription(), 0, std::move(input), std::nullopt);
 
-    EXPECT_TRUE(result.description._cells.empty());
+    EXPECT_TRUE(result.description._objects.empty());
     EXPECT_TRUE(result.description._connections.empty());
 }
 
@@ -78,8 +78,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         },
         CreatureDescription(),
         genome);
@@ -87,19 +87,19 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 0, 0);
-    auto cell2 = getPreviewCell(result.description, 0, 1);
-    EXPECT_EQ(2, cell1._color);
-    EXPECT_EQ(3, cell2._color);
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
+    EXPECT_EQ(2, object1._color);
+    EXPECT_EQ(3, object2._color);
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
-    checkConnections(result.description, {{cell1._pos, cell2._pos}});
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
+    checkConnections(result.description, {{object1._pos, object2._pos}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSeparation_nonRootGene)
@@ -111,8 +111,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(1).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(1).nodeIndex(1),
         },
         CreatureDescription(),
         genome);
@@ -120,19 +120,19 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 1, std::move(input), std::nullopt);
 
-    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 1, 0);
-    auto cell2 = getPreviewCell(result.description, 1, 1);
-    EXPECT_EQ(2, cell1._color);
-    EXPECT_EQ(3, cell2._color);
+    auto object1 = getPreviewCell(result.description, 1, 0);
+    auto object2 = getPreviewCell(result.description, 1, 1);
+    EXPECT_EQ(2, object1._color);
+    EXPECT_EQ(3, object2._color);
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
-    checkConnections(result.description, {{cell1._pos, cell2._pos}});
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
+    checkConnections(result.description, {{object1._pos, object2._pos}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSeparation)
@@ -143,8 +143,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         },
         CreatureDescription(),
         genome);
@@ -152,19 +152,19 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 0, 0);
-    auto cell2 = getPreviewCell(result.description, 0, 1);
-    EXPECT_EQ(2, cell1._color);
-    EXPECT_EQ(3, cell2._color);
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
+    EXPECT_EQ(2, object1._color);
+    EXPECT_EQ(3, object2._color);
 
     auto expectedCell1_pos = RealVector2D{0, 0.5f};
     auto expectedCell2_pos = RealVector2D{0, -0.5f};
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
-    checkConnections(result.description, {{cell1._pos, cell2._pos}});
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
+    checkConnections(result.description, {{object1._pos, object2._pos}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated_withSignalRestrictions)
@@ -181,8 +181,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         },
         CreatureDescription(),
         genome);
@@ -190,19 +190,19 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 0, 0);
-    auto cell2 = getPreviewCell(result.description, 0, 1);
-    ASSERT_TRUE(cell1._signalRestriction.has_value());
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
+    ASSERT_TRUE(object1._signalRestriction.has_value());
     EXPECT_TRUE(
-        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle - OpeningAngle / 2, cell1._signalRestriction->_startAngle), -180.0f))
+        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle - OpeningAngle / 2, object1._signalRestriction->_startAngle), -180.0f))
         < NEAR_ZERO);
     EXPECT_TRUE(
-        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle + OpeningAngle / 2, cell1._signalRestriction->_endAngle), -180.0f))
+        std::abs(Math::getNormalizedAngle(Math::subtractAngle(180.0f + BaseAngle + OpeningAngle / 2, object1._signalRestriction->_endAngle), -180.0f))
         < NEAR_ZERO);
-    checkConnections(result.description, {{cell1._pos, cell2._pos, true, false}});
+    checkConnections(result.description, {{object1._pos, object2._pos, true, false}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
@@ -213,9 +213,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(3).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(2),
+        ObjectDescription().id(1).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(3).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(2),
         },
         CreatureDescription(),
         genome);
@@ -225,24 +225,24 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(3, result.description._cells.size());
+    ASSERT_EQ(3, result.description._objects.size());
     ASSERT_EQ(3, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 0, 0);
-    auto cell2 = getPreviewCell(result.description, 0, 1);
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
     auto cell3 = getPreviewCell(result.description, 0, 2);
-    EXPECT_EQ(2, cell1._color);
-    EXPECT_EQ(3, cell2._color);
+    EXPECT_EQ(2, object1._color);
+    EXPECT_EQ(3, object2._color);
     EXPECT_EQ(4, cell3._color);
 
     auto oneThird = 0.333333f;
     auto expectedCell1_pos = RealVector2D{oneThird, oneThird * 2};
     auto expectedCell2_pos = RealVector2D{oneThird, -oneThird};
     auto expectedCell3_pos = RealVector2D{-oneThird * 2, -oneThird};
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, cell1._pos));
-    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, cell2._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell1_pos, object1._pos));
+    EXPECT_TRUE(TestHelper::approxCompare(expectedCell2_pos, object2._pos));
     EXPECT_TRUE(TestHelper::approxCompare(expectedCell3_pos, cell3._pos));
-    checkConnections(result.description, {{cell1._pos, cell2._pos}, {cell2._pos, cell3._pos}, {cell3._pos, cell1._pos}});
+    checkConnections(result.description, {{object1._pos, object2._pos}, {object2._pos, cell3._pos}, {cell3._pos, object1._pos}});
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multipleNodes_multipleConcatenations)
@@ -253,14 +253,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         },
         CreatureDescription(),
         genome);
@@ -270,12 +270,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(8, result.description._cells.size());
+    ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
 
     std::set<RealVector2D> actualPositions;
-    for (const auto& cell : result.description._cells) {
-        actualPositions.insert(cell._pos);
+    for (const auto& object : result.description._objects) {
+        actualPositions.insert(object._pos);
     }
     std::set<RealVector2D> expectedPositions = {
         {-0.875000238, -2.62500000},
@@ -301,14 +301,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0),
         },
         CreatureDescription(),
         genome);
@@ -318,12 +318,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(8, result.description._cells.size());
+    ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
 
     std::set<RealVector2D> actualPositions;
-    for (const auto& cell : result.description._cells) {
-        actualPositions.insert(cell._pos);
+    for (const auto& object : result.description._objects) {
+        actualPositions.insert(object._pos);
     }
     std::set<RealVector2D> expectedPositions = {
         {-0.875000238, -2.62500000},
@@ -350,14 +350,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
 
     Description input;
     input.addCreature({
-        CellDescription().id(2).pos({10.0f, 4.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(3).pos({10.0f, 5.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(4).pos({10.0f, 6.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(5).pos({10.0f, 7.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(6).pos({10.0f, 8.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(7).pos({10.0f, 9.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(8).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
-        CellDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
+        ObjectDescription().id(2).pos({10.0f, 4.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(3).pos({10.0f, 5.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(4).pos({10.0f, 6.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(5).pos({10.0f, 7.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(6).pos({10.0f, 8.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(7).pos({10.0f, 9.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(8).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
+        ObjectDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -371,12 +371,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(8, result.description._cells.size());
+    ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
 
     std::set<RealVector2D> actualPositions;
-    for (const auto& cell : result.description._cells) {
-        actualPositions.insert(cell._pos);
+    for (const auto& object : result.description._objects) {
+        actualPositions.insert(object._pos);
     }
     std::set<RealVector2D> expectedPositions = {
         {3.375f, -0.125f}, {2.375f, -0.125f}, {1.375f, -0.125f}, {0.375f, -0.125f}, {-0.625f, -0.125}, {-1.625f, -0.125}, {-2.625f, -0.125f}, {-2.625f, 0.875f}};
@@ -394,14 +394,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
-        CellDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        CellDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
         },
         CreatureDescription(),
         genome);
@@ -415,12 +415,12 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(8, result.description._cells.size());
+    ASSERT_EQ(8, result.description._objects.size());
     ASSERT_EQ(7, result.description._connections.size());
 
     std::set<RealVector2D> actualPositions;
-    for (const auto& cell : result.description._cells) {
-        actualPositions.insert(cell._pos);
+    for (const auto& object : result.description._objects) {
+        actualPositions.insert(object._pos);
     }
     std::set<RealVector2D> expectedPositions = {
         {-0.875000238, -2.62500000},
@@ -447,34 +447,34 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_withSep
 
     Description inputCreature1;
     inputCreature1.addCreature({
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
         },
         CreatureDescription(),
         genome);
 
     Description inputCreature2;
     inputCreature2.addCreature({
-        CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
+        ObjectDescription().id(2).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
         },
         CreatureDescription(),
         genome);
     {
         auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(inputCreature1), std::nullopt);
 
-        ASSERT_EQ(1, result.description._cells.size());
+        ASSERT_EQ(1, result.description._objects.size());
         ASSERT_EQ(0, result.description._connections.size());
 
-        auto cell1 = getPreviewCell(result.description, 0, 0);
-        EXPECT_EQ(1, cell1._constructorGeneIndex);
+        auto object1 = getPreviewCell(result.description, 0, 0);
+        EXPECT_EQ(1, object1._constructorGeneIndex);
     }
     {
         auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 1, std::move(inputCreature2), std::nullopt);
 
-        ASSERT_EQ(1, result.description._cells.size());
+        ASSERT_EQ(1, result.description._objects.size());
         ASSERT_EQ(0, result.description._connections.size());
 
-        auto cell1 = getPreviewCell(result.description, 1, 0);
-        EXPECT_EQ(0, cell1._constructorGeneIndex);
+        auto object1 = getPreviewCell(result.description, 1, 0);
+        EXPECT_EQ(0, object1._constructorGeneIndex);
     }
 }
 
@@ -487,8 +487,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
 
     Description input;
     input.addCreature({
-        CellDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(0)),
+        ObjectDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(0)),
         },
         CreatureDescription(),
         genome);
@@ -496,14 +496,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 0, 0);
-    EXPECT_EQ(1, cell1._constructorGeneIndex.value());
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    EXPECT_EQ(1, object1._constructorGeneIndex.value());
 
-    auto cell2 = getPreviewCell(result.description, 1, 0);
-    EXPECT_EQ(0, cell2._constructorGeneIndex.value());
+    auto object2 = getPreviewCell(result.description, 1, 0);
+    EXPECT_EQ(0, object2._constructorGeneIndex.value());
 }
 
 TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
@@ -516,8 +516,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
 
     Description input;
     input.addCreature({
-        CellDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).signalAndState(signal),
-        CellDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalState(SignalState_Fading),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).signalAndState(signal),
+        ObjectDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalState(SignalState_Fading),
         },
         CreatureDescription(),
         genome);
@@ -525,14 +525,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
 
     auto result = PreviewDescriptionConverterService::get().convertToPreviewDescription(genome, 0, std::move(input), std::nullopt);
 
-    ASSERT_EQ(2, result.description._cells.size());
+    ASSERT_EQ(2, result.description._objects.size());
     ASSERT_EQ(1, result.description._connections.size());
 
-    auto cell1 = getPreviewCell(result.description, 0, 0);
-    auto cell2 = getPreviewCell(result.description, 0, 1);
+    auto object1 = getPreviewCell(result.description, 0, 0);
+    auto object2 = getPreviewCell(result.description, 0, 1);
 
-    EXPECT_EQ(SignalState_Active, cell1._signalState);
-    EXPECT_TRUE(cell1._signalState == SignalState_Active);
-    EXPECT_EQ(signal, cell1._signal->_channels);
-    EXPECT_EQ(SignalState_Fading, cell2._signalState);
+    EXPECT_EQ(SignalState_Active, object1._signalState);
+    EXPECT_TRUE(object1._signalState == SignalState_Active);
+    EXPECT_EQ(signal, object1._signal->_channels);
+    EXPECT_EQ(SignalState_Fading, object2._signalState);
 }

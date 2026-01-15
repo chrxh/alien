@@ -91,13 +91,13 @@ DataPointCollection StatisticsConverterService::convert(
     auto unixEpoch = std::chrono::time_point<std::chrono::system_clock>();
     result.systemClock = toDouble(std::chrono::duration_cast<std::chrono::seconds>(now - unixEpoch).count());
 
-    result.numCells = getDataPointBySummation(data.timestep.numCells);
+    result.numObjects = getDataPointBySummation(data.timestep.numObjects);
     result.numSelfReplicators = getDataPointBySummation(data.timestep.numSelfReplicators);
     result.numColonies = getDataPointBySummation(data.timestep.numColonies);
     result.numViruses = getDataPointBySummation(data.timestep.numViruses);
     result.numFreeCells = getDataPointBySummation(data.timestep.numFreeCells);
-    result.numParticles = getDataPointBySummation(data.timestep.numParticles);
-    result.averageNumCells = getDataPointByAveraging(data.timestep.numCells, data.timestep.numSelfReplicators);
+    result.numEnergyParticles = getDataPointBySummation(data.timestep.numEnergyParticles);
+    result.averageNumCells = getDataPointByAveraging(data.timestep.numObjects, data.timestep.numSelfReplicators);
     result.totalEnergy = getDataPointBySummation(data.timestep.totalEnergy);
 
     auto deltaTimesteps = lastTimestep ? toDouble(timestep) - toDouble(*lastTimestep) : 1.0;
@@ -108,7 +108,7 @@ DataPointCollection StatisticsConverterService::convert(
     auto lastDataValue = lastData.value_or(data);
     ColorVector<int> numNonFreeCells;
     for (int i = 0; i < MAX_COLORS; ++i) {
-        numNonFreeCells[i] = data.timestep.numCells[i] - data.timestep.numFreeCells[i];
+        numNonFreeCells[i] = data.timestep.numObjects[i] - data.timestep.numFreeCells[i];
     }
     result.numCreatedCells =
         getDataPointForProcessProperty(data.accumulated.numCreatedCells, lastDataValue.accumulated.numCreatedCells, numNonFreeCells, deltaTimesteps);

@@ -6,7 +6,7 @@
 #include "Base.cuh"
 #include "ConstantMemory.cuh"
 #include "Map.cuh"
-#include "ObjectFactory.cuh"
+#include "EntityFactory.cuh"
 #include "ParameterCalculator.cuh"
 
 class EnergyParticleProcessor
@@ -20,7 +20,7 @@ public:
     __inline__ __device__ static void splitting(SimulationData& data);
     __inline__ __device__ static void transformation(SimulationData& data);
 
-    __inline__ __device__ static void radiate(SimulationData& data, Cell* cell, float energy);
+    __inline__ __device__ static void radiate(SimulationData& data, Object* cell, float energy);
     __inline__ __device__ static void createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy);
 
 private:
@@ -34,17 +34,17 @@ private:
 
 __inline__ __device__ void EnergyParticleProcessor::updateMap(SimulationData& data)
 {
-    auto partition = calcBlockPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcBlockPartition(data.entities.energyParticles.getNumOrigEntries());
 
-    Particle** particlePointers = &data.objects.particles.at(partition.startIndex);
+    Energy** particlePointers = &data.entities.energyParticles.at(partition.startIndex);
     data.particleMap.set_block(partition.numElements(), particlePointers);
 }
 
 __inline__ __device__ void EnergyParticleProcessor::fillDensityMap(SimulationData& data)
 {
-    auto const partition = calcSystemThreadPartition(data.objects.particles.getNumEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.energyParticles.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        data.preprocessedSimulationData.densityMap.addParticle(data.objects.particles.at(index));
+        data.preprocessedSimulationData.densityMap.addParticle(data.entities.energyParticles.at(index));
     }
 }
 
@@ -68,10 +68,10 @@ __inline__ __device__ void EnergyParticleProcessor::calcActiveSources(Simulation
 
 __inline__ __device__ void EnergyParticleProcessor::movement(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.entities.energyParticles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        auto& particle = data.objects.particles.at(particleIndex);
+        auto& particle = data.entities.energyParticles.at(particleIndex);
         particle->pos = particle->pos + particle->vel * cudaSimulationParameters.timestepSize.value;
         data.particleMap.correctPosition(particle->pos);
     }
@@ -79,10 +79,10 @@ __inline__ __device__ void EnergyParticleProcessor::movement(SimulationData& dat
 
 __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.entities.energyParticles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        auto& particle = data.objects.particles.at(particleIndex);
+        auto& particle = data.entities.energyParticles.at(particleIndex);
         auto otherParticle = data.particleMap.get(particle->pos);
         if (otherParticle && otherParticle != particle && Math::lengthSquared(particle->pos - otherParticle->pos) < 0.5) {
 
@@ -103,24 +103,24 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
             }
         } else {
             if (auto cell = data.cellMap.getFirst(particle->pos + particle->vel)) {
-                if (cell->fixed) {
-                    auto vr = particle->vel - cell->vel;
-                    auto r = data.cellMap.getCorrectedDirection(particle->pos - cell->pos);
+                if (object->fixed) {
+                    auto vr = particle->vel - object->vel;
+                    auto r = data.cellMap.getCorrectedDirection(particle->pos - object->pos);
                     auto dot_vr_r = Math::dot(vr, r);
                     if (dot_vr_r < 0) {
                         auto truncated_r_squared = max(0.1f, Math::lengthSquared(r));
-                        particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + cell->vel;
+                        particle->vel = vr - r * 2 * dot_vr_r / truncated_r_squared + object->vel;
                     }
                 } else {
                     if (particle->lastAbsorbedCell == cell) {
                         continue;
                     }
-                    auto radiationAbsorption = ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, cell->pos, cell->color);
+                    auto radiationAbsorption = ParameterCalculator::calcParameter(cudaSimulationParameters.radiationAbsorption, data, object->pos, object->color);
 
                     if (radiationAbsorption < NEAR_ZERO) {
                         continue;
                     }
-                    if (!cell->tryLock()) {
+                    if (!object->tryLock()) {
                         continue;
                     }
                     if (particle->tryLock()) {
@@ -128,23 +128,23 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
                         auto energyToTransfer = particle->energy * radiationAbsorption;
                         if (cudaSimulationParameters.advancedAbsorptionControlToggle.value) {
                             energyToTransfer *=
-                                max(0.0f, 1.0f - Math::length(cell->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[cell->color]);
+                                max(0.0f, 1.0f - Math::length(object->vel) * cudaSimulationParameters.radiationAbsorptionHighVelocityPenalty.value[object->color]);
 
                             auto radiationAbsorptionLowVelocityPenalty = ParameterCalculator::calcParameter(
-                                cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, cell->pos, cell->color);
-                            energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(cell->vel), 10.0f);
+                                cudaSimulationParameters.radiationAbsorptionLowVelocityPenalty, data, object->pos, object->color);
+                            energyToTransfer *= 1.0f - radiationAbsorptionLowVelocityPenalty / powf(1.0f + Math::length(object->vel), 10.0f);
                             energyToTransfer *= powf(
-                                toFloat(cell->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[cell->color]);
+                                toFloat(object->numConnections + 1) / 7.0f, cudaSimulationParameters.radiationAbsorptionLowConnectionPenalty.value[object->color]);
 
                             //auto radiationAbsorptionLowNumCellsPenalty = ParameterCalculator::calcParameter(
-                            //    cudaSimulationParameters.radiationAbsorptionLowNumCellsPenalty, data, cell->pos, cell->color);
-                            //energyToTransfer *= 1.0f - radiationAbsorptionLowNumCellsPenalty / powf(1.0f + cell->numCells, 0.1f);
+                            //    cudaSimulationParameters.radiationAbsorptionLowNumCellsPenalty, data, object->pos, object->color);
+                            //energyToTransfer *= 1.0f - radiationAbsorptionLowNumCellsPenalty / powf(1.0f + object->numObjects, 0.1f);
                         }
 
                         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
-                        cell->rawEnergy += energyToTransfer;
+                        object->rawEnergy += energyToTransfer;
                         particle->energy -= energyToTransfer;
                         bool killParticle = particle->energy < NEAR_ZERO;
 
@@ -156,7 +156,7 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
                             particle->lastAbsorbedCell = cell;
                         }
                     }
-                    cell->releaseLock();
+                    object->releaseLock();
                 }
             }
         }
@@ -165,10 +165,10 @@ __inline__ __device__ void EnergyParticleProcessor::collision(SimulationData& da
 
 __inline__ __device__ void EnergyParticleProcessor::splitting(SimulationData& data)
 {
-    auto partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
+    auto partition = calcSystemThreadPartition(data.entities.energyParticles.getNumOrigEntries());
 
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        auto& particle = data.objects.particles.at(particleIndex);
+        auto& particle = data.entities.energyParticles.at(particleIndex);
         if (particle == nullptr) {
             continue;
         }
@@ -190,7 +190,7 @@ __inline__ __device__ void EnergyParticleProcessor::splitting(SimulationData& da
             float2 otherVel = particle->vel + velPerturbation;
 
             particle->vel -= velPerturbation;
-            ObjectFactory factory;
+            EntityFactory factory;
             factory.init(&data);
             factory.createParticle(particle->energy, otherPos, otherVel, particle->color);
         }
@@ -202,15 +202,15 @@ __inline__ __device__ void EnergyParticleProcessor::transformation(SimulationDat
     if (!cudaSimulationParameters.particleTransformationAllowed.value) {
         return;
     }
-    auto const partition = calcSystemThreadPartition(data.objects.particles.getNumOrigEntries());
+    auto const partition = calcSystemThreadPartition(data.entities.energyParticles.getNumOrigEntries());
     for (int particleIndex = partition.startIndex; particleIndex <= partition.endIndex; particleIndex += partition.step) {
-        if (auto& particle = data.objects.particles.at(particleIndex)) {
+        if (auto& particle = data.entities.energyParticles.at(particleIndex)) {
 
             if (particle->energy >= cudaSimulationParameters.normalCellEnergy.value[particle->color]) {
-                ObjectFactory factory;
+                EntityFactory factory;
                 factory.init(&data);
                 auto cell = factory.createFreeCell(particle->energy, particle->pos, particle->vel);
-                cell->color = particle->color;
+                object->color = particle->color;
 
                 particle = nullptr;
             }
@@ -218,25 +218,25 @@ __inline__ __device__ void EnergyParticleProcessor::transformation(SimulationDat
     }
 }
 
-__inline__ __device__ void EnergyParticleProcessor::radiate(SimulationData& data, Cell* cell, float energy)
+__inline__ __device__ void EnergyParticleProcessor::radiate(SimulationData& data, Object* cell, float energy)
 {
-    auto const cellEnergy = atomicAdd(&cell->usableEnergy, 0);
+    auto const cellEnergy = atomicAdd(&object->usableEnergy, 0);
 
     auto const radiationEnergy = min(cellEnergy, energy);
-    auto origEnergy = atomicAdd(&cell->usableEnergy, -radiationEnergy);
+    auto origEnergy = atomicAdd(&object->usableEnergy, -radiationEnergy);
     if (origEnergy < 1.0f) {
-        atomicAdd(&cell->usableEnergy, radiationEnergy);  //revert
+        atomicAdd(&object->usableEnergy, radiationEnergy);  //revert
         return;
     }
 
-    float2 particleVel = (cell->vel * cudaSimulationParameters.radiationVelocityMultiplier)
+    float2 particleVel = (object->vel * cudaSimulationParameters.radiationVelocityMultiplier)
         + float2{
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation,
             (data.primaryNumberGen.random() - 0.5f) * cudaSimulationParameters.radiationVelocityPerturbation};
-    float2 particlePos = cell->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
+    float2 particlePos = object->pos + Math::getNormalized(particleVel) * 1.5f - particleVel;
     data.cellMap.correctPosition(particlePos);
 
-    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, cell->color, radiationEnergy);
+    EnergyParticleProcessor::createEnergyParticle(data, particlePos, particleVel, object->color, radiationEnergy);
 }
 
 __inline__ __device__ void EnergyParticleProcessor::createEnergyParticle(SimulationData& data, float2 pos, float2 vel, int color, float energy)
@@ -350,7 +350,7 @@ __inline__ __device__ void EnergyParticleProcessor::createEnergyParticle(Simulat
 
     auto particleEnergy = energy * (1.0f - externalEnergyBackflowFactor);
     if (particleEnergy > NEAR_ZERO) {
-        ObjectFactory factory;
+        EntityFactory factory;
         factory.init(&data);
         data.cellMap.correctPosition(pos);
         factory.createParticle(particleEnergy, pos, vel, color);

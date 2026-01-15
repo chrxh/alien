@@ -58,9 +58,9 @@ void _InspectorWindow::process()
     if (ImGui::Begin(generateTitle().c_str(), &_on, ImGuiWindowFlags_HorizontalScrollbar)) {
         auto windowPos = ImGui::GetWindowPos();
         if (isCell()) {
-            processCell(std::get<ExtendedCellDescription>(entity));
+            processCell(std::get<ExtendedObjectDescription>(entity));
         } else {
-            processParticle(std::get<ParticleDescription>(entity));
+            processParticle(std::get<EnergyDescription>(entity));
         }
         ImDrawList* drawList = ImGui::GetBackgroundDrawList();
         auto entityPos = Viewport::get().mapWorldToViewPosition(DescriptionEditService::get().getPos(entity), borderlessRendering);
@@ -88,7 +88,7 @@ uint64_t _InspectorWindow::getId() const
 bool _InspectorWindow::isCell() const
 {
     auto entity = EditorModel::get().getInspectedEntity(_entityId);
-    return std::holds_alternative<ExtendedCellDescription>(entity);
+    return std::holds_alternative<ExtendedObjectDescription>(entity);
 }
 
 std::string _InspectorWindow::generateTitle() const
@@ -103,10 +103,10 @@ std::string _InspectorWindow::generateTitle() const
     return ss.str();
 }
 
-void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
+void _InspectorWindow::processCell(ExtendedObjectDescription& extendedCell)
 {
     if (ImGui::BeginTabBar("##CellInspect", /*ImGuiTabBarFlags_AutoSelectNewTabs | */ ImGuiTabBarFlags_FittingPolicyResizeDown)) {
-        auto& cell = extendedCell.cell;
+        auto& object = extendedCell.cell;
         auto origCell = cell;
         processCellGeneralTab(extendedCell);
         processCellTypeTab(cell);
@@ -128,11 +128,11 @@ void _InspectorWindow::processCell(ExtendedCellDescription& extendedCell)
     }
 }
 
-void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCell)
+void _InspectorWindow::processCellGeneralTab(ExtendedObjectDescription& extendedCell)
 {
     if (ImGui::BeginTabItem("General", nullptr, ImGuiTabItemFlags_None)) {
         if (ImGui::BeginChild("##", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
-            auto& cell = extendedCell.cell;
+            auto& object = extendedCell.cell;
             auto& genome = extendedCell.genome;
             if (ImGui::TreeNodeEx("Properties###general", TreeNodeFlags)) {
                 if (extendedCell.genome.has_value()) {
@@ -143,7 +143,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
 
                 std::stringstream ss;
                 ss << "0x" << std::hex << std::uppercase << cell._id;
-                auto cellId = ss.str();
+                auto objectId = ss.str();
 
                 AlienGui::ComboColor(
                     AlienGui::ComboColorParameters().name("Color").textWidth(BaseTabTextWidth).tooltip(Const::GenomeColorTooltip), cell._color);
@@ -171,7 +171,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                     AlienGui::CheckboxParameters().name("Indestructible wall").textWidth(BaseTabTextWidth).tooltip(Const::CellIndestructibleTooltip),
                     cell._fixed);
                 AlienGui::InputText(
-                    AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
+                    AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), objectId);
                 if (auto frontAngle = cell._frontAngle) {
                     AlienGui::InputFloat(
                         AlienGui::InputFloatParameters().name("TEMP: front angle").format("%.1f").textWidth(BaseTabTextWidth), frontAngle.value());
@@ -241,11 +241,11 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
                 for (auto const& [index, connection] : cell._connections | boost::adaptors::indexed(0)) {
                     if (ImGui::TreeNodeEx(("Connection [" + std::to_string(index) + "]").c_str(), ImGuiTreeNodeFlags_None)) {
                         std::stringstream ss;
-                        ss << "0x" << std::hex << std::uppercase << connection._cellId;
-                        auto cellId = ss.str();
+                        ss << "0x" << std::hex << std::uppercase << connection._objectId;
+                        auto objectId = ss.str();
 
                         AlienGui::InputText(
-                            AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), cellId);
+                            AlienGui::InputTextParameters().name("Cell id").textWidth(BaseTabTextWidth).tooltip(Const::CellIdTooltip).readOnly(true), objectId);
                         AlienGui::InputFloat(
                             AlienGui::InputFloatParameters()
                                 .name("Reference distance")
@@ -273,7 +273,7 @@ void _InspectorWindow::processCellGeneralTab(ExtendedCellDescription& extendedCe
     }
 }
 
-void _InspectorWindow::processCellTypeTab(CellDescription& cell)
+void _InspectorWindow::processCellTypeTab(ObjectDescription& cell)
 {
     if (ImGui::BeginTabItem("Function", nullptr, ImGuiTabItemFlags_None)) {
         int type = cell.getCellType();
@@ -293,10 +293,10 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
                         type)) {
                     switch (type) {
                     case CellType_Structure: {
-                        cell._cellType = StructureCellDescription();
+                        cell._cellType = StructureObjectDescription();
                     } break;
                     case CellType_Free: {
-                        cell._cellType = FreeCellDescription();
+                        cell._cellType = FreeObjectDescription();
                     } break;
                     case CellType_Base: {
                         cell._cellType = BaseDescription();
@@ -368,7 +368,7 @@ void _InspectorWindow::processCellTypeTab(CellDescription& cell)
     }
 }
 
-void _InspectorWindow::processCellTypePropertiesTab(CellDescription& cell)
+void _InspectorWindow::processCellTypePropertiesTab(ObjectDescription& cell)
 {
     if (cell.getCellType() == CellType_Structure || cell.getCellType() == CellType_Free) {
         return;
@@ -498,7 +498,7 @@ void _InspectorWindow::processCellGenomeTab(Description& desc)
         //                .tooltip(Const::GenomeRepetitionsPerBranchTooltip),
         //            numRepetitions);
 
-        //        auto numNodes = toInt(genomeDesc._cells.size());
+        //        auto numNodes = toInt(genomeDesc._objects.size());
         //        AlienGui::InputInt(
         //            AlienGui::InputIntParameters()
         //                .name("Cells per repetition")
@@ -552,7 +552,7 @@ void _InspectorWindow::processGeneratorContent(GeneratorDescription& _generator)
     }
 }
 
-void _InspectorWindow::processNeuronContent(CellDescription& cell)
+void _InspectorWindow::processNeuronContent(ObjectDescription& cell)
 {
     if (ImGui::TreeNodeEx("Neural network", TreeNodeFlags)) {
         //AlienGui::NeuralNetEditor(
@@ -611,7 +611,7 @@ void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
         ImGui::Text("Mode: %s", Const::AttackerModeStrings.at(mode).c_str());
 
         if (mode == AttackerMode_FreeCell) {
-            auto& attackFreeCell = std::get<AttackFreeCellDescription>(attacker._mode);
+            auto& attackFreeCell = std::get<AttackFreeObjectDescription>(attacker._mode);
             if (attackFreeCell._restrictToColor.has_value()) {
                 ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
             }
@@ -706,7 +706,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         } else if (mode == SensorMode_DetectStructure) {
             // No parameters
         } else if (mode == SensorMode_DetectFreeCell) {
-            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+            auto& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Min density")
@@ -757,7 +757,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 
         // Mode-specific parameters
         if (mode == ReconnectorMode_FreeCell) {
-            auto& freeCell = std::get<ReconnectFreeCellDescription>(reconnector._mode);
+            auto& freeCell = std::get<ReconnectFreeObjectDescription>(reconnector._mode);
             AlienGui::ComboOptionalColor(
                 AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 freeCell._restrictToColor);
@@ -802,7 +802,7 @@ void _InspectorWindow::processDetonatorContent(DetonatorDescription& detonator)
     }
 }
 
-void _InspectorWindow::processParticle(ParticleDescription particle)
+void _InspectorWindow::processParticle(EnergyDescription particle)
 {
     auto origParticle = particle;
     auto energy = toFloat(particle._energy);
@@ -823,7 +823,7 @@ float _InspectorWindow::calcWindowWidth() const
     }
 }
 
-void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
+void _InspectorWindow::validateAndCorrect(ObjectDescription& cell) const
 {
     cell._stiffness = std::max(0.0f, std::min(1.0f, cell._stiffness));
     cell._usableEnergy = std::max(0.0f, cell._usableEnergy);
@@ -860,7 +860,7 @@ void _InspectorWindow::validateAndCorrect(CellDescription& cell) const
             auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
             detectEnergy._minDensity = std::max(0.0f, std::min(1.0f, detectEnergy._minDensity));
         } else if (mode == SensorMode_DetectFreeCell) {
-            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
+            auto& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
             detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
         }
         sensor._minRange = std::max(0, std::min(255, sensor._minRange));
