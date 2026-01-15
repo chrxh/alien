@@ -67,7 +67,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     cells.at(0)._usableEnergy = 1000.0f;
     
     Description data;
-    data.addCreature(creature, cells, genome);
+    data.addCreature(cells, creature, genome);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
     }
@@ -116,7 +116,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
     cells.at(0)._usableEnergy = 1000.0f;
 
     Description data;
-    data.addCreature(creature, cells, genome);
+    data.addCreature(cells, creature, genome);
     for (int j = 0; j < 2; ++j) {
         for (int i = 0; i < 20; ++i) {
             auto id = i + j * 20 + 1;
@@ -162,7 +162,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     cells.at(0)._usableEnergy = 1000.0f;
 
     Description data;
-    data.addCreature(creature, cells, genome);
+    data.addCreature(cells, creature, genome);
     for (int i = 1; i < 20; ++i) {
         data.addConnection(i, i + 1);
     }
@@ -218,21 +218,21 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        CreatureDescription(),
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
              .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
              .usableEnergy(normalCellEnergy * 10)},
+        CreatureDescription(),
         genome);
     data.addCreature(
-        CreatureDescription(),
         {CellDescription()
              .id(2)
              .cellState(CellState_Constructing)
              .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
              .cellType(ConstructorDescription().currentNodeIndex(1))
              .usableEnergy(normalCellEnergy)},
+        CreatureDescription(),
         genome);
     data.addConnection(1, 2);
 
@@ -257,20 +257,20 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        CreatureDescription(),
         {CellDescription()
              .id(1)
              .pos({100.0f, 100.0f})
              .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
              .usableEnergy(normalCellEnergy * 10)},
+        CreatureDescription(),
         genome);
     data.addCreature(
-        CreatureDescription(),
         {CellDescription()
              .id(2)
              .pos({101.0f, 100.0f})
              .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
              .usableEnergy(normalCellEnergy)},
+        CreatureDescription(),
         genome);
     data.addConnection(1, 2);
 

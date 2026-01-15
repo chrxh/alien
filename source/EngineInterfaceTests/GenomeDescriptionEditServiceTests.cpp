@@ -815,9 +815,9 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_singleS
 
     // Create cached phenotype with seed (generation 0) and offspring (generation 1)
     Description cachedPhenotype;
-    cachedPhenotype.addCreature(CreatureDescription().generation(0), {CellDescription().pos(RealVector2D{0, 0})}, genome);
+    cachedPhenotype.addCreature({CellDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome);
     auto seedAncestorId = cachedPhenotype._creatures.at(0)._id;
-    cachedPhenotype.addCreature(CreatureDescription().generation(1).ancestorId(seedAncestorId), {CellDescription().pos(RealVector2D{1, 1})}, genome);
+    cachedPhenotype.addCreature({CellDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seedAncestorId), genome);
 
     // Store original IDs from cache
     auto originalSeedId = cachedPhenotype._creatures.at(0)._id;
@@ -994,7 +994,7 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
 
     // Create cached phenotype only for first subGenome
     Description cachedPhenotype;
-    cachedPhenotype.addCreature(CreatureDescription().generation(0), {CellDescription().pos(RealVector2D{0, 0})}, genome1);
+    cachedPhenotype.addCreature({CellDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome1);
 
     // Store original IDs from cache
     auto originalCachedCreatureId = cachedPhenotype._creatures.at(0)._id;
@@ -1077,10 +1077,10 @@ TEST_F(GenomeDescriptionEditServiceTests, createSeedCollectionForPreview_multipl
 
     // Create cached phenotypes for both subGenomes
     Description cachedPhenotype1;
-    cachedPhenotype1.addCreature(CreatureDescription().generation(0), {CellDescription().pos(RealVector2D{0, 0})}, genome1);
+    cachedPhenotype1.addCreature({CellDescription().pos(RealVector2D{0, 0})}, CreatureDescription().generation(0), genome1);
 
     Description cachedPhenotype2;
-    cachedPhenotype2.addCreature(CreatureDescription().generation(0), {CellDescription().pos(RealVector2D{5, 5})}, genome2);
+    cachedPhenotype2.addCreature({CellDescription().pos(RealVector2D{5, 5})}, CreatureDescription().generation(0), genome2);
 
     // Store original IDs from cache
     auto originalCreatureId1 = cachedPhenotype1._creatures.at(0)._id;
@@ -1147,7 +1147,7 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
 
     auto seedCreature = CreatureDescription().generation(0);
     auto seedId = seedCreature._id;
-    preview.addCreature(seedCreature, {CellDescription().pos(RealVector2D{0, 0})}, genome);
+    preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
 
     std::vector<uint64_t> seedCreatureIds = {seedId};
 
@@ -1178,10 +1178,10 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
 
     auto seedCreature = CreatureDescription().generation(0);
     auto seedId = seedCreature._id;
-    preview.addCreature(seedCreature, {CellDescription().pos(RealVector2D{0, 0})}, genome);
+    preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
 
     // Add offspring (generation 1)
-    preview.addCreature(CreatureDescription().generation(1).ancestorId(seedId), {CellDescription().pos(RealVector2D{1, 1})}, genome);
+    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seedId), genome);
 
     std::vector<uint64_t> seedCreatureIds = {seedId};
 
@@ -1225,18 +1225,18 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     // Seed 1
     auto seed1 = CreatureDescription().generation(0);
     auto seed1Id = seed1._id;
-    preview.addCreature(seed1, {CellDescription().pos(RealVector2D{0, 0})}, genome1);
+    preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seed1, genome1);
 
     // Offspring of seed 1
-    preview.addCreature(CreatureDescription().generation(1).ancestorId(seed1Id), {CellDescription().pos(RealVector2D{1, 1})}, genome1);
+    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seed1Id), genome1);
 
     // Seed 2
     auto seed2 = CreatureDescription().generation(0);
     auto seed2Id = seed2._id;
-    preview.addCreature(seed2, {CellDescription().pos(RealVector2D{10, 10})}, genome2);
+    preview.addCreature({CellDescription().pos(RealVector2D{10, 10})}, seed2, genome2);
 
     // Offspring of seed 2
-    preview.addCreature(CreatureDescription().generation(1).ancestorId(seed2Id), {CellDescription().pos(RealVector2D{11, 11})}, genome2);
+    preview.addCreature({CellDescription().pos(RealVector2D{11, 11})}, CreatureDescription().generation(1).ancestorId(seed2Id), genome2);
 
     std::vector<uint64_t> seedCreatureIds = {seed1Id, seed2Id};
 

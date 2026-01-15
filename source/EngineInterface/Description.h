@@ -574,24 +574,7 @@ struct Description
     bool hasUniqueIds() const;
     void assignNewIds();  // Preserves order of cell ids
 
-    Description& addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome = GenomeDescription());
-
-    // Compatibility: iterate over all cells
-    template <typename Func>
-    void forEachCell(Func func)
-    {
-        for (auto& cell : _cells) {
-            func(cell);
-        }
-    }
-
-    template <typename Func>
-    void forEachCell(Func func) const
-    {
-        for (auto const& cell : _cells) {
-            func(cell);
-        }
-    }
+    Description& addCreature(std::vector<CellDescription> const& cells, CreatureDescription const& creature, GenomeDescription const& genome = GenomeDescription());
 
     size_t getNumCells() const;
     size_t getNumFreeCells() const;

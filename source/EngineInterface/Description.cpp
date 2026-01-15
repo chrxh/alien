@@ -450,7 +450,7 @@ void Description::assignNewIds()
     }
 }
 
-Description& Description::addCreature(CreatureDescription const& creature, std::vector<CellDescription> const& cells, GenomeDescription const& genome)
+Description& Description::addCreature(std::vector<CellDescription> const& cells, CreatureDescription const& creature, GenomeDescription const& genome)
 {
     // Add genome to genomes array if not already present
     auto genomeIt = std::find_if(_genomes.begin(), _genomes.end(), [&genome](auto const& g) { return g._id == genome._id; });

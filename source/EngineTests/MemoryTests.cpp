@@ -32,10 +32,10 @@ protected:
         std::vector<float> const& signal,
         std::vector<SignalEntryDescription> const& signalEntries = {})
     {
-        auto data = Description().addCreature(CreatureDescription().id(1), {
+        auto data = Description().addCreature({
             CellDescription().id(1).pos({100.0f, 100.0f}).cellType(MemoryDescription().mode(mode).signalEntries(signalEntries)),
             CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(signal),
-        });
+        }, CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
     }
@@ -69,7 +69,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
     std::vector<float> incomingSignal = {0.2f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     float newSignalWeight = 0.25f;
 
-    auto data = Description().addCreature(CreatureDescription().id(1), {
+    auto data = Description().addCreature({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
@@ -77,7 +77,7 @@ TEST_F(MemoryTests, signalIntegrator_secondSignal_integratesWithWeight)
                           .mode(SignalIntegratorDescription().newSignalWeight(newSignalWeight))
                           .signalEntries({SignalEntryDescription().channels(storedSignal)})),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(incomingSignal),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -99,14 +99,14 @@ TEST_F(MemoryTests, signalIntegrator_weightOfOne_replacesStoredSignal)
     std::vector<float> storedSignal = {1.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> incomingSignal = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-    auto data = Description().addCreature(CreatureDescription().id(1), {
+    auto data = Description().addCreature({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .cellType(
                 MemoryDescription().mode(SignalIntegratorDescription().newSignalWeight(1.0f)).signalEntries({SignalEntryDescription().channels(storedSignal)})),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(incomingSignal),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
@@ -125,14 +125,14 @@ TEST_F(MemoryTests, signalIntegrator_weightOfZero_preservesStoredSignal)
     std::vector<float> storedSignal = {1.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
     std::vector<float> incomingSignal = {0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-    auto data = Description().addCreature(CreatureDescription().id(1), {
+    auto data = Description().addCreature({
         CellDescription()
             .id(1)
             .pos({100.0f, 100.0f})
             .cellType(
                 MemoryDescription().mode(SignalIntegratorDescription().newSignalWeight(0.0f)).signalEntries({SignalEntryDescription().channels(storedSignal)})),
         CellDescription().id(2).pos({101.0f, 100.0f}).signalAndState(incomingSignal),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     _simulationFacade->setSimulationData(data);
