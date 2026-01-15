@@ -481,21 +481,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
                     .addCreature({CellDescription().id(0), CellDescription().id(0)}, CreatureDescription().id(0));
 
     // Perform action
-    data.assignNewIds();
-
-    // Check result
-    {
-        std::unordered_set<uint64_t> ids;
-        for (auto const& creature : data._creatures) {
-            ids.insert(creature._id);
-        }
-        EXPECT_EQ(2, ids.size());
-    }
-    {
-        std::unordered_set<uint64_t> ids;
-        for (auto const& cell : data._cells) { ids.insert(cell._id); }
-        ASSERT_EQ(4, ids.size());
-    }
+    EXPECT_THROW(data.assignNewIds(), std::runtime_error);
 }
 
 TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
@@ -558,29 +544,6 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
     ASSERT_TRUE(ancestor.has_value());
 
     EXPECT_EQ(1, offspring->_ancestorId.value());
-}
-
-TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
-{
-    // Create test data
-    auto data = Description()
-                    .addCreature({CellDescription()}, CreatureDescription().id(2))
-                    .addCreature({CellDescription()}, CreatureDescription().id(2))
-                    .addCreature({CellDescription()}, CreatureDescription().id(3).ancestorId(2));
-
-    // Perform action
-    data.assignNewIds();
-
-    // Check result
-    std::unordered_set<uint64_t> ids;
-    for (auto const& creature : data._creatures) {
-        ids.insert(creature._id);
-    }
-    EXPECT_EQ(3, ids.size());
-
-    for (auto const& creature : data._creatures) {
-        EXPECT_TRUE(!creature._ancestorId.has_value());
-    }
 }
 
 TEST_F(DescriptionEditTests, adaptMaxIds)
