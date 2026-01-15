@@ -1,4 +1,6 @@
 
+#include <set>
+
 #include <boost/range/adaptors.hpp>
 
 #include <gtest/gtest.h>
@@ -1164,6 +1166,10 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     // Should have the genome
     ASSERT_EQ(1, result.at(0)._genomes.size());
     EXPECT_EQ(genome._id, result.at(0)._genomes.at(0)._id);
+
+    // Should have the cell associated with the seed creature
+    ASSERT_EQ(1, result.at(0)._cells.size());
+    EXPECT_EQ(seedId, result.at(0)._cells.at(0)._creatureId);
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSeed_withOffspring)
@@ -1181,7 +1187,9 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seedCreature, genome);
 
     // Add offspring (generation 1)
-    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seedId), genome);
+    auto offspringCreature = CreatureDescription().generation(1).ancestorId(seedId);
+    auto offspringId = offspringCreature._id;
+    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, offspringCreature, genome);
 
     std::vector<uint64_t> seedCreatureIds = {seedId};
 
@@ -1204,6 +1212,17 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_singleSee
     // Check that appropriate genome is contained in the result
     ASSERT_EQ(1, result.at(0)._genomes.size());
     EXPECT_EQ(genome._id, result.at(0)._genomes.at(0)._id);
+
+    // Should have 2 cells (1 from seed, 1 from offspring)
+    ASSERT_EQ(2, result.at(0)._cells.size());
+
+    // Verify cells are associated with correct creatures
+    std::set<uint64_t> cellCreatureIds;
+    for (auto const& cell : result.at(0)._cells) {
+        cellCreatureIds.insert(*cell._creatureId);
+    }
+    EXPECT_TRUE(cellCreatureIds.contains(seedId));
+    EXPECT_TRUE(cellCreatureIds.contains(offspringId));
 }
 
 TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleSeeds_withOffspring)
@@ -1228,7 +1247,9 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     preview.addCreature({CellDescription().pos(RealVector2D{0, 0})}, seed1, genome1);
 
     // Offspring of seed 1
-    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, CreatureDescription().generation(1).ancestorId(seed1Id), genome1);
+    auto offspring1 = CreatureDescription().generation(1).ancestorId(seed1Id);
+    auto offspring1Id = offspring1._id;
+    preview.addCreature({CellDescription().pos(RealVector2D{1, 1})}, offspring1, genome1);
 
     // Seed 2
     auto seed2 = CreatureDescription().generation(0);
@@ -1236,7 +1257,9 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     preview.addCreature({CellDescription().pos(RealVector2D{10, 10})}, seed2, genome2);
 
     // Offspring of seed 2
-    preview.addCreature({CellDescription().pos(RealVector2D{11, 11})}, CreatureDescription().generation(1).ancestorId(seed2Id), genome2);
+    auto offspring2 = CreatureDescription().generation(1).ancestorId(seed2Id);
+    auto offspring2Id = offspring2._id;
+    preview.addCreature({CellDescription().pos(RealVector2D{11, 11})}, offspring2, genome2);
 
     std::vector<uint64_t> seedCreatureIds = {seed1Id, seed2Id};
 
@@ -1262,4 +1285,22 @@ TEST_F(GenomeDescriptionEditServiceTests, extractPhenotypesFromPreview_multipleS
     EXPECT_EQ(genome1._id, result.at(0)._genomes.at(0)._id);
     ASSERT_EQ(1, result.at(1)._genomes.size());
     EXPECT_EQ(genome2._id, result.at(1)._genomes.at(0)._id);
+
+    // Phenotype 1: should have 2 cells (1 from seed1, 1 from offspring1)
+    ASSERT_EQ(2, result.at(0)._cells.size());
+    std::set<uint64_t> phenotype1CellCreatureIds;
+    for (auto const& cell : result.at(0)._cells) {
+        phenotype1CellCreatureIds.insert(*cell._creatureId);
+    }
+    EXPECT_TRUE(phenotype1CellCreatureIds.contains(seed1Id));
+    EXPECT_TRUE(phenotype1CellCreatureIds.contains(offspring1Id));
+
+    // Phenotype 2: should have 2 cells (1 from seed2, 1 from offspring2)
+    ASSERT_EQ(2, result.at(1)._cells.size());
+    std::set<uint64_t> phenotype2CellCreatureIds;
+    for (auto const& cell : result.at(1)._cells) {
+        phenotype2CellCreatureIds.insert(*cell._creatureId);
+    }
+    EXPECT_TRUE(phenotype2CellCreatureIds.contains(seed2Id));
+    EXPECT_TRUE(phenotype2CellCreatureIds.contains(offspring2Id));
 }
