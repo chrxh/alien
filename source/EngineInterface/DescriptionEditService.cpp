@@ -1,6 +1,7 @@
 #include "DescriptionEditService.h"
 
 #include <cmath>
+#include <unordered_map>
 
 #include <boost/range/adaptor/indexed.hpp>
 #include <boost/range/adaptor/map.hpp>
@@ -423,16 +424,11 @@ void DescriptionEditService::randomizeCellColors(Description& description, std::
 
 void DescriptionEditService::randomizeGenomeColors(Description& description, std::vector<int> const& colorCodes) const
 {
-    for (auto& creature : description._creatures) {
+    for (auto& genome : description._genomes) {
         auto newColor = colorCodes[NumberGenerator::get().getRandomInt(toInt(colorCodes.size()))];
-        // Find the genome for this creature
-        auto genomeIt =
-            std::find_if(description._genomes.begin(), description._genomes.end(), [&creature](auto const& g) { return g._id == creature._genomeId; });
-        if (genomeIt != description._genomes.end()) {
-            for (auto& gene : genomeIt->_genes) {
-                for (auto& node : gene._nodes) {
-                    node._color = newColor;
-                }
+        for (auto& gene : genome._genes) {
+            for (auto& node : gene._nodes) {
+                node._color = newColor;
             }
         }
     }
@@ -440,59 +436,64 @@ void DescriptionEditService::randomizeGenomeColors(Description& description, std
 
 void DescriptionEditService::randomizeEnergies(Description& description, float minEnergy, float maxEnergy) const
 {
+    // Step 1: Create random energy value for each creature
+    std::unordered_map<uint64_t, float> creatureEnergies;
     for (auto const& creature : description._creatures) {
-        auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
-        for (auto& cell : description._cells) {
-            if (cell._creatureId == creature._id) {
-                cell._usableEnergy = energy;
-            }
-        }
+        creatureEnergies[creature._id] = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
     }
-    {
-        auto energy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
-        for (auto& cell : description._cells) {
-            if (!cell._creatureId.has_value()) {
-                cell._usableEnergy = energy;
+    
+    // Step 2: Iterate over cells and apply stored energy values (including cells without creatureId)
+    for (auto& cell : description._cells) {
+        if (cell._creatureId.has_value()) {
+            auto it = creatureEnergies.find(cell._creatureId.value());
+            if (it != creatureEnergies.end()) {
+                cell._usableEnergy = it->second;
             }
+        } else {
+            cell._usableEnergy = NumberGenerator::get().getRandomDouble(toDouble(minEnergy), toDouble(maxEnergy));
         }
     }
 }
 
 void DescriptionEditService::randomizeAges(Description& description, int minAge, int maxAge) const
 {
+    // Step 1: Create random age value for each creature
+    std::unordered_map<uint64_t, float> creatureAges;
     for (auto const& creature : description._creatures) {
-        auto age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
-        for (auto& cell : description._cells) {
-            if (cell._creatureId == creature._id) {
-                cell._age = age;
-            }
-        }
+        creatureAges[creature._id] = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
     }
-    {
-        auto age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
-        for (auto& cell : description._cells) {
-            if (!cell._creatureId.has_value()) {
-                cell._age = age;
+    
+    // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
+    for (auto& cell : description._cells) {
+        if (cell._creatureId.has_value()) {
+            auto it = creatureAges.find(cell._creatureId.value());
+            if (it != creatureAges.end()) {
+                cell._age = it->second;
             }
+        } else {
+            cell._age = NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge));
         }
     }
 }
 
 void DescriptionEditService::randomizeCountdowns(Description& description, int minValue, int maxValue) const
 {
+    // Step 1: Create random countdown value for each creature
+    std::unordered_map<uint64_t, float> creatureCountdowns;
     for (auto const& creature : description._creatures) {
-        auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
-        for (auto& cell : description._cells) {
-            if (cell._creatureId == creature._id && cell.getCellType() == CellType_Detonator) {
-                std::get<DetonatorDescription>(cell._cellType)._countdown = countdown;
-            }
-        }
+        creatureCountdowns[creature._id] = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
     }
-    {
-        auto countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
-        for (auto& cell : description._cells) {
-            if (!cell._creatureId.has_value() && cell.getCellType() == CellType_Detonator) {
-                std::get<DetonatorDescription>(cell._cellType)._countdown = countdown;
+    
+    // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
+    for (auto& cell : description._cells) {
+        if (cell.getCellType() == CellType_Detonator) {
+            if (cell._creatureId.has_value()) {
+                auto it = creatureCountdowns.find(cell._creatureId.value());
+                if (it != creatureCountdowns.end()) {
+                    std::get<DetonatorDescription>(cell._cellType)._countdown = it->second;
+                }
+            } else {
+                std::get<DetonatorDescription>(cell._cellType)._countdown = NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue));
             }
         }
     }
