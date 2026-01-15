@@ -463,7 +463,7 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
     // Step 1: Create random age value for each creature
     std::unordered_map<uint64_t, int> creatureAges;
     for (auto const& creature : description._creatures) {
-        creatureAges[creature._id] = static_cast<int>(NumberGenerator::get().getRandomInt(static_cast<uint32_t>(minAge), static_cast<uint32_t>(maxAge)));
+        creatureAges[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
     }
     
     // Step 2: Iterate over cells and apply stored age values (including cells without creatureId)
@@ -474,10 +474,10 @@ void DescriptionEditService::randomizeAges(Description& description, int minAge,
                 cell._age = it->second;
             } else {
                 // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
-                cell._age = static_cast<int>(NumberGenerator::get().getRandomInt(static_cast<uint32_t>(minAge), static_cast<uint32_t>(maxAge)));
+                cell._age = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
             }
         } else {
-            cell._age = static_cast<int>(NumberGenerator::get().getRandomInt(static_cast<uint32_t>(minAge), static_cast<uint32_t>(maxAge)));
+            cell._age = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minAge), toDouble(maxAge)));
         }
     }
 }
@@ -487,7 +487,7 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
     // Step 1: Create random countdown value for each creature
     std::unordered_map<uint64_t, int> creatureCountdowns;
     for (auto const& creature : description._creatures) {
-        creatureCountdowns[creature._id] = static_cast<int>(NumberGenerator::get().getRandomInt(static_cast<uint32_t>(minValue), static_cast<uint32_t>(maxValue)));
+        creatureCountdowns[creature._id] = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
     }
     
     // Step 2: Iterate over cells and apply stored countdown values (including cells without creatureId)
@@ -499,10 +499,10 @@ void DescriptionEditService::randomizeCountdowns(Description& description, int m
                     std::get<DetonatorDescription>(cell._cellType)._countdown = it->second;
                 } else {
                     // Handle cells with creatureId not in the map (shouldn't normally happen, but handle gracefully)
-                    std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomInt(static_cast<uint32_t>(minValue), static_cast<uint32_t>(maxValue)));
+                    std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
                 }
             } else {
-                std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomInt(static_cast<uint32_t>(minValue), static_cast<uint32_t>(maxValue)));
+                std::get<DetonatorDescription>(cell._cellType)._countdown = static_cast<int>(NumberGenerator::get().getRandomDouble(toDouble(minValue), toDouble(maxValue)));
             }
         }
     }
