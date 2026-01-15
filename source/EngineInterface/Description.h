@@ -593,23 +593,9 @@ struct Description
         }
     }
 
-    size_t getNumCells() const { return _cells.size(); }
-
-    size_t getNumFreeCells() const
-    {
-        return std::count_if(_cells.begin(), _cells.end(), [](auto const& cell) { return !cell._creatureId.has_value(); });
-    }
-
-    std::vector<CellDescription> getCellsForCreature(uint64_t creatureId) const
-    {
-        std::vector<CellDescription> result;
-        for (auto const& cell : _cells) {
-            if (cell._creatureId.has_value() && cell._creatureId.value() == creatureId) {
-                result.push_back(cell);
-            }
-        }
-        return result;
-    }
+    size_t getNumCells() const;
+    size_t getNumFreeCells() const;
+    std::vector<CellDescription> getCellsForCreature(uint64_t creatureId) const;
 
     DescriptionCache createCache() const;
     Description& addConnection(uint64_t const& cellId1, uint64_t const& cellId2, DescriptionCache const& cache = nullptr);

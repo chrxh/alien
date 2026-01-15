@@ -340,6 +340,7 @@ void Description::assignNewIds()
     auto findNewCellId = [&](std::optional<uint64_t> const& creatureId, uint64_t cellId) {
 
         // First check in creature-specific map (always preferred when available)
+        auto nonUnique = false;
         auto creatureFindResult = creatureIdToOldToNewCellId.find(creatureId);
         if (creatureFindResult != creatureIdToOldToNewCellId.end()) {
             auto& creatureNonUnique = creatureIdToNonUniqueCellIds[creatureId];
@@ -349,6 +350,8 @@ void Description::assignNewIds()
                 if (findResult != oldToNewMap.end()) {
                     return findResult->second;
                 }
+            } else {
+                nonUnique = true;
             }
         }
 
@@ -358,10 +361,14 @@ void Description::assignNewIds()
             if (findResult != oldToNewCellId.end()) {
                 return findResult->second;
             }
+        } else {
+            nonUnique = true;
         }
 
+        CHECK(!nonUnique);
+
         // If neither creature-specific nor global lookup worked, keep original cellId
-        // This handles the case where the referenced cell doesn't exist or IDs are ambiguous
+        // This handles the case where the referenced cell doesn't exist in the DataDescription
         return cellId;
     };
 
@@ -400,7 +407,7 @@ void Description::assignNewIds()
             } else {
                 // When creature ID is non-unique, we can't determine which creature the cell belongs to
                 // Reset to nullopt to make it a free cell
-                cell._creatureId.reset();
+                //cell._creatureId.reset();
             }
         }
     }
@@ -464,6 +471,27 @@ Description& Description::addCreature(CreatureDescription const& creature, std::
     }
 
     return *this;
+}
+
+size_t Description::getNumCells() const
+{
+    return _cells.size();
+}
+
+size_t Description::getNumFreeCells() const
+{
+    return std::count_if(_cells.begin(), _cells.end(), [](auto const& cell) { return !cell._creatureId.has_value(); });
+}
+
+std::vector<CellDescription> Description::getCellsForCreature(uint64_t creatureId) const
+{
+    std::vector<CellDescription> result;
+    for (auto const& cell : _cells) {
+        if (cell._creatureId.has_value() && cell._creatureId.value() == creatureId) {
+            result.push_back(cell);
+        }
+    }
+    return result;
 }
 
 DescriptionCache Description::createCache() const
