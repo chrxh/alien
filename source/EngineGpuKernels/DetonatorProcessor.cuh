@@ -17,7 +17,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -33,10 +33,10 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
     }
 }
 
-__device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& detonator = object->cellTypeData.detonator;
-    if (SignalProcessor::isManuallyTriggered(data, cell) && detonator.state == DetonatorState_Ready) {
+    if (SignalProcessor::isManuallyTriggered(data, object) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;
     }
     if (detonator.state == DetonatorState_Activated) {
@@ -49,7 +49,7 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             detonator.countdown = 0;
             statistics.incNumDetonations(object->color);
             data.cellMap.executeForEach(object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
-                if (otherCell == cell) {
+                if (otherCell == object) {
                     return;
                 }
                 if (otherCell->fixed) {

@@ -55,8 +55,8 @@ TEST_F(EnergyParticleTests, particleToCell_transformationAllowed)
     // Verify the cell has approximately the same energy as the original particle
     if (!actualData._objects.empty()) {
         auto const& object = actualData._objects.at(0);
-        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, cell._usableEnergy, 1.0f));
-        EXPECT_EQ(0, cell._color);
+        EXPECT_TRUE(approxCompare(normalCellEnergy + 10.0f, object._usableEnergy, 1.0f));
+        EXPECT_EQ(0, object._color);
     }
 }
 
@@ -140,8 +140,8 @@ TEST_F(EnergyParticleTests, particleAbsorption)
     EXPECT_EQ(1, actualData._objects.size());
 
     auto const& object = actualData.getObjectRef(1);
-    EXPECT_TRUE(approxCompare(cellEnergy, cell._usableEnergy));
-    EXPECT_TRUE(approxCompare(particleEnergy, cell._rawEnergy));
+    EXPECT_TRUE(approxCompare(cellEnergy, object._usableEnergy));
+    EXPECT_TRUE(approxCompare(particleEnergy, object._rawEnergy));
 }
 
 TEST_F(EnergyParticleTests, cellToParticle_belowMinEnergy)

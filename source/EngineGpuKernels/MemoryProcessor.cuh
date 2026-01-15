@@ -13,12 +13,12 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processIntegrator(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processDelay(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -34,24 +34,24 @@ __device__ __inline__ void MemoryProcessor::process(SimulationData& data, Simula
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void MemoryProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     if (object->signalState != SignalState_Active) {
         return;
     }
     auto const& mode = object->cellTypeData.memory.mode;
     if (mode == MemoryMode_SignalDelay) {
-        processDelay(data, statistics, cell);
+        processDelay(data, statistics, object);
     } else if (mode == MemoryMode_SignalIntegrator) {
-        processIntegrator(data, statistics, cell);
+        processIntegrator(data, statistics, object);
     } else if (mode == MemoryMode_SignalRecorder) {
-        processSignalRecorder(data, statistics, cell);
+        processSignalRecorder(data, statistics, object);
     } else if (mode == MemoryMode_SignalStorage) {
-        processSignalStorage(data, statistics, cell);
+        processSignalStorage(data, statistics, object);
     }
 }
 
-__inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& memory = object->cellTypeData.memory;
 
@@ -74,7 +74,7 @@ __inline__ __device__ void MemoryProcessor::processIntegrator(SimulationData& da
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& memory = object->cellTypeData.memory;
     auto& signalDelay = memory.modeData.signalDelay;
@@ -124,7 +124,7 @@ __device__ __inline__ void MemoryProcessor::processDelay(SimulationData& data, S
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& memory = object->cellTypeData.memory;
     auto& signalRecorder = memory.modeData.signalRecorder;
@@ -194,7 +194,7 @@ __device__ __inline__ void MemoryProcessor::processSignalRecorder(SimulationData
     }
 }
 
-__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void MemoryProcessor::processSignalStorage(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto& memory = object->cellTypeData.memory;
     auto& signalStorage = memory.modeData.signalStorage;

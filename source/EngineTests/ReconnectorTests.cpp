@@ -519,7 +519,7 @@ TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
 
 TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
 {
-    // Create creature with reconnector and additional cell, signal on connected cell
+    // Create creature with reconnector and additional object, signal on connected cell
     auto data = Description().addCreature({
         ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(ReconnectorDescription().mode(ReconnectCreatureDescription())),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),

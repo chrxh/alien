@@ -194,7 +194,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
     auto cells = GetParam() == CellsOnCreature::No ? data._objects : data.getObjectsForCreature(data._creatures.front()._id);
     std::map<int, ObjectDescription> ageToCell;
     for (auto const& object : cells) {
-        ageToCell.insert_or_assign(object._age, cell);
+        ageToCell.insert_or_assign(object._age, object);
     }
     EXPECT_EQ(10, ageToCell.size());
 
@@ -289,9 +289,9 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
     std::optional<ObjectDescription> cellWithoutConnection, cellWithConnection;
     for (auto const& object : largeCreatureCells) {
         if (object._connections.empty()) {
-            cellWithoutConnection = cell;
+            cellWithoutConnection = object;
         } else {
-            cellWithConnection = cell;
+            cellWithConnection = object;
         }
     }
     ASSERT_TRUE(cellWithoutConnection.has_value());
@@ -329,9 +329,9 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
     for (auto const& object : data._objects) {
         if (!object._creatureId.has_value()) {
             if (object._connections.empty()) {
-                cellWithoutConnection = cell;
+                cellWithoutConnection = object;
             } else {
-                cellWithConnection = cell;
+                cellWithConnection = object;
             }
         }
     }
@@ -371,10 +371,10 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
     std::optional<ObjectDescription> constructor, base;
     for (auto const& object : data._objects) {
         if (object.getCellType() == CellType_Constructor) {
-            constructor = cell;
+            constructor = object;
         }
         if (object.getCellType() == CellType_Base) {
-            base = cell;
+            base = object;
         }
     }
     ASSERT_TRUE(constructor.has_value());
@@ -405,10 +405,10 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
     std::optional<ObjectDescription> constructor, base;
     for (auto const& object : data._objects) {
         if (object.getCellType() == CellType_Constructor) {
-            constructor = cell;
+            constructor = object;
         }
         if (object.getCellType() == CellType_Base) {
-            base = cell;
+            base = object;
         }
     }
     ASSERT_TRUE(constructor.has_value());

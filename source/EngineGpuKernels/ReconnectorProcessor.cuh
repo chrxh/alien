@@ -17,10 +17,10 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void removeConnections(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -36,18 +36,18 @@ __device__ __inline__ void ReconnectorProcessor::process(SimulationData& data, S
     }
 }
 
-__device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void ReconnectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+    if (SignalProcessor::isManuallyTriggered(data, object)) {
         if (object->signal.channels[Channels::CellTypeActivation] > 0) {
-            tryCreateConnection(data, statistics, cell);
+            tryCreateConnection(data, statistics, object);
         } else {
-            removeConnections(data, statistics, cell);
+            removeConnections(data, statistics, object);
         }
     }
 }
 
-__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto const& reconnector = object->cellTypeData.reconnector;
     auto const& reconnectorMode = reconnector.mode;
@@ -57,7 +57,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
     data.cellMap.executeForEach(object->pos, cudaSimulationParameters.reconnectorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
 
         // Skip if already connected or too closely connected
-        if (ObjectConnectionProcessor::isConnectedConnected(cell, otherCell)) {
+        if (ObjectConnectionProcessor::isConnectedConnected(object, otherCell)) {
             return;
         }
 
@@ -123,7 +123,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         }
 
         // Check for own intersecting cells in between
-        if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+        if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherCell)) {
             return;
         }
 
@@ -140,7 +140,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
         lock.init(&object->locked, &closestCell->locked);
         if (lock.tryLock()) {
             if (object->numConnections < MAX_CELL_BONDS && closestCell->numConnections < MAX_CELL_BONDS) {
-                ObjectConnectionProcessor::scheduleAddConnectionPair(data, cell, closestCell);
+                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, closestCell);
                 object->signal.channels[Channels::ReconnectorSuccess] = 1;
                 statistics.incNumReconnectorCreated(object->color);
             }
@@ -150,7 +150,7 @@ __inline__ __device__ void ReconnectorProcessor::tryCreateConnection(SimulationD
 }
 
 
-__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     object->signal.channels[Channels::ReconnectorSuccess] = 0;
 
@@ -169,7 +169,7 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         }
 
         if (shouldRemove) {
-            ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
+            ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedCell);
             object->signal.channels[Channels::ReconnectorSuccess] = 1;
             statistics.incNumReconnectorRemoved(object->color);
         }

@@ -29,7 +29,7 @@ __global__ void cudaChangeCell(SimulationData data, TO changeTO)
         if (object->id == cellTO.id) {
             EntityFactory entityFactory;
             entityFactory.init(&data);
-            entityFactory.changeCellFromTO(changeTO, cellTO, cell);
+            entityFactory.changeCellFromTO(changeTO, cellTO, object);
         }
     }
 }
@@ -71,7 +71,7 @@ __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCrea
 
 namespace
 {
-    __inline__ __device__ bool isSelected(Object* cell, bool includeClusters)
+    __inline__ __device__ bool isSelected(Object* object, bool includeClusters)
     {
         return (includeClusters && object->selected != 0) || (!includeClusters && object->selected == 1);
     }
@@ -84,8 +84,8 @@ __global__ void cudaRemoveSelectedEntities(SimulationData data, bool includeClus
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = data.entities.objects.at(index);
-            if (isSelected(cell, includeClusters)) {
-                cell = nullptr;
+            if (isSelected(object, includeClusters)) {
+                object = nullptr;
             }
         }
     }
@@ -110,7 +110,7 @@ __global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool in
         for (int i = 0; i < object->numConnections; ++i) {
             auto connectedCell = object->connections[i].object;
             if ((includeClusters && object->selected != 0) || (!includeClusters && (object->selected == 1 || connectedCell->selected == 1))) {
-                ObjectConnectionProcessor::deleteConnectionOneWay(cell, connectedCell);
+                ObjectConnectionProcessor::deleteConnectionOneWay(object, connectedCell);
                 --i;
             }
         }
@@ -123,7 +123,7 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
-        if (isSelected(cell, includeClusters)) {
+        if (isSelected(object, includeClusters)) {
             auto const numConnections = object->numConnections;
             for (int i = 0; i < numConnections; ++i) {
                 auto connectedCell = object->connections[i].object;
@@ -172,7 +172,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
             continue;
         }
         data.cellMap.executeForEach(object->pos, 1.3f, object->detached, [&](auto const& otherCell) {
-            if (!otherCell || otherCell == cell) {
+            if (!otherCell || otherCell == object) {
                 return;
             }
             if (1 == otherCell->selected && !considerWithinSelection) {
@@ -189,7 +189,7 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
                 }
             }
             if (object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS) {
-                ObjectConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
+                ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherCell);
                 atomicExch(result, 1);
             }
         });
@@ -261,7 +261,7 @@ __global__ void cudaCalcAccumulatedCenterAndVel(SimulationData data, int refCell
 
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto const& object = data.entities.objects.at(index);
-            if (isSelected(cell, includeClusters)) {
+            if (isSelected(object, includeClusters)) {
                 if (center) {
                     auto pos = object->pos + data.cellMap.getCorrectionIncrement(refPos, object->pos);
                     atomicAdd(&center->x, pos.x);
@@ -300,7 +300,7 @@ __global__ void cudaIncrementPosAndVelForSelection(ShallowUpdateSelectionData up
     auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (isSelected(cell, updateData.considerClusters)) {
+        if (isSelected(object, updateData.considerClusters)) {
             object->pos = object->pos + float2{updateData.posDeltaX, updateData.posDeltaY};
             data.cellMap.correctPosition(object->pos);
             object->vel = float2{updateData.velX, updateData.velY};
@@ -323,7 +323,7 @@ __global__ void cudaSetVelocityForSelection(SimulationData data, float2 velocity
     auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (isSelected(cell, includeClusters)) {
+        if (isSelected(object, includeClusters)) {
             object->vel = velocity;
         }
     }
@@ -342,7 +342,7 @@ __global__ void cudaMakeSticky(SimulationData data, bool includeClusters)
     auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (isSelected(cell, includeClusters)) {
+        if (isSelected(object, includeClusters)) {
             object->sticky = true;
         }
     }
@@ -353,7 +353,7 @@ __global__ void cudaRemoveStickiness(SimulationData data, bool includeClusters)
     auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (isSelected(cell, includeClusters)) {
+        if (isSelected(object, includeClusters)) {
             object->sticky = false;
         }
     }
@@ -364,7 +364,7 @@ __global__ void cudaSetBarrier(SimulationData data, bool value, bool includeClus
     auto const cellPartition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (isSelected(cell, includeClusters)) {
+        if (isSelected(object, includeClusters)) {
             object->fixed = value;
         }
     }
@@ -382,7 +382,7 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
 
                 if (1 != connectedCell->selected
                     && data.cellMap.getDistance(object->pos, connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
-                    ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, cell, connectedCell);
+                    ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedCell);
                     atomicExch(result, 1);
                 }
             }
@@ -460,23 +460,23 @@ __global__ void cudaApplyCataclysm(SimulationData data)
     //    if (object->cellType == CellType_Constructor) {
     //        if (data.primaryNumberGen.random() < 0.3f) {
     //            for (int j = 0; j < 100; ++j) {
-    //                MutationProcessor::neuronDataMutation(data, cell);
+    //                MutationProcessor::neuronDataMutation(data, object);
     //            }
     //            for (int j = 0; j < 50; ++j) {
-    //                MutationProcessor::propertiesMutation(data, cell);
+    //                MutationProcessor::propertiesMutation(data, object);
     //            }
-    //            MutationProcessor::geometryMutation(data, cell);
-    //            MutationProcessor::customGeometryMutation(data, cell);
-    //            MutationProcessor::cellTypeMutation(data, cell);
+    //            MutationProcessor::geometryMutation(data, object);
+    //            MutationProcessor::customGeometryMutation(data, object);
+    //            MutationProcessor::cellTypeMutation(data, object);
     //            int num = data.primaryNumberGen.random(5);
     //            for (int i = 0; i < num; ++i) {
-    //                MutationProcessor::insertMutation(data, cell);
+    //                MutationProcessor::insertMutation(data, object);
     //            }
-    //            //                MutationProcessor::translateMutation(data, cell);
+    //            //                MutationProcessor::translateMutation(data, object);
     //            for (int i = 0; i < 2; ++i) {
-    //                MutationProcessor::duplicateMutation(data, cell);
+    //                MutationProcessor::duplicateMutation(data, object);
     //            }
-    //            //                MutationProcessor::deleteMutation(data, cell);
+    //            //                MutationProcessor::deleteMutation(data, object);
     //        }
     //    }
     //}
@@ -520,7 +520,7 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCe
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
-            result.collectCell(cell, refPos, data.cellMap);
+            result.collectCell(object, refPos, data.cellMap);
             if (object->creature != nullptr) {
                 if (alienAtomicExch64(&object->creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();

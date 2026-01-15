@@ -172,7 +172,7 @@ void GettingStartedWindow::processIntern()
 
         ImGui::Spacing();
         drawHeading2("Cell function");
-        ImGui::Text("It is possible to assign a special function to a cell, which will be executed at regular time intervals. The following functions are "
+        ImGui::Text("It is possible to assign a special function to a object, which will be executed at regular time intervals. The following functions are "
                     "implemented:");
         drawItemText(
             "Neuron: It equips the cell with a small network of 8 neurons. It processes input gained from the signals of connected cells and provides an "
@@ -301,7 +301,7 @@ void GettingStartedWindow::processIntern()
                       "conveniently changed in the 'Pattern editor'. In addition, selections can be saved, loaded, copied and pasted.");
         drawHeading2("Genome editor");
         drawParagraph("In the 'Genome editor', genomes describing cell networks can be created and modified. Each tab shows the principal part of the genome. "
-                      "It is a sequence of cells that are supposed to be constructed in that order. If one of these cells is a constructor cell, it contains "
+                      "It is a sequence of cells that are supposed to be constructed in that order. If one of these cells is a constructor object, it contains "
                       "an additional genome that can be edited in a separate tab, if desired.");
         drawParagraph("To translate a genome into an actual structure, there are two options:");
         drawItemText("You can generate a spore using the corresponding toolbar button. A spore is a single constructor cell containing the specific genome and "
@@ -312,7 +312,7 @@ void GettingStartedWindow::processIntern()
             "invoking the 'Inject from editor' button.");
         drawHeading2("Object inspection");
         drawParagraph("Nearly every property of each particle can be viewed and edited. For this purpose, special editing windows can be attached to a "
-                      "particle. To do this, you have to select one or more particles (not too many) and invoke 'Inspect objects' from the editor menu. Each "
+                      "energyParticle. To do this, you have to select one or more particles (not too many) and invoke 'Inspect objects' from the editor menu. Each "
                       "selected particle is now connected to a window. It is even possible to view these editing windows during a running simulation. In this "
                       "way, you can monitor in real-time how properties of individual particles change over time.");
         drawHeading2("Mass operations");
@@ -352,7 +352,7 @@ void GettingStartedWindow::processIntern()
         drawParagraph("The principle of energy conservation holds true in a simulation, which means that energy particles cannot spontaneously come into "
                       "existence out of nothingness. This principle plays a vital role in ensuring the stability of long-term simulations. If a radiation "
                       "source is defined, it will emit a particle only when a cell somewhere loses energy. Conversely, in the absence of a radiation source, "
-                      "any emitted energy particle would originate directly in the spatial vicinity of the corresponding cell.");
+                      "any emitted energy particle would originate directly in the spatial vicinity of the corresponding object.");
         drawParagraph("The existence of matter in the form of cells is a prerequisite for the radiation source to emit particles. Furthermore, the simulation "
                       "parameters should be adjusted in a way that guarantees a gradual loss of energy from cells over time.");
 

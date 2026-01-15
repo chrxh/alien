@@ -111,7 +111,7 @@ __global__ void cudaExtractCellData(SimulationData data, CellVertexData* objectD
                 // Rectangle?
                 auto fourthCellCandidate1 = connectedCell->getConnectedCell(backIndex + 1);
                 auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
-                if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != cell && fourthCellCandidate2 != cell
+                if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                     && connectedCell != prevConnectedCell) {
                     isInTriangleOrQuad = 1;
                     break;
@@ -239,7 +239,7 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
             // Rectangle?
             auto fourthCellCandidate1 = connectedCell->getConnectedCell(backIndex + 1);
             auto fourthCellCandidate2 = prevConnectedCell->getConnectedCell(prevBackIndex - 1);
-            if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != cell && fourthCellCandidate2 != cell
+            if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
                 && connectedCell != prevConnectedCell) {
                 if (object->id < connectedCell->id && object->id < prevConnectedCell->id && object->id < fourthCellCandidate2->id) {
                     addTriangle(object, index, connectedCell, fourthCellCandidate1);

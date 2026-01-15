@@ -98,11 +98,11 @@ __inline__ __device__ void ObjectProcessor::fillDensityMap(SimulationData& data)
 {
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = data.entities.objects.at(index);
+        auto object = data.entities.objects.at(index);
         if (object->cellType == CellType_Free) {
-            data.preprocessedSimulationData.densityMap.addFreeCell(cell);
+            data.preprocessedSimulationData.densityMap.addFreeCell(object);
         } else if (object->cellType == CellType_Structure) {
-            data.preprocessedSimulationData.densityMap.addStructureCell(cell);
+            data.preprocessedSimulationData.densityMap.addStructureCell(object);
         }
     }
 }
@@ -214,7 +214,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                 // Calc density
                 localDensity += calcKernel(adaptedDistance / smoothingLength) / (smoothingLength * smoothingLength);
 
-                if (cell != otherCell) {
+                if (object != otherCell) {
 
                     // Overlap correction
                     if (!object->fixed && origDistance < cudaSimulationParameters.minCellDistance.value) {
@@ -254,7 +254,7 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     if (Math::length(velDelta) >= cellFusionVelocity && object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS
                         && (object->sticky || otherCell->sticky) && object->usableEnergy <= cellMaxBindingEnergy && otherCell->usableEnergy <= cellMaxBindingEnergy
                         && !object->fixed && !otherCell->fixed) {
-                        ObjectConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
+                        ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherCell);
                     }
                 }
             }
@@ -341,7 +341,7 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = cells.at(index);
         data.cellMap.executeForEach(object->pos, cudaSimulationParameters.maxCollisionDistance.value, object->detached, [&](auto const& otherCell) {
-            if (otherCell == cell) {
+            if (otherCell == object) {
                 return;
             }
 
@@ -396,7 +396,7 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
                 if (object->numConnections < MAX_CELL_BONDS && otherCell->numConnections < MAX_CELL_BONDS && (object->sticky || otherCell->sticky)
                     && Math::length(velDelta) >= cellFusionVelocity && isApproaching && object->usableEnergy <= cellMaxBindingEnergy
                     && otherCell->usableEnergy <= cellMaxBindingEnergy && !object->fixed && !otherCell->fixed) {
-                    ObjectConnectionProcessor::scheduleAddConnectionPair(data, cell, otherCell);
+                    ObjectConnectionProcessor::scheduleAddConnectionPair(data, object, otherCell);
                 }
             }
         });
@@ -417,7 +417,7 @@ __inline__ __device__ void ObjectProcessor::checkForces(SimulationData& data)
 
         if (Math::length(object->shared1) > ParameterCalculator::calcParameter(cudaSimulationParameters.maxForce, data, object->pos, object->color)) {
             if (data.primaryNumberGen.random() < cudaSimulationParameters.maxForceDecayProbability) {
-                ObjectConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+                ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
             }
         }
     }
@@ -534,7 +534,7 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
             }
         }
         if (scheduleForDestruction) {
-            ObjectConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+            ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
             for (int i = 0; i < object->numConnections; ++i) {
                 auto connectedCell = object->connections[i].object;
                 connectedCell->cellState = CellState_Detaching;
@@ -635,7 +635,7 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
                 } else if (connectedCellState == CellState_Reviving) {
                     isSameCreatureNeighborReviving = true;
                 } else if (connectedCellState == CellState_Activating) {
-                    if (connectedCell->connections[0].object == cell) {
+                    if (connectedCell->connections[0].object == object) {
                         isNeighborActivating = true;
                         //activatingObjectConnection = i;
                     }
@@ -724,9 +724,9 @@ __inline__ __device__ void ObjectProcessor::frontAngleUpdate_calcFutureValue(Sim
                     }
                     if (otherCell->frontAngleId == object->creature->frontAngleId) {
                         auto frontAngle_otherCell_cell =
-                            Math::getNormalizedAngle(otherCell->frontAngle + getInitialAngelSpan(otherCell, cell, otherCell->connections[0].object), -180.0f);
+                            Math::getNormalizedAngle(otherCell->frontAngle + getInitialAngelSpan(otherCell, object, otherCell->connections[0].object), -180.0f);
                         auto frontAngle_cell_otherCell = Math::getNormalizedAngle(frontAngle_otherCell_cell - 180.0f, -180.0f);
-                        auto frontAngle_cell_connection0 = Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(cell, 0, i), -180.0f);
+                        auto frontAngle_cell_connection0 = Math::getNormalizedAngle(frontAngle_cell_otherCell + getInitialAngelSpan(object, 0, i), -180.0f);
                         object->tempValue.as_uint32_float.floatPart = frontAngle_cell_connection0;
 
                         update = true;
@@ -878,7 +878,7 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
         }
         auto cellMaxBindingEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.cellMaxBindingEnergy, data, object->pos);
         if (object->usableEnergy > cellMaxBindingEnergy) {
-            ObjectConnectionProcessor::scheduleDeleteAllConnections(data, cell);
+            ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
         }
 
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
@@ -979,16 +979,16 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
             auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
             auto cellNormalEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
 
-            auto needsEnergy = [](Object* cell) {
-                return (object->cellState == CellState_Ready || object->cellState == CellState_Detaching || object->cellState == CellState_Reviving)
-                    && object->cellType == CellType_Constructor && object->creature
-                    && !ConstructorHelper::isFinished(object->cellTypeData.constructor, *object->creature->genome);
+            auto needsEnergy = [](Object* obj) {
+                return (obj->cellState == CellState_Ready || obj->cellState == CellState_Detaching || obj->cellState == CellState_Reviving)
+                    && obj->cellType == CellType_Constructor && obj->creature
+                    && !ConstructorHelper::isFinished(obj->cellTypeData.constructor, *obj->creature->genome);
             };
-            auto lowEnergy = [&](Object* cell) { return object->usableEnergy < cellNormalEnergy; };
+            auto lowEnergy = [&](Object* obj) { return obj->usableEnergy < cellNormalEnergy; };
 
-            auto cellNeedsEnergy = needsEnergy(cell);
+            auto cellNeedsEnergy = needsEnergy(object);
             auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
-            auto connectedCellLowEnergy = lowEnergy(cell);
+            auto connectedCellLowEnergy = lowEnergy(object);
 
             auto flow = 0.0f;
             if (connectedCellLowEnergy) {
@@ -1061,7 +1061,7 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
     }
 }
 
-__device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2)
+__device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* object, int connectionIndex1, int connectionIndex2)
 {
     if ((connectionIndex1 - connectionIndex2 + object->numConnections) % object->numConnections == 0) {
         return 0;
@@ -1069,7 +1069,7 @@ __device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* cell, i
     auto result = 0.0f;
     for (int i = connectionIndex1 + 1; i < connectionIndex1 + object->numConnections; i++) {
         auto index = i % object->numConnections;
-        result += MuscleProcessor::getInitialAngleFromPrevious(cell, index);
+        result += MuscleProcessor::getInitialAngleFromPrevious(object, index);
         if (index == connectionIndex2) {
             break;
         }
@@ -1077,7 +1077,7 @@ __device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* cell, i
     return Math::getNormalizedAngle(result, -180.0f);
 }
 
-__device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* cell, Object* connectedCell1, Object* connectedCell2)
+__device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* object, Object* connectedCell1, Object* connectedCell2)
 {
     auto connectionIndex1 = -1;
     auto connectionIndex2 = -1;
@@ -1092,5 +1092,5 @@ __device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* cell, O
     if (connectionIndex1 == -1 || connectionIndex2 == -1) {
         return 0;
     }
-    return getInitialAngelSpan(cell, connectionIndex1, connectionIndex2);
+    return getInitialAngelSpan(object, connectionIndex1, connectionIndex2);
 }

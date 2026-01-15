@@ -302,7 +302,7 @@ void StatisticsWindow::processTimelineStatistics()
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        processPlot(row++, &DataPointCollection::numCells);
+        processPlot(row++, &DataPointCollection::numObjects);
         ImGui::TableSetColumnIndex(1);
         AlienGui::Text("Cells");
 

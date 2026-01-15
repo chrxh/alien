@@ -46,7 +46,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     // Verify the fixed cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialEnergy, object._usableEnergy));
 }
 
 TEST_F(RadiationTests, structureCells_shouldNotRadiate)
@@ -70,7 +70,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
     // Verify the structure cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialEnergy, object._usableEnergy));
 }
 
 TEST_F(RadiationTests, baseCells_shouldRadiate)
@@ -160,5 +160,5 @@ TEST_F(RadiationTests, fixedStructureCells_shouldNotRadiate)
     // Verify the cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, cell._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialEnergy, object._usableEnergy));
 }

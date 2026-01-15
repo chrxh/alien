@@ -108,10 +108,10 @@ TEST_F(LayerParameterTests, circularZone_minCellEnergy_cellsDieInsideZone)
 
     for (auto const& object : resultData._objects) {
         // Check if cell is near the expected positions
-        if (approxCompare(cell._pos.x, 510.0f, 10.0f) && approxCompare(cell._pos.y, 500.0f, 10.0f)) {
+        if (approxCompare(object._pos.x, 510.0f, 10.0f) && approxCompare(object._pos.y, 500.0f, 10.0f)) {
             foundInsideSurvivor = true;
         }
-        if (approxCompare(cell._pos.x, 710.0f, 10.0f) && approxCompare(cell._pos.y, 500.0f, 10.0f)) {
+        if (approxCompare(object._pos.x, 710.0f, 10.0f) && approxCompare(object._pos.y, 500.0f, 10.0f)) {
             foundOutsideSurvivor = true;
         }
     }
@@ -452,15 +452,15 @@ TEST_F(LayerParameterTests, movingRectangularZone_cellsAffectedByMovingZone)
 
     for (auto const& object : resultData._objects) {
         // Check for cell that was initially in zone (around x=320)
-        if (approxCompare(cell._pos.x, 320.0f, 20.0f) && approxCompare(cell._pos.y, 500.0f, 20.0f)) {
+        if (approxCompare(object._pos.x, 320.0f, 20.0f) && approxCompare(object._pos.y, 500.0f, 20.0f)) {
             foundInitialZoneSurvivor = true;
         }
         // Check for cell that got caught by moving zone (around x=460)
-        if (approxCompare(cell._pos.x, 460.0f, 20.0f) && approxCompare(cell._pos.y, 500.0f, 20.0f)) {
+        if (approxCompare(object._pos.x, 460.0f, 20.0f) && approxCompare(object._pos.y, 500.0f, 20.0f)) {
             foundCaughtSurvivor = true;
         }
         // Check for cell outside zone path (around y=650)
-        if (approxCompare(cell._pos.y, 650.0f, 20.0f)) {
+        if (approxCompare(object._pos.y, 650.0f, 20.0f)) {
             foundOutsideSurvivor = true;
         }
     }

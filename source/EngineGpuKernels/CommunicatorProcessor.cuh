@@ -14,8 +14,8 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& result);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processSender(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static bool tryTransmitSignal(SimulationData& data, Object* senderCell, Object* receiverCell, int newNumTimesSent);
 };
@@ -33,12 +33,12 @@ __device__ __inline__ void CommunicatorProcessor::process(SimulationData& data, 
     }
 }
 
-__device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ bool shouldProcess;
     if (threadIdx.x == 0) {
         // Process if signal is Active or Fading (signal has been or is being processed this timestep)
-        shouldProcess = SignalProcessor::isManuallyTriggered(data, cell);
+        shouldProcess = SignalProcessor::isManuallyTriggered(data, object);
     }
     __syncthreads();
 
@@ -48,12 +48,12 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
 
     auto const& mode = object->cellTypeData.communicator.mode;
     if (mode == CommunicatorMode_Sender) {
-        processSender(data, statistics, cell);
+        processSender(data, statistics, object);
     }
     // Receiver mode: signals are set by senders, no additional processing needed
 }
 
-__device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ float range;
     __shared__ int maxTimesSent;
@@ -78,7 +78,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     int rangeInt = static_cast<int>(ceilf(range));
 
     // Matching lambda to check if a cell is a valid receiver
-    auto isMatch = [&cell](Object* otherCell) {
+    auto isMatch = [&object](Object* otherCell) {
         // Must be a communicator in receiver mode
         if (otherCell->cellType != CellType_Communicator || otherCell->cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;
@@ -136,7 +136,7 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
         auto otherCell = data.cellMap.getFirst(scanPos);
         while (otherCell != nullptr) {
             if (isMatch(otherCell)) {
-                tryTransmitSignal(data, cell, otherCell, newNumTimesSent);
+                tryTransmitSignal(data, object, otherCell, newNumTimesSent);
             }
             otherCell = otherCell->nextCell;
         }

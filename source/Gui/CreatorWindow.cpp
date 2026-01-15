@@ -236,7 +236,7 @@ void CreatorWindow::createCell()
                     .fixed(_fixed)
                     .sticky(_makeSticky);
     Description description;
-    description._objects.emplace_back(cell);
+    description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 
@@ -244,7 +244,7 @@ void CreatorWindow::createParticle()
 {
     auto energyParticle = EnergyDescription().pos(getRandomPos()).energy(_energy);
     Description description;
-    description._energyParticles.emplace_back(particle);
+    description._energyParticles.emplace_back(energyParticle);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
 }
 

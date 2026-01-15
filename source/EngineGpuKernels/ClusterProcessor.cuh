@@ -73,7 +73,7 @@ __device__ __inline__ void ClusterProcessor::findClusterBoundaries(SimulationDat
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
+        auto object = cells.at(index);
         auto cluster = cells.at(object->clusterIndex);
         if (object->pos.x < data.worldSize.x / 3) {
             atomicOr(&cluster->clusterBoundaries, 1);
@@ -90,7 +90,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterPosAndVel(Simulati
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
+        auto object = cells.at(index);
         auto cluster = cells.at(object->clusterIndex);
         atomicAdd(&cluster->clusterVel.x, object->vel.x);
         atomicAdd(&cluster->clusterVel.y, object->vel.y);
@@ -117,7 +117,7 @@ __device__ __inline__ void ClusterProcessor::accumulateClusterAngularProp(Simula
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
+        auto object = cells.at(index);
         auto cluster = cells.at(object->clusterIndex);
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
@@ -145,7 +145,7 @@ __device__ __inline__ void ClusterProcessor::applyClusterData(SimulationData& da
     auto const partition = calcSystemThreadPartition(cells.getNumEntries());
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
-        auto cell = cells.at(index);
+        auto object = cells.at(index);
         auto cluster = cells.at(object->clusterIndex);
         auto clusterPos = cluster->clusterPos / cluster->numCellsInCluster;
         auto clusterVel = cluster->clusterVel / cluster->numCellsInCluster;

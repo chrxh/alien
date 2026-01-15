@@ -189,13 +189,13 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     }
 
     // Check angles without muscle distortions
-    auto getInitialAngle = [&muscleMode](ObjectDescription const& cell) {
+    auto getInitialAngle = [&muscleMode](ObjectDescription const& object) {
         if (muscleMode == MuscleMode_AutoBending) {
-            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_ManualBending) {
-            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_AngleBending) {
-            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }
@@ -245,10 +245,10 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     std::vector<ObjectDescription> spikes1;
     std::vector<ObjectDescription> spikes2;
     for (auto const& object : cells) {
-        if (cell._color == 0) {
-            body.emplace_back(cell);
-        } else if (cell._color == 1) {
-            leg.emplace_back(cell);
+        if (object._color == 0) {
+            body.emplace_back(object);
+        } else if (object._color == 1) {
+            leg.emplace_back(object);
         }
     }
     spikes1.emplace_back(actualData.getObjectRef(leg.at(1)._connections.at(3)._objectId));
@@ -275,13 +275,13 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     }
 
     // Check angles without muscle distortions
-    auto getInitialAngle = [&muscleMode](ObjectDescription const& cell) {
+    auto getInitialAngle = [&muscleMode](ObjectDescription const& object) {
         if (muscleMode == MuscleMode_AutoBending) {
-            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_ManualBending) {
-            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_AngleBending) {
-            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(cell._cellType)._mode)._initialAngle.value();
+            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }
@@ -338,7 +338,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     RealVector2D movementDirection;
     {
         auto actualData = _simulationFacade->getSimulationData();
-        for (auto& object : actualData._objects) { cell._vel = {0, 0}; }
+        for (auto& object : actualData._objects) { object._vel = {0, 0}; }
         _simulationFacade->setSimulationData(actualData);
 
         DescriptionEditService::get().removeCell(actualData, 0);
@@ -407,9 +407,9 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     auto first = true;
     for (auto const& object : cells) {
         if (first) {
-            EXPECT_TRUE(approxCompareAngles(0.0f, cell._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(0.0f, object._frontAngle.value()));
         } else {
-            EXPECT_TRUE(approxCompareAngles(180.0f, cell._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(180.0f, object._frontAngle.value()));
         }
         first = false;
     }
@@ -451,7 +451,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     float startPos_projected = 0;
     {
         auto actualData = _simulationFacade->getSimulationData();
-        for (auto& object : actualData._objects) { cell._vel = {0, 0}; }
+        for (auto& object : actualData._objects) { object._vel = {0, 0}; }
         _simulationFacade->setSimulationData(actualData);
 
         DescriptionEditService::get().removeCell(actualData, 0);

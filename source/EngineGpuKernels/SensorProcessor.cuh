@@ -10,12 +10,12 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
-    __inline__ __device__ static void processDetection(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void processTelemetry(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void initialScan(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static void relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processDetection(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void processTelemetry(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void initialScan(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static void relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     enum class ScanType
     {
@@ -23,7 +23,7 @@ private:
         RelocateLastMatch
     };
     __inline__ __device__ static uint64_t
-    getMatchInfo(SimulationData& data, Object* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType);
+    getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float absAngle, float distance, ScanType scanType);
 
     __inline__ __device__ static uint64_t pack(float distance, float angle, float density, uint16_t misc = 0);
     __inline__ __device__ static void unpack(float& distance, float& angle, float& density, uint16_t& misc, uint64_t bytes);
@@ -54,11 +54,11 @@ __inline__ __device__ void SensorProcessor::process(SimulationData& data, Simula
     }
 }
 
-__inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void SensorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ bool isTriggered;
     if (threadIdx.x == 0) {
-        isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, cell, object->cellTypeData.sensor.autoTriggerInterval);
+        isTriggered = SignalProcessor::isAutoOrManuallyTriggered(data, object, object->cellTypeData.sensor.autoTriggerInterval);
         if (object->frontAngle == VALUE_NOT_SET_FLOAT) {
             isTriggered = false;
         }
@@ -69,30 +69,30 @@ __inline__ __device__ void SensorProcessor::processCell(SimulationData& data, Si
         statistics.incNumSensorActivities(object->color);
 
         if (object->cellTypeData.sensor.mode != SensorMode_Telemetry) {
-            processDetection(data, statistics, cell);
+            processDetection(data, statistics, object);
         } else {
-            processTelemetry(data, statistics, cell);
+            processTelemetry(data, statistics, object);
         }
     }
 }
 
-__inline__ __device__ void SensorProcessor::processDetection(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void SensorProcessor::processDetection(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto forceInitialScan = object->signal.channels[Channels::SensorForceInitialScan] < -NEAR_ZERO;
     if (!object->cellTypeData.sensor.lastMatchAvailable || forceInitialScan) {
-        initialScan(data, statistics, cell);
+        initialScan(data, statistics, object);
     } else {
-        relocateLastMatch(data, statistics, cell);
+        relocateLastMatch(data, statistics, object);
     }
 }
 
-__inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     if (threadIdx.x == 0) {
 
         // Create signal if not already existing
         if (object->signalState != SignalState_Active) {
-            SignalProcessor::createEmptySignal(cell);
+            SignalProcessor::createEmptySignal(object);
         }
 
         // Measure cell energy level
@@ -107,7 +107,7 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
         object->signal.channels[Channels::SensorTelemetryCellEnergy] = 1.0f - 1.0f / powf(object->usableEnergy + 1.0f, 0.1f);
 
         // Measure cell velocity with respect to front angle
-        auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+        auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
         auto absFrontAngle = refAngle + object->frontAngle;
         auto velAngle = Math::angleOfVector(object->vel);
         object->signal.channels[Channels::SensorTelemetryCellVelAngle] =
@@ -125,7 +125,7 @@ __inline__ __device__ void SensorProcessor::processTelemetry(SimulationData& dat
     }
 }
 
-__inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     __shared__ uint64_t lookupResult;
 
@@ -176,7 +176,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
             data.cellMap.correctPosition(scanPos);
 
             if (distance > startRadius) {
-                uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::LocateMatch);
+                uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::LocateMatch);
                 if (matchInfo != 0xffffffffffffffff) {
                     alienAtomicMin64(&lookupResult, matchInfo);
                     break;
@@ -196,14 +196,14 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
         if (lookupResult != 0xffffffffffffffff) {
             // Create signal if not already existing
             if (object->signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(cell);
+                SignalProcessor::createEmptySignal(object);
             }
 
             float distance, absAngle, density;
             uint16_t creatureIdPart;
             unpack(distance, absAngle, density, creatureIdPart, lookupResult);
 
-            auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+            auto refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
             auto relAngle = Math::getNormalizedAngle(absAngle - refAngle - object->frontAngle, -180.0f);
             writeSignal(object->signal, relAngle, density, distance);
             statistics.incNumSensorMatches(object->color);
@@ -224,7 +224,7 @@ __inline__ __device__ void SensorProcessor::initialScan(SimulationData& data, Si
     }
 }
 
-__inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     int radius = toInt(blockDim.x) / 2;
     CUDA_CHECK(32 == radius);
@@ -235,7 +235,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
     
     if (threadIdx.x == 0) {
         lookupResult = 0xffffffffffffffff;
-        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, cell));
+        refAngle = Math::angleOfVector(SignalProcessor::calcReferenceDirection(data, object));
     }
     __syncthreads();
     
@@ -246,7 +246,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
         auto scanPos = centerScanPos + delta;
         auto distance = Math::length(delta);
         auto angle = Math::angleOfVector(delta);
-        uint64_t matchInfo = getMatchInfo(data, cell, scanPos, angle, distance, ScanType::RelocateLastMatch);
+        uint64_t matchInfo = getMatchInfo(data, object, scanPos, angle, distance, ScanType::RelocateLastMatch);
         if (matchInfo != 0xffffffffffffffff) {
             alienAtomicMin64(&lookupResult, matchInfo);
             break;
@@ -295,7 +295,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 
             // Create signal if not already existing
             if (object->signalState != SignalState_Active) {
-                SignalProcessor::createEmptySignal(cell);
+                SignalProcessor::createEmptySignal(object);
             }
 
             auto targetPos = object->pos + Math::unitVectorOfAngle(absAngle) * distance;
@@ -315,7 +315,7 @@ __inline__ __device__ void SensorProcessor::relocateLastMatch(SimulationData& da
 }
 
 __inline__ __device__ uint64_t
-SensorProcessor::getMatchInfo(SimulationData& data, Object* cell, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
+SensorProcessor::getMatchInfo(SimulationData& data, Object* object, float2 const& scanPos, float absAngle, float distance, ScanType scanType)
 {
     if (scanType == ScanType::RelocateLastMatch) {
         auto delta = data.cellMap.getCorrectedDirection(scanPos - object->pos);
@@ -354,7 +354,7 @@ SensorProcessor::getMatchInfo(SimulationData& data, Object* cell, float2 const& 
 
             auto otherCell = data.cellMap.getFirst(scanPos);
             while (otherCell != nullptr) {
-                // Check if this cell is part of a creature (not structure or free cell)
+                // Check if this cell is part of a creature (not structure or free object)
                 if (otherCell->cellType != CellType_Structure && otherCell->cellType != CellType_Free && !object->isSameCreature(otherCell)) {
                     bool matches = true;
 

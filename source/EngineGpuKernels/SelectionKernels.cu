@@ -124,7 +124,7 @@ __global__ void cudaRolloutSelectionStep(SimulationData data, int* result)
         auto const& object = data.entities.objects.at(index);
 
         if (0 != object->selected) {
-            auto currentCell = cell;
+            auto currentCell = object;
 
             //heuristics to cover connected cells
             for (int i = 0; i < 30; ++i) {

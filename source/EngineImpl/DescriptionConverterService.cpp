@@ -155,7 +155,7 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
             auto creatureTOIndex = to.objects[i].creatureIndex;
             object._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
-        result._objects.emplace_back(cell);
+        result._objects.emplace_back(object);
     }
 
     // Particles
@@ -194,13 +194,13 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
         setConnections(cellTOs, object, cellIndexTOById);
     }
     for (auto const& energyParticle : description._energyParticles) {
-        addParticle(particleTOs, particle);
+        addParticle(particleTOs, energyParticle);
     }
 
     return provideDataTO(creatureTOs, genomeTOs, geneTOs, nodeTOs, cellTOs, particleTOs, heap);
 }
 
-TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& cell) const
+TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& object) const
 {
     std::vector<ObjectTO> cellTOs;
     std::vector<uint8_t> heap;
@@ -880,13 +880,13 @@ CreatureDescription DescriptionConverterService::createCreatureDescription(TO co
 EnergyDescription DescriptionConverterService::createEnergyDescription(TO const& to, int particleIndex) const
 {
     auto const& energyParticle = to.energyParticles[particleIndex];
-    NumberGenerator::get().adaptMaxIds({.entityId = particle.id});
+    NumberGenerator::get().adaptMaxIds({.entityId = energyParticle.id});
     return EnergyDescription()
-        .id(particle.id)
-        .pos({particle.pos.x, particle.pos.y})
-        .vel({particle.vel.x, particle.vel.y})
-        .energy(particle.energy)
-        .color(particle.color);
+        .id(energyParticle.id)
+        .pos({energyParticle.pos.x, energyParticle.pos.y})
+        .vel({energyParticle.vel.x, energyParticle.vel.y})
+        .energy(energyParticle.energy)
+        .color(energyParticle.color);
 }
 
 void DescriptionConverterService::convertGenomeToTO(

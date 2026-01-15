@@ -15,7 +15,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -28,13 +28,13 @@ __device__ __inline__ void DepotProcessor::process(SimulationData& data, Simulat
     auto partition = calcSystemThreadPartition(operations.getNumEntries());
     for (int i = partition.startIndex; i <= partition.endIndex; i += partition.step) {
         auto const& object = operations.at(i).object;
-        processCell(data, statistics, cell);
+        processCell(data, statistics, object);
     }
 }
 
-__device__ __inline__ void DepotProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__device__ __inline__ void DepotProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+    if (SignalProcessor::isManuallyTriggered(data, object)) {
         auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
         if (object->signal.channels[Channels::CellTypeActivation] > 0 && object->usableEnergy > normalCellEnergy) {
             auto energyToTransfer = max(min(object->usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);

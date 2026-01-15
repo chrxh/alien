@@ -261,19 +261,19 @@ public:
         }
     }
 
-    __device__ __inline__ void addFreeCell(Object* cell)
+    __device__ __inline__ void addFreeCell(Object* object)
     {
-        auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
-            auto color = calcMod(cell->color, MAX_COLORS);
+            auto color = calcMod(object->color, MAX_COLORS);
             // Increment both the color-specific count and the total count
             alienAtomicAdd64(&_freeCellDensityMap[index], static_cast<uint64_t>((1ull << (color * 8)) | (1ull << 56)));
         }
     }
 
-    __device__ __inline__ void addStructureCell(Object* cell)
+    __device__ __inline__ void addStructureCell(Object* object)
     {
-        auto index = toInt(cell->pos.x) / _slotSize + toInt(cell->pos.y) / _slotSize * _densityMapSize.x;
+        auto index = toInt(object->pos.x) / _slotSize + toInt(object->pos.y) / _slotSize * _densityMapSize.x;
         if (index >= 0 && index < _densityMapSize.x * _densityMapSize.y) {
             atomicAdd(&_structureCellDensityMap[index], 1u);
         }

@@ -154,7 +154,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Clear selection if another node has been selected outside of this widget or if cell id does not exist in preview
     auto selectedCellIdExists = false;
     for (auto const& object : desc._objects) {
-        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
+        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == object._id) {
             selectedCellIdExists = true;
             break;
         }
@@ -168,7 +168,7 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     {
         auto maxDistance = 0.0f;
         for (auto const& object : desc._objects) {
-            maxDistance = std::max(maxDistance, Math::length(cell._pos));
+            maxDistance = std::max(maxDistance, Math::length(object._pos));
         }
         auto radius = (maxDistance + 1.0f);
         radius = std::max(radius, 3.0f) * 1.25f;
@@ -199,18 +199,18 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Draw selected gene
     auto selectedGeneColor = ImColor::HSV(0.66f, 0.5f, 0.15f);
     for (auto const& object : desc._objects) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
-        if (selectedGene.has_value() && cell._geneIndex == selectedGene.value()) {
+        auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
+        if (selectedGene.has_value() && object._geneIndex == selectedGene.value()) {
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, selectedGeneColor);
         }
     }
 
     // Draw selected nodes
     for (auto const& object : desc._objects) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
-        if (selectedGene.has_value() && selectedNode.has_value() && cell._geneIndex == selectedGene.value() && cell._nodeIndex == selectedNode.value()) {
+        auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
+        if (selectedGene.has_value() && selectedNode.has_value() && object._geneIndex == selectedGene.value() && object._nodeIndex == selectedNode.value()) {
             float h, s, v;
-            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[cell._color], h, s, v);
+            AlienGui::ConvertRGBtoHSV(Const::IndividualCellColors[object._color], h, s, v);
             s = 0.5f;
             v = 0.3f;
             drawList->AddCircleFilled({cellPos.x, cellPos.y}, cellSize * 0.6f, ImColor::HSV(h, s, v));
@@ -220,14 +220,14 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Draw signal restrictions
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& object : desc._objects) {
-            auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
+            auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             float radius = cellSize * 0.33f;
 
-            if (!cell._signalRestriction.has_value()) {
+            if (!object._signalRestriction.has_value()) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius, ImColor::HSV(0, 0, 1.0f, 0.2f));
             } else {
-                auto startAngle = Math::getNormalizedAngle(cell._signalRestriction->_startAngle, 0);
-                auto endAngle = Math::getNormalizedAngle(cell._signalRestriction->_endAngle, 0);
+                auto startAngle = Math::getNormalizedAngle(object._signalRestriction->_startAngle, 0);
+                auto endAngle = Math::getNormalizedAngle(object._signalRestriction->_endAngle, 0);
 
                 // Draw filled ring sector (annular sector) between startAngle and endAngle
                 const int numSegments = 32;  // Increase for smoother arc
@@ -257,15 +257,15 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
 
     // Draw cells and selected cells
     for (auto const& object : desc._objects) {
-        auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
+        auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
         float h, s, v;
-        uint32_t color = cell._color != -1 ? Const::IndividualCellColors[cell._color] : 0x707070;
+        uint32_t color = object._color != -1 ? Const::IndividualCellColors[object._color] : 0x707070;
         AlienGui::ConvertRGBtoHSV(color, h, s, v);
 
         auto cellRadiusFactor = _zoom > ZoomLevelForConnections ? 0.25f : 0.5f;
         drawList->AddCircleFilled({cellPos.x, cellPos.y}, std::max(1.0f, cellSize * cellRadiusFactor), ImColor::HSV(h, s * 1.2f, v * 1.0f));
 
-        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == cell._id) {
+        if (_selectedCellIdFromPreview.has_value() && _selectedCellIdFromPreview.value() == object._id) {
             if (_zoom > ZoomLevelForLabels) {
                 drawList->AddCircle({cellPos.x, cellPos.y}, cellSize * 0.25f, ImColor::HSV(0, 0, 1, 0.7f), 0, 2.0f/*cellSize * 0.05f*/);
             }
@@ -274,10 +274,10 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
         if (clickedOnPreviewWindow) {
             if (mousePos.x >= cellPos.x - cellSize / 2 && mousePos.y >= cellPos.y - cellSize / 2 && mousePos.x <= cellPos.x + cellSize / 2
                 && mousePos.y <= cellPos.y + cellSize / 2) {
-                selectedGene = cell._geneIndex;
-                selectedNode = cell._nodeIndex;
+                selectedGene = object._geneIndex;
+                selectedNode = object._nodeIndex;
                 _selectedNodeFromPreview = selectedNode;
-                _selectedCellIdFromPreview = cell._id;
+                _selectedCellIdFromPreview = object._id;
 
             }
         }
@@ -286,15 +286,15 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Draw signals
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& object : desc._objects) {
-            auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
+            auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
             auto constexpr cellRadiusFactor = 0.3f;
             float radius = cellSize * cellRadiusFactor;
 
-            if (cell._signalState == SignalState_Active) {
+            if (object._signalState == SignalState_Active) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 1.0f, 1.0f));
                 drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.65f, ImColor::HSV(0, 0, 0.2f, 0.8f));
             }
-            if (cell._signalState == SignalState_Fading) {
+            if (object._signalState == SignalState_Fading) {
                 drawList->AddCircleFilled({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 1.0f, 0.5f));
                 drawList->AddCircle({cellPos.x, cellPos.y}, radius * 0.35f, ImColor::HSV(0, 0, 0.2f, 0.5f));
             }
@@ -304,8 +304,8 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Draw cell connections
     if (_zoom > ZoomLevelForConnections) {
         for (auto const& connection : desc._connections) {
-            auto cellPos1 = mapWorldToViewPosition(connection._cell1, windowSize, windowPos);
-            auto cellPos2 = mapWorldToViewPosition(connection._cell2, windowSize, windowPos);
+            auto cellPos1 = mapWorldToViewPosition(connection._object1, windowSize, windowPos);
+            auto cellPos2 = mapWorldToViewPosition(connection._object2, windowSize, windowPos);
 
             auto direction = cellPos1 - cellPos2;
 
@@ -344,9 +344,9 @@ void _CreaturePreviewWidget::processCellGraphAndSelection(ConversionResult const
     // Draw gene references
     if (_zoom > ZoomLevelForLabels) {
         for (auto const& object : desc._objects) {
-            if (cell._constructorGeneIndex.has_value()) {
-                auto cellPos = mapWorldToViewPosition(cell._pos, windowSize, windowPos);
-                auto text = std::to_string(cell._constructorGeneIndex.value() + 1);
+            if (object._constructorGeneIndex.has_value()) {
+                auto cellPos = mapWorldToViewPosition(object._pos, windowSize, windowPos);
+                auto text = std::to_string(object._constructorGeneIndex.value() + 1);
                 auto textLength = toFloat(text.size());
                 auto truncatedSize = std::min(scale(30.0f), cellSize);
                 drawList->AddRectFilled(
@@ -378,8 +378,8 @@ void _CreaturePreviewWidget::processSignalEditor(bool& phenotypeChanged, Descrip
     }
     std::optional<CellPreviewDescription> selectedCell;
     for (auto const& object : conversionResult.description._objects) {
-        if (cell._id == _selectedCellIdFromPreview.value()) {
-            selectedCell = cell;
+        if (object._id == _selectedCellIdFromPreview.value()) {
+            selectedCell = object;
             break;
         }
     }
@@ -518,11 +518,11 @@ void _CreaturePreviewWidget::moveCenter(
 void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreviewDescription const& editedCell) const
 {
     for (auto& object : phenotype._objects) {
-        if (cell._id == editedCell._id) {
-            cell._signalState = editedCell._signalState;
+        if (object._id == editedCell._id) {
+            object._signalState = editedCell._signalState;
             if (editedCell._signalState == SignalState_Active) {
                 auto signalDesc = SignalDescription().channels(editedCell._signal.value()._channels);
-                cell._signal = signalDesc;
+                object._signal = signalDesc;
             }
         }
     }

@@ -275,7 +275,7 @@ void PatternEditorWindow::processIntern()
         _angularVel = 0;
     }
     ImGui::SameLine();
-    AlienGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected cell.\n"
+    AlienGui::HelpMarker("If turned on, all changes made in this window or with the mouse cursor are applied to the cell networks of the selected object.\n"
                          "If this option is disabled, the changes will be applied only to the selected cells. In this case, the connections between the cells "
                          "and the neighboring cells are recalculated when the positions are changed.\n"
                          "If you hold down the SHIFT key, this toggle button is temporarily turned off.");

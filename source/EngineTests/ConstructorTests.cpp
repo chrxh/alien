@@ -2670,9 +2670,9 @@ TEST_F(ConstructorTests, avoidConnectionsBetweenDifferentConstructions)
     ObjectDescription object1, object2;
     for (auto const& object : constructedCells) {
         if (object._parentNodeIndex == 0) {
-            object1 = cell;
+            object1 = object;
         } else {
-            object2 = cell;
+            object2 = object;
         }
     }
     EXPECT_EQ(3, object1._connections.size());
@@ -3089,12 +3089,12 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon)
     auto object = [&](uint64_t id) { return actualData.getObjectRef(id); };
     auto constructedCell = actualData.getOtherObjectRef({0, 1, 2, 3, 4});
 
-    EXPECT_EQ(1, cell(1)._connections.size());
-    EXPECT_EQ(3, cell(2)._connections.size());
-    EXPECT_EQ(2, cell(3)._connections.size());
-    EXPECT_EQ(2, cell(4)._connections.size());
+    EXPECT_EQ(1, object(1)._connections.size());
+    EXPECT_EQ(3, object(2)._connections.size());
+    EXPECT_EQ(2, object(3)._connections.size());
+    EXPECT_EQ(2, object(4)._connections.size());
     EXPECT_EQ(3, constructedCell._connections.size());
-    EXPECT_EQ(1, cell(0)._connections.size());
+    EXPECT_EQ(1, object(0)._connections.size());
 
     EXPECT_TRUE(approxCompare(90.0f, actualData.getConnectionRef(2, constructedCell._id)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(180.0f, actualData.getConnectionRef(2, 1)._angleFromPrevious));
@@ -3150,12 +3150,12 @@ TEST_F(ConstructorTests, angleCorrectionByInnerSumOfPolygon_mirrored)
     auto object = [&](uint64_t id) { return actualData.getObjectRef(id); };
     auto constructedCell = actualData.getOtherObjectRef({0, 1, 2, 3, 4});
 
-    EXPECT_EQ(1, cell(1)._connections.size());
-    EXPECT_EQ(3, cell(2)._connections.size());
-    EXPECT_EQ(2, cell(3)._connections.size());
-    EXPECT_EQ(2, cell(4)._connections.size());
+    EXPECT_EQ(1, object(1)._connections.size());
+    EXPECT_EQ(3, object(2)._connections.size());
+    EXPECT_EQ(2, object(3)._connections.size());
+    EXPECT_EQ(2, object(4)._connections.size());
     EXPECT_EQ(3, constructedCell._connections.size());
-    EXPECT_EQ(1, cell(0)._connections.size());
+    EXPECT_EQ(1, object(0)._connections.size());
 
     EXPECT_TRUE(approxCompare(180.0f, actualData.getConnectionRef(2, constructedCell._id)._angleFromPrevious));
     EXPECT_TRUE(approxCompare(90.0f, actualData.getConnectionRef(2, 1)._angleFromPrevious));

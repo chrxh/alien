@@ -165,9 +165,9 @@ TEST_F(DataTransferTests, setSimulationData_keepIdsStable)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> expectedCellIds;
-    for (auto const& object : data._objects) { expectedCellIds.insert(cell._id); }
+    for (auto const& object : data._objects) { expectedCellIds.insert(object._id); }
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& object : actualData._objects) { actualCellIds.insert(cell._id); }
+    for (auto const& object : actualData._objects) { actualCellIds.insert(object._id); }
     EXPECT_EQ(expectedCellIds, actualCellIds);
 
     std::unordered_set<uint64_t> expectedCreatureIds;
@@ -203,7 +203,7 @@ TEST_F(DataTransferTests, addAndSelectSimulationData_assignNewIds)
     auto actualData = _simulationFacade->getSimulationData();
 
     std::unordered_set<uint64_t> actualCellIds;
-    for (auto const& object : actualData._objects) { actualCellIds.insert(cell._id); }
+    for (auto const& object : actualData._objects) { actualCellIds.insert(object._id); }
     EXPECT_EQ(2 * 4, actualCellIds.size());
 
     std::unordered_set<uint64_t> actualCreatureIds;

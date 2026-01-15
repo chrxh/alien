@@ -17,7 +17,7 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
 
     __inline__ __device__ static float applyActivationFunction(ActivationFunction activationFunction, float x);
 };
@@ -34,12 +34,12 @@ __device__ __inline__ void NeuronProcessor::process(SimulationData& data, Simula
     for (int i = partition.startIndex; i <= partition.endIndex; ++i) {
         auto& object = cells.at(i);
         if (object->neuralNetwork) {
-            processCell(data, statistics, cell);
+            processCell(data, statistics, object);
         }
     }
 }
 
-__inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void NeuronProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
     auto block = cg::this_thread_block();
     auto tile = cg::tiled_partition<MAX_CHANNELS>(block);

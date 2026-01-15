@@ -9,8 +9,8 @@ public:
     __inline__ __device__ static void process(SimulationData& data, SimulationStatistics& statistics);
 
 private:
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell);
-    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object);
+    __inline__ __device__ static int countDefenderCells(SimulationStatistics& statistics, Object* object);
 };
 
 /************************************************************************/
@@ -26,9 +26,9 @@ __device__ __inline__ void InjectorProcessor::process(SimulationData& data, Simu
     }
 }
 
-__inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, cell)) {
+    if (SignalProcessor::isManuallyTriggered(data, object)) {
         auto injectorEnergyCost = cudaSimulationParameters.injectorEnergyCost.value[object->color];
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
 
@@ -51,7 +51,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
                 return;
             }
             // Only inject to other cells which are in a visible cone with respect to the injector cell
-            if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+            if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherCell)) {
                 return;
             }
             injectedCell = otherCell;
@@ -78,7 +78,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             object->signal.channels[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {
-                EnergyParticleProcessor::radiate(data, cell, injectorEnergyCost);
+                EnergyParticleProcessor::radiate(data, object, injectorEnergyCost);
             }
         }
 
@@ -86,7 +86,7 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
     }
 }
 
-__inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatistics& statistics, Object* cell)
+__inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatistics& statistics, Object* object)
 {
     int result = 0;
     for (int i = 0; i < object->numConnections; ++i) {

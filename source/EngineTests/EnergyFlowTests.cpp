@@ -30,7 +30,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
     Description data;
     for (int i = 0; i < 20; ++i) {
         auto object = ObjectDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
-        data._objects.emplace_back(cell);
+        data._objects.emplace_back(object);
         if (i > 0) {
             data.addConnection(i, i + 1);
         }
@@ -60,7 +60,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
         if (i == 19) {
             object.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
         }
-        cells.push_back(cell);
+        cells.push_back(object);
     }
     cells.at(0)._usableEnergy = 1000.0f;
     
@@ -106,7 +106,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             if (id == constructorId1 || id == constructorId2) {
                 object.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
             }
-            cells.push_back(cell);
+            cells.push_back(object);
         }
     }
     cells.at(0)._usableEnergy = 1000.0f;
@@ -151,7 +151,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
         if (i == 19) {
             object.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
         }
-        cells.push_back(cell);
+        cells.push_back(object);
     }
     cells.at(0)._usableEnergy = 1000.0f;
 
@@ -491,7 +491,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
             auto object = ObjectDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
             // Make all cells Digestors with different conductivity
             object.cellType(DigestorDescription().rawEnergyConductivity(conductivity));
-            data._objects.emplace_back(cell);
+            data._objects.emplace_back(object);
             if (i > 0) {
                 data.addConnection(i, i + 1);
             }

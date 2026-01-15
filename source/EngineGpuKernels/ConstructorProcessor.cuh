@@ -44,11 +44,11 @@ private:
         int requiredNodeId2;           // -1 = none
     };
     //
-    //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* cell);
+    //    __inline__ __device__ static void completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* object);
     //
-    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell, bool isPreview);
-    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* cell);
-    __inline__ __device__ static ConstructionData createConstructionData(Object* cell);
+    __inline__ __device__ static void processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview);
+    __inline__ __device__ static Creature* findOrCreateNewCreature(SimulationData& data, Object* object);
+    __inline__ __device__ static ConstructionData createConstructionData(Object* object);
 
     __inline__ __device__ static Object*
     tryConstructCell(SimulationData& data, SimulationStatistics& statistics, Object* hostCell, ConstructionData const& constructionData);
@@ -119,7 +119,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
     }
 }
 
-//__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* cell)
+//__inline__ __device__ void ConstructorProcessor::completenessCheck(SimulationData& data, SimulationStatistics& statistics, Object* object)
 //{
 //    if (!cudaSimulationParameters.constructorCompletenessCheck.value) {
 //        return;
@@ -128,7 +128,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    if (!GenomeDecoder::isFirstNode(constructor)) {
 //        return;
 //    }
-//    if (!SignalProcessor::isAutoTriggered(data, cell, object->cellTypeData.constructor.autoTriggerInterval)) {
+//    if (!SignalProcessor::isAutoTriggered(data, object, object->cellTypeData.constructor.autoTriggerInterval)) {
 //        return;
 //    }
 //
@@ -143,7 +143,7 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //
 //    auto constexpr QueueLength = 512;
 //    Object* taggedCells[QueueLength];
-//    taggedCells[0] = cell;
+//    taggedCells[0] = object;
 //    int numTaggedCells = 1;
 //    int currentTaggedCellIndex = 0;
 //    do {
@@ -171,26 +171,26 @@ __inline__ __device__ void ConstructorProcessor::process(SimulationData& data, S
 //    constructor.isReady = (actualCells >= constructor.numExpectedCells);
 //}
 //
-__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* cell, bool isPreview)
+__inline__ __device__ void ConstructorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object, bool isPreview)
 {
     if (object->creature == nullptr) {
         return;
     }
     auto& constructor = object->cellTypeData.constructor;
-    if (SignalProcessor::isAutoOrManuallyTriggered(data, cell, constructor.autoTriggerInterval, isPreview)) {
-        constructor.offspring = findOrCreateNewCreature(data, cell);
+    if (SignalProcessor::isAutoOrManuallyTriggered(data, object, constructor.autoTriggerInterval, isPreview)) {
+        constructor.offspring = findOrCreateNewCreature(data, object);
 
         if (ConstructorHelper::isFinished(constructor, *constructor.offspring->genome)) {
             return;
         }
 
-        if (!checkForValidConstruction(cell)) {
+        if (!checkForValidConstruction(object)) {
             constructor.currentNodeIndex = 0;
             constructor.currentConcatenation = 0;
         }
 
-        auto constructionData = createConstructionData(cell);
-        if (tryConstructCell(data, statistics, cell, constructionData)) {
+        auto constructionData = createConstructionData(object);
+        if (tryConstructCell(data, statistics, object, constructionData)) {
 
             object->signal.channels[Channels::ConstructorSuccess] = 1;  // Successful
 
@@ -223,7 +223,7 @@ __inline__ __device__ void ConstructorProcessor::processCell(SimulationData& dat
     }
 }
 
-__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Object* cell)
+__inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(SimulationData& data, Object* object)
 {
     auto& constructor = object->cellTypeData.constructor;
 
@@ -242,7 +242,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
 
     // Current branch under construction => use creature reference from there
     if (!(ConstructorHelper::isFirstNode(constructor) && ConstructorHelper::isFirstConcatenation(constructor))) {
-        auto lastConstructionCell = getLastConstructedCellOnBranch(cell);
+        auto lastConstructionCell = getLastConstructedCellOnBranch(object);
         if (lastConstructionCell) {
             return lastConstructionCell->creature;
         }
@@ -261,7 +261,7 @@ __inline__ __device__ Creature* ConstructorProcessor::findOrCreateNewCreature(Si
     return result;
 }
 
-__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Object* cell)
+__inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcessor::createConstructionData(Object* object)
 {
     auto& constructor = object->cellTypeData.constructor;
     auto& genome = constructor.offspring->genome;
@@ -279,7 +279,7 @@ __inline__ __device__ ConstructorProcessor::ConstructionData ConstructorProcesso
     result.isLastNodeOfLastConcatenation = result.isLastNode && ConstructorHelper::isLastConcatenation(constructor, *genome);
 
     result.hasInfiniteConcatenations = ConstructorHelper::hasInfiniteConcatenations(result.gene);
-    result.lastConstructionCell = getLastConstructedCellOnBranch(cell);
+    result.lastConstructionCell = getLastConstructedCellOnBranch(object);
     result.angle = result.node->referenceAngle;
     result.cellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
     if (result.node->cellType == CellTypeGenome_Constructor) {

@@ -38,7 +38,7 @@ __device__ __inline__ void AttackerProcessor::process(SimulationData& data, Simu
 
 __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    if (SignalProcessor::isManuallyTriggered(data, cell) && object->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
+    if (SignalProcessor::isManuallyTriggered(data, object) && object->rawEnergy < SimulationParameters::attackerMaxRawEnergyThreshold) {
 
         auto attackerEnergyCost = ParameterCalculator::calcParameter(cudaSimulationParameters.attackerEnergyCost, data, object->pos, object->color);
         auto cellMinEnergy = ParameterCalculator::calcParameter(cudaSimulationParameters.minCellEnergy, data, object->pos, object->color);
@@ -140,7 +140,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
             if (energyToTransfer > NEAR_ZERO) {
 
                 // Only attack other cells which are in a visible cone with respect to the attack cell
-                if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, cell, otherCell)) {
+                if (ObjectConnectionProcessor::existsOwnIntersectingCellInBetween(data, object, otherCell)) {
                     return;
                 }
 
@@ -176,7 +176,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
 
         // Radiation
         if (attackerEnergyCost > 0) {
-            EnergyParticleProcessor::radiate(data, cell, attackerEnergyCost);
+            EnergyParticleProcessor::radiate(data, object, attackerEnergyCost);
         }
 
         // Output (signal is already present since attacker can only be manually triggered)
