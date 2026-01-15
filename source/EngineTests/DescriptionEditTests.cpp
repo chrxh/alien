@@ -135,7 +135,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
     if (GetParam() == CellsOnCreature::No) {
         data._cells = {CellDescription().id(0), CellDescription().id(1)};
     } else {
-        data.addCreature(CreatureDescription(), {CellDescription().id(0), CellDescription().id(1)});
+        data.addCreature({CellDescription().id(0), CellDescription().id(1)}, CreatureDescription());
     }
 
     // Perform action
@@ -143,7 +143,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_differentCellIds)
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
 
     EXPECT_EQ(2, ids.size());
 }
@@ -155,7 +155,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
         if (GetParam() == CellsOnCreature::No) {
             return Description().cells({CellDescription().id(0), CellDescription().id(0)});
         } else {
-            return Description().addCreature(CreatureDescription(), {CellDescription().id(0), CellDescription().id(0)});
+            return Description().addCreature({CellDescription().id(0), CellDescription().id(0)}, CreatureDescription());
         }
     };
     auto data = createCollection();
@@ -165,7 +165,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_sameCellIds)
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
     EXPECT_EQ(2, ids.size());
 }
 
@@ -184,7 +184,7 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
             cells.emplace_back(CellDescription().id(i).age(i));
         }
         std::sort(cells.begin(), cells.end(), [](auto const& lhs, auto const& rhs) { return lhs._id > rhs._id; });
-        data.addCreature(CreatureDescription(), cells);
+        data.addCreature(cells, CreatureDescription());
     }
 
     // Perform action
@@ -216,17 +216,17 @@ TEST_F(DescriptionEditTests, assignNewIds_sameConnectionOnDifferentCreatures)
                         CellDescription().id(0).connections({ConnectionDescription().cellId(1)}),
                         CellDescription().id(1).connections({ConnectionDescription().cellId(0)}),
                     })
-                    .addCreature(CreatureDescription(), {
+                    .addCreature({
                         CellDescription().id(0).connections({ConnectionDescription().cellId(1)}),
                         CellDescription().id(1).connections({ConnectionDescription().cellId(0)}),
-                    });
+                    }, CreatureDescription());
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(4, ids.size());
 
     ASSERT_EQ(2, data.getNumFreeCells());
@@ -250,20 +250,20 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription(), {
+                    .addCreature({
                         CellDescription().id(0).connections({ConnectionDescription().cellId(2)}),
                         CellDescription().id(1),
-                    })
-                    .addCreature(CreatureDescription(), {
+                    }, CreatureDescription())
+                    .addCreature({
                         CellDescription().id(2).connections({ConnectionDescription().cellId(0)}),
-                    });
+                    }, CreatureDescription());
 
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(3, ids.size());
 
     ASSERT_EQ(0, data.getNumFreeCells());
@@ -310,15 +310,15 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionNotContained)
                         CellDescription().id(0).connections({ConnectionDescription().cellId(3)}),
                         CellDescription().id(1),
                     })
-                    .addCreature(CreatureDescription(), {
+                    .addCreature({
                         CellDescription().id(2).connections({ConnectionDescription().cellId(4)}),
-                    });
+                    }, CreatureDescription());
     // Perform action
     data.assignNewIds();
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(3, ids.size());
 
     ASSERT_EQ(2, data.getNumFreeCells());
@@ -361,7 +361,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_containe
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(2, ids.size());
 
     ASSERT_EQ(2, data._cells.size());
@@ -395,7 +395,7 @@ TEST_F(DescriptionEditTests, assignNewIds_cellWithLastConstructedCellId_notConta
 
     // Check result
     std::unordered_set<uint64_t> ids;
-    data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+    for (auto const& cell : data._cells) { ids.insert(cell._id); }
     ASSERT_EQ(2, ids.size());
 
     ASSERT_EQ(2, data._cells.size());
@@ -452,8 +452,8 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)})
-                    .addCreature(CreatureDescription().id(1), {CellDescription().id(0), CellDescription().id(0)});
+                    .addCreature({CellDescription().id(0), CellDescription().id(0)}, CreatureDescription().id(0))
+                    .addCreature({CellDescription().id(0), CellDescription().id(0)}, CreatureDescription().id(1));
 
     // Perform action
     data.assignNewIds();
@@ -468,7 +468,7 @@ TEST_F(DescriptionEditTests, assignNewIds_differentCreatureIds)
     }
     {
         std::unordered_set<uint64_t> ids;
-        data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+        for (auto const& cell : data._cells) { ids.insert(cell._id); }
         ASSERT_EQ(4, ids.size());
     }
 }
@@ -477,8 +477,8 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)})
-                    .addCreature(CreatureDescription().id(0), {CellDescription().id(0), CellDescription().id(0)});
+                    .addCreature({CellDescription().id(0), CellDescription().id(0)}, CreatureDescription().id(0))
+                    .addCreature({CellDescription().id(0), CellDescription().id(0)}, CreatureDescription().id(0));
 
     // Perform action
     data.assignNewIds();
@@ -493,7 +493,7 @@ TEST_F(DescriptionEditTests, assignNewIds_sameCreatureIds)
     }
     {
         std::unordered_set<uint64_t> ids;
-        data.forEachCell([&ids](auto const& cell) { ids.insert(cell._id); });
+        for (auto const& cell : data._cells) { ids.insert(cell._id); }
         ASSERT_EQ(4, ids.size());
     }
 }
@@ -502,8 +502,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_contained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2), {CellDescription()})
-                    .addCreature(CreatureDescription().id(3).ancestorId(2), {CellDescription()});
+                    .addCreature({CellDescription()}, CreatureDescription().id(2))
+                    .addCreature({CellDescription()}, CreatureDescription().id(3).ancestorId(2));
 
     // Perform action
     data.assignNewIds();
@@ -533,8 +533,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notContained)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2), {CellDescription()})
-                    .addCreature(CreatureDescription().id(3).ancestorId(1), {CellDescription()});
+                    .addCreature({CellDescription()}, CreatureDescription().id(2))
+                    .addCreature({CellDescription()}, CreatureDescription().id(3).ancestorId(1));
 
     // Perform action
     data.assignNewIds();
@@ -564,9 +564,9 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
 {
     // Create test data
     auto data = Description()
-                    .addCreature(CreatureDescription().id(2), {CellDescription()})
-                    .addCreature(CreatureDescription().id(2), {CellDescription()})
-                    .addCreature(CreatureDescription().id(3).ancestorId(2), {CellDescription()});
+                    .addCreature({CellDescription()}, CreatureDescription().id(2))
+                    .addCreature({CellDescription()}, CreatureDescription().id(2))
+                    .addCreature({CellDescription()}, CreatureDescription().id(3).ancestorId(2));
 
     // Perform action
     data.assignNewIds();
@@ -586,8 +586,8 @@ TEST_F(DescriptionEditTests, assignNewIds_creatureWithAncestorId_notUnique)
 TEST_F(DescriptionEditTests, adaptMaxIds)
 {
     auto data = Description()
-                    .addCreature(CreatureDescription().id(3), {CellDescription().id(5)})
-                    .addCreature(CreatureDescription(), {CellDescription()})
+                    .addCreature({CellDescription().id(5)}, CreatureDescription().id(3))
+                    .addCreature({CellDescription()}, CreatureDescription())
                     .particles({
                         ParticleDescription().id(7),
                         ParticleDescription(),
@@ -610,7 +610,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_lowerRight)
     for (int i = 0; i < 1000; ++i) {
         cells.emplace_back(CellDescription().id(i).pos({toFloat((50 + i) % WorldWidth), toFloat((50 + i) % WorldHeight)}));
     }
-    auto data = Description().addCreature(CreatureDescription(), cells);
+    auto data = Description().addCreature(cells, CreatureDescription());
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }
@@ -640,7 +640,7 @@ TEST_F(DescriptionEditTests, flattenTopology_longDiagonalCreature_upperLeft)
     for (int i = 0; i < 1000; ++i) {
         cells.emplace_back(CellDescription().id(i).pos({toFloat((50 - i + WorldWidth) % WorldWidth), toFloat((50 - i + WorldHeight) % WorldHeight)}));
     }
-    auto data = Description().addCreature(CreatureDescription(), cells);
+    auto data = Description().addCreature(cells, CreatureDescription());
     for (int i = 1; i < 1000; ++i) {
         data.addConnection(i - 1, i);
     }

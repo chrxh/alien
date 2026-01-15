@@ -134,8 +134,8 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, Direction::Forward);
     auto data = Description().addCreature(
-        CreatureDescription(),
         {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        CreatureDescription(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -217,8 +217,8 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     auto genome = createGenomeForCreatureWithOneLegAndSpikes(muscleMode, Direction::Forward);
     auto data = Description().addCreature(
-        CreatureDescription(),
         {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        CreatureDescription(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -328,8 +328,8 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
     auto data = Description().addCreature(
-        CreatureDescription(),
         {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        CreatureDescription(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -338,7 +338,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
     RealVector2D movementDirection;
     {
         auto actualData = _simulationFacade->getSimulationData();
-        actualData.forEachCell([](CellDescription& cell) { cell._vel = {0, 0}; });
+        for (auto& cell : actualData._cells) { cell._vel = {0, 0}; }
         _simulationFacade->setSimulationData(actualData);
 
         DescriptionEditService::get().removeCell(actualData, 0);
@@ -386,8 +386,8 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
     auto data = Description().addCreature(
-        CreatureDescription(),
         {CellDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        CreatureDescription(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -440,8 +440,8 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Description().addCreature(
-        CreatureDescription(),
         {CellDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        CreatureDescription(),
         genome);
 
     _simulationFacade->setSimulationData(data);
@@ -451,7 +451,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
     float startPos_projected = 0;
     {
         auto actualData = _simulationFacade->getSimulationData();
-        actualData.forEachCell([](CellDescription& cell) { cell._vel = {0, 0}; });
+        for (auto& cell : actualData._cells) { cell._vel = {0, 0}; }
         _simulationFacade->setSimulationData(actualData);
 
         DescriptionEditService::get().removeCell(actualData, 0);

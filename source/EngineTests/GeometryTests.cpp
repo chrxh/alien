@@ -212,11 +212,11 @@ TEST_F(GeometryTests, copyBuffers_mixedCellsAndParticles)
 
 TEST_F(GeometryTests, copyBuffers_creature)
 {
-    auto data = Description().addCreature(CreatureDescription().id(1), {
+    auto data = Description().addCreature({
         CellDescription().id(1).pos({100.0f, 100.0f}),
         CellDescription().id(2).pos({101.0f, 100.0f}),
         CellDescription().id(3).pos({102.0f, 100.0f}),
-    });
+    }, CreatureDescription().id(1));
     data.addConnection(1, 2);
     data.addConnection(2, 3);
     _simulationFacade->setSimulationData(data);
