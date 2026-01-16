@@ -53,7 +53,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
         data.objectMap.executeForEach(object->pos, cudaSimulationParameters.attackerRadius.value[object->color], object->detached, [&](auto const& otherObject) {
 
             if (attackerMode == AttackerMode_FreeCell) {
-                if (otherObject->typeData.cell.cellType != CellType_Free) {
+                if (otherObject->type != ObjectType_FreeCell) {
                     return;
                 }
 

@@ -117,11 +117,7 @@ InjectorDescription::InjectorDescription() {}
 
 CellType CellDescription::getCellType() const
 {
-    if (std::holds_alternative<StructureDescription>(_cellType)) {
-        return CellType_Structure;
-    } else if (std::holds_alternative<FreeCellDescription>(_cellType)) {
-        return CellType_Free;
-    } else if (std::holds_alternative<BaseDescription>(_cellType)) {
+    if (std::holds_alternative<BaseDescription>(_cellType)) {
         return CellType_Base;
     } else if (std::holds_alternative<DepotDescription>(_cellType)) {
         return CellType_Depot;

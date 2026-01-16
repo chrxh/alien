@@ -33,7 +33,7 @@ __inline__ __device__ void SignalProcessor::collectCellTypeOperations(Simulation
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
 
-        if (object->typeData.cell.cellType != CellType_Structure && object->typeData.cell.cellType != CellType_Free && object->typeData.cell.cellType != CellType_Base) {
+        if (object->type != ObjectType_Structure && object->type != ObjectType_FreeCell && object->typeData.cell.cellType != CellType_Base) {
             if (object->typeData.cell.cellType == CellType_Detonator && object->typeData.cell.cellTypeData.detonator.state == DetonatorState_Activated) {
                 data.cellTypeOperations[object->typeData.cell.cellType].tryAddEntry(CellTypeOperation{object});
             } else if (object->typeData.cell.cellState != CellState_Constructing && object->typeData.cell.cellState != CellState_Activating && object->typeData.cell.activationTime == 0) {
@@ -50,7 +50,7 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->typeData.cell.cellType == CellType_Structure || object->typeData.cell.cellType == CellType_Free) {
+        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
             continue;
         }
 
@@ -115,7 +115,7 @@ __inline__ __device__ void SignalProcessor::updateSignals(SimulationData& data)
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
-        if (object->typeData.cell.cellType == CellType_Structure || object->typeData.cell.cellType == CellType_Free) {
+        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
             continue;
         }
 

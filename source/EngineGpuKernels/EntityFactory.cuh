@@ -601,7 +601,7 @@ __inline__ __device__ Object* EntityFactory::createFreeCell(float energy, float2
     object->typeData.cell.nodeIndex = 0;
     object->typeData.cell.parentNodeIndex = 0;
     object->typeData.cell.geneIndex = 0;
-    object->typeData.cell.cellType = CellType_Free;
+    object->type = ObjectType_FreeCell;
     object->typeData.cell.neuralNetwork = nullptr;
 
     return object;

@@ -14,7 +14,7 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = objects.at(index);
             statistics.incNumCells(object->color);
-            if (object->typeData.cell.cellType == CellType_Free) {
+            if (object->type == ObjectType_FreeCell) {
                 statistics.incNumFreeCells(object->color);
             }
             statistics.addEnergy(object->color, object->typeData.cell.getEnergy());

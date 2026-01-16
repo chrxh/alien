@@ -248,15 +248,12 @@ DescriptionConverterService::DescriptionConverterService()
 ObjectDescription DescriptionConverterService::createObjectDescription(TO const& to, int objectIndex) const
 {
     ObjectDescription result(false);
-    CellDescription& cellDesc = result.getCellRef();
 
     auto const& objectTO = to.objects[objectIndex];
     result._id = objectTO.id;
     NumberGenerator::get().adaptMaxIds({.entityId = objectTO.id});
     result._pos = RealVector2D{objectTO.pos.x, objectTO.pos.y};
     result._vel = RealVector2D{objectTO.vel.x, objectTO.vel.y};
-    cellDesc._usableEnergy = objectTO.typeData.cell.usableEnergy;
-    cellDesc._rawEnergy = objectTO.typeData.cell.rawEnergy;
     result._stiffness = objectTO.stiffness;
     std::vector<ConnectionDescription> connections;
     for (int i = 0; i < objectTO.numConnections; ++i) {
@@ -273,11 +270,27 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         connections.emplace_back(connection);
     }
     result._connections = connections;
-    cellDesc._cellState = objectTO.typeData.cell.cellState;
     result._fixed = objectTO.fixed;
     result._sticky = objectTO.sticky;
-    cellDesc._age = objectTO.typeData.cell.age;
     result._color = objectTO.color;
+
+    // Handle object type: Structure, FreeCell, or Cell
+    if (objectTO.type == ObjectType_Structure) {
+        StructureDescription structureDesc;
+        result._type = structureDesc;
+        return result;
+    } else if (objectTO.type == ObjectType_FreeCell) {
+        FreeCellDescription freeCellDesc;
+        result._type = freeCellDesc;
+        return result;
+    }
+
+    // ObjectType_Cell - access typeData.cell
+    CellDescription cellDesc;
+    cellDesc._usableEnergy = objectTO.typeData.cell.usableEnergy;
+    cellDesc._rawEnergy = objectTO.typeData.cell.rawEnergy;
+    cellDesc._cellState = objectTO.typeData.cell.cellState;
+    cellDesc._age = objectTO.typeData.cell.age;
     cellDesc._frontAngle = objectTO.typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.typeData.cell.frontAngle) : std::nullopt;
     cellDesc._cellTriggered = objectTO.typeData.cell.cellTriggered;
     cellDesc._nodeIndex = objectTO.typeData.cell.nodeIndex;
@@ -287,14 +300,6 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
     cellDesc._headCell = objectTO.typeData.cell.headCell;
 
     switch (objectTO.typeData.cell.cellType) {
-    case CellType_Structure: {
-        StructureDescription base;
-        cellDesc._cellType = base;
-    } break;
-    case CellType_Free: {
-        FreeCellDescription base;
-        cellDesc._cellType = base;
-    } break;
     case CellType_Base: {
         BaseDescription base;
         cellDesc._cellType = base;
@@ -581,6 +586,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
     }
     cellDesc._activationTime = objectTO.typeData.cell.activationTime;
+    result._type = cellDesc;
     return result;
 }
 

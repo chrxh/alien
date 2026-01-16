@@ -292,12 +292,6 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
                             .tooltip(Const::getCellTypeTooltip(type)),
                         type)) {
                     switch (type) {
-                    case CellType_Structure: {
-                        object.getCellRef()._cellType = StructureDescription();
-                    } break;
-                    case CellType_Free: {
-                        object.getCellRef()._cellType = FreeCellDescription();
-                    } break;
                     case CellType_Base: {
                         object.getCellRef()._cellType = BaseDescription();
                     } break;
@@ -370,7 +364,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
 
 void _InspectorWindow::processCellTypePropertiesTab(ObjectDescription& object)
 {
-    if (object.getCellRef().getCellType() == CellType_Structure || object.getCellRef().getCellType() == CellType_Free) {
+    if (object.getObjectType() == ObjectType_Structure || object.getObjectType() == ObjectType_FreeCell) {
         return;
     }
 
