@@ -261,21 +261,37 @@ namespace
         auto& objectTO = to.objects[objectTOIndex];
 
         objectTO.id = object->id;
-        objectTO.typeData.cell.belongToCreature = (object->typeData.cell.creature != nullptr);
-        if (objectTO.typeData.cell.belongToCreature) {
-            objectTO.typeData.cell.creatureIndex = object->typeData.cell.creature->creatureIndex;
-        }
         objectTO.pos = object->pos;
         objectTO.vel = object->vel;
         objectTO.fixed = object->fixed;
         objectTO.sticky = object->sticky;
-        objectTO.typeData.cell.usableEnergy = object->typeData.cell.usableEnergy;
-        objectTO.typeData.cell.rawEnergy = object->typeData.cell.rawEnergy;
         objectTO.stiffness = object->stiffness;
         objectTO.numConnections = object->numConnections;
+        objectTO.color = object->color;
+        objectTO.type = object->type;
+
+        object->tempValue.as_uint64 = objectTOIndex;
+        for (int i = 0; i < object->numConnections; ++i) {
+            auto connectingCell = object->connections[i].object;
+            objectTO.connections[i].objectIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
+            objectTO.connections[i].distance = object->connections[i].distance;
+            objectTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;
+        }
+
+        // Handle Structure and FreeCell object types
+        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
+            return;
+        }
+
+        // ObjectType_Cell - access cell data
+        objectTO.typeData.cell.belongToCreature = (object->typeData.cell.creature != nullptr);
+        if (objectTO.typeData.cell.belongToCreature) {
+            objectTO.typeData.cell.creatureIndex = object->typeData.cell.creature->creatureIndex;
+        }
+        objectTO.typeData.cell.usableEnergy = object->typeData.cell.usableEnergy;
+        objectTO.typeData.cell.rawEnergy = object->typeData.cell.rawEnergy;
         objectTO.typeData.cell.cellState = object->typeData.cell.cellState;
         objectTO.typeData.cell.cellType = object->typeData.cell.cellType;
-        objectTO.color = object->color;
         objectTO.typeData.cell.frontAngle = object->typeData.cell.frontAngle;
         objectTO.typeData.cell.age = object->typeData.cell.age;
         objectTO.typeData.cell.signalRestriction.mode = object->typeData.cell.signalRestriction.mode;
@@ -293,14 +309,6 @@ namespace
         objectTO.typeData.cell.geneIndex = object->typeData.cell.geneIndex;
         objectTO.typeData.cell.frontAngleId = object->typeData.cell.frontAngleId;
         objectTO.typeData.cell.headCell = object->typeData.cell.headCell;
-
-        object->tempValue.as_uint64 = objectTOIndex;
-        for (int i = 0; i < object->numConnections; ++i) {
-            auto connectingCell = object->connections[i].object;
-            objectTO.connections[i].objectIndex = reinterpret_cast<uint8_t*>(connectingCell) - heap;
-            objectTO.connections[i].distance = object->connections[i].distance;
-            objectTO.connections[i].angleFromPrevious = object->connections[i].angleFromPrevious;
-        }
 
         if (object->typeData.cell.neuralNetwork != nullptr) {
             int targetSize;  //not used

@@ -965,6 +965,9 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
 
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = objects.at(index);
+        if (object->type == ObjectType_Structure || object->type == ObjectType_FreeCell) {
+            continue;
+        }
         if (object->numConnections == 0) {
             continue;
         }
@@ -973,6 +976,10 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
         //}
         auto i = *data.timestep % object->numConnections;
         auto& connectedObject = object->connections[i].object;
+        // Skip if connected object is not a Cell
+        if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
+            continue;
+        }
 
         // Flow of usable energy
         {

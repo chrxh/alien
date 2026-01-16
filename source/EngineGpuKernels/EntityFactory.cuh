@@ -306,7 +306,6 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TO const& to, in
     object->selected = 0;
     object->scheduledOperationIndex = -1;
     object->numConnections = objectTO.numConnections;
-    object->typeData.cell.event = CellEvent_No;
     object->density = 1.0f;
     for (int i = 0; i < object->numConnections; ++i) {
         auto& connectingCell = object->connections[i];
@@ -314,6 +313,14 @@ __inline__ __device__ Object* EntityFactory::createObjectFromTO(TO const& to, in
         connectingCell.distance = objectTO.connections[i].distance;
         connectingCell.angleFromPrevious = objectTO.connections[i].angleFromPrevious;
     }
+
+    // Handle Structure and FreeCell object types
+    if (objectTO.type == ObjectType_Structure || objectTO.type == ObjectType_FreeCell) {
+        return object;
+    }
+
+    // ObjectType_Cell - access cell data
+    object->typeData.cell.event = CellEvent_No;
     if (objectTO.typeData.cell.belongToCreature) {
         auto const& genomeTO = to.creatures[objectTO.typeData.cell.creatureIndex];
         object->typeData.cell.creature = &_data->entities.heap.atType<Creature>(genomeTO.creatureIndexOnGpu);
@@ -329,15 +336,23 @@ __inline__ __device__ void EntityFactory::changeObjectFromTO(TO const& to, Objec
     object->pos = objectTO.pos;
     _map.correctPosition(object->pos);
     object->vel = objectTO.vel;
+    object->stiffness = objectTO.stiffness;
+    object->fixed = objectTO.fixed;
+    object->sticky = objectTO.sticky;
+    object->color = objectTO.color;
+    object->type = objectTO.type;
+
+    // Handle Structure and FreeCell object types
+    if (objectTO.type == ObjectType_Structure || objectTO.type == ObjectType_FreeCell) {
+        return;
+    }
+
+    // ObjectType_Cell - access cell data
     object->typeData.cell.cellState = objectTO.typeData.cell.cellState;
     object->typeData.cell.usableEnergy = objectTO.typeData.cell.usableEnergy;
     object->typeData.cell.rawEnergy = objectTO.typeData.cell.rawEnergy;
-    object->stiffness = objectTO.stiffness;
     object->typeData.cell.cellType = objectTO.typeData.cell.cellType;
-    object->fixed = objectTO.fixed;
-    object->sticky = objectTO.sticky;
     object->typeData.cell.age = objectTO.typeData.cell.age;
-    object->color = objectTO.color;
     object->typeData.cell.frontAngle = objectTO.typeData.cell.frontAngle;
     object->typeData.cell.activationTime = objectTO.typeData.cell.activationTime;
     object->typeData.cell.cellTriggered = objectTO.typeData.cell.cellTriggered;

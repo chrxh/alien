@@ -66,6 +66,10 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
         for (int i = 0, j = object->numConnections; i < j; ++i) {
             auto connectedObject = object->connections[i].object;
+            // Skip Structure and FreeCell objects for signal propagation
+            if (connectedObject->type == ObjectType_Structure || connectedObject->type == ObjectType_FreeCell) {
+                continue;
+            }
             if (connectedObject->typeData.cell.cellState == CellState_Constructing || connectedObject->typeData.cell.signalState != SignalState_Active) {
                 continue;
             }
