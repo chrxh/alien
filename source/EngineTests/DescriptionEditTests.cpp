@@ -198,12 +198,12 @@ TEST_P(DescriptionEditTests_CellIdGeneration, assignNewIds_preserveOrder)
     }
     EXPECT_EQ(10, ageToCell.size());
 
-    std::optional<uint64_t> lastCellId;
+    std::optional<uint64_t> lastObjectId;
     for (auto const& object : ageToCell | std::views::values) {
-        if (!lastCellId.has_value()) {
-            lastCellId = object._id;
+        if (!lastObjectId.has_value()) {
+            lastObjectId = object._id;
         } else {
-            EXPECT_TRUE(lastCellId.value() < object._id);
+            EXPECT_TRUE(lastObjectId.value() < object._id);
         }
     }
 }
@@ -283,7 +283,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
 
     auto smallCreatureCells = data.getObjectsForCreature(smallCreature->_id);
     EXPECT_EQ(1, smallCreatureCells.front()._connections.size());
-    auto connectedCellId = smallCreatureCells.front()._connections.front()._objectId;
+    auto connectedObjectId = smallCreatureCells.front()._connections.front()._objectId;
 
     auto largeCreatureCells = data.getObjectsForCreature(largeCreature->_id);
     std::optional<ObjectDescription> cellWithoutConnection, cellWithConnection;
@@ -298,7 +298,7 @@ TEST_F(DescriptionEditTests, assignNewIds_connectionBetweenCreature)
     ASSERT_TRUE(cellWithConnection.has_value());
 
     ASSERT_EQ(1, cellWithConnection->_connections.size());
-    EXPECT_EQ(connectedCellId, cellWithConnection->_id);
+    EXPECT_EQ(connectedObjectId, cellWithConnection->_id);
     EXPECT_EQ(smallCreatureCells.front()._id, cellWithConnection->_connections.front()._objectId);
 }
 

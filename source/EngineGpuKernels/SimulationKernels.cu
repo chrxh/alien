@@ -138,7 +138,7 @@ __global__ void cudaNextTimestep_cellType_generator(SimulationData data, Simulat
 
 __global__ void cudaNextTimestep_cellType_constructor_completenessCheck(SimulationData data, SimulationStatistics statistics)
 {
-    ConstructorProcessor::preprocess(data);
+    ConstructorProcessor::completenessCheck(data);
 }
 
 __global__ void cudaNextTimestep_cellType_constructor(SimulationData data, SimulationStatistics statistics, bool forPreview)

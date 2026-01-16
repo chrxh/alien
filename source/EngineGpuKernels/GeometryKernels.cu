@@ -91,28 +91,28 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
             int backIndices[MAX_OBJECT_CONNECTIONS];
             for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
                 auto connectionIndex = i % numConnections;
-                auto const& connectedCell = object->connections[connectionIndex].object;
-                auto backIndex = connectedCell->getConnectionIndex(object);
+                auto const& connectedObject = object->connections[connectionIndex].object;
+                auto backIndex = connectedObject->getConnectionIndex(object);
                 backIndices[connectionIndex] = backIndex;
                 if (first) {
                     first = false;
                     continue;
                 }
                 auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-                auto const& prevConnectedCell = object->connections[prevIndex].object;
+                auto const& prevConnectedObject = object->connections[prevIndex].object;
                 auto prevBackIndex = backIndices[prevIndex];
 
                 // Triangle?
-                if (prevConnectedCell->getConnectedObject(prevBackIndex - 1) == connectedCell) {
+                if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
                     isInTriangleOrQuad = 1;
                     break;
                 }
 
                 // Rectangle?
-                auto fourthCellCandidate1 = connectedCell->getConnectedObject(backIndex + 1);
-                auto fourthCellCandidate2 = prevConnectedCell->getConnectedObject(prevBackIndex - 1);
+                auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
+                auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
                 if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
-                    && connectedCell != prevConnectedCell) {
+                    && connectedObject != prevConnectedObject) {
                     isInTriangleOrQuad = 1;
                     break;
                 }
@@ -173,14 +173,14 @@ __global__ void cudaExtractLineIndices(SimulationData data, unsigned int* lineIn
 
         // Add line indices for each connection
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedCell = object->connections[i].object;
+            auto connectedObject = object->connections[i].object;
 
             // Only add each connection once (from lower index to higher index to avoid duplicates)
-            if (object->id < connectedCell->id) {
-                if (Math::length(object->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]) {
+            if (object->id < connectedObject->id) {
+                if (Math::length(object->pos - connectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]) {
                     uint64_t lineIndex = alienAtomicAdd64(numLineIndices, uint64_t(2));
                     if (lineIndices != nullptr) {
-                        uint64_t connectedIndex = connectedCell->tempValue.as_uint64;
+                        uint64_t connectedIndex = connectedObject->tempValue.as_uint64;
                         lineIndices[lineIndex] = static_cast<unsigned int>(objectIndex);
                         lineIndices[lineIndex + 1] = static_cast<unsigned int>(connectedIndex);
                     }
@@ -194,13 +194,13 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
 {
     auto const& partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
 
-    auto addTriangle = [&](Object* object, uint64_t objectIndex, Object* connectedCell, Object* prevConnectedCell) {
+    auto addTriangle = [&](Object* object, uint64_t objectIndex, Object* connectedObject, Object* prevConnectedObject) {
         // Only add triangle once (avoid duplicates by checking ids)
-        if (Math::length(object->pos - connectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
-            && Math::length(object->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
-            && Math::length(connectedCell->pos - prevConnectedCell->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedCell->color]) {
-            uint64_t connectedIndex1 = connectedCell->tempValue.as_uint64;
-            uint64_t connectedIndex2 = prevConnectedCell->tempValue.as_uint64;
+        if (Math::length(object->pos - connectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
+            && Math::length(object->pos - prevConnectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[object->color]
+            && Math::length(connectedObject->pos - prevConnectedObject->pos) <= cudaSimulationParameters.maxBindingDistance.value[connectedObject->color]) {
+            uint64_t connectedIndex1 = connectedObject->tempValue.as_uint64;
+            uint64_t connectedIndex2 = prevConnectedObject->tempValue.as_uint64;
             uint64_t triangleIndex = alienAtomicAdd64(numTriangleIndices, uint64_t(3));
             if (triangleIndices != nullptr) {
                 triangleIndices[triangleIndex] = static_cast<unsigned int>(objectIndex);
@@ -218,32 +218,32 @@ __global__ void cudaExtractTriangleIndices(SimulationData data, unsigned int* tr
         int backIndices[MAX_OBJECT_CONNECTIONS];
         for (int i = 0, numConnections = object->numConnections; i < numConnections + 1; ++i) {
             auto connectionIndex = i % numConnections;
-            auto const& connectedCell = object->connections[connectionIndex].object;
-            auto backIndex = connectedCell->getConnectionIndex(object);
+            auto const& connectedObject = object->connections[connectionIndex].object;
+            auto backIndex = connectedObject->getConnectionIndex(object);
             backIndices[connectionIndex] = backIndex;
             if (first) {
                 first = false;
                 continue;
             }
             auto prevIndex = (connectionIndex + numConnections - 1) % numConnections;
-            auto const& prevConnectedCell = object->connections[prevIndex].object;
+            auto const& prevConnectedObject = object->connections[prevIndex].object;
             auto prevBackIndex = backIndices[prevIndex];
 
             // Triangle?
-            if (prevConnectedCell->getConnectedObject(prevBackIndex - 1) == connectedCell) {
-                if (object->id < connectedCell->id && object->id < prevConnectedCell->id) {
-                    addTriangle(object, index, prevConnectedCell, connectedCell);
+            if (prevConnectedObject->getConnectedObject(prevBackIndex - 1) == connectedObject) {
+                if (object->id < connectedObject->id && object->id < prevConnectedObject->id) {
+                    addTriangle(object, index, prevConnectedObject, connectedObject);
                 }
             }
 
             // Rectangle?
-            auto fourthCellCandidate1 = connectedCell->getConnectedObject(backIndex + 1);
-            auto fourthCellCandidate2 = prevConnectedCell->getConnectedObject(prevBackIndex - 1);
+            auto fourthCellCandidate1 = connectedObject->getConnectedObject(backIndex + 1);
+            auto fourthCellCandidate2 = prevConnectedObject->getConnectedObject(prevBackIndex - 1);
             if (fourthCellCandidate2 == fourthCellCandidate1 && fourthCellCandidate1 != object && fourthCellCandidate2 != object
-                && connectedCell != prevConnectedCell) {
-                if (object->id < connectedCell->id && object->id < prevConnectedCell->id && object->id < fourthCellCandidate2->id) {
-                    addTriangle(object, index, connectedCell, fourthCellCandidate1);
-                    addTriangle(object, index, fourthCellCandidate1, prevConnectedCell);
+                && connectedObject != prevConnectedObject) {
+                if (object->id < connectedObject->id && object->id < prevConnectedObject->id && object->id < fourthCellCandidate2->id) {
+                    addTriangle(object, index, connectedObject, fourthCellCandidate1);
+                    addTriangle(object, index, fourthCellCandidate1, prevConnectedObject);
                 }
             }
         }
@@ -403,8 +403,8 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
                                        object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional) && 
                                       object->numConnections > 0;
                 if (hasRestriction) {
-                    auto const& connectedCell = object->connections[0].object;
-                    auto connectionAngle = Math::angleOfVector(connectedCell->pos - object->pos);
+                    auto const& connectedObject = object->connections[0].object;
+                    auto connectionAngle = Math::angleOfVector(connectedObject->pos - object->pos);
 
                     auto signalAngleRestrictionStart = connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
                     auto signalAngleRestrictionEnd = connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
@@ -466,15 +466,15 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 summedAngle += object->connections[i].angleFromPrevious;
             }
 
-            auto connectedCell = object->connections[i].object;
+            auto connectedObject = object->connections[i].object;
 
             // Only add each connection once (from lower id to higher id to avoid duplicates)
-            if (object->id >= connectedCell->id) {
+            if (object->id >= connectedObject->id) {
                 continue;
             }
 
             // Check if this connection should be drawn
-            if (Math::length(object->pos - connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
+            if (Math::length(object->pos - connectedObject->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
                 continue;
             }
 
@@ -486,22 +486,22 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 !hasRestriction1 || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
 
             // Determine if signal can flow from object2 to object1
-            // Need to calculate the reverse angle from connectedCell's perspective
-            auto signalAngleRestrictionStart2 = 180.0f + connectedCell->typeData.cell.signalRestriction.baseAngle - connectedCell->typeData.cell.signalRestriction.openingAngle / 2;
-            auto signalAngleRestrictionEnd2 = 180.0f + connectedCell->typeData.cell.signalRestriction.baseAngle + connectedCell->typeData.cell.signalRestriction.openingAngle / 2;
+            // Need to calculate the reverse angle from connectedObject's perspective
+            auto signalAngleRestrictionStart2 = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
+            auto signalAngleRestrictionEnd2 = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle + connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
             signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
             signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
 
-            // Find the angle of this connection from connectedCell's perspective
+            // Find the angle of this connection from connectedObject's perspective
             auto summedAngle2 = 0.0f;
             bool arrowToCell1 = false;
-            bool hasRestriction2 = (connectedCell->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
-                                    connectedCell->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
-            for (int j = 0; j < connectedCell->numConnections; ++j) {
+            bool hasRestriction2 = (connectedObject->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
+                                    connectedObject->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
+            for (int j = 0; j < connectedObject->numConnections; ++j) {
                 if (j > 0) {
-                    summedAngle2 += connectedCell->connections[j].angleFromPrevious;
+                    summedAngle2 += connectedObject->connections[j].angleFromPrevious;
                 }
-                if (connectedCell->connections[j].object->id == object->id) {
+                if (connectedObject->connections[j].object->id == object->id) {
                     arrowToCell1 = !hasRestriction2
                         || Math::isAngleStrictInBetween(signalAngleRestrictionStart2, signalAngleRestrictionEnd2, summedAngle2);
                     break;
@@ -510,7 +510,7 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
 
             // Get cell colors
             auto cellColor = getCellColor(object->color);
-            auto connectedCellColor = getCellColor(connectedCell->color);
+            auto connectedObjectColor = getCellColor(connectedObject->color);
 
             // Encode arrow direction in flags: bit 0 = arrow to object1, bit 1 = arrow to object2
             int arrowFlags = (arrowToCell1 ? 1 : 0) | (arrowToCell2 ? 2 : 0);
@@ -528,11 +528,11 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
                 connectionArrowData[vertexIndex].arrowFlags = arrowFlags;
 
                 // Second vertex (object2)
-                connectionArrowData[vertexIndex + 1].pos[0] = connectedCell->pos.x;
-                connectionArrowData[vertexIndex + 1].pos[1] = connectedCell->pos.y;
-                connectionArrowData[vertexIndex + 1].color[0] = toFloat((connectedCellColor >> 16) & 0xff) / 255.0f;
-                connectionArrowData[vertexIndex + 1].color[1] = toFloat((connectedCellColor >> 8) & 0xff) / 255.0f;
-                connectionArrowData[vertexIndex + 1].color[2] = toFloat((connectedCellColor >> 0) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].pos[0] = connectedObject->pos.x;
+                connectionArrowData[vertexIndex + 1].pos[1] = connectedObject->pos.y;
+                connectionArrowData[vertexIndex + 1].color[0] = toFloat((connectedObjectColor >> 16) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].color[1] = toFloat((connectedObjectColor >> 8) & 0xff) / 255.0f;
+                connectionArrowData[vertexIndex + 1].color[2] = toFloat((connectedObjectColor >> 0) & 0xff) / 255.0f;
                 connectionArrowData[vertexIndex + 1].arrowFlags = arrowFlags;
             }
         }

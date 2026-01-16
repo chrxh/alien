@@ -90,9 +90,9 @@ __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatis
 {
     int result = 0;
     for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedCell = object->connections[i].object;
-        if (connectedCell->typeData.cell.cellType == CellType_Defender && connectedCell->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
-            statistics.incNumDefenderActivities(connectedCell->color);
+        auto connectedObject = object->connections[i].object;
+        if (connectedObject->typeData.cell.cellType == CellType_Defender && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
+            statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
     }

@@ -25,5 +25,5 @@ private:
     ColorVector<double> _cellMaxAge = {0, 0, 0, 0, 0, 0, 0};  //cloned parameter with double precision
 
     bool _lastAdaptiveCellMaxAge = false;
-    ColorVector<int> _lastCellMaxAge = {0, 0, 0, 0, 0, 0, 0};
+    ColorVector<int> _lastObjectMaxAge = {0, 0, 0, 0, 0, 0, 0};
 };

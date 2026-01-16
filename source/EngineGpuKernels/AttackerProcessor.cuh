@@ -191,9 +191,9 @@ __inline__ __device__ int AttackerProcessor::countDefenderCells(SimulationStatis
         ++result;
     }
     for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedCell = object->connections[i].object;
-        if (connectedCell->typeData.cell.cellType == CellType_Defender && connectedCell->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
-            statistics.incNumDefenderActivities(connectedCell->color);
+        auto connectedObject = object->connections[i].object;
+        if (connectedObject->typeData.cell.cellType == CellType_Defender && connectedObject->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstAttacker) {
+            statistics.incNumDefenderActivities(connectedObject->color);
             ++result;
         }
     }

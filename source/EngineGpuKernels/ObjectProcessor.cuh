@@ -62,7 +62,7 @@ private:
     static auto constexpr FrontAngleId_NoUpdate = VALUE_NOT_SET_FLOAT;
 
     __inline__ __device__ static float getInitialAngelSpan(Object* cell, int connectionIndex1, int connectionIndex2);
-    __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedCell1, Object* connectedCell2);
+    __inline__ __device__ static float getInitialAngelSpan(Object* cell, Object* connectedObject1, Object* connectedObject2);
 };
 
 /************************************************************************/
@@ -225,8 +225,8 @@ __inline__ __device__ void ObjectProcessor::calcFluidForces_reconnectCells_corre
                     auto velDelta = object->vel - otherObject->vel;
                     bool isConnected = false;
                     for (int i = 0; i < object->numConnections; ++i) {
-                        auto const& connectedCell = object->connections[i].object;
-                        if (connectedCell == otherObject) {
+                        auto const& connectedObject = object->connections[i].object;
+                        if (connectedObject == otherObject) {
                             isConnected = true;
                         }
                     }
@@ -359,8 +359,8 @@ __inline__ __device__ void ObjectProcessor::calcCollisions_reconnectCells_correc
 
             bool alreadyConnected = false;
             for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedCell = object->connections[i].object;
-                if (connectedCell == otherObject) {
+                auto const& connectedObject = object->connections[i].object;
+                if (connectedObject == otherObject) {
                     alreadyConnected = true;
                     break;
                 }
@@ -459,20 +459,20 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
 
         auto numConnections = object->numConnections;
         for (int i = 0; i < numConnections; ++i) {
-            auto connectedCell = object->connections[i].object;
-            auto connectedCellStiffnessSquared = connectedCell->stiffness * connectedCell->stiffness;
+            auto connectedObject = object->connections[i].object;
+            auto connectedObjectStiffnessSquared = connectedObject->stiffness * connectedObject->stiffness;
 
-            auto displacement = connectedCell->pos - object->pos;
+            auto displacement = connectedObject->pos - object->pos;
             data.objectMap.correctDirection(displacement);
 
             auto actualDistance = Math::length(displacement);
             auto bondDistance = object->connections[i].distance;
             auto deviation = actualDistance - bondDistance;
-            force = force + Math::getNormalized(displacement) * deviation * (cellStiffnessSquared + connectedCellStiffnessSquared) / 6;
+            force = force + Math::getNormalized(displacement) * deviation * (cellStiffnessSquared + connectedObjectStiffnessSquared) / 6;
 
             if (calcAngularForces) {
                 auto lastIndex = (i + numConnections - 1) % numConnections;
-                auto lastConnectedCell = object->connections[lastIndex].object;
+                auto lastConnectedObject = object->connections[lastIndex].object;
 
                 auto referenceAngleFromPrevious = object->connections[i].angleFromPrevious;
 
@@ -495,11 +495,11 @@ __inline__ __device__ void ObjectProcessor::calcConnectionForces(SimulationData&
                 auto force2 = r1 * strength1;
                 auto force1 = r2 * strength2;
 
-                if (!connectedCell->fixed && !lastConnectedCell->fixed) {
-                    atomicAdd(&connectedCell->shared1.x, force1.x);
-                    atomicAdd(&connectedCell->shared1.y, force1.y);
-                    atomicAdd(&lastConnectedCell->shared1.x, force2.x);
-                    atomicAdd(&lastConnectedCell->shared1.y, force2.y);
+                if (!connectedObject->fixed && !lastConnectedObject->fixed) {
+                    atomicAdd(&connectedObject->shared1.x, force1.x);
+                    atomicAdd(&connectedObject->shared1.y, force1.y);
+                    atomicAdd(&lastConnectedObject->shared1.x, force2.x);
+                    atomicAdd(&lastConnectedObject->shared1.y, force2.y);
                 }
                 force -= force1 + force2;
             }
@@ -524,9 +524,9 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
 
         bool scheduleForDestruction = false;
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedCell = object->connections[i].object;
+            auto connectedObject = object->connections[i].object;
 
-            auto displacement = connectedCell->pos - object->pos;
+            auto displacement = connectedObject->pos - object->pos;
             data.objectMap.correctDirection(displacement);
             auto actualDistance = Math::length(displacement);
             if (actualDistance > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
@@ -536,8 +536,8 @@ __inline__ __device__ void ObjectProcessor::checkConnections(SimulationData& dat
         if (scheduleForDestruction) {
             ObjectConnectionProcessor::scheduleDeleteAllConnections(data, object);
             for (int i = 0; i < object->numConnections; ++i) {
-                auto connectedCell = object->connections[i].object;
-                connectedCell->typeData.cell.cellState = CellState_Detaching;
+                auto connectedObject = object->connections[i].object;
+                connectedObject->typeData.cell.cellState = CellState_Detaching;
             }
         }
     }
@@ -627,21 +627,21 @@ __inline__ __device__ void ObjectProcessor::cellStateTransition_calcFutureState(
         bool isNeighborActivating = false;
         //int activatingObjectConnection = -1;
         for (int i = 0; i < object->numConnections; ++i) {
-            auto const& connectedCell = object->connections[i].object;
-            if (object->typeData.cell.isSameCreature(&connectedCell->typeData.cell)) {
-                auto connectedCellState = connectedCell->typeData.cell.cellState;
-                if (connectedCellState == CellState_Detaching) {
+            auto const& connectedObject = object->connections[i].object;
+            if (object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
+                auto connectedObjectState = connectedObject->typeData.cell.cellState;
+                if (connectedObjectState == CellState_Detaching) {
                     isSameCreatureNeighborDetaching = true;
-                } else if (connectedCellState == CellState_Reviving) {
+                } else if (connectedObjectState == CellState_Reviving) {
                     isSameCreatureNeighborReviving = true;
-                } else if (connectedCellState == CellState_Activating) {
-                    if (connectedCell->connections[0].object == object) {
+                } else if (connectedObjectState == CellState_Activating) {
+                    if (connectedObject->connections[0].object == object) {
                         isNeighborActivating = true;
                         //activatingObjectConnection = i;
                     }
                 }
             } else {
-                if (connectedCell->typeData.cell.cellState == CellState_Detaching) {
+                if (connectedObject->typeData.cell.cellState == CellState_Detaching) {
                     isOtherCreatureNeighborDetaching = true;
                 }
             }
@@ -922,10 +922,10 @@ __inline__ __device__ void ObjectProcessor::decay(SimulationData& data)
             auto orig = atomicExch(&object->typeData.cell.cellState, CellState_Dying);
             if (orig != CellState_Dying) {
                 for (int i = 0; i < object->numConnections; ++i) {
-                    auto const& connectedCell = object->connections[i].object;
-                    auto origConnected = atomicExch(&connectedCell->typeData.cell.cellState, CellState_Detaching);
+                    auto const& connectedObject = object->connections[i].object;
+                    auto origConnected = atomicExch(&connectedObject->typeData.cell.cellState, CellState_Detaching);
                     if (origConnected == CellState_Dying) {
-                        atomicExch(&connectedCell->typeData.cell.cellState, CellState_Dying);
+                        atomicExch(&connectedObject->typeData.cell.cellState, CellState_Dying);
                     }
                 }
             }
@@ -972,7 +972,7 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
         //    continue;
         //}
         auto i = *data.timestep % object->numConnections;
-        auto& connectedCell = object->connections[i].object;
+        auto& connectedObject = object->connections[i].object;
 
         // Flow of usable energy
         {
@@ -987,21 +987,21 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
             auto lowEnergy = [&](Object* obj) { return obj->typeData.cell.usableEnergy < cellNormalEnergy; };
 
             auto cellNeedsEnergy = needsEnergy(object);
-            auto connectedCellNeedsEnergy = needsEnergy(connectedCell);
-            auto connectedCellLowEnergy = lowEnergy(object);
+            auto connectedObjectNeedsEnergy = needsEnergy(connectedObject);
+            auto connectedObjectLowEnergy = lowEnergy(object);
 
             auto flow = 0.0f;
-            if (connectedCellLowEnergy) {
-                if (object->typeData.cell.usableEnergy > connectedCell->typeData.cell.usableEnergy) {
-                    flow = (object->typeData.cell.usableEnergy - connectedCell->typeData.cell.usableEnergy) / 2;
+            if (connectedObjectLowEnergy) {
+                if (object->typeData.cell.usableEnergy > connectedObject->typeData.cell.usableEnergy) {
+                    flow = (object->typeData.cell.usableEnergy - connectedObject->typeData.cell.usableEnergy) / 2;
                 }
             } else {
-                if ((cellNeedsEnergy && connectedCellNeedsEnergy) || (!cellNeedsEnergy && !connectedCellNeedsEnergy)) {
-                    if (object->typeData.cell.usableEnergy > connectedCell->typeData.cell.usableEnergy) {
-                        flow = (object->typeData.cell.usableEnergy - connectedCell->typeData.cell.usableEnergy) / 2;
+                if ((cellNeedsEnergy && connectedObjectNeedsEnergy) || (!cellNeedsEnergy && !connectedObjectNeedsEnergy)) {
+                    if (object->typeData.cell.usableEnergy > connectedObject->typeData.cell.usableEnergy) {
+                        flow = (object->typeData.cell.usableEnergy - connectedObject->typeData.cell.usableEnergy) / 2;
                     }
                 }
-                if (!cellNeedsEnergy && connectedCellNeedsEnergy) {
+                if (!cellNeedsEnergy && connectedObjectNeedsEnergy) {
                     if (object->typeData.cell.usableEnergy > cellNormalEnergy) {
                         flow = object->typeData.cell.usableEnergy - cellNormalEnergy;
                     }
@@ -1014,7 +1014,7 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
                 if (orig < cellMinEnergy) {
                     atomicAdd(&object->typeData.cell.usableEnergy, flow);
                 } else {
-                    atomicAdd(&connectedCell->typeData.cell.usableEnergy, flow);
+                    atomicAdd(&connectedObject->typeData.cell.usableEnergy, flow);
                 }
             }
         }
@@ -1022,27 +1022,27 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
         // Flow of raw energy
         {
             if ((object->typeData.cell.cellState == CellState_Ready || object->typeData.cell.cellState == CellState_Detaching || object->typeData.cell.cellState == CellState_Reviving)
-                && (connectedCell->typeData.cell.cellState == CellState_Ready || connectedCell->typeData.cell.cellState == CellState_Detaching
-                    || connectedCell->typeData.cell.cellState == CellState_Reviving)
-                && connectedCell->typeData.cell.rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
+                && (connectedObject->typeData.cell.cellState == CellState_Ready || connectedObject->typeData.cell.cellState == CellState_Detaching
+                    || connectedObject->typeData.cell.cellState == CellState_Reviving)
+                && connectedObject->typeData.cell.rawEnergy < SimulationParameters::maxRawEnergyThresholdForConduction) {
 
                 auto flow = 0.0f;
                 auto maxFlow = 0.0f;
-                if (connectedCell->typeData.cell.cellType == CellType_Digestor) {
-                    maxFlow += connectedCell->typeData.cell.cellTypeData.digestor.rawEnergyConductivity
-                        * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedCell->color];
+                if (connectedObject->typeData.cell.cellType == CellType_Digestor) {
+                    maxFlow += connectedObject->typeData.cell.cellTypeData.digestor.rawEnergyConductivity
+                        * cudaSimulationParameters.maxRawEnergyConductivity.value[connectedObject->color];
                     if (object->typeData.cell.cellType == CellType_Digestor) {
                         maxFlow += object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity * cudaSimulationParameters.maxRawEnergyConductivity.value[object->color];
 
                         auto cellConversionRate = 1.0f - object->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
-                        auto connectedCellConversionRate = 1.0f - connectedCell->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
-                        if (cellConversionRate == 0 && connectedCellConversionRate == 0) {
+                        auto connectedObjectConversionRate = 1.0f - connectedObject->typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
+                        if (cellConversionRate == 0 && connectedObjectConversionRate == 0) {
                             cellConversionRate = 1;
-                            connectedCellConversionRate = 1;
+                            connectedObjectConversionRate = 1;
                         }
 
                         auto targetEnergy =
-                            (object->typeData.cell.rawEnergy + connectedCell->typeData.cell.rawEnergy) * cellConversionRate / (cellConversionRate + connectedCellConversionRate);
+                            (object->typeData.cell.rawEnergy + connectedObject->typeData.cell.rawEnergy) * cellConversionRate / (cellConversionRate + connectedObjectConversionRate);
                         flow = max(object->typeData.cell.rawEnergy - targetEnergy, 0.0f);
                     } else {
                         flow = object->typeData.cell.rawEnergy;
@@ -1054,7 +1054,7 @@ __inline__ __device__ void ObjectProcessor::performEnergyFlow(SimulationData& da
                 if (orig < 0) {
                     atomicAdd(&object->typeData.cell.rawEnergy, flow);
                 } else {
-                    atomicAdd(&connectedCell->typeData.cell.rawEnergy, flow);
+                    atomicAdd(&connectedObject->typeData.cell.rawEnergy, flow);
                 }
             }
         }
@@ -1077,15 +1077,15 @@ __device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* object,
     return Math::getNormalizedAngle(result, -180.0f);
 }
 
-__device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* object, Object* connectedCell1, Object* connectedCell2)
+__device__ __inline__ float ObjectProcessor::getInitialAngelSpan(Object* object, Object* connectedObject1, Object* connectedObject2)
 {
     auto connectionIndex1 = -1;
     auto connectionIndex2 = -1;
     for (int i = 0; i < object->numConnections; i++) {
-        if (object->connections[i].object == connectedCell1) {
+        if (object->connections[i].object == connectedObject1) {
             connectionIndex1 = i;
         }
-        if (object->connections[i].object == connectedCell2) {
+        if (object->connections[i].object == connectedObject2) {
             connectionIndex2 = i;
         }
     }

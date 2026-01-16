@@ -158,18 +158,18 @@ __inline__ __device__ void ReconnectorProcessor::removeConnections(SimulationDat
         return;
     }
     for (int i = 0; i < object->numConnections; ++i) {
-        auto connectedCell = object->connections[i].object;
+        auto connectedObject = object->connections[i].object;
         bool shouldRemove = false;
 
-        if (connectedCell->typeData.cell.cellType == CellType_Structure || connectedCell->typeData.cell.cellType == CellType_Free) {
+        if (connectedObject->typeData.cell.cellType == CellType_Structure || connectedObject->typeData.cell.cellType == CellType_Free) {
             shouldRemove = true;
         }
-        if (!object->typeData.cell.isSameCreature(&connectedCell->typeData.cell)) {
+        if (!object->typeData.cell.isSameCreature(&connectedObject->typeData.cell)) {
             shouldRemove = true;
         }
 
         if (shouldRemove) {
-            ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedCell);
+            ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
             object->typeData.cell.signal.channels[Channels::ReconnectorSuccess] = 1;
             statistics.incNumReconnectorRemoved(object->color);
         }

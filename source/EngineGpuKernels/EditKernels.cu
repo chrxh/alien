@@ -108,9 +108,9 @@ __global__ void cudaRemoveSelectedObjectConnections(SimulationData data, bool in
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto& object = data.entities.objects.at(index);
         for (int i = 0; i < object->numConnections; ++i) {
-            auto connectedCell = object->connections[i].object;
-            if ((includeClusters && object->selected != 0) || (!includeClusters && (object->selected == 1 || connectedCell->selected == 1))) {
-                ObjectConnectionProcessor::deleteConnectionOneWay(object, connectedCell);
+            auto connectedObject = object->connections[i].object;
+            if ((includeClusters && object->selected != 0) || (!includeClusters && (object->selected == 1 || connectedObject->selected == 1))) {
+                ObjectConnectionProcessor::deleteConnectionOneWay(object, connectedObject);
                 --i;
             }
         }
@@ -126,9 +126,9 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
         if (isSelected(object, includeClusters)) {
             auto const numConnections = object->numConnections;
             for (int i = 0; i < numConnections; ++i) {
-                auto connectedCell = object->connections[i].object;
-                if (isSelected(connectedCell, includeClusters)) {
-                    auto delta = connectedCell->pos - object->pos;
+                auto connectedObject = object->connections[i].object;
+                if (isSelected(connectedObject, includeClusters)) {
+                    auto delta = connectedObject->pos - object->pos;
                     data.objectMap.correctDirection(delta);
                     object->connections[i].distance = Math::length(delta);
                 }
@@ -136,14 +136,14 @@ __global__ void cudaRelaxSelectedEntities(SimulationData data, bool includeClust
 
             if (numConnections > 1) {
                 for (int i = 0; i < numConnections; ++i) {
-                    auto prevConnectedCell = object->connections[(i + numConnections - 1) % numConnections].object;
-                    auto connectedCell = object->connections[i].object;
-                    if (isSelected(connectedCell, includeClusters) && isSelected(prevConnectedCell, includeClusters)) {
-                        auto prevDisplacement = prevConnectedCell->pos - object->pos;
+                    auto prevConnectedObject = object->connections[(i + numConnections - 1) % numConnections].object;
+                    auto connectedObject = object->connections[i].object;
+                    if (isSelected(connectedObject, includeClusters) && isSelected(prevConnectedObject, includeClusters)) {
+                        auto prevDisplacement = prevConnectedObject->pos - object->pos;
                         data.objectMap.correctDirection(prevDisplacement);
                         auto prevAngle = Math::angleOfVector(prevDisplacement);
 
-                        auto displacement = connectedCell->pos - object->pos;
+                        auto displacement = connectedObject->pos - object->pos;
                         data.objectMap.correctDirection(displacement);
                         auto angle = Math::angleOfVector(displacement);
 
@@ -183,8 +183,8 @@ __global__ void cudaScheduleConnectSelection(SimulationData data, bool considerW
             data.objectMap.correctDirection(posDelta);
 
             for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedCell = object->connections[i].object;
-                if (connectedCell == otherObject) {
+                auto const& connectedObject = object->connections[i].object;
+                if (connectedObject == otherObject) {
                     return;
                 }
             }
@@ -378,11 +378,11 @@ __global__ void cudaScheduleDisconnectSelectionFromRemainings(SimulationData dat
         auto const& object = data.entities.objects.at(index);
         if (1 == object->selected) {
             for (int i = 0; i < object->numConnections; ++i) {
-                auto const& connectedCell = object->connections[i].object;
+                auto const& connectedObject = object->connections[i].object;
 
-                if (1 != connectedCell->selected
-                    && data.objectMap.getDistance(object->pos, connectedCell->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
-                    ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedCell);
+                if (1 != connectedObject->selected
+                    && data.objectMap.getDistance(object->pos, connectedObject->pos) > cudaSimulationParameters.maxBindingDistance.value[object->color]) {
+                    ObjectConnectionProcessor::scheduleDeleteConnectionPair(data, object, connectedObject);
                     atomicExch(result, 1);
                 }
             }

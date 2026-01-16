@@ -65,33 +65,33 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
         object->typeData.cell.futureSignal.numTimesSent = INT_MAX;  // Will track minimum
 
         for (int i = 0, j = object->numConnections; i < j; ++i) {
-            auto connectedCell = object->connections[i].object;
-            if (connectedCell->typeData.cell.cellState == CellState_Constructing || connectedCell->typeData.cell.signalState != SignalState_Active) {
+            auto connectedObject = object->connections[i].object;
+            if (connectedObject->typeData.cell.cellState == CellState_Constructing || connectedObject->typeData.cell.signalState != SignalState_Active) {
                 continue;
             }
             int skip = false;
-            auto restrictionMode = connectedCell->typeData.cell.signalRestriction.mode;
+            auto restrictionMode = connectedObject->typeData.cell.signalRestriction.mode;
             
             if (restrictionMode == SignalRestrictionMode_Active || restrictionMode == SignalRestrictionMode_Conditional) {
-                float signalAngleRestrictionStart = 180.0f + connectedCell->typeData.cell.signalRestriction.baseAngle - connectedCell->typeData.cell.signalRestriction.openingAngle / 2;
-                float signalAngleRestrictionEnd = 180.0f + connectedCell->typeData.cell.signalRestriction.baseAngle + connectedCell->typeData.cell.signalRestriction.openingAngle / 2;
+                float signalAngleRestrictionStart = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle - connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
+                float signalAngleRestrictionEnd = 180.0f + connectedObject->typeData.cell.signalRestriction.baseAngle + connectedObject->typeData.cell.signalRestriction.openingAngle / 2;
 
                 float connectionAngle = 0;
-                for (int k = 0, l = connectedCell->numConnections; k < l; ++k) {
-                    if (connectedCell->connections[k].object == object) {
+                for (int k = 0, l = connectedObject->numConnections; k < l; ++k) {
+                    if (connectedObject->connections[k].object == object) {
                         bool isInsideCone = Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, connectionAngle);
                         if (!isInsideCone) {
                             // Outside the cone: signal is always blocked for both Active and Conditional modes
                             skip = true;
                         } else if (restrictionMode == SignalRestrictionMode_Conditional) {
                             // Inside the cone in Conditional mode: signal passes only if channel[0] >= 0
-                            if (connectedCell->typeData.cell.signal.channels[0] < 0) {
+                            if (connectedObject->typeData.cell.signal.channels[0] < 0) {
                                 skip = true;
                             }
                         }
                         break;
                     }
-                    connectionAngle += connectedCell->connections[k].angleFromPrevious;
+                    connectionAngle += connectedObject->connections[k].angleFromPrevious;
                 }
                 if (skip) {
                     continue;
@@ -100,10 +100,10 @@ __inline__ __device__ void SignalProcessor::calcFutureSignals(SimulationData& da
 
             object->typeData.cell.futureSignalState = SignalState_Active;
             for (int k = 0; k < MAX_CHANNELS; ++k) {
-                object->typeData.cell.futureSignal.channels[k] += connectedCell->typeData.cell.signal.channels[k];
+                object->typeData.cell.futureSignal.channels[k] += connectedObject->typeData.cell.signal.channels[k];
             }
             // Keep minimum numTimesSent when signals merge
-            object->typeData.cell.futureSignal.numTimesSent = min(object->typeData.cell.futureSignal.numTimesSent, connectedCell->typeData.cell.signal.numTimesSent);
+            object->typeData.cell.futureSignal.numTimesSent = min(object->typeData.cell.futureSignal.numTimesSent, connectedObject->typeData.cell.signal.numTimesSent);
         }
     }
 }

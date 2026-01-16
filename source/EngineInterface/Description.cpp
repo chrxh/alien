@@ -203,7 +203,7 @@ bool ObjectDescription::isConnectedTo(uint64_t id) const
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._objectId == id; }) != _connections.end();
 }
 
-float ObjectDescription::getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const
+float ObjectDescription::getAngleSpan(uint64_t connectedObjectId1, uint64_t connectedObjectId2) const
 {
     std::optional<float> result;
     auto numConnections = _connections.size();
@@ -212,10 +212,10 @@ float ObjectDescription::getAngleSpan(uint64_t connectedCellId1, uint64_t connec
         if (result.has_value()) {
             *result += connection._angleFromPrevious;
         }
-        if (connection._objectId == connectedCellId1) {
+        if (connection._objectId == connectedObjectId1) {
             result = 0.0f;
         }
-        if (result.has_value() && connection._objectId == connectedCellId2) {
+        if (result.has_value() && connection._objectId == connectedObjectId2) {
             return result.value();
         }
     }
@@ -320,10 +320,10 @@ void Description::assignNewIds()
     });
 
     // Generate new cellIds and create maps for fast access
-    std::unordered_map<uint64_t, uint64_t> oldToNewCellId;
+    std::unordered_map<uint64_t, uint64_t> oldToNewObjectId;
     std::unordered_set<uint64_t> nonUniqueCellIds;
 
-    std::unordered_map<std::optional<uint64_t>, std::map<uint64_t, uint64_t>> creatureIdToOldToNewCellId;
+    std::unordered_map<std::optional<uint64_t>, std::map<uint64_t, uint64_t>> creatureIdToOldToNewObjectId;
     std::unordered_map<std::optional<uint64_t>, std::set<uint64_t>> creatureIdToNonUniqueCellIds;
 
     for (auto& [index, oldId] : indexToOldCellId) {
@@ -331,13 +331,13 @@ void Description::assignNewIds()
 
         auto& object = _objects.at(index);
         {
-            auto insertionResult = oldToNewCellId.insert({oldId, newId});
+            auto insertionResult = oldToNewObjectId.insert({oldId, newId});
             if (!insertionResult.second) {
                 nonUniqueCellIds.insert(oldId);
             }
         }
         {
-            auto insertionResult = creatureIdToOldToNewCellId[object.getCellRef()._creatureId].insert({oldId, newId});
+            auto insertionResult = creatureIdToOldToNewObjectId[object.getCellRef()._creatureId].insert({oldId, newId});
             if (!insertionResult.second) {
                 creatureIdToNonUniqueCellIds[object.getCellRef()._creatureId].insert(oldId);
             }
@@ -347,12 +347,12 @@ void Description::assignNewIds()
     }
 
     // Helper for finding new objectId (uses original cellIds)
-    auto findNewCellId = [&](std::optional<uint64_t> const& creatureId, uint64_t objectId) {
+    auto findNewObjectId = [&](std::optional<uint64_t> const& creatureId, uint64_t objectId) {
 
         // First check in creature-specific map (always preferred when available)
         auto nonUnique = false;
-        auto creatureFindResult = creatureIdToOldToNewCellId.find(creatureId);
-        if (creatureFindResult != creatureIdToOldToNewCellId.end()) {
+        auto creatureFindResult = creatureIdToOldToNewObjectId.find(creatureId);
+        if (creatureFindResult != creatureIdToOldToNewObjectId.end()) {
             auto& creatureNonUnique = creatureIdToNonUniqueCellIds[creatureId];
             if (!creatureNonUnique.contains(objectId)) {
                 auto& oldToNewMap = creatureFindResult->second;
@@ -367,8 +367,8 @@ void Description::assignNewIds()
 
         // Fallback: check in global map if unique globally
         if (!nonUniqueCellIds.contains(objectId)) {
-            auto findResult = oldToNewCellId.find(objectId);
-            if (findResult != oldToNewCellId.end()) {
+            auto findResult = oldToNewObjectId.find(objectId);
+            if (findResult != oldToNewObjectId.end()) {
                 return findResult->second;
             }
         } else {
@@ -384,12 +384,12 @@ void Description::assignNewIds()
 
     for (auto& object : _objects) {
         for (auto& connection : object._connections) {
-            connection._objectId = findNewCellId(object.getCellRef()._creatureId, connection._objectId);
+            connection._objectId = findNewObjectId(object.getCellRef()._creatureId, connection._objectId);
         }
         if (object.getCellRef().getCellType() == CellType_Constructor) {
             auto& constructor = std::get<ConstructorDescription>(object.getCellRef()._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = findNewCellId(object.getCellRef()._creatureId, constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewObjectId(object.getCellRef()._creatureId, constructor._lastConstructedCellId.value());
             }
         }
     }
@@ -544,9 +544,9 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
             newConnection._objectId = otherObject._id;
             newConnection._distance = toFloat(Math::length(otherObjectRefPos - cellRefPos));
 
-            auto connectedCell = getObjectRef(object._connections.front()._objectId, cache);
-            auto connectedCellDelta = connectedCell._pos - cellRefPos;
-            auto prevAngle = Math::angleOfVector(connectedCellDelta);
+            auto connectedObject = getObjectRef(object._connections.front()._objectId, cache);
+            auto connectedObjectDelta = connectedObject._pos - cellRefPos;
+            auto prevAngle = Math::angleOfVector(connectedObjectDelta);
             auto angleDiff = newAngle - prevAngle;
             if (angleDiff >= 0) {
                 newConnection._angleFromPrevious = toFloat(angleDiff);
@@ -559,9 +559,9 @@ Description& Description::addConnection(uint64_t const& objectId1, uint64_t cons
             return;
         }
 
-        auto firstConnectedCell = getObjectRef(object._connections.front()._objectId, cache);
-        auto firstConnectedCellDelta = firstConnectedCell._pos - cellRefPos;
-        auto angle = Math::angleOfVector(firstConnectedCellDelta);
+        auto firstConnectedObject = getObjectRef(object._connections.front()._objectId, cache);
+        auto firstConnectedObjectDelta = firstConnectedObject._pos - cellRefPos;
+        auto angle = Math::angleOfVector(firstConnectedObjectDelta);
         auto connectionIt = ++object._connections.begin();
         while (true) {
             auto nextAngle = angle + connectionIt->_angleFromPrevious;

@@ -33,7 +33,7 @@ public:
 
     __inline__ __device__ static bool
     existCrossingConnections(SimulationData& data, float2 const& pos1, float2 const& pos2, float const& radius, bool detached);
-    __inline__ __device__ static bool checkConnectedCellsForCrossingConnection(Object* object1, float2 otherObjectPos);
+    __inline__ __device__ static bool checkConnectedObjectsForCrossingConnection(Object* object1, float2 otherObjectPos);
     __inline__ __device__ static bool hasAngleSpace(SimulationData& data, Object* object, float angle, ConstructorAngleAlignment angleAlignment);
     __inline__ __device__ static bool isConnectedConnected(Object* object, Object* otherObject);
 
@@ -82,19 +82,19 @@ __inline__ __device__ void ObjectConnectionProcessor::scheduleDeleteAllConnectio
     }
 
     for (int i = 0; i < object->numConnections; ++i) {
-        auto const& connectedCell = object->connections[i].object;
+        auto const& connectedObject = object->connections[i].object;
         {
             StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
             operation.data.delConnection.connectedObject = object;
             operation.nextOperationIndex = -1;
-            scheduleOperationOnCell(data, connectedCell, index);
+            scheduleOperationOnCell(data, connectedObject, index);
             ++index;
         }
         {
             StructuralOperation& operation = data.structuralOperations.at(index);
             operation.type = StructuralOperation::Type::DelConnection;
-            operation.data.delConnection.connectedObject = connectedCell;
+            operation.data.delConnection.connectedObject = connectedObject;
             operation.nextOperationIndex = -1;
             scheduleOperationOnCell(data, object, index);
             ++index;
@@ -290,7 +290,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     }
 
     // !!! Performance intensive !!!
-    //if (checkConnectedCellsForCrossingConnection(object1, object2->pos)) {
+    //if (checkConnectedObjectsForCrossingConnection(object1, object2->pos)) {
     //    return false;
     //}
 
@@ -316,9 +316,9 @@ __inline__ __device__ bool ObjectConnectionProcessor::tryAddConnectionOneWay(
     // special case: object1 has one connection
     // *****
     if (1 == object1->numConnections) {
-        auto connectedCellDelta = object1->connections[0].object->pos - object1->pos;
-        data.objectMap.correctDirection(connectedCellDelta);
-        auto prevAngle = Math::angleOfVector(connectedCellDelta);
+        auto connectedObjectDelta = object1->connections[0].object->pos - object1->pos;
+        data.objectMap.correctDirection(connectedObjectDelta);
+        auto prevAngle = Math::angleOfVector(connectedObjectDelta);
         auto angleDiff = Math::subtractAngle(newAngle, prevAngle);
         if (0 != desiredAngleOnCell1) {
             angleDiff = desiredAngleOnCell1;
@@ -485,18 +485,18 @@ ObjectConnectionProcessor::existCrossingConnections(SimulationData& data, float2
     return result;
 }
 
-__inline__ __device__ bool ObjectConnectionProcessor::checkConnectedCellsForCrossingConnection(Object* object1, float2 otherObjectPos)
+__inline__ __device__ bool ObjectConnectionProcessor::checkConnectedObjectsForCrossingConnection(Object* object1, float2 otherObjectPos)
 {
     auto const& n = object1->numConnections;
     if (n < 2) {
         return false;
     }
     for (int i = 0; i < n; ++i) {
-        auto connectedCell = object1->connections[i].object;
-        auto nextConnectedCell = object1->connections[(i + 1) % n].object;
+        auto connectedObject = object1->connections[i].object;
+        auto nextConnectedObject = object1->connections[(i + 1) % n].object;
         bool bothConnected = false;
-        for (int j = 0; j < connectedCell->numConnections; ++j) {
-            if (connectedCell->connections[j].object == nextConnectedCell) {
+        for (int j = 0; j < connectedObject->numConnections; ++j) {
+            if (connectedObject->connections[j].object == nextConnectedObject) {
                 bothConnected = true;
                 break;
             }
@@ -504,7 +504,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::checkConnectedCellsForCros
         if (!bothConnected) {
             continue;
         }
-        if (Math::crossing(object1->pos, otherObjectPos, connectedCell->pos, nextConnectedCell->pos)) {
+        if (Math::crossing(object1->pos, otherObjectPos, connectedObject->pos, nextConnectedObject->pos)) {
             return true;
         }
     }
@@ -539,15 +539,15 @@ __inline__ __device__ bool ObjectConnectionProcessor::isConnectedConnected(Objec
     }
     bool result = false;
     for (int i = 0; i < otherObject->numConnections; ++i) {
-        auto const& connectedCell = otherObject->connections[i].object;
-        if (connectedCell == object) {
+        auto const& connectedObject = otherObject->connections[i].object;
+        if (connectedObject == object) {
             result = true;
             break;
         }
 
-        for (int j = 0; j < connectedCell->numConnections; ++j) {
-            auto const& connectedConnectedCell = connectedCell->connections[j].object;
-            if (connectedConnectedCell == object) {
+        for (int j = 0; j < connectedObject->numConnections; ++j) {
+            auto const& connectedConnectedObject = connectedObject->connections[j].object;
+            if (connectedConnectedObject == object) {
                 result = true;
                 break;
             }

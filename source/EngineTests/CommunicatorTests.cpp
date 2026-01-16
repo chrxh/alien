@@ -288,7 +288,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     // Calculate the receiver's connected cell position based on the angle difference
     // Sender reference angle is 90 degrees (pointing right), receiver will be at 90 + receiverRefAngleDiff
     auto receiverRefAngle = 90.0f + receiverRefAngleDiff;
-    auto receiverConnectedCellOffset = Math::unitVectorOfAngle(receiverRefAngle);
+    auto receiverConnectedObjectOffset = Math::unitVectorOfAngle(receiverRefAngle);
 
     auto data = Description().addCreature({
         ObjectDescription().id(100).pos({100.0f, 100.0f}).type(CellDescription().cellType(CommunicatorDescription().mode(SenderDescription().range(50.0f).maxTimesSent(4)))),
@@ -298,7 +298,7 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
 
     data.addCreature({
         ObjectDescription().id(200).pos({120.0f, 100.0f}).type(CellDescription().cellType(CommunicatorDescription().mode(ReceiverDescription()))),
-        ObjectDescription().id(201).pos({120.0f + receiverConnectedCellOffset.x, 100.0f + receiverConnectedCellOffset.y}),
+        ObjectDescription().id(201).pos({120.0f + receiverConnectedObjectOffset.x, 100.0f + receiverConnectedObjectOffset.y}),
     }, CreatureDescription().id(2));
     data.addConnection(200, 201);
 

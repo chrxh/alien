@@ -527,7 +527,7 @@ struct ObjectDescription
     CellDescription const& getCellRef() const;
 
     bool isConnectedTo(uint64_t id) const;
-    float getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const;
+    float getAngleSpan(uint64_t connectedObjectId1, uint64_t connectedObjectId2) const;
 };
 
 struct EnergyDescription

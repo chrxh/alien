@@ -541,19 +541,19 @@ struct Object
     float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
 
-    __device__ __inline__ float& getRefDistance(Object* connectedCell)
+    __device__ __inline__ float& getRefDistance(Object* connectedObject)
     {
-        auto index = getConnectionIndex(connectedCell);
+        auto index = getConnectionIndex(connectedObject);
         return connections[index].distance;
 
         CUDA_CHECK(false);
         return tempValue.as_uint32_float.floatPart;  // Return some dummy in order to prevent compile error
     }
 
-    __device__ __inline__ int getConnectionIndex(Object* connectedCell)
+    __device__ __inline__ int getConnectionIndex(Object* connectedObject)
     {
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].object == connectedCell) {
+            if (connections[i].object == connectedObject) {
                 return i;
             }
         }
@@ -589,15 +589,15 @@ struct Object
         return Math::getNormalizedAngle(result, 0.0f);
     }
 
-    __device__ __inline__ float getAngelSpan(Object* connectedCell1, Object* connectedCell2)
+    __device__ __inline__ float getAngelSpan(Object* connectedObject1, Object* connectedObject2)
     {
         auto connectionIndex1 = -1;
         auto connectionIndex2 = -1;
         for (int i = 0; i < numConnections; i++) {
-            if (connections[i].object == connectedCell1) {
+            if (connections[i].object == connectedObject1) {
                 connectionIndex1 = i;
             }
-            if (connections[i].object == connectedCell2) {
+            if (connections[i].object == connectedObject2) {
                 connectionIndex2 = i;
             }
         }

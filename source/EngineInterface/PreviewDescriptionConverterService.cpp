@@ -139,13 +139,13 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             if (i > 0) {
                 summedAngle += object._connections[i]._angleFromPrevious;
             }
-            auto connectedCellId = object._connections[i]._objectId;
+            auto connectedObjectId = object._connections[i]._objectId;
 
             bool shouldAddArrow =
                 !hasNodeRestriction || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
 
             if (shouldAddArrow) {
-                arrowFromCell1ToCell2.insert({object._id, connectedCellId});
+                arrowFromCell1ToCell2.insert({object._id, connectedObjectId});
             }
         }
     }

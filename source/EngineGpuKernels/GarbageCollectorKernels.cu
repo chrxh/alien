@@ -18,19 +18,19 @@ __global__ void cudaCleanupCellsStep1(Array<Object*> objects, Heap newHeap)
 
     int numCellsToCopy = objectPartition.numElements();
     if (numCellsToCopy > 0) {
-        auto newCells = newHeap.getTypedSubArray<Object>(numCellsToCopy);
+        auto newObjects = newHeap.getTypedSubArray<Object>(numCellsToCopy);
         auto newHeapStart = newHeap.getArray();
 
-        int newCellIndex = 0;
+        int newObjectIndex = 0;
         for (int index = objectPartition.startIndex; index <= objectPartition.endIndex; index += objectPartition.step) {
             auto& object = objects.at(index);
-            auto newCell = &newCells[newCellIndex];
-            *newCell = *object;
+            auto newObject = &newObjects[newObjectIndex];
+            *newObject = *object;
 
-            object->tempValue.as_uint64 = reinterpret_cast<uint8_t*>(newCell) - newHeapStart;  // Save index of new cell in old cell
-            object = newCell;
+            object->tempValue.as_uint64 = reinterpret_cast<uint8_t*>(newObject) - newHeapStart;  // Save index of new cell in old cell
+            object = newObject;
 
-            ++newCellIndex;
+            ++newObjectIndex;
         }
     }
 }
@@ -43,8 +43,8 @@ __global__ void cudaCleanupCellsStep2(Array<Object*> cellPointers, Heap newHeap)
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = cellPointers.at(index);
             for (int i = 0; i < object->numConnections; ++i) {
-                auto& connectedCell = object->connections[i].object;
-                connectedCell = reinterpret_cast<Object*>(newHeapStart + connectedCell->tempValue.as_uint64);
+                auto& connectedObject = object->connections[i].object;
+                connectedObject = reinterpret_cast<Object*>(newHeapStart + connectedObject->tempValue.as_uint64);
             }
             if (object->typeData.cell.cellType == CellType_Constructor) {
                 object->typeData.cell.cellTypeData.constructor.offspring = nullptr;

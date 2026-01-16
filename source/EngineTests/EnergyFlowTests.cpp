@@ -494,10 +494,10 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
 
     // With high conductivity, energy should have spread further
     // Check the last cell - it should have more energy with high conductivity
-    auto lastCellLow = actualDataLow.getObjectRef(10);
-    auto lastCellHigh = actualDataHigh.getObjectRef(10);
+    auto lastObjectLow = actualDataLow.getObjectRef(10);
+    auto lastObjectHigh = actualDataHigh.getObjectRef(10);
     
-    EXPECT_TRUE(lastCellHigh.getCellRef()._rawEnergy > lastCellLow.getCellRef()._rawEnergy + NEAR_ZERO);
+    EXPECT_TRUE(lastObjectHigh.getCellRef()._rawEnergy > lastObjectLow.getCellRef()._rawEnergy + NEAR_ZERO);
     
     // Energy conservation
     EXPECT_TRUE(approxCompare(getEnergy(dataLowConductivity), getEnergy(actualDataLow)));

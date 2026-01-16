@@ -187,9 +187,9 @@ void CudaGeometryBuffers::freeBuffersForNoInterop()
 void CudaGeometryBuffers::copyToOpenGL(GeometryBuffers const& geometryBuffers, NumRenderObjects const& numObjects)
 {
     if (numObjects.objects > 0) {
-        std::vector<ObjectVertexData> hostCellBuffer(numObjects.objects);
-        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostCellBuffer.data(), deviceObjectBuffer, numObjects.objects * sizeof(ObjectVertexData), cudaMemcpyDeviceToHost));
-        geometryBuffers->setCellData(hostCellBuffer.data(), numObjects.objects);
+        std::vector<ObjectVertexData> hostObjectBuffer(numObjects.objects);
+        CHECK_FOR_CUDA_ERROR(cudaMemcpy(hostObjectBuffer.data(), deviceObjectBuffer, numObjects.objects * sizeof(ObjectVertexData), cudaMemcpyDeviceToHost));
+        geometryBuffers->setCellData(hostObjectBuffer.data(), numObjects.objects);
     }
 
     if (numObjects.energies > 0) {
