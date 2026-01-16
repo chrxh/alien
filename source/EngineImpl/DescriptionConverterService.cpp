@@ -152,7 +152,7 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
         auto object = createObjectDescription(to, i);
 
         // Only access cell data for Cell objects
-        if (to.objects[i].type == ObjectType_Cell && to.objects[i].typeData.cell.belongToCreature) {
+        if (to.objects[i].type == ObjectType_Cell) {
             auto creatureTOIndex = to.objects[i].typeData.cell.creatureIndex;
             object.getCellRef()._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
@@ -597,7 +597,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         result._type = cellDesc;
 
     } else {
-        CHECK(false, "Unknown object type TO");
+        CHECK(false);
     }
     return result;
 }
@@ -1476,7 +1476,7 @@ void DescriptionConverterService::convertObjectToTO(
             objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
         }
     } else {
-        CHECK(false, "Unknown object type");
+        CHECK(false);
     }
 }
 

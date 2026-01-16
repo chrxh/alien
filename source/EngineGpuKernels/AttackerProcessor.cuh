@@ -116,7 +116,7 @@ __device__ __inline__ void AttackerProcessor::processCell(SimulationData& data, 
                 }
                 auto const& otherCell = &otherObject->typeData.cell;
 
-                if (cell->isSameCreature(&otherCell)) {
+                if (cell->isSameCreature(otherCell)) {
                     return;
                 }
                 // Do not attack offspring
