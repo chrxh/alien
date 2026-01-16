@@ -26,9 +26,9 @@ struct StructureObjectDescription
     auto operator<=>(StructureObjectDescription const&) const = default;
 };
 
-struct FreeObjectDescription
+struct FreeCellDescription
 {
-    auto operator<=>(FreeObjectDescription const&) const = default;
+    auto operator<=>(FreeCellDescription const&) const = default;
 };
 
 struct NeuralNetworkDescription
@@ -93,12 +93,12 @@ struct DetectStructureDescription
     auto operator<=>(DetectStructureDescription const&) const = default;
 };
 
-struct DetectFreeObjectDescription
+struct DetectFreeCellDescription
 {
-    auto operator<=>(DetectFreeObjectDescription const&) const = default;
+    auto operator<=>(DetectFreeCellDescription const&) const = default;
 
-    MEMBER(DetectFreeObjectDescription, float, minDensity, 0.05f);
-    MEMBER(DetectFreeObjectDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(DetectFreeCellDescription, float, minDensity, 0.05f);
+    MEMBER(DetectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct DetectCreatureDescription
@@ -111,7 +111,7 @@ struct DetectCreatureDescription
     MEMBER(DetectCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using SensorModeDescription = std::variant<TelemetryDescription, DetectEnergyDescription, DetectStructureDescription, DetectFreeObjectDescription, DetectCreatureDescription>;
+using SensorModeDescription = std::variant<TelemetryDescription, DetectEnergyDescription, DetectStructureDescription, DetectFreeCellDescription, DetectCreatureDescription>;
 
 struct SensorLastMatchDescription
 {
@@ -153,11 +153,11 @@ struct GeneratorDescription
     MEMBER(GeneratorDescription, int, numPulses, 0);
 };
 
-struct AttackFreeObjectDescription
+struct AttackFreeCellDescription
 {
-    auto operator<=>(AttackFreeObjectDescription const&) const = default;
+    auto operator<=>(AttackFreeCellDescription const&) const = default;
 
-    MEMBER(AttackFreeObjectDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(AttackFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct AttackCreatureDescription
@@ -170,7 +170,7 @@ struct AttackCreatureDescription
     MEMBER(AttackCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using AttackerModeDescription = std::variant<AttackFreeObjectDescription, AttackCreatureDescription>;
+using AttackerModeDescription = std::variant<AttackFreeCellDescription, AttackCreatureDescription>;
 
 struct AttackerDescription
 {
@@ -301,11 +301,11 @@ struct ReconnectStructureDescription
     auto operator<=>(ReconnectStructureDescription const&) const = default;
 };
 
-struct ReconnectFreeObjectDescription
+struct ReconnectFreeCellDescription
 {
-    auto operator<=>(ReconnectFreeObjectDescription const&) const = default;
+    auto operator<=>(ReconnectFreeCellDescription const&) const = default;
 
-    MEMBER(ReconnectFreeObjectDescription, std::optional<int>, restrictToColor, std::nullopt);
+    MEMBER(ReconnectFreeCellDescription, std::optional<int>, restrictToColor, std::nullopt);
 };
 
 struct ReconnectCreatureDescription
@@ -318,7 +318,7 @@ struct ReconnectCreatureDescription
     MEMBER(ReconnectCreatureDescription, LineageRestriction, restrictToLineage, LineageRestriction_No);
 };
 
-using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeObjectDescription, ReconnectCreatureDescription>;
+using ReconnectorModeDescription = std::variant<ReconnectStructureDescription, ReconnectFreeCellDescription, ReconnectCreatureDescription>;
 
 struct ReconnectorDescription
 {
@@ -434,7 +434,7 @@ struct CommunicatorDescription
 
 using CellTypeDescription = std::variant<
     StructureObjectDescription,
-    FreeObjectDescription,
+    FreeCellDescription,
     BaseDescription,
     DepotDescription,
     ConstructorDescription,

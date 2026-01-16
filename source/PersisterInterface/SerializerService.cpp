@@ -1064,15 +1064,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectFreeObjectDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDescription& data)
     {
-        DetectFreeObjectDescription defaultObject;
+        DetectFreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(DetectFreeObjectDescription)
+    SPLIT_SERIALIZATION(DetectFreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
@@ -1126,14 +1126,14 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneratorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, AttackFreeObjectDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, AttackFreeCellDescription& data)
     {
-        AttackFreeObjectDescription defaultObject;
+        AttackFreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(AttackFreeObjectDescription)
+    SPLIT_SERIALIZATION(AttackFreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackCreatureDescription& data)
@@ -1286,14 +1286,14 @@ namespace cereal
     SPLIT_SERIALIZATION(ReconnectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeObjectDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellDescription& data)
     {
-        ReconnectFreeObjectDescription defaultObject;
+        ReconnectFreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ReconnectFreeObjectDescription)
+    SPLIT_SERIALIZATION(ReconnectFreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureDescription& data)
@@ -1447,29 +1447,29 @@ namespace cereal
         ObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Object_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Object_Energy, std::get<CellDescription>(data._type)._usableEnergy, std::get<CellDescription>(defaultObject._type)._usableEnergy);
-        loadSave(task, auxiliaries, Id_Object_RawEnergy, std::get<CellDescription>(data._type)._rawEnergy, std::get<CellDescription>(defaultObject._type)._rawEnergy);
+        loadSave(task, auxiliaries, Id_Object_Energy, data.getCellRef()._usableEnergy, defaultObject.getCellRef()._usableEnergy);
+        loadSave(task, auxiliaries, Id_Object_RawEnergy, data.getCellRef()._rawEnergy, defaultObject.getCellRef()._rawEnergy);
         loadSave(task, auxiliaries, Id_Object_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Object_Vel, data._vel, defaultObject._vel);
         loadSave(task, auxiliaries, Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Object_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Object_AngleToFront, std::get<CellDescription>(data._type)._frontAngle, std::get<CellDescription>(defaultObject._type)._frontAngle);
+        loadSave(task, auxiliaries, Id_Object_AngleToFront, data.getCellRef()._frontAngle, defaultObject.getCellRef()._frontAngle);
         loadSave(task, auxiliaries, Id_Object_Fixed, data._fixed, defaultObject._fixed);
         loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
-        loadSave(task, auxiliaries, Id_Object_Age, std::get<CellDescription>(data._type)._age, std::get<CellDescription>(defaultObject._type)._age);
-        loadSave(task, auxiliaries, Id_Object_CellState, std::get<CellDescription>(data._type)._cellState, std::get<CellDescription>(defaultObject._type)._cellState);
-        loadSave(task, auxiliaries, Id_Object_ActivationTime, std::get<CellDescription>(data._type)._activationTime, std::get<CellDescription>(defaultObject._type)._activationTime);
-        loadSave(task, auxiliaries, Id_Object_CellTriggered, std::get<CellDescription>(data._type)._cellTriggered, std::get<CellDescription>(defaultObject._type)._cellTriggered);
-        loadSave(task, auxiliaries, Id_Object_NodeIndex, std::get<CellDescription>(data._type)._nodeIndex, std::get<CellDescription>(defaultObject._type)._nodeIndex);
-        loadSave(task, auxiliaries, Id_Object_ParentNodeIndex, std::get<CellDescription>(data._type)._parentNodeIndex, std::get<CellDescription>(defaultObject._type)._parentNodeIndex);
-        loadSave(task, auxiliaries, Id_Object_GeneIndex, std::get<CellDescription>(data._type)._geneIndex, std::get<CellDescription>(defaultObject._type)._geneIndex);
-        loadSave(task, auxiliaries, Id_Object_SignalState, std::get<CellDescription>(data._type)._signalState, std::get<CellDescription>(defaultObject._type)._signalState);
-        loadSave(task, auxiliaries, Id_Object_FrontAngleId, std::get<CellDescription>(data._type)._frontAngleId, std::get<CellDescription>(defaultObject._type)._frontAngleId);
-        loadSave(task, auxiliaries, Id_Object_IsFrontAngleRefCell, std::get<CellDescription>(data._type)._headCell, std::get<CellDescription>(defaultObject._type)._headCell);
-        loadSave(task, auxiliaries, Id_Object_CreatureId, std::get<CellDescription>(data._type)._creatureId, std::get<CellDescription>(defaultObject._type)._creatureId);
+        loadSave(task, auxiliaries, Id_Object_Age, data.getCellRef()._age, defaultObject.getCellRef()._age);
+        loadSave(task, auxiliaries, Id_Object_CellState, data.getCellRef()._cellState, defaultObject.getCellRef()._cellState);
+        loadSave(task, auxiliaries, Id_Object_ActivationTime, data.getCellRef()._activationTime, defaultObject.getCellRef()._activationTime);
+        loadSave(task, auxiliaries, Id_Object_CellTriggered, data.getCellRef()._cellTriggered, defaultObject.getCellRef()._cellTriggered);
+        loadSave(task, auxiliaries, Id_Object_NodeIndex, data.getCellRef()._nodeIndex, defaultObject.getCellRef()._nodeIndex);
+        loadSave(task, auxiliaries, Id_Object_ParentNodeIndex, data.getCellRef()._parentNodeIndex, defaultObject.getCellRef()._parentNodeIndex);
+        loadSave(task, auxiliaries, Id_Object_GeneIndex, data.getCellRef()._geneIndex, defaultObject.getCellRef()._geneIndex);
+        loadSave(task, auxiliaries, Id_Object_SignalState, data.getCellRef()._signalState, defaultObject.getCellRef()._signalState);
+        loadSave(task, auxiliaries, Id_Object_FrontAngleId, data.getCellRef()._frontAngleId, defaultObject.getCellRef()._frontAngleId);
+        loadSave(task, auxiliaries, Id_Object_IsFrontAngleRefCell, data.getCellRef()._headCell, defaultObject.getCellRef()._headCell);
+        loadSave(task, auxiliaries, Id_Object_CreatureId, data.getCellRef()._creatureId, defaultObject.getCellRef()._creatureId);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, std::get<CellDescription>(data._type)._cellType, std::get<CellDescription>(data._type)._signal, std::get<CellDescription>(data._type)._signalRestriction, std::get<CellDescription>(data._type)._neuralNetwork);
+        ar(data._connections, data.getCellRef()._cellType, data.getCellRef()._signal, data.getCellRef()._signalRestriction, data.getCellRef()._neuralNetwork);
     }
     SPLIT_SERIALIZATION(ObjectDescription)
 

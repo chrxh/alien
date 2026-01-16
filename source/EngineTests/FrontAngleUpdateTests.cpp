@@ -48,9 +48,9 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.has_value());
-    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.has_value());
-    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getObjectRef(1).getCellRef()._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getObjectRef(2).getCellRef()._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getObjectRef(3).getCellRef()._frontAngle.has_value());
 }
 
 TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
@@ -79,8 +79,8 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.has_value());
-    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getObjectRef(1).getCellRef()._frontAngle.has_value());
+    EXPECT_FALSE(actualData.getObjectRef(2).getCellRef()._frontAngle.has_value());
 }
 
 
@@ -125,16 +125,16 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(9, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(4)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(4).getCellRef()._frontAngle.value()));
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(5)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(6)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(7)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(8)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(9)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(5).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(6).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(7).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(8).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(9).getCellRef()._frontAngle.value()));
 }
 
 TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
@@ -165,9 +165,9 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
 }
 
 TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
@@ -209,14 +209,14 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
         auto creature = actualData.getCreatureRef(1);
         ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
     }
     {
         auto creature = actualData.getCreatureRef(2);
         ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
 
-        EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.has_value());
+        EXPECT_FALSE(actualData.getObjectRef(3).getCellRef()._frontAngle.has_value());
     }
 }
 
@@ -271,15 +271,15 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     ASSERT_EQ(4, actualData.getObjectsForCreature(creature._id).size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(4)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(4).getCellRef()._frontAngle.value()));
     } else {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(4)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(4).getCellRef()._frontAngle.value()));
     }
 }
 
@@ -322,13 +322,13 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
     } else {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
     }
 }
 
@@ -370,7 +370,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2).getCellRef()._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(3).getCellRef()._frontAngle.value()));
 }

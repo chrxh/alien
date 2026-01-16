@@ -73,7 +73,7 @@ ObjectDescription DescriptionTestDataFactory::createNonDefaultObjectDescription(
         nn.weight(2, 1, 0.7f);
         nn._biases.at(1) = -0.4f;
         nn._activationFunctions.at(5) = 2 % ActivationFunction_Count;
-        std::get<CellDescription>(result._type)._neuralNetwork = nn;
+        result.getCellRef()._neuralNetwork = nn;
     }
     return result;
 }
@@ -185,34 +185,34 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
     if (cell._color != node._color) {
         return false;
     }
-    if (!std::get<CellDescription>(cell._type)._neuralNetwork.has_value()) {
+    if (!cell.getCellRef()._neuralNetwork.has_value()) {
         return false;
     }
     for (int i = 0; i < MAX_CHANNELS * MAX_CHANNELS; ++i) {
-        if (std::get<CellDescription>(cell._type)._neuralNetwork->_weights[i] != node._neuralNetwork._weights[i]) {
+        if (cell.getCellRef()._neuralNetwork->_weights[i] != node._neuralNetwork._weights[i]) {
             return false;
         }
     }
     for (int i = 0; i < MAX_CHANNELS; ++i) {
-        if (std::get<CellDescription>(cell._type)._neuralNetwork->_biases[i] != node._neuralNetwork._biases[i]) {
+        if (cell.getCellRef()._neuralNetwork->_biases[i] != node._neuralNetwork._biases[i]) {
             return false;
         }
-        if (std::get<CellDescription>(cell._type)._neuralNetwork->_activationFunctions[i] != node._neuralNetwork._activationFunctions[i]) {
+        if (cell.getCellRef()._neuralNetwork->_activationFunctions[i] != node._neuralNetwork._activationFunctions[i]) {
             return false;
         }
     }
-    if (std::get<CellDescription>(cell._type)._signalRestriction._mode != node._signalRestriction._mode) {
+    if (cell.getCellRef()._signalRestriction._mode != node._signalRestriction._mode) {
         return false;
     }
-    if (std::get<CellDescription>(cell._type)._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
+    if (cell.getCellRef()._signalRestriction._baseAngle != node._signalRestriction._baseAngle) {
         return false;
     }
-    if (std::get<CellDescription>(cell._type)._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
+    if (cell.getCellRef()._signalRestriction._openingAngle != node._signalRestriction._openingAngle) {
         return false;
     }
 
     auto nodeType = node.getCellType();
-    switch (std::get<CellDescription>(cell._type).getCellType()) {
+    switch (cell.getCellRef().getCellType()) {
     case CellType_Base: {
         if (nodeType != CellTypeGenome_Base) {
             return false;
@@ -222,7 +222,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Depot) {
             return false;
         }
-        auto const& depot = std::get<DepotDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& depot = std::get<DepotDescription>(cell.getCellRef()._cellType);
         auto const& nodeDepot = std::get<DepotGenomeDescription>(node._cellType);
         if (depot._storageLimit != nodeDepot._storageLimit) {
             return false;
@@ -232,7 +232,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Constructor) {
             return false;
         }
-        auto const& constructor = std::get<ConstructorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& constructor = std::get<ConstructorDescription>(cell.getCellRef()._cellType);
         auto const& nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellType);
         if (constructor._autoTriggerInterval != nodeConstructor._autoTriggerInterval) {
             return false;
@@ -248,7 +248,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Sensor) {
             return false;
         }
-        auto const& sensor = std::get<SensorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& sensor = std::get<SensorDescription>(cell.getCellRef()._cellType);
         auto const& nodeSensor = std::get<SensorGenomeDescription>(node._cellType);
         if (sensor._autoTriggerInterval != nodeSensor._autoTriggerInterval) {
             return false;
@@ -276,7 +276,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
             // No fields to compare
         } break;
         case SensorMode_DetectFreeCell: {
-            auto const& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
+            auto const& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
             auto const& nodeDetectFreeCell = std::get<DetectFreeCellGenomeDescription>(nodeSensor._mode);
             if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
                 return false;
@@ -307,7 +307,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Generator) {
             return false;
         }
-        auto const& generator = std::get<GeneratorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& generator = std::get<GeneratorDescription>(cell.getCellRef()._cellType);
         auto const& nodeGenerator = std::get<GeneratorGenomeDescription>(node._cellType);
         if (generator._autoTriggerInterval != nodeGenerator._autoTriggerInterval) {
             return false;
@@ -323,14 +323,14 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Attacker) {
             return false;
         }
-        auto const& attacker = std::get<AttackerDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& attacker = std::get<AttackerDescription>(cell.getCellRef()._cellType);
         auto const& nodeAttacker = std::get<AttackerGenomeDescription>(node._cellType);
         if (attacker.getMode() != nodeAttacker.getMode()) {
             return false;
         }
         switch (attacker.getMode()) {
         case AttackerMode_FreeCell: {
-            auto const& freeCellMode = std::get<AttackFreeObjectDescription>(attacker._mode);
+            auto const& freeCellMode = std::get<AttackFreeCellDescription>(attacker._mode);
             auto const& nodeFreeCellMode = std::get<AttackFreeCellGenomeDescription>(nodeAttacker._mode);
             if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
                 return false;
@@ -358,7 +358,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Injector) {
             return false;
         }
-        auto const& injector = std::get<InjectorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& injector = std::get<InjectorDescription>(cell.getCellRef()._cellType);
         auto const& nodeInjector = std::get<InjectorGenomeDescription>(node._cellType);
         if (injector._geneIndex != nodeInjector._geneIndex) {
             return false;
@@ -368,7 +368,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Muscle) {
             return false;
         }
-        auto const& muscle = std::get<MuscleDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& muscle = std::get<MuscleDescription>(cell.getCellRef()._cellType);
         auto const& nodeMuscle = std::get<MuscleGenomeDescription>(node._cellType);
         if (muscle.getMode() != nodeMuscle.getMode()) {
             return false;
@@ -434,7 +434,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Defender) {
             return false;
         }
-        auto const& defender = std::get<DefenderDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& defender = std::get<DefenderDescription>(cell.getCellRef()._cellType);
         auto const& nodeDefender = std::get<DefenderGenomeDescription>(node._cellType);
         if (defender._mode != nodeDefender._mode) {
             return false;
@@ -444,7 +444,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Reconnector) {
             return false;
         }
-        auto const& reconnector = std::get<ReconnectorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& reconnector = std::get<ReconnectorDescription>(cell.getCellRef()._cellType);
         auto const& nodeReconnector = std::get<ReconnectorGenomeDescription>(node._cellType);
         if (reconnector.getMode() != nodeReconnector.getMode()) {
             return false;
@@ -454,7 +454,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
             // No fields to compare
         } break;
         case ReconnectorMode_FreeCell: {
-            auto const& freeCellMode = std::get<ReconnectFreeObjectDescription>(reconnector._mode);
+            auto const& freeCellMode = std::get<ReconnectFreeCellDescription>(reconnector._mode);
             auto const& nodeFreeCellMode = std::get<ReconnectFreeCellGenomeDescription>(nodeReconnector._mode);
             if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
                 return false;
@@ -482,7 +482,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Detonator) {
             return false;
         }
-        auto const& detonator = std::get<DetonatorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& detonator = std::get<DetonatorDescription>(cell.getCellRef()._cellType);
         auto const& nodeDetonator = std::get<DetonatorGenomeDescription>(node._cellType);
         if (detonator._countdown != nodeDetonator._countdown) {
             return false;
@@ -492,7 +492,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Digestor) {
             return false;
         }
-        auto const& digestor = std::get<DigestorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& digestor = std::get<DigestorDescription>(cell.getCellRef()._cellType);
         auto const& nodeDigestor = std::get<DigestorGenomeDescription>(node._cellType);
         if (digestor._rawEnergyConductivity != nodeDigestor._rawEnergyConductivity) {
             return false;
@@ -502,7 +502,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Memory) {
             return false;
         }
-        auto const& memory = std::get<MemoryDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& memory = std::get<MemoryDescription>(cell.getCellRef()._cellType);
         auto const& nodeMemory = std::get<MemoryGenomeDescription>(node._cellType);
         if (memory.getMode() != nodeMemory.getMode()) {
             return false;
@@ -558,7 +558,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         if (nodeType != CellTypeGenome_Communicator) {
             return false;
         }
-        auto const& communicator = std::get<CommunicatorDescription>(std::get<CellDescription>(cell._type)._cellType);
+        auto const& communicator = std::get<CommunicatorDescription>(cell.getCellRef()._cellType);
         auto const& nodeCommunicator = std::get<CommunicatorGenomeDescription>(node._cellType);
         if (communicator.getMode() != nodeCommunicator.getMode()) {
             return false;
@@ -604,7 +604,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Structure:
         return StructureObjectDescription();
     case CellType_Free:
-        return FreeObjectDescription();
+        return FreeCellDescription();
     case CellType_Base:
         return BaseDescription();
     case CellType_Depot:
@@ -634,7 +634,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             sensorModeDesc = DetectStructureDescription();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeObjectDescription().minDensity(0.25f).restrictToColor(2);
+            sensorModeDesc = DetectFreeCellDescription().minDensity(0.25f).restrictToColor(2);
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc =
@@ -722,7 +722,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             reconnectorModeDesc = ReconnectStructureDescription();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeObjectDescription().restrictToColor(2);
+            reconnectorModeDesc = ReconnectFreeCellDescription().restrictToColor(2);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =

@@ -29,7 +29,7 @@ TEST_F(SignalTests, noSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(generator.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SignalTests, forwardSignal)
@@ -47,14 +47,14 @@ TEST_F(SignalTests, forwardSignal)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
 
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(std::get<CellDescription>(object2._type)._signalState == SignalState_Active);
-    EXPECT_EQ(signal, std::get<CellDescription>(object2._type)._signal._channels);
-    EXPECT_EQ(3, std::get<CellDescription>(object2._type)._signal._numTimesSent);
-    EXPECT_EQ(1, std::get<CellDescription>(object1._type)._signalState);
-    EXPECT_EQ(2, std::get<CellDescription>(object2._type)._signalState);
+    EXPECT_TRUE(object2.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(signal, object2.getCellRef()._signal._channels);
+    EXPECT_EQ(3, object2.getCellRef()._signal._numTimesSent);
+    EXPECT_EQ(1, object1.getCellRef()._signalState);
+    EXPECT_EQ(2, object2.getCellRef()._signalState);
 }
 
 TEST_F(SignalTests, forwardSignal_detailedPreview)
@@ -72,13 +72,13 @@ TEST_F(SignalTests, forwardSignal_detailedPreview)
     auto actualData = _simulationFacade->getPreviewData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
 
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(std::get<CellDescription>(object2._type)._signalState == SignalState_Active);
-    EXPECT_EQ(signal, std::get<CellDescription>(object2._type)._signal._channels);
-    EXPECT_EQ(1, std::get<CellDescription>(object1._type)._signalState);
-    EXPECT_EQ(2, std::get<CellDescription>(object2._type)._signalState);
+    EXPECT_TRUE(object2.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(signal, object2.getCellRef()._signal._channels);
+    EXPECT_EQ(1, object1.getCellRef()._signalState);
+    EXPECT_EQ(2, object2.getCellRef()._signalState);
 }
 
 TEST_F(SignalTests, vanishSignal_singleCell)
@@ -94,7 +94,7 @@ TEST_F(SignalTests, vanishSignal_singleCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SignalTests, vanishSignal_relaxationNeeded)
@@ -112,7 +112,7 @@ TEST_F(SignalTests, vanishSignal_relaxationNeeded)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SignalTests, mergeSignals)
@@ -133,23 +133,23 @@ TEST_F(SignalTests, mergeSignals)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
 
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(std::get<CellDescription>(object2._type)._signalState == SignalState_Active);
+    EXPECT_TRUE(object2.getCellRef()._signalState == SignalState_Active);
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_FALSE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);
 
     std::vector<float> sumSignal(signal1.size());
     for (size_t i = 0; i < signal1.size(); ++i) {
         sumSignal[i] = signal1[i] + signal2[i];
     }
-    EXPECT_TRUE(approxCompare(sumSignal, std::get<CellDescription>(object2._type)._signal._channels));
-    EXPECT_EQ(3, std::get<CellDescription>(object2._type)._signal._numTimesSent);  // Takes minimum of 7 and 3
-    EXPECT_EQ(1, std::get<CellDescription>(object1._type)._signalState);
-    EXPECT_EQ(2, std::get<CellDescription>(object2._type)._signalState);
-    EXPECT_EQ(1, std::get<CellDescription>(cell3._type)._signalState);
+    EXPECT_TRUE(approxCompare(sumSignal, object2.getCellRef()._signal._channels));
+    EXPECT_EQ(3, object2.getCellRef()._signal._numTimesSent);  // Takes minimum of 7 and 3
+    EXPECT_EQ(1, object1.getCellRef()._signalState);
+    EXPECT_EQ(2, object2.getCellRef()._signalState);
+    EXPECT_EQ(1, cell3.getCellRef()._signalState);
 }
 
 TEST_F(SignalTests, forkSignals)
@@ -169,20 +169,20 @@ TEST_F(SignalTests, forkSignals)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_TRUE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(object1._type)._signal._channels));
-    EXPECT_EQ(5, std::get<CellDescription>(object1._type)._signal._numTimesSent);
-    EXPECT_EQ(2, std::get<CellDescription>(object1._type)._signalState);
+    EXPECT_TRUE(object1.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(signal, object1.getCellRef()._signal._channels));
+    EXPECT_EQ(5, object1.getCellRef()._signal._numTimesSent);
+    EXPECT_EQ(2, object1.getCellRef()._signalState);
 
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_FALSE(std::get<CellDescription>(object2._type)._signalState == SignalState_Active);
-    EXPECT_EQ(1, std::get<CellDescription>(object2._type)._signalState);
+    EXPECT_FALSE(object2.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(1, object2.getCellRef()._signalState);
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(cell3._type)._signal._channels));
-    EXPECT_EQ(5, std::get<CellDescription>(cell3._type)._signal._numTimesSent);
-    EXPECT_EQ(2, std::get<CellDescription>(cell3._type)._signalState);
+    EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
+    EXPECT_EQ(5, cell3.getCellRef()._signal._numTimesSent);
+    EXPECT_EQ(2, cell3.getCellRef()._signalState);
 }
 
 enum class AngleRange
@@ -216,17 +216,17 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMatch)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
-    EXPECT_EQ(0, std::get<CellDescription>(object1._type)._signalState);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(0, object1.getCellRef()._signalState);
 
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_FALSE(std::get<CellDescription>(object2._type)._signalState == SignalState_Active);
-    EXPECT_EQ(1, std::get<CellDescription>(object2._type)._signalState);
+    EXPECT_FALSE(object2.getCellRef()._signalState == SignalState_Active);
+    EXPECT_EQ(1, object2.getCellRef()._signalState);
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(cell3._type)._signal._channels));
-    EXPECT_EQ(2, std::get<CellDescription>(cell3._type)._signalState);
+    EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
+    EXPECT_EQ(2, cell3.getCellRef()._signalState);
 }
 
 TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
@@ -247,13 +247,13 @@ TEST_P(SignalTests_BothSides, routeSignalOnRight_sharpMismatch)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto object1 = actualData.getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(object1._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object1.getCellRef()._signalState == SignalState_Active);
 
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_FALSE(std::get<CellDescription>(object2._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(object2.getCellRef()._signalState == SignalState_Active);
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_FALSE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);
 }
 
 // Tests for SignalRestrictionMode_Conditional
@@ -266,9 +266,9 @@ TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
 
     // Cell 2 has conditional restriction - signal to cell 3 is outside the cone
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._baseAngle = 45.0f;  // Restriction points away from cell 3
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._openingAngle = 90.0f;
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 45.0f;  // Restriction points away from cell 3
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
     data._objects = {
         ObjectDescription().id(1).pos({0, 0}),
@@ -283,7 +283,7 @@ TEST_F(SignalTests, conditionalMode_outsideCone_alwaysBlocked)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_FALSE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);  // Signal blocked because outside cone
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);  // Signal blocked because outside cone
 }
 
 TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
@@ -294,9 +294,9 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone but channel[0] < 0
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._openingAngle = 90.0f;
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
     data._objects = {
         ObjectDescription().id(1).pos({0, 0}),
@@ -311,7 +311,7 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Negative_blocked)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_FALSE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);  // Signal blocked because channel[0] < 0
+    EXPECT_FALSE(cell3.getCellRef()._signalState == SignalState_Active);  // Signal blocked because channel[0] < 0
 }
 
 TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
@@ -322,9 +322,9 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._openingAngle = 90.0f;
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
     data._objects = {
         ObjectDescription().id(1).pos({0, 0}),
@@ -339,8 +339,8 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Zero_passes)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);  // Signal passes through
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(cell3._type)._signal._channels));
+    EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);  // Signal passes through
+    EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
 }
 
 TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
@@ -351,9 +351,9 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
 
     // Cell 2 has conditional restriction - signal to cell 3 is inside the cone and channel[0] >= 0
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._mode = SignalRestrictionMode_Conditional;
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._openingAngle = 90.0f;
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Conditional;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 0.0f;  // Restriction centered on cell 3 direction
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 90.0f;
 
     data._objects = {
         ObjectDescription().id(1).pos({0, 0}),
@@ -368,8 +368,8 @@ TEST_F(SignalTests, conditionalMode_insideCone_channel0Positive_passes)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);  // Signal passes through
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(cell3._type)._signal._channels));
+    EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);  // Signal passes through
+    EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
 }
 
 TEST_F(SignalTests, inactiveMode_noRestriction)
@@ -380,9 +380,9 @@ TEST_F(SignalTests, inactiveMode_noRestriction)
 
     // Cell 2 has inactive restriction - signal should pass even with restrictive angles
     auto cell2Desc = ObjectDescription().id(2).pos({1, 0}).type(CellDescription().signalAndState(signal));
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._mode = SignalRestrictionMode_Inactive;
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._baseAngle = 45.0f;  // Would block if active
-    std::get<CellDescription>(cell2Desc._type)._signalRestriction._openingAngle = 10.0f;
+    cell2Desc.getCellRef()._signalRestriction._mode = SignalRestrictionMode_Inactive;
+    cell2Desc.getCellRef()._signalRestriction._baseAngle = 45.0f;  // Would block if active
+    cell2Desc.getCellRef()._signalRestriction._openingAngle = 10.0f;
 
     data._objects = {
         ObjectDescription().id(1).pos({0, 0}),
@@ -397,6 +397,6 @@ TEST_F(SignalTests, inactiveMode_noRestriction)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto cell3 = actualData.getObjectRef(3);
-    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._signalState == SignalState_Active);  // Signal passes through
-    EXPECT_TRUE(approxCompare(signal, std::get<CellDescription>(cell3._type)._signal._channels));
+    EXPECT_TRUE(cell3.getCellRef()._signalState == SignalState_Active);  // Signal passes through
+    EXPECT_TRUE(approxCompare(signal, cell3.getCellRef()._signal._channels));
 }

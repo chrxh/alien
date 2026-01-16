@@ -37,7 +37,7 @@ public:
         if (cellType == CellType_Structure) {
             return StructureObjectDescription();
         } else if (cellType == CellType_Free) {
-            return FreeObjectDescription();
+            return FreeCellDescription();
         } else {
             return BaseDescription();
         }
@@ -76,8 +76,8 @@ TEST_P(CellStateTransitionTests, ready_ready)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
 TEST_P(CellStateTransitionTests, ready_dying)
@@ -95,8 +95,8 @@ TEST_P(CellStateTransitionTests, ready_dying)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-    EXPECT_EQ(CellState_Dying, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+    EXPECT_EQ(CellState_Dying, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
 TEST_P(CellStateTransitionTests, ready_detaching)
@@ -116,22 +116,22 @@ TEST_P(CellStateTransitionTests, ready_detaching)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -157,22 +157,22 @@ TEST_P(CellStateTransitionTests, ready_detaching_onHeadCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Reviving, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -198,22 +198,22 @@ TEST_P(CellStateTransitionTests, ready_detaching_onNonHeadCell)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -233,14 +233,14 @@ TEST_P(CellStateTransitionTests, ready_detaching_differentCreature)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (deathConsequences == CellDeathConsequences_None) {
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -262,21 +262,21 @@ TEST_P(CellStateTransitionTests, detaching_reviving)
 
     if (deathConsequences == CellDeathConsequences_None) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_CreatureDies) {
-        EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     } else if (deathConsequences == CellDeathConsequences_DetachedPartsDie) {
         if (cellType == CellType_Base) {
-            EXPECT_EQ(CellState_Reviving, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Reviving, actualData.getObjectRef(1).getCellRef()._cellState);
         } else {
-            EXPECT_EQ(CellState_Detaching, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+            EXPECT_EQ(CellState_Detaching, actualData.getObjectRef(1).getCellRef()._cellState);
         }
-        EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+        EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
     }
 }
 
@@ -297,11 +297,11 @@ TEST_P(CellStateTransitionTests, underConstruction_activating)
     auto actualData = _simulationFacade->getSimulationData();
 
     if (cellType == CellType_Base) {
-        EXPECT_EQ(CellState_Activating, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+        EXPECT_EQ(CellState_Activating, actualData.getObjectRef(1).getCellRef()._cellState);
     } else {
-        EXPECT_EQ(CellState_Constructing, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+        EXPECT_EQ(CellState_Constructing, actualData.getObjectRef(1).getCellRef()._cellState);
     }
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(2)._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(2).getCellRef()._cellState);
 }
 
 TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
@@ -317,5 +317,5 @@ TEST_P(CellStateTransitionTests, noDyingForBarrierCells)
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
     auto actualData = _simulationFacade->getSimulationData();
-    EXPECT_EQ(CellState_Ready, std::get<CellDescription>(actualData.getObjectRef(1)._type)._cellState);
+    EXPECT_EQ(CellState_Ready, actualData.getObjectRef(1).getCellRef()._cellState);
 }

@@ -67,7 +67,7 @@ TEST_F(CommunicatorTests, sender_noReceiver_noSignalTransmitted)
     auto result = _simulationFacade->getSimulationData();
     auto sender = result.getObjectRef(100);
 
-    EXPECT_TRUE(std::get<CellDescription>(sender._type)._signalState == SignalState_Active);
+    EXPECT_TRUE(sender.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
@@ -85,11 +85,11 @@ TEST_F(CommunicatorTests, sender_receiverInRange_signalTransmitted)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should have received the signal
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
-    EXPECT_FLOAT_EQ(std::get<CellDescription>(receiver._type)._signal._channels[0], 1.0f);
-    EXPECT_FLOAT_EQ(std::get<CellDescription>(receiver._type)._signal._channels[1], 0.5f);
-    EXPECT_FLOAT_EQ(std::get<CellDescription>(receiver._type)._signal._channels[2], 3.0f);
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signal._numTimesSent, 1);
+    EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[0], 1.0f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+    EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[2], 3.0f);
+    EXPECT_EQ(receiver.getCellRef()._signal._numTimesSent, 1);
 }
 
 TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
@@ -107,7 +107,7 @@ TEST_F(CommunicatorTests, sender_receiverOutOfRange_noSignalTransmitted)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal
-    EXPECT_NE(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_NE(receiver.getCellRef()._signalState, SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
@@ -128,7 +128,7 @@ TEST_F(CommunicatorTests, sender_sameCreatureReceiver_noSignalTransmitted)
     auto receiver = result.getObjectRef(2);
 
     // Since they're in the same creature, CommunicatorProcessor should NOT transmit.
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Inactive);
+    EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Inactive);
 }
 
 TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
@@ -149,9 +149,9 @@ TEST_F(CommunicatorTests, sender_multipleReceiversInRange_allReceiveSignal)
     // All receivers should have received the signal
     for (uint64_t id : {200, 300, 400}) {
         auto receiver = result.getObjectRef(id);
-        EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
-        EXPECT_FLOAT_EQ(std::get<CellDescription>(receiver._type)._signal._channels[1], 0.5f);
-        EXPECT_EQ(std::get<CellDescription>(receiver._type)._signal._numTimesSent, 1);
+        EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
+        EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
+        EXPECT_EQ(receiver.getCellRef()._signal._numTimesSent, 1);
     }
 }
 
@@ -174,7 +174,7 @@ TEST_F(CommunicatorTests, sender_maxTimesSentExceeded_noSignalTransmitted)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (maxTimesSent exceeded)
-    EXPECT_NE(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_NE(receiver.getCellRef()._signalState, SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
@@ -192,7 +192,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_matchingColor)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should have received the signal (color matches)
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
@@ -210,7 +210,7 @@ TEST_F(CommunicatorTests, sender_receiverColorRestriction_nonMatchingColor)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (color doesn't match)
-    EXPECT_NE(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_NE(receiver.getCellRef()._signalState, SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
@@ -233,7 +233,7 @@ TEST_F(CommunicatorTests, sender_noActiveSignal_noTransmission)
     auto receiver = result.getObjectRef(200);
 
     // Receiver should NOT have received the signal (sender has no active signal)
-    EXPECT_NE(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_NE(receiver.getCellRef()._signalState, SignalState_Active);
 }
 
 TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
@@ -262,10 +262,10 @@ TEST_F(CommunicatorTests, sender_signalPriority_lowerNumTimesSentWins)
     auto receiver = result.getObjectRef(300);
 
     // Receiver should have received the signal
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
     // The numTimesSent should be the lower one + 1 = 2
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signal._numTimesSent, 2);
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signal._channels[0], -1.0f);
+    EXPECT_EQ(receiver.getCellRef()._signal._numTimesSent, 2);
+    EXPECT_EQ(receiver.getCellRef()._signal._channels[0], -1.0f);
 }
 
 /**
@@ -308,14 +308,14 @@ TEST_P(CommunicatorTests_AngleTranslation, sender_angleTranslation)
     auto result = _simulationFacade->getSimulationData();
     auto receiver = result.getObjectRef(200);
 
-    EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+    EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
 
     // The angle translation formula: translatedAngle = senderAngle + (senderRefAngle - receiverRefAngle) / 180
     // senderAngle = 0.5 (90 degrees), senderRefAngle = 90 degrees, receiverRefAngle = 90 + receiverRefAngleDiff
     // angleDiff = 90 - (90 + receiverRefAngleDiff) = -receiverRefAngleDiff
     // translatedAngle = 0.5 + (-receiverRefAngleDiff) / 180
     auto expectedAngle = Math::getNormalizedAngle(0.5f * 180.0f - receiverRefAngleDiff, -180.0f) / 180.0f;
-    EXPECT_NEAR(std::get<CellDescription>(receiver._type)._signal._channels[1], expectedAngle, 0.001f);
+    EXPECT_NEAR(receiver.getCellRef()._signal._channels[1], expectedAngle, 0.001f);
 }
 
 /**
@@ -374,9 +374,9 @@ TEST_P(CommunicatorTests_LineageRestriction, sender_lineageRestriction)
     auto receiver = result.getObjectRef(200);
 
     if (params.expectedAccept) {
-        EXPECT_EQ(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
-        EXPECT_FLOAT_EQ(std::get<CellDescription>(receiver._type)._signal._channels[1], 0.5f);
+        EXPECT_EQ(receiver.getCellRef()._signalState, SignalState_Active);
+        EXPECT_FLOAT_EQ(receiver.getCellRef()._signal._channels[1], 0.5f);
     } else {
-        EXPECT_NE(std::get<CellDescription>(receiver._type)._signalState, SignalState_Active);
+        EXPECT_NE(receiver.getCellRef()._signalState, SignalState_Active);
     }
 }

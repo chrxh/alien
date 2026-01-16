@@ -71,7 +71,7 @@ TEST_F(ReconnectorTests, structureMode_connectToStructure)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_TRUE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
@@ -88,7 +88,7 @@ TEST_F(ReconnectorTests, structureMode_ignoreNonStructure)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, structureMode_outOfRange)
@@ -106,7 +106,7 @@ TEST_F(ReconnectorTests, structureMode_outOfRange)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
 //*******************************************
@@ -115,10 +115,10 @@ TEST_F(ReconnectorTests, structureMode_outOfRange)
 
 TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
     // Add free cell within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -127,12 +127,12 @@ TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_TRUE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
     // Add base cell (non-free) within range
     data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(BaseDescription())));
@@ -144,15 +144,15 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription().restrictToColor(1));
 
     // Add free cell with matching color
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -164,10 +164,10 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_failed)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription().restrictToColor(1));
 
     // Add free cell with non-matching color
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -199,7 +199,7 @@ TEST_F(ReconnectorTests, creatureMode_connectToDifferentCreature)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_TRUE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
@@ -221,7 +221,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreOwnCreature)
 
     // Should not connect to cell in same creature
     EXPECT_FALSE(actualData.hasConnection(1, 3));
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
@@ -229,7 +229,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add free cell within range (not part of a creature)
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -460,7 +460,7 @@ TEST_F(ReconnectorTests, removeConnections_removeStructureConnection)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
@@ -468,7 +468,7 @@ TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add free cell and connect it to reconnector
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);
@@ -481,7 +481,7 @@ TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
@@ -506,7 +506,7 @@ TEST_F(ReconnectorTests, removeConnections_removeDifferentCreatureConnection)
     EXPECT_FALSE(actualData.hasConnection(1, 10));
     // Connection to own creature should remain
     EXPECT_TRUE(actualData.hasConnection(1, 2));
-    EXPECT_TRUE(std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
+    EXPECT_TRUE(actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess] > NEAR_ZERO);
 }
 
 TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
@@ -530,7 +530,7 @@ TEST_F(ReconnectorTests, removeConnections_keepOwnCreatureConnection)
     EXPECT_TRUE(actualData.hasConnection(1, 2));
     EXPECT_TRUE(actualData.hasConnection(1, 3));
     // No removal occurred
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
 //*******************************************
@@ -595,7 +595,7 @@ TEST_F(ReconnectorTests, skipAlreadyConnected)
     // Connection should still exist but no new connection created
     EXPECT_TRUE(actualData.hasConnection(1, 10));
     // Success should be 0 because no new connection was made
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }
 
 TEST_F(ReconnectorTests, energyConservation)
@@ -642,5 +642,5 @@ TEST_F(ReconnectorTests, rayNotBlockedByDifferentCreatureConnections)
     auto actualReconnector = actualData.getObjectRef(1);
 
     EXPECT_FALSE(actualData.hasConnection(1, 10));
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualReconnector._type)._signal._channels[Channels::ReconnectorSuccess]));
+    EXPECT_TRUE(approxCompare(0.0f, actualReconnector.getCellRef()._signal._channels[Channels::ReconnectorSuccess]));
 }

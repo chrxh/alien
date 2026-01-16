@@ -58,8 +58,8 @@ IntegrationTestFramework::~IntegrationTestFramework()
 double IntegrationTestFramework::getEnergy(Description const& data) const
 {
     auto getDepotEnergy = [](ObjectDescription const& object) -> double {
-        if (std::get<CellDescription>(object._type).getCellType() == CellType_Depot) {
-            auto const& depot = std::get<DepotDescription>(std::get<CellDescription>(object._type)._cellType);
+        if (object.getCellRef().getCellType() == CellType_Depot) {
+            auto const& depot = std::get<DepotDescription>(object.getCellRef()._cellType);
             return depot._storedUsableEnergy;
         }
         return 0;
@@ -67,7 +67,7 @@ double IntegrationTestFramework::getEnergy(Description const& data) const
 
     double result = 0;
     for (auto const& object : data._objects) {
-        result += std::get<CellDescription>(object._type)._usableEnergy + std::get<CellDescription>(object._type)._rawEnergy + getDepotEnergy(object);
+        result += object.getCellRef()._usableEnergy + object.getCellRef()._rawEnergy + getDepotEnergy(object);
     }
     for (auto const& energyParticle : data._energies) {
         result += energyParticle._energy;

@@ -252,7 +252,7 @@ std::vector<Description> GenomeDescriptionEditService::extractPhenotypesFromPrev
         }
     }
     for (auto& object: preview._objects) {
-        auto creatureIndex = cache->creatureIdToIndex.at(*std::get<CellDescription>(object._type)._creatureId);
+        auto creatureIndex = cache->creatureIdToIndex.at(*object.getCellRef()._creatureId);
         auto& creature = preview._creatures.at(creatureIndex);
         auto phenotypeIndex = creatureIdToIndex.at(creature._generation == 0 ? creature._id : creature._ancestorId.value());
         result.at(phenotypeIndex)._objects.emplace_back(std::move(object));
@@ -268,8 +268,8 @@ void GenomeDescriptionEditService::removeSeedFromPhenotype(Description& phenotyp
         creatureIdToIndex.emplace(creature._id, toInt(creatureIndex));
     }
     for (auto const& object : phenotype._objects) {
-        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
-            auto const& creature = phenotype._creatures.at(creatureIdToIndex.at(std::get<CellDescription>(object._type)._creatureId.value()));
+        if (object.getCellRef()._creatureId.has_value()) {
+            auto const& creature = phenotype._creatures.at(creatureIdToIndex.at(object.getCellRef()._creatureId.value()));
             if (creature._generation == 0) {
                 seedCellIds.insert(object._id);
             }

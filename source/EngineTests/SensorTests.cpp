@@ -24,7 +24,7 @@ protected:
         } else if (mode == SensorMode_DetectStructure) {
             return DetectStructureDescription();
         } else if (mode == SensorMode_DetectFreeCell) {
-            return DetectFreeObjectDescription().minDensity(0.05f);
+            return DetectFreeCellDescription().minDensity(0.05f);
         } else if (mode == SensorMode_DetectCreature) {
             return DetectCreatureDescription();
         } else {
@@ -60,7 +60,7 @@ protected:
             }
         } else if (mode == SensorMode_DetectFreeCell) {
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(FreeObjectDescription())));
+                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(FreeCellDescription())));
             }
         } else if (mode == SensorMode_DetectStructure) {
             for (int i = 0; i < count; ++i) {
@@ -108,17 +108,17 @@ TEST_P(SensorTests_AllDetectionModes, autoTriggered_noTarget)
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-        EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+        EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
     }
     {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-        EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+        EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
     }
     {
         _simulationFacade->calcTimesteps(14);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-        EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+        EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
     }
 }
 
@@ -132,7 +132,7 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_noSignal)
     for (int i = 0; i < 10; ++i) {
         _simulationFacade->calcTimesteps(1);
         auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-        EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+        EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
     }
 }
 
@@ -147,8 +147,8 @@ TEST_P(SensorTests_AllDetectionModes, manuallyTriggered_withSignal)
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
@@ -166,7 +166,7 @@ TEST_P(SensorTests_AllDetectionModes, noFrontAngle)
 
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_P(SensorTests_AllDetectionModes, targetAbove)
@@ -186,11 +186,11 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
     // Angle should be roughly -90 degrees (-0.5 normalized)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] < -0.3f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] > -0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > -0.7f);
 }
 
 TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
@@ -210,10 +210,10 @@ TEST_P(SensorTests_AllDetectionModes, targetAbove_differentFrontAngle)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
     // Angle should be roughly -180 degrees
-    auto angleAsSignal = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle];
+    auto angleAsSignal = actualSensor.getCellRef()._signal._channels[Channels::SensorAngle];
     EXPECT_TRUE(angleAsSignal < -0.9f || angleAsSignal > 0.9f);
 }
 
@@ -234,11 +234,11 @@ TEST_P(SensorTests_AllDetectionModes, targetBelow)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
     // Angle should be roughly +90 degrees (+0.5 normalized)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] > 0.3f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] < 0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > 0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < 0.7f);
 }
 
 TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
@@ -261,13 +261,13 @@ TEST_P(SensorTests_AllDetectionModes, closerTargetDetected)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // Should detect the closer targets (above the sensor)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] > 0.6f);  // Closer = higher value
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.6f);  // Closer = higher value
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
     // Angle should be roughly -90 degrees (-0.5 normalized)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] < -0.3f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] > -0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > -0.7f);
 }
 
 TEST_P(SensorTests_AllDetectionModes, minRange_found)
@@ -287,7 +287,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
@@ -307,7 +307,7 @@ TEST_P(SensorTests_AllDetectionModes, minRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    ASSERT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_P(SensorTests_AllDetectionModes, maxRange_found)
@@ -327,7 +327,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
@@ -347,7 +347,7 @@ TEST_P(SensorTests_AllDetectionModes, maxRange_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    ASSERT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
@@ -370,7 +370,7 @@ TEST_P(SensorTests_AllDetectionModes, rayBlockedBySameCreatureConnections)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
@@ -393,9 +393,9 @@ TEST_P(SensorTests_AllDetectionModes, rayNotBlockedByDifferentCreature)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
     // Ray should NOT be blocked by different creature connections
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
@@ -420,7 +420,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayBlockedByStructureCells)
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
 
     // Should not find target because ray is blocked by structure cells
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_behind)
@@ -443,9 +443,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCel
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
 TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCells_differentAngle)
@@ -468,9 +468,9 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, rayNotBlockedByStructureCel
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
 }
 
 TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary)
@@ -489,10 +489,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Second scan - target hasn't moved, should still be found via relocation
@@ -500,18 +500,18 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetStationary
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Angle should be roughly -90 degrees (-0.5 normalized)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] < -0.3f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] > -0.7f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass] > 0.0f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] < 0.9f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] > 0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > -0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorMass] > 0.0f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] < 0.9f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.7f);
 
     // Verify lastMatch is still present
-    sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
@@ -532,7 +532,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Move the target by deleting and re-adding at a new position
     actualData = _simulationFacade->getSimulationData();
@@ -550,17 +550,17 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved)
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Angle should be roughly -65 degrees (~ -0.4 normalized)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] < -0.3f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] > -0.5f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] < 0.8f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] > 0.5f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < -0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > -0.5f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] < 0.8f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.5f);
 
     // Verify lastMatch position was updated
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
@@ -581,10 +581,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Move the target to a position outside the sensor's maxRange
@@ -604,10 +604,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_abov
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 
     // Verify lastMatch was cleared
-    sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
@@ -628,10 +628,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Move the target to a position inside the sensor's minRange
@@ -651,10 +651,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_belo
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 
     // Verify lastMatch was cleared
-    sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
@@ -675,7 +675,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Move the target by deleting and re-adding at a new position
     actualData = _simulationFacade->getSimulationData();
@@ -693,16 +693,16 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetMoved_forc
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Angle should be roughly +90 degrees (+0.5 normalized)
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] > 0.3f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorAngle] < 0.7f);
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] > 0.8f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] > 0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorAngle] < 0.7f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.8f);
 
     // Verify lastMatch position was updated
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_TRUE(sensorDesc._lastMatch.has_value());
 }
 
@@ -723,7 +723,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Move the target by deleting and re-adding at a new position
     actualData = _simulationFacade->getSimulationData();
@@ -739,10 +739,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetDisappeare
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 
     // Verify lastMatch was cleared
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
@@ -763,7 +763,7 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Add structure cells between sensor and target to block the ray
     actualData = _simulationFacade->getSimulationData();
@@ -777,10 +777,10 @@ TEST_P(SensorTests_AllDetectionModesExceptStructure, relocation_targetBlocked)
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 
     // Verify lastMatch was cleared
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     EXPECT_FALSE(sensorDesc._lastMatch.has_value());
 }
 
@@ -802,7 +802,7 @@ TEST_F(SensorTests, detectEnergy_targetNotFound_belowMinDensity)
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    ASSERT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 /**
@@ -828,7 +828,7 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
     auto actualSensor = actualData.getObjectRef(1);
 
     // Should not find anything because only non-structure cells are present
-    ASSERT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 /**
@@ -837,37 +837,37 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeObjectDescription().minDensity(0.5f)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add just a few free cells
-    data._objects.emplace_back(ObjectDescription().id(100).pos({100.0f, 50.0f}).type(CellDescription().cellType(FreeObjectDescription()).usableEnergy(10.0f)));
+    data._objects.emplace_back(ObjectDescription().id(100).pos({100.0f, 50.0f}).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
 
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectFreeCell_restrictToColor)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeObjectDescription().minDensity(0.05f).restrictToColor(1)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0),
     });
     data.addConnection(1, 2);
 
     // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(CellDescription().cellType(FreeObjectDescription()).usableEnergy(10.0f)));
+        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
     }
 
     // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(CellDescription().cellType(FreeObjectDescription()).usableEnergy(10.0f)));
+        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -876,16 +876,16 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // Should detect the color 1 cells, not the color 0 cells
     // Color 1 cells are farther (below at y=150 vs y=80), so distance should be higher
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorDistance] > 0.3f);
+    EXPECT_TRUE(actualSensor.getCellRef()._signal._channels[Channels::SensorDistance] > 0.3f);
 }
 
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeObjectDescription().minDensity(0.05f)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -902,7 +902,7 @@ TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
     auto actualSensor = actualData.getObjectRef(1);
 
     // Should not find anything because only non-free cells are present
-    ASSERT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    ASSERT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 /**
@@ -931,8 +931,8 @@ TEST_F(SensorTests, detectCreature_restrictToColor_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
@@ -951,7 +951,7 @@ TEST_F(SensorTests, detectCreature_restrictToColor_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_minNumCells_found)
@@ -970,8 +970,8 @@ TEST_F(SensorTests, detectCreature_minNumCells_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests, detectCreature_minNumCells_notFound)
@@ -991,7 +991,7 @@ TEST_F(SensorTests, detectCreature_minNumCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_maxNumCells_found)
@@ -1010,8 +1010,8 @@ TEST_F(SensorTests, detectCreature_maxNumCells_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
@@ -1036,7 +1036,7 @@ TEST_F(SensorTests, detectCreature_maxNumCells_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
@@ -1058,8 +1058,8 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
@@ -1082,7 +1082,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_sameLineage_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
@@ -1104,8 +1104,8 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_found)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 }
 
 TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
@@ -1128,7 +1128,7 @@ TEST_F(SensorTests, detectCreature_restrictToLineage_otherLineage_notFound)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_ignoreStructureCells)
@@ -1152,7 +1152,7 @@ TEST_F(SensorTests, detectCreature_ignoreStructureCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_ignoreFreeCells)
@@ -1166,7 +1166,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     // Add free cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
-            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(FreeObjectDescription())));
+            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(FreeCellDescription())));
         }
     }
 
@@ -1176,7 +1176,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 TEST_F(SensorTests, detectCreature_ignoreSameCreature)
@@ -1204,7 +1204,7 @@ TEST_F(SensorTests, detectCreature_ignoreSameCreature)
     auto actualSensor = actualData.getObjectRef(1);
 
     // Should not detect own creature cells
-    EXPECT_FALSE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    EXPECT_FALSE(actualSensor.getCellRef()._signalState == SignalState_Active);
 }
 
 /**
@@ -1236,10 +1236,10 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_30cells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // 30 cells should give density ~0.5
-    auto density = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass];
+    auto density = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(density > 0.45f);
     EXPECT_TRUE(density < 0.55f);
 }
@@ -1266,10 +1266,10 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_60cells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // 60 cells should give density ~0.75
-    auto density = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass];
+    auto density = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(density > 0.70f);
     EXPECT_TRUE(density < 0.80f);
 }
@@ -1296,10 +1296,10 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_120cells)
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // 120 cells should give density ~1.0
-    auto density = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass];
+    auto density = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(density > 0.95f);
 }
 
@@ -1324,15 +1324,15 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_relocation)
 
     auto actualData = _simulationFacade->getSimulationData();
     auto actualSensor = actualData.getObjectRef(1);
-    CHECK(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    CHECK(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
 
     // Verify initial density is correct (~0.75 for 60 cells)
-    auto initialDensity = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass];
+    auto initialDensity = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(initialDensity > 0.70f);
     EXPECT_TRUE(initialDensity < 0.80f);
 
     // Verify lastMatch was stored
-    auto sensorDesc = std::get<SensorDescription>(std::get<CellDescription>(actualSensor._type)._cellType);
+    auto sensorDesc = std::get<SensorDescription>(actualSensor.getCellRef()._cellType);
     CHECK(sensorDesc._lastMatch.has_value());
 
     // Second scan - relocation should also report the correct cell count density
@@ -1340,10 +1340,10 @@ TEST_F(SensorTests, detectCreature_densityOutputReflectsCellCount_relocation)
     actualData = _simulationFacade->getSimulationData();
     actualSensor = actualData.getObjectRef(1);
 
-    EXPECT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorFoundResult]));
+    EXPECT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(1.0f, actualSensor.getCellRef()._signal._channels[Channels::SensorFoundResult]));
     // Relocation should still report density ~0.75 for 60 cells
-    auto relocationDensity = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorMass];
+    auto relocationDensity = actualSensor.getCellRef()._signal._channels[Channels::SensorMass];
     EXPECT_TRUE(relocationDensity > 0.70f);
     EXPECT_TRUE(relocationDensity < 0.80f);
 }
@@ -1362,25 +1362,25 @@ TEST_F(SensorTests, telemetry_allOutputs)
     _simulationFacade->calcTimesteps(1);
     auto actualSensor = _simulationFacade->getSimulationData().getObjectRef(1);
     
-    ASSERT_TRUE(std::get<CellDescription>(actualSensor._type)._signalState == SignalState_Active);
+    ASSERT_TRUE(actualSensor.getCellRef()._signalState == SignalState_Active);
     
     // Verify cell energy channel is populated and within expected range
     // Formula: 1.0 - 1.0 / pow(energy + 1.0, 0.1)
     // For energy=100: 1.0 - 1.0 / pow(101, 0.1) ≈ 0.36
-    auto energySignal = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorTelemetryCellEnergy];
+    auto energySignal = actualSensor.getCellRef()._signal._channels[Channels::SensorTelemetryCellEnergy];
     EXPECT_TRUE(energySignal > 0.3f);
     EXPECT_TRUE(energySignal < 0.4f);
     
     // Verify velocity angle channel is populated
     // Range: [-1.0, 1.0] representing angle relative to front angle
-    auto velAngle = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorTelemetryCellVelAngle];
+    auto velAngle = actualSensor.getCellRef()._signal._channels[Channels::SensorTelemetryCellVelAngle];
     EXPECT_TRUE(velAngle >= -1.0f);
     EXPECT_TRUE(velAngle <= 1.0f);
     
     // Verify velocity strength channel is populated and within expected range
     // Formula: min(log(1.0 + vel * 50) / 1.5, 1.0)
     // For vel ≈ 0.112: log(1 + 5.6) / 1.5 ≈ 0.63
-    auto velStrength = std::get<CellDescription>(actualSensor._type)._signal._channels[Channels::SensorTelemetryCellVelStrength];
+    auto velStrength = actualSensor.getCellRef()._signal._channels[Channels::SensorTelemetryCellVelStrength];
     EXPECT_TRUE(velStrength > 0.5f);
     EXPECT_TRUE(velStrength < 0.7f);
 }

@@ -60,7 +60,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
     // Add target creature within attack radius
     data.add(createTargetCreature({100.0f, 103.0f}), false);
     auto& origTarget = data.getObjectRef(100);
-    std::get<CellDescription>(origTarget._type)._rawEnergy = 100.0f;
+    origTarget.getCellRef()._rawEnergy = 100.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  
@@ -70,12 +70,12 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_belowThreshold)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Attacker should attack because rawEnergy is below threshold
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(actualTarget._type)._rawEnergy, std::get<CellDescription>(origTarget._type)._rawEnergy));
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(approxCompare(actualTarget.getCellRef()._rawEnergy, origTarget.getCellRef()._rawEnergy));
 
     // Attacker should have a signal with success value > 0
-    ASSERT_TRUE(std::get<CellDescription>(actualAttacker._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(std::get<CellDescription>(actualAttacker._type)._signal._channels[Channels::AttackerSuccess] > NEAR_ZERO);
+    ASSERT_TRUE(actualAttacker.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(actualAttacker.getCellRef()._signal._channels[Channels::AttackerSuccess] > NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
@@ -96,12 +96,12 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_aboveThreshold)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Attacker should NOT attack because rawEnergy is above threshold
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(actualTarget._type)._rawEnergy, std::get<CellDescription>(origTarget._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(actualTarget.getCellRef()._rawEnergy, origTarget.getCellRef()._rawEnergy));
 
     // Attacker should have a signal with success value = 0
-    ASSERT_TRUE(std::get<CellDescription>(actualAttacker._type)._signalState == SignalState_Active);
-    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualAttacker._type)._signal._channels[Channels::AttackerSuccess]));
+    ASSERT_TRUE(actualAttacker.getCellRef()._signalState == SignalState_Active);
+    EXPECT_TRUE(approxCompare(0.0f, actualAttacker.getCellRef()._signal._channels[Channels::AttackerSuccess]));
 }
 
 TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
@@ -122,7 +122,7 @@ TEST_F(AttackerTests, maxRawEnergyThreshold_outsideRange)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Attacker should NOT attack because rawEnergy is above threshold
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**
@@ -145,7 +145,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_fullStrength)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Attack should happen at full strength
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
@@ -166,7 +166,7 @@ TEST_F(AttackerTests, foodChainColorMatrix_zeroStrength)
     auto actualTarget = actualData.getObjectRef(100);
 
     // No attack should happen because color matrix is zero
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, outputSignal_noTarget)
@@ -181,8 +181,8 @@ TEST_F(AttackerTests, outputSignal_noTarget)
     auto actualAttacker = actualData.getObjectRef(1);
 
     // Attacker may have signal from generator but AttackerSuccess should be 0
-    if (std::get<CellDescription>(actualAttacker._type)._signalState == SignalState_Active) {
-        EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualAttacker._type)._signal._channels[Channels::AttackerSuccess]));
+    if (actualAttacker.getCellRef()._signalState == SignalState_Active) {
+        EXPECT_TRUE(approxCompare(0.0f, actualAttacker.getCellRef()._signal._channels[Channels::AttackerSuccess]));
     }
 }
 
@@ -214,8 +214,8 @@ TEST_F(AttackerTests, noAttackOnOwnCreatureCells)
     auto actualCell4 = actualData.getObjectRef(4);
 
     // Own creature cells should NOT be attacked
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origCell3._type)._usableEnergy, std::get<CellDescription>(actualCell3._type)._usableEnergy));
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origCell4._type)._usableEnergy, std::get<CellDescription>(actualCell4._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origCell3.getCellRef()._usableEnergy, actualCell3.getCellRef()._usableEnergy));
+    EXPECT_TRUE(approxCompare(origCell4.getCellRef()._usableEnergy, actualCell4.getCellRef()._usableEnergy));
 }
 
 /**
@@ -244,7 +244,7 @@ TEST_F(AttackerTests, noAttackOnOffspring)
     auto actualCell = actualData.getObjectRef(100);
 
     // Offspring cells should NOT be attacked
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origCell._type)._usableEnergy, std::get<CellDescription>(actualCell._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origCell.getCellRef()._usableEnergy, actualCell.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, attackOnNonOffspring)
@@ -266,7 +266,7 @@ TEST_F(AttackerTests, attackOnNonOffspring)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Non-offspring cells should be attacked
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 /**
@@ -287,7 +287,7 @@ TEST_F(AttackerTests, noAttackOnFixedCells)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Fixed cells should NOT be attacked
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**
@@ -321,7 +321,7 @@ TEST_F(AttackerTests, rayBlockedBySameCreatureConnections)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because ray is blocked by same-creature connections
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
@@ -347,8 +347,8 @@ TEST_F(AttackerTests, rayNotBlockedByDifferentCreatureConnections)
     auto actualTarget2 = actualData.getObjectRef(50);
 
     // Both targets should be attacked because blocking connections belong to different creature
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget1._type)._usableEnergy < 100.0f - NEAR_ZERO);
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget2._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget1.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget2.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, rayNotBlocked_noIntersection)
@@ -375,7 +375,7 @@ TEST_F(AttackerTests, rayNotBlocked_noIntersection)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because ray is not blocked
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 /**
@@ -401,7 +401,7 @@ TEST_F(AttackerTests, restrictToColor_matchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because color matches restriction
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, restrictToColor_nonMatchingColor)
@@ -425,7 +425,7 @@ TEST_F(AttackerTests, restrictToColor_nonMatchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because color does not match restriction
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, restrictToColor_noRestriction)
@@ -447,7 +447,7 @@ TEST_F(AttackerTests, restrictToColor_noRestriction)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because there is no color restriction
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 /**
@@ -473,7 +473,7 @@ TEST_F(AttackerTests, minNumCells_creatureAboveMinimum)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because creature has at least 2 cells
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, minNumCells_creatureBelowMinimum)
@@ -497,7 +497,7 @@ TEST_F(AttackerTests, minNumCells_creatureBelowMinimum)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because creature has fewer cells than minimum
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**
@@ -523,7 +523,7 @@ TEST_F(AttackerTests, maxNumCells_creatureBelowMaximum)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because creature has at most 5 cells
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, maxNumCells_creatureAboveMaximum)
@@ -547,7 +547,7 @@ TEST_F(AttackerTests, maxNumCells_creatureAboveMaximum)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because creature has more cells than maximum
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**
@@ -577,7 +577,7 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_matching)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because lineage matches
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, restrictToLineage_sameLineage_notMatching)
@@ -605,7 +605,7 @@ TEST_F(AttackerTests, restrictToLineage_sameLineage_notMatching)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because lineage does not match
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, restrictToLineage_otherLineage_matching)
@@ -631,7 +631,7 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_matching)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because lineage is different
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, restrictToLineage_otherLineage_notMatching)
@@ -659,7 +659,7 @@ TEST_F(AttackerTests, restrictToLineage_otherLineage_notMatching)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because lineage is the same
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, restrictToLineage_noRestriction)
@@ -685,7 +685,7 @@ TEST_F(AttackerTests, restrictToLineage_noRestriction)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because there is no lineage restriction
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 /**
@@ -714,7 +714,7 @@ TEST_F(AttackerTests, combinedRestrictions_allMatch)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should be attacked because all restrictions are met
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, combinedRestrictions_colorMismatch)
@@ -738,7 +738,7 @@ TEST_F(AttackerTests, combinedRestrictions_colorMismatch)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Target should NOT be attacked because color does not match
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 /**
@@ -749,14 +749,14 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
 {
     // Create attacker creature in FreeCell mode
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription()))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
-    // Add a free cell (not part of a creature) - using FreeObjectDescription
+    // Add a free cell (not part of a creature) - using FreeCellDescription
     data.addCreature({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     }, CreatureDescription().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -766,21 +766,21 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked in FreeCell mode
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
 {
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription().restrictToColor(1)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription().restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell with matching color (color 1)
     data.addCreature({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(1).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(1).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     }, CreatureDescription().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -790,21 +790,21 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should be attacked because color matches restriction
-    EXPECT_TRUE(std::get<CellDescription>(actualTarget._type)._usableEnergy < 100.0f - NEAR_ZERO);
+    EXPECT_TRUE(actualTarget.getCellRef()._usableEnergy < 100.0f - NEAR_ZERO);
 }
 
 TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
 {
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription().restrictToColor(1)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription().restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell with non-matching color (color 0)
     data.addCreature({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(0).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(0).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     }, CreatureDescription().id(2));
 
     auto origTarget = data.getObjectRef(100);
@@ -816,14 +816,14 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked because color does not match restriction
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
 {
     // Create attacker creature in FreeCell mode
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription()))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
@@ -840,7 +840,7 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Creature should NOT be attacked in FreeCell mode
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
 
 TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
@@ -854,7 +854,7 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 
     // Add a free cell (not part of a creature)
     data.objects({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     });
 
     auto origTarget = data.getObjectRef(100);
@@ -866,5 +866,5 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
     auto actualTarget = actualData.getObjectRef(100);
 
     // Free cell should NOT be attacked in Creature mode
-    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origTarget._type)._usableEnergy, std::get<CellDescription>(actualTarget._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(origTarget.getCellRef()._usableEnergy, actualTarget.getCellRef()._usableEnergy));
 }
