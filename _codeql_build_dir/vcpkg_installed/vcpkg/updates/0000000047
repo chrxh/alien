@@ -1,0 +1,8 @@
+Package: boost-optional
+Version: 1.90.0
+Depends: boost-assert, boost-cmake, boost-config, boost-core, boost-headers, boost-throw-exception, boost-type-traits
+Architecture: x64-linux
+Multi-Arch: same
+Abi: c1572b74c9c1d7551a9e9e7f0db5c3a201f8db0097f5d2a439f316d3738c295f
+Description: Boost optional module
+Status: install ok installed

@@ -749,14 +749,14 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell)
 {
     // Create attacker creature in FreeCell mode
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription()))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
-    // Add a free cell (not part of a creature) - using FreeObjectDescription
+    // Add a free cell (not part of a creature) - using FreeCellDescription
     data.addCreature({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     }, CreatureDescription().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -773,14 +773,14 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_matchingColor)
 {
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription().restrictToColor(1)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription().restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell with matching color (color 1)
     data.addCreature({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(1).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(1).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     }, CreatureDescription().id(2));
 
     _simulationFacade->setSimulationData(data);
@@ -797,14 +797,14 @@ TEST_F(AttackerTests, freeCellMode_attackFreeCell_nonMatchingColor)
 {
     // Create attacker creature in FreeCell mode with color restriction to color 1
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription().restrictToColor(1)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription().restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
 
     // Add a free cell with non-matching color (color 0)
     data.addCreature({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(0).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).color(0).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     }, CreatureDescription().id(2));
 
     auto origTarget = data.getObjectRef(100);
@@ -823,7 +823,7 @@ TEST_F(AttackerTests, freeCellMode_doesNotAttackCreature)
 {
     // Create attacker creature in FreeCell mode
     auto data = Description().addCreature({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeObjectDescription()))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(AttackerDescription().mode(AttackFreeCellDescription()))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
     }, CreatureDescription().id(1));
     data.addConnection(1, 2);
@@ -854,7 +854,7 @@ TEST_F(AttackerTests, creatureMode_doesNotAttackFreeCell)
 
     // Add a free cell (not part of a creature)
     data.objects({
-        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeObjectDescription())),
+        ObjectDescription().id(100).pos({100.0f, 103.0f}).type(CellDescription().usableEnergy(100.0f).cellType(FreeCellDescription())),
     });
 
     auto origTarget = data.getObjectRef(100);

@@ -296,7 +296,7 @@ void _InspectorWindow::processCellTypeTab(ObjectDescription& object)
                         object.getCellRef()._cellType = StructureObjectDescription();
                     } break;
                     case CellType_Free: {
-                        object.getCellRef()._cellType = FreeObjectDescription();
+                        object.getCellRef()._cellType = FreeCellDescription();
                     } break;
                     case CellType_Base: {
                         object.getCellRef()._cellType = BaseDescription();
@@ -611,7 +611,7 @@ void _InspectorWindow::processAttackerContent(AttackerDescription& attacker)
         ImGui::Text("Mode: %s", Const::AttackerModeStrings.at(mode).c_str());
 
         if (mode == AttackerMode_FreeCell) {
-            auto& attackFreeCell = std::get<AttackFreeObjectDescription>(attacker._mode);
+            auto& attackFreeCell = std::get<AttackFreeCellDescription>(attacker._mode);
             if (attackFreeCell._restrictToColor.has_value()) {
                 ImGui::Text("Restrict to color: %d", *attackFreeCell._restrictToColor);
             }
@@ -706,7 +706,7 @@ void _InspectorWindow::processSensorContent(SensorDescription& sensor)
         } else if (mode == SensorMode_DetectStructure) {
             // No parameters
         } else if (mode == SensorMode_DetectFreeCell) {
-            auto& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
+            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
             AlienGui::InputFloat(
                 AlienGui::InputFloatParameters()
                     .name("Min density")
@@ -757,7 +757,7 @@ void _InspectorWindow::processReconnectorContent(ReconnectorDescription& reconne
 
         // Mode-specific parameters
         if (mode == ReconnectorMode_FreeCell) {
-            auto& freeCell = std::get<ReconnectFreeObjectDescription>(reconnector._mode);
+            auto& freeCell = std::get<ReconnectFreeCellDescription>(reconnector._mode);
             AlienGui::ComboOptionalColor(
                 AlienGui::ComboColorParameters().name("Restrict to color").textWidth(CellTypeTextWidth).tooltip(Const::GenomeReconnectorRestrictToColorTooltip),
                 freeCell._restrictToColor);
@@ -860,7 +860,7 @@ void _InspectorWindow::validateAndCorrect(ObjectDescription& object) const
             auto& detectEnergy = std::get<DetectEnergyDescription>(sensor._mode);
             detectEnergy._minDensity = std::max(0.0f, std::min(1.0f, detectEnergy._minDensity));
         } else if (mode == SensorMode_DetectFreeCell) {
-            auto& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
+            auto& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
             detectFreeCell._minDensity = std::max(0.0f, std::min(1.0f, detectFreeCell._minDensity));
         }
         sensor._minRange = std::max(0, std::min(255, sensor._minRange));

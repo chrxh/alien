@@ -1,0 +1,8 @@
+Package: boost-functional
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-core, boost-function, boost-function-types, boost-headers, boost-mpl, boost-preprocessor, boost-type-traits, boost-typeof, boost-utility
+Architecture: x64-linux
+Multi-Arch: same
+Abi: e0f97a38518d9bf17301d45f640bb0ce891fcf5e588b90eb556bd79105b0d00d
+Description: Boost functional module
+Status: install ok half-installed

@@ -72,7 +72,7 @@ struct DetectEnergyTO
 struct DetectStructureTO
 {};
 
-struct DetectFreeObjectTO
+struct DetectFreeCellTO
 {
     float minDensity;
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
@@ -91,7 +91,7 @@ union SensorModeTO
     TelemetryTO telemetry;
     DetectEnergyTO detectEnergy;
     DetectStructureTO detectStructure;
-    DetectFreeObjectTO detectFreeCell;
+    DetectFreeCellTO detectFreeCell;
     DetectCreatureTO detectCreature;
 };
 
@@ -124,7 +124,7 @@ struct GeneratorTO
     uint32_t numPulses;
 };
 
-struct AttackFreeObjectTO
+struct AttackFreeCellTO
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
 };
@@ -139,7 +139,7 @@ struct AttackCreatureTO
 
 union AttackerModeTO
 {
-    AttackFreeObjectTO attackFreeCell;
+    AttackFreeCellTO attackFreeCell;
     AttackCreatureTO attackCreature;
 };
 
@@ -250,7 +250,7 @@ struct DefenderTO
 struct ReconnectStructureTO
 {};
 
-struct ReconnectFreeObjectTO
+struct ReconnectFreeCellTO
 {
     uint8_t restrictToColor;  // 0 ... 6 = color restriction, 255 = no restriction
 };
@@ -266,7 +266,7 @@ struct ReconnectCreatureTO
 union ReconnectorModeTO
 {
     ReconnectStructureTO reconnectStructure;
-    ReconnectFreeObjectTO reconnectFreeCell;
+    ReconnectFreeCellTO reconnectFreeCell;
     ReconnectCreatureTO reconnectCreature;
 };
 

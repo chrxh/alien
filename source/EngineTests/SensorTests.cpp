@@ -24,7 +24,7 @@ protected:
         } else if (mode == SensorMode_DetectStructure) {
             return DetectStructureDescription();
         } else if (mode == SensorMode_DetectFreeCell) {
-            return DetectFreeObjectDescription().minDensity(0.05f);
+            return DetectFreeCellDescription().minDensity(0.05f);
         } else if (mode == SensorMode_DetectCreature) {
             return DetectCreatureDescription();
         } else {
@@ -60,7 +60,7 @@ protected:
             }
         } else if (mode == SensorMode_DetectFreeCell) {
             for (int i = 0; i < count; ++i) {
-                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(FreeObjectDescription())));
+                data._objects.emplace_back(ObjectDescription().pos({startPos.x + i, startPos.y}).type(CellDescription().cellType(FreeCellDescription())));
             }
         } else if (mode == SensorMode_DetectStructure) {
             for (int i = 0; i < count; ++i) {
@@ -837,13 +837,13 @@ TEST_F(SensorTests, detectStructure_ignoreDifferentCellTypes)
 TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeObjectDescription().minDensity(0.5f)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.5f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
 
     // Add just a few free cells
-    data._objects.emplace_back(ObjectDescription().id(100).pos({100.0f, 50.0f}).type(CellDescription().cellType(FreeObjectDescription()).usableEnergy(10.0f)));
+    data._objects.emplace_back(ObjectDescription().id(100).pos({100.0f, 50.0f}).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);
@@ -855,19 +855,19 @@ TEST_F(SensorTests, detectFreeCell_notFound_belowMinDensity)
 TEST_F(SensorTests, detectFreeCell_restrictToColor)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeObjectDescription().minDensity(0.05f).restrictToColor(1)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).color(0).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f).restrictToColor(1)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}).color(0),
     });
     data.addConnection(1, 2);
 
     // Add free cells with wrong color (color 0) closer
     for (int i = 0; i < 10; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(CellDescription().cellType(FreeObjectDescription()).usableEnergy(10.0f)));
+        data._objects.emplace_back(ObjectDescription().id(100 + i).pos({98.0f + i, 80.0f}).color(0).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
     }
 
     // Add free cells with correct color (color 1) farther but still in range
     for (int i = 0; i < 8; ++i) {
-        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(CellDescription().cellType(FreeObjectDescription()).usableEnergy(10.0f)));
+        data._objects.emplace_back(ObjectDescription().id(200 + i).pos({98.0f + i, 150.0f}).color(1).type(CellDescription().cellType(FreeCellDescription()).usableEnergy(10.0f)));
     }
 
     _simulationFacade->setSimulationData(data);
@@ -885,7 +885,7 @@ TEST_F(SensorTests, detectFreeCell_restrictToColor)
 TEST_F(SensorTests, detectFreeCell_ignoreDifferentCellTypes)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeObjectDescription().minDensity(0.05f)))),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().frontAngle(0.0f).cellType(SensorDescription().autoTriggerInterval(3).mode(DetectFreeCellDescription().minDensity(0.05f)))),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -1166,7 +1166,7 @@ TEST_F(SensorTests, detectCreature_ignoreFreeCells)
     // Add free cells (should be ignored)
     for (int i = 0; i < 10; ++i) {
         for (int j = 0; j < 10; ++j) {
-            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(FreeObjectDescription())));
+            data._objects.emplace_back(ObjectDescription().pos({100.0f + toFloat(i), 50.0f + toFloat(j)}).type(CellDescription().cellType(FreeCellDescription())));
         }
     }
 

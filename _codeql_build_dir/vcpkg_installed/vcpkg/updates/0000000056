@@ -1,0 +1,8 @@
+Package: boost-bind
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-core, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 5e07de02258ceadcda2b9bf159526db505940154f27e107304ce5758fe73cfe9
+Description: Boost bind module
+Status: install ok half-installed

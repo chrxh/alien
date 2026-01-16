@@ -115,10 +115,10 @@ TEST_F(ReconnectorTests, structureMode_outOfRange)
 
 TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
     // Add free cell within range
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -132,7 +132,7 @@ TEST_F(ReconnectorTests, freeCellMode_connectToFreeCell)
 
 TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription());
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription());
 
     // Add base cell (non-free) within range
     data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(BaseDescription())));
@@ -149,10 +149,10 @@ TEST_F(ReconnectorTests, freeCellMode_ignoreNonFreeCell)
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription().restrictToColor(1));
 
     // Add free cell with matching color
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(1).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -164,10 +164,10 @@ TEST_F(ReconnectorTests, freeCellMode_colorRestriction_success)
 
 TEST_F(ReconnectorTests, freeCellMode_colorRestriction_failed)
 {
-    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeObjectDescription().restrictToColor(1));
+    auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectFreeCellDescription().restrictToColor(1));
 
     // Add free cell with non-matching color
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).color(0).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -229,7 +229,7 @@ TEST_F(ReconnectorTests, creatureMode_ignoreFreeCells)
     auto data = createReconnectorWithPositiveSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add free cell within range (not part of a creature)
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(1);  // Wait for generator to trigger
@@ -468,7 +468,7 @@ TEST_F(ReconnectorTests, removeConnections_removeFreeObjectConnection)
     auto data = createReconnectorWithNegativeSignal({100.0f, 100.0f}, ReconnectCreatureDescription());
 
     // Add free cell and connect it to reconnector
-    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeObjectDescription())));
+    data._objects.emplace_back(ObjectDescription().id(10).pos({99.0f, 100.0f}).type(CellDescription().cellType(FreeCellDescription())));
     data.addConnection(1, 10);
 
     _simulationFacade->setSimulationData(data);

@@ -100,7 +100,7 @@ TEST_F(RadiationTests, freeCells_shouldRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(FreeObjectDescription())));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(FreeCellDescription())));
 
     _simulationFacade->setSimulationData(data);
 

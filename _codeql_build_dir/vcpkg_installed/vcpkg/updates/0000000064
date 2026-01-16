@@ -1,0 +1,8 @@
+Package: boost-iterator
+Version: 1.90.0
+Depends: boost-cmake, boost-concept-check, boost-config, boost-core, boost-detail, boost-fusion, boost-headers, boost-mp11, boost-mpl, boost-optional, boost-type-traits, boost-utility
+Architecture: x64-linux
+Multi-Arch: same
+Abi: c5b21aa16aad9dd6c7e0c878d24542999e8a844c4692397e22fc2ad60eced5d4
+Description: Boost iterator module
+Status: install ok half-installed

@@ -1064,15 +1064,15 @@ namespace cereal
     SPLIT_SERIALIZATION(DetectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, DetectFreeObjectDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, DetectFreeCellDescription& data)
     {
-        DetectFreeObjectDescription defaultObject;
+        DetectFreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_MinDensity, data._minDensity, defaultObject._minDensity);
         loadSave(task, auxiliaries, Id_SensorMode_DetectFreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(DetectFreeObjectDescription)
+    SPLIT_SERIALIZATION(DetectFreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, DetectCreatureDescription& data)
@@ -1126,14 +1126,14 @@ namespace cereal
     SPLIT_SERIALIZATION(GeneratorDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, AttackFreeObjectDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, AttackFreeCellDescription& data)
     {
-        AttackFreeObjectDescription defaultObject;
+        AttackFreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_AttackerMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(AttackFreeObjectDescription)
+    SPLIT_SERIALIZATION(AttackFreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, AttackCreatureDescription& data)
@@ -1286,14 +1286,14 @@ namespace cereal
     SPLIT_SERIALIZATION(ReconnectStructureDescription)
 
     template <class Archive>
-    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeObjectDescription& data)
+    void loadSave(SerializationTask task, Archive& ar, ReconnectFreeCellDescription& data)
     {
-        ReconnectFreeObjectDescription defaultObject;
+        ReconnectFreeCellDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_ReconnectorMode_FreeCell_RestrictToColor, data._restrictToColor, defaultObject._restrictToColor);
         processLoadSaveMap(task, ar, auxiliaries);
     }
-    SPLIT_SERIALIZATION(ReconnectFreeObjectDescription)
+    SPLIT_SERIALIZATION(ReconnectFreeCellDescription)
 
     template <class Archive>
     void loadSave(SerializationTask task, Archive& ar, ReconnectCreatureDescription& data)

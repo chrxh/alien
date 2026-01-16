@@ -292,7 +292,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         cellDesc._cellType = base;
     } break;
     case CellType_Free: {
-        FreeObjectDescription base;
+        FreeCellDescription base;
         cellDesc._cellType = base;
     } break;
     case CellType_Base: {
@@ -339,7 +339,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             DetectStructureDescription detectStructure;
             sensor._mode = detectStructure;
         } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
-            DetectFreeObjectDescription detectFreeCell;
+            DetectFreeCellDescription detectFreeCell;
             detectFreeCell._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
             detectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
@@ -380,7 +380,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
     case CellType_Attacker: {
         AttackerDescription attacker;
         if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
-            AttackFreeObjectDescription attackFreeCell;
+            AttackFreeCellDescription attackFreeCell;
             attackFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor))
                 : std::nullopt;
@@ -482,7 +482,7 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             ReconnectStructureDescription reconnectStructure;
             reconnector._mode = reconnectStructure;
         } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
-            ReconnectFreeObjectDescription reconnectFreeCell;
+            ReconnectFreeCellDescription reconnectFreeCell;
             reconnectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
                 ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
                 : std::nullopt;
@@ -978,9 +978,9 @@ void DescriptionConverterService::convertGenomeToTO(
                 } else if (sensorTO.mode == SensorMode_DetectStructure) {
                 } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
                     auto const& detectFreeCellDesc = std::get<DetectFreeCellGenomeDescription>(sensorDesc._mode);
-                    auto& detectFreeObjectTO = sensorTO.modeData.detectFreeCell;
-                    detectFreeObjectTO.minDensity = detectFreeCellDesc._minDensity;
-                    detectFreeObjectTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+                    auto& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
+                    detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
+                    detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
                 } else if (sensorTO.mode == SensorMode_DetectCreature) {
                     auto const& detectCreatureDesc = std::get<DetectCreatureGenomeDescription>(sensorDesc._mode);
                     auto& detectCreatureTO = sensorTO.modeData.detectCreature;
@@ -1003,8 +1003,8 @@ void DescriptionConverterService::convertGenomeToTO(
                 attackerTO.mode = attackerDesc.getMode();
                 if (attackerTO.mode == AttackerMode_FreeCell) {
                     auto const& attackFreeCellDesc = std::get<AttackFreeCellGenomeDescription>(attackerDesc._mode);
-                    auto& attackFreeObjectTO = attackerTO.modeData.attackFreeCell;
-                    attackFreeObjectTO.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
+                    auto& attackFreeCellTO = attackerTO.modeData.attackFreeCell;
+                    attackFreeCellTO.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
                 } else if (attackerTO.mode == AttackerMode_Creature) {
                     auto const& attackCreatureDesc = std::get<AttackCreatureGenomeDescription>(attackerDesc._mode);
                     auto& attackCreatureTO = attackerTO.modeData.attackCreature;
@@ -1071,8 +1071,8 @@ void DescriptionConverterService::convertGenomeToTO(
                     // No data to copy
                 } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
                     auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellGenomeDescription>(reconnectorDesc._mode);
-                    auto& reconnectFreeObjectTO = reconnectorTO.modeData.reconnectFreeCell;
-                    reconnectFreeObjectTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
+                    auto& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
+                    reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
                 } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
                     auto const& reconnectCreatureDesc = std::get<ReconnectCreatureGenomeDescription>(reconnectorDesc._mode);
                     auto& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;
@@ -1254,10 +1254,10 @@ void DescriptionConverterService::convertObjectToTO(
             detectEnergyTO.minDensity = detectEnergyDesc._minDensity;
         } else if (sensorTO.mode == SensorMode_DetectStructure) {
         } else if (sensorTO.mode == SensorMode_DetectFreeCell) {
-            auto const& detectFreeCellDesc = std::get<DetectFreeObjectDescription>(sensorDesc._mode);
-            DetectFreeObjectTO& detectFreeObjectTO = sensorTO.modeData.detectFreeCell;
-            detectFreeObjectTO.minDensity = detectFreeCellDesc._minDensity;
-            detectFreeObjectTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
+            auto const& detectFreeCellDesc = std::get<DetectFreeCellDescription>(sensorDesc._mode);
+            DetectFreeCellTO& detectFreeCellTO = sensorTO.modeData.detectFreeCell;
+            detectFreeCellTO.minDensity = detectFreeCellDesc._minDensity;
+            detectFreeCellTO.restrictToColor = static_cast<uint8_t>(detectFreeCellDesc._restrictToColor.value_or(255));
         } else if (sensorTO.mode == SensorMode_DetectCreature) {
             auto const& detectCreatureDesc = std::get<DetectCreatureDescription>(sensorDesc._mode);
             DetectCreatureTO& detectCreatureTO = sensorTO.modeData.detectCreature;
@@ -1285,7 +1285,7 @@ void DescriptionConverterService::convertObjectToTO(
         AttackerTO& attackerTO = objectTO.typeData.cell.cellTypeData.attacker;
         attackerTO.mode = attackerDesc.getMode();
         if (attackerTO.mode == AttackerMode_FreeCell) {
-            auto const& attackFreeCellDesc = std::get<AttackFreeObjectDescription>(attackerDesc._mode);
+            auto const& attackFreeCellDesc = std::get<AttackFreeCellDescription>(attackerDesc._mode);
             attackerTO.modeData.attackFreeCell.restrictToColor = static_cast<uint8_t>(attackFreeCellDesc._restrictToColor.value_or(255));
         } else if (attackerTO.mode == AttackerMode_Creature) {
             auto const& attackCreatureDesc = std::get<AttackCreatureDescription>(attackerDesc._mode);
@@ -1365,9 +1365,9 @@ void DescriptionConverterService::convertObjectToTO(
         if (reconnectorTO.mode == ReconnectorMode_Structure) {
             // No data to copy
         } else if (reconnectorTO.mode == ReconnectorMode_FreeCell) {
-            auto const& reconnectFreeCellDesc = std::get<ReconnectFreeObjectDescription>(reconnectorDesc._mode);
-            ReconnectFreeObjectTO& reconnectFreeObjectTO = reconnectorTO.modeData.reconnectFreeCell;
-            reconnectFreeObjectTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
+            auto const& reconnectFreeCellDesc = std::get<ReconnectFreeCellDescription>(reconnectorDesc._mode);
+            ReconnectFreeCellTO& reconnectFreeCellTO = reconnectorTO.modeData.reconnectFreeCell;
+            reconnectFreeCellTO.restrictToColor = static_cast<uint8_t>(reconnectFreeCellDesc._restrictToColor.value_or(255));
         } else if (reconnectorTO.mode == ReconnectorMode_Creature) {
             auto const& reconnectCreatureDesc = std::get<ReconnectCreatureDescription>(reconnectorDesc._mode);
             ReconnectCreatureTO& reconnectCreatureTO = reconnectorTO.modeData.reconnectCreature;

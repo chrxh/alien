@@ -1,0 +1,8 @@
+Package: boost-io
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-headers
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 8d76bfc2b0f84afe5c75b232cf849936f3feffb81c5fd3f5c85b054abfcf7ef6
+Description: Boost io module
+Status: install ok half-installed

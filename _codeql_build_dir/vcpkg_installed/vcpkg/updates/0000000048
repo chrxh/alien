@@ -1,0 +1,8 @@
+Package: boost-mpl
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-core, boost-headers, boost-predef, boost-preprocessor, boost-static-assert, boost-type-traits, boost-utility
+Architecture: x64-linux
+Multi-Arch: same
+Abi: cffb6ea051996d97d96c63bf4fcd0fbae574ca831fd0db522128401aeb33f1ca
+Description: Boost mpl module
+Status: install ok half-installed

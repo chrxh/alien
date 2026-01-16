@@ -36,7 +36,7 @@ SensorMode SensorDescription::getMode() const
         return SensorMode_DetectEnergy;
     } else if (std::holds_alternative<DetectStructureDescription>(_mode)) {
         return SensorMode_DetectStructure;
-    } else if (std::holds_alternative<DetectFreeObjectDescription>(_mode)) {
+    } else if (std::holds_alternative<DetectFreeCellDescription>(_mode)) {
         return SensorMode_DetectFreeCell;
     } else if (std::holds_alternative<DetectCreatureDescription>(_mode)) {
         return SensorMode_DetectCreature;
@@ -66,7 +66,7 @@ ReconnectorMode ReconnectorDescription::getMode() const
 {
     if (std::holds_alternative<ReconnectStructureDescription>(_mode)) {
         return ReconnectorMode_Structure;
-    } else if (std::holds_alternative<ReconnectFreeObjectDescription>(_mode)) {
+    } else if (std::holds_alternative<ReconnectFreeCellDescription>(_mode)) {
         return ReconnectorMode_FreeCell;
     } else if (std::holds_alternative<ReconnectCreatureDescription>(_mode)) {
         return ReconnectorMode_Creature;
@@ -81,7 +81,7 @@ SignalEntryDescription::SignalEntryDescription()
 
 AttackerMode AttackerDescription::getMode() const
 {
-    if (std::holds_alternative<AttackFreeObjectDescription>(_mode)) {
+    if (std::holds_alternative<AttackFreeCellDescription>(_mode)) {
         return AttackerMode_FreeCell;
     } else if (std::holds_alternative<AttackCreatureDescription>(_mode)) {
         return AttackerMode_Creature;
@@ -119,7 +119,7 @@ CellType CellDescription::getCellType() const
 {
     if (std::holds_alternative<StructureObjectDescription>(_cellType)) {
         return CellType_Structure;
-    } else if (std::holds_alternative<FreeObjectDescription>(_cellType)) {
+    } else if (std::holds_alternative<FreeCellDescription>(_cellType)) {
         return CellType_Free;
     } else if (std::holds_alternative<BaseDescription>(_cellType)) {
         return CellType_Base;

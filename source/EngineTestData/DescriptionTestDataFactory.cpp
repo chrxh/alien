@@ -276,7 +276,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
             // No fields to compare
         } break;
         case SensorMode_DetectFreeCell: {
-            auto const& detectFreeCell = std::get<DetectFreeObjectDescription>(sensor._mode);
+            auto const& detectFreeCell = std::get<DetectFreeCellDescription>(sensor._mode);
             auto const& nodeDetectFreeCell = std::get<DetectFreeCellGenomeDescription>(nodeSensor._mode);
             if (detectFreeCell._minDensity != nodeDetectFreeCell._minDensity) {
                 return false;
@@ -330,7 +330,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
         }
         switch (attacker.getMode()) {
         case AttackerMode_FreeCell: {
-            auto const& freeCellMode = std::get<AttackFreeObjectDescription>(attacker._mode);
+            auto const& freeCellMode = std::get<AttackFreeCellDescription>(attacker._mode);
             auto const& nodeFreeCellMode = std::get<AttackFreeCellGenomeDescription>(nodeAttacker._mode);
             if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
                 return false;
@@ -454,7 +454,7 @@ bool DescriptionTestDataFactory::compare(ObjectDescription const& cell, NodeDesc
             // No fields to compare
         } break;
         case ReconnectorMode_FreeCell: {
-            auto const& freeCellMode = std::get<ReconnectFreeObjectDescription>(reconnector._mode);
+            auto const& freeCellMode = std::get<ReconnectFreeCellDescription>(reconnector._mode);
             auto const& nodeFreeCellMode = std::get<ReconnectFreeCellGenomeDescription>(nodeReconnector._mode);
             if (freeCellMode._restrictToColor != nodeFreeCellMode._restrictToColor) {
                 return false;
@@ -604,7 +604,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
     case CellType_Structure:
         return StructureObjectDescription();
     case CellType_Free:
-        return FreeObjectDescription();
+        return FreeCellDescription();
     case CellType_Base:
         return BaseDescription();
     case CellType_Depot:
@@ -634,7 +634,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             sensorModeDesc = DetectStructureDescription();
             break;
         case SensorMode_DetectFreeCell:
-            sensorModeDesc = DetectFreeObjectDescription().minDensity(0.25f).restrictToColor(2);
+            sensorModeDesc = DetectFreeCellDescription().minDensity(0.25f).restrictToColor(2);
             break;
         case SensorMode_DetectCreature:
             sensorModeDesc =
@@ -722,7 +722,7 @@ CellTypeDescription DescriptionTestDataFactory::createNonDefaultCellTypeDescript
             reconnectorModeDesc = ReconnectStructureDescription();
             break;
         case ReconnectorMode_FreeCell:
-            reconnectorModeDesc = ReconnectFreeObjectDescription().restrictToColor(2);
+            reconnectorModeDesc = ReconnectFreeCellDescription().restrictToColor(2);
             break;
         case ReconnectorMode_Creature:
             reconnectorModeDesc =

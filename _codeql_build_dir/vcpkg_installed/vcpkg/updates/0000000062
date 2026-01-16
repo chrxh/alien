@@ -1,0 +1,8 @@
+Package: boost-fusion
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-container-hash, boost-core, boost-function-types, boost-functional, boost-headers, boost-mpl, boost-preprocessor, boost-static-assert, boost-tuple, boost-type-traits, boost-typeof, boost-utility
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 58b4c381ea1054157d0981b5ed6da8e2c7f8e9b499a590458802decb30a64ac4
+Description: Boost fusion module
+Status: install ok half-installed

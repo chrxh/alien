@@ -1,0 +1,8 @@
+Package: boost-function-types
+Version: 1.90.0
+Depends: boost-cmake, boost-config, boost-core, boost-detail, boost-headers, boost-mpl, boost-preprocessor, boost-type-traits
+Architecture: x64-linux
+Multi-Arch: same
+Abi: 0e62ea3b1f6c0201bc22c6b1ea1ff9c70922259fc841e3793df87f0483fb43ef
+Description: Boost function_types module
+Status: install ok half-installed
