@@ -227,14 +227,7 @@ CreatorWindow::CreatorWindow()
 
 void CreatorWindow::createCell()
 {
-    auto object = ObjectDescription()
-                    .cellType(StructureObjectDescription())
-                    .pos(getRandomPos())
-                    .usableEnergy(_energy)
-                    .stiffness(_stiffness)
-                    .color(EditorModel::get().getDefaultColorCode())
-                    .fixed(_fixed)
-                    .sticky(_makeSticky);
+    auto object = ObjectDescription().pos(getRandomPos()).stiffness(_stiffness).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).sticky(_makeSticky).type(CellDescription().cellType(StructureObjectDescription()).usableEnergy(_energy));
     Description description;
     description._objects.emplace_back(object);
     _SimulationFacade::get()->addAndSelectSimulationData(std::move(description));
@@ -307,15 +300,7 @@ void CreatorWindow::createDisc()
         for (auto angle = 0.0; angle < 360.0f - angleInc / 2; angle += angleInc) {
             auto relPos = Math::unitVectorOfAngle(angle) * radius;
 
-            description._objects.emplace_back(ObjectDescription()
-                                                .id(NumberGenerator::get().createId())
-                                                .cellType(StructureObjectDescription())
-                                                .usableEnergy(_energy)
-                                                .stiffness(_stiffness)
-                                                .sticky(_makeSticky)
-                                                .pos(relPos)
-                                                .color(EditorModel::get().getDefaultColorCode())
-                                                .fixed(_fixed));
+            description._objects.emplace_back(ObjectDescription().id(NumberGenerator::get().createId()).stiffness(_stiffness).sticky(_makeSticky).pos(relPos).color(EditorModel::get().getDefaultColorCode()).fixed(_fixed).type(CellDescription().cellType(StructureObjectDescription()).usableEnergy(_energy)));
         }
     }
 

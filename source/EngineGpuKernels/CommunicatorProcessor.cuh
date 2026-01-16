@@ -46,7 +46,7 @@ __device__ __inline__ void CommunicatorProcessor::processCell(SimulationData& da
         return;
     }
 
-    auto const& mode = object->cellTypeData.communicator.mode;
+    auto const& mode = object->typeData.cell.cellTypeData.communicator.mode;
     if (mode == CommunicatorMode_Sender) {
         processSender(data, statistics, object);
     }
@@ -61,10 +61,10 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     __shared__ float2 senderPos;
 
     if (threadIdx.x == 0) {
-        auto& sender = object->cellTypeData.communicator.modeData.sender;
+        auto& sender = object->typeData.cell.cellTypeData.communicator.modeData.sender;
         range = sender.range;
         maxTimesSent = sender.maxTimesSent;
-        currentNumTimesSent = object->signal.numTimesSent;
+        currentNumTimesSent = object->typeData.cell.signal.numTimesSent;
         senderPos = object->pos;
     }
     __syncthreads();
@@ -80,16 +80,16 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
     // Matching lambda to check if a cell is a valid receiver
     auto isMatch = [&object](Object* otherCell) {
         // Must be a communicator in receiver mode
-        if (otherCell->cellType != CellType_Communicator || otherCell->cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
+        if (otherCell->typeData.cell.cellType != CellType_Communicator || otherCell->typeData.cell.cellTypeData.communicator.mode != CommunicatorMode_Receiver) {
             return false;
         }
 
         // Must be from a different creature
-        if (object->isSameCreature(otherCell)) {
+        if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
             return false;
         }
 
-        auto const& receiver = otherCell->cellTypeData.communicator.modeData.receiver;
+        auto const& receiver = otherCell->typeData.cell.cellTypeData.communicator.modeData.receiver;
 
         // Check color restriction
         if (receiver.restrictToColor != 255 && object->color != receiver.restrictToColor) {
@@ -98,14 +98,14 @@ __device__ __inline__ void CommunicatorProcessor::processSender(SimulationData& 
 
         // Check lineage restriction
         if (receiver.restrictToLineage != LineageRestriction_No) {
-            if (object->creature == nullptr || otherCell->creature == nullptr) {
+            if (object->typeData.cell.creature == nullptr || otherCell->typeData.cell.creature == nullptr) {
                 return false;
             } else if (receiver.restrictToLineage == LineageRestriction_SameLineage) {
-                if (object->creature->lineageId != otherCell->creature->lineageId) {
+                if (object->typeData.cell.creature->lineageId != otherCell->typeData.cell.creature->lineageId) {
                     return false;
                 }
             } else if (receiver.restrictToLineage == LineageRestriction_OtherLineage) {
-                if (object->creature->lineageId == otherCell->creature->lineageId) {
+                if (object->typeData.cell.creature->lineageId == otherCell->typeData.cell.creature->lineageId) {
                     return false;
                 }
             }
@@ -149,9 +149,9 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
 
     // Check if we should override existing signal
     bool shouldTransmit = false;
-    if (receiverCell->signalState != SignalState_Active) {
+    if (receiverCell->typeData.cell.signalState != SignalState_Active) {
         shouldTransmit = true;
-    } else if (newNumTimesSent < receiverCell->signal.numTimesSent) {
+    } else if (newNumTimesSent < receiverCell->typeData.cell.signal.numTimesSent) {
         // Override only if new signal has fewer transmission hops
         shouldTransmit = true;
     }
@@ -159,10 +159,10 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
     if (shouldTransmit) {
         // Copy signal to receiver with incremented numTimesSent
         for (int k = 0; k < MAX_CHANNELS; ++k) {
-            receiverCell->signal.channels[k] = senderCell->signal.channels[k];
+            receiverCell->typeData.cell.signal.channels[k] = senderCell->typeData.cell.signal.channels[k];
         }
-        receiverCell->signal.numTimesSent = newNumTimesSent;
-        receiverCell->signalState = SignalState_Active;
+        receiverCell->typeData.cell.signal.numTimesSent = newNumTimesSent;
+        receiverCell->typeData.cell.signalState = SignalState_Active;
 
         // Translate angle in channel[1] from sender's reference direction to receiver's reference direction
         // The angle is encoded as value/180 degrees, where 1.0 = 180 deg and -1.0 = -180 deg
@@ -175,11 +175,11 @@ __inline__ __device__ bool CommunicatorProcessor::tryTransmitSignal(SimulationDa
         auto angleDiff = senderRefAngle - receiverRefAngle;
 
         // The signal angle is encoded as angle/180, so the diff must also be scaled
-        auto senderAngle = senderCell->signal.channels[Channels::CommunicatorAngle];
+        auto senderAngle = senderCell->typeData.cell.signal.channels[Channels::CommunicatorAngle];
         auto translatedAngle = senderAngle + angleDiff / 180.0f;
         // Normalize to [-1, 1] range (representing [-180, 180] degrees)
         translatedAngle = Math::getNormalizedAngle(translatedAngle * 180.0f, -180.0f) / 180.0f;
-        receiverCell->signal.channels[Channels::CommunicatorAngle] = translatedAngle;
+        receiverCell->typeData.cell.signal.channels[Channels::CommunicatorAngle] = translatedAngle;
     }
 
     receiverCell->releaseLock();

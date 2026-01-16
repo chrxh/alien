@@ -15,27 +15,27 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                 CUDA_THROW_NOT_IMPLEMENTED();
             }
 
-            if (object->creature) {
-                if (reinterpret_cast<uint64_t>(object->creature) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(object->creature) + sizeof(Creature)
+            if (object->typeData.cell.creature) {
+                if (reinterpret_cast<uint64_t>(object->typeData.cell.creature) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature) + sizeof(Creature)
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong creature pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                if (reinterpret_cast<uint64_t>(object->creature->genome) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(object->creature->genome) + sizeof(Genome)
+                if (reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome) + sizeof(Genome)
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong genome pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                if (reinterpret_cast<uint64_t>(object->creature->genome->genes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
-                    || reinterpret_cast<uint64_t>(object->creature->genome->genes) + sizeof(Gene) * object->creature->genome->numGenes
+                if (reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
+                    || reinterpret_cast<uint64_t>(object->typeData.cell.creature->genome->genes) + sizeof(Gene) * object->typeData.cell.creature->genome->numGenes
                         >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
                     printf("wrong genes pointer at %d\n", location);
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
-                for (int i = 0; i < object->creature->genome->numGenes; ++i) {
-                    auto const& gene = object->creature->genome->genes[i];
+                for (int i = 0; i < object->typeData.cell.creature->genome->numGenes; ++i) {
+                    auto const& gene = object->typeData.cell.creature->genome->genes[i];
                     if (reinterpret_cast<uint64_t>(gene.nodes) < reinterpret_cast<uint64_t>(data.entities.heap.getArray())
                         || reinterpret_cast<uint64_t>(gene.nodes) + sizeof(Node) * gene.numNodes
                             >= reinterpret_cast<uint64_t>(data.entities.heap.getArray() + data.entities.heap.getCapacity())) {
@@ -66,12 +66,12 @@ __device__ void DEBUG_checkCells(SimulationData& data, float* sumEnergy, int loc
                     CUDA_THROW_NOT_IMPLEMENTED();
                 }
             }
-            if (object->usableEnergy < 0 || isnan(object->usableEnergy)) {
+            if (object->typeData.cell.usableEnergy < 0 || isnan(object->typeData.cell.usableEnergy)) {
                 printf("cell energy invalid at %d", location);
                 //CUDA_THROW_NOT_IMPLEMENTED();
             }
             if (sumEnergy != nullptr) {
-                atomicAdd(sumEnergy, object->usableEnergy);
+                atomicAdd(sumEnergy, object->typeData.cell.usableEnergy);
             }
         }
     }

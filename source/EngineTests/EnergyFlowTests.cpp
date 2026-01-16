@@ -35,7 +35,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
             data.addConnection(i, i + 1);
         }
     }
-    data._objects.at(0)._usableEnergy = 1000.0f;
+    std::get<CellDescription>(data._objects.at(0)._type)._usableEnergy = 1000.0f;
 
     _simulationFacade->setSimulationData(data);
     _simulationFacade->calcTimesteps(2000);
@@ -43,7 +43,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsLeadsEqualDistribution)
     auto actualData = _simulationFacade->getSimulationData();
 
     for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualData.getObjectRef(i + 1)._usableEnergy < 150.0f);
+        EXPECT_TRUE(std::get<CellDescription>(actualData.getObjectRef(i + 1)._type)._usableEnergy < 150.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -58,11 +58,11 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
     for (int i = 0; i < 20; ++i) {
         auto object = ObjectDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            object.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
+            std::get<CellDescription>(object._type)._cellType = ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
         }
         cells.push_back(object);
     }
-    cells.at(0)._usableEnergy = 1000.0f;
+    std::get<CellDescription>(cells.at(0)._type)._usableEnergy = 1000.0f;
     
     Description data;
     data.addCreature(cells, CreatureDescription(), genome);
@@ -82,9 +82,9 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToActiveConstructor)
 
     for (int i = 1; i < 21; ++i) {
         if (i == 20) {
-            EXPECT_TRUE(actualData.getObjectRef(i)._usableEnergy > 900.0f);
+            EXPECT_TRUE(std::get<CellDescription>(actualData.getObjectRef(i)._type)._usableEnergy > 900.0f);
         } else {
-            EXPECT_TRUE(actualData.getObjectRef(i)._usableEnergy < 110.0f);
+            EXPECT_TRUE(std::get<CellDescription>(actualData.getObjectRef(i)._type)._usableEnergy < 110.0f);
         }
     }
 }
@@ -104,12 +104,12 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
             auto id = i + j * 20 + 1;
             auto object = ObjectDescription().id(id).pos({100.0f + toFloat(i), 100.0f});
             if (id == constructorId1 || id == constructorId2) {
-                object.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0));
+                std::get<CellDescription>(object._type)._cellType = ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(0);
             }
             cells.push_back(object);
         }
     }
-    cells.at(0)._usableEnergy = 1000.0f;
+    std::get<CellDescription>(cells.at(0)._type)._usableEnergy = 1000.0f;
 
     Description data;
     data.addCreature(cells, CreatureDescription(), genome);
@@ -132,9 +132,9 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsToClosestActiveConstructor)
 
     for (int i = 1; i < 41; ++i) {
         if (i == constructorId1) {
-            EXPECT_TRUE(actualData.getObjectRef(i)._usableEnergy > 900.0f);
+            EXPECT_TRUE(std::get<CellDescription>(actualData.getObjectRef(i)._type)._usableEnergy > 900.0f);
         } else {
-            EXPECT_TRUE(actualData.getObjectRef(i)._usableEnergy < 110.0f);
+            EXPECT_TRUE(std::get<CellDescription>(actualData.getObjectRef(i)._type)._usableEnergy < 110.0f);
         }
     }
 }
@@ -149,11 +149,11 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     for (int i = 0; i < 20; ++i) {
         auto object = ObjectDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
         if (i == 19) {
-            object.cellType(ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1));
+            std::get<CellDescription>(object._type)._cellType = ConstructorDescription().geneIndex(0).autoTriggerInterval(0).currentBranch(1);
         }
         cells.push_back(object);
     }
-    cells.at(0)._usableEnergy = 1000.0f;
+    std::get<CellDescription>(cells.at(0)._type)._usableEnergy = 1000.0f;
 
     Description data;
     data.addCreature(cells, CreatureDescription(), genome);
@@ -167,7 +167,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
     auto actualData = _simulationFacade->getSimulationData();
 
     for (int i = 0; i < 20; ++i) {
-        EXPECT_TRUE(actualData.getObjectRef(i + 1)._usableEnergy < 150.0f);
+        EXPECT_TRUE(std::get<CellDescription>(actualData.getObjectRef(i + 1)._type)._usableEnergy < 150.0f);
     }
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
@@ -175,10 +175,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToFinishedConstructor)
 TEST_F(EnergyFlowTests, usableEnergyFlowsBranches)
 {
     auto data = Description().objects({
-        ObjectDescription().id(0).pos({100.0f, 99.0f}).usableEnergy(100.0f),
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).usableEnergy(240.0f),
-        ObjectDescription().id(2).pos({100.0f, 101.0f}).usableEnergy(100.0f),
-        ObjectDescription().id(3).pos({99.0f, 100.0f}).usableEnergy(100.0f),
+        ObjectDescription().id(0).pos({100.0f, 99.0f}).type(CellDescription().usableEnergy(100.0f)),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().usableEnergy(240.0f)),
+        ObjectDescription().id(2).pos({100.0f, 101.0f}).type(CellDescription().usableEnergy(100.0f)),
+        ObjectDescription().id(3).pos({99.0f, 100.0f}).type(CellDescription().usableEnergy(100.0f)),
     });
     data.addConnection(0, 1);
     data.addConnection(1, 2);
@@ -193,14 +193,14 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsBranches)
         EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
         for (auto const& object : actualData._objects) {
-            EXPECT_TRUE(object._usableEnergy > 100.0f - NEAR_ZERO);
+            EXPECT_TRUE(std::get<CellDescription>(object._type)._usableEnergy > 100.0f - NEAR_ZERO);
         }
     }
     {
         auto actualData = _simulationFacade->getSimulationData();
         for (auto const& object : actualData._objects) {
-            EXPECT_TRUE(object._usableEnergy > 540.0f / 4 - 5.0f);
-            EXPECT_TRUE(object._usableEnergy < 540.0f / 4 + 5.0f);
+            EXPECT_TRUE(std::get<CellDescription>(object._type)._usableEnergy > 540.0f / 4 - 5.0f);
+            EXPECT_TRUE(std::get<CellDescription>(object._type)._usableEnergy < 540.0f / 4 + 5.0f);
         }
     }
 }
@@ -212,20 +212,11 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        {ObjectDescription()
-             .id(1)
-             .pos({100.0f, 100.0f})
-             .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy * 10)},
+        {ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
         CreatureDescription(),
         genome);
     data.addCreature(
-        {ObjectDescription()
-             .id(2)
-             .cellState(CellState_Constructing)
-             .pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f})
-             .cellType(ConstructorDescription().currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy)},
+        {ObjectDescription().id(2).pos({100.0f + 1.0f + _parameters.constructorAdditionalOffspringDistance, 100.0f}).type(CellDescription().cellState(CellState_Constructing).cellType(ConstructorDescription().currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDescription(),
         genome);
     data.addConnection(1, 2);
@@ -240,8 +231,8 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsNotToConstructorUnderConstruction)
     EXPECT_EQ(2, actualData.getNumObjects());
     auto object1 = actualData.getObjectRef(1);
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(abs(object1._usableEnergy - normalCellEnergy * 10) < 1.0f);
-    EXPECT_TRUE(abs(object2._usableEnergy - normalCellEnergy) < 1.0f);
+    EXPECT_TRUE(abs(std::get<CellDescription>(object1._type)._usableEnergy - normalCellEnergy * 10) < 1.0f);
+    EXPECT_TRUE(abs(std::get<CellDescription>(object2._type)._usableEnergy - normalCellEnergy) < 1.0f);
 }
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
@@ -251,19 +242,11 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
     Description data;
     data.addCreature(
-        {ObjectDescription()
-             .id(1)
-             .pos({100.0f, 100.0f})
-             .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy * 10)},
+        {ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy * 10))},
         CreatureDescription(),
         genome);
     data.addCreature(
-        {ObjectDescription()
-             .id(2)
-             .pos({101.0f, 100.0f})
-             .cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1))
-             .usableEnergy(normalCellEnergy)},
+        {ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().cellType(ConstructorDescription().autoTriggerInterval(0).currentNodeIndex(1)).usableEnergy(normalCellEnergy))},
         CreatureDescription(),
         genome);
     data.addConnection(1, 2);
@@ -278,8 +261,8 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEquallyToActiveConstructors)
     EXPECT_EQ(2, actualData.getNumObjects());
     auto object1 = actualData.getObjectRef(1);
     auto object2 = actualData.getObjectRef(2);
-    EXPECT_TRUE(abs(object1._usableEnergy - actualEnergy / 2) < 1.0f);
-    EXPECT_TRUE(abs(object2._usableEnergy - actualEnergy / 2) < 1.0f);
+    EXPECT_TRUE(abs(std::get<CellDescription>(object1._type)._usableEnergy - actualEnergy / 2) < 1.0f);
+    EXPECT_TRUE(abs(std::get<CellDescription>(object2._type)._usableEnergy - actualEnergy / 2) < 1.0f);
 }
 
 TEST_F(EnergyFlowTests, usableEnergyFlowsPrioritizeLowEnergyCell)
@@ -288,9 +271,9 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsPrioritizeLowEnergyCell)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).usableEnergy(normalCellEnergy * 5.0f),    // High energy cell
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.5f),  // Low energy cell (below normal)
-        ObjectDescription().id(3).pos({102.0f, 100.0f}).usableEnergy(normalCellEnergy),        // Normal energy cell
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 5.0f)),    // High energy cell
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.5f)),  // Low energy cell (below normal)
+        ObjectDescription().id(3).pos({102.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy)),        // Normal energy cell
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -306,10 +289,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsPrioritizeLowEnergyCell)
     auto cell3 = actualData.getObjectRef(3);
 
     // Cell 2 should have gained significant energy (approaching normal energy)
-    EXPECT_TRUE(object2._usableEnergy > normalCellEnergy * 0.5 + 10.0f);
+    EXPECT_TRUE(std::get<CellDescription>(object2._type)._usableEnergy > normalCellEnergy * 0.5 + 10.0f);
 
     // Cell 1 should have lost energy to cell 2
-    EXPECT_TRUE(object1._usableEnergy < normalCellEnergy * 5);
+    EXPECT_TRUE(std::get<CellDescription>(object1._type)._usableEnergy < normalCellEnergy * 5);
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -321,8 +304,8 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEqualizeLowEnergyCells)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.8f),  // Below normal
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.55f),  // Much lower
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.8f)),  // Below normal
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.55f)),  // Much lower
     });
     data.addConnection(1, 2);
 
@@ -336,8 +319,8 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsEqualizeLowEnergyCells)
 
     // Both cells should approach equal energy levels (since both are below normal)
     auto avgEnergy = (normalCellEnergy * 0.8 + normalCellEnergy * 0.55) / 2.0f;
-    EXPECT_TRUE(abs(object1._usableEnergy - avgEnergy) < 10.0f);
-    EXPECT_TRUE(abs(object2._usableEnergy - avgEnergy) < 10.0f);
+    EXPECT_TRUE(abs(std::get<CellDescription>(object1._type)._usableEnergy - avgEnergy) < 10.0f);
+    EXPECT_TRUE(abs(std::get<CellDescription>(object2._type)._usableEnergy - avgEnergy) < 10.0f);
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -349,10 +332,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsFromHighToLowEnergyInChain)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).usableEnergy(normalCellEnergy * 2),    // High
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).usableEnergy(normalCellEnergy),        // Normal
-        ObjectDescription().id(3).pos({102.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.55f),  // Low
-        ObjectDescription().id(4).pos({103.0f, 100.0f}).usableEnergy(normalCellEnergy),        // Normal
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 2)),    // High
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy)),        // Normal
+        ObjectDescription().id(3).pos({102.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.55f)),  // Low
+        ObjectDescription().id(4).pos({103.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy)),        // Normal
     });
     data.addConnection(1, 2);
     data.addConnection(2, 3);
@@ -366,7 +349,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsFromHighToLowEnergyInChain)
     auto cell3 = actualData.getObjectRef(3);
 
     // Cell 3 (low energy) should receive energy and approach normal energy
-    EXPECT_TRUE(cell3._usableEnergy > normalCellEnergy * 0.4 + 10.0f);
+    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._usableEnergy > normalCellEnergy * 0.4 + 10.0f);
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -378,10 +361,10 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
     auto normalCellEnergy = _parameters.normalCellEnergy.value[0];
 
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).usableEnergy(normalCellEnergy * 10),   // Very high energy
-        ObjectDescription().id(2).pos({101.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.55f),  // Low
-        ObjectDescription().id(3).pos({102.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.6f),  // Low
-        ObjectDescription().id(4).pos({103.0f, 100.0f}).usableEnergy(normalCellEnergy * 0.7f),  // Low
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 10)),   // Very high energy
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.55f)),  // Low
+        ObjectDescription().id(3).pos({102.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.6f)),  // Low
+        ObjectDescription().id(4).pos({103.0f, 100.0f}).type(CellDescription().usableEnergy(normalCellEnergy * 0.7f)),  // Low
     });
     data.addConnection(1, 2);
     data.addConnection(1, 3);
@@ -397,9 +380,9 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
     auto cell4 = actualData.getObjectRef(4);
 
     // All low energy cells should have gained energy
-    EXPECT_TRUE(object2._usableEnergy > normalCellEnergy * 0.3);
-    EXPECT_TRUE(cell3._usableEnergy > normalCellEnergy * 0.4);
-    EXPECT_TRUE(cell4._usableEnergy > normalCellEnergy * 0.5);
+    EXPECT_TRUE(std::get<CellDescription>(object2._type)._usableEnergy > normalCellEnergy * 0.3);
+    EXPECT_TRUE(std::get<CellDescription>(cell3._type)._usableEnergy > normalCellEnergy * 0.4);
+    EXPECT_TRUE(std::get<CellDescription>(cell4._type)._usableEnergy > normalCellEnergy * 0.5);
 
     // Total energy should be conserved
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
@@ -408,7 +391,7 @@ TEST_F(EnergyFlowTests, usableEnergyFlowsMultipleLowEnergyCells)
 TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_nonDigestor)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).rawEnergy(100.0f),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().rawEnergy(100.0f)),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
     });
 
@@ -417,16 +400,16 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_nonDigestor)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(100.0f, actualData.getObjectRef(1)._rawEnergy));
-    EXPECT_TRUE(approxCompare(0.0f, actualData.getObjectRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(100.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_digestor)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).rawEnergy(10.0f),
-        ObjectDescription().id(2).cellType(DigestorDescription()).pos({101.0f, 100.0f}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().rawEnergy(10.0f)),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription())),
     });
     data.addConnection(1, 2);
 
@@ -435,15 +418,15 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_nonDigestor_digestor)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(0.0f, actualData.getObjectRef(1)._rawEnergy));
-    EXPECT_TRUE(approxCompare(10.0f, actualData.getObjectRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(10.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_nonDigestor)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).cellType(DigestorDescription()).pos({100.0f, 100.0f}).rawEnergy(10.0f),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription()).rawEnergy(10.0f)),
         ObjectDescription().id(2).pos({101.0f, 100.0f}),
     });
     data.addConnection(1, 2);
@@ -453,16 +436,16 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_nonDigestor)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(10.0f, actualData.getObjectRef(1)._rawEnergy));
-    EXPECT_TRUE(approxCompare(0.0f, actualData.getObjectRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(10.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
 TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_digestor)
 {
     auto data = Description().objects({
-        ObjectDescription().id(1).cellType(DigestorDescription().rawEnergyConductivity(0.7f)).pos({100.0f, 100.0f}).rawEnergy(10.0f),
-        ObjectDescription().id(2).cellType(DigestorDescription().rawEnergyConductivity(0.3f)).pos({101.0f, 100.0f}),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().rawEnergyConductivity(0.7f)).rawEnergy(10.0f)),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().rawEnergyConductivity(0.3f))),
     });
     data.addConnection(1, 2);
 
@@ -471,8 +454,8 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_digestor_digestor)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(3.0f, actualData.getObjectRef(1)._rawEnergy));
-    EXPECT_TRUE(approxCompare(7.0f, actualData.getObjectRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(3.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(7.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }
 
@@ -490,14 +473,14 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
         for (int i = 0; i < 10; ++i) {
             auto object = ObjectDescription().id(i + 1).pos({100.0f + toFloat(i), 100.0f});
             // Make all cells Digestors with different conductivity
-            object.cellType(DigestorDescription().rawEnergyConductivity(conductivity));
+            std::get<CellDescription>(object._type)._cellType = DigestorDescription().rawEnergyConductivity(conductivity);
             data._objects.emplace_back(object);
             if (i > 0) {
                 data.addConnection(i, i + 1);
             }
         }
         // Put all raw energy in the first cell
-        data._objects.at(0)._rawEnergy = 100.0f;
+        std::get<CellDescription>(data._objects.at(0)._type)._rawEnergy = 100.0f;
     }
 
     // Run simulations for a shorter time to see difference in flow rate
@@ -514,7 +497,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
     auto lastCellLow = actualDataLow.getObjectRef(10);
     auto lastCellHigh = actualDataHigh.getObjectRef(10);
     
-    EXPECT_TRUE(lastCellHigh._rawEnergy > lastCellLow._rawEnergy + NEAR_ZERO);
+    EXPECT_TRUE(std::get<CellDescription>(lastCellHigh._type)._rawEnergy > std::get<CellDescription>(lastCellLow._type)._rawEnergy + NEAR_ZERO);
     
     // Energy conservation
     EXPECT_TRUE(approxCompare(getEnergy(dataLowConductivity), getEnergy(actualDataLow)));
@@ -524,16 +507,8 @@ TEST_F(EnergyFlowTests, rawEnergyFlows_highConductivity)
 TEST_F(EnergyFlowTests, rawEnergyFlow_exceedRawEnergyThreshold)
 {
     auto data = Description().objects({
-        ObjectDescription()
-            .id(1)
-            .cellType(DigestorDescription().rawEnergyConductivity(0.7f))
-            .pos({100.0f, 100.0f})
-            .rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction * 2),
-        ObjectDescription()
-            .id(2)
-            .cellType(DigestorDescription().rawEnergyConductivity(0.3f))
-            .pos({101.0f, 100.0f})
-            .rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction + NEAR_ZERO),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().rawEnergyConductivity(0.7f)).rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction * 2)),
+        ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().rawEnergyConductivity(0.3f)).rawEnergy(SimulationParameters::maxRawEnergyThresholdForConduction + NEAR_ZERO)),
     });
     data.addConnection(1, 2);
 
@@ -542,7 +517,7 @@ TEST_F(EnergyFlowTests, rawEnergyFlow_exceedRawEnergyThreshold)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(SimulationParameters::maxRawEnergyThresholdForConduction * 2, actualData.getObjectRef(1)._rawEnergy));
-    EXPECT_TRUE(approxCompare(SimulationParameters::maxRawEnergyThresholdForConduction + NEAR_ZERO, actualData.getObjectRef(2)._rawEnergy));
+    EXPECT_TRUE(approxCompare(SimulationParameters::maxRawEnergyThresholdForConduction * 2, std::get<CellDescription>(actualData.getObjectRef(1)._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(SimulationParameters::maxRawEnergyThresholdForConduction + NEAR_ZERO, std::get<CellDescription>(actualData.getObjectRef(2)._type)._rawEnergy));
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 }

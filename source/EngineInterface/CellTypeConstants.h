@@ -15,6 +15,13 @@ namespace Channels
     auto constexpr CellTypeActivation = 0;
 }
 
+using ObjectType = int;
+enum ObjectType_
+{
+    ObjectType_Cell,
+    ObjectType_Count,
+};
+
 using CellType = int;
 enum CellType_
 {

@@ -36,19 +36,19 @@ __device__ __inline__ void DepotProcessor::processCell(SimulationData& data, Sim
 {
     if (SignalProcessor::isManuallyTriggered(data, object)) {
         auto normalCellEnergy = cudaSimulationParameters.normalCellEnergy.value[object->color];
-        if (object->signal.channels[Channels::CellTypeActivation] > 0 && object->usableEnergy > normalCellEnergy) {
-            auto energyToTransfer = max(min(object->usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
-            auto storageLimit = min(object->cellTypeData.depot.storageLimit, SimulationParameters::depotStorageLimit);
-            if (object->cellTypeData.depot.storedUsableEnergy + energyToTransfer > storageLimit) {
-                energyToTransfer = storageLimit - object->cellTypeData.depot.storedUsableEnergy;
+        if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] > 0 && object->typeData.cell.usableEnergy > normalCellEnergy) {
+            auto energyToTransfer = max(min(object->typeData.cell.usableEnergy - normalCellEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
+            auto storageLimit = min(object->typeData.cell.cellTypeData.depot.storageLimit, SimulationParameters::depotStorageLimit);
+            if (object->typeData.cell.cellTypeData.depot.storedUsableEnergy + energyToTransfer > storageLimit) {
+                energyToTransfer = storageLimit - object->typeData.cell.cellTypeData.depot.storedUsableEnergy;
             }
-            object->usableEnergy -= energyToTransfer;
-            object->cellTypeData.depot.storedUsableEnergy += energyToTransfer;
+            object->typeData.cell.usableEnergy -= energyToTransfer;
+            object->typeData.cell.cellTypeData.depot.storedUsableEnergy += energyToTransfer;
         }
-        if (object->signal.channels[Channels::CellTypeActivation] < 0 && object->cellTypeData.depot.storedUsableEnergy > 0) {
-            auto energyToTransfer = max(min(object->cellTypeData.depot.storedUsableEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
-            object->usableEnergy += energyToTransfer;
-            object->cellTypeData.depot.storedUsableEnergy -= energyToTransfer;
+        if (object->typeData.cell.signal.channels[Channels::CellTypeActivation] < 0 && object->typeData.cell.cellTypeData.depot.storedUsableEnergy > 0) {
+            auto energyToTransfer = max(min(object->typeData.cell.cellTypeData.depot.storedUsableEnergy, SimulationParameters::depotEnergyTransferUnit), 0.0f);
+            object->typeData.cell.usableEnergy += energyToTransfer;
+            object->typeData.cell.cellTypeData.depot.storedUsableEnergy -= energyToTransfer;
         }
     }
 }

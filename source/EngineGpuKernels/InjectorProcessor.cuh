@@ -38,16 +38,16 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
             if (injectedCell != nullptr) {
                 return;
             }
-            if (otherCell->creature == nullptr) {
+            if (otherCell->typeData.cell.creature == nullptr) {
                 return;
             }
-            if (object->isSameCreature(otherCell)) {
+            if (object->typeData.cell.isSameCreature(&otherCell->typeData.cell)) {
                 return;
             }
             if (otherCell->fixed) {
                 return;
             }
-            if (otherCell->cellType != CellType_Constructor) {
+            if (otherCell->typeData.cell.cellType != CellType_Constructor) {
                 return;
             }
             // Only inject to other cells which are in a visible cone with respect to the injector cell
@@ -60,29 +60,29 @@ __inline__ __device__ void InjectorProcessor::processCell(SimulationData& data, 
 
         if (injectedCell) {
             injectorEnergyCost *= (1.0f + toFloat(numDefenders) * 0.5f);
-            if (object->usableEnergy - injectorEnergyCost < cellMinEnergy) {
-                object->signal.channels[Channels::InjectorSuccess] = 0;
+            if (object->typeData.cell.usableEnergy - injectorEnergyCost < cellMinEnergy) {
+                object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 0;
                 return;
             }
 
             EntityFactory factory;
             factory.init(&data);
-            auto cloneCreature = factory.cloneCreature(object->creature);
+            auto cloneCreature = factory.cloneCreature(object->typeData.cell.creature);
             cloneCreature->numObjects = 1;
-            injectedCell->creature = cloneCreature;
-            injectedCell->cellTypeData.constructor.geneIndex = object->cellTypeData.injector.geneIndex;
-            injectedCell->cellTypeData.constructor.currentNodeIndex = 0;
-            injectedCell->cellTypeData.constructor.currentConcatenation = 0;
-            injectedCell->cellTypeData.constructor.currentBranch = 0;
-            injectedCell->cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
-            object->signal.channels[Channels::InjectorSuccess] = 1;
+            injectedCell->typeData.cell.creature = cloneCreature;
+            injectedCell->typeData.cell.cellTypeData.constructor.geneIndex = object->typeData.cell.cellTypeData.injector.geneIndex;
+            injectedCell->typeData.cell.cellTypeData.constructor.currentNodeIndex = 0;
+            injectedCell->typeData.cell.cellTypeData.constructor.currentConcatenation = 0;
+            injectedCell->typeData.cell.cellTypeData.constructor.currentBranch = 0;
+            injectedCell->typeData.cell.cellTypeData.constructor.lastConstructedCellId = VALUE_NOT_SET_UINT64;
+            object->typeData.cell.signal.channels[Channels::InjectorSuccess] = 1;
 
             if (injectorEnergyCost > 0) {
                 EnergyProcessor::radiate(data, object, injectorEnergyCost);
             }
         }
 
-        object->signal.channels[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
+        object->typeData.cell.signal.channels[Channels::InjectorSuccess] = injectedCell != nullptr ? 1 : 0;
     }
 }
 
@@ -91,7 +91,7 @@ __inline__ __device__ int InjectorProcessor::countDefenderCells(SimulationStatis
     int result = 0;
     for (int i = 0; i < object->numConnections; ++i) {
         auto connectedCell = object->connections[i].object;
-        if (connectedCell->cellType == CellType_Defender && connectedCell->cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
+        if (connectedCell->typeData.cell.cellType == CellType_Defender && connectedCell->typeData.cell.cellTypeData.defender.mode == DefenderMode_DefendAgainstInjector) {
             statistics.incNumDefenderActivities(connectedCell->color);
             ++result;
         }

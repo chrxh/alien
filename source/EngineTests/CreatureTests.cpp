@@ -134,7 +134,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, Direction::Forward);
     auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        {ObjectDescription().id(0).pos({200.0f, 200.0f}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDescription(),
         genome);
 
@@ -144,7 +144,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Check that the seed provides no energy anymore after the creature is constructed
-    auto constructor = std::get<ConstructorDescription>(actualData.getObjectRef(0)._cellType);
+    auto constructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(0)._type)._cellType);
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
@@ -172,30 +172,30 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithTwoLegs)
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
-        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(0.0f, std::get<CellDescription>(body.at(0)._type)._frontAngle.value()));
         for (int i = 1; i < 6; ++i) {
-            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i)._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(180.0f, std::get<CellDescription>(body.at(i)._type)._frontAngle.value()));
         }
 
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg1.at(0)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(-90.0f, std::get<CellDescription>(leg1.at(0)._type)._frontAngle.value()));
         for (int i = 1; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(90.0f, leg1.at(i)._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(90.0f, std::get<CellDescription>(leg1.at(i)._type)._frontAngle.value()));
         }
 
-        EXPECT_TRUE(approxCompareAngles(90.0f, leg2.at(0)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(90.0f, std::get<CellDescription>(leg2.at(0)._type)._frontAngle.value()));
         for (int i = 1; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(-90.0f, leg2.at(i)._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(-90.0f, std::get<CellDescription>(leg2.at(i)._type)._frontAngle.value()));
         }
     }
 
     // Check angles without muscle distortions
     auto getInitialAngle = [&muscleMode](ObjectDescription const& object) {
         if (muscleMode == MuscleMode_AutoBending) {
-            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
+            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(std::get<CellDescription>(object._type)._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_ManualBending) {
-            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
+            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(std::get<CellDescription>(object._type)._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_AngleBending) {
-            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
+            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(std::get<CellDescription>(object._type)._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }
@@ -217,7 +217,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     auto genome = createGenomeForCreatureWithOneLegAndSpikes(muscleMode, Direction::Forward);
     auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        {ObjectDescription().id(0).pos({200.0f, 200.0f}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDescription(),
         genome);
 
@@ -227,7 +227,7 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
     auto actualData = _simulationFacade->getSimulationData();
 
     // Check that the seed provides no energy anymore after the creature is constructed
-    auto constructor = std::get<ConstructorDescription>(actualData.getObjectRef(0)._cellType);
+    auto constructor = std::get<ConstructorDescription>(std::get<CellDescription>(actualData.getObjectRef(0)._type)._cellType);
     if (genome._genes[constructor._geneIndex]._separation) {
         EXPECT_EQ(ProvideEnergy_CellOnly, constructor._provideEnergy);
     }
@@ -259,29 +259,29 @@ TEST_P(CreatureTests_BendingMuscles, constructCreatureWithOneLegAndSpikes)
 
     // Check front angles
     if (muscleMode != MuscleMode_AngleBending) {
-        EXPECT_TRUE(approxCompareAngles(0.0f, body.at(0)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(0.0f, std::get<CellDescription>(body.at(0)._type)._frontAngle.value()));
         for (int i = 1; i < 6; ++i) {
-            EXPECT_TRUE(approxCompareAngles(180.0f, body.at(i)._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(180.0f, std::get<CellDescription>(body.at(i)._type)._frontAngle.value()));
         }
 
-        EXPECT_TRUE(approxCompareAngles(-90.0f, leg.at(0)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(-90.0f, std::get<CellDescription>(leg.at(0)._type)._frontAngle.value()));
         for (int i = 1; i < 4; ++i) {
-            EXPECT_TRUE(approxCompareAngles(90.0f, leg.at(i)._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(90.0f, std::get<CellDescription>(leg.at(i)._type)._frontAngle.value()));
         }
-        EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(0)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(0.0f, spikes1.at(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(180.0f, spikes2.at(0)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(180.0f, spikes2.at(1)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(0.0f, std::get<CellDescription>(spikes1.at(0)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(0.0f, std::get<CellDescription>(spikes1.at(1)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(180.0f, std::get<CellDescription>(spikes2.at(0)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(180.0f, std::get<CellDescription>(spikes2.at(1)._type)._frontAngle.value()));
     }
 
     // Check angles without muscle distortions
     auto getInitialAngle = [&muscleMode](ObjectDescription const& object) {
         if (muscleMode == MuscleMode_AutoBending) {
-            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
+            return std::get<AutoBendingDescription>(std::get<MuscleDescription>(std::get<CellDescription>(object._type)._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_ManualBending) {
-            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
+            return std::get<ManualBendingDescription>(std::get<MuscleDescription>(std::get<CellDescription>(object._type)._cellType)._mode)._initialAngle.value();
         } else if (muscleMode == MuscleMode_AngleBending) {
-            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(object._cellType)._mode)._initialAngle.value();
+            return std::get<AngleBendingDescription>(std::get<MuscleDescription>(std::get<CellDescription>(object._type)._cellType)._mode)._initialAngle.value();
         } else {
             CHECK(false);
         }
@@ -328,7 +328,7 @@ TEST_P(CreatureTests_BendingMuscles_TwoDirections, moveCreatureWithTwoLegs)
 
     auto genome = createGenomeForCreatureWithTwoLegs(muscleMode, direction);
     auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        {ObjectDescription().id(0).pos(refPoint).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDescription(),
         genome);
 
@@ -386,7 +386,7 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, Direction::Forward, 0.0f);
     auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos({200.0f, 200.0f}).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        {ObjectDescription().id(0).pos({200.0f, 200.0f}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDescription(),
         genome);
 
@@ -407,9 +407,9 @@ TEST_P(CreatureTests_CrawlingMuscles, constructCrawlingCreature)
     auto first = true;
     for (auto const& object : cells) {
         if (first) {
-            EXPECT_TRUE(approxCompareAngles(0.0f, object._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(0.0f, std::get<CellDescription>(object._type)._frontAngle.value()));
         } else {
-            EXPECT_TRUE(approxCompareAngles(180.0f, object._frontAngle.value()));
+            EXPECT_TRUE(approxCompareAngles(180.0f, std::get<CellDescription>(object._type)._frontAngle.value()));
         }
         first = false;
     }
@@ -440,7 +440,7 @@ TEST_P(CreatureTests_CrawlingMuscles_TwoDirections_DifferentFrontAngles, moveCra
 
     auto genome = createGenomeForCrawlingCreature(muscleMode, direction, frontAngle);
     auto data = Description().addCreature(
-        {ObjectDescription().id(0).pos(refPoint).cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        {ObjectDescription().id(0).pos(refPoint).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDescription(),
         genome);
 

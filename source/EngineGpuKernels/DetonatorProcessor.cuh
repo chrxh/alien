@@ -35,7 +35,7 @@ __device__ __inline__ void DetonatorProcessor::process(SimulationData& data, Sim
 
 __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data, SimulationStatistics& statistics, Object* object)
 {
-    auto& detonator = object->cellTypeData.detonator;
+    auto& detonator = object->typeData.cell.cellTypeData.detonator;
     if (SignalProcessor::isManuallyTriggered(data, object) && detonator.state == DetonatorState_Ready) {
         detonator.state = DetonatorState_Activated;
     }
@@ -44,8 +44,8 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
             --detonator.countdown;
         }
         if (detonator.countdown == -1) {
-            object->event = CellEvent_Detonation;
-            object->eventCounter = 10;
+            object->typeData.cell.event = CellEvent_Detonation;
+            object->typeData.cell.eventCounter = 10;
             detonator.countdown = 0;
             statistics.incNumDetonations(object->color);
             data.objectMap.executeForEach(object->pos, cudaSimulationParameters.detonatorRadius.value[object->color], object->detached, [&](Object* const& otherCell) {
@@ -61,10 +61,10 @@ __device__ __inline__ void DetonatorProcessor::processCell(SimulationData& data,
                     auto force = delta / lengthSquared * cudaSimulationParameters.detonatorRadius.value[object->color] * 2;
                     otherCell->vel += force;
                 }
-                if (otherCell->cellType == CellType_Detonator && otherCell->cellTypeData.detonator.state != DetonatorState_Exploded) {
+                if (otherCell->typeData.cell.cellType == CellType_Detonator && otherCell->typeData.cell.cellTypeData.detonator.state != DetonatorState_Exploded) {
                     if (data.primaryNumberGen.random() < cudaSimulationParameters.detonatorChainExplosionProbability.value[object->color]) {
-                        otherCell->cellTypeData.detonator.state = DetonatorState_Activated;
-                        otherCell->cellTypeData.detonator.countdown = 1;
+                        otherCell->typeData.cell.cellTypeData.detonator.state = DetonatorState_Activated;
+                        otherCell->typeData.cell.cellTypeData.detonator.countdown = 1;
                     }
                 }
             });

@@ -44,8 +44,8 @@ TEST_F(DataTransferTests, twoCreaturesSharingOneGenome)
          GeneDescription().separation(false).nodes({NodeDescription(), NodeDescription(), NodeDescription()})});
 
     Description data;
-    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).cellType(BaseDescription()), ObjectDescription().id(2).pos({11.0f, 10.0f}).cellType(BaseDescription())}, CreatureDescription(), genome);
-    data.addCreature({ObjectDescription().id(3).pos({20.0f, 20.0f}).cellType(BaseDescription()), ObjectDescription().id(4).pos({21.0f, 20.0f}).cellType(BaseDescription())}, CreatureDescription(), genome);
+    data.addCreature({ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
+    data.addCreature({ObjectDescription().id(3).pos({20.0f, 20.0f}).type(CellDescription().cellType(BaseDescription())), ObjectDescription().id(4).pos({21.0f, 20.0f}).type(CellDescription().cellType(BaseDescription()))}, CreatureDescription(), genome);
     data.addConnection(1, 2);
     data.addConnection(3, 4);
 

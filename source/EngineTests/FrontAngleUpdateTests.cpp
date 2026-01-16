@@ -27,9 +27,9 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
 
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
             },
         CreatureDescription()
             .id(1)
@@ -48,9 +48,9 @@ TEST_F(FrontAngleUpdateTests, noUpdate_noFrontAngleRefCell)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_FALSE(actualData.getObjectRef(1)._frontAngle.has_value());
-    EXPECT_FALSE(actualData.getObjectRef(2)._frontAngle.has_value());
-    EXPECT_FALSE(actualData.getObjectRef(3)._frontAngle.has_value());
+    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.has_value());
+    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.has_value());
+    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.has_value());
 }
 
 TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
@@ -59,8 +59,8 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
 
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
             },
         CreatureDescription()
             .id(1)
@@ -79,8 +79,8 @@ TEST_F(FrontAngleUpdateTests, noUpdate_equalFrontAngleId)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_FALSE(actualData.getObjectRef(1)._frontAngle.has_value());
-    EXPECT_FALSE(actualData.getObjectRef(2)._frontAngle.has_value());
+    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.has_value());
+    EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.has_value());
 }
 
 
@@ -91,15 +91,15 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
 
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(4).pos({9.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(5).pos({8.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(6).pos({9.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(7).pos({12.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(8).pos({11.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(9).pos({11.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(4).pos({9.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(5).pos({8.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(6).pos({9.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(7).pos({12.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(8).pos({11.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(9).pos({11.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
             },
         CreatureDescription()
             .id(1)
@@ -125,16 +125,16 @@ TEST_F(FrontAngleUpdateTests, higherFrontAngleIdLeadsToUpdate)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(9, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(4)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(4)._type)._frontAngle.value()));
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(5)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(6)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(7)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(8)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(9)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(5)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(6)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(7)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(8)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(9)._type)._frontAngle.value()));
 }
 
 TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
@@ -144,9 +144,9 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
 
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).frontAngle(7.0f).headCell(true),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).frontAngle(42.0f),
-                ObjectDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId).frontAngle(23.0f),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).frontAngle(7.0f).headCell(true)),
+                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).frontAngle(42.0f)),
+                ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).frontAngle(23.0f)),
             },
         CreatureDescription()
             .id(1)
@@ -165,9 +165,9 @@ TEST_F(FrontAngleUpdateTests, frontAngleUpdate)
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
 }
 
 TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
@@ -179,8 +179,8 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
 
     data.addCreature(
             {
-                ObjectDescription().id(1).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
-                ObjectDescription().id(2).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+                ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDescription().id(2).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
             },
         CreatureDescription()
             .id(1)
@@ -189,7 +189,7 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
 
     data.addCreature(
             {
-            ObjectDescription().id(3).pos({10.0f, 12.0f}).frontAngleId(InitialFrontAngleId),
+            ObjectDescription().id(3).pos({10.0f, 12.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
         },
         CreatureDescription().id(2),
         GenomeDescription().frontAngle(FrontAngle));
@@ -209,14 +209,14 @@ TEST_F(FrontAngleUpdateTests, updateRestrictedToSameCreature)
         auto creature = actualData.getCreatureRef(1);
         ASSERT_EQ(2, actualData.getObjectsForCreature(creature._id).size());
 
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
     }
     {
         auto creature = actualData.getCreatureRef(2);
         ASSERT_EQ(1, actualData.getObjectsForCreature(creature._id).size());
 
-        EXPECT_FALSE(actualData.getObjectRef(3)._frontAngle.has_value());
+        EXPECT_FALSE(std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.has_value());
     }
 }
 
@@ -246,10 +246,10 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     }();
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
-                ObjectDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
-                ObjectDescription().id(3).pos({9.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(4).pos({9.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+                ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode))),
+                ObjectDescription().id(3).pos({9.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(4).pos({9.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
             },
         CreatureDescription()
             .id(1)
@@ -271,15 +271,15 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_tw
     ASSERT_EQ(4, actualData.getObjectsForCreature(creature._id).size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(4)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(4)._type)._frontAngle.value()));
     } else {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(3)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(4)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(4)._type)._frontAngle.value()));
     }
 }
 
@@ -299,9 +299,9 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     }();
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
-                ObjectDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId),
-                ObjectDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
+                ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode))),
+                ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
+                ObjectDescription().id(3).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
             },
         CreatureDescription()
             .id(1)
@@ -322,13 +322,13 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_on
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
     if (muscleModeType == MuscleMode_AutoBending || muscleModeType == MuscleMode_ManualBending) {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
     } else {
-        EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, actualData.getObjectRef(1)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(2)._frontAngle.value()));
-        EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(3)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle + 90.0f, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+        EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
     }
 }
 
@@ -348,9 +348,9 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     }();
     auto data = Description().addCreature(
             {
-                ObjectDescription().id(1).pos({11.0f, 10.0f}).frontAngleId(InitialFrontAngleId).headCell(true),
-                ObjectDescription().id(2).pos({10.0f, 10.0f}).frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode)),
-                ObjectDescription().id(3).pos({10.0f, 11.0f}).frontAngleId(InitialFrontAngleId),
+                ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).headCell(true)),
+                ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId).cellType(MuscleDescription().mode(muscleMode))),
+                ObjectDescription().id(3).pos({10.0f, 11.0f}).type(CellDescription().frontAngleId(InitialFrontAngleId)),
             },
         CreatureDescription()
             .id(1)
@@ -370,7 +370,7 @@ TEST_P(FrontAngleUpdateTests_BendingMuscles, useInitialAngleForBendingMuscles_in
     auto creature = actualData.getCreatureRef(1);
     ASSERT_EQ(3, actualData.getObjectsForCreature(creature._id).size());
 
-    EXPECT_TRUE(approxCompareAngles(FrontAngle, actualData.getObjectRef(1)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, actualData.getObjectRef(2)._frontAngle.value()));
-    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, actualData.getObjectRef(3)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle, std::get<CellDescription>(actualData.getObjectRef(1)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 180.0f, std::get<CellDescription>(actualData.getObjectRef(2)._type)._frontAngle.value()));
+    EXPECT_TRUE(approxCompareAngles(FrontAngle - 90.0f, std::get<CellDescription>(actualData.getObjectRef(3)._type)._frontAngle.value()));
 }

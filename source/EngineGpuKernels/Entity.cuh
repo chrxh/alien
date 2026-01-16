@@ -446,21 +446,12 @@ struct Creature
     uint64_t creatureIndex;  // May be invalid
 };
 
-struct Object
+struct Cell
 {
     // General
-    uint64_t id;
-    uint8_t numConnections;
-    ObjectConnection connections[MAX_CELL_BONDS];
-    float2 pos;
-    float2 vel;
     float usableEnergy;
     float rawEnergy;
-    float stiffness;
-    uint8_t color;
     float frontAngle;  // May be invalid
-    bool fixed;
-    bool sticky;
     uint32_t age;
     CellState cellState;
 
@@ -491,6 +482,51 @@ struct Object
     uint8_t eventCounter;
     float2 eventPos;
 
+    // Cluster data
+    uint32_t clusterIndex;
+    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
+    float2 clusterPos;
+    float2 clusterVel;
+    float clusterAngularMomentum;
+    float clusterAngularMass;
+    uint32_t numCellsInCluster;
+
+    __device__ __inline__ bool isSameCreature(Cell* otherCell)
+    {
+        return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
+            || (otherCell->creature == nullptr && this->creature == nullptr);
+    }
+
+    __device__ __inline__ float getEnergy() const
+    {
+        auto result = usableEnergy + rawEnergy;
+        if (cellType == CellType_Depot) {
+            result += cellTypeData.depot.storedUsableEnergy;
+        }
+        return result;
+    }
+};
+
+union ObjectTypeData
+{
+    Cell cell;
+};
+
+struct Object
+{
+    // General
+    uint64_t id;
+    uint8_t numConnections;
+    ObjectConnection connections[MAX_CELL_BONDS];
+    float2 pos;
+    float2 vel;
+    float stiffness;
+    uint8_t color;
+    bool fixed;
+    bool sticky;
+    ObjectType type;
+    ObjectTypeData typeData;
+
     // Editing data
     uint8_t selected;  // 0 = no, 1 = selected, 2 = cluster selected
     uint8_t detached;  // 0 = no, 1 = yes
@@ -504,21 +540,6 @@ struct Object
     int32_t scheduledOperationIndex;  // -1 = no operation scheduled
     float2 shared1;                   // Variable with different meanings depending on context
     float2 shared2;
-
-    // Cluster data
-    uint32_t clusterIndex;
-    int32_t clusterBoundaries;  // 1 = cluster occupies left boundary, 2 = cluster occupies upper boundary
-    float2 clusterPos;
-    float2 clusterVel;
-    float clusterAngularMomentum;
-    float clusterAngularMass;
-    uint32_t numCellsInCluster;
-
-    __device__ __inline__ bool isSameCreature(Object* otherCell)
-    {
-        return (otherCell->creature != nullptr && this->creature != nullptr && otherCell->creature->id == this->creature->id)
-            || (otherCell->creature == nullptr && this->creature == nullptr);
-    }
 
     __device__ __inline__ float& getRefDistance(Object* connectedCell)
     {
@@ -585,16 +606,6 @@ struct Object
         }
         return getAngelSpan(connectionIndex1, connectionIndex2);
     }
-
-    __device__ __inline__ float getEnergy() const
-    {
-        auto result = usableEnergy + rawEnergy;
-        if (cellType == CellType_Depot) {
-            result += cellTypeData.depot.storedUsableEnergy;
-        }
-        return result;
-    }
-
 
     __device__ __inline__ void getLock()
     {

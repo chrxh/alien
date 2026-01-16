@@ -468,53 +468,61 @@ struct SignalDescription
     MEMBER(SignalDescription, int, numTimesSent, 0);
 };
 
+struct CellDescription
+{
+    auto operator<=>(CellDescription const&) const = default;
+
+    MEMBER(CellDescription, float, usableEnergy, 100.0f);
+    MEMBER(CellDescription, float, rawEnergy, 0.0f);
+    MEMBER(
+        CellDescription,
+        std::optional<float>,
+        frontAngle,
+        std::nullopt);  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
+    MEMBER(CellDescription, int, age, 0);
+    MEMBER(CellDescription, CellState, cellState, CellState_Ready);
+
+    // Creature/genome data
+    MEMBER(CellDescription, std::optional<uint64_t>, creatureId, std::nullopt);
+    MEMBER(CellDescription, int, nodeIndex, 0);
+    MEMBER(CellDescription, int, parentNodeIndex, 0);
+    MEMBER(CellDescription, int, geneIndex, 0);
+
+    // Cell type-specific data
+    MEMBER(CellDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
+    MEMBER(CellDescription, CellTypeDescription, cellType, BaseDescription());
+    MEMBER(CellDescription, SignalState, signalState, SignalState_Inactive);
+    MEMBER(CellDescription, SignalDescription, signal, SignalDescription());  // For signalState == SignalState_Active
+    MEMBER(CellDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
+    MEMBER(CellDescription, int, activationTime, 0);
+    MEMBER(CellDescription, CellTriggered, cellTriggered, CellTriggered_No);
+
+    // Process data
+    MEMBER(CellDescription, int, frontAngleId, 0);
+    MEMBER(CellDescription, bool, headCell, false);
+
+    CellType getCellType() const;
+    CellDescription& signalAndState(std::vector<float> const& value);
+    CellDescription& signalRestriction(float baseAngle, float openingAngle);
+};
+
+using ObjectTypeDescription = std::variant<CellDescription>;
+
 struct ObjectDescription
 {
     ObjectDescription(bool createIds = true);
     auto operator<=>(ObjectDescription const&) const = default;
 
-    // General
     uint64_t _id = 0;
     ObjectDescription id(uint64_t id);
     MEMBER(ObjectDescription, std::vector<ConnectionDescription>, connections, {});
     MEMBER(ObjectDescription, RealVector2D, pos, RealVector2D());
     MEMBER(ObjectDescription, RealVector2D, vel, RealVector2D());
-    MEMBER(ObjectDescription, float, usableEnergy, 100.0f);
-    MEMBER(ObjectDescription, float, rawEnergy, 0.0f);
     MEMBER(ObjectDescription, float, stiffness, 1.0f);
     MEMBER(ObjectDescription, int, color, 0);
-    MEMBER(
-        ObjectDescription,
-        std::optional<float>,
-        frontAngle,
-        std::nullopt);  // Angle between [cell, cell->connection[0]] and front direction in reference configuration
     MEMBER(ObjectDescription, bool, fixed, false);
     MEMBER(ObjectDescription, bool, sticky, false);
-    MEMBER(ObjectDescription, int, age, 0);
-    MEMBER(ObjectDescription, CellState, cellState, CellState_Ready);
-
-    // Creature/genome data
-    MEMBER(ObjectDescription, std::optional<uint64_t>, creatureId, std::nullopt);
-    MEMBER(ObjectDescription, int, nodeIndex, 0);
-    MEMBER(ObjectDescription, int, parentNodeIndex, 0);
-    MEMBER(ObjectDescription, int, geneIndex, 0);
-
-    // Cell type-specific data
-    MEMBER(ObjectDescription, std::optional<NeuralNetworkDescription>, neuralNetwork, std::nullopt);
-    MEMBER(ObjectDescription, CellTypeDescription, cellType, BaseDescription());
-    MEMBER(ObjectDescription, SignalState, signalState, SignalState_Inactive);
-    MEMBER(ObjectDescription, SignalDescription, signal, SignalDescription());    // For signalState == SignalState_Active
-    MEMBER(ObjectDescription, SignalRestrictionDescription, signalRestriction, SignalRestrictionDescription());
-    MEMBER(ObjectDescription, int, activationTime, 0);
-    MEMBER(ObjectDescription, CellTriggered, cellTriggered, CellTriggered_No);
-
-    // Process data
-    MEMBER(ObjectDescription, int, frontAngleId, 0);
-    MEMBER(ObjectDescription, bool, headCell, false);
-
-    CellType getCellType() const;
-    ObjectDescription& signalAndState(std::vector<float> const& value);
-    ObjectDescription& signalRestriction(float baseAngle, float openingAngle);
+    MEMBER(ObjectDescription, ObjectTypeDescription, type, CellDescription());
 
     bool isConnectedTo(uint64_t id) const;
     float getAngleSpan(uint64_t connectedCellId1, uint64_t connectedCellId2) const;

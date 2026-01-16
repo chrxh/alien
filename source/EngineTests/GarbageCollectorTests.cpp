@@ -74,8 +74,8 @@ TEST_P(GarbageCollectorTests_AllCleanupActions, cleanupAfterTimestep_memoryCells
 
     auto data = Description().addCreature(
         {
-            ObjectDescription().pos({100.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription()})),
-            ObjectDescription().pos({101.0f, 100.0f}).cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()})),
+            ObjectDescription().pos({100.0f, 100.0f}).type(CellDescription().cellType(MemoryDescription().signalEntries({SignalEntryDescription()}))),
+            ObjectDescription().pos({101.0f, 100.0f}).type(CellDescription().cellType(MemoryDescription().signalEntries({SignalEntryDescription(), SignalEntryDescription()}))),
         },
         CreatureDescription(),
         genome);

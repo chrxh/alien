@@ -159,7 +159,7 @@ __inline__ __device__ void ObjectConnectionProcessor::processDeleteCellOperation
             Object* empty = nullptr;
             auto origCell = alienAtomicExch(&data.entities.objects.at(objectIndex), empty);
             if (origCell) {
-                EnergyProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->getEnergy());
+                EnergyProcessor::createEnergyParticle(data, origCell->pos, origCell->vel, origCell->color, origCell->typeData.cell.getEnergy());
 
                 for (int i = 0; i < origCell->numConnections; ++i) {
                     StructuralOperation operation;
@@ -634,7 +634,7 @@ __inline__ __device__ bool ObjectConnectionProcessor::existsOwnIntersectingCellI
         if (nearCell == otherCell) {
             return;
         }
-        if (!object->isSameCreature(nearCell)) {
+        if (!object->typeData.cell.isSameCreature(&nearCell->typeData.cell)) {
             return;
         }
         for (int i = 0; i < nearCell->numConnections; ++i) {

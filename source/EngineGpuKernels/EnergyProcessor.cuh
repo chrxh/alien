@@ -144,7 +144,7 @@ __inline__ __device__ void EnergyProcessor::collision(SimulationData& data)
                         if (particle->energy < 0.01f /* && energyToTransfer > 0.1f*/) {
                             energyToTransfer = particle->energy;
                         }
-                        object->rawEnergy += energyToTransfer;
+                        object->typeData.cell.rawEnergy += energyToTransfer;
                         particle->energy -= energyToTransfer;
                         bool killParticle = particle->energy < NEAR_ZERO;
 
@@ -220,12 +220,12 @@ __inline__ __device__ void EnergyProcessor::transformation(SimulationData& data)
 
 __inline__ __device__ void EnergyProcessor::radiate(SimulationData& data, Object* cell, float energy)
 {
-    auto const cellEnergy = atomicAdd(&cell->usableEnergy, 0);
+    auto const cellEnergy = atomicAdd(&cell->typeData.cell.usableEnergy, 0);
 
     auto const radiationEnergy = min(cellEnergy, energy);
-    auto origEnergy = atomicAdd(&cell->usableEnergy, -radiationEnergy);
+    auto origEnergy = atomicAdd(&cell->typeData.cell.usableEnergy, -radiationEnergy);
     if (origEnergy < 1.0f) {
-        atomicAdd(&cell->usableEnergy, radiationEnergy);  //revert
+        atomicAdd(&cell->typeData.cell.usableEnergy, radiationEnergy);  //revert
         return;
     }
 

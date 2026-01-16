@@ -27,12 +27,8 @@ protected:
     Description createDepotWithIncomingPositiveSignal(float usableEnergy, float storedUsableEnergy = 0.0f, float storageLimit = 200.0f)
     {
         auto data = Description().addCreature({
-            ObjectDescription()
-                .id(1)
-                .pos({100.0f, 100.0f})
-                .cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit))
-                .usableEnergy(usableEnergy),
-            ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({1, 0, 0, 0, 0, 0, 0, 0}),
+            ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy).storageLimit(storageLimit)).usableEnergy(usableEnergy)),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({1, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
@@ -42,8 +38,8 @@ protected:
     {
         // Using alternation with interval 0 produces -1.0f on first pulse since numPulses (0) is not < alternationInterval (0)
         auto data = Description().addCreature({
-            ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy),
-            ObjectDescription().id(2).pos({101.0f, 100.0f}).signalAndState({-1, 0, 0, 0, 0, 0, 0, 0}),
+            ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(storedUsableEnergy)).usableEnergy(usableEnergy)),
+            ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalAndState({-1, 0, 0, 0, 0, 0, 0, 0})),
         }, CreatureDescription().id(1));
         data.addConnection(1, 2);
         return data;
@@ -57,7 +53,7 @@ TEST_F(DepotTests, noSignal_noChange)
 
     // Create depot without a cell carrying a signel => no signal will be sent
     auto data = Description().objects({
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy),
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().cellType(DepotDescription().storedUsableEnergy(50.0f)).usableEnergy(initialUsableEnergy)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -69,8 +65,8 @@ TEST_F(DepotTests, noSignal_noChange)
     auto actualDepot = actualData.getObjectRef(1);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(origDepot._usableEnergy, actualDepot._usableEnergy));
-    EXPECT_TRUE(approxCompare(50.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(std::get<CellDescription>(origDepot._type)._usableEnergy, std::get<CellDescription>(actualDepot._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(50.0f, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
 }
 
 TEST_F(DepotTests, positiveSignal_storeEnergy)
@@ -88,8 +84,8 @@ TEST_F(DepotTests, positiveSignal_storeEnergy)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy should have been transferred to storage
-    EXPECT_TRUE(actualDepot._usableEnergy < initialUsableEnergy - NEAR_ZERO);
-    EXPECT_TRUE(std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy > NEAR_ZERO);
+    EXPECT_TRUE(std::get<CellDescription>(actualDepot._type)._usableEnergy < initialUsableEnergy - NEAR_ZERO);
+    EXPECT_TRUE(std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy > NEAR_ZERO);
 }
 
 TEST_F(DepotTests, negativeSignal_releaseEnergy)
@@ -107,8 +103,8 @@ TEST_F(DepotTests, negativeSignal_releaseEnergy)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy should have been released from storage
-    EXPECT_TRUE(actualDepot._usableEnergy > normalCellEnergy + NEAR_ZERO);
-    EXPECT_TRUE(std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy < initialStoredEnergy - NEAR_ZERO);
+    EXPECT_TRUE(std::get<CellDescription>(actualDepot._type)._usableEnergy > normalCellEnergy + NEAR_ZERO);
+    EXPECT_TRUE(std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy < initialStoredEnergy - NEAR_ZERO);
 }
 
 TEST_F(DepotTests, positiveSignal_usableEnergyBelowNormal_noStore)
@@ -126,7 +122,7 @@ TEST_F(DepotTests, positiveSignal_usableEnergyBelowNormal_noStore)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // No energy should have been stored since usableEnergy <= normalCellEnergy
-    EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
 }
 
 TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
@@ -143,8 +139,8 @@ TEST_F(DepotTests, negativeSignal_noStoredEnergy_noRelease)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // No energy should have been released since storedUsableEnergy was 0
-    EXPECT_TRUE(approxCompare(normalCellEnergy, actualDepot._usableEnergy));
-    EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(normalCellEnergy, std::get<CellDescription>(actualDepot._type)._usableEnergy));
+    EXPECT_TRUE(approxCompare(0.0f, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
 }
 
 TEST_F(DepotTests, positiveSignal_energyTransferCapped)
@@ -166,10 +162,10 @@ TEST_F(DepotTests, positiveSignal_energyTransferCapped)
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
-    EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
-        initialUsableEnergy + origOtherCell._usableEnergy - SimulationParameters::depotEnergyTransferUnit,
-        actualDepot._usableEnergy + actualOtherCell._usableEnergy));
+        initialUsableEnergy + std::get<CellDescription>(origOtherCell._type)._usableEnergy - SimulationParameters::depotEnergyTransferUnit,
+        std::get<CellDescription>(actualDepot._type)._usableEnergy + std::get<CellDescription>(actualOtherCell._type)._usableEnergy));
 }
 
 TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
@@ -193,7 +189,7 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit1)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     // Energy should be capped at storageLimit
-    EXPECT_TRUE(approxCompare(storageLimit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(storageLimit, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
 }
 
 TEST_F(DepotTests, positiveSignal_reachedStorageLimit2)
@@ -217,7 +213,7 @@ TEST_F(DepotTests, positiveSignal_reachedStorageLimit2)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
 
     // Energy should be capped at SimulationParameters::depotstorageLimit
-    EXPECT_TRUE(approxCompare(SimulationParameters::depotStorageLimit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+    EXPECT_TRUE(approxCompare(SimulationParameters::depotStorageLimit, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
 }
 
 TEST_F(DepotTests, negativeSignal_energyTransferCapped)
@@ -240,8 +236,8 @@ TEST_F(DepotTests, negativeSignal_energyTransferCapped)
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
     // Energy transfer should be capped at depotEnergyTransferUnit
     EXPECT_TRUE(approxCompare(
-        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(actualDepot._cellType)._storedUsableEnergy));
+        initialStoredEnergy - SimulationParameters::depotEnergyTransferUnit, std::get<DepotDescription>(std::get<CellDescription>(actualDepot._type)._cellType)._storedUsableEnergy));
     EXPECT_TRUE(approxCompare(
-        origDepotEnergy + origOtherCell._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
-        actualDepot._usableEnergy + actualOtherCell._usableEnergy));
+        origDepotEnergy + std::get<CellDescription>(origOtherCell._type)._usableEnergy + SimulationParameters::depotEnergyTransferUnit,
+        std::get<CellDescription>(actualDepot._type)._usableEnergy + std::get<CellDescription>(actualOtherCell._type)._usableEnergy));
 }

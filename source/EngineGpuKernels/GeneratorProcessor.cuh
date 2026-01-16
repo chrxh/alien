@@ -27,16 +27,16 @@ __inline__ __device__ void GeneratorProcessor::process(SimulationData& data, Sim
         auto const& operation = operations.at(i);
         auto const& object = operation.object;
 
-        auto& generator = object->cellTypeData.generator;
+        auto& generator = object->typeData.cell.cellTypeData.generator;
         if (SignalProcessor::isAutoTriggered(data, object, max(1, generator.autoTriggerInterval))) {
-            if (object->signalState != SignalState_Active) {
+            if (object->typeData.cell.signalState != SignalState_Active) {
                 SignalProcessor::createEmptySignal(object);
             }
             statistics.incNumGeneratorPulses(object->color);
             if (generator.pulseType == GeneratorPulseType_Positive) {
-                object->signal.channels[Channels::CellTypeActivation] += 1.0f;
+                object->typeData.cell.signal.channels[Channels::CellTypeActivation] += 1.0f;
             } else {
-                object->signal.channels[Channels::CellTypeActivation] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
+                object->typeData.cell.signal.channels[Channels::CellTypeActivation] += generator.numPulses < generator.alternationInterval ? 1.0f : -1.0f;
             }
             ++generator.numPulses;
             if (generator.alternationInterval > 0 && generator.numPulses == generator.alternationInterval * 2) {

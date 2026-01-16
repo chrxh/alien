@@ -52,7 +52,7 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     // Get first and second constructed cell on start gene
     std::set<uint64_t> cellIdsOnStartGene;
     for (auto const& object : phenotype._objects) {
-        if (object._geneIndex != startGeneIndex) {
+        if (std::get<CellDescription>(object._type)._geneIndex != startGeneIndex) {
             continue;
         }
         cellIdsOnStartGene.insert(object._id);
@@ -64,10 +64,10 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
         secondCell = phenotype.getObjectRef(getSecondElement(cellIdsOnStartGene));
     } else {
         // Only 1 cell with start gene? => try cells of referenced gene
-        if (firstCell.getCellType() == CellType_Constructor) {
-            auto refGeneIndex = std::get<ConstructorDescription>(firstCell._cellType)._geneIndex;
+        if (std::get<CellDescription>(firstCell._type).getCellType() == CellType_Constructor) {
+            auto refGeneIndex = std::get<ConstructorDescription>(std::get<CellDescription>(firstCell._type)._cellType)._geneIndex;
             for (auto const& object : phenotype._objects) {
-                if (object._geneIndex != refGeneIndex || object._id == firstCell._id) {
+                if (std::get<CellDescription>(object._type)._geneIndex != refGeneIndex || object._id == firstCell._id) {
                     continue;
                 }
                 if (!secondCell.has_value() || object._id > secondCell->_id) {
@@ -85,17 +85,17 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
     }
 
     // Create preview cells
-    auto getNode = [&](ObjectDescription const& object) -> NodeDescription const& { return genome._genes.at(object._geneIndex)._nodes.at(object._nodeIndex); };
+    auto getNode = [&](ObjectDescription const& object) -> NodeDescription const& { return genome._genes.at(std::get<CellDescription>(object._type)._geneIndex)._nodes.at(std::get<CellDescription>(object._type)._nodeIndex); };
     for (auto const& object : phenotype._objects) {
         auto const& node = getNode(object);
-        auto const& color = object._cellState == CellState_Ready ? node._color : -1;
+        auto const& color = std::get<CellDescription>(object._type)._cellState == CellState_Ready ? node._color : -1;
         auto previewCell = CellPreviewDescription()
                                .id(object._id)
                                .pos(object._pos)
                                .color(color)
-                               .geneIndex(object._geneIndex)
-                               .nodeIndex(object._nodeIndex)
-                               .signalState(object._signalState);
+                               .geneIndex(std::get<CellDescription>(object._type)._geneIndex)
+                               .nodeIndex(std::get<CellDescription>(object._type)._nodeIndex)
+                               .signalState(std::get<CellDescription>(object._type)._signalState);
 
         // Render as active if mode is Active or Conditional
         bool hasRestriction = (node._signalRestriction._mode == SignalRestrictionMode_Active || 
@@ -109,10 +109,10 @@ ConversionResult PreviewDescriptionConverterService::convertToPreviewDescription
             auto signalAngleRestrictionEnd = Math::getNormalizedAngle(baseAngle + node._signalRestriction._openingAngle / 2, 0);
             previewCell._signalRestriction = SignalRestrictionPreviewDescription().startAngle(signalAngleRestrictionStart).endAngle(signalAngleRestrictionEnd);
         }
-        if (object._signalState == SignalState_Active) {
-            previewCell._signal = SignalPreviewDescription().channels(object._signal._channels);
+        if (std::get<CellDescription>(object._type)._signalState == SignalState_Active) {
+            previewCell._signal = SignalPreviewDescription().channels(std::get<CellDescription>(object._type)._signal._channels);
         }
-        if (object.getCellType() == CellType_Constructor) {
+        if (std::get<CellDescription>(object._type).getCellType() == CellType_Constructor) {
             if (!genome._genes.empty()) {
                 auto nodeConstructor = std::get<ConstructorGenomeDescription>(node._cellType);
                 previewCell._constructorGeneIndex = nodeConstructor._geneIndex;

@@ -102,13 +102,7 @@ void ImageToPatternDialog::show()
                     int matchedCellColor;
                     float matchedCellIntensity;
                     getMatchedCellColor(ImColor(r, g, b, 255), matchedCellColor, matchedCellIntensity);
-                    dataDesc._objects.emplace_back(ObjectDescription()
-                                                     .id(NumberGenerator::get().createId())
-                                                     .cellType(StructureObjectDescription())
-                                                     .usableEnergy(matchedCellIntensity * 200)
-                                                     .pos({toFloat(x) + xOffset, toFloat(y)})
-                                                     .color(matchedCellColor)
-                                                     .fixed(false));
+                    dataDesc._objects.emplace_back(ObjectDescription().id(NumberGenerator::get().createId()).pos({toFloat(x) + xOffset, toFloat(y)}).color(matchedCellColor).fixed(false).type(CellDescription().cellType(StructureObjectDescription()).usableEnergy(matchedCellIntensity * 200)));
                 }
             }
         }

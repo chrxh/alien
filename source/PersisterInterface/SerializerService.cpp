@@ -1447,29 +1447,29 @@ namespace cereal
         ObjectDescription defaultObject;
         auto auxiliaries = getLoadSaveMap(task, ar);
         loadSave(task, auxiliaries, Id_Object_Id, data._id, defaultObject._id);
-        loadSave(task, auxiliaries, Id_Object_Energy, data._usableEnergy, defaultObject._usableEnergy);
-        loadSave(task, auxiliaries, Id_Object_RawEnergy, data._rawEnergy, defaultObject._rawEnergy);
+        loadSave(task, auxiliaries, Id_Object_Energy, std::get<CellDescription>(data._type)._usableEnergy, std::get<CellDescription>(defaultObject._type)._usableEnergy);
+        loadSave(task, auxiliaries, Id_Object_RawEnergy, std::get<CellDescription>(data._type)._rawEnergy, std::get<CellDescription>(defaultObject._type)._rawEnergy);
         loadSave(task, auxiliaries, Id_Object_Pos, data._pos, defaultObject._pos);
         loadSave(task, auxiliaries, Id_Object_Vel, data._vel, defaultObject._vel);
         loadSave(task, auxiliaries, Id_Object_Stiffness, data._stiffness, defaultObject._stiffness);
         loadSave(task, auxiliaries, Id_Object_Color, data._color, defaultObject._color);
-        loadSave(task, auxiliaries, Id_Object_AngleToFront, data._frontAngle, defaultObject._frontAngle);
+        loadSave(task, auxiliaries, Id_Object_AngleToFront, std::get<CellDescription>(data._type)._frontAngle, std::get<CellDescription>(defaultObject._type)._frontAngle);
         loadSave(task, auxiliaries, Id_Object_Fixed, data._fixed, defaultObject._fixed);
         loadSave(task, auxiliaries, Id_Object_Sticky, data._sticky, defaultObject._sticky);
-        loadSave(task, auxiliaries, Id_Object_Age, data._age, defaultObject._age);
-        loadSave(task, auxiliaries, Id_Object_CellState, data._cellState, defaultObject._cellState);
-        loadSave(task, auxiliaries, Id_Object_ActivationTime, data._activationTime, defaultObject._activationTime);
-        loadSave(task, auxiliaries, Id_Object_CellTriggered, data._cellTriggered, defaultObject._cellTriggered);
-        loadSave(task, auxiliaries, Id_Object_NodeIndex, data._nodeIndex, defaultObject._nodeIndex);
-        loadSave(task, auxiliaries, Id_Object_ParentNodeIndex, data._parentNodeIndex, defaultObject._parentNodeIndex);
-        loadSave(task, auxiliaries, Id_Object_GeneIndex, data._geneIndex, defaultObject._geneIndex);
-        loadSave(task, auxiliaries, Id_Object_SignalState, data._signalState, defaultObject._signalState);
-        loadSave(task, auxiliaries, Id_Object_FrontAngleId, data._frontAngleId, defaultObject._frontAngleId);
-        loadSave(task, auxiliaries, Id_Object_IsFrontAngleRefCell, data._headCell, defaultObject._headCell);
-        loadSave(task, auxiliaries, Id_Object_CreatureId, data._creatureId, defaultObject._creatureId);
+        loadSave(task, auxiliaries, Id_Object_Age, std::get<CellDescription>(data._type)._age, std::get<CellDescription>(defaultObject._type)._age);
+        loadSave(task, auxiliaries, Id_Object_CellState, std::get<CellDescription>(data._type)._cellState, std::get<CellDescription>(defaultObject._type)._cellState);
+        loadSave(task, auxiliaries, Id_Object_ActivationTime, std::get<CellDescription>(data._type)._activationTime, std::get<CellDescription>(defaultObject._type)._activationTime);
+        loadSave(task, auxiliaries, Id_Object_CellTriggered, std::get<CellDescription>(data._type)._cellTriggered, std::get<CellDescription>(defaultObject._type)._cellTriggered);
+        loadSave(task, auxiliaries, Id_Object_NodeIndex, std::get<CellDescription>(data._type)._nodeIndex, std::get<CellDescription>(defaultObject._type)._nodeIndex);
+        loadSave(task, auxiliaries, Id_Object_ParentNodeIndex, std::get<CellDescription>(data._type)._parentNodeIndex, std::get<CellDescription>(defaultObject._type)._parentNodeIndex);
+        loadSave(task, auxiliaries, Id_Object_GeneIndex, std::get<CellDescription>(data._type)._geneIndex, std::get<CellDescription>(defaultObject._type)._geneIndex);
+        loadSave(task, auxiliaries, Id_Object_SignalState, std::get<CellDescription>(data._type)._signalState, std::get<CellDescription>(defaultObject._type)._signalState);
+        loadSave(task, auxiliaries, Id_Object_FrontAngleId, std::get<CellDescription>(data._type)._frontAngleId, std::get<CellDescription>(defaultObject._type)._frontAngleId);
+        loadSave(task, auxiliaries, Id_Object_IsFrontAngleRefCell, std::get<CellDescription>(data._type)._headCell, std::get<CellDescription>(defaultObject._type)._headCell);
+        loadSave(task, auxiliaries, Id_Object_CreatureId, std::get<CellDescription>(data._type)._creatureId, std::get<CellDescription>(defaultObject._type)._creatureId);
         processLoadSaveMap(task, ar, auxiliaries);
 
-        ar(data._connections, data._cellType, data._signal, data._signalRestriction, data._neuralNetwork);
+        ar(data._connections, std::get<CellDescription>(data._type)._cellType, std::get<CellDescription>(data._type)._signal, std::get<CellDescription>(data._type)._signalRestriction, std::get<CellDescription>(data._type)._neuralNetwork);
     }
     SPLIT_SERIALIZATION(ObjectDescription)
 

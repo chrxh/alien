@@ -151,9 +151,9 @@ Description DescriptionConverterService::convertTOtoDescription(TO const& to) co
     for (int i = 0; i < *to.numObjects; ++i) {
         auto object = createObjectDescription(to, i);
 
-        if (to.objects[i].belongToCreature) {
-            auto creatureTOIndex = to.objects[i].creatureIndex;
-            object._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
+        if (to.objects[i].typeData.cell.belongToCreature) {
+            auto creatureTOIndex = to.objects[i].typeData.cell.creatureIndex;
+            std::get<CellDescription>(object._type)._creatureId = creatureIdByTOIndex.at(creatureTOIndex);
         }
         result._objects.emplace_back(object);
     }
@@ -188,7 +188,7 @@ TO DescriptionConverterService::convertDescriptionToTO(Description const& descri
 
     std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
     for (auto const& object : description._objects) {
-        convertCellToTO(objectTOs, heap, objectIndexTOById, object, object._creatureId, creatureTOIndexById);
+        convertObjectToTO(objectTOs, heap, objectIndexTOById, object, std::get<CellDescription>(object._type)._creatureId, creatureTOIndexById);
     }
     for (auto const& object : description._objects) {
         setConnections(objectTOs, object, objectIndexTOById);
@@ -207,7 +207,7 @@ TO DescriptionConverterService::convertDescriptionToTO(ObjectDescription const& 
 
     std::unordered_map<uint64_t, uint64_t> objectIndexTOById;
     std::unordered_map<uint64_t, uint64_t> creatureTOIndexById;
-    convertCellToTO(objectTOs, heap, objectIndexTOById, object, std::nullopt, creatureTOIndexById);
+    convertObjectToTO(objectTOs, heap, objectIndexTOById, object, std::nullopt, creatureTOIndexById);
 
     return provideDataTO({}, {}, {}, {}, objectTOs, {}, heap);
 }
@@ -248,14 +248,15 @@ DescriptionConverterService::DescriptionConverterService()
 ObjectDescription DescriptionConverterService::createObjectDescription(TO const& to, int objectIndex) const
 {
     ObjectDescription result(false);
+    CellDescription& cellDesc = std::get<CellDescription>(result._type);
 
     auto const& objectTO = to.objects[objectIndex];
     result._id = objectTO.id;
     NumberGenerator::get().adaptMaxIds({.entityId = objectTO.id});
-    result._pos = RealVector2D(objectTO.pos.x, objectTO.pos.y);
-    result._vel = RealVector2D(objectTO.vel.x, objectTO.vel.y);
-    result._usableEnergy = objectTO.usableEnergy;
-    result._rawEnergy = objectTO.rawEnergy;
+    result._pos = RealVector2D{objectTO.pos.x, objectTO.pos.y};
+    result._vel = RealVector2D{objectTO.vel.x, objectTO.vel.y};
+    cellDesc._usableEnergy = objectTO.typeData.cell.usableEnergy;
+    cellDesc._rawEnergy = objectTO.typeData.cell.rawEnergy;
     result._stiffness = objectTO.stiffness;
     std::vector<ConnectionDescription> connections;
     for (int i = 0; i < objectTO.numConnections; ++i) {
@@ -272,250 +273,250 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         connections.emplace_back(connection);
     }
     result._connections = connections;
-    result._cellState = objectTO.cellState;
+    cellDesc._cellState = objectTO.typeData.cell.cellState;
     result._fixed = objectTO.fixed;
     result._sticky = objectTO.sticky;
-    result._age = objectTO.age;
+    cellDesc._age = objectTO.typeData.cell.age;
     result._color = objectTO.color;
-    result._frontAngle = objectTO.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.frontAngle) : std::nullopt;
-    result._cellTriggered = objectTO.cellTriggered;
-    result._nodeIndex = objectTO.nodeIndex;
-    result._parentNodeIndex = objectTO.parentNodeIndex;
-    result._geneIndex = objectTO.geneIndex;
-    result._frontAngleId = objectTO.frontAngleId;
-    result._headCell = objectTO.headCell;
+    cellDesc._frontAngle = objectTO.typeData.cell.frontAngle != VALUE_NOT_SET_FLOAT ? std::make_optional(objectTO.typeData.cell.frontAngle) : std::nullopt;
+    cellDesc._cellTriggered = objectTO.typeData.cell.cellTriggered;
+    cellDesc._nodeIndex = objectTO.typeData.cell.nodeIndex;
+    cellDesc._parentNodeIndex = objectTO.typeData.cell.parentNodeIndex;
+    cellDesc._geneIndex = objectTO.typeData.cell.geneIndex;
+    cellDesc._frontAngleId = objectTO.typeData.cell.frontAngleId;
+    cellDesc._headCell = objectTO.typeData.cell.headCell;
 
-    switch (objectTO.cellType) {
+    switch (objectTO.typeData.cell.cellType) {
     case CellType_Structure: {
         StructureObjectDescription base;
-        result._cellType = base;
+        cellDesc._cellType = base;
     } break;
     case CellType_Free: {
         FreeObjectDescription base;
-        result._cellType = base;
+        cellDesc._cellType = base;
     } break;
     case CellType_Base: {
         BaseDescription base;
-        result._cellType = base;
+        cellDesc._cellType = base;
     } break;
     case CellType_Depot: {
         DepotDescription transmitter;
-        transmitter._storageLimit = objectTO.cellTypeData.depot.storageLimit;
-        transmitter._storedUsableEnergy = objectTO.cellTypeData.depot.storedUsableEnergy;
-        result._cellType = transmitter;
+        transmitter._storageLimit = objectTO.typeData.cell.cellTypeData.depot.storageLimit;
+        transmitter._storedUsableEnergy = objectTO.typeData.cell.cellTypeData.depot.storedUsableEnergy;
+        cellDesc._cellType = transmitter;
     } break;
     case CellType_Constructor: {
         ConstructorDescription constructor;
         constructor._autoTriggerInterval =
-            objectTO.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(objectTO.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
-        constructor._constructionActivationTime = objectTO.cellTypeData.constructor.constructionActivationTime;
-        constructor._constructionAngle = objectTO.cellTypeData.constructor.constructionAngle;
-        constructor._provideEnergy = objectTO.cellTypeData.constructor.provideEnergy;
-        constructor._geneIndex = objectTO.cellTypeData.constructor.geneIndex;
-        constructor._lastConstructedCellId = objectTO.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
-            ? std::make_optional(objectTO.cellTypeData.constructor.lastConstructedCellId)
+            objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval > 0 ? std::make_optional(objectTO.typeData.cell.cellTypeData.constructor.autoTriggerInterval) : std::nullopt;
+        constructor._constructionActivationTime = objectTO.typeData.cell.cellTypeData.constructor.constructionActivationTime;
+        constructor._constructionAngle = objectTO.typeData.cell.cellTypeData.constructor.constructionAngle;
+        constructor._provideEnergy = objectTO.typeData.cell.cellTypeData.constructor.provideEnergy;
+        constructor._geneIndex = objectTO.typeData.cell.cellTypeData.constructor.geneIndex;
+        constructor._lastConstructedCellId = objectTO.typeData.cell.cellTypeData.constructor.lastConstructedCellId != VALUE_NOT_SET_UINT64
+            ? std::make_optional(objectTO.typeData.cell.cellTypeData.constructor.lastConstructedCellId)
             : std::nullopt;
-        constructor._currentNodeIndex = objectTO.cellTypeData.constructor.currentNodeIndex;
-        constructor._currentConcatenation = objectTO.cellTypeData.constructor.currentConcatenation;
-        constructor._currentBranch = objectTO.cellTypeData.constructor.currentBranch;
-        result._cellType = constructor;
+        constructor._currentNodeIndex = objectTO.typeData.cell.cellTypeData.constructor.currentNodeIndex;
+        constructor._currentConcatenation = objectTO.typeData.cell.cellTypeData.constructor.currentConcatenation;
+        constructor._currentBranch = objectTO.typeData.cell.cellTypeData.constructor.currentBranch;
+        cellDesc._cellType = constructor;
     } break;
     case CellType_Sensor: {
         SensorDescription sensor;
         sensor._autoTriggerInterval =
-            objectTO.cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(objectTO.cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
-        sensor._minRange = objectTO.cellTypeData.sensor.minRange;
-        sensor._maxRange = objectTO.cellTypeData.sensor.maxRange;
+            objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval > 0 ? std::make_optional(objectTO.typeData.cell.cellTypeData.sensor.autoTriggerInterval) : std::nullopt;
+        sensor._minRange = objectTO.typeData.cell.cellTypeData.sensor.minRange;
+        sensor._maxRange = objectTO.typeData.cell.cellTypeData.sensor.maxRange;
 
-        if (objectTO.cellTypeData.sensor.mode == SensorMode_Telemetry) {
+        if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_Telemetry) {
             TelemetryDescription telemetry;
             sensor._mode = telemetry;
-        } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
+        } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectEnergy) {
             DetectEnergyDescription detectEnergy;
-            detectEnergy._minDensity = objectTO.cellTypeData.sensor.modeData.detectEnergy.minDensity;
+            detectEnergy._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectEnergy.minDensity;
             sensor._mode = detectEnergy;
-        } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
+        } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectStructure) {
             DetectStructureDescription detectStructure;
             sensor._mode = detectStructure;
-        } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
+        } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectFreeCell) {
             DetectFreeObjectDescription detectFreeCell;
-            detectFreeCell._minDensity = objectTO.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
-            detectFreeCell._restrictToColor = objectTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
+            detectFreeCell._minDensity = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.minDensity;
+            detectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectFreeCell.restrictToColor))
                 : std::nullopt;
             sensor._mode = detectFreeCell;
-        } else if (objectTO.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
+        } else if (objectTO.typeData.cell.cellTypeData.sensor.mode == SensorMode_DetectCreature) {
             DetectCreatureDescription detectCreature;
-            detectCreature._minNumCells = objectTO.cellTypeData.sensor.modeData.detectCreature.minNumCells > 0
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.sensor.modeData.detectCreature.minNumCells))
+            detectCreature._minNumCells = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.minNumCells))
                 : std::nullopt;
-            detectCreature._maxNumCells = objectTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells > 0
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.sensor.modeData.detectCreature.maxNumCells))
+            detectCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.maxNumCells))
                 : std::nullopt;
-            detectCreature._restrictToColor = objectTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.sensor.modeData.detectCreature.restrictToColor))
+            detectCreature._restrictToColor = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToColor))
                 : std::nullopt;
-            detectCreature._restrictToLineage = objectTO.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
+            detectCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.sensor.modeData.detectCreature.restrictToLineage;
             sensor._mode = detectCreature;
         }
-        if (objectTO.cellTypeData.sensor.lastMatchAvailable) {
+        if (objectTO.typeData.cell.cellTypeData.sensor.lastMatchAvailable) {
             SensorLastMatchDescription lastMatchDesc;
-            lastMatchDesc._creatureId = objectTO.cellTypeData.sensor.lastMatch.creatureId;
+            lastMatchDesc._creatureId = objectTO.typeData.cell.cellTypeData.sensor.lastMatch.creatureId;
             lastMatchDesc._pos = RealVector2D{
-                objectTO.cellTypeData.sensor.lastMatch.pos.x, objectTO.cellTypeData.sensor.lastMatch.pos.y};
+                objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.x, objectTO.typeData.cell.cellTypeData.sensor.lastMatch.pos.y};
             sensor._lastMatch = lastMatchDesc;
         }
 
-        result._cellType = sensor;
+        cellDesc._cellType = sensor;
     } break;
     case CellType_Generator: {
         GeneratorDescription generator;
-        generator._autoTriggerInterval = objectTO.cellTypeData.generator.autoTriggerInterval;
-        generator._pulseType = objectTO.cellTypeData.generator.pulseType;
-        generator._alternationInterval = objectTO.cellTypeData.generator.alternationInterval;
-        generator._numPulses = objectTO.cellTypeData.generator.numPulses;
-        result._cellType = generator;
+        generator._autoTriggerInterval = objectTO.typeData.cell.cellTypeData.generator.autoTriggerInterval;
+        generator._pulseType = objectTO.typeData.cell.cellTypeData.generator.pulseType;
+        generator._alternationInterval = objectTO.typeData.cell.cellTypeData.generator.alternationInterval;
+        generator._numPulses = objectTO.typeData.cell.cellTypeData.generator.numPulses;
+        cellDesc._cellType = generator;
     } break;
     case CellType_Attacker: {
         AttackerDescription attacker;
-        if (objectTO.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
+        if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_FreeCell) {
             AttackFreeObjectDescription attackFreeCell;
-            attackFreeCell._restrictToColor = objectTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor))
+            attackFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackFreeCell.restrictToColor))
                 : std::nullopt;
             attacker._mode = attackFreeCell;
-        } else if (objectTO.cellTypeData.attacker.mode == AttackerMode_Creature) {
+        } else if (objectTO.typeData.cell.cellTypeData.attacker.mode == AttackerMode_Creature) {
             AttackCreatureDescription attackCreature;
-            attackCreature._minNumCells = objectTO.cellTypeData.attacker.modeData.attackCreature.minNumCells > 0
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.attacker.modeData.attackCreature.minNumCells))
+            attackCreature._minNumCells = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.minNumCells))
                 : std::nullopt;
-            attackCreature._maxNumCells = objectTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells > 0
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.attacker.modeData.attackCreature.maxNumCells))
+            attackCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.maxNumCells))
                 : std::nullopt;
-            attackCreature._restrictToColor = objectTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.attacker.modeData.attackCreature.restrictToColor))
+            attackCreature._restrictToColor = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToColor))
                 : std::nullopt;
-            attackCreature._restrictToLineage = objectTO.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
+            attackCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.attacker.modeData.attackCreature.restrictToLineage;
             attacker._mode = attackCreature;
         }
-        result._cellType = attacker;
+        cellDesc._cellType = attacker;
     } break;
     case CellType_Injector: {
         InjectorDescription injector;
-        injector._geneIndex = objectTO.cellTypeData.injector.geneIndex;
-        result._cellType = injector;
+        injector._geneIndex = objectTO.typeData.cell.cellTypeData.injector.geneIndex;
+        cellDesc._cellType = injector;
     } break;
     case CellType_Muscle: {
         MuscleDescription muscle;
-        if (objectTO.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
+        if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoBending) {
             AutoBendingDescription bending;
-            bending._maxAngleDeviation = objectTO.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
-            bending._forwardBackwardRatio = objectTO.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
-            bending._initialAngle = objectTO.cellTypeData.muscle.modeData.autoBending.initialAngle != VALUE_NOT_SET_FLOAT
-                ? std::make_optional(objectTO.cellTypeData.muscle.modeData.autoBending.initialAngle)
+            bending._maxAngleDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.maxAngleDeviation;
+            bending._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forwardBackwardRatio;
+            bending._initialAngle = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.initialAngle)
                 : std::nullopt;
-            bending._forward = objectTO.cellTypeData.muscle.modeData.autoBending.forward;
-            bending._activation = objectTO.cellTypeData.muscle.modeData.autoBending.activation;
-            bending._activationCountdown = objectTO.cellTypeData.muscle.modeData.autoBending.activationCountdown;
-            bending._impulseAlreadyApplied = objectTO.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
+            bending._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.forward;
+            bending._activation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activation;
+            bending._activationCountdown = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.activationCountdown;
+            bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoBending.impulseAlreadyApplied;
             muscle._mode = bending;
-        } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
+        } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualBending) {
             ManualBendingDescription bending;
-            bending._maxAngleDeviation = objectTO.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
-            bending._forwardBackwardRatio = objectTO.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
-            bending._initialAngle = objectTO.cellTypeData.muscle.modeData.manualBending.initialAngle != VALUE_NOT_SET_FLOAT
-                ? std::make_optional(objectTO.cellTypeData.muscle.modeData.manualBending.initialAngle)
+            bending._maxAngleDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.maxAngleDeviation;
+            bending._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.forwardBackwardRatio;
+            bending._initialAngle = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.initialAngle)
                 : std::nullopt;
-            bending._lastAngleDelta = objectTO.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
-            bending._impulseAlreadyApplied = objectTO.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
+            bending._lastAngleDelta = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.lastAngleDelta;
+            bending._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualBending.impulseAlreadyApplied;
             muscle._mode = bending;
-        } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
+        } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AngleBending) {
             AngleBendingDescription bending;
-            bending._maxAngleDeviation = objectTO.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
-            bending._attractionRepulsionRatio = objectTO.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
-            bending._initialAngle = objectTO.cellTypeData.muscle.modeData.angleBending.initialAngle != VALUE_NOT_SET_FLOAT
-                ? std::make_optional(objectTO.cellTypeData.muscle.modeData.angleBending.initialAngle)
+            bending._maxAngleDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.maxAngleDeviation;
+            bending._attractionRepulsionRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.attractionRepulsionRatio;
+            bending._initialAngle = objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.angleBending.initialAngle)
                 : std::nullopt;
             muscle._mode = bending;
-        } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
+        } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_AutoCrawling) {
             AutoCrawlingDescription crawling;
-            crawling._maxDistanceDeviation = objectTO.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
-            crawling._forwardBackwardRatio = objectTO.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
-            crawling._initialDistance = objectTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance != VALUE_NOT_SET_FLOAT
-                ? std::make_optional(objectTO.cellTypeData.muscle.modeData.autoCrawling.initialDistance)
+            crawling._maxDistanceDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.maxDistanceDeviation;
+            crawling._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forwardBackwardRatio;
+            crawling._initialDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.initialDistance)
                 : std::nullopt;
-            crawling._lastActualDistance = objectTO.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
-            crawling._forward = objectTO.cellTypeData.muscle.modeData.autoCrawling.forward;
-            crawling._activation = objectTO.cellTypeData.muscle.modeData.autoCrawling.activation;
-            crawling._activationCountdown = objectTO.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
-            crawling._impulseAlreadyApplied = objectTO.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
+            crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.lastActualDistance;
+            crawling._forward = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.forward;
+            crawling._activation = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activation;
+            crawling._activationCountdown = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.activationCountdown;
+            crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.autoCrawling.impulseAlreadyApplied;
             muscle._mode = crawling;
-        } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
+        } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_ManualCrawling) {
             ManualCrawlingDescription crawling;
-            crawling._maxDistanceDeviation = objectTO.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
-            crawling._forwardBackwardRatio = objectTO.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
-            crawling._initialDistance = objectTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance != VALUE_NOT_SET_FLOAT
-                ? std::make_optional(objectTO.cellTypeData.muscle.modeData.manualCrawling.initialDistance)
+            crawling._maxDistanceDeviation = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.maxDistanceDeviation;
+            crawling._forwardBackwardRatio = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.forwardBackwardRatio;
+            crawling._initialDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance != VALUE_NOT_SET_FLOAT
+                ? std::make_optional(objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.initialDistance)
                 : std::nullopt;
-            crawling._lastActualDistance = objectTO.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
-            crawling._lastDistanceDelta = objectTO.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
-            crawling._impulseAlreadyApplied = objectTO.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
+            crawling._lastActualDistance = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastActualDistance;
+            crawling._lastDistanceDelta = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.lastDistanceDelta;
+            crawling._impulseAlreadyApplied = objectTO.typeData.cell.cellTypeData.muscle.modeData.manualCrawling.impulseAlreadyApplied;
             muscle._mode = crawling;
-        } else if (objectTO.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
+        } else if (objectTO.typeData.cell.cellTypeData.muscle.mode == MuscleMode_DirectMovement) {
             DirectMovementDescription movement;
             muscle._mode = movement;
         }
 
-        muscle._lastMovementX = objectTO.cellTypeData.muscle.lastMovementX;
-        muscle._lastMovementY = objectTO.cellTypeData.muscle.lastMovementY;
-        result._cellType = muscle;
+        muscle._lastMovementX = objectTO.typeData.cell.cellTypeData.muscle.lastMovementX;
+        muscle._lastMovementY = objectTO.typeData.cell.cellTypeData.muscle.lastMovementY;
+        cellDesc._cellType = muscle;
     } break;
     case CellType_Defender: {
         DefenderDescription defender;
-        defender._mode = objectTO.cellTypeData.defender.mode;
-        result._cellType = defender;
+        defender._mode = objectTO.typeData.cell.cellTypeData.defender.mode;
+        cellDesc._cellType = defender;
     } break;
     case CellType_Reconnector: {
         ReconnectorDescription reconnector;
-        if (objectTO.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
+        if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Structure) {
             ReconnectStructureDescription reconnectStructure;
             reconnector._mode = reconnectStructure;
-        } else if (objectTO.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
+        } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_FreeCell) {
             ReconnectFreeObjectDescription reconnectFreeCell;
-            reconnectFreeCell._restrictToColor = objectTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
+            reconnectFreeCell._restrictToColor = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectFreeCell.restrictToColor))
                 : std::nullopt;
             reconnector._mode = reconnectFreeCell;
-        } else if (objectTO.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
+        } else if (objectTO.typeData.cell.cellTypeData.reconnector.mode == ReconnectorMode_Creature) {
             ReconnectCreatureDescription reconnectCreature;
-            reconnectCreature._minNumCells = objectTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells > 0
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells))
+            reconnectCreature._minNumCells = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells > 0
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.minNumCells))
                 : std::nullopt;
-            reconnectCreature._maxNumCells = objectTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
+            reconnectCreature._maxNumCells = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells > 0
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.maxNumCells))
                 : std::nullopt;
-            reconnectCreature._restrictToColor = objectTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor != 255
-                ? std::make_optional(static_cast<int>(objectTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor))
+            reconnectCreature._restrictToColor = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor != 255
+                ? std::make_optional(static_cast<int>(objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToColor))
                 : std::nullopt;
-            reconnectCreature._restrictToLineage = objectTO.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
+            reconnectCreature._restrictToLineage = objectTO.typeData.cell.cellTypeData.reconnector.modeData.reconnectCreature.restrictToLineage;
             reconnector._mode = reconnectCreature;
         }
-        result._cellType = reconnector;
+        cellDesc._cellType = reconnector;
     } break;
     case CellType_Detonator: {
         DetonatorDescription detonator;
-        detonator._state = objectTO.cellTypeData.detonator.state;
-        detonator._countdown = objectTO.cellTypeData.detonator.countdown;
-        result._cellType = detonator;
+        detonator._state = objectTO.typeData.cell.cellTypeData.detonator.state;
+        detonator._countdown = objectTO.typeData.cell.cellTypeData.detonator.countdown;
+        cellDesc._cellType = detonator;
     } break;
     case CellType_Digestor: {
         DigestorDescription digestor;
-        digestor._rawEnergyConductivity = objectTO.cellTypeData.digestor.rawEnergyConductivity;
-        result._cellType = digestor;
+        digestor._rawEnergyConductivity = objectTO.typeData.cell.cellTypeData.digestor.rawEnergyConductivity;
+        cellDesc._cellType = digestor;
     } break;
     case CellType_Memory: {
         MemoryDescription memory;
-        auto const& memoryTO = objectTO.cellTypeData.memory;
+        auto const& memoryTO = objectTO.typeData.cell.cellTypeData.memory;
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             SignalDelayDescription signalDelay;
             signalDelay._delay = memoryTO.modeData.signalDelay.delay;
@@ -541,11 +542,11 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
         memory._channelBitMask = memoryTO.channelBitMask;
         auto const& signalEntriesTO = getFromHeap<SignalEntryTO>(to.heap, memoryTO.signalEntriesDataIndex);
         copyMemoryEntriesToDescription(memory._signalEntries, signalEntriesTO, memoryTO.numSignalEntries);
-        result._cellType = memory;
+        cellDesc._cellType = memory;
     } break;
     case CellType_Communicator: {
         CommunicatorDescription communicator;
-        auto const& communicatorTO = objectTO.cellTypeData.communicator;
+        auto const& communicatorTO = objectTO.typeData.cell.cellTypeData.communicator;
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             SenderDescription sender;
             sender._range = communicatorTO.modeData.sender.range;
@@ -559,27 +560,27 @@ ObjectDescription DescriptionConverterService::createObjectDescription(TO const&
             receiver._restrictToLineage = communicatorTO.modeData.receiver.restrictToLineage;
             communicator._mode = receiver;
         }
-        result._cellType = communicator;
+        cellDesc._cellType = communicator;
     } break;
     }
-    if (objectTO.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
-        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.neuralNetworkDataIndex);
-        result._neuralNetwork = convert(*neuralNetworkTO);
+    if (objectTO.typeData.cell.neuralNetworkDataIndex != VALUE_NOT_SET_UINT64) {
+        auto const& neuralNetworkTO = getFromHeap<NeuralNetworkTO>(to.heap, objectTO.typeData.cell.neuralNetworkDataIndex);
+        cellDesc._neuralNetwork = convert(*neuralNetworkTO);
     }
 
     SignalRestrictionDescription routingRestriction;
-    routingRestriction._mode = objectTO.signalRestriction.mode;
-    routingRestriction._baseAngle = objectTO.signalRestriction.baseAngle;
-    routingRestriction._openingAngle = objectTO.signalRestriction.openingAngle;
-    result._signalRestriction = routingRestriction;
-    result._signalState = objectTO.signalState;
-    if (objectTO.signalState == SignalState_Active) {
+    routingRestriction._mode = objectTO.typeData.cell.signalRestriction.mode;
+    routingRestriction._baseAngle = objectTO.typeData.cell.signalRestriction.baseAngle;
+    routingRestriction._openingAngle = objectTO.typeData.cell.signalRestriction.openingAngle;
+    cellDesc._signalRestriction = routingRestriction;
+    cellDesc._signalState = objectTO.typeData.cell.signalState;
+    if (objectTO.typeData.cell.signalState == SignalState_Active) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            result._signal._channels[i] = objectTO.signal.channels[i];
+            cellDesc._signal._channels[i] = objectTO.typeData.cell.signal.channels[i];
         }
-        result._signal._numTimesSent = objectTO.signal.numTimesSent;
+        cellDesc._signal._numTimesSent = objectTO.typeData.cell.signal.numTimesSent;
     }
-    result._activationTime = objectTO.activationTime;
+    cellDesc._activationTime = objectTO.typeData.cell.activationTime;
     return result;
 }
 
@@ -1166,64 +1167,66 @@ namespace
     }
 }
 
-void DescriptionConverterService::convertCellToTO(
+void DescriptionConverterService::convertObjectToTO(
     std::vector<ObjectTO>& objectTOs,
     std::vector<uint8_t>& heap,
     std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,
-    ObjectDescription const& cellDesc,
+    ObjectDescription const& objectDesc,
     std::optional<uint64_t> const& creatureId,
     std::unordered_map<uint64_t, uint64_t> const& creatureTOIndexById) const
 {
+    CellDescription const& cellDesc = std::get<CellDescription>(objectDesc._type);
+
     auto objectIndex = objectTOs.size();
     objectTOs.resize(objectIndex + 1);
 
     ObjectTO& objectTO = objectTOs.at(objectIndex);
-    objectTO.id = cellDesc._id;
+    objectTO.id = objectDesc._id;
     objectTOIndexById.insert_or_assign(objectTO.id, objectIndex);
 
-    objectTO.belongToCreature = creatureId.has_value();
-    if (objectTO.belongToCreature) {
-        objectTO.creatureIndex = creatureTOIndexById.at(creatureId.value());
+    objectTO.typeData.cell.belongToCreature = creatureId.has_value();
+    if (objectTO.typeData.cell.belongToCreature) {
+        objectTO.typeData.cell.creatureIndex = creatureTOIndexById.at(creatureId.value());
     }
-    objectTO.pos = {cellDesc._pos.x, cellDesc._pos.y};
-    objectTO.vel = {cellDesc._vel.x, cellDesc._vel.y};
-    objectTO.usableEnergy = cellDesc._usableEnergy;
-    checkAndCorrectInvalidEnergy(objectTO.usableEnergy);
-    objectTO.rawEnergy = cellDesc._rawEnergy;
-    objectTO.stiffness = cellDesc._stiffness;
-    objectTO.cellState = cellDesc._cellState;
-    objectTO.cellType = cellDesc.getCellType();
-    objectTO.cellTriggered = cellDesc._cellTriggered;
-    objectTO.nodeIndex = cellDesc._nodeIndex;
-    objectTO.parentNodeIndex = cellDesc._parentNodeIndex;
-    objectTO.geneIndex = cellDesc._geneIndex;
-    objectTO.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
-    objectTO.frontAngleId = cellDesc._frontAngleId;
-    objectTO.headCell = cellDesc._headCell;
+    objectTO.pos = {objectDesc._pos.x, objectDesc._pos.y};
+    objectTO.vel = {objectDesc._vel.x, objectDesc._vel.y};
+    objectTO.typeData.cell.usableEnergy = cellDesc._usableEnergy;
+    checkAndCorrectInvalidEnergy(objectTO.typeData.cell.usableEnergy);
+    objectTO.typeData.cell.rawEnergy = cellDesc._rawEnergy;
+    objectTO.stiffness = objectDesc._stiffness;
+    objectTO.typeData.cell.cellState = cellDesc._cellState;
+    objectTO.typeData.cell.cellType = objectDesc.getCellType();
+    objectTO.typeData.cell.cellTriggered = cellDesc._cellTriggered;
+    objectTO.typeData.cell.nodeIndex = cellDesc._nodeIndex;
+    objectTO.typeData.cell.parentNodeIndex = cellDesc._parentNodeIndex;
+    objectTO.typeData.cell.geneIndex = cellDesc._geneIndex;
+    objectTO.typeData.cell.frontAngle = cellDesc._frontAngle.value_or(VALUE_NOT_SET_FLOAT);
+    objectTO.typeData.cell.frontAngleId = cellDesc._frontAngleId;
+    objectTO.typeData.cell.headCell = cellDesc._headCell;
 
-    auto cellType = cellDesc.getCellType();
+    auto cellType = objectDesc.getCellType();
     if (cellDesc._neuralNetwork.has_value()) {
-        objectTO.neuralNetworkDataIndex = heap.size();
+        objectTO.typeData.cell.neuralNetworkDataIndex = heap.size();
         heap.resize(heap.size() + sizeof(NeuralNetworkTO));
         auto neuralNetworkTO = reinterpret_cast<NeuralNetworkTO*>(heap.data() + heap.size() - sizeof(NeuralNetworkTO));
         *neuralNetworkTO = convert(*cellDesc._neuralNetwork);
     } else {
-        objectTO.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
+        objectTO.typeData.cell.neuralNetworkDataIndex = VALUE_NOT_SET_UINT64;
     }
     switch (cellType) {
     case CellType_Base: {
         BaseTO baseTO;
-        objectTO.cellTypeData.base = baseTO;
+        objectTO.typeData.cell.cellTypeData.base = baseTO;
     } break;
     case CellType_Depot: {
         auto const& depotDesc = std::get<DepotDescription>(cellDesc._cellType);
-        DepotTO& depotTO = objectTO.cellTypeData.depot;
+        DepotTO& depotTO = objectTO.typeData.cell.cellTypeData.depot;
         depotTO.storageLimit = depotDesc._storageLimit;
         depotTO.storedUsableEnergy = depotDesc._storedUsableEnergy;
     } break;
     case CellType_Constructor: {
         auto const& constructorDesc = std::get<ConstructorDescription>(cellDesc._cellType);
-        ConstructorTO& constructorTO = objectTO.cellTypeData.constructor;
+        ConstructorTO& constructorTO = objectTO.typeData.cell.cellTypeData.constructor;
         constructorTO.autoTriggerInterval = static_cast<uint32_t>(constructorDesc._autoTriggerInterval.value_or(0));
         constructorTO.constructionActivationTime = constructorDesc._constructionActivationTime;
         constructorTO.constructionAngle = constructorDesc._constructionAngle;
@@ -1236,7 +1239,7 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Sensor: {
         auto const& sensorDesc = std::get<SensorDescription>(cellDesc._cellType);
-        SensorTO& sensorTO = objectTO.cellTypeData.sensor;
+        SensorTO& sensorTO = objectTO.typeData.cell.cellTypeData.sensor;
         sensorTO.autoTriggerInterval = static_cast<uint32_t>(sensorDesc._autoTriggerInterval.value_or(0));
         sensorTO.minRange = static_cast<uint16_t>(sensorDesc._minRange);
         sensorTO.maxRange = static_cast<uint16_t>(sensorDesc._maxRange);
@@ -1271,7 +1274,7 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Generator: {
         auto const& generatorDesc = std::get<GeneratorDescription>(cellDesc._cellType);
-        GeneratorTO& generatorTO = objectTO.cellTypeData.generator;
+        GeneratorTO& generatorTO = objectTO.typeData.cell.cellTypeData.generator;
         generatorTO.autoTriggerInterval = generatorDesc._autoTriggerInterval;
         generatorTO.pulseType = generatorDesc._pulseType;
         generatorTO.alternationInterval = generatorDesc._alternationInterval;
@@ -1279,7 +1282,7 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Attacker: {
         auto const& attackerDesc = std::get<AttackerDescription>(cellDesc._cellType);
-        AttackerTO& attackerTO = objectTO.cellTypeData.attacker;
+        AttackerTO& attackerTO = objectTO.typeData.cell.cellTypeData.attacker;
         attackerTO.mode = attackerDesc.getMode();
         if (attackerTO.mode == AttackerMode_FreeCell) {
             auto const& attackFreeCellDesc = std::get<AttackFreeObjectDescription>(attackerDesc._mode);
@@ -1294,12 +1297,12 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Injector: {
         auto const& injectorDesc = std::get<InjectorDescription>(cellDesc._cellType);
-        InjectorTO& injectorTO = objectTO.cellTypeData.injector;
+        InjectorTO& injectorTO = objectTO.typeData.cell.cellTypeData.injector;
         injectorTO.geneIndex = static_cast<uint16_t>(injectorDesc._geneIndex);
     } break;
     case CellType_Muscle: {
         auto const& muscleDesc = std::get<MuscleDescription>(cellDesc._cellType);
-        MuscleTO& muscleTO = objectTO.cellTypeData.muscle;
+        MuscleTO& muscleTO = objectTO.typeData.cell.cellTypeData.muscle;
         muscleTO.mode = muscleDesc.getMode();
         if (muscleTO.mode == MuscleMode_AutoBending) {
             auto const& bendingDesc = std::get<AutoBendingDescription>(muscleDesc._mode);
@@ -1352,12 +1355,12 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Defender: {
         auto const& defenderDesc = std::get<DefenderDescription>(cellDesc._cellType);
-        DefenderTO& defenderTO = objectTO.cellTypeData.defender;
+        DefenderTO& defenderTO = objectTO.typeData.cell.cellTypeData.defender;
         defenderTO.mode = defenderDesc._mode;
     } break;
     case CellType_Reconnector: {
         auto const& reconnectorDesc = std::get<ReconnectorDescription>(cellDesc._cellType);
-        ReconnectorTO& reconnectorTO = objectTO.cellTypeData.reconnector;
+        ReconnectorTO& reconnectorTO = objectTO.typeData.cell.cellTypeData.reconnector;
         reconnectorTO.mode = reconnectorDesc.getMode();
         if (reconnectorTO.mode == ReconnectorMode_Structure) {
             // No data to copy
@@ -1376,18 +1379,18 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Detonator: {
         auto const& detonatorDesc = std::get<DetonatorDescription>(cellDesc._cellType);
-        DetonatorTO& detonatorTO = objectTO.cellTypeData.detonator;
+        DetonatorTO& detonatorTO = objectTO.typeData.cell.cellTypeData.detonator;
         detonatorTO.state = detonatorDesc._state;
         detonatorTO.countdown = detonatorDesc._countdown;
     } break;
     case CellType_Digestor: {
         auto const& digestorDesc = std::get<DigestorDescription>(cellDesc._cellType);
-        DigestorTO& digestorTO = objectTO.cellTypeData.digestor;
+        DigestorTO& digestorTO = objectTO.typeData.cell.cellTypeData.digestor;
         digestorTO.rawEnergyConductivity = digestorDesc._rawEnergyConductivity;
     } break;
     case CellType_Memory: {
         auto const& memoryDesc = std::get<MemoryDescription>(cellDesc._cellType);
-        auto& memoryTO = objectTO.cellTypeData.memory;
+        auto& memoryTO = objectTO.typeData.cell.cellTypeData.memory;
         memoryTO.mode = memoryDesc.getMode();
         if (memoryTO.mode == MemoryMode_SignalDelay) {
             auto const& signalDelayDesc = std::get<SignalDelayDescription>(memoryDesc._mode);
@@ -1416,7 +1419,7 @@ void DescriptionConverterService::convertCellToTO(
     } break;
     case CellType_Communicator: {
         auto const& communicatorDesc = std::get<CommunicatorDescription>(cellDesc._cellType);
-        CommunicatorTO& communicatorTO = objectTO.cellTypeData.communicator;
+        CommunicatorTO& communicatorTO = objectTO.typeData.cell.cellTypeData.communicator;
         communicatorTO.mode = communicatorDesc.getMode();
         if (communicatorTO.mode == CommunicatorMode_Sender) {
             auto const& senderDesc = std::get<SenderDescription>(communicatorDesc._mode);
@@ -1429,22 +1432,22 @@ void DescriptionConverterService::convertCellToTO(
         }
     } break;
     }
-    objectTO.signalRestriction.mode = cellDesc._signalRestriction._mode;
-    objectTO.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
-    objectTO.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
-    objectTO.signalState = cellDesc._signalState;
+    objectTO.typeData.cell.signalRestriction.mode = cellDesc._signalRestriction._mode;
+    objectTO.typeData.cell.signalRestriction.baseAngle = cellDesc._signalRestriction._baseAngle;
+    objectTO.typeData.cell.signalRestriction.openingAngle = cellDesc._signalRestriction._openingAngle;
+    objectTO.typeData.cell.signalState = cellDesc._signalState;
     if (cellDesc._signalState == SignalState_Active) {
         for (int i = 0; i < MAX_CHANNELS; ++i) {
-            objectTO.signal.channels[i] = cellDesc._signal._channels[i];
+            objectTO.typeData.cell.signal.channels[i] = cellDesc._signal._channels[i];
         }
-        objectTO.signal.numTimesSent = cellDesc._signal._numTimesSent;
+        objectTO.typeData.cell.signal.numTimesSent = cellDesc._signal._numTimesSent;
     }
-    objectTO.activationTime = cellDesc._activationTime;
+    objectTO.typeData.cell.activationTime = cellDesc._activationTime;
     objectTO.numConnections = 0;
-    objectTO.fixed = cellDesc._fixed;
-    objectTO.sticky = cellDesc._sticky;
-    objectTO.age = cellDesc._age;
-    objectTO.color = cellDesc._color;
+    objectTO.fixed = objectDesc._fixed;
+    objectTO.sticky = objectDesc._sticky;
+    objectTO.typeData.cell.age = cellDesc._age;
+    objectTO.color = objectDesc._color;
 }
 
 void DescriptionConverterService::addParticle(std::vector<EnergyTO>& particleTOs, EnergyDescription const& particleDesc) const

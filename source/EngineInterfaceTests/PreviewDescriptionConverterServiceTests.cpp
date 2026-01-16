@@ -78,8 +78,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -111,8 +111,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withSepar
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(1).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(1).nodeIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -143,8 +143,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_withoutSe
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -181,8 +181,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertTwoCellCreature_separated
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -213,9 +213,9 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertThreeCellCreature)
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(3).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(2),
+        ObjectDescription().id(1).pos({10.0f, 9.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(3).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(2)),
         },
         CreatureDescription(),
         genome);
@@ -253,14 +253,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_multiple
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 4.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({10.0f, 5.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(3).pos({10.0f, 6.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(4).pos({10.0f, 7.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(5).pos({10.0f, 8.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(6).pos({10.0f, 9.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(7).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(8).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -301,14 +301,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGene_oneNode_
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0),
+        ObjectDescription().id(1).pos({10.0f, 4.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({10.0f, 5.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(3).pos({10.0f, 6.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(4).pos({10.0f, 7.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(5).pos({10.0f, 8.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(6).pos({10.0f, 9.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(7).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(8).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
         },
         CreatureDescription(),
         genome);
@@ -350,14 +350,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_twoGenes_oneNode
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(2).pos({10.0f, 4.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(3).pos({10.0f, 5.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(4).pos({10.0f, 6.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(5).pos({10.0f, 7.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(6).pos({10.0f, 8.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(7).pos({10.0f, 9.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(8).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0),
-        ObjectDescription().id(1).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
+        ObjectDescription().id(2).pos({10.0f, 4.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(3).pos({10.0f, 5.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(4).pos({10.0f, 6.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(5).pos({10.0f, 7.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(6).pos({10.0f, 8.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(7).pos({10.0f, 9.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(8).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(1).nodeIndex(0)),
+        ObjectDescription().id(1).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1))),
         },
         CreatureDescription(),
         genome);
@@ -394,14 +394,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreature_oneGenes_twoNode
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 4.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(2).pos({10.0f, 5.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(3).pos({10.0f, 6.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(4).pos({10.0f, 7.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(5).pos({10.0f, 8.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(6).pos({10.0f, 9.0f}).geneIndex(0).nodeIndex(1),
-        ObjectDescription().id(7).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0),
-        ObjectDescription().id(8).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(1),
+        ObjectDescription().id(1).pos({10.0f, 4.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(2).pos({10.0f, 5.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(3).pos({10.0f, 6.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(4).pos({10.0f, 7.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(5).pos({10.0f, 8.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(6).pos({10.0f, 9.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
+        ObjectDescription().id(7).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0)),
+        ObjectDescription().id(8).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1)),
         },
         CreatureDescription(),
         genome);
@@ -447,14 +447,14 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_withSep
 
     Description inputCreature1;
     inputCreature1.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2))),
         },
         CreatureDescription(),
         genome);
 
     Description inputCreature2;
     inputCreature2.addCreature({
-        ObjectDescription().id(2).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2)),
+        ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(2))),
         },
         CreatureDescription(),
         genome);
@@ -487,8 +487,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCastratedCreature_without
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(0).pos({11.0f, 10.0f}).geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1)),
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(0)),
+        ObjectDescription().id(0).pos({11.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0).cellType(ConstructorDescription().geneIndex(1))),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(1).nodeIndex(0).cellType(ConstructorDescription().geneIndex(0))),
         },
         CreatureDescription(),
         genome);
@@ -516,8 +516,8 @@ TEST_F(PreviewDescriptionConverterServiceTests, convertCreatureWithSignals)
 
     Description input;
     input.addCreature({
-        ObjectDescription().id(1).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(0).signalAndState(signal),
-        ObjectDescription().id(2).pos({10.0f, 10.0f}).geneIndex(0).nodeIndex(1).signalState(SignalState_Fading),
+        ObjectDescription().id(1).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(0).signalAndState(signal)),
+        ObjectDescription().id(2).pos({10.0f, 10.0f}).type(CellDescription().geneIndex(0).nodeIndex(1).signalState(SignalState_Fading)),
         },
         CreatureDescription(),
         genome);

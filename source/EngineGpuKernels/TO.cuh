@@ -390,21 +390,12 @@ struct SignalTO
     int numTimesSent;
 };
 
-struct ObjectTO
+struct CellTO
 {
     // General
-    uint64_t id;
-    ConnectionTO connections[MAX_CELL_BONDS];
-    float2 pos;
-    float2 vel;
     float usableEnergy;
     float rawEnergy;
-    float stiffness;
-    uint8_t color;
-    uint8_t numConnections;
     float frontAngle;  // May be invalid
-    bool fixed;
-    bool sticky;
     uint32_t age;
     CellState cellState;
 
@@ -415,19 +406,40 @@ struct ObjectTO
     uint16_t parentNodeIndex;
     uint16_t geneIndex;
 
-    // Process data
-    uint32_t frontAngleId;
-    bool headCell;
-
     // Cell type data
     uint64_t neuralNetworkDataIndex;  // May be invalid (not used for structure and base cells)
     CellType cellType;
     CellTypeDataTO cellTypeData;
     SignalState signalState;
-    SignalTO signal;    // For signalState == SignalState_Active
+    SignalTO signal;  // For signalState == SignalState_Active
     SignalRestrictionTO signalRestriction;
     uint32_t activationTime;
     CellTriggered cellTriggered;
+
+    // Process data
+    uint32_t frontAngleId;
+    bool headCell;
+};
+
+union ObjectTypeDataTO
+{
+    CellTO cell;
+};
+
+struct ObjectTO
+{
+    // General
+    uint64_t id;
+    uint8_t numConnections;
+    ConnectionTO connections[MAX_CELL_BONDS];
+    float2 pos;
+    float2 vel;
+    float stiffness;
+    uint8_t color;
+    bool fixed;
+    bool sticky;
+    ObjectType type;
+    ObjectTypeDataTO typeData;
 
     // Editing data
     uint8_t selected;

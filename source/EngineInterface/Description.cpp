@@ -115,21 +115,7 @@ CommunicatorMode CommunicatorDescription::getMode() const
 
 InjectorDescription::InjectorDescription() {}
 
-ObjectDescription::ObjectDescription(bool createIds)
-{
-    if (createIds) {
-        _id = NumberGenerator::get().createId();
-    }
-}
-
-ObjectDescription ObjectDescription::id(uint64_t id)
-{
-    NumberGenerator::get().adaptMaxIds({.entityId = id});
-    _id = id;
-    return *this;
-}
-
-CellType ObjectDescription::getCellType() const
+CellType CellDescription::getCellType() const
 {
     if (std::holds_alternative<StructureObjectDescription>(_cellType)) {
         return CellType_Structure;
@@ -167,6 +153,41 @@ CellType ObjectDescription::getCellType() const
     CHECK(false);
 }
 
+CellDescription& CellDescription::signalAndState(std::vector<float> const& value)
+{
+    CHECK(value.size() == MAX_CHANNELS);
+
+    SignalDescription newSignal;
+    newSignal._channels = value;
+    _signal = newSignal;
+    _signalState = SignalState_Active;
+    return *this;
+}
+
+CellDescription& CellDescription::signalRestriction(float baseAngle, float openingAngle)
+{
+    SignalRestrictionDescription routingRestriction;
+    routingRestriction._mode = SignalRestrictionMode_Active;
+    routingRestriction._baseAngle = baseAngle;
+    routingRestriction._openingAngle = openingAngle;
+    _signalRestriction = routingRestriction;
+    return *this;
+}
+
+ObjectDescription::ObjectDescription(bool createIds)
+{
+    if (createIds) {
+        _id = NumberGenerator::get().createId();
+    }
+}
+
+ObjectDescription ObjectDescription::id(uint64_t id)
+{
+    NumberGenerator::get().adaptMaxIds({.entityId = id});
+    _id = id;
+    return *this;
+}
+
 bool ObjectDescription::isConnectedTo(uint64_t id) const
 {
     return std::find_if(_connections.begin(), _connections.end(), [&id](auto const& connection) { return connection._objectId == id; }) != _connections.end();
@@ -189,27 +210,6 @@ float ObjectDescription::getAngleSpan(uint64_t connectedCellId1, uint64_t connec
         }
     }
     CHECK(false);
-}
-
-ObjectDescription& ObjectDescription::signalAndState(std::vector<float> const& value)
-{
-    CHECK(value.size() == MAX_CHANNELS);
-
-    SignalDescription newSignal;
-    newSignal._channels = value;
-    _signal = newSignal;
-    _signalState = SignalState_Active;
-    return *this;
-}
-
-ObjectDescription& ObjectDescription::signalRestriction(float baseAngle, float openingAngle)
-{
-    SignalRestrictionDescription routingRestriction;
-    routingRestriction._mode = SignalRestrictionMode_Active;
-    routingRestriction._baseAngle = baseAngle;
-    routingRestriction._openingAngle = openingAngle;
-    _signalRestriction = routingRestriction;
-    return *this;
 }
 
 EnergyDescription::EnergyDescription()
@@ -327,9 +327,9 @@ void Description::assignNewIds()
             }
         }
         {
-            auto insertionResult = creatureIdToOldToNewCellId[object._creatureId].insert({oldId, newId});
+            auto insertionResult = creatureIdToOldToNewCellId[std::get<CellDescription>(object._type)._creatureId].insert({oldId, newId});
             if (!insertionResult.second) {
-                creatureIdToNonUniqueCellIds[object._creatureId].insert(oldId);
+                creatureIdToNonUniqueCellIds[std::get<CellDescription>(object._type)._creatureId].insert(oldId);
             }
         }
 
@@ -374,12 +374,12 @@ void Description::assignNewIds()
 
     for (auto& object : _objects) {
         for (auto& connection : object._connections) {
-            connection._objectId = findNewCellId(object._creatureId, connection._objectId);
+            connection._objectId = findNewCellId(std::get<CellDescription>(object._type)._creatureId, connection._objectId);
         }
-        if (object.getCellType() == CellType_Constructor) {
-            auto& constructor = std::get<ConstructorDescription>(object._cellType);
+        if (std::get<CellDescription>(object._type).getCellType() == CellType_Constructor) {
+            auto& constructor = std::get<ConstructorDescription>(std::get<CellDescription>(object._type)._cellType);
             if (constructor._lastConstructedCellId.has_value()) {
-                constructor._lastConstructedCellId = findNewCellId(object._creatureId, constructor._lastConstructedCellId.value());
+                constructor._lastConstructedCellId = findNewCellId(std::get<CellDescription>(object._type)._creatureId, constructor._lastConstructedCellId.value());
             }
         }
     }
@@ -398,11 +398,11 @@ void Description::assignNewIds()
 
     // Assign new creatureIds to cells
     for (auto& object : _objects) {
-        if (object._creatureId.has_value()) {
-            CHECK(!nonUniqueCreatureIds.contains(object._creatureId.value()));
-            auto findResult = oldToNewCreatureId.find(object._creatureId.value());
+        if (std::get<CellDescription>(object._type)._creatureId.has_value()) {
+            CHECK(!nonUniqueCreatureIds.contains(std::get<CellDescription>(object._type)._creatureId.value()));
+            auto findResult = oldToNewCreatureId.find(std::get<CellDescription>(object._type)._creatureId.value());
             if (findResult != oldToNewCreatureId.end()) {
-                object._creatureId = findResult->second;
+                std::get<CellDescription>(object._type)._creatureId = findResult->second;
             }
         }
     }
@@ -461,7 +461,7 @@ Description& Description::addCreature(std::vector<ObjectDescription> const& obje
 
     // Add cells with creatureId set
     for (auto object : objects) {
-        object._creatureId = creature._id;
+        std::get<CellDescription>(object._type)._creatureId = creature._id;
         _objects.emplace_back(object);
     }
 
@@ -475,14 +475,14 @@ size_t Description::getNumObjects() const
 
 size_t Description::getNumObjectsWithoutCreature() const
 {
-    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return !object._creatureId.has_value(); });
+    return std::count_if(_objects.begin(), _objects.end(), [](auto const& object) { return !std::get<CellDescription>(object._type)._creatureId.has_value(); });
 }
 
 std::vector<ObjectDescription> Description::getObjectsForCreature(uint64_t creatureId) const
 {
     std::vector<ObjectDescription> result;
     for (auto const& object : _objects) {
-        if (object._creatureId.has_value() && object._creatureId.value() == creatureId) {
+        if (std::get<CellDescription>(object._type)._creatureId.has_value() && std::get<CellDescription>(object._type)._creatureId.value() == creatureId) {
             result.push_back(object);
         }
     }

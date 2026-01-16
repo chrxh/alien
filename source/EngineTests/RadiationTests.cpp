@@ -31,7 +31,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     auto initialEnergy = 200.0f;
 
     Description data;
-    data._objects.emplace_back(ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).usableEnergy(initialEnergy).fixed(true).color(0));
+    data._objects.emplace_back(ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDescription().usableEnergy(initialEnergy)));
 
     _simulationFacade->setSimulationData(data);
 
@@ -46,7 +46,7 @@ TEST_F(RadiationTests, fixedCells_shouldNotRadiate)
     // Verify the fixed cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, object._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialEnergy, std::get<CellDescription>(object._type)._usableEnergy));
 }
 
 TEST_F(RadiationTests, structureCells_shouldNotRadiate)
@@ -55,7 +55,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).usableEnergy(initialEnergy).cellType(StructureObjectDescription()).color(0));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureObjectDescription())));
 
     _simulationFacade->setSimulationData(data);
 
@@ -70,7 +70,7 @@ TEST_F(RadiationTests, structureCells_shouldNotRadiate)
     // Verify the structure cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, object._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialEnergy, std::get<CellDescription>(object._type)._usableEnergy));
 }
 
 TEST_F(RadiationTests, baseCells_shouldRadiate)
@@ -78,7 +78,7 @@ TEST_F(RadiationTests, baseCells_shouldRadiate)
     auto initialEnergy = 200.0f;
 
     Description data;
-    data._objects.emplace_back(ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).usableEnergy(initialEnergy).cellType(BaseDescription()).color(0));
+    data._objects.emplace_back(ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(BaseDescription())));
 
     _simulationFacade->setSimulationData(data);
 
@@ -100,7 +100,7 @@ TEST_F(RadiationTests, freeCells_shouldRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).usableEnergy(initialEnergy).cellType(FreeObjectDescription()).color(0));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(FreeObjectDescription())));
 
     _simulationFacade->setSimulationData(data);
 
@@ -122,7 +122,7 @@ TEST_F(RadiationTests, constructorCells_shouldRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).usableEnergy(initialEnergy).cellType(ConstructorDescription()).color(0));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(ConstructorDescription())));
 
     _simulationFacade->setSimulationData(data);
 
@@ -145,7 +145,7 @@ TEST_F(RadiationTests, fixedStructureCells_shouldNotRadiate)
 
     Description data;
     data._objects.emplace_back(
-        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).usableEnergy(initialEnergy).cellType(StructureObjectDescription()).fixed(true).color(0));
+        ObjectDescription().id(1).pos({100.0f, 100.0f}).vel({0.0f, 0.0f}).fixed(true).color(0).type(CellDescription().usableEnergy(initialEnergy).cellType(StructureObjectDescription())));
 
     _simulationFacade->setSimulationData(data);
 
@@ -160,5 +160,5 @@ TEST_F(RadiationTests, fixedStructureCells_shouldNotRadiate)
     // Verify the cell retained its energy
     EXPECT_EQ(1, actualData._objects.size());
     auto const& object = actualData._objects.at(0);
-    EXPECT_TRUE(approxCompare(initialEnergy, object._usableEnergy));
+    EXPECT_TRUE(approxCompare(initialEnergy, std::get<CellDescription>(object._type)._usableEnergy));
 }

@@ -46,7 +46,7 @@ private:
         CreatureDescription const& creatureDesc,
         std::unordered_map<uint64_t, uint64_t> const& genomeTOIndexById,
         std::unordered_map<uint64_t, uint64_t>& creatureTOIndexById) const;
-    void convertCellToTO(
+    void convertObjectToTO(
         std::vector<ObjectTO>& objectTOs,
         std::vector<uint8_t>& heap,
         std::unordered_map<uint64_t, uint64_t>& objectTOIndexById,

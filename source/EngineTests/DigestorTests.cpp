@@ -29,7 +29,7 @@ public:
 TEST_F(DigestorTests, conversion_noEnergyConversion)
 {
     auto data = Description().objects({
-        ObjectDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f),
+        ObjectDescription().id(0).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().setRawEnergyConversionRate(0.0f)).rawEnergy(100.0f)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -41,14 +41,14 @@ TEST_F(DigestorTests, conversion_noEnergyConversion)
     auto actualDigestor = actualData.getObjectRef(0);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(approxCompare(actualDigestor._rawEnergy, origDigestor._rawEnergy));
-    EXPECT_TRUE(approxCompare(actualDigestor._usableEnergy, origDigestor._usableEnergy));
+    EXPECT_TRUE(approxCompare(std::get<CellDescription>(actualDigestor._type)._rawEnergy, std::get<CellDescription>(origDigestor._type)._rawEnergy));
+    EXPECT_TRUE(approxCompare(std::get<CellDescription>(actualDigestor._type)._usableEnergy, std::get<CellDescription>(origDigestor._type)._usableEnergy));
 }
 
 TEST_F(DigestorTests, conversion_highEnergyConversionRate)
 {
     auto data = Description().objects({
-        ObjectDescription().id(0).pos({100.0f, 100.0f}).cellType(DigestorDescription().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f),
+        ObjectDescription().id(0).pos({100.0f, 100.0f}).type(CellDescription().cellType(DigestorDescription().setRawEnergyConversionRate(1.0f)).rawEnergy(100.0f)),
     });
 
     _simulationFacade->setSimulationData(data);
@@ -60,7 +60,7 @@ TEST_F(DigestorTests, conversion_highEnergyConversionRate)
     auto actualDigestor = actualData.getObjectRef(0);
 
     EXPECT_TRUE(approxCompare(getEnergy(data), getEnergy(actualData)));
-    EXPECT_TRUE(actualDigestor._rawEnergy < origDigestor._rawEnergy - NEAR_ZERO);
-    EXPECT_TRUE(actualDigestor._usableEnergy > origDigestor._usableEnergy + NEAR_ZERO);
+    EXPECT_TRUE(std::get<CellDescription>(actualDigestor._type)._rawEnergy < std::get<CellDescription>(origDigestor._type)._rawEnergy - NEAR_ZERO);
+    EXPECT_TRUE(std::get<CellDescription>(actualDigestor._type)._usableEnergy > std::get<CellDescription>(origDigestor._type)._usableEnergy + NEAR_ZERO);
 }
 

@@ -519,10 +519,10 @@ void _CreaturePreviewWidget::updatePhenotype(Description& phenotype, CellPreview
 {
     for (auto& object : phenotype._objects) {
         if (object._id == editedCell._id) {
-            object._signalState = editedCell._signalState;
+            std::get<CellDescription>(object._type)._signalState = editedCell._signalState;
             if (editedCell._signalState == SignalState_Active) {
                 auto signalDesc = SignalDescription().channels(editedCell._signal.value()._channels);
-                object._signal = signalDesc;
+                std::get<CellDescription>(object._type)._signal = signalDesc;
             }
         }
     }

@@ -240,10 +240,7 @@ TEST_F(GeometryTests, copyBuffers_creature)
 
 TEST_F(GeometryTests, copyBuffers_selectedObjectData_noRestriction_inactive)
 {
-    auto object = ObjectDescription()
-                    .id(1)
-                    .pos({100.0f, 100.0f})
-                    .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive).baseAngle(45.0f).openingAngle(90.0f));
+    auto object = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive).baseAngle(45.0f).openingAngle(90.0f)));
 
     auto data = Description().objects({
         object,
@@ -266,10 +263,7 @@ TEST_F(GeometryTests, copyBuffers_selectedObjectData_noRestriction_inactive)
 
 TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_active)
 {
-    auto object = ObjectDescription()
-                    .id(1)
-                    .pos({100.0f, 100.0f})
-                    .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(90.0f));
+    auto object = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(45.0f).openingAngle(90.0f)));
 
     auto data = Description().objects({
         object,
@@ -292,10 +286,7 @@ TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_active)
 
 TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_conditional)
 {
-    auto object = ObjectDescription()
-                    .id(1)
-                    .pos({100.0f, 100.0f})
-                    .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(45.0f).openingAngle(90.0f));
+    auto object = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(45.0f).openingAngle(90.0f)));
 
     auto data = Description().objects({
         object,
@@ -318,15 +309,9 @@ TEST_F(GeometryTests, copyBuffers_selectedObjectData_hasRestriction_conditional)
 
 TEST_F(GeometryTests, copyBuffers_connectionData_noRestriction_inactive_bothDirections)
 {
-    auto object1 = ObjectDescription()
-                     .id(1)
-                     .pos({100.0f, 100.0f})
-                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
+    auto object1 = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
-    auto object2 = ObjectDescription()
-                     .id(2)
-                     .pos({101.0f, 100.0f})
-                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
+    auto object2 = ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
     auto data = Description().objects({object1, object2});
     data.addConnection(1, 2);
@@ -351,15 +336,9 @@ TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_active_restrict
 {
     // Use baseAngle = 90 and openingAngle = 90 to point away from connection
     // Connection angle is 0 (first connection), so range [45+180, 135+180] = [225, 315] doesn't include 0
-    auto object1 = ObjectDescription()
-                     .id(1)
-                     .pos({100.0f, 100.0f})
-                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(90.0f).openingAngle(90.0f));
+    auto object1 = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Active).baseAngle(90.0f).openingAngle(90.0f)));
 
-    auto object2 = ObjectDescription()
-                     .id(2)
-                     .pos({101.0f, 100.0f})
-                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
+    auto object2 = ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
     auto data = Description().objects({object1, object2});
     data.addConnection(1, 2);
@@ -384,15 +363,9 @@ TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_active_restrict
 TEST_F(GeometryTests, copyBuffers_connectionData_withRestriction_conditional_restrictedDirection)
 {
     // Use baseAngle = 90 and openingAngle = 90 to point away from connection
-    auto object1 = ObjectDescription()
-                     .id(1)
-                     .pos({100.0f, 100.0f})
-                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(90.0f).openingAngle(90.0f));
+    auto object1 = ObjectDescription().id(1).pos({100.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Conditional).baseAngle(90.0f).openingAngle(90.0f)));
 
-    auto object2 = ObjectDescription()
-                     .id(2)
-                     .pos({101.0f, 100.0f})
-                     .signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive));
+    auto object2 = ObjectDescription().id(2).pos({101.0f, 100.0f}).type(CellDescription().signalRestriction(SignalRestrictionDescription().mode(SignalRestrictionMode_Inactive)));
 
     auto data = Description().objects({object1, object2});
     data.addConnection(1, 2);

@@ -307,11 +307,7 @@ void GenomeEditorWindow::onCreateSeed()
 
     Description seed;
     seed.addCreature(
-        {ObjectDescription()
-             .pos(pos)
-             .stiffness(1.0f)
-             .color(EditorModel::get().getDefaultColorCode())
-             .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0))},
+        {ObjectDescription().pos(pos).stiffness(1.0f).color(EditorModel::get().getDefaultColorCode()).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration).geneIndex(0)))},
         CreatureDescription().lineageId(toInt(NumberGenerator::get().createId() % 0x80000000)),
         genome);
 

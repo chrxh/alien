@@ -14,18 +14,18 @@ __global__ void cudaUpdateTimestepStatistics_substep2(SimulationData data, Simul
         for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
             auto& object = objects.at(index);
             statistics.incNumCells(object->color);
-            if (object->cellType == CellType_Free) {
+            if (object->typeData.cell.cellType == CellType_Free) {
                 statistics.incNumFreeCells(object->color);
             }
-            statistics.addEnergy(object->color, object->getEnergy());
-            //if (object->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->cellTypeData.constructor)) {
+            statistics.addEnergy(object->color, object->typeData.cell.getEnergy());
+            //if (object->typeData.cell.cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->typeData.cell.cellTypeData.constructor)) {
             //    statistics.incNumReplicator(object->color);
             //    statistics.incMutant(object->color, object->lineageId, object->numObjects);
-            //    auto numNodes = GenomeDecoder::getNumNodesRecursively(object->cellTypeData.constructor.genome, object->cellTypeData.constructor.genomeSize, true, true);
+            //    auto numNodes = GenomeDecoder::getNumNodesRecursively(object->typeData.cell.cellTypeData.constructor.genome, object->typeData.cell.cellTypeData.constructor.genomeSize, true, true);
             //    statistics.addNumGenomeNodes(object->color, numNodes);
             //    statistics.addNumCells(object->color, object->numObjects);
             //}
-            //if (object->cellType == CellType_Injector && GenomeDecoder::containsSelfReplication(object->cellTypeData.injector)) {
+            //if (object->typeData.cell.cellType == CellType_Injector && GenomeDecoder::containsSelfReplication(object->typeData.cell.cellTypeData.injector)) {
             //    statistics.incNumViruses(object->color);
             //}
         }
@@ -57,7 +57,7 @@ __global__ void cudaUpdateTimestepStatistics_substep3(SimulationData data, Simul
 
         //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         //    auto& object = cells.at(index);
-        //if (object->cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->cellTypeData.constructor)) {
+        //if (object->typeData.cell.cellType == CellType_Constructor && GenomeDecoder::containsSelfReplication(object->typeData.cell.cellTypeData.constructor)) {
         //    auto variance = toDouble(object->numObjects) - averageNumCells;
         //    variance = variance * variance / numReplicators;
         //    statistics.addToNumCellsVariance(object->color, variance);
@@ -81,7 +81,7 @@ __global__ void cudaUpdateHistogramData_substep2(SimulationData data, Simulation
         if (object->fixed) {
             continue;
         }
-        statistics.maxValue(object->age);
+        statistics.maxValue(object->typeData.cell.age);
     }
 }
 
@@ -96,7 +96,7 @@ __global__ void cudaUpdateHistogramData_substep3(SimulationData data, Simulation
         if (object->fixed) {
             continue;
         }
-        auto slot = object->age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);
+        auto slot = object->typeData.cell.age * MAX_HISTOGRAM_SLOTS / (maxAge + 1);
         statistics.incNumCells(object->color, slot);
     }
 }

@@ -25,9 +25,7 @@ public:
         auto& numberGen = NumberGenerator::get();
         return Description().addCreature(
             {
-                ObjectDescription()
-                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
+                ObjectDescription().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDescription().lineageId(0),
             GenomeDescription().genes({
@@ -59,9 +57,7 @@ public:
         auto rawEnergyConductivity = digestionCapability == DigestionCapability::Low ? 1.0f : 0.0f;
         return Description().addCreature(
             {
-                ObjectDescription()
-                    .pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)})
-                    .cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration)),
+                ObjectDescription().pos({numberGen.getRandomFloat(0.0f, worldSize.x), numberGen.getRandomFloat(0.0f, worldSize.y)}).type(CellDescription().cellType(ConstructorDescription().provideEnergy(ProvideEnergy_FreeGeneration))),
             },
             CreatureDescription().lineageId(1),
             GenomeDescription().genes({

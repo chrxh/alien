@@ -80,8 +80,8 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
 
     Description data;
     data._objects = {
-        ObjectDescription().id(1).pos({0, 0}).neuralNetwork(nn),
-        ObjectDescription().id(2).pos({0, 1}).signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f}),
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
+        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 1, 0, 0, 0, 0.5f})),
     };
     data.addConnection(1, 2);
 
@@ -91,7 +91,7 @@ TEST_P(NeuronTests_AllActivationFunctions, weights)
     auto actualData = _simulationFacade->getSimulationData();
 
     EXPECT_TRUE(
-        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), actualData.getObjectRef(1)._signal._channels));
+        approxCompare(applyActivationFunction(activationFunction, {0, 0, 1.0f + 0.5f * 0.5f, 0, 0, -1.5f, 0, 0}), std::get<CellDescription>(actualData.getObjectRef(1)._type)._signal._channels));
 }
 
 TEST_P(NeuronTests_AllActivationFunctions, bias)
@@ -109,8 +109,8 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
 
     Description data;
     data._objects = {
-        ObjectDescription().id(1).pos({0, 0}).neuralNetwork(nn),
-        ObjectDescription().id(2).pos({0, 1}).signalAndState({0, 0, 0, 0, 0, 0, 0, 0}),
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().neuralNetwork(nn)),
+        ObjectDescription().id(2).pos({0, 1}).type(CellDescription().signalAndState({0, 0, 0, 0, 0, 0, 0, 0})),
     };
     data.addConnection(1, 2);
 
@@ -119,5 +119,5 @@ TEST_P(NeuronTests_AllActivationFunctions, bias)
 
     auto actualData = _simulationFacade->getSimulationData();
 
-    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), actualData.getObjectRef(1)._signal._channels));
+    EXPECT_TRUE(approxCompare(applyActivationFunction(activationFunction, {0, 0, 1, 0, 0, 0, 0, -1}), std::get<CellDescription>(actualData.getObjectRef(1)._type)._signal._channels));
 }

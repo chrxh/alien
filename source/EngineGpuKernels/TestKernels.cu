@@ -157,22 +157,22 @@ __global__ void cudaTestArePointersValid(SimulationData data, bool* result)
                     *result &= isPointerValid(data, connectingCell);
                 }
 
-                if (object->cellType == CellType_Memory) {
-                    if (object->cellTypeData.memory.numSignalEntries > 0) {
-                        auto signalEntries = object->cellTypeData.memory.signalEntries;
+                if (object->typeData.cell.cellType == CellType_Memory) {
+                    if (object->typeData.cell.cellTypeData.memory.numSignalEntries > 0) {
+                        auto signalEntries = object->typeData.cell.cellTypeData.memory.signalEntries;
                         *result &= isPointerValid(data, signalEntries);
                     }
                 }
 
-                if (object->neuralNetwork != nullptr) {
-                    *result &= isPointerValid(data, object->neuralNetwork);
+                if (object->typeData.cell.neuralNetwork != nullptr) {
+                    *result &= isPointerValid(data, object->typeData.cell.neuralNetwork);
                 }
 
-                if (object->creature != nullptr) {
-                    if (!isPointerValid(data, object->creature)) {
+                if (object->typeData.cell.creature != nullptr) {
+                    if (!isPointerValid(data, object->typeData.cell.creature)) {
                         *result = false;
                     } else {
-                        *result &= isGenomeValid(data, object->creature->genome);
+                        *result &= isGenomeValid(data, object->typeData.cell.creature->genome);
                     }
                 }
             } else {

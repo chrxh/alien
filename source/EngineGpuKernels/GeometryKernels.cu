@@ -124,7 +124,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
 
         auto const& cellColor = getCellColor(object->color);
 
-        auto luminance = object->getEnergy() / 300.0f;  //1.0f - 50000.0f / (object->energy * object->energy + 50000.0f);
+        auto luminance = object->typeData.cell.getEnergy() / 300.0f;  //1.0f - 50000.0f / (object->energy * object->energy + 50000.0f);
         auto white = luminance / 10.0f;
         if (object->selected == 1) {
             luminance = (luminance + 0.1f) * 1.7f;
@@ -143,7 +143,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         float normalizedHash = toFloat(hash & 0xFFFFFF) / toFloat(0xFFFFFF);
         float zPos = normalizedHash * 0.05f;
 
-        auto zOffset = object->creature != nullptr ? toFloat(object->creature->id % 1000) / 2000 : 0.0f;
+        auto zOffset = object->typeData.cell.creature != nullptr ? toFloat(object->typeData.cell.creature->id % 1000) / 2000 : 0.0f;
 
         // Write cell data at cell index position
         objectData[index].pos[0] = pos.x;
@@ -154,7 +154,7 @@ __global__ void cudaExtractCellData(SimulationData data, ObjectVertexData* objec
         objectData[index].color[2] = toFloat(cellColor & 0xff) / 255.0f * luminance + white;
 
         // Pack both cellType (lower 8 bits) and signalState (upper 8 bits) into state field
-        objectData[index].state = object->cellType | (object->signalState << 8) | (isInTriangleOrQuad << 16);
+        objectData[index].state = object->typeData.cell.cellType | (object->typeData.cell.signalState << 8) | (isInTriangleOrQuad << 16);
 
         // Store cell index for line extraction (just use the index directly)
         object->tempValue.as_uint64 = index;
@@ -399,15 +399,15 @@ __global__ void cudaExtractSelectedObjectData(SimulationData data, SelectedObjec
                 // Calculate signal angle restrictions for this cell
                 // The 180° offset converts from connection-relative to absolute angles in world space
                 // Render as active if mode is Active or Conditional
-                bool hasRestriction = (object->signalRestriction.mode == SignalRestrictionMode_Active || 
-                                       object->signalRestriction.mode == SignalRestrictionMode_Conditional) && 
+                bool hasRestriction = (object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
+                                       object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional) && 
                                       object->numConnections > 0;
                 if (hasRestriction) {
                     auto const& connectedCell = object->connections[0].object;
                     auto connectionAngle = Math::angleOfVector(connectedCell->pos - object->pos);
 
-                    auto signalAngleRestrictionStart = connectionAngle + 180.0f + object->signalRestriction.baseAngle - object->signalRestriction.openingAngle / 2;
-                    auto signalAngleRestrictionEnd = connectionAngle + 180.0f + object->signalRestriction.baseAngle + object->signalRestriction.openingAngle / 2;
+                    auto signalAngleRestrictionStart = connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
+                    auto signalAngleRestrictionEnd = connectionAngle + 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
                     signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
                     signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
@@ -453,8 +453,8 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
         }
 
         // Calculate signal angle restrictions for this cell
-        auto signalAngleRestrictionStart = 180.0f + object->signalRestriction.baseAngle - object->signalRestriction.openingAngle / 2;
-        auto signalAngleRestrictionEnd = 180.0f + object->signalRestriction.baseAngle + object->signalRestriction.openingAngle / 2;
+        auto signalAngleRestrictionStart = 180.0f + object->typeData.cell.signalRestriction.baseAngle - object->typeData.cell.signalRestriction.openingAngle / 2;
+        auto signalAngleRestrictionEnd = 180.0f + object->typeData.cell.signalRestriction.baseAngle + object->typeData.cell.signalRestriction.openingAngle / 2;
         signalAngleRestrictionStart = Math::getNormalizedAngle(signalAngleRestrictionStart, 0.0f);
         signalAngleRestrictionEnd = Math::getNormalizedAngle(signalAngleRestrictionEnd, 0.0f);
 
@@ -480,23 +480,23 @@ __global__ void cudaExtractSelectedConnectionData(SimulationData data, Connectio
 
             // Determine if signal can flow from object1 to object2
             // For rendering, Active and Conditional modes are treated as having restriction
-            bool hasRestriction1 = (object->signalRestriction.mode == SignalRestrictionMode_Active || 
-                                    object->signalRestriction.mode == SignalRestrictionMode_Conditional);
+            bool hasRestriction1 = (object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
+                                    object->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
             bool arrowToCell2 =
                 !hasRestriction1 || Math::isAngleStrictInBetween(signalAngleRestrictionStart, signalAngleRestrictionEnd, summedAngle);
 
             // Determine if signal can flow from object2 to object1
             // Need to calculate the reverse angle from connectedCell's perspective
-            auto signalAngleRestrictionStart2 = 180.0f + connectedCell->signalRestriction.baseAngle - connectedCell->signalRestriction.openingAngle / 2;
-            auto signalAngleRestrictionEnd2 = 180.0f + connectedCell->signalRestriction.baseAngle + connectedCell->signalRestriction.openingAngle / 2;
+            auto signalAngleRestrictionStart2 = 180.0f + connectedCell->typeData.cell.signalRestriction.baseAngle - connectedCell->typeData.cell.signalRestriction.openingAngle / 2;
+            auto signalAngleRestrictionEnd2 = 180.0f + connectedCell->typeData.cell.signalRestriction.baseAngle + connectedCell->typeData.cell.signalRestriction.openingAngle / 2;
             signalAngleRestrictionStart2 = Math::getNormalizedAngle(signalAngleRestrictionStart2, 0.0f);
             signalAngleRestrictionEnd2 = Math::getNormalizedAngle(signalAngleRestrictionEnd2, 0.0f);
 
             // Find the angle of this connection from connectedCell's perspective
             auto summedAngle2 = 0.0f;
             bool arrowToCell1 = false;
-            bool hasRestriction2 = (connectedCell->signalRestriction.mode == SignalRestrictionMode_Active || 
-                                    connectedCell->signalRestriction.mode == SignalRestrictionMode_Conditional);
+            bool hasRestriction2 = (connectedCell->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Active || 
+                                    connectedCell->typeData.cell.signalRestriction.mode == SignalRestrictionMode_Conditional);
             for (int j = 0; j < connectedCell->numConnections; ++j) {
                 if (j > 0) {
                     summedAngle2 += connectedCell->connections[j].angleFromPrevious;
@@ -546,10 +546,10 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
         auto const& object = data.entities.objects.at(index);
 
         // Only process cells that have been attacked and have attackVisualization enabled
-        if (object->eventCounter > 0 && object->event == CellEvent_Attacked) {
+        if (object->typeData.cell.eventCounter > 0 && object->typeData.cell.event == CellEvent_Attacked) {
 
             // Check if the attacker position is close enough to draw
-            if (Math::length(object->eventPos - object->pos) < 10.0f) {
+            if (Math::length(object->typeData.cell.eventPos - object->pos) < 10.0f) {
                 // Add attack event line data (2 vertices for the line: from attacker to attacked)
                 uint64_t vertexIndex = alienAtomicAdd64(numAttackEventVertices, uint64_t(2));
                 if (attackEventData != nullptr) {
@@ -557,8 +557,8 @@ __global__ void cudaExtractAttackEventData(SimulationData data, AttackEventVerte
                     float redColor[3] = {0.5f, 0.0f, 0.0f};
 
                     // First vertex (attacker position - from eventPos)
-                    attackEventData[vertexIndex].pos[0] = object->eventPos.x;
-                    attackEventData[vertexIndex].pos[1] = object->eventPos.y;
+                    attackEventData[vertexIndex].pos[0] = object->typeData.cell.eventPos.x;
+                    attackEventData[vertexIndex].pos[1] = object->typeData.cell.eventPos.y;
                     attackEventData[vertexIndex].color[0] = redColor[0];
                     attackEventData[vertexIndex].color[1] = redColor[1];
                     attackEventData[vertexIndex].color[2] = redColor[2];
@@ -582,7 +582,7 @@ __global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEv
         auto const& object = data.entities.objects.at(index);
 
         // Only process cells that have detonation event
-        if (object->eventCounter > 0 && object->event == CellEvent_Detonation) {
+        if (object->typeData.cell.eventCounter > 0 && object->typeData.cell.event == CellEvent_Detonation) {
 
             // Add detonation event point data (1 vertex for the circle center)
             uint64_t vertexIndex = alienAtomicAdd64(numDetonationEventVertices, uint64_t(1));
@@ -593,7 +593,7 @@ __global__ void cudaExtractDetonationEventData(SimulationData data, DetonationEv
 
                 // Radius proportional to eventCounter
                 // Scale the radius based on eventCounter (make it visible)
-                detonationEventData[vertexIndex].radius = toFloat(object->eventCounter * object->eventCounter) / 3.0f;
+                detonationEventData[vertexIndex].radius = toFloat(object->typeData.cell.eventCounter * object->typeData.cell.eventCounter) / 3.0f;
             }
         }
     }

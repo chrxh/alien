@@ -20,7 +20,7 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -29,14 +29,14 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator._signalState == SignalState_Active);
+    EXPECT_FALSE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -45,15 +45,15 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    ASSERT_TRUE(generator._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
+    ASSERT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
     };
 
     _simulationFacade->setPreviewData(data);
@@ -61,15 +61,15 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulse_detailedPreview)
     auto actualData = _simulationFacade->getPreviewData();
 
     auto generator = actualData.getObjectRef(1);
-    ASSERT_TRUE(generator._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
+    ASSERT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97 * 2)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97 * 2))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -78,15 +78,15 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
+    EXPECT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -95,14 +95,14 @@ TEST_F(GeneratorTests, generatePulse_timeAfterFirstPulse)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_FALSE(generator._signalState == SignalState_Active);
+    EXPECT_FALSE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
 }
 
 TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -111,15 +111,15 @@ TEST_F(GeneratorTests, generatePulse_timeBeforeFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
+    EXPECT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -128,15 +128,15 @@ TEST_F(GeneratorTests, generatePulse_timeAtFirstPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator._signalState == SignalState_Active);
-    EXPECT_EQ(-1.0f, generator._signal._channels.at(0));
+    EXPECT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_EQ(-1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3)),
+        ObjectDescription().id(1).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(97).pulseType(GeneratorPulseType_Alternation).alternationInterval(3))),
     };
 
     _simulationFacade->setSimulationData(data);
@@ -147,15 +147,15 @@ TEST_F(GeneratorTests, generatePulse_timeAtSecondPulseAlternation)
     auto actualData = _simulationFacade->getSimulationData();
 
     auto generator = actualData.getObjectRef(1);
-    EXPECT_TRUE(generator._signalState == SignalState_Active);
-    EXPECT_EQ(1.0f, generator._signal._channels.at(0));
+    EXPECT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+    EXPECT_EQ(1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0));
 }
 
 TEST_F(GeneratorTests, generatePulse_triangularNetwork)
 {
     Description data;
     data._objects = {
-        ObjectDescription().id(1).pos({0, 0}).cellType(GeneratorDescription().autoTriggerInterval(10)),
+        ObjectDescription().id(1).pos({0, 0}).type(CellDescription().cellType(GeneratorDescription().autoTriggerInterval(10))),
         ObjectDescription().id(2).pos({1, 0}),
         ObjectDescription().id(3).pos({0.5, 0.5}),
     };
@@ -170,16 +170,16 @@ TEST_F(GeneratorTests, generatePulse_triangularNetwork)
         auto actualData = _simulationFacade->getSimulationData();
 
         auto generator = actualData.getObjectRef(1);
-        EXPECT_TRUE(generator._signalState == SignalState_Active);
-        EXPECT_TRUE(approxCompare(1.0f, generator._signal._channels.at(0)));
-        EXPECT_EQ(2, generator._signalState);
+        EXPECT_TRUE(std::get<CellDescription>(generator._type)._signalState == SignalState_Active);
+        EXPECT_TRUE(approxCompare(1.0f, std::get<CellDescription>(generator._type)._signal._channels.at(0)));
+        EXPECT_EQ(2, std::get<CellDescription>(generator._type)._signalState);
 
         auto base1 = actualData.getObjectRef(2);
-        EXPECT_FALSE(base1._signalState == SignalState_Active);
-        EXPECT_EQ(0, base1._signalState);
+        EXPECT_FALSE(std::get<CellDescription>(base1._type)._signalState == SignalState_Active);
+        EXPECT_EQ(0, std::get<CellDescription>(base1._type)._signalState);
 
         auto base2 = actualData.getObjectRef(3);
-        EXPECT_FALSE(base2._signalState == SignalState_Active);
-        EXPECT_EQ(0, base2._signalState);
+        EXPECT_FALSE(std::get<CellDescription>(base2._type)._signalState == SignalState_Active);
+        EXPECT_EQ(0, std::get<CellDescription>(base2._type)._signalState);
     }
 }

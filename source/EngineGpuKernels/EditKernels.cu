@@ -62,8 +62,8 @@ __global__ void cudaChangeCellToCreature(SimulationData data, Creature** newCrea
     auto const partition = calcSystemThreadPartition(data.entities.objects.getNumEntries());
     for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (object->creature->id == (*newCreature)->id) {
-            object->creature = *newCreature;
+        if (object->typeData.cell.creature->id == (*newCreature)->id) {
+            object->typeData.cell.creature = *newCreature;
             *result = true;
         }
     }
@@ -457,7 +457,7 @@ __global__ void cudaApplyCataclysm(SimulationData data)
     //for (int index = partition.startIndex; index <= partition.endIndex; index += partition.step) {
     //    auto& object = cells.at(index);
 
-    //    if (object->cellType == CellType_Constructor) {
+    //    if (object->typeData.cell.cellType == CellType_Constructor) {
     //        if (data.primaryNumberGen.random() < 0.3f) {
     //            for (int j = 0; j < 100; ++j) {
     //                MutationProcessor::neuronDataMutation(data, object);
@@ -505,8 +505,8 @@ __global__ void cudaGetSelectionShallowData_step1(SimulationData data)
 
     for (int index = cellPartition.startIndex; index <= cellPartition.endIndex; index += cellPartition.step) {
         auto const& object = data.entities.objects.at(index);
-        if (0 != object->selected && object->creature != nullptr) {
-            object->creature->creatureIndex = 0;
+        if (0 != object->selected && object->typeData.cell.creature != nullptr) {
+            object->typeData.cell.creature->creatureIndex = 0;
         }
     }
 }
@@ -521,8 +521,8 @@ __global__ void cudaGetSelectionShallowData_step2(SimulationData data, int refCe
         auto const& object = data.entities.objects.at(index);
         if (0 != object->selected) {
             result.collectCell(object, refPos, data.objectMap);
-            if (object->creature != nullptr) {
-                if (alienAtomicExch64(&object->creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
+            if (object->typeData.cell.creature != nullptr) {
+                if (alienAtomicExch64(&object->typeData.cell.creature->creatureIndex, static_cast<uint64_t>(1)) == static_cast<uint64_t>(0)) {
                     result.collectCreature();
                 }
             }
